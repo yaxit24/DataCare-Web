@@ -184,11 +184,11 @@ and a column the map does not name is reported as unmapped rather than silently 
 
 ```json
 {
-  "report":  "day-book",
+  "report": "day-book",
   "columns": { "VchNo": "vchNo", "AcName": "acCode", "Dr Amount": "dr", "Cr Amount": "cr" },
   "numeric": ["dr", "cr"],
-  "key":     ["vchNo", "acCode"],
-  "scale":   { "dr": 2, "cr": 2 },
+  "key": ["vchNo", "acCode"],
+  "scale": { "dr": 2, "cr": 2 },
   "crystalHeaderHint": "VchNo"
 }
 ```

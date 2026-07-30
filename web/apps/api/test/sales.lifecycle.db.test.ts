@@ -1160,4 +1160,112 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     const fine = Number(((net * 91.6) / 100).toFixed(3));
     expect(new Set([gross, net, fine]).size, 'all three bases must differ').toBe(3);
   });
+
+  // ---------------------------------------------------------------------------------------------------
+  // L6 continued: a rounding setting must reach the PERSISTED value, not merely the policy object.
+  //
+  // `resolveRoundingPolicy` is already unit tested, including that ALL_ROF_REMOVE=Y forces four precisions to 2
+  // while leaving PR_RATE_ROF independent (MS_OPNCOMP.cs:1297-1303). What was NOT proven is that the resolved
+  // policy reaches the database — a policy object with the right number in it is worth nothing if the write
+  // path ignores it.
+  //
+  // Observability matters here: SL_DETL's money columns are numeric(_,2), so a precision finer than two
+  // decimals cannot be seen in them at all. SL_DATA.CGST_TAX and SGST_TAX are `double precision` with NO
+  // scale, which is where the desktop's unrounded intra-state halves live (gstSplit: the two halves are
+  // assigned without rounding, so an odd-paise tax stores as 0.505 twice rather than 0.51 + 0.50). Those
+  // columns are therefore the only place a tax-precision change is visible end to end.
+  // ---------------------------------------------------------------------------------------------------
+  const taxHalvesFor = async (settings: {
+    taxRof: string;
+    allRofRemove: string;
+  }): Promise<{ cgst: number; sgst: number; taxAmt: number }> => {
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "TAX_ROF"=$1, "ALL_ROF_REMOVE"=$2 WHERE tenant_id=$3 AND "CO_CODE"=$4`,
+      settings.taxRof,
+      settings.allRofRemove,
+      TENANT,
+      CO,
+    );
+    // An UNTAGGED loose line: a tag can only be sold once, and this helper posts several vouchers to compare
+    // precisions. Tax is computed from the amount either way, so the tag adds nothing to what is being tested
+    // while making the helper unusable after its first call.
+    const created = await createSale(runtime, saleInput(), [
+      {
+        itCode: 'GOLD',
+        pcs: 1,
+        grossWt: 10,
+        netWt: 10,
+        touch: 91.6,
+        // A rate chosen so 3% of the line lands beyond two decimals, which is what makes the precisions
+        // distinguishable at all.
+        rate: 7131.1,
+      },
+    ]);
+    const vch = created.voucherNo ?? String(created.vchNo).padStart(5, '0');
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT coalesce("CGST_TAX",0)::float cgst, coalesce("SGST_TAX",0)::float sgst,
+              coalesce("TAX_AMT",0)::float "taxAmt"
+         FROM "SL_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2 LIMIT 1`,
+      TENANT,
+      vch,
+    )) as { cgst: number; sgst: number; taxAmt: number }[];
+    return rows[0]!;
+  };
+
+  it('TAX_ROF reaches the persisted tax, and ALL_ROF_REMOVE overrides it', async () => {
+    const at5 = await taxHalvesFor({ taxRof: '5', allRofRemove: 'N' });
+    const at2 = await taxHalvesFor({ taxRof: '2', allRofRemove: 'N' });
+    const at0 = await taxHalvesFor({ taxRof: '0', allRofRemove: 'N' });
+
+    // The halves are stored UNROUNDED, so each is exactly half of the rounded total.
+    for (const [label, r] of [
+      ['5dp', at5],
+      ['2dp', at2],
+      ['0dp', at0],
+    ] as const) {
+      expect(r.cgst, `${label} halves must be equal`).toBeCloseTo(r.sgst, 6);
+      expect(r.cgst + r.sgst, `${label} halves must sum to the tax`).toBeCloseTo(r.taxAmt, 2);
+    }
+
+    // Zero decimals leaves a whole-rupee tax, and that IS visible in TAX_AMT.
+    expect(Number.isInteger(at0.taxAmt), 'TAX_ROF=0 must give a whole-rupee tax').toBe(true);
+    expect(at5.taxAmt, 'TAX_ROF=5 must differ from 0dp').not.toBeCloseTo(at0.taxAmt, 2);
+
+    // But 5 versus 2 decimals is NOT observable in TAX_AMT: that column is numeric(_,2), so the database
+    // truncates the difference away before anyone can read it. The distinction survives only in the
+    // double-precision halves. Asserting it on TAX_AMT would have produced a test that can never fail, which
+    // is how this assertion was first written.
+    expect(at5.cgst, 'the 5dp half must differ from the 2dp half').not.toBeCloseTo(at2.cgst, 6);
+
+    // ALL_ROF_REMOVE=Y forces tax precision to 2 REGARDLESS of TAX_ROF. Asserted against the 2dp case rather
+    // than a literal, so the test states the relationship the setting creates rather than a magic number.
+    const forced = await taxHalvesFor({ taxRof: '5', allRofRemove: 'Y' });
+    expect(forced.cgst, 'ALL_ROF_REMOVE=Y must behave as TAX_ROF=2').toBeCloseTo(at2.cgst, 6);
+    // Compared on the halves, for the same reason: TAX_AMT cannot represent the difference being asserted.
+    expect(forced.cgst, 'and must NOT behave as the configured 5').not.toBeCloseTo(at5.cgst, 6);
+
+    // The halves reach the database UNROUNDED. GV-TOTALS pins gstSplit(1.01) -> 0.505 twice at unit level;
+    // this asserts the same property survives the write path, which is the part a unit test cannot show.
+    //
+    // The TAX_ROF=2 case is the one that proves it, and the choice of case matters. At 2 decimals the tax is
+    // an odd number of paise, so each half gains a THIRD decimal that rounding to paise would destroy.
+    // Asserting this at TAX_ROF=5 proves nothing, because rounding a 4-decimal half to 5 decimals is a no-op
+    // - which is exactly how the first version of this assertion passed against a deliberately broken build.
+    const halfThirdDecimal = Math.round(at2.cgst * 1000) % 10;
+    expect(
+      halfThirdDecimal,
+      'an odd-paise tax must halve to a third decimal, proving the halves were not rounded',
+    ).not.toBe(0);
+    expect(at2.cgst + at2.sgst, 'and the two halves must still sum to the tax exactly').toBeCloseTo(
+      at2.taxAmt,
+      6,
+    );
+
+    // Restore, so a later test in this file is not run under a forced policy.
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "TAX_ROF"=NULL, "ALL_ROF_REMOVE"=NULL WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+  });
 });
