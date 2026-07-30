@@ -31,6 +31,11 @@ import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/count
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
 import type { RoundingPolicy } from '../shared/roundingPolicy.js';
 import {
+  desktopLabourTypeFor,
+  effectiveLabourRate,
+  legacyLabourModeFor,
+} from '../shared/labourDesktop.js';
+import {
   cashPurchaseParty,
   generatedLabourRate,
   purchaseAmountBase,
@@ -719,18 +724,19 @@ async function writePurchaseTx(
     SILVER_FINE: num(c.in.silverFineWt),
     ITM_RATE: num(c.in.rate),
     ITM_AMT: c.calc.metal,
-    LBR_TYPE: c.in.labourType
-      ? (
-          {
-            per_gram: 'G',
-            per_piece: 'P',
-            percentage: '%',
-            fixed: 'N',
-          } as Record<string, string>
-        )[c.in.labourType]
-      : null,
+    // LBR_TYPE selects the weight BASIS: G gross wise, N net wise, K kg wise, P pcs wise
+    // (CO_SET.LBR_TYPE options; TR_SALE.cs:11104/11119/11108/11127). The previous map sent per_gram to 'G',
+    // which is GROSS weight, and emitted '%', which the varchar(1) column never holds.
+    LBR_TYPE: desktopLabourTypeFor(c.in.labourType, behavior.labourType) || null,
     LBR_PRC: num(c.in.labourPct),
-    LBR_RATE: num(c.in.labourRate),
+    // Derived when the operator supplied a percentage rather than a rate (TR_SALE.cs:11021):
+    // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof).
+    LBR_RATE: effectiveLabourRate(
+      num(c.in.labourRate),
+      num(c.in.rate),
+      num(c.in.labourPct),
+      roundingPolicy.labourDecimals,
+    ),
     LBR_AMT: c.calc.labour,
     OTH_AMT: num(c.in.otherAmount),
     // TR_PURC.cs:13142 — TOT_AMT <- mSG_PR[i,40], computed as
@@ -1233,14 +1239,7 @@ async function writePurchaseTx(
         num(c.in.touch),
         num(c.in.westPct),
         num(c.in.labourRate),
-        c.in.labourType
-          ? (
-              { per_gram: 'G', per_piece: 'P', percentage: '%', fixed: 'N' } as Record<
-                string,
-                string
-              >
-            )[c.in.labourType]
-          : null,
+        desktopLabourTypeFor(c.in.labourType, behavior.labourType) || null,
         ctx.mainUser || null,
       );
     }
@@ -1456,8 +1455,7 @@ export async function getPurchase(
     );
     const h = headers[0]!;
     const labourType = (value: unknown): LabourType | undefined =>
-      ({ G: 'per_gram', P: 'per_piece', '%': 'percentage', N: 'fixed' })[text(value)] as
-        LabourType | undefined;
+      legacyLabourModeFor(value) as LabourType | undefined;
     return {
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),

@@ -1,5 +1,9 @@
 import { resolveOldGoldValuation } from './oldGoldValuation.js';
-import { desktopLabourTypeFor, effectiveLabourRate } from '../shared/labourDesktop.js';
+import {
+  desktopLabourTypeFor,
+  effectiveLabourRate,
+  legacyLabourModeFor,
+} from '../shared/labourDesktop.js';
 import {
   averageTouchByItemTx,
   billProfit,
@@ -1530,14 +1534,7 @@ async function writeSaleTx(
         num(c.in.touch),
         num(c.in.westPct),
         num(c.in.labourRate),
-        c.in.labourType
-          ? (
-              { per_gram: 'G', per_piece: 'P', percentage: '%', fixed: 'N' } as Record<
-                string,
-                string
-              >
-            )[c.in.labourType]
-          : null,
+        desktopLabourTypeFor(c.in.labourType, behavior.labourType) || null,
         ctx.mainUser || null,
       );
     }
@@ -1865,9 +1862,11 @@ export async function getSale(
       ...params,
     );
     const h = headers[0]!;
+    // Must agree with `desktopLabourTypeFor`. Reading 'N' as 'fixed' would corrupt the round trip now that
+    // per-gram is correctly written as 'N'; 'G' and 'K' have no legacy mode and yield undefined rather than a
+    // wrong one. `labourBasis` below carries the raw code so nothing is lost.
     const labourType = (value: unknown): LabourType | undefined =>
-      ({ G: 'per_gram', P: 'per_piece', '%': 'percentage', N: 'fixed' })[text(value)] as
-        LabourType | undefined;
+      legacyLabourModeFor(value) as LabourType | undefined;
     return {
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),

@@ -204,3 +204,39 @@ export function desktopLabourTypeFor(
       return fallback;
   }
 }
+
+/**
+ * Read a persisted `LBR_TYPE` back into the API's legacy mode vocabulary.
+ *
+ * The mapping is LOSSY in one direction and that is stated rather than hidden: the desktop has four bases but
+ * the legacy API vocabulary only expresses two of them.
+ *
+ *   'N' -> 'per_gram'    net weight x rate
+ *   'P' -> 'per_piece'   pieces x rate
+ *   'G' -> undefined     gross weight x rate has no legacy mode
+ *   'K' -> undefined     per-kilogram has no legacy mode
+ *
+ * Callers that need fidelity must read the raw code. Returning `undefined` for G and K is deliberate: the
+ * alternative is to claim a line is per-gram when it is priced on gross weight or per kilogram, which would
+ * silently change the amount on the next save.
+ *
+ * The inverse of `desktopLabourTypeFor` must agree with it. It previously read 'N' as 'fixed', so once the
+ * forward map was corrected to send per-gram to 'N', a saved line would have read back as a flat charge - a
+ * round-trip corruption introduced by fixing only one direction.
+ */
+export function legacyLabourModeFor(code: unknown): 'per_gram' | 'per_piece' | undefined {
+  switch (
+    String(code ?? '')
+      .trim()
+      .toUpperCase()
+      .slice(0, 1)
+  ) {
+    case 'N':
+      return 'per_gram';
+    case 'P':
+      return 'per_piece';
+    default:
+      // 'G' and 'K' have no legacy equivalent, and neither does a blank or unknown code.
+      return undefined;
+  }
+}

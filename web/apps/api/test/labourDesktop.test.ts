@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   desktopLabourAmount,
   desktopLabourRateFromPercent,
+  desktopLabourTypeFor,
   DESKTOP_LABOUR_TYPES,
+  legacyLabourModeFor,
   type DesktopLabourType,
 } from '../src/modules/shared/labourDesktop.js';
 
@@ -177,5 +179,51 @@ describe('GV-LBR type codes', () => {
         rate: 1,
       }),
     ).toThrow(/unknown labour type/i);
+  });
+
+  describe('GV-LBRRT: the forward and inverse maps must agree', () => {
+    it('GV-LBRRT-001 per_gram survives a round trip through the persisted code', () => {
+      // The bug this guards was introduced by fixing only one direction: once per_gram correctly wrote 'N',
+      // the untouched inverse still read 'N' as 'fixed', so a saved line came back as a flat charge.
+      const code = desktopLabourTypeFor('per_gram', 'G');
+      expect(code).toBe('N');
+      expect(legacyLabourModeFor(code)).toBe('per_gram');
+    });
+
+    it('GV-LBRRT-002 per_piece survives a round trip', () => {
+      const code = desktopLabourTypeFor('per_piece', 'G');
+      expect(code).toBe('P');
+      expect(legacyLabourModeFor(code)).toBe('per_piece');
+    });
+
+    it('GV-LBRRT-003 G and K report no legacy mode rather than a wrong one', () => {
+      // Claiming a gross-weight or per-kilogram line is per-gram would change the amount on the next save.
+      expect(legacyLabourModeFor('G')).toBeUndefined();
+      expect(legacyLabourModeFor('K')).toBeUndefined();
+    });
+
+    it('GV-LBRRT-004 a desktop code passed straight through is preserved', () => {
+      // A caller that already speaks G/N/K/P must not be re-mapped.
+      for (const code of DESKTOP_LABOUR_TYPES) {
+        expect(desktopLabourTypeFor(code, 'N')).toBe(code);
+      }
+    });
+
+    it('GV-LBRRT-005 percentage and fixed fall back to the company basis, never to a made-up code', () => {
+      // A percentage is not a basis: it derives the rate and keeps whatever basis applies. `fixed` has no
+      // desktop code at all.
+      expect(desktopLabourTypeFor('percentage', 'K')).toBe('K');
+      expect(desktopLabourTypeFor('fixed', 'K')).toBe('K');
+      // With no company default configured the result is blank, not a guess.
+      expect(desktopLabourTypeFor('percentage', '')).toBe('');
+      expect(desktopLabourTypeFor('fixed', undefined)).toBe('');
+      // And never '%', which the varchar(1) column cannot hold meaningfully.
+      expect(desktopLabourTypeFor('percentage', 'N')).not.toBe('%');
+    });
+
+    it('GV-LBRRT-006 an unrecognised company default does not leak into the column', () => {
+      expect(desktopLabourTypeFor(undefined, 'ZZZ')).toBe('');
+      expect(desktopLabourTypeFor('fixed', '%')).toBe('');
+    });
   });
 });
