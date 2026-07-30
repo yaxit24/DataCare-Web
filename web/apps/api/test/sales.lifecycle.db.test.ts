@@ -1056,6 +1056,48 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     expect(hidden.billProfit).toBeUndefined();
   });
 
+  it('projects the sale into a Rojmel that reconciles with the ledger', async () => {
+    // The desktop writes 4 Rojmel rows for a 2-line sale: one metal row per line carrying that line's
+    // pieces and weight, plus a party row and a tax row. Verified on Live24 book 027 voucher 00001,
+    // where the metal rows summed to the sales leg exactly (1087.00 + 428.00 = 1515.00).
+    const created = await createSale(runtime, saleInput(), firstLines);
+    const vch = String(created.vchNo).padStart(5, '0');
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "AC_CODE","LD_CODE","IT_TYPE","SIGN","LEDR_KEY",
+              "DR_AMT"::float dr,"CR_AMT"::float cr,"ITM_PCS"::float pcs,"ITM_GWT"::float gwt
+         FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+      TENANT,
+      vch,
+    )) as Array<Record<string, unknown>>;
+    expect(rows.length).toBeGreaterThan(0);
+
+    const metal = rows.filter((r) => r.IT_TYPE !== 'A');
+    const money = rows.filter((r) => r.IT_TYPE === 'A');
+    // One metal row per sale line, each carrying weight — this is what AC_DATA cannot express and the
+    // whole reason the Rojmel exists.
+    expect(metal).toHaveLength(firstLines.length);
+    expect(metal.every((r) => Number(r.gwt ?? 0) > 0)).toBe(true);
+    expect(metal.every((r) => r.SIGN === '-')).toBe(true); // metal out on a sale
+    expect(money.every((r) => Number(r.gwt ?? 0) === 0)).toBe(true);
+
+    // The party row's amount must equal the party's ledger debit. Asserting against AC_DATA rather
+    // than a hard-coded figure means the two projections cannot silently disagree.
+    const [partyLeg] = (await owner.$queryRawUnsafe(
+      `SELECT "DR_AMT"::float dr FROM "AC_DATA"
+        WHERE tenant_id=$1 AND "VCH_NO"=$2 AND "AC_CODE"=$3 AND "DR_AMT">0`,
+      TENANT,
+      vch,
+      'CUST',
+    )) as Array<{ dr: number }>;
+    const partyRow = rows.find((r) => r.AC_CODE === 'CUST' && r.IT_TYPE === 'A');
+    expect(partyRow).toBeDefined();
+    expect(Number(partyRow!.dr ?? 0)).toBeCloseTo(Number(partyLeg?.dr ?? 0), 2);
+
+    // Every row carries the voucher key, and LEDR_KEY encodes the row type at offset 22.
+    expect(rows.every((r) => String(r.LEDR_KEY).length >= 23)).toBe(true);
+    expect(metal.every((r) => String(r.LEDR_KEY).slice(21, 23) === '01')).toBe(true);
+  });
+
   it('writes exactly the declared set of tables, so a dropped write cannot pass unnoticed', async () => {
     // WHY THIS EXISTS
     // The lifecycle tests assert the CONTENT of rows they look at, but nothing asserted the SET of tables that
@@ -1080,6 +1122,9 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         'AC_DATA',
         'BILL_OS_DATA',
         'MAIN_STOCK',
+        // The day book. The desktop writes it on every sale (3179 real rows); the web did not until
+        // the Rojmel projection was added, so an F11 day book had no metal rows to show.
+        'ROJ_MEL_DATA',
         'SL_DATA',
         'SL_DETL',
         'SL_IDTL',

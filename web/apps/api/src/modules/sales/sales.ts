@@ -49,6 +49,7 @@ import {
 } from '../shared/counterStockPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
 import type { RoundingPolicy } from '../shared/roundingPolicy.js';
+import { buildSaleRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import {
   generatedLabourRate,
   resolveSettingsBehaviorTx,
@@ -1488,6 +1489,42 @@ async function writeSaleTx(
     });
   }
 
+  // The Rojmel — the day book the desktop binds to F11. A second projection of this sale showing metal
+  // movement beside money, which AC_DATA cannot carry. Verified against the real desktop database:
+  // 3179 rows, and a sale's three ledger legs become one metal row per detail line (the revenue leg
+  // split, each carrying that line's pieces and weight) plus a party row and a tax row.
+  // See project-memory/parity/ROJMEL-MODEL-VERIFIED.md and modules/shared/rojmel.ts.
+  const rojmelRows = buildSaleRojmel(
+    {
+      scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
+      key,
+      coBook: key.CO_BOOK,
+      vchNo: key.VCH_NO,
+      vchDate: voucherDate,
+      vchType: bookPolicy.vchType,
+      bookName: bookPolicy.bookName,
+      partyName: input.acName ?? '',
+      partyCode: input.acCode,
+    },
+    computed.map((c, idx) => {
+      const item = String(c.in.itCode ?? '').trim();
+      return {
+        lineNo: idx + 1,
+        revenueAc: saleAcByItem[item] ?? salesAc,
+        amount: c.calc.net,
+        metal: rojmelMetalFor(metalByItem[item] ?? c.in.metal),
+        pcs: num(c.in.pcs),
+        grossWt: num(c.in.grossWt),
+        netWt: num(c.in.netWt),
+        rate: num(c.in.rate),
+      };
+    }),
+    // partyAmount is the payable the party's ledger leg carries (net + tax, after round-off). The
+    // lifecycle test asserts it equals the AC_DATA party debit rather than trusting this field name.
+    { taxAc, taxAmount: totals.tax, partyAmount: totals.total },
+    bookPolicy.inout !== 'I', // outward for a sale; an inward book mirrors the direction
+  );
+
   await postVoucherTx(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
     bookName: bookPolicy.bookName,
@@ -1500,6 +1537,7 @@ async function writeSaleTx(
       ...(oldGoldStock.length ? [{ table: 'MAIN_STOCK', rows: oldGoldStock }] : []),
       { table: 'TAX_DATA', rows: taxRows },
       { table: 'BILL_OS_DATA', rows: [osRow] },
+      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
     ],
   });
 

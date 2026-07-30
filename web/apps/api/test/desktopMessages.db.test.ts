@@ -43,6 +43,7 @@ databaseDescribe('desktop validation wording', () => {
 
   const cleanup = async (): Promise<void> => {
     for (const table of [
+      'ROJ_MEL_DATA',
       'SL_DETL',
       'SL_DATA',
       'BILL_OS_DATA',

@@ -115,6 +115,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       'TAX_DATA',
       'AC_DATA',
       'SL_IDTL',
+      'ROJ_MEL_DATA',
       'SL_DETL',
       'SL_DATA',
       'SL_PR_DETL',

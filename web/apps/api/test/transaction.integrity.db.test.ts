@@ -51,6 +51,7 @@ databaseDescribe('database-backed transaction integrity', () => {
       'AC_DATA',
       'SL_IDTL',
       'SL_PR_DETL',
+      'ROJ_MEL_DATA',
       'SL_DETL',
       'SL_DATA',
       'BAR_IDTL',
