@@ -381,6 +381,7 @@ import { trialBalanceFull, salesByGroup, cashDaySummary } from '../modules/repor
 import { customerCrm, areaWiseSales, locationWiseSales } from '../modules/reports/reports9.js';
 import { gstInputRegister } from '../modules/reports/reports10.js';
 import { orderLotZoom, tagEstimate } from '../modules/reports/orderTagReports.js';
+import { toCsv } from '../modules/reports/reportCsv.js';
 import {
   readFilters,
   REPORT_FILTER_BINDINGS,
@@ -2528,6 +2529,62 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     'trial-balance': trialBalance as ReportBuilder,
     'trial-balance-full': trialBalanceFull as ReportBuilder,
   };
+  /**
+   * Resolve a report to its rows and totals.
+   *
+   * Shared by the XLSX and CSV exports so the two cannot disagree about what a report contains. Keeping the
+   * resolution in one place also means the filter handling below — which the shared builder signature cannot
+   * express — is applied identically to both formats.
+   */
+  const resolveReport = async (
+    slug: string,
+    req: FastifyRequest,
+  ): Promise<{ rows: Record<string, unknown>[]; totals?: Record<string, unknown> }> => {
+    const build = REPORT_BUILDERS[slug]!;
+    const scope = readScope(req);
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    const result: any =
+      slug === 'order-lot-zoom'
+        ? await orderLotZoom(prisma, scope, q.lotNo ?? '')
+        : slug === 'tag-estimate'
+          ? await tagEstimate(prisma, scope, {
+              ...readFilters(q),
+              tagNo: q.tagNo || undefined,
+              direction: q.direction === 'Out' ? 'Out' : 'In',
+            })
+          : await build(prisma, scope, range(req));
+    const rows: Record<string, unknown>[] = Array.isArray(result)
+      ? result
+      : Array.isArray(result?.rows)
+        ? result.rows
+        : [result];
+    const totals =
+      !Array.isArray(result) && result?.totals && typeof result.totals === 'object'
+        ? (result.totals as Record<string, unknown>)
+        : undefined;
+    return { rows, totals };
+  };
+
+  /**
+   * CSV export for every report.
+   *
+   * The desktop exports CSV from every report and the web previously had exactly one such route, so this is a
+   * real capability gap as well as the input the parity comparison needs: Crystal exports CSV, the web exports
+   * CSV, and the two files can then be compared on rows and totals rather than on layout.
+   */
+  app.get('/reports/:report/export.csv', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const slug = String((req.params as any).report ?? '');
+    if (!REPORT_BUILDERS[slug]) {
+      return reply.code(404).send({ error: 'unknown-report', report: slug });
+    }
+    const { rows, totals } = await resolveReport(slug, req);
+    return reply
+      .header('content-type', 'text/csv; charset=utf-8')
+      .header('content-disposition', `attachment; filename="${slug}.csv"`)
+      .send(toCsv(rows, { totals }));
+  });
+
   app.get('/reports/:report/export.xlsx', auth, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const slug = String((req.params as any).report ?? '');

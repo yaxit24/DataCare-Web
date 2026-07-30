@@ -162,12 +162,55 @@ Work in this order — the first two are usually operator error, not a defect:
 A `WEB NEVER WROTE THIS TABLE` finding is always significant: it means a whole table in the desktop write set
 is absent from the web's.
 
-## Extending to reports
+## Reports: comparing the data
 
-The same principle applies, using data rather than pixels. Crystal exports to CSV; the web exports XLSX and
-CSV. Compare the **rows and totals**, not the layout. Pixel-identical Crystal output is not claimed anywhere in
-this project and should not be inferred from the 254 layout baselines, which only detect regressions in the
-web's own renderer.
+Built and tested. Compare the **rows and control totals**, never the layout — Crystal pixel parity is not
+claimed anywhere in this project and must not be inferred from the 254 layout baselines, which only detect
+regressions in the web's own renderer.
+
+While you are on the Windows box, export each report you care about to CSV:
+
+    DataCareNext -> open the report -> Export -> CSV
+
+Then on the web side, with the **same date range and filters**:
+
+```bash
+curl -b cookies.txt "http://<host>/reports/day-book/export.csv" -o web-day-book.csv
+```
+
+Every report has a CSV export. Write a column map, because Crystal names its fields after the report designer's
+choices and the web names them after its own row keys — there is no reliable way to infer the correspondence,
+and a column the map does not name is reported as unmapped rather than silently dropped:
+
+```json
+{
+  "report":  "day-book",
+  "columns": { "VchNo": "vchNo", "AcName": "acCode", "Dr Amount": "dr", "Cr Amount": "cr" },
+  "numeric": ["dr", "cr"],
+  "key":     ["vchNo", "acCode"],
+  "scale":   { "dr": 2, "cr": 2 },
+  "crystalHeaderHint": "VchNo"
+}
+```
+
+```bash
+node apps/api/integration/report-compare.mjs crystal-day-book.csv web-day-book.csv day-book-map.json
+```
+
+The reader handles what a real Crystal export carries: a UTF-8 BOM, a title block, page headers repeated on
+every page, group captions, blank separators, a grand total, thousands separators and parenthesised negatives.
+None of those are counted as data rows — miscounting them would make the row totals disagree for reasons that
+have nothing to do with the business logic.
+
+Output leads with the denominator, and states plainly when it did **not** run a row-level comparison:
+
+```
+  rows      crystal 50  web 50
+  total dr: crystal 663942.82  web 663942.82
+  row level: 200 fields compared, 0 differing
+  skipped   crystal {"blank":1,"repeatedHeader":24,"groupOrSubtotal":0,"total":1}
+  VERDICT: matched
+```
 
 ## What this procedure does not cover
 

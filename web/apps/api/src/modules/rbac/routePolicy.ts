@@ -501,7 +501,11 @@ route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding']);
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
 route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);
-route('Reports/Tag Estimate', ['GET /reports/tag-estimate', 'GET /reports/:report/filters']);
+route('Reports/Tag Estimate', [
+  'GET /reports/tag-estimate',
+  'GET /reports/:report/filters',
+  'GET /reports/:report/export.csv',
+]);
 route('Reports/Order Zoom', ['GET /reports/order-lot-zoom']);
 route('Reports/Old Gold / Exchange', ['GET /reports/old-gold-register']);
 route('Reports/Sales by Party', ['GET /reports/sales-by-party']);
