@@ -10,6 +10,7 @@ import {
 } from '../src/modules/purchase/purchase.js';
 import { createSale } from '../src/modules/sales/sales.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
+import { footprintOf, ledgerLegs, voucherTables } from './support/footprint.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -18,6 +19,24 @@ const CO = '01';
 const LC = '01';
 const YEAR = '2024-2025';
 const BOOK = 'PUR';
+/**
+ * Established empirically by posting a purchase and enumerating every VCH_NO table that received rows.
+ *
+ * Richer than a sale's because a purchase CREATES stock: it registers tags (BAR_DETL, BAR_IDTL) and the lot
+ * they belong to (LOT_DETL) as well as posting the ledger and tax. Those three are the tables a silent
+ * regression would be most costly in — stock that exists on the bill but not in the tag ledger.
+ */
+const FOOTPRINT_PURCHASE: string[] = [
+  'AC_DATA',
+  'BAR_DETL',
+  'BAR_IDTL',
+  'BILL_OS_DATA',
+  'LOT_DETL',
+  'MAIN_STOCK',
+  'PR_DATA',
+  'PR_DETL',
+  'TAX_DATA',
+];
 const DAY = '2024-04-10';
 const scope: VoucherScope = {
   tenantId: TENANT,
@@ -847,4 +866,25 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       expect(String(row.LEDR_KEY).trim().length).toBeGreaterThan(10);
     }
   }, 30_000);
+
+  it('writes exactly the declared set of tables, so a dropped write cannot pass unnoticed', async () => {
+    // Same guard as the sales suite, for the reason established there: dropping every tax row from a voucher
+    // passed 26 tests because nothing asserted WHICH tables received rows, only the content of the rows the
+    // tests happened to read. The probe is schema-driven so a table nobody listed is still covered.
+    const created = await createPurchase(runtime, purchaseInput(), firstLines);
+    const vch = String(created.vchNo).padStart(5, '0');
+
+    const tables = await voucherTables(owner);
+    expect(tables.length, 'the schema must expose voucher tables to probe').toBeGreaterThan(30);
+    const touched = await footprintOf(owner, tables, TENANT, vch);
+
+    // Asserted as an exact SET so both directions fail: a table that stops receiving rows, and one that starts
+    // receiving them unexpectedly - which is how a duplicate ledger posting appears.
+    expect(touched).toEqual(FOOTPRINT_PURCHASE);
+
+    // A footprint check alone would pass if AC_DATA received rows that did not balance.
+    const legs = await ledgerLegs(owner, TENANT, vch);
+    expect(legs.dr, 'the ledger must actually be posted').toBeGreaterThan(0);
+    expect(legs.dr, 'and it must balance').toBeCloseTo(legs.cr, 2);
+  });
 });

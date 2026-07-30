@@ -33,6 +33,7 @@ import {
 } from '../src/modules/membership/scheme.js';
 import { schemePassbookData } from '../src/modules/scheme/passbook.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
+import { footprintOf, ledgerLegs, voucherTables } from './support/footprint.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -1158,4 +1159,56 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     )) as Array<{ n: number }>;
     expect(again[0]!.n).toBe(before);
   }, 30_000);
+
+  it('a sale return writes exactly its declared set of tables', async () => {
+    // Established empirically. A return is the family member most likely to lose a write silently, because it
+    // reverses stock and ledger rather than creating them, so an absent table looks like "nothing to reverse".
+    const created = await createSaleReturn(runtime, returnInput(), returnLines);
+    const vch = String(created.voucherNo ?? created.vchNo).padStart(5, '0');
+    const tables = await voucherTables(owner);
+    expect(tables.length).toBeGreaterThan(30);
+    const touched = await footprintOf(owner, tables, TENANT, vch);
+    expect(touched.length, 'a return must write something').toBeGreaterThan(0);
+    for (const required of ['SL_DETL_RTN', 'AC_DATA']) {
+      expect(touched, `a sale return must write ${required}`).toContain(required);
+    }
+    const legs = await ledgerLegs(owner, TENANT, vch);
+    expect(legs.dr, 'the reversal must be posted').toBeGreaterThan(0);
+    expect(legs.dr, 'and it must balance').toBeCloseTo(legs.cr, 2);
+  });
+
+  it('a sales order posts the ledger only when it carries an advance', async () => {
+    // My first version of this asserted an order NEVER posts to AC_DATA. That was wrong, and the source says
+    // so: TR_SALE_ORD.cs:9558,9729 delete and rewrite AC_DATA rows, and the form carries ADV_AMT. An advance
+    // is real money received, so it belongs in the ledger.
+    //
+    // The distinction that matters is therefore conditional, and testing it both ways is what makes it
+    // meaningful: with an advance the ledger is posted and balanced; with none it is not touched at all. An
+    // order that posted without an advance would inflate the books with work not yet done.
+    const withAdvance = await createSalesOrder(runtime, orderInput());
+    const vchA = String(withAdvance.voucherNo ?? withAdvance.vchNo).padStart(5, '0');
+    const tables = await voucherTables(owner);
+    expect(tables.length).toBeGreaterThan(30);
+
+    const touchedA = await footprintOf(owner, tables, TENANT, vchA);
+    expect(touchedA, 'an order must record itself').toContain('SL_ORD_DATA');
+    expect(touchedA, 'the advance is real money and belongs in the ledger').toContain('AC_DATA');
+    // An order is a commitment, not a taxable supply: no tax rows until it becomes a bill.
+    expect(touchedA, 'an order must NOT write tax rows').not.toContain('TAX_DATA');
+
+    const legsA = await ledgerLegs(owner, TENANT, vchA);
+    expect(legsA.dr, 'the advance posting must balance').toBeCloseTo(legsA.cr, 2);
+    expect(legsA.dr, 'and it must be non-zero when an advance was taken').toBeGreaterThan(0);
+
+    const noAdvance = await createSalesOrder(runtime, orderInput({ advanceAmount: 0 }));
+    const vchB = String(noAdvance.voucherNo ?? noAdvance.vchNo).padStart(5, '0');
+    const touchedB = await footprintOf(owner, tables, TENANT, vchB);
+    expect(touchedB, 'an order without an advance must still record itself').toContain(
+      'SL_ORD_DATA',
+    );
+    expect(
+      touchedB,
+      'but with no money received there is nothing to post, so the ledger must be untouched',
+    ).not.toContain('AC_DATA');
+  });
 });
