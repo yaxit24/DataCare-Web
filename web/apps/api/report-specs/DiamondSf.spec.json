@@ -1,0 +1,216 @@
+{
+ "report": "DiamondSf",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 75,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 93,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "Detail",
+     "height": 3011,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 0,
+       "top": 0,
+       "width": 0,
+       "height": 200,
+       "dataSource": "{BAR_CAN_DETL.IT_CODE}"
+      },
+      {
+       "type": "PictureObject",
+       "name": "Picture4",
+       "left": 683,
+       "top": 60,
+       "width": 4320,
+       "height": 2820
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 2633,
+       "top": 1313,
+       "width": 840,
+       "height": 142,
+       "dataSource": "{BAR_CAN_DETL.TAG_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 1408,
+       "top": 1530,
+       "width": 2312,
+       "height": 226,
+       "dataSource": "{@Product}"
+      },
+      {
+       "type": "BlobFieldObject",
+       "name": "Field16",
+       "left": 3203,
+       "top": 1530,
+       "width": 1577,
+       "height": 1176
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 1830,
+       "top": 1763,
+       "width": 1131,
+       "height": 185,
+       "dataSource": "{BAR_CAN_DETL.ITM_GWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 1597,
+       "top": 1988,
+       "width": 947,
+       "height": 216,
+       "dataSource": "{BAR_CAN_DETL.ITM_NWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 1470,
+       "top": 2243,
+       "width": 1553,
+       "height": 234,
+       "dataSource": "{BAR_CAN_DETL.ITM_REMARK}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 1482,
+       "top": 2453,
+       "width": 1177,
+       "height": 234,
+       "dataSource": "{BAR_CAN_DETL.ITM_POLISH}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 585,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "PageFooter",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "ACName",
+   "ref": "{@ACName}",
+   "type": "UnknownField",
+   "text": "{BAR_CAN_DETL.DESIGN}"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "UnknownField",
+   "text": "{BAR_CAN_DETL.DESIGN}"
+  },
+  {
+   "name": "ItmWt",
+   "ref": "{@ItmWt}",
+   "type": "StringField",
+   "text": "'G.'+totext({BAR_CAN_DETL.ITM_GWT},3)"
+  },
+  {
+   "name": "Labour",
+   "ref": "{@Labour}",
+   "type": "UnknownField",
+   "text": "if {BAR_CAN_DETL.MRP} <>0 then 'MRP: ' & totext({BAR_CAN_DETL.MRP},'0') ELSE IF {BAR_CAN_DETL.LBR_RATE} <> 0 THEN 'LP: ' & totext({BAR_CAN_DETL.LBR_RATE},'0') else IF {BAR_CAN_DETL.LBR_AMT} <> 0 THEN "
+  },
+  {
+   "name": "MrpPrint",
+   "ref": "{@MrpPrint}",
+   "type": "StringField",
+   "text": "''"
+  },
+  {
+   "name": "netWt",
+   "ref": "{@netWt}",
+   "type": "StringField",
+   "text": "'N.'+totext({BAR_CAN_DETL.ITM_NWT},3)"
+  },
+  {
+   "name": "otAmt",
+   "ref": "{@otAmt}",
+   "type": "UnknownField",
+   "text": "{@otAmt}"
+  },
+  {
+   "name": "OtherDtl",
+   "ref": "{@OtherDtl}",
+   "type": "UnknownField",
+   "text": "{BAR_IDTL.IT_CODE} & \" / \" & totext({BAR_IDTL.ITM_GWT},2)& \" / \" & totext({BAR_IDTL.ITM_AMT},0)"
+  },
+  {
+   "name": "Pcs",
+   "ref": "{@Pcs}",
+   "type": "StringField",
+   "text": "totext({BAR_CAN_DETL.ITM_PCS},'0')"
+  },
+  {
+   "name": "Product",
+   "ref": "{@Product}",
+   "type": "StringField",
+   "text": "{PRODUCT_MAST.PR_NAME}"
+  },
+  {
+   "name": "TagNo",
+   "ref": "{@TagNo}",
+   "type": "StringField",
+   "text": "'*' + {BAR_CAN_DETL.TAG_NO} + '*'"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 9,
+ "formulaCount": 11
+}

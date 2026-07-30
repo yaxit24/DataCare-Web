@@ -1,0 +1,522 @@
+{
+ "form": "TR_MEMB_ENT",
+ "controlCount": 49,
+ "byKind": {
+  "textbox": 18,
+  "button": 9,
+  "masked": 1,
+  "label": 13,
+  "panel": 2,
+  "grid": 4,
+  "other": 1,
+  "check": 1
+ },
+ "grids": [
+  "MSG",
+  "MSG_TOT",
+  "DGV",
+  "MSG_UPI"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "BtnPassBook",
+   "FlowLayoutPanel1",
+   "BtnLast",
+   "BtnFirst"
+  ],
+  "FlowLayoutPanel1": [
+   "nLineSkip",
+   "lblLineSkip",
+   "chkWapp"
+  ],
+  "this": [
+   "nMembAmt",
+   "nSchmAmt",
+   "Label7",
+   "TEXT_UPI",
+   "MSG_UPI",
+   "tSchmType",
+   "Label6",
+   "tQrCane",
+   "lbrMsgShow",
+   "tVchDesc",
+   "Label5",
+   "DGV",
+   "tChqNo",
+   "Label4",
+   "tBankName",
+   "Label1",
+   "Label9",
+   "tSchmName",
+   "Label15",
+   "tSchmCode",
+   "tEmpCode",
+   "tEmpName",
+   "Label3",
+   "tHdVchNo",
+   "Cr",
+   "BtnF1",
+   "TEXT_ENTRY",
+   "MSG_TOT",
+   "MSG",
+   "mDay",
+   "mTime",
+   "mVchDate",
+   "lblBDate",
+   "Label2",
+   "tVchNo",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "104,52",
+   "size": "76,22",
+   "tabIndex": "0",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "mVchDate",
+   "type": "MaskedTextBox",
+   "location": "297,52",
+   "size": "76,22",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tSchmCode",
+   "type": "TextBox",
+   "location": "104,86",
+   "size": "75,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "471,217",
+   "size": "100,18",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "183,505",
+   "size": "57,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnLast",
+   "type": "SimpleButton",
+   "location": "202,3",
+   "size": "41,37",
+   "tabIndex": "5",
+   "text": ">",
+   "kind": "button"
+  },
+  {
+   "name": "tVchDesc",
+   "type": "TextBox",
+   "location": "183,534",
+   "size": "548,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Memb Entry",
+   "kind": "label"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnFirst",
+   "type": "SimpleButton",
+   "location": "155,3",
+   "size": "41,37",
+   "tabIndex": "6",
+   "text": "<",
+   "kind": "button"
+  },
+  {
+   "name": "tHdVchNo",
+   "type": "TextBox",
+   "location": "8,8",
+   "size": "56,15",
+   "tabIndex": "7",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "FlowLayoutPanel1",
+   "type": "FlowLayoutPanel",
+   "location": "249,3",
+   "size": "475,36",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnPassBook",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "28",
+   "text": "&PbPrint",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "27,52",
+   "size": "68,20",
+   "tabIndex": "1125",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "227,53",
+   "size": "71,20",
+   "tabIndex": "1126",
+   "text": "Vch Date",
+   "kind": "label"
+  },
+  {
+   "name": "mTime",
+   "type": "TextBox",
+   "location": "378,52",
+   "size": "75,22",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mDay",
+   "type": "TextBox",
+   "location": "458,52",
+   "size": "83,22",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "104,121",
+   "size": "729,213",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "105,335",
+   "size": "730,15",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnF1",
+   "type": "SimpleButton",
+   "location": "186,51",
+   "size": "35,23",
+   "tabIndex": "1149",
+   "text": "F1",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1203,471",
+   "size": "28,28",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "101,505",
+   "size": "69,20",
+   "tabIndex": "1161",
+   "text": "Employee",
+   "kind": "label"
+  },
+  {
+   "name": "tEmpName",
+   "type": "TextBox",
+   "location": "246,505",
+   "size": "249,22",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nLineSkip",
+   "type": "TextBox",
+   "location": "433,3",
+   "size": "39,27",
+   "tabIndex": "1167",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblLineSkip",
+   "type": "Label",
+   "location": "347,0",
+   "size": "80,31",
+   "tabIndex": "1168",
+   "text": "Line Skip",
+   "kind": "label"
+  },
+  {
+   "name": "chkWapp",
+   "type": "CheckBox",
+   "location": "222,3",
+   "size": "119,27",
+   "tabIndex": "1169",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "3,86",
+   "size": "92,20",
+   "tabIndex": "1210",
+   "text": "Schm Code",
+   "kind": "label"
+  },
+  {
+   "name": "tSchmName",
+   "type": "TextBox",
+   "location": "185,86",
+   "size": "356,22",
+   "tabIndex": "1211",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nMembAmt",
+   "type": "TextBox",
+   "location": "864,87",
+   "size": "88,22",
+   "tabIndex": "1212",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "549,89",
+   "size": "77,20",
+   "tabIndex": "1213",
+   "text": "Schm Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "101,355",
+   "size": "78,20",
+   "tabIndex": "1214",
+   "text": "Bank Name",
+   "kind": "label"
+  },
+  {
+   "name": "tBankName",
+   "type": "TextBox",
+   "location": "183,355",
+   "size": "312,22",
+   "tabIndex": "1215",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "505,355",
+   "size": "61,20",
+   "tabIndex": "1216",
+   "text": "Chq No",
+   "kind": "label"
+  },
+  {
+   "name": "tChqNo",
+   "type": "TextBox",
+   "location": "572,355",
+   "size": "159,22",
+   "tabIndex": "1217",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "841,121",
+   "size": "325,378",
+   "tabIndex": "1218",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "101,534",
+   "size": "78,20",
+   "tabIndex": "1219",
+   "text": "Vch Desc",
+   "kind": "label"
+  },
+  {
+   "name": "lbrMsgShow",
+   "type": "Label",
+   "location": "841,525",
+   "size": "125,20",
+   "tabIndex": "1220",
+   "text": "Whatsapp Msg",
+   "kind": "label"
+  },
+  {
+   "name": "tQrCane",
+   "type": "TextBox",
+   "location": "634,53",
+   "size": "88,22",
+   "tabIndex": "1221",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "555,53",
+   "size": "73,20",
+   "tabIndex": "1222",
+   "text": "Qr Scene",
+   "kind": "label"
+  },
+  {
+   "name": "tSchmType",
+   "type": "TextBox",
+   "location": "728,87",
+   "size": "33,22",
+   "tabIndex": "1223",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG_UPI",
+   "type": "AxMSFlexGrid",
+   "location": "105,388",
+   "size": "728,111",
+   "tabIndex": "1224",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "TEXT_UPI",
+   "type": "TextBox",
+   "location": "395,434",
+   "size": "100,18",
+   "tabIndex": "1225",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nSchmAmt",
+   "type": "TextBox",
+   "location": "634,89",
+   "size": "88,22",
+   "tabIndex": "1226",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "782,89",
+   "size": "90,20",
+   "tabIndex": "1227",
+   "text": "Memb Amt",
+   "kind": "label"
+  }
+ ]
+}

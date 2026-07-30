@@ -1,0 +1,60 @@
+# syntax=docker/dockerfile:1
+###############################################################################
+# DataCareNext API — multi-stage image (pnpm + turbo monorepo).
+#
+# Builds @datacare/api and its workspace deps (@datacare/core, @datacare/db,
+# @datacare/types), generates the Prisma client, and runs the compiled
+# apps/api/dist/server.js. Right-sized per ADR-0002.
+#
+#   build context: the `web/` repo root (so the whole pnpm workspace is visible)
+#   exposed port : 4000  (server.ts reads process.env.PORT; next.config proxies
+#                          /api -> http://api:4000)
+###############################################################################
+
+# ---- Stage 1: build the whole workspace --------------------------------------
+# Exact Playwright image supplies Node plus the Chromium/runtime dependency set used by
+# playwright@1.61.1. Keeping build and runtime on the same base avoids musl/glibc drift.
+FROM mcr.microsoft.com/playwright:v1.61.1-noble AS build
+
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN corepack enable
+
+WORKDIR /repo
+
+# Copy workspace manifests first for better install-layer caching.
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml turbo.json tsconfig.base.json ./
+COPY packages ./packages
+COPY apps ./apps
+
+# Install every workspace dependency, frozen to the committed lockfile.
+RUN pnpm install --frozen-lockfile
+
+# Generate the Prisma client BEFORE the build so tsc has the generated types.
+# (No database connection is required for `prisma generate`.)
+RUN pnpm --filter @datacare/db run db:generate
+
+# Build all packages + the API via turbo. @datacare/api uses `tsc -p tsconfig.json`
+# (rootDir=src, outDir=dist) so this emits apps/api/dist/server.js.
+RUN pnpm build
+
+# ---- Stage 2: browser-enabled runtime ----------------------------------------
+FROM mcr.microsoft.com/playwright:v1.61.1-noble AS runtime
+
+ENV NODE_ENV=production
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+# API listens on 4000; production configuration is validated before startup.
+ENV PORT=4000
+
+WORKDIR /repo
+# Copy the fully installed + built workspace. pnpm's symlinked node_modules stay
+# valid because build and runtime use the same exact Playwright base image and /repo path.
+COPY --from=build /repo /repo
+
+WORKDIR /repo/apps/api
+EXPOSE 4000
+# Run unprivileged; the bundled Chromium under /ms-playwright is readable by pwuser.
+USER pwuser
+
+# server.ts boots buildApp({ prisma, secret: process.env.JWT_SECRET }) and listens
+# on PORT with host 0.0.0.0. Requires env: DATABASE_URL, JWT_SECRET.
+CMD ["node", "dist/server.js"]

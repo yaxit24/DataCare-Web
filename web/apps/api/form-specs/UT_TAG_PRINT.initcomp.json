@@ -1,0 +1,387 @@
+{
+ "form": "UT_TAG_PRINT",
+ "controlCount": 36,
+ "byKind": {
+  "button": 8,
+  "textbox": 10,
+  "panel": 1,
+  "label": 10,
+  "grid": 1,
+  "other": 2,
+  "combo": 3,
+  "check": 1
+ },
+ "grids": [
+  "MSG"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "btnRfid",
+   "cboPrintType",
+   "lblPrintType"
+  ],
+  "this": [
+   "chkHmIdUpdate",
+   "PictureBox1",
+   "cboItemTyp",
+   "Label7",
+   "tGrName",
+   "tPrName",
+   "Label4",
+   "Label5",
+   "tPrCode",
+   "tGrCode",
+   "Label3",
+   "nLableSkip",
+   "btnTagSet",
+   "cboPrintfile",
+   "Label6",
+   "tHdVchNo",
+   "tBookCode",
+   "tBookName",
+   "Label1",
+   "Cr",
+   "BtnF1",
+   "lblItem",
+   "TEXT_ENTRY",
+   "MSG",
+   "Label2",
+   "tVchNo",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "tBookCode",
+   "type": "TextBox",
+   "location": "102,44",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "102,78",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "525,210",
+   "size": "100,18",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "nLableSkip",
+   "type": "TextBox",
+   "location": "1131,537",
+   "size": "39,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Tag Print",
+   "kind": "label"
+  },
+  {
+   "name": "btnRfid",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "32",
+   "text": "&Rfid",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "28,78",
+   "size": "68,18",
+   "tabIndex": "1125",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "12,110",
+   "size": "1158,421",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "lblItem",
+   "type": "Label",
+   "location": "12,538",
+   "size": "221,20",
+   "tabIndex": "1139",
+   "text": "Item Name",
+   "kind": "label"
+  },
+  {
+   "name": "BtnF1",
+   "type": "SimpleButton",
+   "location": "184,78",
+   "size": "35,23",
+   "tabIndex": "1149",
+   "text": "F1",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1181,147",
+   "size": "28,28",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "36,44",
+   "size": "60,20",
+   "tabIndex": "1157",
+   "text": "Book",
+   "kind": "label"
+  },
+  {
+   "name": "tBookName",
+   "type": "TextBox",
+   "location": "184,44",
+   "size": "224,23",
+   "tabIndex": "1158",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tHdVchNo",
+   "type": "TextBox",
+   "location": "8,8",
+   "size": "56,15",
+   "tabIndex": "1159",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboPrintfile",
+   "type": "ComboBox",
+   "location": "1007,79",
+   "size": "113,24",
+   "tabIndex": "1160",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "895,80",
+   "size": "106,20",
+   "tabIndex": "1161",
+   "text": "Print file Name",
+   "kind": "label"
+  },
+  {
+   "name": "btnTagSet",
+   "type": "SimpleButton",
+   "location": "1126,78",
+   "size": "44,24",
+   "tabIndex": "1162",
+   "text": "Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "1042,538",
+   "size": "80,20",
+   "tabIndex": "1164",
+   "text": "Lable Skip",
+   "kind": "label"
+  },
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "483,77",
+   "size": "66,22",
+   "tabIndex": "1165",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "483,42",
+   "size": "66,22",
+   "tabIndex": "1166",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "413,79",
+   "size": "66,20",
+   "tabIndex": "1167",
+   "text": "Pr Code",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "413,44",
+   "size": "66,20",
+   "tabIndex": "1168",
+   "text": "Gr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tPrName",
+   "type": "TextBox",
+   "location": "552,77",
+   "size": "240,22",
+   "tabIndex": "1169",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tGrName",
+   "type": "TextBox",
+   "location": "552,42",
+   "size": "240,22",
+   "tabIndex": "1170",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "309,77",
+   "size": "99,22",
+   "tabIndex": "1171",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "228,77",
+   "size": "73,20",
+   "tabIndex": "1172",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "chkHmIdUpdate",
+   "type": "CheckBox",
+   "location": "899,48",
+   "size": "135,19",
+   "tabIndex": "1175",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "cboPrintType",
+   "type": "ComboBox",
+   "location": "624,3",
+   "size": "100,24",
+   "tabIndex": "1244",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblPrintType",
+   "type": "Label",
+   "location": "520,0",
+   "size": "98,30",
+   "tabIndex": "1245",
+   "text": "Print Type",
+   "kind": "label"
+  },
+  {
+   "name": "PictureBox1",
+   "type": "PictureBox",
+   "location": "812,48",
+   "size": "56,48",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  }
+ ]
+}

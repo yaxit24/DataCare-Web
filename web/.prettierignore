@@ -1,0 +1,9 @@
+# Generated/extracted desktop evidence; formatting would create noise and can alter source fidelity.
+apps/api/form-specs/
+apps/api/report-specs/
+
+# Build/test outputs.
+apps/web/.next/
+**/dist/
+coverage/
+.turbo/

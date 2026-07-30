@@ -1,0 +1,102 @@
+{
+ "form": "UT_USER_REQUEST",
+ "controlCount": 8,
+ "byKind": {
+  "textbox": 1,
+  "radio": 2,
+  "panel": 1,
+  "label": 2,
+  "button": 2
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnSave"
+  ],
+  "this": [
+   "lblBook",
+   "RadioDelete",
+   "PnlBotam",
+   "RadioEdit",
+   "tItDesc",
+   "Label4"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tItDesc",
+   "type": "TextBox",
+   "location": "13,69",
+   "size": "384,144",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "RadioEdit",
+   "type": "RadioButton",
+   "location": "70,223",
+   "size": "108,24",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "radio"
+  },
+  {
+   "name": "RadioDelete",
+   "type": "RadioButton",
+   "location": "225,224",
+   "size": "126,24",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "radio"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,257",
+   "size": "408,47",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "11,40",
+   "size": "106,20",
+   "tabIndex": "3",
+   "text": "Edit Remark",
+   "kind": "label"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "408,31",
+   "tabIndex": "4",
+   "text": "User Request",
+   "kind": "label"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "215,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "312,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  }
+ ]
+}

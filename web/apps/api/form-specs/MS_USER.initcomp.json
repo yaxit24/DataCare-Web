@@ -1,0 +1,276 @@
+{
+ "form": "MS_USER",
+ "controlCount": 25,
+ "byKind": {
+  "textbox": 5,
+  "combo": 2,
+  "panel": 1,
+  "button": 7,
+  "label": 8,
+  "other": 1,
+  "grid": 1
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 4,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "btnMenuUpdate",
+   "Cr"
+  ],
+  "this": [
+   "Label7",
+   "tResetPwd",
+   "DGV",
+   "btnUserRights",
+   "cboUser",
+   "Label6",
+   "Label5",
+   "Label4",
+   "Label3",
+   "Label1",
+   "Label2",
+   "cboUserTyp",
+   "tConPasword",
+   "tPasword",
+   "tUserName",
+   "tOldPasword",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tUserName",
+   "type": "TextBox",
+   "location": "915,193",
+   "size": "184,22",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tOldPasword",
+   "type": "TextBox",
+   "location": "915,228",
+   "size": "184,22",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tPasword",
+   "type": "TextBox",
+   "location": "915,264",
+   "size": "184,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tConPasword",
+   "type": "TextBox",
+   "location": "915,301",
+   "size": "184,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboUserTyp",
+   "type": "ComboBox",
+   "location": "915,338",
+   "size": "184,23",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "User Create",
+   "kind": "label"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "8",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "9",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "636,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "btnMenuUpdate",
+   "type": "SimpleButton",
+   "location": "670,3",
+   "size": "151,37",
+   "tabIndex": "11",
+   "text": "&Menu Update",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "779,193",
+   "size": "124,20",
+   "tabIndex": "15",
+   "text": "Create New User",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "779,228",
+   "size": "124,20",
+   "tabIndex": "16",
+   "text": "Old Password",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "779,264",
+   "size": "124,20",
+   "tabIndex": "17",
+   "text": "New Password",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "779,301",
+   "size": "124,20",
+   "tabIndex": "18",
+   "text": "Confirm Password",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "779,338",
+   "size": "124,20",
+   "tabIndex": "19",
+   "text": "User Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboUser",
+   "type": "ComboBox",
+   "location": "120,48",
+   "size": "184,26",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "16,48",
+   "size": "98,20",
+   "tabIndex": "1133",
+   "text": "User Name",
+   "kind": "label"
+  },
+  {
+   "name": "btnUserRights",
+   "type": "SimpleButton",
+   "location": "249,521",
+   "size": "217,32",
+   "tabIndex": "1154",
+   "text": "Update User Right",
+   "kind": "button"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "23,83",
+   "size": "687,428",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tResetPwd",
+   "type": "TextBox",
+   "location": "915,383",
+   "size": "184,22",
+   "tabIndex": "1156",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "779,383",
+   "size": "124,20",
+   "tabIndex": "1157",
+   "text": "ReSet Pwd",
+   "kind": "label"
+  }
+ ]
+}

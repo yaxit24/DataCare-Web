@@ -1,0 +1,291 @@
+{
+ "report": "SchmPassBook",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "PageHeader",
+     "height": 495,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 1749,
+       "top": 120,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 9890,
+       "top": 120,
+       "width": 1090,
+       "height": 228,
+       "dataSource": "{TEMP_AD_DATA.ITM_RATE}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 311,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 3645,
+       "top": 32,
+       "width": 802,
+       "height": 226,
+       "dataSource": "{TEMP_AD_DATA.MEMB_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 285,
+       "top": 45,
+       "width": 424,
+       "height": 228,
+       "dataSource": "{@SrNo}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 1200,
+       "top": 45,
+       "width": 1440,
+       "height": 244,
+       "dataSource": "{TEMP_AD_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 3044,
+       "top": 45,
+       "width": 556,
+       "height": 230,
+       "dataSource": "{TEMP_AD_DATA.SCHM_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 4704,
+       "top": 45,
+       "width": 1296,
+       "height": 232,
+       "dataSource": "{TEMP_AD_DATA.SCHM_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 6638,
+       "top": 45,
+       "width": 727,
+       "height": 230,
+       "dataSource": "{TEMP_AD_DATA.CHQ_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 7365,
+       "top": 45,
+       "width": 945,
+       "height": 228,
+       "dataSource": "{TEMP_AD_DATA.REC_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 8381,
+       "top": 45,
+       "width": 1449,
+       "height": 228,
+       "dataSource": "{@MembLdr}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 10112,
+       "top": 45,
+       "width": 1018,
+       "height": 228,
+       "dataSource": "{TEMP_AD_DATA.ITM_GWT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 346,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageFooter",
+     "height": 405,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AD_MEMB.AC_ADD1} + ' , ' + {AD_MEMB.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{AD_MEMB.AC_ADD3} + ' , ' + {AD_MEMB.AC_CITY}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "UnknownField",
+   "text": "'Gst No : ' + {AD_MEMB.AC_LSTNO}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if {AD_MEMB.AC_MOBILE} <> '' then 'Mo : ' + {AD_MEMB.AC_MOBILE} else if {AD_MEMB.AC_PHONE} <> '' then 'Ph : ' + {AD_MEMB.AC_MOBILE} else 'Mo : ' + {AD_MEMB.AC_MOBILE2}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE} + ' Ph : ' + {CO_MAST.CO_PHONE}"
+  },
+  {
+   "name": "CrDrType",
+   "ref": "{@CrDrType}",
+   "type": "StringField",
+   "text": "if {@PartyBal} < 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "GoldRate",
+   "ref": "{@GoldRate}",
+   "type": "StringField",
+   "text": "round({TEMP_AD_DATA.ITM_GWT},3) & ' ' & round({TEMP_AD_DATA.ITM_RATE},2)"
+  },
+  {
+   "name": "HeaderPrint",
+   "ref": "{@HeaderPrint}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "InVoiceTipe",
+   "ref": "{@InVoiceTipe}",
+   "type": "StringField",
+   "text": "'ORIGINAL'"
+  },
+  {
+   "name": "MembLdr",
+   "ref": "{@MembLdr}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "PartyBal",
+   "ref": "{@PartyBal}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "SrNo",
+   "ref": "{@SrNo}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar SrNo := SrNo + 1; SrNo"
+  },
+  {
+   "name": "Tax",
+   "ref": "{@Tax}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{TEMP_AD_DATA.CO_YEAR}+{TEMP_AD_DATA.CO_BOOK}+{TEMP_AD_DATA.VCH_NO}+{TEMP_AD_DATA.MEMB_CODE}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "UnknownField",
+   "text": "if {TEMP_AD_DATA.REC_AMT} <> 0 then 'Ruppes : ' & ucase(ToWords (Sum ({TEMP_AD_DATA.REC_AMT}, {@VchGroup}),0 ))"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 11,
+ "formulaCount": 20
+}

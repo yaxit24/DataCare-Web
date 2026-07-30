@@ -1,0 +1,313 @@
+{
+ "form": "RP_GRAPH",
+ "controlCount": 29,
+ "byKind": {
+  "button": 12,
+  "masked": 2,
+  "combo": 4,
+  "panel": 2,
+  "label": 6,
+  "textbox": 3
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "cboTrntype",
+   "Label5",
+   "cboBookType",
+   "Label4",
+   "cboSlType",
+   "Label1",
+   "tLcCode",
+   "tGrName",
+   "Label10",
+   "tGrCode",
+   "Label2",
+   "mToDt",
+   "mFromDt",
+   "Panel1",
+   "cboItemTyp",
+   "Label3",
+   "PnlBotam",
+   "BtnGroup",
+   "BtnMothSl",
+   "BtnItem",
+   "BtnEmpSl",
+   "BtnSize",
+   "BtnExpType",
+   "BtnKrSl"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "Print",
+   "kind": "button"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "61,11",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "Excel",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "143,11",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&InOut",
+   "kind": "button"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "464,12",
+   "size": "82,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnItem",
+   "type": "QButton",
+   "location": "362,44",
+   "size": "143,37",
+   "tabIndex": "5",
+   "text": "&Product SL",
+   "kind": "button"
+  },
+  {
+   "name": "BtnMothSl",
+   "type": "QButton",
+   "location": "203,44",
+   "size": "143,37",
+   "tabIndex": "6",
+   "text": "&Month SL",
+   "kind": "button"
+  },
+  {
+   "name": "BtnGroup",
+   "type": "QButton",
+   "location": "44,44",
+   "size": "143,37",
+   "tabIndex": "7",
+   "text": "&Last 30 Day SL",
+   "kind": "button"
+  },
+  {
+   "name": "BtnEmpSl",
+   "type": "QButton",
+   "location": "521,44",
+   "size": "143,37",
+   "tabIndex": "8",
+   "text": "&Emp SL",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSize",
+   "type": "QButton",
+   "location": "680,44",
+   "size": "143,37",
+   "tabIndex": "9",
+   "text": "&Monthly Exp",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExpType",
+   "type": "QButton",
+   "location": "839,44",
+   "size": "143,37",
+   "tabIndex": "10",
+   "text": "Exp Type",
+   "kind": "button"
+  },
+  {
+   "name": "BtnKrSl",
+   "type": "QButton",
+   "location": "998,44",
+   "size": "143,37",
+   "tabIndex": "11",
+   "text": "Karigar SL",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "385,12",
+   "size": "73,20",
+   "tabIndex": "108",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "0,78",
+   "size": "1186,483",
+   "tabIndex": "110",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "12,12",
+   "size": "44,20",
+   "tabIndex": "122",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "986,11",
+   "size": "48,22",
+   "tabIndex": "1166",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "917,11",
+   "size": "64,20",
+   "tabIndex": "1167",
+   "text": "Gr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tGrName",
+   "type": "TextBox",
+   "location": "1038,11",
+   "size": "98,22",
+   "tabIndex": "1168",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "1142,10",
+   "size": "44,22",
+   "tabIndex": "1169",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboSlType",
+   "type": "ComboBox",
+   "location": "291,11",
+   "size": "87,22",
+   "tabIndex": "1170",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "222,11",
+   "size": "63,20",
+   "tabIndex": "1171",
+   "text": "SL Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboBookType",
+   "type": "ComboBox",
+   "location": "636,12",
+   "size": "90,22",
+   "tabIndex": "1172",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "552,12",
+   "size": "80,20",
+   "tabIndex": "1173",
+   "text": "Book Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboTrntype",
+   "type": "ComboBox",
+   "location": "816,12",
+   "size": "86,22",
+   "tabIndex": "1174",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "738,13",
+   "size": "72,20",
+   "tabIndex": "1175",
+   "text": "Tran type",
+   "kind": "label"
+  }
+ ]
+}

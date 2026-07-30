@@ -1,0 +1,1855 @@
+{
+ "form": "UT_SETTING_MAIN",
+ "controlCount": 182,
+ "byKind": {
+  "tab": 7,
+  "panel": 5,
+  "button": 59,
+  "label": 55,
+  "combo": 53,
+  "textbox": 1,
+  "grid": 2
+ },
+ "grids": [
+  "DGV",
+  "val2"
+ ],
+ "tabs": [
+  "TabPanel1",
+  "TabPanel3",
+  "TabPanel2",
+  "TabMenu",
+  "Tab1",
+  "Tab3",
+  "Tab2"
+ ],
+ "gridColumns": 2,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "TabMenu": [
+   "TabPanel1",
+   "TabPanel3",
+   "TabPanel2"
+  ],
+  "Pnl1": [
+   "btnMainFontChange",
+   "cboMainFontChange",
+   "Label7",
+   "pnlSet",
+   "btnFineStkType",
+   "cboFineStkType",
+   "Label8",
+   "btnWhSaleImg",
+   "cboWhSaleImg",
+   "Label49",
+   "btnAprlImg",
+   "cboAprlImg",
+   "Label46",
+   "BtnDhrnImgPrint",
+   "cboDhrnImgPrint",
+   "Label44",
+   "brnImgWithWt",
+   "cboImgWithWt",
+   "Label43",
+   "btnOrdTagStkLess",
+   "cboOrdTagStkLess",
+   "Label40",
+   "brnReminderType",
+   "cboReminderType",
+   "Label38",
+   "btnRptTotShow",
+   "cboRptTotShow",
+   "Label37",
+   "BtnSchmWapp",
+   "cboSchmWapp",
+   "Label36",
+   "btnDhrnWapp",
+   "cboDhrnWapp",
+   "Label35",
+   "btnEstmatTax",
+   "cboEstmateWithTax",
+   "Label32",
+   "btnDcMemb",
+   "Label27",
+   "tDcPwd",
+   "BtnCashLimit",
+   "cboCashLimit",
+   "Label26",
+   "btnPreviousLock",
+   "cboPreviousLock",
+   "Label25",
+   "btnGridRowHeightSet",
+   "cboGridRowHeight",
+   "Label24",
+   "btnFontStyle",
+   "cboFontStyle",
+   "Label23",
+   "btnFontName",
+   "CboFontName",
+   "Label22",
+   "btnFontSize",
+   "cboFontSize",
+   "Label21",
+   "btnFontChang",
+   "cboFontChange",
+   "Label20",
+   "btnEmpMandotry",
+   "cboEmpMandatory",
+   "Label19",
+   "btnPrintFormSet",
+   "cboPrintFormSet",
+   "Label18",
+   "btnOrdImage",
+   "cboOrdImage",
+   "Label12",
+   "btnDesignGen",
+   "cboDesignGen",
+   "Label11",
+   "btnWappSlprint",
+   "cboWappSlPrint",
+   "Label10",
+   "btnCountryId",
+   "cboCountryid",
+   "Label9",
+   "btnCustSms",
+   "cboCustSms",
+   "Label17",
+   "btnAdminSms",
+   "cboAdminSms",
+   "Label16",
+   "btnPrRateRof",
+   "cboPrRateRof",
+   "Label15",
+   "btnBalSheetType",
+   "cboBalSheetType",
+   "Label4",
+   "btnTotFineStkType",
+   "cboTotFineStkType",
+   "lblTotFineStk",
+   "btnSlImgPrint",
+   "cboSalesImagPrint",
+   "Label3",
+   "btnLoanIntDay",
+   "cboLoanIntType",
+   "Label6",
+   "btnCustOsSms",
+   "cboCustOsSms",
+   "Label2",
+   "btnQrcode",
+   "cboQrCode",
+   "Label1"
+  ],
+  "Pnl3": [
+   "btnCrystalRptType",
+   "cboCrystalViewType",
+   "Label53",
+   "btnPurRateWith",
+   "cboPurRateWith",
+   "Label52",
+   "btnSlRateWith",
+   "cboSlRateWith",
+   "Label51",
+   "btnScrolbar",
+   "brnRefresh",
+   "cboStkRefresh",
+   "Label5",
+   "btnItmLotStk",
+   "cboitmWithLotStk",
+   "Label50",
+   "btnSilverWt3digit",
+   "cboSilverLedr3digit",
+   "Label48",
+   "btnOthItmWtRemove",
+   "cboOthItmWtRemove",
+   "Label47",
+   "btnLbrWithGht",
+   "cboLbrWitGht",
+   "Label45",
+   "btnAllBranchAcShow",
+   "cboAllBrancAcShow",
+   "Label41",
+   "btnTagRowPrint",
+   "cboTagRowPrint",
+   "Label34",
+   "btnTagRowSave",
+   "cboTagRowSave",
+   "Label33",
+   "btnTagSlWtDiff",
+   "cboTagSaleWtDiff",
+   "Label31",
+   "btnStkRptType",
+   "cboStkRptType",
+   "Label30",
+   "cboScorlbar",
+   "Label29",
+   "btnBillTitRof",
+   "cboBilTotRof",
+   "Label28"
+  ],
+  "Pnl2": [
+   "btnEmpAsUser",
+   "cboEmpAsUser",
+   "Label42",
+   "btnHelpLent",
+   "cboHelpLent",
+   "Label39",
+   "btnMobileSearch",
+   "cboMobileSearch",
+   "Label14",
+   "btnOrnaIsu",
+   "cboOrnaIsu",
+   "Label13"
+  ],
+  "this": [
+   "TabMenu",
+   "PnlBotam",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "TabPanel1",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Pnl1",
+   "type": "Panel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "TabPanel3",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "TabPanel2",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Pnl2",
+   "type": "Panel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Pnl3",
+   "type": "Panel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "101",
+   "text": "Setting Main",
+   "kind": "label"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "1126",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "TabMenu",
+   "type": "SuperTabControl",
+   "location": "0,32",
+   "size": "1309,534",
+   "tabIndex": "1127",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "-4,21",
+   "size": "158,20",
+   "tabIndex": "1131",
+   "text": "Tag Qr Code Generate",
+   "kind": "label"
+  },
+  {
+   "name": "cboQrCode",
+   "type": "ComboBox",
+   "location": "160,21",
+   "size": "91,22",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnQrcode",
+   "type": "QButton",
+   "location": "261,15",
+   "size": "121,32",
+   "tabIndex": "1133",
+   "text": "Tag Qr Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "388,20",
+   "size": "165,20",
+   "tabIndex": "1134",
+   "text": "Cust Bill Wapp With Os",
+   "kind": "label"
+  },
+  {
+   "name": "cboCustOsSms",
+   "type": "ComboBox",
+   "location": "555,20",
+   "size": "91,22",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnCustOsSms",
+   "type": "QButton",
+   "location": "656,16",
+   "size": "121,32",
+   "tabIndex": "1136",
+   "text": "Bill Os Sms Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "791,212",
+   "size": "151,20",
+   "tabIndex": "1146",
+   "text": "Loan Int  Day / Month",
+   "kind": "label"
+  },
+  {
+   "name": "cboLoanIntType",
+   "type": "ComboBox",
+   "location": "950,212",
+   "size": "95,22",
+   "tabIndex": "1147",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnLoanIntDay",
+   "type": "QButton",
+   "location": "1054,207",
+   "size": "121,32",
+   "tabIndex": "1148",
+   "text": "Loan Int Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "6,59",
+   "size": "148,20",
+   "tabIndex": "1149",
+   "text": "Sales Bill Image Print",
+   "kind": "label"
+  },
+  {
+   "name": "cboSalesImagPrint",
+   "type": "ComboBox",
+   "location": "160,59",
+   "size": "91,22",
+   "tabIndex": "1150",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnSlImgPrint",
+   "type": "QButton",
+   "location": "261,53",
+   "size": "121,32",
+   "tabIndex": "1151",
+   "text": "Img Print Set",
+   "kind": "button"
+  },
+  {
+   "name": "lblTotFineStk",
+   "type": "Label",
+   "location": "786,336",
+   "size": "156,20",
+   "tabIndex": "1152",
+   "text": "Total Fine Report Stock Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboTotFineStkType",
+   "type": "ComboBox",
+   "location": "950,336",
+   "size": "95,22",
+   "tabIndex": "1153",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnTotFineStkType",
+   "type": "QButton",
+   "location": "1054,331",
+   "size": "121,32",
+   "tabIndex": "1154",
+   "text": "Stk Type Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "797,252",
+   "size": "145,20",
+   "tabIndex": "1155",
+   "text": "Balance Sheet Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboBalSheetType",
+   "type": "ComboBox",
+   "location": "950,253",
+   "size": "95,22",
+   "tabIndex": "1156",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnBalSheetType",
+   "type": "QButton",
+   "location": "1054,248",
+   "size": "121,32",
+   "tabIndex": "1157",
+   "text": "Bal Sheet Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "819,172",
+   "size": "123,20",
+   "tabIndex": "1170",
+   "text": "Purc Rate Rof",
+   "kind": "label"
+  },
+  {
+   "name": "cboPrRateRof",
+   "type": "ComboBox",
+   "location": "950,174",
+   "size": "95,22",
+   "tabIndex": "1171",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnPrRateRof",
+   "type": "QButton",
+   "location": "1054,169",
+   "size": "121,32",
+   "tabIndex": "1172",
+   "text": "Rate Rof Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label16",
+   "type": "Label",
+   "location": "391,57",
+   "size": "159,20",
+   "tabIndex": "1182",
+   "text": "Admin Whsatsapp",
+   "kind": "label"
+  },
+  {
+   "name": "cboAdminSms",
+   "type": "ComboBox",
+   "location": "555,57",
+   "size": "91,22",
+   "tabIndex": "1183",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnAdminSms",
+   "type": "QButton",
+   "location": "656,53",
+   "size": "121,32",
+   "tabIndex": "1184",
+   "text": "Admin Sms Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label17",
+   "type": "Label",
+   "location": "394,93",
+   "size": "155,20",
+   "tabIndex": "1185",
+   "text": "Customer Whatsapp",
+   "kind": "label"
+  },
+  {
+   "name": "cboCustSms",
+   "type": "ComboBox",
+   "location": "555,94",
+   "size": "91,22",
+   "tabIndex": "1186",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnCustSms",
+   "type": "QButton",
+   "location": "656,91",
+   "size": "121,32",
+   "tabIndex": "1187",
+   "text": "Cust Sms Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "388,130",
+   "size": "162,20",
+   "tabIndex": "1188",
+   "text": "Whatsapp Country Code",
+   "kind": "label"
+  },
+  {
+   "name": "cboCountryid",
+   "type": "ComboBox",
+   "location": "555,131",
+   "size": "91,22",
+   "tabIndex": "1189",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnCountryId",
+   "type": "QButton",
+   "location": "656,129",
+   "size": "121,32",
+   "tabIndex": "1190",
+   "text": "Country Id Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "391,170",
+   "size": "159,20",
+   "tabIndex": "1191",
+   "text": "Wapp Sl Default Print",
+   "kind": "label"
+  },
+  {
+   "name": "cboWappSlPrint",
+   "type": "ComboBox",
+   "location": "555,170",
+   "size": "91,22",
+   "tabIndex": "1192",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnWappSlprint",
+   "type": "QButton",
+   "location": "656,167",
+   "size": "121,32",
+   "tabIndex": "1193",
+   "text": "Wapp Print Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "10,292",
+   "size": "146,20",
+   "tabIndex": "1197",
+   "text": "Tag Entry Design Gen",
+   "kind": "label"
+  },
+  {
+   "name": "cboDesignGen",
+   "type": "ComboBox",
+   "location": "160,292",
+   "size": "91,22",
+   "tabIndex": "1198",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnDesignGen",
+   "type": "QButton",
+   "location": "261,285",
+   "size": "121,32",
+   "tabIndex": "1199",
+   "text": "Design Gen Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "6,98",
+   "size": "148,20",
+   "tabIndex": "1200",
+   "text": "Sales Order Image Print",
+   "kind": "label"
+  },
+  {
+   "name": "cboOrdImage",
+   "type": "ComboBox",
+   "location": "160,98",
+   "size": "91,22",
+   "tabIndex": "1201",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnOrdImage",
+   "type": "QButton",
+   "location": "261,92",
+   "size": "121,32",
+   "tabIndex": "1202",
+   "text": "Ord Img Print",
+   "kind": "button"
+  },
+  {
+   "name": "Label18",
+   "type": "Label",
+   "location": "6,442",
+   "size": "148,20",
+   "tabIndex": "1203",
+   "text": "Print Form Default Btn Set",
+   "kind": "label"
+  },
+  {
+   "name": "Label13",
+   "type": "Label",
+   "location": "85,25",
+   "size": "201,20",
+   "tabIndex": "1203",
+   "text": "Bill Os Then Ornament  isu",
+   "kind": "label"
+  },
+  {
+   "name": "cboPrintFormSet",
+   "type": "ComboBox",
+   "location": "160,442",
+   "size": "91,22",
+   "tabIndex": "1204",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboOrnaIsu",
+   "type": "ComboBox",
+   "location": "294,25",
+   "size": "106,22",
+   "tabIndex": "1204",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnPrintFormSet",
+   "type": "QButton",
+   "location": "261,437",
+   "size": "121,32",
+   "tabIndex": "1205",
+   "text": "Print Btn Set",
+   "kind": "button"
+  },
+  {
+   "name": "btnOrnaIsu",
+   "type": "QButton",
+   "location": "408,19",
+   "size": "121,32",
+   "tabIndex": "1205",
+   "text": "Orna Isu Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label19",
+   "type": "Label",
+   "location": "13,333",
+   "size": "143,20",
+   "tabIndex": "1206",
+   "text": "Emp Mandatory in SL",
+   "kind": "label"
+  },
+  {
+   "name": "Label14",
+   "type": "Label",
+   "location": "74,69",
+   "size": "212,20",
+   "tabIndex": "1206",
+   "text": "Party Help Serch With Mobile",
+   "kind": "label"
+  },
+  {
+   "name": "cboEmpMandatory",
+   "type": "ComboBox",
+   "location": "160,331",
+   "size": "91,22",
+   "tabIndex": "1207",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboMobileSearch",
+   "type": "ComboBox",
+   "location": "294,69",
+   "size": "106,22",
+   "tabIndex": "1207",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnEmpMandotry",
+   "type": "QButton",
+   "location": "261,323",
+   "size": "121,32",
+   "tabIndex": "1208",
+   "text": "Sale Emp Set",
+   "kind": "button"
+  },
+  {
+   "name": "btnMobileSearch",
+   "type": "QButton",
+   "location": "408,63",
+   "size": "121,32",
+   "tabIndex": "1208",
+   "text": "Mo No Help Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label39",
+   "type": "Label",
+   "location": "12,113",
+   "size": "271,20",
+   "tabIndex": "1209",
+   "text": "All Form Vch Desc Help Length Set",
+   "kind": "label"
+  },
+  {
+   "name": "cboHelpLent",
+   "type": "ComboBox",
+   "location": "294,113",
+   "size": "106,22",
+   "tabIndex": "1210",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnHelpLent",
+   "type": "QButton",
+   "location": "408,107",
+   "size": "121,32",
+   "tabIndex": "1211",
+   "text": "Help Lnth Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label42",
+   "type": "Label",
+   "location": "3,157",
+   "size": "280,20",
+   "tabIndex": "1212",
+   "text": "User Wise Emp Set  In All Transection",
+   "kind": "label"
+  },
+  {
+   "name": "cboEmpAsUser",
+   "type": "ComboBox",
+   "location": "294,157",
+   "size": "106,22",
+   "tabIndex": "1213",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnEmpAsUser",
+   "type": "QButton",
+   "location": "408,151",
+   "size": "121,32",
+   "tabIndex": "1214",
+   "text": "Emp As User",
+   "kind": "button"
+  },
+  {
+   "name": "Label20",
+   "type": "Label",
+   "location": "408,289",
+   "size": "142,20",
+   "tabIndex": "1221",
+   "text": "Report Font Change",
+   "kind": "label"
+  },
+  {
+   "name": "cboFontChange",
+   "type": "ComboBox",
+   "location": "555,287",
+   "size": "91,22",
+   "tabIndex": "1222",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnFontChang",
+   "type": "QButton",
+   "location": "656,283",
+   "size": "121,32",
+   "tabIndex": "1223",
+   "text": "Font Change",
+   "kind": "button"
+  },
+  {
+   "name": "Label21",
+   "type": "Label",
+   "location": "453,325",
+   "size": "97,20",
+   "tabIndex": "1224",
+   "text": "Font Size",
+   "kind": "label"
+  },
+  {
+   "name": "cboFontSize",
+   "type": "ComboBox",
+   "location": "555,325",
+   "size": "91,22",
+   "tabIndex": "1225",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnFontSize",
+   "type": "QButton",
+   "location": "656,321",
+   "size": "121,32",
+   "tabIndex": "1226",
+   "text": "Font Size",
+   "kind": "button"
+  },
+  {
+   "name": "Label22",
+   "type": "Label",
+   "location": "453,365",
+   "size": "97,20",
+   "tabIndex": "1227",
+   "text": "Font Name",
+   "kind": "label"
+  },
+  {
+   "name": "CboFontName",
+   "type": "ComboBox",
+   "location": "555,365",
+   "size": "91,22",
+   "tabIndex": "1228",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnFontName",
+   "type": "QButton",
+   "location": "656,360",
+   "size": "121,32",
+   "tabIndex": "1229",
+   "text": "Font Name",
+   "kind": "button"
+  },
+  {
+   "name": "Label23",
+   "type": "Label",
+   "location": "453,403",
+   "size": "97,20",
+   "tabIndex": "1230",
+   "text": "Font Style",
+   "kind": "label"
+  },
+  {
+   "name": "cboFontStyle",
+   "type": "ComboBox",
+   "location": "555,403",
+   "size": "91,22",
+   "tabIndex": "1231",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnFontStyle",
+   "type": "QButton",
+   "location": "656,398",
+   "size": "121,32",
+   "tabIndex": "1232",
+   "text": "Font Style",
+   "kind": "button"
+  },
+  {
+   "name": "Label24",
+   "type": "Label",
+   "location": "453,441",
+   "size": "97,20",
+   "tabIndex": "1233",
+   "text": "Grid Row Height",
+   "kind": "label"
+  },
+  {
+   "name": "cboGridRowHeight",
+   "type": "ComboBox",
+   "location": "555,441",
+   "size": "91,22",
+   "tabIndex": "1234",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnGridRowHeightSet",
+   "type": "QButton",
+   "location": "656,436",
+   "size": "121,32",
+   "tabIndex": "1235",
+   "text": "Gird Row Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label25",
+   "type": "Label",
+   "location": "12,402",
+   "size": "143,20",
+   "tabIndex": "1236",
+   "text": "Pre Day Entry Lock",
+   "kind": "label"
+  },
+  {
+   "name": "cboPreviousLock",
+   "type": "ComboBox",
+   "location": "161,402",
+   "size": "91,22",
+   "tabIndex": "1237",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnPreviousLock",
+   "type": "QButton",
+   "location": "261,399",
+   "size": "121,32",
+   "tabIndex": "1238",
+   "text": "Lock Date Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label26",
+   "type": "Label",
+   "location": "805,21",
+   "size": "137,20",
+   "tabIndex": "1239",
+   "text": "Party Cash Limit Set",
+   "kind": "label"
+  },
+  {
+   "name": "cboCashLimit",
+   "type": "ComboBox",
+   "location": "950,21",
+   "size": "95,22",
+   "tabIndex": "1240",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnCashLimit",
+   "type": "QButton",
+   "location": "1054,16",
+   "size": "121,32",
+   "tabIndex": "1241",
+   "text": "Cash Limit Set",
+   "kind": "button"
+  },
+  {
+   "name": "tDcPwd",
+   "type": "TextBox",
+   "location": "950,421",
+   "size": "94,22",
+   "tabIndex": "1242",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label28",
+   "type": "Label",
+   "location": "50,30",
+   "size": "152,20",
+   "tabIndex": "1242",
+   "text": "Bill Tot Amt Round of",
+   "kind": "label"
+  },
+  {
+   "name": "Label27",
+   "type": "Label",
+   "location": "808,423",
+   "size": "134,20",
+   "tabIndex": "1243",
+   "text": "Dc Memb Pwd",
+   "kind": "label"
+  },
+  {
+   "name": "cboBilTotRof",
+   "type": "ComboBox",
+   "location": "211,30",
+   "size": "91,22",
+   "tabIndex": "1243",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnDcMemb",
+   "type": "QButton",
+   "location": "1054,416",
+   "size": "121,32",
+   "tabIndex": "1244",
+   "text": "DataCare Pwd",
+   "kind": "button"
+  },
+  {
+   "name": "btnBillTitRof",
+   "type": "QButton",
+   "location": "317,25",
+   "size": "121,32",
+   "tabIndex": "1244",
+   "text": "Bill Tot Rof Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label32",
+   "type": "Label",
+   "location": "19,368",
+   "size": "135,20",
+   "tabIndex": "1245",
+   "text": "Estmate With Tax",
+   "kind": "label"
+  },
+  {
+   "name": "Label29",
+   "type": "Label",
+   "location": "50,74",
+   "size": "152,20",
+   "tabIndex": "1245",
+   "text": "Item Tot Grid Scorllbar",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "12,11",
+   "size": "750,478",
+   "tabIndex": "1246",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "cboEstmateWithTax",
+   "type": "ComboBox",
+   "location": "161,366",
+   "size": "91,22",
+   "tabIndex": "1246",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboScorlbar",
+   "type": "ComboBox",
+   "location": "211,74",
+   "size": "91,22",
+   "tabIndex": "1246",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnEstmatTax",
+   "type": "QButton",
+   "location": "261,361",
+   "size": "121,32",
+   "tabIndex": "1247",
+   "text": "Estmt Tax Set",
+   "kind": "button"
+  },
+  {
+   "name": "btnScrolbar",
+   "type": "QButton",
+   "location": "317,69",
+   "size": "121,32",
+   "tabIndex": "1247",
+   "text": "Scrollbar Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label35",
+   "type": "Label",
+   "location": "391,209",
+   "size": "159,20",
+   "tabIndex": "1248",
+   "text": "Dhrn Whatsapp",
+   "kind": "label"
+  },
+  {
+   "name": "Label30",
+   "type": "Label",
+   "location": "50,118",
+   "size": "152,20",
+   "tabIndex": "1248",
+   "text": "Stock F3 Report Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboDhrnWapp",
+   "type": "ComboBox",
+   "location": "555,209",
+   "size": "91,22",
+   "tabIndex": "1249",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboStkRptType",
+   "type": "ComboBox",
+   "location": "211,118",
+   "size": "91,22",
+   "tabIndex": "1249",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnDhrnWapp",
+   "type": "QButton",
+   "location": "656,206",
+   "size": "121,32",
+   "tabIndex": "1250",
+   "text": "Dhrn Wapp",
+   "kind": "button"
+  },
+  {
+   "name": "btnStkRptType",
+   "type": "QButton",
+   "location": "317,113",
+   "size": "121,32",
+   "tabIndex": "1250",
+   "text": "Stk Rpt Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label36",
+   "type": "Label",
+   "location": "391,248",
+   "size": "159,20",
+   "tabIndex": "1251",
+   "text": "Schem Whatsapp",
+   "kind": "label"
+  },
+  {
+   "name": "Label31",
+   "type": "Label",
+   "location": "43,294",
+   "size": "159,20",
+   "tabIndex": "1251",
+   "text": "Tag Wt and Sl Wt  Same",
+   "kind": "label"
+  },
+  {
+   "name": "cboSchmWapp",
+   "type": "ComboBox",
+   "location": "555,248",
+   "size": "91,22",
+   "tabIndex": "1252",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboTagSaleWtDiff",
+   "type": "ComboBox",
+   "location": "211,294",
+   "size": "91,22",
+   "tabIndex": "1252",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnSchmWapp",
+   "type": "QButton",
+   "location": "656,245",
+   "size": "121,32",
+   "tabIndex": "1253",
+   "text": "Schm Wapp ",
+   "kind": "button"
+  },
+  {
+   "name": "btnTagSlWtDiff",
+   "type": "QButton",
+   "location": "317,289",
+   "size": "121,32",
+   "tabIndex": "1253",
+   "text": "Wt Same Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label37",
+   "type": "Label",
+   "location": "818,62",
+   "size": "124,20",
+   "tabIndex": "1254",
+   "text": "Report Totel Show",
+   "kind": "label"
+  },
+  {
+   "name": "Label33",
+   "type": "Label",
+   "location": "3,162",
+   "size": "197,20",
+   "tabIndex": "1254",
+   "text": "Tag Entry Row wise Auto  Save",
+   "kind": "label"
+  },
+  {
+   "name": "cboRptTotShow",
+   "type": "ComboBox",
+   "location": "950,63",
+   "size": "95,22",
+   "tabIndex": "1255",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboTagRowSave",
+   "type": "ComboBox",
+   "location": "211,162",
+   "size": "91,22",
+   "tabIndex": "1255",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnRptTotShow",
+   "type": "QButton",
+   "location": "1054,55",
+   "size": "121,32",
+   "tabIndex": "1256",
+   "text": "Footer Show ",
+   "kind": "button"
+  },
+  {
+   "name": "btnTagRowSave",
+   "type": "QButton",
+   "location": "317,157",
+   "size": "121,32",
+   "tabIndex": "1256",
+   "text": "Tag Row Save",
+   "kind": "button"
+  },
+  {
+   "name": "Label38",
+   "type": "Label",
+   "location": "796,103",
+   "size": "146,20",
+   "tabIndex": "1257",
+   "text": "Home Reminder Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label34",
+   "type": "Label",
+   "location": "12,206",
+   "size": "188,20",
+   "tabIndex": "1257",
+   "text": "Tag Entry Row wise Print",
+   "kind": "label"
+  },
+  {
+   "name": "cboReminderType",
+   "type": "ComboBox",
+   "location": "950,102",
+   "size": "95,22",
+   "tabIndex": "1258",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboTagRowPrint",
+   "type": "ComboBox",
+   "location": "211,206",
+   "size": "91,22",
+   "tabIndex": "1258",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "brnReminderType",
+   "type": "QButton",
+   "location": "1054,93",
+   "size": "121,32",
+   "tabIndex": "1259",
+   "text": "Rem Type Set",
+   "kind": "button"
+  },
+  {
+   "name": "btnTagRowPrint",
+   "type": "QButton",
+   "location": "317,201",
+   "size": "121,32",
+   "tabIndex": "1259",
+   "text": "Tag Row Print",
+   "kind": "button"
+  },
+  {
+   "name": "Label40",
+   "type": "Label",
+   "location": "810,138",
+   "size": "132,20",
+   "tabIndex": "1260",
+   "text": "Ord Tag Stock Less",
+   "kind": "label"
+  },
+  {
+   "name": "Label41",
+   "type": "Label",
+   "location": "12,250",
+   "size": "188,20",
+   "tabIndex": "1260",
+   "text": "All Branch Ac Show",
+   "kind": "label"
+  },
+  {
+   "name": "cboOrdTagStkLess",
+   "type": "ComboBox",
+   "location": "950,139",
+   "size": "95,22",
+   "tabIndex": "1261",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboAllBrancAcShow",
+   "type": "ComboBox",
+   "location": "211,250",
+   "size": "91,22",
+   "tabIndex": "1261",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnOrdTagStkLess",
+   "type": "QButton",
+   "location": "1054,131",
+   "size": "121,32",
+   "tabIndex": "1262",
+   "text": "Ord Tag Less",
+   "kind": "button"
+  },
+  {
+   "name": "btnAllBranchAcShow",
+   "type": "QButton",
+   "location": "317,245",
+   "size": "121,32",
+   "tabIndex": "1262",
+   "text": "Loct Ac Show",
+   "kind": "button"
+  },
+  {
+   "name": "Label43",
+   "type": "Label",
+   "location": "5,252",
+   "size": "151,20",
+   "tabIndex": "1263",
+   "text": "Whatsapp Img  With Wt",
+   "kind": "label"
+  },
+  {
+   "name": "Label45",
+   "type": "Label",
+   "location": "0,338",
+   "size": "202,20",
+   "tabIndex": "1263",
+   "text": "LAmt = GhtWt + NetWt * LRate",
+   "kind": "label"
+  },
+  {
+   "name": "cboImgWithWt",
+   "type": "ComboBox",
+   "location": "160,253",
+   "size": "91,22",
+   "tabIndex": "1264",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboLbrWitGht",
+   "type": "ComboBox",
+   "location": "211,338",
+   "size": "91,22",
+   "tabIndex": "1264",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "brnImgWithWt",
+   "type": "QButton",
+   "location": "261,246",
+   "size": "121,32",
+   "tabIndex": "1265",
+   "text": "Img Wt Set",
+   "kind": "button"
+  },
+  {
+   "name": "btnLbrWithGht",
+   "type": "QButton",
+   "location": "317,333",
+   "size": "121,32",
+   "tabIndex": "1265",
+   "text": "Lbr Ght Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label44",
+   "type": "Label",
+   "location": "5,175",
+   "size": "151,20",
+   "tabIndex": "1266",
+   "text": "Dhrn Itm Img Print",
+   "kind": "label"
+  },
+  {
+   "name": "Label47",
+   "type": "Label",
+   "location": "0,382",
+   "size": "202,20",
+   "tabIndex": "1266",
+   "text": "Oth Itm Wt Remove In Wh Sale",
+   "kind": "label"
+  },
+  {
+   "name": "cboDhrnImgPrint",
+   "type": "ComboBox",
+   "location": "160,176",
+   "size": "91,22",
+   "tabIndex": "1267",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboOthItmWtRemove",
+   "type": "ComboBox",
+   "location": "211,382",
+   "size": "91,22",
+   "tabIndex": "1267",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnDhrnImgPrint",
+   "type": "QButton",
+   "location": "261,170",
+   "size": "121,32",
+   "tabIndex": "1268",
+   "text": "Dhrn Img Print",
+   "kind": "button"
+  },
+  {
+   "name": "btnOthItmWtRemove",
+   "type": "QButton",
+   "location": "317,377",
+   "size": "121,32",
+   "tabIndex": "1268",
+   "text": "Oth Wt Remov",
+   "kind": "button"
+  },
+  {
+   "name": "Label46",
+   "type": "Label",
+   "location": "5,135",
+   "size": "151,20",
+   "tabIndex": "1269",
+   "text": "Aprl Itm Img Print",
+   "kind": "label"
+  },
+  {
+   "name": "Label48",
+   "type": "Label",
+   "location": "0,426",
+   "size": "202,20",
+   "tabIndex": "1269",
+   "text": "Silver Ledger With 3 Digit",
+   "kind": "label"
+  },
+  {
+   "name": "cboAprlImg",
+   "type": "ComboBox",
+   "location": "160,136",
+   "size": "91,22",
+   "tabIndex": "1270",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboSilverLedr3digit",
+   "type": "ComboBox",
+   "location": "211,426",
+   "size": "91,22",
+   "tabIndex": "1270",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnAprlImg",
+   "type": "QButton",
+   "location": "261,131",
+   "size": "121,32",
+   "tabIndex": "1271",
+   "text": "Aprl Img Print",
+   "kind": "button"
+  },
+  {
+   "name": "btnSilverWt3digit",
+   "type": "QButton",
+   "location": "317,421",
+   "size": "121,32",
+   "tabIndex": "1271",
+   "text": "Silver Ldr Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label49",
+   "type": "Label",
+   "location": "5,212",
+   "size": "151,20",
+   "tabIndex": "1272",
+   "text": "Wh Sale Img Print",
+   "kind": "label"
+  },
+  {
+   "name": "Label50",
+   "type": "Label",
+   "location": "467,30",
+   "size": "152,20",
+   "tabIndex": "1272",
+   "text": "Item With Lot Stock",
+   "kind": "label"
+  },
+  {
+   "name": "cboWhSaleImg",
+   "type": "ComboBox",
+   "location": "160,213",
+   "size": "91,22",
+   "tabIndex": "1273",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboitmWithLotStk",
+   "type": "ComboBox",
+   "location": "628,30",
+   "size": "91,22",
+   "tabIndex": "1273",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnWhSaleImg",
+   "type": "QButton",
+   "location": "261,207",
+   "size": "121,32",
+   "tabIndex": "1274",
+   "text": "Wh Img Print",
+   "kind": "button"
+  },
+  {
+   "name": "btnItmLotStk",
+   "type": "QButton",
+   "location": "734,25",
+   "size": "121,32",
+   "tabIndex": "1274",
+   "text": "Itm Lot Stk Set",
+   "kind": "button"
+  },
+  {
+   "name": "pnlSet",
+   "type": "Panel",
+   "location": "1187,4",
+   "size": "779,501",
+   "tabIndex": "1275",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "432,76",
+   "size": "187,20",
+   "tabIndex": "1275",
+   "text": "Curent Day Stock Refresh",
+   "kind": "label"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "785,295",
+   "size": "157,20",
+   "tabIndex": "1276",
+   "text": "Bal Sheet Rpt Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboStkRefresh",
+   "type": "ComboBox",
+   "location": "628,78",
+   "size": "91,22",
+   "tabIndex": "1276",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboFineStkType",
+   "type": "ComboBox",
+   "location": "950,295",
+   "size": "95,22",
+   "tabIndex": "1277",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "brnRefresh",
+   "type": "QButton",
+   "location": "734,74",
+   "size": "121,32",
+   "tabIndex": "1277",
+   "text": "Stk Refresh Set",
+   "kind": "button"
+  },
+  {
+   "name": "btnFineStkType",
+   "type": "QButton",
+   "location": "1054,289",
+   "size": "121,32",
+   "tabIndex": "1278",
+   "text": "Rpt Type Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label51",
+   "type": "Label",
+   "location": "444,120",
+   "size": "175,20",
+   "tabIndex": "1278",
+   "text": "Sales Rate Calc With",
+   "kind": "label"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "801,373",
+   "size": "142,20",
+   "tabIndex": "1279",
+   "text": "Main Font Change",
+   "kind": "label"
+  },
+  {
+   "name": "cboSlRateWith",
+   "type": "ComboBox",
+   "location": "628,122",
+   "size": "91,22",
+   "tabIndex": "1279",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboMainFontChange",
+   "type": "ComboBox",
+   "location": "950,376",
+   "size": "96,22",
+   "tabIndex": "1280",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnSlRateWith",
+   "type": "QButton",
+   "location": "734,118",
+   "size": "121,32",
+   "tabIndex": "1280",
+   "text": "Sl Rat Calc Set",
+   "kind": "button"
+  },
+  {
+   "name": "btnMainFontChange",
+   "type": "QButton",
+   "location": "1054,372",
+   "size": "121,32",
+   "tabIndex": "1281",
+   "text": "Main F-Change",
+   "kind": "button"
+  },
+  {
+   "name": "Label52",
+   "type": "Label",
+   "location": "444,164",
+   "size": "175,20",
+   "tabIndex": "1281",
+   "text": "Purc Rate Calc With",
+   "kind": "label"
+  },
+  {
+   "name": "cboPurRateWith",
+   "type": "ComboBox",
+   "location": "628,166",
+   "size": "91,22",
+   "tabIndex": "1282",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnPurRateWith",
+   "type": "QButton",
+   "location": "734,162",
+   "size": "121,32",
+   "tabIndex": "1283",
+   "text": "Pr Rat Calc Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label53",
+   "type": "Label",
+   "location": "444,208",
+   "size": "175,20",
+   "tabIndex": "1284",
+   "text": "Crystal Report View Type",
+   "kind": "label"
+  },
+  {
+   "name": "cboCrystalViewType",
+   "type": "ComboBox",
+   "location": "628,210",
+   "size": "91,22",
+   "tabIndex": "1285",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnCrystalRptType",
+   "type": "QButton",
+   "location": "734,206",
+   "size": "121,32",
+   "tabIndex": "1286",
+   "text": "Crystal Rpt Set",
+   "kind": "button"
+  },
+  {
+   "name": "val2",
+   "type": "DataGridViewButtonColumn",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "OK",
+   "kind": "grid"
+  },
+  {
+   "name": "Tab1",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Setting1",
+   "kind": "tab"
+  },
+  {
+   "name": "Tab3",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Setting3",
+   "kind": "tab"
+  },
+  {
+   "name": "Tab2",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Advance Cantrol",
+   "kind": "tab"
+  }
+ ]
+}

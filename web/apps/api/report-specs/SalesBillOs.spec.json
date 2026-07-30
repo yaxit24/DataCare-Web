@@ -1,0 +1,266 @@
+{
+ "report": "SalesBillOs",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 495,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 262,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 870,
+       "top": 0,
+       "width": 840,
+       "height": 255,
+       "text": "RecAmt :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 1800,
+       "top": 0,
+       "width": 945,
+       "height": 209,
+       "dataSource": "{BILL_OS_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 2835,
+       "top": 21,
+       "width": 1260,
+       "height": 209,
+       "dataSource": "{@RecAmt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "ReportFooter",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "RecAmt",
+   "ref": "{@RecAmt}",
+   "type": "NumberField",
+   "text": "{BILL_OS_DATA.REC_AMT}+{BILL_OS_DATA.KASAR_AMT}"
+  },
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "if {SL_DATA.ADD1} <> '' then {SL_DATA.ADD1} + ' , ' + {SL_DATA.ADD2} else {AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "if{SL_DATA.ADD1} <> '' then {SL_DATA.ADD3} + ' , ' + {SL_DATA.CITY} else {AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_GSTNO} = \"\" then ' State : ' & {AC_MAST.AC_STATE} else {AC_MAST.AC_GSTNO} & ' State : ' & {AC_MAST.AC_STATE}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if{SL_DATA.ADD1} <> '' then {SL_DATA.MOBILE} else if {AC_MAST.AC_MOBILE} <> '' then {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then {AC_MAST.AC_MOBILE} else {AC_MAST.AC_MOBILE2}"
+  },
+  {
+   "name": "Cashamt",
+   "ref": "{@Cashamt}",
+   "type": "NumberField",
+   "text": "if {SL_DATA.AC_CODE} = '00045' then {SL_DATA.TOT_AMT}-{SL_DATA.ADV_AMT}-{SL_DATA.OLD_GL_AMT}-{SL_DATA.OLD_SL_AMT}-{SL_DATA.KASAR_AMT} else {SL_DATA.CASH_AMT}"
+  },
+  {
+   "name": "ClAmt",
+   "ref": "{@ClAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "ClAmtCrDr",
+   "ref": "{@ClAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@ClAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "CoAdd1",
+   "ref": "{@CoAdd1}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD1} else {CO_MAST.CO_ADD1}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD2} + ' , ' + {LOCT_MAST.LC_ADD3} else {CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_CITY} + ' Mo : ' + {LOCT_MAST.LC_MOBILE} + ' Ph : ' + {LOCT_MAST.LC_PHONE} else {CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE} + ' Ph : ' + {CO_M"
+  },
+  {
+   "name": "CoName",
+   "ref": "{@CoName}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_NAME} ELSE {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DrownBank",
+   "ref": "{@DrownBank}",
+   "type": "StringField",
+   "text": "if {SL_DATA.CHQ_NO} <> '' Then {SL_DATA.BANK_NAME} + ' Chq No : ' + {SL_DATA.CHQ_NO} else {SL_DATA.BANK_NAME}"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "GstNo",
+   "ref": "{@GstNo}",
+   "type": "StringField",
+   "text": "'GSTIN : ' & {CO_MAST.CO_GST_NO}"
+  },
+  {
+   "name": "InVoiceType",
+   "ref": "{@InVoiceType}",
+   "type": "StringField",
+   "text": "'ORIGINAL FOR RECIPIENT'"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "StringField",
+   "text": "if {SL_DETL.TAG_NO} <> '' then {SL_DETL.TAG_NO} + ' - ' + {ITEM_MAST.IT_NAME} else {ITEM_MAST.IT_NAME}"
+  },
+  {
+   "name": "LbrAmt",
+   "ref": "{@LbrAmt}",
+   "type": "NumberField",
+   "text": "if {SL_DETL.LBR_PRC} <> 0 then {SL_DETL.LBR_PRC} else if {SL_DETL.LBR_RATE} <> 0 then {SL_DETL.LBR_RATE} else {SL_DETL.LBR_AMT}"
+  },
+  {
+   "name": "LbrPrint",
+   "ref": "{@LbrPrint}",
+   "type": "StringField",
+   "text": "'N'"
+  },
+  {
+   "name": "OpAmt",
+   "ref": "{@OpAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpAmtCrDr",
+   "ref": "{@OpAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@OpAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "OsPrint",
+   "ref": "{@OsPrint}",
+   "type": "StringField",
+   "text": "'N'"
+  },
+  {
+   "name": "OtherCharg",
+   "ref": "{@OtherCharg}",
+   "type": "NumberField",
+   "text": "{SL_DETL.LBR_AMT}+{SL_DETL.OTH_AMT}"
+  },
+  {
+   "name": "RefNo",
+   "ref": "{@RefNo}",
+   "type": "StringField",
+   "text": "IF {SL_DATA.BILL_NO} <> \"\" THEN {BOOK_DATA.BOOK_SR_NAME} & \"-\" & {SL_DATA.VCH_NO} & \" / \" & 'Ref No : ' & {SL_DATA.BILL_NO} ELSE {BOOK_DATA.BOOK_SR_NAME} & \"-\" & {SL_DATA.VCH_NO}"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "TaxCGST",
+   "ref": "{@TaxCGST}",
+   "type": "StringField",
+   "text": "'CGST : ' & {SL_DATA.TAX_PRC}/2 & '% :'"
+  },
+  {
+   "name": "TaxIGST",
+   "ref": "{@TaxIGST}",
+   "type": "StringField",
+   "text": "'IGST : ' & {SL_DATA.TAX_PRC} & '% :'"
+  },
+  {
+   "name": "TaxSGST",
+   "ref": "{@TaxSGST}",
+   "type": "StringField",
+   "text": "'SGST : ' & {SL_DATA.TAX_PRC}/2 & '% :'"
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.CASH_AMT} +{SL_DATA.CARD_AMT}+{SL_DATA.CHQ_AMT}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{SL_DATA.CO_YEAR}+{SL_DATA.CO_BOOK}+{SL_DATA.VCH_NO}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "StringField",
+   "text": "numbervar RmVal:=0; numbervar Amt:=0; numbervar pAmt:=0; stringvar InWords :=\"Rupees :\"; Amt := ({SL_DATA.TOT_AMT}); if Amt > 10000000 then RmVal := truncate(Amt/10000000); if Amt = 10000000 then RmVa"
+  }
+ ],
+ "sectionCount": 3,
+ "objectCount": 3,
+ "formulaCount": 32
+}

@@ -1,0 +1,319 @@
+{
+ "form": "RP_BALANCE",
+ "controlCount": 29,
+ "byKind": {
+  "button": 12,
+  "masked": 2,
+  "textbox": 4,
+  "panel": 2,
+  "label": 5,
+  "other": 1,
+  "grid": 1,
+  "check": 2
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "PanelSale": [
+   "btnFine",
+   "BtnBalanceZoom",
+   "BtnPandLZoom",
+   "btnZoom",
+   "BtnTrialBalance",
+   "BtnPandL",
+   "Btnbalsheet"
+  ],
+  "this": [
+   "chkTodayBal",
+   "chkOpBal",
+   "DGV",
+   "nSilverAmt",
+   "nGoldAmt",
+   "mToDt",
+   "mFromDt",
+   "PanelSale",
+   "tLcCode",
+   "tLcName",
+   "Label6",
+   "Label4",
+   "Label2",
+   "Label1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnTrialBalance",
+   "type": "QButton",
+   "location": "127,18",
+   "size": "143,37",
+   "tabIndex": "0",
+   "text": "Trial Balance",
+   "kind": "button"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "387,63",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPandL",
+   "type": "QButton",
+   "location": "285,18",
+   "size": "143,37",
+   "tabIndex": "1",
+   "text": "Profit and Loss",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "554,64",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "Btnbalsheet",
+   "type": "QButton",
+   "location": "441,18",
+   "size": "143,37",
+   "tabIndex": "2",
+   "text": "Balance Sheet",
+   "kind": "button"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "708,64",
+   "size": "55,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnZoom",
+   "type": "QButton",
+   "location": "127,67",
+   "size": "143,37",
+   "tabIndex": "3",
+   "text": "Trial Zoom",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPandLZoom",
+   "type": "QButton",
+   "location": "285,67",
+   "size": "143,37",
+   "tabIndex": "4",
+   "text": "P / L  Zoom",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnBalanceZoom",
+   "type": "QButton",
+   "location": "441,67",
+   "size": "143,37",
+   "tabIndex": "5",
+   "text": "Balance Zoom",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Report All",
+   "kind": "label"
+  },
+  {
+   "name": "btnFine",
+   "type": "QButton",
+   "location": "285,116",
+   "size": "143,37",
+   "tabIndex": "7",
+   "text": "Total Fine Report",
+   "kind": "button"
+  },
+  {
+   "name": "PanelSale",
+   "type": "Panel",
+   "location": "237,157",
+   "size": "663,174",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "436,97",
+   "size": "111,20",
+   "tabIndex": "1160",
+   "text": "Gold Rate 10 gm",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "446,63",
+   "size": "102,20",
+   "tabIndex": "1162",
+   "text": "As On Date",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "433,127",
+   "size": "114,20",
+   "tabIndex": "1171",
+   "text": "Silver Rate 10 gm",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "641,64",
+   "size": "60,20",
+   "tabIndex": "1176",
+   "text": "lc Code",
+   "kind": "label"
+  },
+  {
+   "name": "tLcName",
+   "type": "TextBox",
+   "location": "769,64",
+   "size": "216,23",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nGoldAmt",
+   "type": "TextBox",
+   "location": "554,95",
+   "size": "76,22",
+   "tabIndex": "1178",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nSilverAmt",
+   "type": "TextBox",
+   "location": "554,126",
+   "size": "76,22",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,349",
+   "size": "1158,204",
+   "tabIndex": "1180",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "chkOpBal",
+   "type": "CheckBox",
+   "location": "655,97",
+   "size": "141,20",
+   "tabIndex": "1181",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "chkTodayBal",
+   "type": "CheckBox",
+   "location": "655,127",
+   "size": "141,20",
+   "tabIndex": "1182",
+   "text": "",
+   "kind": "check"
+  }
+ ]
+}

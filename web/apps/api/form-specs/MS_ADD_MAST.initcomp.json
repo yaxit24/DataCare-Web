@@ -1,0 +1,112 @@
+{
+ "form": "MS_ADD_MAST",
+ "controlCount": 1,
+ "byKind": {
+  "textbox": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "TabMenu": [
+   "TabPanel1",
+   "TabPanel2",
+   "TabPanel3"
+  ],
+  "Pnl1": [
+   "mBhlDate",
+   "mAnDate",
+   "mBhDate",
+   "Label22",
+   "Label9",
+   "Label18",
+   "cboGroup",
+   "tMobile",
+   "lblMoNo",
+   "BtnF1",
+   "cboArea",
+   "cboCountry",
+   "Label17",
+   "cboState",
+   "cboDistrict",
+   "tConParcon",
+   "Label16",
+   "cboCity",
+   "lblBookCo",
+   "Label15",
+   "lblCity",
+   "Label7",
+   "tPinCode",
+   "Label4",
+   "Label3",
+   "tEmail",
+   "tPhone",
+   "tAddress3",
+   "tAddress2",
+   "tAddress1",
+   "lblEmail",
+   "lblPhone",
+   "lblAdd3",
+   "lblAdd2",
+   "lblAdd1",
+   "tAcName",
+   "tAcCode",
+   "Label2",
+   "Label1"
+  ],
+  "Pnl2": [
+   "tMobile2",
+   "Label6",
+   "tPhone2",
+   "Label5",
+   "nDpcPrc",
+   "lblDpc",
+   "nCrDay",
+   "lblCrDay",
+   "lblLBDate",
+   "lblBDate",
+   "lblAnvDate",
+   "tRtgsNo",
+   "tBankAcNo",
+   "tBankArea",
+   "tBankName",
+   "Label11",
+   "Label12",
+   "Label13",
+   "Label14",
+   "tRefAcName",
+   "tRefAc",
+   "Label20"
+  ],
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "btnAcImport"
+  ],
+  "this": [
+   "DGV",
+   "tCustDetl",
+   "PnlBotam",
+   "TabMenu",
+   "Text1",
+   "lblBook",
+   "tdistrict",
+   "TState",
+   "tCountry"
+  ]
+ },
+ "controls": [
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  }
+ ]
+}

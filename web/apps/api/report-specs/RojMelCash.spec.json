@@ -1,0 +1,462 @@
+{
+ "report": "RojMelCash",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section8",
+     "kind": "ReportHeader",
+     "height": 319,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 60,
+       "top": 45,
+       "width": 570,
+       "height": 230,
+       "text": "VchNo"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 765,
+       "top": 45,
+       "width": 1320,
+       "height": 240,
+       "text": "Ac Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 2610,
+       "top": 45,
+       "width": 765,
+       "height": 230,
+       "text": "Rate"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 3510,
+       "top": 45,
+       "width": 765,
+       "height": 230,
+       "text": "Amount"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 4275,
+       "top": 45,
+       "width": 795,
+       "height": 230,
+       "text": "Jm Fine"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupHeader",
+     "height": 234,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 260,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 60,
+       "top": 17,
+       "width": 660,
+       "height": 226,
+       "dataSource": "{RATE_CUT_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 2655,
+       "top": 17,
+       "width": 720,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.FINE_RATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 3435,
+       "top": 17,
+       "width": 840,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.DR_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 4200,
+       "top": 17,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.CR_FINE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 765,
+       "top": 34,
+       "width": 1830,
+       "height": 226,
+       "dataSource": "{RATE_CUT_DATA.AC_NAME}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 446,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 208,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "ItType",
+   "ref": "{@ItType}",
+   "type": "StringField",
+   "text": "{GROUP_MAST.TRAD_TYPE}"
+  },
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "UnknownField",
+   "text": "{MAIN_STOCK.CR_AMT}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "ItType",
+   "ref": "{@ItType}",
+   "type": "StringField",
+   "text": "if {GROUP_MAST.GR_TYPE} = 'G' then 'Gold Ornament' else if {GROUP_MAST.GR_TYPE} = 'S' then IF {GROUP_MAST.GR_CODE} = 'OS' THEN 'Old Silver' ELSE IF {GROUP_MAST.GR_CODE} = 'LB' THEN 'Old Bhangar' ELSE "
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{MAIN_STOCK.DESCR}"
+  },
+  {
+   "name": "TagNo",
+   "ref": "{@TagNo}",
+   "type": "UnknownField",
+   "text": "if {MAIN_STOCK.DESIGN} <> '' then {MAIN_STOCK.DESIGN} else {MAIN_STOCK.TAG_NO}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{MAIN_STOCK.CO_YEAR}+{MAIN_STOCK.CO_BOOK}+{MAIN_STOCK.VCH_NO}"
+  },
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "NumberField",
+   "text": "{AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "Gwt",
+   "ref": "{@Gwt}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.ITM_GWT}"
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.DESCR}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{AC_DATA.CO_YEAR}+{AC_DATA.CO_BOOK}+{AC_DATA.VCH_NO}"
+  },
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "NumberField",
+   "text": "{AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "Gwt",
+   "ref": "{@Gwt}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.ITM_GWT}"
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.DESCR}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{AC_DATA.CO_YEAR}+{AC_DATA.CO_BOOK}+{AC_DATA.VCH_NO}"
+  },
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.ITM_SIGN} = '-' then {MAIN_STOCK.ITM_FINE} else -{MAIN_STOCK.ITM_FINE}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "ItType",
+   "ref": "{@ItType}",
+   "type": "StringField",
+   "text": "if {GROUP_MAST.GR_TYPE} = 'G' then 'Gold Ornament' else if {GROUP_MAST.GR_TYPE} = 'S' then IF {GROUP_MAST.GR_CODE} = 'OS' THEN 'Old Silver' ELSE IF {GROUP_MAST.GR_CODE} = 'LB' THEN 'Old Bhangar' ELSE "
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{MAIN_STOCK.DESCR}"
+  },
+  {
+   "name": "TagNo",
+   "ref": "{@TagNo}",
+   "type": "UnknownField",
+   "text": "if {MAIN_STOCK.DESIGN} <> '' then {MAIN_STOCK.DESIGN} else {MAIN_STOCK.TAG_NO}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{MAIN_STOCK.CO_YEAR}+{MAIN_STOCK.CO_BOOK}+{MAIN_STOCK.VCH_NO}"
+  },
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "UnknownField",
+   "text": "if {AC_DATA.SIGN} = '-' then {AC_DATA.ITM_FINE} else -{AC_DATA.ITM_FINE}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.DESCR}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{AC_DATA.CO_YEAR}+{AC_DATA.CO_BOOK}+{AC_DATA.VCH_NO}"
+  },
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "UnknownField",
+   "text": "if {AC_DATA.SIGN} = '-' then {AC_DATA.ITM_FINE} else -{AC_DATA.ITM_FINE}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.DESCR}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{AC_DATA.CO_YEAR}+{AC_DATA.CO_BOOK}+{AC_DATA.VCH_NO}"
+  },
+  {
+   "name": "ClStkGl",
+   "ref": "{@ClStkGl}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "ClStkSl",
+   "ref": "{@ClStkSl}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "Co_Add1",
+   "ref": "{@Co_Add1}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3} + {CO_MAST.CO_CITY}+' '+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "co_name",
+   "ref": "{@co_name}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "DataType",
+   "ref": "{@DataType}",
+   "type": "StringField",
+   "text": "''"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "ItGroup",
+   "ref": "{@ItGroup}",
+   "type": "StringField",
+   "text": "'FS'"
+  },
+  {
+   "name": "MainCrTot",
+   "ref": "{@MainCrTot}",
+   "type": "UnknownField",
+   "text": "if {@OpenCashAmt} > 0 then Sum ({@CurCrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\") + {@OpenCashAmt} else Sum ({@CurCrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")"
+  },
+  {
+   "name": "MainDrTot",
+   "ref": "{@MainDrTot}",
+   "type": "UnknownField",
+   "text": "if {@OpenCashAmt} < 0 then Sum ({@CurDrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")- {@OpenCashAmt} else Sum ({@CurDrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")"
+  },
+  {
+   "name": "OpenCashAmt",
+   "ref": "{@OpenCashAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpStkGl",
+   "ref": "{@OpStkGl}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpStkSl",
+   "ref": "{@OpStkSl}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "RjCrAmt",
+   "ref": "{@RjCrAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "RjDrAmt",
+   "ref": "{@RjDrAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'ISSUE RECEIVE REPORT FROM DATE OF ' & {@FromDate}"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "date(2001,03,31)"
+  },
+  {
+   "name": "TotDrCr",
+   "ref": "{@TotDrCr}",
+   "type": "NumberField",
+   "text": "{@OpenCashAmt} + {@RjDrAmt}-{@RjCrAmt}"
+  },
+  {
+   "name": "VchDate",
+   "ref": "{@VchDate}",
+   "type": "DateField",
+   "text": ""
+  }
+ ],
+ "sectionCount": 6,
+ "objectCount": 10,
+ "formulaCount": 49
+}

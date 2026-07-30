@@ -1,0 +1,172 @@
+{
+ "form": "UT_HDD",
+ "controlCount": 15,
+ "byKind": {
+  "button": 6,
+  "textbox": 3,
+  "panel": 1,
+  "label": 3,
+  "other": 2
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "btnUpdate",
+   "Label3",
+   "tHddNo",
+   "PictureBox2",
+   "PictureBox1",
+   "tSrNo2",
+   "Label2",
+   "tSrNo1",
+   "Label1",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "847,3",
+   "size": "87,37",
+   "tabIndex": "0",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "tHddNo",
+   "type": "TextBox",
+   "location": "502,252",
+   "size": "130,26",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "940,3",
+   "size": "87,37",
+   "tabIndex": "1",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "tSrNo1",
+   "type": "TextBox",
+   "location": "278,99",
+   "size": "344,19",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1033,3",
+   "size": "87,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tSrNo2",
+   "type": "TextBox",
+   "location": "780,97",
+   "size": "351,19",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1126,3",
+   "size": "87,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1219,3",
+   "size": "87,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "188,97",
+   "size": "84,20",
+   "tabIndex": "113",
+   "text": "Sr No 1 :",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "694,94",
+   "size": "76,20",
+   "tabIndex": "115",
+   "text": "Sr No 2 :",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "527,216",
+   "size": "84,20",
+   "tabIndex": "119",
+   "text": "Hdd No",
+   "kind": "label"
+  },
+  {
+   "name": "btnUpdate",
+   "type": "SimpleButton",
+   "location": "505,306",
+   "size": "127,32",
+   "tabIndex": "120",
+   "text": "Hdd Update",
+   "kind": "button"
+  },
+  {
+   "name": "PictureBox1",
+   "type": "PictureBox",
+   "location": "224,134",
+   "size": "172,144",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PictureBox2",
+   "type": "PictureBox",
+   "location": "720,134",
+   "size": "170,144",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  }
+ ]
+}

@@ -1,0 +1,264 @@
+'use client';
+import { useState } from 'react';
+import { post, ApiError } from '../../../../lib/api';
+import { useBusinessScope } from '../../../../components/BusinessScope';
+import { BookSelect } from '../../../../components/BookSelect';
+import { LookupPicker } from '../../../../components/LookupPicker';
+
+interface Line {
+  partyAc: string;
+  partyName: string;
+  amount: string;
+  mode: string;
+  bankAc: string;
+  chqNo: string;
+  kasar: string;
+}
+const blank = (): Line => ({
+  partyAc: '',
+  partyName: '',
+  amount: '',
+  mode: 'cash',
+  bankAc: '',
+  chqNo: '',
+  kasar: '',
+});
+const n = (v: string) => Number(v || 0);
+const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
+const inr = (x: number) => x.toLocaleString('en-IN');
+
+/**
+ * Multi-Party Receipt (Phase 6 / TR_CASH grid). Collects money IN from several parties in ONE
+ * receipt voucher: each row is a party + amount received + mode (+ cheque) + an optional kasar
+ * (round-off / discount) written off so that party clears in full. Posts to /receipts/batch which
+ * builds the balanced AC_DATA ledger (Dr cash/bank + Dr KASAR; Cr party for amount+kasar) and one
+ * CASH_DATA row per line.
+ */
+export default function BatchReceiptPage() {
+  const { lcCode, coYear } = useBusinessScope();
+  const [coBook, setCoBook] = useState('');
+  const [vchDate, setVchDate] = useState('');
+  const [lines, setLines] = useState<Line[]>([blank(), blank()]);
+  const [result, setResult] = useState<{ vchNo: number; total: number } | null>(null);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const setLine = (i: number, k: keyof Line, v: string) =>
+    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+
+  // Live totals: money received (Σ amount, the receipt total), kasar written off, and the gross
+  // cleared (received + kasar) credited to the parties.
+  const totRecv = r2(lines.reduce((s, l) => s + n(l.amount), 0));
+  const totKasar = r2(lines.reduce((s, l) => s + n(l.kasar), 0));
+  const totCleared = r2(totRecv + totKasar);
+  const validLines = lines.filter((l) => l.partyAc.trim() && n(l.amount) > 0);
+  const canSubmit = validLines.length >= 1 && totRecv > 0;
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setErr('');
+    setResult(null);
+    setBusy(true);
+    try {
+      const body = {
+        coBook,
+        coYear,
+        lcCode,
+        vchDate: vchDate || undefined,
+        lines: validLines.map((l) => ({
+          partyAc: l.partyAc,
+          partyName: l.partyName || undefined,
+          amount: Number(l.amount || 0),
+          mode: l.mode,
+          bankAc: l.mode === 'cash' ? undefined : l.bankAc || undefined,
+          chqNo: l.mode === 'cheque' ? l.chqNo || undefined : undefined,
+          kasarAmt: Number(l.kasar || 0),
+        })),
+      };
+      setResult(await post('/receipts/batch', body));
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <h1>Multi-Party Receipt</h1>
+      <form onSubmit={submit}>
+        <div className="panel">
+          <div className="row">
+            <div className="field">
+              <label>Book</label>
+              <BookSelect value={coBook} onChange={setCoBook} preferred="RCT" />
+            </div>
+            <div className="field">
+              <label>Year</label>
+              <input value={coYear} readOnly />
+            </div>
+            <div className="field">
+              <label>Location</label>
+              <input value={lcCode} readOnly />
+            </div>
+            <div className="field">
+              <label>Date</label>
+              <input type="date" value={vchDate} onChange={(e) => setVchDate(e.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        <div className="panel" style={{ overflow: 'auto' }}>
+          <h2>Collections</h2>
+          <table className="grid">
+            <thead>
+              <tr>
+                <th>Party</th>
+                <th>Name</th>
+                <th className="num">Amount</th>
+                <th>Mode</th>
+                <th>Bank A/C</th>
+                <th>Cheque No</th>
+                <th className="num">Kasar</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.map((l, i) => (
+                <tr key={i}>
+                  <td>
+                    <LookupPicker
+                      entity="accounts"
+                      value={l.partyAc}
+                      onChange={(v) => setLine(i, 'partyAc', v)}
+                      onPick={(r) => setLine(i, 'partyName', String(r.name || ''))}
+                      style={{ width: 170 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      style={{ width: '100%', minWidth: 150 }}
+                      value={l.partyName}
+                      onChange={(e) => setLine(i, 'partyName', e.target.value)}
+                      placeholder="party name"
+                    />
+                  </td>
+                  <td className="num">
+                    <input
+                      style={{ width: 110, textAlign: 'right' }}
+                      value={l.amount}
+                      onChange={(e) => setLine(i, 'amount', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </td>
+                  <td>
+                    <select value={l.mode} onChange={(e) => setLine(i, 'mode', e.target.value)}>
+                      <option value="cash">Cash</option>
+                      <option value="cheque">Cheque</option>
+                      <option value="card">Card</option>
+                      <option value="upi">UPI</option>
+                      <option value="bank">Bank</option>
+                    </select>
+                  </td>
+                  <td>
+                    {l.mode === 'cash' ? (
+                      <span className="muted">—</span>
+                    ) : (
+                      <LookupPicker
+                        entity="accounts"
+                        value={l.bankAc}
+                        onChange={(v) => setLine(i, 'bankAc', v)}
+                        style={{ width: 140 }}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    <input
+                      style={{ width: 120 }}
+                      value={l.chqNo}
+                      onChange={(e) => setLine(i, 'chqNo', e.target.value)}
+                      disabled={l.mode !== 'cheque'}
+                      placeholder={l.mode === 'cheque' ? 'chq no' : ''}
+                    />
+                  </td>
+                  <td className="num">
+                    <input
+                      style={{ width: 100, textAlign: 'right' }}
+                      value={l.kasar}
+                      onChange={(e) => setLine(i, 'kasar', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() =>
+                        setLines((ls) =>
+                          ls.length > 1
+                            ? ls.filter((_, j) => j !== i)
+                            : ls.map((x, j) => (j === i ? blank() : x)),
+                        )
+                      }
+                    >
+                      ×
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={2} style={{ textAlign: 'right', fontWeight: 600 }}>
+                  Totals
+                </td>
+                <td className="num">
+                  <b>{inr(totRecv)}</b>
+                </td>
+                <td colSpan={3}></td>
+                <td className="num">
+                  <b>{inr(totKasar)}</b>
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div className="toolbar" style={{ marginTop: 10 }}>
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => setLines((ls) => [...ls, blank()])}
+            >
+              + Add line
+            </button>
+            <span className="spacer" />
+            <span className="muted" style={{ marginRight: 16 }}>
+              Received ₹{inr(totRecv)} · Kasar ₹{inr(totKasar)} · Cleared ₹{inr(totCleared)}
+              {' · '}
+              <b>{validLines.length}</b> {validLines.length === 1 ? 'party' : 'parties'}
+            </span>
+            <button className="primary" disabled={busy || !canSubmit}>
+              {busy ? 'Saving…' : 'Post Receipt'}
+            </button>
+          </div>
+          {!canSubmit && totRecv === 0 && (
+            <div className="muted" style={{ marginTop: 6 }}>
+              Add at least one party with an amount to post.
+            </div>
+          )}
+        </div>
+      </form>
+
+      {err && <div className="msg err">{err}</div>}
+      {result && (
+        <div className="panel">
+          <div className="msg ok">
+            Posted — Receipt Voucher #{result.vchNo} · Total received ₹
+            {inr(r2(Number(result.total ?? 0)))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,65 @@
+# Windows-only extraction of Crystal Report (.rpt) layout geometry → XML.
+# The .rpt visual layout (sections, FieldObject Left/Top/Width/Height, fonts, formulas,
+# subreports) lives in a proprietary Crystal binary readable only by the SAP Crystal .NET
+# SDK, which runs only on Windows. This job runs a free GitHub-hosted Windows runner, converts
+# every unified/reports/*.rpt to XML with RptToXml, and uploads the XML as a downloadable artifact.
+# Run it manually: Actions tab → "Extract RPT geometry (Windows)" → Run workflow.
+# Then unzip the artifact into extraction_output/rpt_xml/ on the Mac; a macOS parser turns the
+# XML into per-report layout specs the web report engine renders pixel-exact.
+name: Extract RPT geometry (Windows)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  rpt-to-xml:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install SAP Crystal Reports runtime (SDK assemblies)
+        shell: pwsh
+        run: |
+          # Primary: Chocolatey package. If it fails, fall back to the SAP MSIs (both 32/64-bit).
+          choco install crystal-reports-2020-runtime-64bit -y --no-progress; if ($LASTEXITCODE -ne 0) {
+            Write-Host "choco package unavailable — download the SAP runtime MSIs from:"
+            Write-Host "https://www.sap.com/cmp/td/sap-crystal-reports-visual-studio-trial.html"
+            $urls = @(
+              'https://origin.softwaredownloads.sap.com/tmp/CRforVS_redist_install_64bit.zip',
+              'https://origin.softwaredownloads.sap.com/tmp/CRforVS_redist_install_32bit.zip'
+            )
+            foreach ($u in $urls) { try { Invoke-WebRequest $u -OutFile (Split-Path $u -Leaf) } catch { Write-Host "manual download may be required: $u" } }
+          }
+
+      - name: Build RptToXml
+        shell: pwsh
+        run: |
+          git clone --depth 1 https://github.com/ajryan/RptToXml tool
+          # Try prebuilt release first; else build with MSBuild/dotnet.
+          $rel = "tool/RptToXml/bin/Release/RptToXml.exe"
+          if (-not (Test-Path $rel)) {
+            & "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" tool\RptToXml.sln /p:Configuration=Release 2>$null
+            if (-not (Test-Path $rel)) { dotnet build tool\RptToXml.sln -c Release 2>$null }
+          }
+
+      - name: Convert all .rpt → .xml
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Recurse tool -Filter RptToXml.exe | Select-Object -First 1
+          if (-not $exe) { Write-Error "RptToXml.exe not found — check the build step"; exit 1 }
+          New-Item -ItemType Directory -Force extraction_output/rpt_xml | Out-Null
+          $ok = 0; $fail = 0
+          Get-ChildItem unified/reports/*.rpt | ForEach-Object {
+            $out = "extraction_output/rpt_xml/" + $_.BaseName + ".xml"
+            & $exe.FullName $_.FullName $out
+            if ($LASTEXITCODE -eq 0 -and (Test-Path $out)) { $ok++ } else { $fail++; Write-Host "FAILED: $($_.Name)" }
+          }
+          Write-Host "converted=$ok failed=$fail"
+
+      - name: Upload XML artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpt-xml
+          path: extraction_output/rpt_xml
+          if-no-files-found: error

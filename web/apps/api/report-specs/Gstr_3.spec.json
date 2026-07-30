@@ -1,0 +1,1067 @@
+{
+ "report": "Gstr_3",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 2325,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 240,
+       "top": 135,
+       "width": 11090,
+       "height": 315,
+       "text": "FORM GSTR 3"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 10880,
+       "top": 135,
+       "width": 450,
+       "height": 228,
+       "dataSource": "PageNumber"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text13",
+       "left": 360,
+       "top": 480,
+       "width": 10970,
+       "height": 255,
+       "text": "Monthly Return"
+      },
+      {
+       "type": "BoxObject",
+       "name": "Box1",
+       "left": 240,
+       "top": 840,
+       "width": 11090,
+       "height": 1484
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 360,
+       "top": 930,
+       "width": 10970,
+       "height": 255,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 240,
+       "top": 1260,
+       "width": 11090,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 690,
+       "top": 1260,
+       "width": 0,
+       "height": 1065
+      },
+      {
+       "type": "LineObject",
+       "name": "Line18",
+       "left": 5760,
+       "top": 1260,
+       "width": 0,
+       "height": 1064
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 270,
+       "top": 1320,
+       "width": 270,
+       "height": 255,
+       "text": "1"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 1193,
+       "top": 1320,
+       "width": 1627,
+       "height": 238,
+       "text": "GST No :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 5955,
+       "top": 1320,
+       "width": 2945,
+       "height": 226,
+       "dataSource": "{CO_MAST.CO_GST_NO}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 240,
+       "top": 1620,
+       "width": 11090,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line9",
+       "left": 1095,
+       "top": 1620,
+       "width": 0,
+       "height": 705
+      },
+      {
+       "type": "TextObject",
+       "name": "Text14",
+       "left": 690,
+       "top": 1680,
+       "width": 270,
+       "height": 255,
+       "text": "a"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 1193,
+       "top": 1680,
+       "width": 3360,
+       "height": 255,
+       "text": "Legal name of the registered person"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 5955,
+       "top": 1680,
+       "width": 4980,
+       "height": 227,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 270,
+       "top": 1855,
+       "width": 270,
+       "height": 255,
+       "text": "2"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line17",
+       "left": 683,
+       "top": 1980,
+       "width": 10647,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text16",
+       "left": 690,
+       "top": 2040,
+       "width": 270,
+       "height": 255,
+       "text": "b"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 1193,
+       "top": 2040,
+       "width": 2167,
+       "height": 255,
+       "text": "Trade name, if any"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1515,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 240,
+       "top": 105,
+       "width": 11090,
+       "height": 315,
+       "text": "FORM GSTR 3"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field36",
+       "left": 10880,
+       "top": 105,
+       "width": 450,
+       "height": 228,
+       "dataSource": "PageNumber"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 240,
+       "top": 420,
+       "width": 11090,
+       "height": 255,
+       "text": "Monthly Return"
+      },
+      {
+       "type": "BoxObject",
+       "name": "Box3",
+       "left": 240,
+       "top": 720,
+       "width": 11090,
+       "height": 794
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 240,
+       "top": 810,
+       "width": 11090,
+       "height": 255,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line26",
+       "left": 240,
+       "top": 1125,
+       "width": 11090,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line27",
+       "left": 5760,
+       "top": 1125,
+       "width": 0,
+       "height": 389
+      },
+      {
+       "type": "TextObject",
+       "name": "Text46",
+       "left": 593,
+       "top": 1185,
+       "width": 1087,
+       "height": 238,
+       "text": "GST No :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 1890,
+       "top": 1185,
+       "width": 2910,
+       "height": 226,
+       "dataSource": "{CO_MAST.CO_GST_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 5955,
+       "top": 1185,
+       "width": 5205,
+       "height": 227,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "GroupHeader",
+     "height": 860,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 360,
+       "top": 165,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "{@TaxTypeName}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line10",
+       "left": 240,
+       "top": 465,
+       "width": 11090,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 240,
+       "top": 465,
+       "width": 0,
+       "height": 1770
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 1095,
+       "top": 465,
+       "width": 0,
+       "height": 1770
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 4970,
+       "top": 465,
+       "width": 0,
+       "height": 1770
+      },
+      {
+       "type": "LineObject",
+       "name": "Line12",
+       "left": 6880,
+       "top": 465,
+       "width": 0,
+       "height": 1770
+      },
+      {
+       "type": "LineObject",
+       "name": "Line23",
+       "left": 8320,
+       "top": 465,
+       "width": 0,
+       "height": 1770
+      },
+      {
+       "type": "LineObject",
+       "name": "Line14",
+       "left": 9780,
+       "top": 465,
+       "width": 0,
+       "height": 1770
+      },
+      {
+       "type": "LineObject",
+       "name": "Line15",
+       "left": 11330,
+       "top": 465,
+       "width": 0,
+       "height": 1770
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 360,
+       "top": 540,
+       "width": 600,
+       "height": 270,
+       "text": "Sr No"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 1193,
+       "top": 540,
+       "width": 2880,
+       "height": 270,
+       "text": "Section Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text11",
+       "left": 5070,
+       "top": 540,
+       "width": 1680,
+       "height": 270,
+       "text": "Total Taxable Value"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text12",
+       "left": 6960,
+       "top": 540,
+       "width": 1260,
+       "height": 270,
+       "text": "Total IGST"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text17",
+       "left": 8400,
+       "top": 540,
+       "width": 1260,
+       "height": 270,
+       "text": "Total CGST"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text18",
+       "left": 9840,
+       "top": 540,
+       "width": 1320,
+       "height": 270,
+       "text": "Total SGST"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line7",
+       "left": 240,
+       "top": 840,
+       "width": 11090,
+       "height": 0
+      }
+     ]
+    },
+    {
+     "name": "Section12",
+     "kind": "GroupHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 345,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 360,
+       "top": 45,
+       "width": 480,
+       "height": 216,
+       "dataSource": "{@SrNo}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 1193,
+       "top": 45,
+       "width": 3607,
+       "height": 226,
+       "dataSource": "GroupName ({@PartyType})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 5070,
+       "top": 45,
+       "width": 1680,
+       "height": 228,
+       "dataSource": "Sum ({@GrossVal}, {@PartyType})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 6960,
+       "top": 45,
+       "width": 1260,
+       "height": 228,
+       "dataSource": "Sum ({@IGST}, {@PartyType})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 8400,
+       "top": 45,
+       "width": 1260,
+       "height": 228,
+       "dataSource": "Sum ({@CGST}, {@PartyType})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 9840,
+       "top": 45,
+       "width": 1320,
+       "height": 228,
+       "dataSource": "Sum ({@SGST}, {@PartyType})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line11",
+       "left": 260,
+       "top": 345,
+       "width": 11070,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section10",
+     "kind": "Detail",
+     "height": 288,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 5070,
+       "top": 60,
+       "width": 1680,
+       "height": 228,
+       "dataSource": "{@GrossVal}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 6960,
+       "top": 60,
+       "width": 1260,
+       "height": 204,
+       "dataSource": "{@IGST}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 8400,
+       "top": 60,
+       "width": 1260,
+       "height": 204,
+       "dataSource": "{@CGST}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 9840,
+       "top": 60,
+       "width": 1320,
+       "height": 204,
+       "dataSource": "{@SGST}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupFooter",
+     "height": 223,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "GroupFooter",
+     "height": 568,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line8",
+       "left": 240,
+       "top": 0,
+       "width": 11090,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 5070,
+       "top": 75,
+       "width": 1680,
+       "height": 238,
+       "dataSource": "Sum ({@GrossVal}, {@TaxInOutGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 6960,
+       "top": 75,
+       "width": 1260,
+       "height": 238,
+       "dataSource": "Sum ({@IGST}, {@TaxInOutGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 8400,
+       "top": 75,
+       "width": 1260,
+       "height": 238,
+       "dataSource": "Sum ({@CGST}, {@TaxInOutGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 9840,
+       "top": 75,
+       "width": 1320,
+       "height": 238,
+       "dataSource": "Sum ({@SGST}, {@TaxInOutGroup})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area12",
+   "sections": [
+    {
+     "name": "Section15",
+     "kind": "ReportFooter",
+     "height": 478,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line16",
+       "left": 2820,
+       "top": 15,
+       "width": 8510,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line13",
+       "left": 2820,
+       "top": 15,
+       "width": 0,
+       "height": 990
+      },
+      {
+       "type": "LineObject",
+       "name": "Line24",
+       "left": 4965,
+       "top": 15,
+       "width": 0,
+       "height": 990
+      },
+      {
+       "type": "LineObject",
+       "name": "Line20",
+       "left": 6885,
+       "top": 15,
+       "width": 0,
+       "height": 990
+      },
+      {
+       "type": "LineObject",
+       "name": "Line21",
+       "left": 8325,
+       "top": 15,
+       "width": 0,
+       "height": 990
+      },
+      {
+       "type": "LineObject",
+       "name": "Line22",
+       "left": 9780,
+       "top": 15,
+       "width": 0,
+       "height": 990
+      },
+      {
+       "type": "LineObject",
+       "name": "Line19",
+       "left": 11330,
+       "top": 15,
+       "width": 0,
+       "height": 990
+      },
+      {
+       "type": "TextObject",
+       "name": "Text15",
+       "left": 3360,
+       "top": 135,
+       "width": 1455,
+       "height": 255,
+       "text": "Payable Tax :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 4980,
+       "top": 135,
+       "width": 1770,
+       "height": 238,
+       "dataSource": "Sum ({@GrossVal})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 6960,
+       "top": 135,
+       "width": 1260,
+       "height": 238,
+       "dataSource": "Sum ({@IGST})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 8400,
+       "top": 135,
+       "width": 1260,
+       "height": 238,
+       "dataSource": "Sum ({@CGST})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 9840,
+       "top": 135,
+       "width": 1320,
+       "height": 238,
+       "dataSource": "Sum ({@SGST})"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "ReportFooter",
+     "height": 600,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line28",
+       "left": 2820,
+       "top": 15,
+       "width": 8510,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text19",
+       "left": 3360,
+       "top": 135,
+       "width": 1455,
+       "height": 255,
+       "text": "Balance Tax :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 4980,
+       "top": 135,
+       "width": 1770,
+       "height": 238,
+       "dataSource": "Sum ({@GrossVal})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 6960,
+       "top": 135,
+       "width": 1260,
+       "height": 238,
+       "dataSource": "Sum ({@IGST})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 8400,
+       "top": 135,
+       "width": 1260,
+       "height": 238,
+       "dataSource": "Sum ({@CGST})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 9840,
+       "top": 135,
+       "width": 1320,
+       "height": 238,
+       "dataSource": "Sum ({@SGST})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line25",
+       "left": 2820,
+       "top": 480,
+       "width": 8510,
+       "height": 0
+      }
+     ]
+    },
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 675,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text28",
+       "left": 360,
+       "top": 120,
+       "width": 10800,
+       "height": 480,
+       "text": "I hereby solemnly affirm and declare that the information given herein above is true and correct to the best of my knowledge and belief and nothing has been concealed therefrom"
+      }
+     ]
+    },
+    {
+     "name": "Section18",
+     "kind": "ReportFooter",
+     "height": 1055,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text30",
+       "left": 240,
+       "top": 90,
+       "width": 450,
+       "height": 240,
+       "text": "Place :"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text29",
+       "left": 7290,
+       "top": 90,
+       "width": 4020,
+       "height": 240,
+       "text": "Full Singature of the authorised signatory"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text31",
+       "left": 240,
+       "top": 435,
+       "width": 450,
+       "height": 240,
+       "text": "Date :"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text32",
+       "left": 7290,
+       "top": 435,
+       "width": 765,
+       "height": 240,
+       "text": "Name :"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text33",
+       "left": 7290,
+       "top": 750,
+       "width": 765,
+       "height": 240,
+       "text": "Status:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area13",
+   "sections": [
+    {
+     "name": "Section17",
+     "kind": "PageFooter",
+     "height": 225,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "if{TAX_DATA.PARTY_NAME} = '' then {AC_MAST.AC_NAME} else {TAX_DATA.PARTY_NAME}"
+  },
+  {
+   "name": "Address",
+   "ref": "{@Address}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+' '+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "AddVat",
+   "ref": "{@AddVat}",
+   "type": "UnknownField",
+   "text": "IF {BOOK_DATA.BOOK_INOUT}='O' THEN {TAX_DATA.ADD_TAX_AMT} ELSE -({TAX_DATA.ADD_TAX_AMT})"
+  },
+  {
+   "name": "BillGroup",
+   "ref": "{@BillGroup}",
+   "type": "StringField",
+   "text": "{TAX_DATA.CO_YEAR}+{TAX_DATA.CO_BOOK}+{TAX_DATA.VCH_NO}"
+  },
+  {
+   "name": "Book",
+   "ref": "{@Book}",
+   "type": "StringField",
+   "text": "{TAX_DATA.CO_BOOK}"
+  },
+  {
+   "name": "CGST",
+   "ref": "{@CGST}",
+   "type": "NumberField",
+   "text": "IF {TAX_DATA.TAX_TYPE} = 'CGST' THEN IF{TAX_DATA.TAX_SIGN} = '+' THEN {TAX_DATA.TAX_AMT} ELSE -{TAX_DATA.TAX_AMT}"
+  },
+  {
+   "name": "CgstRate",
+   "ref": "{@CgstRate}",
+   "type": "NumberField",
+   "text": "IF {@CGST}+{@SGST} <> 0 THEN {TAX_DATA.TAX_PRC}"
+  },
+  {
+   "name": "CurMonth",
+   "ref": "{@CurMonth}",
+   "type": "StringField",
+   "text": "RIGHT({@RptTitel},10)"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "Date(2001,04,01)"
+  },
+  {
+   "name": "GrossVal",
+   "ref": "{@GrossVal}",
+   "type": "NumberField",
+   "text": "if{TAX_DATA.TAX_TYPE} = \"SGST\" or {TAX_DATA.TAX_TYPE} = \"IGST\" THEN IF {TAX_DATA.TAX_SIGN} = '+' THEN {TAX_DATA.NET_AMT} ELSE -{TAX_DATA.NET_AMT}"
+  },
+  {
+   "name": "IGST",
+   "ref": "{@IGST}",
+   "type": "NumberField",
+   "text": "IF {TAX_DATA.TAX_TYPE} = 'IGST' THEN IF{TAX_DATA.TAX_SIGN} = '+' THEN {TAX_DATA.TAX_AMT} ELSE -{TAX_DATA.TAX_AMT}"
+  },
+  {
+   "name": "IgstRate",
+   "ref": "{@IgstRate}",
+   "type": "UnknownField",
+   "text": "IF {TAX_DATA.AC_GST_TYPE} = 'IGST' THEN {TAX_DATA.TAX_PRC}"
+  },
+  {
+   "name": "MonthTot",
+   "ref": "{@MonthTot}",
+   "type": "StringField",
+   "text": "'N'"
+  },
+  {
+   "name": "PartyType",
+   "ref": "{@PartyType}",
+   "type": "StringField",
+   "text": "IF {AC_MAST.AC_GST_TYPE} = 'I' THEN if {AC_MAST.AC_GSTNO} <> '' then 'Inter State Registered Taxpayer' else 'Inter State Consumers' ELSE if {AC_MAST.AC_GSTNO} <> '' then 'Intra State Registered Taxpay"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'VatReport'"
+  },
+  {
+   "name": "SGST",
+   "ref": "{@SGST}",
+   "type": "NumberField",
+   "text": "IF {TAX_DATA.TAX_TYPE} = 'SGST' THEN IF{TAX_DATA.TAX_SIGN} = '+' THEN {TAX_DATA.TAX_AMT} ELSE -{TAX_DATA.TAX_AMT}"
+  },
+  {
+   "name": "SGSTFDF",
+   "ref": "{@SGSTFDF}",
+   "type": "UnknownField",
+   "text": "IF {TAX_DATA.AC_GST_TYPE} = 'SGST' THEN {TAX_DATA.TAX_AMT}"
+  },
+  {
+   "name": "SgstRate",
+   "ref": "{@SgstRate}",
+   "type": "NumberField",
+   "text": "IF {@CGST}+{@SGST} <> 0 THEN {TAX_DATA.TAX_PRC}"
+  },
+  {
+   "name": "SrNo",
+   "ref": "{@SrNo}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar SrNo := SrNo + 1; SrNo"
+  },
+  {
+   "name": "TaxGroup",
+   "ref": "{@TaxGroup}",
+   "type": "StringField",
+   "text": "IF {BOOK_DATA.BOOK_INOUT}='O' THEN \"1\"+{TAX_DATA.CO_BOOK} else \"2\"+{TAX_DATA.CO_BOOK}"
+  },
+  {
+   "name": "TaxInOutGroup",
+   "ref": "{@TaxInOutGroup}",
+   "type": "StringField",
+   "text": "{TAX_DATA.TAX_SIGN}"
+  },
+  {
+   "name": "TaxTypeName",
+   "ref": "{@TaxTypeName}",
+   "type": "StringField",
+   "text": "if {TAX_DATA.TAX_SIGN} = '+' then 'Detail Of Outward Supplies From GSTR - 1' else 'Detail Of Inward Supplies From GSTR - 2'"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "Date(2001,07,31)"
+  },
+  {
+   "name": "TotAmt",
+   "ref": "{@TotAmt}",
+   "type": "NumberField",
+   "text": "{TAX_DATA.TOT_AMT}"
+  },
+  {
+   "name": "VatPrc",
+   "ref": "{@VatPrc}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{TAX_DATA.CO_YEAR}+{TAX_DATA.CO_BOOK}+{TAX_DATA.VCH_NO}+{TAX_DATA.TAX_CODE}"
+  },
+  {
+   "name": "VchNo",
+   "ref": "{@VchNo}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_SR_NAME} & \"-\" & {TAX_DATA.VCH_NO}"
+  }
+ ],
+ "sectionCount": 13,
+ "objectCount": 87,
+ "formulaCount": 27
+}

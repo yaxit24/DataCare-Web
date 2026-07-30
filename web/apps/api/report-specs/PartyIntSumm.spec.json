@@ -1,0 +1,879 @@
+{
+ "report": "PartyIntSumm",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 390,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1119,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 60,
+       "top": 36,
+       "width": 957,
+       "height": 114,
+       "text": ""
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 135,
+       "top": 165,
+       "width": 11250,
+       "height": 375,
+       "dataSource": "{@co_name}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 135,
+       "top": 570,
+       "width": 11250,
+       "height": 200,
+       "dataSource": "{@Co_Add1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 10875,
+       "top": 810,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 135,
+       "top": 836,
+       "width": 11250,
+       "height": 200,
+       "dataSource": "{@RptTitel}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 455,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 360,
+       "top": 0,
+       "width": 11025,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 240,
+       "top": 75,
+       "width": 660,
+       "height": 246,
+       "text": "SrNo"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 735,
+       "top": 75,
+       "width": 1125,
+       "height": 240,
+       "text": "Ac Code"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 1695,
+       "top": 75,
+       "width": 1080,
+       "height": 255,
+       "text": "Ac Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 5046,
+       "top": 75,
+       "width": 1374,
+       "height": 255,
+       "text": "Balance"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 6795,
+       "top": 75,
+       "width": 1365,
+       "height": 255,
+       "text": "Payabel"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 8145,
+       "top": 75,
+       "width": 1395,
+       "height": 240,
+       "text": "Receivable"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text13",
+       "left": 9540,
+       "top": 75,
+       "width": 1455,
+       "height": 240,
+       "text": "Net Balance"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 240,
+       "top": 360,
+       "width": 11160,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 279,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 240,
+       "top": 45,
+       "width": 323,
+       "height": 204,
+       "dataSource": "{@SrNo}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 735,
+       "top": 45,
+       "width": 900,
+       "height": 200,
+       "dataSource": "GroupName ({AC_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 1695,
+       "top": 45,
+       "width": 3345,
+       "height": 220,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field55",
+       "left": 5160,
+       "top": 45,
+       "width": 1260,
+       "height": 204,
+       "dataSource": "{@NetClosing}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field56",
+       "left": 6478,
+       "top": 45,
+       "width": 272,
+       "height": 234,
+       "dataSource": "{@NetClosingCrDr}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 6795,
+       "top": 45,
+       "width": 1365,
+       "height": 204,
+       "dataSource": "Sum ({@interest}, {AC_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 8220,
+       "top": 45,
+       "width": 1320,
+       "height": 204,
+       "dataSource": "Sum ({@interest}, {AC_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 9631,
+       "top": 45,
+       "width": 1364,
+       "height": 204,
+       "dataSource": "{@BalanceWithInt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 11076,
+       "top": 45,
+       "width": 288,
+       "height": 226,
+       "dataSource": "{@TotCrdr}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 11235,
+       "top": 45,
+       "width": 330,
+       "height": 210,
+       "dataSource": "{@InitBalAmt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "Detail",
+     "height": 296,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 240,
+       "top": 0,
+       "width": 1020,
+       "height": 240,
+       "dataSource": "{BOOK_DATA.BOOK_SNAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 1380,
+       "top": 0,
+       "width": 750,
+       "height": 245,
+       "dataSource": "{AC_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 1695,
+       "top": 0,
+       "width": 751,
+       "height": 211,
+       "dataSource": "{AC_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field36",
+       "left": 3300,
+       "top": 0,
+       "width": 751,
+       "height": 211,
+       "dataSource": "{@DueDate}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 5046,
+       "top": 0,
+       "width": 1374,
+       "height": 211,
+       "dataSource": "{@DrAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 5880,
+       "top": 0,
+       "width": 1365,
+       "height": 211,
+       "dataSource": "{@CrAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field37",
+       "left": 8145,
+       "top": 0,
+       "width": 1395,
+       "height": 211,
+       "dataSource": "{@Balance}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 8790,
+       "top": 0,
+       "width": 330,
+       "height": 245,
+       "dataSource": "{@BalCrDr}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field31",
+       "left": 9178,
+       "top": 0,
+       "width": 632,
+       "height": 211,
+       "dataSource": "{@days}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 9436,
+       "top": 0,
+       "width": 374,
+       "height": 240,
+       "text": "365"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field32",
+       "left": 9780,
+       "top": 0,
+       "width": 1215,
+       "height": 211,
+       "dataSource": "{@interest}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 11220,
+       "top": 0,
+       "width": 211,
+       "height": 226,
+       "dataSource": "{@BalAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 11385,
+       "top": 0,
+       "width": 226,
+       "height": 226,
+       "dataSource": "{@intSumm}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "GroupFooter",
+     "height": 995,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line7",
+       "left": 3945,
+       "top": 0,
+       "width": 7275,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text27",
+       "left": 1845,
+       "top": 105,
+       "width": 2550,
+       "height": 200,
+       "text": "Accoutns Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 5015,
+       "top": 105,
+       "width": 1405,
+       "height": 216,
+       "dataSource": "Sum ({@DrAmt}, {AC_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 5849,
+       "top": 105,
+       "width": 1396,
+       "height": 216,
+       "dataSource": "Sum ({@CrAmt}, {AC_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field54",
+       "left": 9540,
+       "top": 105,
+       "width": 1080,
+       "height": 248,
+       "dataSource": "{@IntLabel}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section13",
+     "kind": "ReportFooter",
+     "height": 600,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 345,
+       "top": 45,
+       "width": 10875,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 5520,
+       "top": 240,
+       "width": 2016,
+       "height": 226,
+       "dataSource": "{@LblGrandTotal}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 7680,
+       "top": 240,
+       "width": 1500,
+       "height": 238,
+       "dataSource": "Sum ({@interest})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section14",
+     "kind": "PageFooter",
+     "height": 384,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcCrAmt",
+   "ref": "{@AcCrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar OpCrAmt; NumberVar OpDrAmt; if OpCrAmt - OpDrAmt > 0 then {@TranCrAmt} + OpCrAmt - OpDrAmt + {@CloseCrAmt} else {@TranCrAmt} + {@CloseCrAmt};"
+  },
+  {
+   "name": "AcDrAmt",
+   "ref": "{@AcDrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar OpCrAmt; NumberVar OpDrAmt; if OpCrAmt - OpDrAmt <= 0 then {@TranDrAmt} + OpDrAmt - OpCrAmt + {@CloseDrAmt} else {@TranDrAmt} + {@CloseDrAmt};"
+  },
+  {
+   "name": "AcPayInt",
+   "ref": "{@AcPayInt}",
+   "type": "NumberField",
+   "text": "12"
+  },
+  {
+   "name": "AcRecInt",
+   "ref": "{@AcRecInt}",
+   "type": "NumberField",
+   "text": "12"
+  },
+  {
+   "name": "BalAmt",
+   "ref": "{@BalAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar BalAmt; BalAmt := BalAmt + {@CrAmt} - {@DrAmt}; BalAmt;"
+  },
+  {
+   "name": "Balance",
+   "ref": "{@Balance}",
+   "type": "NumberField",
+   "text": "EvaluateAfter ({@BalAmt}); WhilePrintingRecords; NumberVar BalAmt;"
+  },
+  {
+   "name": "BalanceWithInt",
+   "ref": "{@BalanceWithInt}",
+   "type": "NumberField",
+   "text": "Sum ({@CrAmt}, {AC_DATA.AC_CODE})+Sum ({@interest}, {AC_DATA.AC_CODE})-Sum ({@DrAmt}, {AC_DATA.AC_CODE})"
+  },
+  {
+   "name": "BalCrDr",
+   "ref": "{@BalCrDr}",
+   "type": "StringField",
+   "text": "EvaluateAfter ({@BalAmt}); WhilePrintingRecords; NumberVar BalAmt; if BalAmt > 0 then 'Cr' else if BalAmt < 0 then 'Dr';"
+  },
+  {
+   "name": "BillNo",
+   "ref": "{@BillNo}",
+   "type": "StringField",
+   "text": "if {AC_DATA.CO_BOOK} >='0010' and {AC_DATA.CO_BOOK} <'0200' then {AC_DATA.CHQ_NO} else {AC_DATA.BILL_NO}"
+  },
+  {
+   "name": "CloseCrAmt",
+   "ref": "{@CloseCrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar BalAmt ; NumberVar TranCrAmt; NumberVar TranDrAmt; if BalAmt <= 0 then Abs(BalAmt)"
+  },
+  {
+   "name": "CloseDrAmt",
+   "ref": "{@CloseDrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar BalAmt ; NumberVar TranCrAmt; NumberVar TranDrAmt; if BalAmt > 0 then abs(BalAmt);"
+  },
+  {
+   "name": "Co_Add1",
+   "ref": "{@Co_Add1}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3} +' '+ {CO_MAST.CO_CITY}+' '+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "Co_Add2",
+   "ref": "{@Co_Add2}",
+   "type": "UnknownField",
+   "text": "{UNIT_NAME.CO_CITY}+' '+{UNIT_NAME.CO_PIN}+' '+'Phone : ' +{UNIT_NAME.CO_PHONE}+' '+' Fax :'+{UNIT_NAME.CO_FAX}"
+  },
+  {
+   "name": "co_name",
+   "ref": "{@co_name}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CrAmt",
+   "ref": "{@CrAmt}",
+   "type": "NumberField",
+   "text": "if {@FromDate} <= {AC_DATA.VCH_DATE} then {AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "days",
+   "ref": "{@days}",
+   "type": "NumberField",
+   "text": "NumberVar Days; Days=0; Days :=( {@ToDate}-{AC_DATA.VCH_DATE}) + 1; Days;"
+  },
+  {
+   "name": "dbcd",
+   "ref": "{@dbcd}",
+   "type": "StringField",
+   "text": "//if isnull({DYBK_MAST.BOOK_SNAME}) or trim({DYBK_MAST.BOOK_SNAME}) = \"\" then {AC_DATA.CO_BOOK} //else // {DYBK_MAST.BOOK_SNAME}"
+  },
+  {
+   "name": "Description",
+   "ref": "{@Description}",
+   "type": "UnknownField",
+   "text": "trim({AC_DATA.DESCR}) //trim({TRAN_DEDC.VCH_DESC})"
+  },
+  {
+   "name": "Divider",
+   "ref": "{@Divider}",
+   "type": "NumberField",
+   "text": "365"
+  },
+  {
+   "name": "DrAmt",
+   "ref": "{@DrAmt}",
+   "type": "NumberField",
+   "text": "if {@FromDate} <= {AC_DATA.VCH_DATE} then {AC_DATA.DR_AMT}"
+  },
+  {
+   "name": "DueDate",
+   "ref": "{@DueDate}",
+   "type": "DateField",
+   "text": "{AC_DATA.VCH_DATE}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2012,04,01)"
+  },
+  {
+   "name": "GroupDate",
+   "ref": "{@GroupDate}",
+   "type": "DateField",
+   "text": "{AC_DATA.VCH_DATE}"
+  },
+  {
+   "name": "HaderPrint",
+   "ref": "{@HaderPrint}",
+   "type": "BooleanField",
+   "text": "WhilePrintingRecords; BooleanVar HeaderPrint:= True;"
+  },
+  {
+   "name": "InitBalAmt",
+   "ref": "{@InitBalAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; if OnFirstRecord or {AC_DATA.AC_CODE} <> Previous({AC_DATA.AC_CODE}) then ( NumberVar BalAmt := 0 ; booleanVar OpBalPrint := False; NumberVar TranCrAmt:=0; NumberVar TranDrAmt:=0"
+  },
+  {
+   "name": "interest",
+   "ref": "{@interest}",
+   "type": "NumberField",
+   "text": "if{AC_DATA.CR_AMT} <> 0 then if {@days} = 366 then round((({AC_DATA.CR_AMT} * {@AcPayInt} /100)/{@divider})*({@days}-1),0) else round((({AC_DATA.CR_AMT} * {@AcPayInt} /100)/{@divider})*{@days},0) else"
+  },
+  {
+   "name": "IntLabel",
+   "ref": "{@IntLabel}",
+   "type": "StringField",
+   "text": "if Sum ({@interest}, {AC_DATA.AC_CODE}) > 0 then \"Net Payable\" else if Sum ({@interest}, {AC_DATA.AC_CODE}) < 0 then \"Net Receivable\""
+  },
+  {
+   "name": "intSumm",
+   "ref": "{@intSumm}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar IntTotSum; IntTotSum := IntTotSum +{@interest}; IntTotSum;"
+  },
+  {
+   "name": "LblGrandTotal",
+   "ref": "{@LblGrandTotal}",
+   "type": "StringField",
+   "text": "if Sum ({@interest}) > 0 then \"Net Payable Tota;\" else if Sum ({@interest}) < 0 then \"Net Receivable Total\""
+  },
+  {
+   "name": "MnthCrAmt",
+   "ref": "{@MnthCrAmt}",
+   "type": "UnknownField",
+   "text": "if Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, \"monthly\") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, \"monthly\") < 0 then abs(Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, \"monthly\") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, \"monthl"
+  },
+  {
+   "name": "MnthDrAmt",
+   "ref": "{@MnthDrAmt}",
+   "type": "UnknownField",
+   "text": "if Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, \"monthly\") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, \"monthly\") > 0 then Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, \"monthly\") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, \"monthly\")"
+  },
+  {
+   "name": "NetClosing",
+   "ref": "{@NetClosing}",
+   "type": "NumberField",
+   "text": "Sum ({@CrAmt}, {AC_DATA.AC_CODE}) -Sum ({@DrAmt}, {AC_DATA.AC_CODE})"
+  },
+  {
+   "name": "NetClosingCrDr",
+   "ref": "{@NetClosingCrDr}",
+   "type": "StringField",
+   "text": "if {@NetClosing}> 0 then 'Cr' else if {@NetClosing}< 0 then 'Dr'"
+  },
+  {
+   "name": "NextDate",
+   "ref": "{@NextDate}",
+   "type": "DateField",
+   "text": "WhilePrintingRecords; dateVar NextDate; if {@GroupDate} >= {@FromDate} then if OnLastRecord or {AC_DATA.AC_CODE} <> Next({AC_DATA.AC_CODE}) then NextDate := {@ToDate} else NextDate := Next({@GroupDate"
+  },
+  {
+   "name": "OnlyOpIntr",
+   "ref": "{@OnlyOpIntr}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar TranDrAmt; NumberVar TranCrAmt; NumberVar OpDrAmt; NumberVar OpCrAmt; NumberVar TotIntAmt; if not (TranDrAmt <> 0 Or TranCrAmt <> 0 or (OpCrAmt - OpDrAmt) = 0) then Tot"
+  },
+  {
+   "name": "OpBal",
+   "ref": "{@OpBal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar BalAmt; abs(BalAmt);"
+  },
+  {
+   "name": "OpBalCrDr",
+   "ref": "{@OpBalCrDr}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; NumberVar BalAmt; if BalAmt > 0 then 'Cr' else if BalAmt < 0 then 'Dr';"
+  },
+  {
+   "name": "OpBalPrint",
+   "ref": "{@OpBalPrint}",
+   "type": "BooleanField",
+   "text": "WhilePrintingRecords; booleanVar OpBalPrint; if {AC_DATA.VCH_DATE} >= {@FromDate} then OpBalPrint := True;"
+  },
+  {
+   "name": "OpCredit",
+   "ref": "{@OpCredit}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar BalAmt; if BalAmt > 0 then BalAmt else 0;"
+  },
+  {
+   "name": "OpDays",
+   "ref": "{@OpDays}",
+   "type": "NumberField",
+   "text": "NumberVar Days; Days := {@ToDate} -{AC_DATA.VCH_DATE}; Days;"
+  },
+  {
+   "name": "OpDebit",
+   "ref": "{@OpDebit}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar BalAmt; if BalAmt < 0 then BalAmt else 0;"
+  },
+  {
+   "name": "OpInterest",
+   "ref": "{@OpInterest}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; if {@Opproduct} < 0 then {@Opproduct} * {@pay_int}/({@divider}*100) else {@Opproduct} * {@rec_int}/({@divider}*100)"
+  },
+  {
+   "name": "OpProduct",
+   "ref": "{@OpProduct}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; NumberVar BalAmt; NumberVar Days; BalAmt * Days * -1;"
+  },
+  {
+   "name": "Pay_Int",
+   "ref": "{@Pay_Int}",
+   "type": "NumberField",
+   "text": "{@AcPayInt}"
+  },
+  {
+   "name": "product",
+   "ref": "{@product}",
+   "type": "NumberField",
+   "text": "EvaluateAfter ({@Balance}); whileprintingrecords; NumberVar Product; NumberVar BalAmt; NumberVar Days; Product := BalAmt * {@Days} * -1; Product;"
+  },
+  {
+   "name": "Rec_Int",
+   "ref": "{@Rec_Int}",
+   "type": "NumberField",
+   "text": "{@AcRecInt}"
+  },
+  {
+   "name": "ReportOnDueDate",
+   "ref": "{@ReportOnDueDate}",
+   "type": "BooleanField",
+   "text": "True"
+  },
+  {
+   "name": "reset",
+   "ref": "{@reset}",
+   "type": "BooleanField",
+   "text": "//WhilePrintingRecords; //NumberVar opg ; //NumberVar cpg := Pagenumber; //booleanvar zprn; //zprn=false; //if pagenumber=1 then //( zprn := true; // opg := Pagenumber) //else // if opg <> cpg then //"
+  },
+  {
+   "name": "ResetHeaderPrint",
+   "ref": "{@ResetHeaderPrint}",
+   "type": "BooleanField",
+   "text": "WhilePrintingRecords; BooleanVar HeaderPrint := False;"
+  },
+  {
+   "name": "ResetRunInterest",
+   "ref": "{@ResetRunInterest}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; if not InRepeatedGroupHeader then NumberVar TotIntAmt := 0;"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "\"LEDGER REPORT\""
+  },
+  {
+   "name": "RunOpInterest",
+   "ref": "{@RunOpInterest}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; BooleanVar OpBalPrint; EvaluateAfter ({@OpInterest}); //if {AC_DATA.VCH_DATE} <= {@FromDate} then if Not ({@GroupDate} < {@FromDate} or OpBalPrint = True) then NumberVar TotIntAm"
+  },
+  {
+   "name": "RunTotInterest",
+   "ref": "{@RunTotInterest}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar TotIntAmt; if {@GroupDate} >= {@FromDate} then if OnLastRecord or {@GroupDate} <> Next({@GroupDate}) then TotIntAmt := TotIntAmt + {@Interest}; TotIntAmt;"
+  },
+  {
+   "name": "SrNo",
+   "ref": "{@SrNo}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar SrNo; //if not InRepeatedGroupHeader then //SrNo := SrNo + 1; SrNo;"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "date(2031,03,31)"
+  },
+  {
+   "name": "TotCrdr",
+   "ref": "{@TotCrdr}",
+   "type": "StringField",
+   "text": "if {@BalanceWithInt} > 0 then 'Cr' else if {@BalanceWithInt} < 0 then 'Dr'"
+  },
+  {
+   "name": "TotInterest",
+   "ref": "{@TotInterest}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "TranCrAmt",
+   "ref": "{@TranCrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar TranCrAmt;"
+  },
+  {
+   "name": "TranDrAmt",
+   "ref": "{@TranDrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar TranDrAmt;"
+  },
+  {
+   "name": "TranTotal",
+   "ref": "{@TranTotal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar TranCrAmt; NumberVar TranDrAmt; NumberVar OpCrAmt; NumberVar OpDrAmt; if {AC_DATA.VCH_DATE} >= {@FromDate} then ( TranCrAmt := TranCrAmt + {@CrAmt}; TranDrAmt := TranDr"
+  },
+  {
+   "name": "VchDate",
+   "ref": "{@VchDate}",
+   "type": "DateField",
+   "text": "{AC_DATA.VCH_DATE}"
+  }
+ ],
+ "sectionCount": 8,
+ "objectCount": 45,
+ "formulaCount": 62
+}

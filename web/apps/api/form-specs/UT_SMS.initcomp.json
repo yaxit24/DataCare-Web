@@ -1,0 +1,587 @@
+{
+ "form": "UT_SMS",
+ "controlCount": 56,
+ "byKind": {
+  "textbox": 6,
+  "combo": 5,
+  "panel": 1,
+  "button": 14,
+  "label": 23,
+  "other": 2,
+  "grid": 1,
+  "check": 4
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 7,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "BtnExcel",
+   "Cr"
+  ],
+  "this": [
+   "btnWhatsapp",
+   "_lnkTargetEnglish",
+   "_lnkSourceEnglish",
+   "lblMsgLenth",
+   "BtnTanslat",
+   "_comboTo",
+   "Label16",
+   "_comboFrom",
+   "Label15",
+   "Label14",
+   "TxtUniCode",
+   "lblSmsCount",
+   "chkRetSend",
+   "lblAcGroup",
+   "cboAcGroup",
+   "chkOsAmt",
+   "ChkOnlyMoNo",
+   "Label13",
+   "cboBarth",
+   "Label10",
+   "Label11",
+   "Label12",
+   "Label9",
+   "Label8",
+   "Label7",
+   "tsmstype",
+   "Label6",
+   "btnExlImport",
+   "lblSmsRow",
+   "chkAllRow",
+   "BtnMemb",
+   "BtnAc",
+   "BtnBalance",
+   "BtnSmsSend",
+   "WebBrowser1",
+   "Label4",
+   "tMsg",
+   "Label3",
+   "tMobileNo",
+   "btnOk",
+   "DGV",
+   "Label5",
+   "Label1",
+   "Label2",
+   "CboSmsType",
+   "nFromOs",
+   "nToOs",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "nFromOs",
+   "type": "TextBox",
+   "location": "666,45",
+   "size": "81,22",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nToOs",
+   "type": "TextBox",
+   "location": "666,78",
+   "size": "81,22",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "CboSmsType",
+   "type": "ComboBox",
+   "location": "128,42",
+   "size": "145,24",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Sms Master",
+   "kind": "label"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "8",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "9",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "696,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnExcel",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "11",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "576,44",
+   "size": "84,20",
+   "tabIndex": "15",
+   "text": "From Os >",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "596,78",
+   "size": "64,20",
+   "tabIndex": "16",
+   "text": "To Os <",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "27,42",
+   "size": "94,20",
+   "tabIndex": "19",
+   "text": "Sms Type",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "20,116",
+   "size": "1152,231",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "btnOk",
+   "type": "QButton",
+   "location": "924,42",
+   "size": "117,37",
+   "tabIndex": "1156",
+   "text": "Get List",
+   "kind": "button"
+  },
+  {
+   "name": "tMobileNo",
+   "type": "TextBox",
+   "location": "110,359",
+   "size": "117,22",
+   "tabIndex": "1157",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "20,360",
+   "size": "84,20",
+   "tabIndex": "1158",
+   "text": "Mobile No",
+   "kind": "label"
+  },
+  {
+   "name": "tMsg",
+   "type": "TextBox",
+   "location": "110,389",
+   "size": "586,63",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "16,389",
+   "size": "84,20",
+   "tabIndex": "1162",
+   "text": "English Msg",
+   "kind": "label"
+  },
+  {
+   "name": "WebBrowser1",
+   "type": "WebBrowser",
+   "location": "827,361",
+   "size": "345,63",
+   "tabIndex": "1163",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnSmsSend",
+   "type": "QButton",
+   "location": "709,391",
+   "size": "98,33",
+   "tabIndex": "1164",
+   "text": "Sms Send",
+   "kind": "button"
+  },
+  {
+   "name": "BtnBalance",
+   "type": "QButton",
+   "location": "709,436",
+   "size": "98,33",
+   "tabIndex": "1165",
+   "text": "Balance",
+   "kind": "button"
+  },
+  {
+   "name": "BtnAc",
+   "type": "SimpleButton",
+   "location": "233,358",
+   "size": "35,23",
+   "tabIndex": "1166",
+   "text": "A",
+   "kind": "button"
+  },
+  {
+   "name": "BtnMemb",
+   "type": "SimpleButton",
+   "location": "274,358",
+   "size": "35,23",
+   "tabIndex": "1167",
+   "text": "M",
+   "kind": "button"
+  },
+  {
+   "name": "chkAllRow",
+   "type": "CheckBox",
+   "location": "335,361",
+   "size": "134,19",
+   "tabIndex": "1168",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "lblSmsRow",
+   "type": "Label",
+   "location": "475,361",
+   "size": "94,20",
+   "tabIndex": "1169",
+   "text": "Sms Row",
+   "kind": "label"
+  },
+  {
+   "name": "btnExlImport",
+   "type": "QButton",
+   "location": "1057,42",
+   "size": "115,37",
+   "tabIndex": "1170",
+   "text": "Exel Import",
+   "kind": "button"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "704,479",
+   "size": "74,20",
+   "tabIndex": "1171",
+   "text": "Sms Type",
+   "kind": "label"
+  },
+  {
+   "name": "tsmstype",
+   "type": "TextBox",
+   "location": "783,478",
+   "size": "24,22",
+   "tabIndex": "1172",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "829,463",
+   "size": "150,20",
+   "tabIndex": "1173",
+   "text": "Type  = O  Party Os",
+   "kind": "label"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "829,488",
+   "size": "150,20",
+   "tabIndex": "1174",
+   "text": "Type  = L  Bill Msg",
+   "kind": "label"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "829,514",
+   "size": "150,20",
+   "tabIndex": "1175",
+   "text": "Type  = G  Gold Rate",
+   "kind": "label"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "985,463",
+   "size": "187,20",
+   "tabIndex": "1176",
+   "text": "Type  = A Then Anniversary",
+   "kind": "label"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "985,488",
+   "size": "187,20",
+   "tabIndex": "1177",
+   "text": "Type  = B Then Birthday",
+   "kind": "label"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "985,514",
+   "size": "187,20",
+   "tabIndex": "1178",
+   "text": "Type  = M Then Mobile Os",
+   "kind": "label"
+  },
+  {
+   "name": "cboBarth",
+   "type": "ComboBox",
+   "location": "128,78",
+   "size": "145,24",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label13",
+   "type": "Label",
+   "location": "10,77",
+   "size": "110,20",
+   "tabIndex": "1180",
+   "text": "Barthday Sms",
+   "kind": "label"
+  },
+  {
+   "name": "ChkOnlyMoNo",
+   "type": "CheckBox",
+   "location": "768,43",
+   "size": "121,19",
+   "tabIndex": "1181",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "chkOsAmt",
+   "type": "CheckBox",
+   "location": "768,66",
+   "size": "121,19",
+   "tabIndex": "1182",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "cboAcGroup",
+   "type": "ComboBox",
+   "location": "382,44",
+   "size": "191,24",
+   "tabIndex": "1183",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblAcGroup",
+   "type": "Label",
+   "location": "280,44",
+   "size": "92,20",
+   "tabIndex": "1184",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "chkRetSend",
+   "type": "CheckBox",
+   "location": "768,90",
+   "size": "135,19",
+   "tabIndex": "1185",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "lblSmsCount",
+   "type": "Label",
+   "location": "596,361",
+   "size": "94,20",
+   "tabIndex": "1186",
+   "text": "Sms Count",
+   "kind": "label"
+  },
+  {
+   "name": "TxtUniCode",
+   "type": "TextBox",
+   "location": "110,487",
+   "size": "586,67",
+   "tabIndex": "1187",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label14",
+   "type": "Label",
+   "location": "16,479",
+   "size": "84,46",
+   "tabIndex": "1188",
+   "text": "Multi Language",
+   "kind": "label"
+  },
+  {
+   "name": "_comboFrom",
+   "type": "ComboBox",
+   "location": "110,458",
+   "size": "124,22",
+   "tabIndex": "1189",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "14,458",
+   "size": "90,20",
+   "tabIndex": "1190",
+   "text": "Translate To",
+   "kind": "label"
+  },
+  {
+   "name": "_comboTo",
+   "type": "ComboBox",
+   "location": "457,458",
+   "size": "124,22",
+   "tabIndex": "1191",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label16",
+   "type": "Label",
+   "location": "343,459",
+   "size": "109,20",
+   "tabIndex": "1192",
+   "text": "Translate From",
+   "kind": "label"
+  },
+  {
+   "name": "BtnTanslat",
+   "type": "SimpleButton",
+   "location": "240,458",
+   "size": "96,23",
+   "tabIndex": "1193",
+   "text": "Translate",
+   "kind": "button"
+  },
+  {
+   "name": "lblMsgLenth",
+   "type": "Label",
+   "location": "709,360",
+   "size": "94,20",
+   "tabIndex": "1194",
+   "text": "Msg Lenth",
+   "kind": "label"
+  },
+  {
+   "name": "_lnkSourceEnglish",
+   "type": "LinkLabel",
+   "location": "59,436",
+   "size": "41,13",
+   "tabIndex": "1195",
+   "text": "English",
+   "kind": "label"
+  },
+  {
+   "name": "_lnkTargetEnglish",
+   "type": "LinkLabel",
+   "location": "587,463",
+   "size": "41,13",
+   "tabIndex": "1196",
+   "text": "English",
+   "kind": "label"
+  },
+  {
+   "name": "btnWhatsapp",
+   "type": "QButton",
+   "location": "709,514",
+   "size": "98,33",
+   "tabIndex": "1197",
+   "text": "Whatsapp",
+   "kind": "button"
+  }
+ ]
+}

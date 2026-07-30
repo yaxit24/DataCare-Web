@@ -1,0 +1,246 @@
+{
+ "report": "TempAdd2",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "Detail",
+     "height": 238,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 15,
+       "top": 0,
+       "width": 5457,
+       "height": 238,
+       "dataSource": "{@AcName}"
+      }
+     ]
+    },
+    {
+     "name": "Section6",
+     "kind": "Detail",
+     "height": 220,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 15,
+       "top": 0,
+       "width": 5409,
+       "height": 216,
+       "dataSource": "{@AcAdd}"
+      }
+     ]
+    },
+    {
+     "name": "Section7",
+     "kind": "Detail",
+     "height": 235,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 15,
+       "top": 0,
+       "width": 5409,
+       "height": 216,
+       "dataSource": "{@AcAdd2}"
+      }
+     ]
+    },
+    {
+     "name": "Section8",
+     "kind": "Detail",
+     "height": 220,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 15,
+       "top": 0,
+       "width": 5409,
+       "height": 216,
+       "dataSource": "{@AcAdd3}"
+      }
+     ]
+    },
+    {
+     "name": "Section9",
+     "kind": "Detail",
+     "height": 224,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 15,
+       "top": 0,
+       "width": 5409,
+       "height": 216,
+       "dataSource": "{@AcCity}"
+      }
+     ]
+    },
+    {
+     "name": "Section10",
+     "kind": "Detail",
+     "height": 220,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 15,
+       "top": 0,
+       "width": 5409,
+       "height": 216,
+       "dataSource": "{@AcPhone}"
+      }
+     ]
+    },
+    {
+     "name": "Section11",
+     "kind": "Detail",
+     "height": 220,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 30,
+       "top": 0,
+       "width": 5394,
+       "height": 210,
+       "dataSource": "{@AcMobile}"
+      }
+     ]
+    },
+    {
+     "name": "Section13",
+     "kind": "Detail",
+     "height": 220,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 15,
+       "top": 0,
+       "width": 5409,
+       "height": 216,
+       "dataSource": "{@Mail}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section14",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section15",
+     "kind": "PageFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd",
+   "ref": "{@AcAdd}",
+   "type": "StringField",
+   "text": "{TEMP_ADD.AC_ADD1}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{TEMP_ADD.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd3",
+   "ref": "{@AcAdd3}",
+   "type": "StringField",
+   "text": "{TEMP_ADD.AC_ADD3}"
+  },
+  {
+   "name": "AcCity",
+   "ref": "{@AcCity}",
+   "type": "StringField",
+   "text": "IF {TEMP_ADD.AC_PIN} <> \"\" THEN {TEMP_ADD.AC_CITY} + ' - ' + {TEMP_ADD.AC_PIN} ELSE {TEMP_ADD.AC_CITY}"
+  },
+  {
+   "name": "AcCode",
+   "ref": "{@AcCode}",
+   "type": "StringField",
+   "text": "{TEMP_ADD.AC_CODE}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "IF {TEMP_ADD.AC_MOBILE} <> '' THEN 'MOBILE:' + {TEMP_ADD.AC_MOBILE}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{TEMP_ADD.AC_NAME}"
+  },
+  {
+   "name": "AcPhone",
+   "ref": "{@AcPhone}",
+   "type": "StringField",
+   "text": "IF {TEMP_ADD.AC_PHONE} <> '' THEN 'PHONE:' + {TEMP_ADD.AC_PHONE}"
+  },
+  {
+   "name": "Mail",
+   "ref": "{@Mail}",
+   "type": "StringField",
+   "text": "IF {TEMP_ADD.AC_EMAIL} <> '' THEN 'EMAIL:' + {TEMP_ADD.AC_EMAIL}"
+  }
+ ],
+ "sectionCount": 12,
+ "objectCount": 8,
+ "formulaCount": 9
+}

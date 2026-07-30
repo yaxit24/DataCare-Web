@@ -1,0 +1,736 @@
+{
+ "report": "ItemLedger",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 226,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 8404,
+       "top": 0,
+       "width": 1226,
+       "height": 216,
+       "dataSource": "{@ItOpDr}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1005,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 165,
+       "top": 45,
+       "width": 11025,
+       "height": 305,
+       "dataSource": "{@Company}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 165,
+       "top": 420,
+       "width": 11025,
+       "height": 315,
+       "dataSource": "{@CoAdd1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 165,
+       "top": 735,
+       "width": 11025,
+       "height": 255,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 10680,
+       "top": 735,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 429,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 210,
+       "top": 45,
+       "width": 16470,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 165,
+       "top": 120,
+       "width": 2640,
+       "height": 270,
+       "text": "Item Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 6810,
+       "top": 120,
+       "width": 1371,
+       "height": 285,
+       "text": "Isu Gross"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 8259,
+       "top": 120,
+       "width": 1371,
+       "height": 285,
+       "text": "Isu Net"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 9863,
+       "top": 120,
+       "width": 1297,
+       "height": 285,
+       "text": "Rec Gross"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 11190,
+       "top": 120,
+       "width": 1297,
+       "height": 285,
+       "text": "Rec Net"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 13920,
+       "top": 120,
+       "width": 1297,
+       "height": 285,
+       "text": "Balance Gross"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 15360,
+       "top": 120,
+       "width": 1297,
+       "height": 285,
+       "text": "Balance Net"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 165,
+       "top": 405,
+       "width": 16515,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 330,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 165,
+       "top": 30,
+       "width": 4545,
+       "height": 240,
+       "dataSource": "{@ItemName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 10200,
+       "top": 30,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@ReSetAcBal}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 165,
+       "top": 300,
+       "width": 16515,
+       "height": 0
+      }
+     ]
+    },
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 350,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 4650,
+       "top": 30,
+       "width": 2160,
+       "height": 259,
+       "text": "Opening Balance :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 7273,
+       "top": 30,
+       "width": 947,
+       "height": 216,
+       "dataSource": "{@ItOpIsuGwt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 8471,
+       "top": 30,
+       "width": 1159,
+       "height": 216,
+       "dataSource": "{@ItOpCr}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 10112,
+       "top": 30,
+       "width": 958,
+       "height": 204,
+       "dataSource": "{@AcOpBal}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 14340,
+       "top": 30,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@ResetGrWt}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 765,
+       "top": 300,
+       "width": 15915,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "Detail",
+     "height": 283,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 765,
+       "top": 15,
+       "width": 885,
+       "height": 226,
+       "dataSource": "{MAIN_STOCK.VCH_TYPE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 1725,
+       "top": 15,
+       "width": 750,
+       "height": 226,
+       "dataSource": "{MAIN_STOCK.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 2520,
+       "top": 15,
+       "width": 929,
+       "height": 204,
+       "dataSource": "{MAIN_STOCK.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 3525,
+       "top": 15,
+       "width": 3435,
+       "height": 226,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 4365,
+       "top": 15,
+       "width": 871,
+       "height": 226,
+       "dataSource": "{@OpDrItm}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 5939,
+       "top": 15,
+       "width": 871,
+       "height": 226,
+       "dataSource": "{@OpCrItm}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 7350,
+       "top": 15,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@IsuGrWt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 8414,
+       "top": 15,
+       "width": 1216,
+       "height": 204,
+       "dataSource": "{@DrRs}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 10245,
+       "top": 15,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@RecGrwt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 11344,
+       "top": 15,
+       "width": 1151,
+       "height": 204,
+       "dataSource": "{@CrRs}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 13999,
+       "top": 15,
+       "width": 1211,
+       "height": 204,
+       "dataSource": "{@AcBalanceGwt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 15360,
+       "top": 15,
+       "width": 1304,
+       "height": 204,
+       "dataSource": "{@AcBalance}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 765,
+       "top": 240,
+       "width": 15915,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 318,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 4650,
+       "top": 0,
+       "width": 2160,
+       "height": 259,
+       "text": "Closing Balance :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 7350,
+       "top": 0,
+       "width": 890,
+       "height": 216,
+       "dataSource": "Sum ({@IsuGrWt}, {MAIN_STOCK.IT_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 8403,
+       "top": 0,
+       "width": 1227,
+       "height": 216,
+       "dataSource": "Sum ({@DrRs}, {MAIN_STOCK.IT_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 10180,
+       "top": 0,
+       "width": 890,
+       "height": 216,
+       "dataSource": "Sum ({@RecGrwt}, {MAIN_STOCK.IT_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 11317,
+       "top": 0,
+       "width": 1178,
+       "height": 216,
+       "dataSource": "Sum ({@CrRs}, {MAIN_STOCK.IT_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 15360,
+       "top": 0,
+       "width": 1315,
+       "height": 216,
+       "dataSource": "{@ItemClosing}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "ReportFooter",
+     "height": 360,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 8470,
+       "top": 0,
+       "width": 1160,
+       "height": 216,
+       "dataSource": "Sum ({@CrRs})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "PageFooter",
+     "height": 240,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "AcBalance",
+   "ref": "{@AcBalance}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar AcBal; AcBal := AcBal + {@CrRs} - {@DrRs}; AcBal;"
+  },
+  {
+   "name": "AcBalanceGwt",
+   "ref": "{@AcBalanceGwt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar AcBala; AcBala := AcBala + ({@RecGrwt} - {@IsuGrWt}) ; AcBala;"
+  },
+  {
+   "name": "AcOpBal",
+   "ref": "{@AcOpBal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar AcBal := {@ItOpCr}-{@ItOpDr};"
+  },
+  {
+   "name": "AcOpGold",
+   "ref": "{@AcOpGold}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "AcWt",
+   "ref": "{@AcWt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "CoAdd1",
+   "ref": "{@CoAdd1}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1} + ' '+{CO_MAST.CO_ADD2} + ' ' + {CO_MAST.CO_CITY}"
+  },
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CrBalRs",
+   "ref": "{@CrBalRs}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} >= {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='+' then {MAIN_STOCK.ITM_GWT}"
+  },
+  {
+   "name": "CrGold",
+   "ref": "{@CrGold}",
+   "type": "UnknownField",
+   "text": "if {MAIN_STOCK.IT_TYPE} = 'G' AND {MAIN_STOCK.ITM_SIGN} = '+' THEN {MAIN_STOCK.FINE_WT} else 0"
+  },
+  {
+   "name": "CrRs",
+   "ref": "{@CrRs}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} >= {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='+' then {MAIN_STOCK.ITM_NWT}"
+  },
+  {
+   "name": "CrSl",
+   "ref": "{@CrSl}",
+   "type": "UnknownField",
+   "text": "if {MAIN_STOCK.IT_TYPE} = 'S' AND {MAIN_STOCK.ITM_SIGN} = '+' THEN {MAIN_STOCK.FINE_WT}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DrBalRs",
+   "ref": "{@DrBalRs}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} >= {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='-' then {MAIN_STOCK.ITM_GWT}"
+  },
+  {
+   "name": "DrGold",
+   "ref": "{@DrGold}",
+   "type": "UnknownField",
+   "text": "if {MAIN_STOCK.IT_TYPE} = 'G' AND {MAIN_STOCK.ITM_SIGN} = '-' THEN {MAIN_STOCK.FINE_WT} else 0"
+  },
+  {
+   "name": "DrRs",
+   "ref": "{@DrRs}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} >= {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='-' then {MAIN_STOCK.ITM_NWT}"
+  },
+  {
+   "name": "DrSl",
+   "ref": "{@DrSl}",
+   "type": "UnknownField",
+   "text": "if {MAIN_STOCK.IT_TYPE} = 'S' AND {MAIN_STOCK.ITM_SIGN} = '-' THEN {MAIN_STOCK.FINE_WT}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2012,01,01)"
+  },
+  {
+   "name": "GoldBalance",
+   "ref": "{@GoldBalance}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar GoldBal; GoldBal := GoldBal + {@CrGold} - {@DrGold}; GoldBal;"
+  },
+  {
+   "name": "GoldCrDr",
+   "ref": "{@GoldCrDr}",
+   "type": "StringField",
+   "text": "if {@GoldBalance} < 0 then 'Dr' else 'Cr'"
+  },
+  {
+   "name": "GoldOpBal",
+   "ref": "{@GoldOpBal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar GoldBal := {@AcOpGold} ;"
+  },
+  {
+   "name": "IsuGrWt",
+   "ref": "{@IsuGrWt}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} >= {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='-' then {MAIN_STOCK.ITM_GWT}"
+  },
+  {
+   "name": "ItemClosing",
+   "ref": "{@ItemClosing}",
+   "type": "NumberField",
+   "text": "({@ItOpCr}+Sum ({@CrRs}, {MAIN_STOCK.IT_CODE}))-({@ItOpDr}+Sum ({@DrRs}, {MAIN_STOCK.IT_CODE}))"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "StringField",
+   "text": "{ITEM_MAST.IT_NAME}"
+  },
+  {
+   "name": "ItOpCr",
+   "ref": "{@ItOpCr}",
+   "type": "NumberField",
+   "text": "IF Sum ({@OpDrItm}, {MAIN_STOCK.IT_CODE}) < Sum ({@OpCrItm}, {MAIN_STOCK.IT_CODE}) THEN Sum ({@OpCrItm}, {MAIN_STOCK.IT_CODE}) - Sum ({@OpDrItm}, {MAIN_STOCK.IT_CODE}) ELSE 0"
+  },
+  {
+   "name": "ItOpDr",
+   "ref": "{@ItOpDr}",
+   "type": "NumberField",
+   "text": "IF Sum ({@OpDrItm}, {MAIN_STOCK.IT_CODE}) > Sum ({@OpCrItm}, {MAIN_STOCK.IT_CODE}) THEN Sum ({@OpDrItm}, {MAIN_STOCK.IT_CODE})-Sum ({@OpCrItm}, {MAIN_STOCK.IT_CODE}) ELSE 0"
+  },
+  {
+   "name": "ItOpIsuGwt",
+   "ref": "{@ItOpIsuGwt}",
+   "type": "NumberField",
+   "text": "IF Sum ({@OpDrGwt}, {MAIN_STOCK.IT_CODE}) < Sum ({@OpCrGwt}, {MAIN_STOCK.IT_CODE}) THEN Sum ({@OpCrGwt}, {MAIN_STOCK.IT_CODE}) - Sum ({@OpDrGwt}, {MAIN_STOCK.IT_CODE}) ELSE 0"
+  },
+  {
+   "name": "OpCrGwt",
+   "ref": "{@OpCrGwt}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} < {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='+' then {MAIN_STOCK.ITM_GWT}"
+  },
+  {
+   "name": "OpCrItm",
+   "ref": "{@OpCrItm}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} < {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='+' then {MAIN_STOCK.ITM_NWT}"
+  },
+  {
+   "name": "OpDrGwt",
+   "ref": "{@OpDrGwt}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} < {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='-' then {MAIN_STOCK.ITM_GWT}"
+  },
+  {
+   "name": "OpDrItm",
+   "ref": "{@OpDrItm}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} < {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='-' then {MAIN_STOCK.ITM_NWT}"
+  },
+  {
+   "name": "RecGrwt",
+   "ref": "{@RecGrwt}",
+   "type": "NumberField",
+   "text": "if {MAIN_STOCK.VCH_DATE} >= {@FromDate} then if {MAIN_STOCK.ITM_SIGN} ='+' then {MAIN_STOCK.ITM_GWT}"
+  },
+  {
+   "name": "ReSetAcBal",
+   "ref": "{@ReSetAcBal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar GoldBala := 0 ;"
+  },
+  {
+   "name": "ReSetGoldBal",
+   "ref": "{@ReSetGoldBal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar GoldBal := 0 ;"
+  },
+  {
+   "name": "ResetGrWt",
+   "ref": "{@ResetGrWt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar AcBala := 0 ;"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "\"TRIAL BALANCE AS ON DATE\""
+  },
+  {
+   "name": "RsCrDr",
+   "ref": "{@RsCrDr}",
+   "type": "StringField",
+   "text": "if {@AcBalance} < 0 then 'Dr' else 'Cr'"
+  },
+  {
+   "name": "Silver",
+   "ref": "{@Silver}",
+   "type": "UnknownField",
+   "text": "Sum ({@DrSl}, {MAIN_STOCK.AC_CODE}) - Sum ({@CrSl}, {MAIN_STOCK.AC_CODE})"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "date(2012,03,03)"
+  },
+  {
+   "name": "Weight",
+   "ref": "{@Weight}",
+   "type": "NumberField",
+   "text": ""
+  }
+ ],
+ "sectionCount": 9,
+ "objectCount": 43,
+ "formulaCount": 40
+}

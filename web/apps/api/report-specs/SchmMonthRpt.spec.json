@@ -1,0 +1,128 @@
+{
+ "report": "SchmMonthRpt",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 510,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "PageHeader",
+     "height": 1050,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 0,
+       "top": 0,
+       "width": 11040,
+       "height": 345,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 0,
+       "top": 405,
+       "width": 11505,
+       "height": 270,
+       "dataSource": "{@co_add}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 0,
+       "top": 690,
+       "width": 11505,
+       "height": 240,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 10060,
+       "top": 690,
+       "width": 980,
+       "height": 228,
+       "dataSource": "PageNumber"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 130,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 1272,
+     "objects": [
+      {
+       "type": "CrossTabObject",
+       "name": "CrossTab1",
+       "left": 240,
+       "top": 0,
+       "width": 4888,
+       "height": 1234
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageFooter",
+     "height": 135,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "co_add",
+   "ref": "{@co_add}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+\" \"+{CO_MAST.CO_ADD2}+\" \"+{CO_MAST.CO_ADD3}+\" \"+{CO_MAST.CO_CITY}+\" Ph-\"+{CO_MAST.CO_PHONE}"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'STOCK REPORT '"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 5,
+ "formulaCount": 2
+}

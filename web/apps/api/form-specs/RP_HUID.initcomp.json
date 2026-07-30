@@ -1,0 +1,307 @@
+{
+ "form": "RP_HUID",
+ "controlCount": 28,
+ "byKind": {
+  "button": 8,
+  "masked": 2,
+  "other": 2,
+  "combo": 4,
+  "label": 8,
+  "textbox": 2,
+  "grid": 1,
+  "panel": 1
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "this": [
+   "Label8",
+   "tAcCode",
+   "cboHuId",
+   "Label6",
+   "Label5",
+   "mToDt",
+   "mFromDt",
+   "cboGroup",
+   "Label4",
+   "Label2",
+   "tTagNo",
+   "cboProduct",
+   "Label1",
+   "cboItemTyp",
+   "Label3",
+   "DGV",
+   "BtnIn",
+   "BtnOut",
+   "BtnStock",
+   "tSerchAll",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "78,44",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "160,44",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "tSerchAll",
+   "type": "SearchControl",
+   "location": "78,82",
+   "size": "158,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "329,44",
+   "size": "103,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "cboProduct",
+   "type": "ComboBox",
+   "location": "509,44",
+   "size": "156,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "cboGroup",
+   "type": "ComboBox",
+   "location": "509,82",
+   "size": "156,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Tag Stock With HuId",
+   "kind": "label"
+  },
+  {
+   "name": "tTagNo",
+   "type": "TextBox",
+   "location": "738,44",
+   "size": "88,22",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "DGV",
+   "type": "GridControl",
+   "location": "12,116",
+   "size": "1161,441",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnStock",
+   "type": "QButton",
+   "location": "1008,82",
+   "size": "143,37",
+   "tabIndex": "7",
+   "text": "&Stock Tag",
+   "kind": "button"
+  },
+  {
+   "name": "BtnIn",
+   "type": "QButton",
+   "location": "683,82",
+   "size": "143,37",
+   "tabIndex": "8",
+   "text": "&In Tag",
+   "kind": "button"
+  },
+  {
+   "name": "BtnOut",
+   "type": "QButton",
+   "location": "846,82",
+   "size": "143,37",
+   "tabIndex": "9",
+   "text": "&Out Tag",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "248,46",
+   "size": "77,20",
+   "tabIndex": "124",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "439,46",
+   "size": "64,20",
+   "tabIndex": "126",
+   "text": "Product",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "679,44",
+   "size": "53,20",
+   "tabIndex": "128",
+   "text": "TagNo",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "450,81",
+   "size": "53,20",
+   "tabIndex": "130",
+   "text": "Group",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "29,46",
+   "size": "44,20",
+   "tabIndex": "133",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "cboHuId",
+   "type": "ComboBox",
+   "location": "329,82",
+   "size": "103,22",
+   "tabIndex": "134",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "244,82",
+   "size": "81,20",
+   "tabIndex": "135",
+   "text": "HuId Type",
+   "kind": "label"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "936,45",
+   "size": "83,22",
+   "tabIndex": "1180",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "859,45",
+   "size": "69,20",
+   "tabIndex": "1181",
+   "text": "AcCode",
+   "kind": "label"
+  }
+ ]
+}

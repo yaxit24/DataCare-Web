@@ -1,0 +1,640 @@
+{
+ "report": "AcFineGold",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1005,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 120,
+       "top": 45,
+       "width": 10920,
+       "height": 305,
+       "dataSource": "{@Company}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 120,
+       "top": 420,
+       "width": 10920,
+       "height": 315,
+       "dataSource": "{@CoAdd1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 120,
+       "top": 735,
+       "width": 10920,
+       "height": 255,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 10650,
+       "top": 735,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 405,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 240,
+       "top": 45,
+       "width": 11040,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 1605,
+       "top": 120,
+       "width": 1700,
+       "height": 270,
+       "text": "AcCode"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 2625,
+       "top": 120,
+       "width": 1700,
+       "height": 270,
+       "text": "Party Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 7537,
+       "top": 120,
+       "width": 1223,
+       "height": 285,
+       "text": "Gold Dr Wt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 8902,
+       "top": 120,
+       "width": 1223,
+       "height": 285,
+       "text": "Gold Cr Wt"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 240,
+       "top": 405,
+       "width": 10080,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 471,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 420,
+       "top": 180,
+       "width": 540,
+       "height": 276,
+       "dataSource": "{AC_GROUP.AC_GR}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 960,
+       "top": 180,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "{AC_GROUP.AC_GR_NAME}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line7",
+       "left": 240,
+       "top": 420,
+       "width": 10080,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area10",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "GroupHeader",
+     "height": 226,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 223,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 7537,
+       "top": 0,
+       "width": 1223,
+       "height": 204,
+       "dataSource": "Sum ({@DrGold}, {AC_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 8902,
+       "top": 0,
+       "width": 1223,
+       "height": 204,
+       "dataSource": "Sum ({@CrGold}, {AC_DATA.AC_CODE})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "Detail",
+     "height": 240,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 7537,
+       "top": 0,
+       "width": 1223,
+       "height": 204,
+       "dataSource": "{@DrGold}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 8902,
+       "top": 0,
+       "width": 1223,
+       "height": 204,
+       "dataSource": "{@CrGold}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 273,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 1605,
+       "top": 0,
+       "width": 915,
+       "height": 226,
+       "dataSource": "{AC_DATA.AC_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 2625,
+       "top": 0,
+       "width": 4800,
+       "height": 240,
+       "dataSource": "{@AcName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 7538,
+       "top": 0,
+       "width": 1222,
+       "height": 204,
+       "dataSource": "{@PartyDrGold}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 8902,
+       "top": 0,
+       "width": 1223,
+       "height": 204,
+       "dataSource": "{@PartyCrGold}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 1440,
+       "top": 255,
+       "width": 8880,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area11",
+   "sections": [
+    {
+     "name": "Section13",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupFooter",
+     "height": 315,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 7537,
+       "top": 60,
+       "width": 1223,
+       "height": 204,
+       "dataSource": "Sum ({@DrGold}, {AC_GROUP.AC_GR})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 8902,
+       "top": 60,
+       "width": 1223,
+       "height": 204,
+       "dataSource": "Sum ({@CrGold}, {AC_GROUP.AC_GR})"
+      }
+     ]
+    },
+    {
+     "name": "Section10",
+     "kind": "GroupFooter",
+     "height": 415,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 720,
+       "top": 0,
+       "width": 10537,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field35",
+       "left": 7537,
+       "top": 75,
+       "width": 1223,
+       "height": 216,
+       "dataSource": "{@GroupDrGold}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field36",
+       "left": 8902,
+       "top": 75,
+       "width": 1223,
+       "height": 216,
+       "dataSource": "{@GroupCrGold}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "ReportFooter",
+     "height": 403,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 3360,
+       "top": 0,
+       "width": 6960,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 5400,
+       "top": 105,
+       "width": 1700,
+       "height": 270,
+       "text": "Grand Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 7560,
+       "top": 105,
+       "width": 1200,
+       "height": 204,
+       "dataSource": "{@DrWt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 8880,
+       "top": 105,
+       "width": 1245,
+       "height": 204,
+       "dataSource": "{@CrWt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "PageFooter",
+     "height": 240,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "AcWt",
+   "ref": "{@AcWt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "Amount",
+   "ref": "{@Amount}",
+   "type": "NumberField",
+   "text": "Sum ({@DrRs}, {AC_DATA.AC_CODE}) - Sum ({@CrRs}, {AC_DATA.AC_CODE})"
+  },
+  {
+   "name": "CoAdd1",
+   "ref": "{@CoAdd1}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1} + ' '+{CO_MAST.CO_ADD2} + ' ' + {CO_MAST.CO_CITY}"
+  },
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CrGold",
+   "ref": "{@CrGold}",
+   "type": "NumberField",
+   "text": "if {AC_DATA.IT_TYPE} = 'G' AND {AC_DATA.SIGN} = '+' THEN {AC_DATA.FINE_WT}"
+  },
+  {
+   "name": "CrRs",
+   "ref": "{@CrRs}",
+   "type": "NumberField",
+   "text": "{AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "CrSl",
+   "ref": "{@CrSl}",
+   "type": "NumberField",
+   "text": "if {AC_DATA.IT_TYPE} = 'S' AND {AC_DATA.SIGN} = '+' THEN {AC_DATA.FINE_WT}"
+  },
+  {
+   "name": "CrWt",
+   "ref": "{@CrWt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DrGold",
+   "ref": "{@DrGold}",
+   "type": "NumberField",
+   "text": "if {AC_DATA.IT_TYPE} = 'G' AND {AC_DATA.SIGN} = '-' THEN {AC_DATA.FINE_WT}"
+  },
+  {
+   "name": "DrRs",
+   "ref": "{@DrRs}",
+   "type": "NumberField",
+   "text": "{AC_DATA.DR_AMT}"
+  },
+  {
+   "name": "DrSl",
+   "ref": "{@DrSl}",
+   "type": "NumberField",
+   "text": "if {AC_DATA.IT_TYPE} = 'S' AND {AC_DATA.SIGN} = '-' THEN {AC_DATA.FINE_WT}"
+  },
+  {
+   "name": "DrWt",
+   "ref": "{@DrWt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "Gold",
+   "ref": "{@Gold}",
+   "type": "NumberField",
+   "text": "round(Sum ({@DrGold}, {AC_DATA.AC_CODE}),3) - round(Sum ({@CrGold}, {AC_DATA.AC_CODE}),3)"
+  },
+  {
+   "name": "GroupAmt",
+   "ref": "{@GroupAmt}",
+   "type": "NumberField",
+   "text": "Sum ({@DrRs}, {AC_GROUP.AC_GR})-Sum ({@CrRs}, {AC_GROUP.AC_GR})"
+  },
+  {
+   "name": "GroupCrGold",
+   "ref": "{@GroupCrGold}",
+   "type": "NumberField",
+   "text": "if {@GroupGold} < 0 then -{@GroupGold}"
+  },
+  {
+   "name": "GroupCrRs",
+   "ref": "{@GroupCrRs}",
+   "type": "NumberField",
+   "text": "if {@GroupAmt} < 0 then -{@GroupAmt}"
+  },
+  {
+   "name": "GroupCrSl",
+   "ref": "{@GroupCrSl}",
+   "type": "NumberField",
+   "text": "if {@GroupSl} < 0 then -{@GroupSl}"
+  },
+  {
+   "name": "GroupDrGold",
+   "ref": "{@GroupDrGold}",
+   "type": "NumberField",
+   "text": "if {@GroupGold} > 0 then {@GroupGold}"
+  },
+  {
+   "name": "GroupDrRs",
+   "ref": "{@GroupDrRs}",
+   "type": "NumberField",
+   "text": "if {@GroupAmt} > 0 then {@GroupAmt}"
+  },
+  {
+   "name": "GroupDrSl",
+   "ref": "{@GroupDrSl}",
+   "type": "NumberField",
+   "text": "if {@GroupSl} > 0 then {@GroupSl}"
+  },
+  {
+   "name": "GroupGold",
+   "ref": "{@GroupGold}",
+   "type": "NumberField",
+   "text": "Sum ({@DrGold}, {AC_GROUP.AC_GR})-Sum ({@CrGold}, {AC_GROUP.AC_GR})"
+  },
+  {
+   "name": "GroupSl",
+   "ref": "{@GroupSl}",
+   "type": "NumberField",
+   "text": "Sum ({@DrSl}, {AC_GROUP.AC_GR})-Sum ({@CrSl}, {AC_GROUP.AC_GR})"
+  },
+  {
+   "name": "PartyCrGold",
+   "ref": "{@PartyCrGold}",
+   "type": "NumberField",
+   "text": "if {@Gold} < 0 then -{@Gold}"
+  },
+  {
+   "name": "PartyCrRs",
+   "ref": "{@PartyCrRs}",
+   "type": "NumberField",
+   "text": "if {@Amount} < 0 then -{@Amount}"
+  },
+  {
+   "name": "PartyCrSl",
+   "ref": "{@PartyCrSl}",
+   "type": "NumberField",
+   "text": "if {@Silver} < 0 then -{@Silver}"
+  },
+  {
+   "name": "PartyDrGold",
+   "ref": "{@PartyDrGold}",
+   "type": "NumberField",
+   "text": "if {@Gold} > 0 then {@Gold}"
+  },
+  {
+   "name": "PartyDrRs",
+   "ref": "{@PartyDrRs}",
+   "type": "NumberField",
+   "text": "if {@Amount} > 0 then {@Amount}"
+  },
+  {
+   "name": "PartyDrSl",
+   "ref": "{@PartyDrSl}",
+   "type": "NumberField",
+   "text": "if {@Silver} > 0 then {@Silver}"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "\"TRIAL BALANCE AS ON DATE\""
+  },
+  {
+   "name": "Silver",
+   "ref": "{@Silver}",
+   "type": "NumberField",
+   "text": "Sum ({@DrSl}, {AC_DATA.AC_CODE}) - Sum ({@CrSl}, {AC_DATA.AC_CODE})"
+  },
+  {
+   "name": "Weight",
+   "ref": "{@Weight}",
+   "type": "NumberField",
+   "text": ""
+  }
+ ],
+ "sectionCount": 13,
+ "objectCount": 31,
+ "formulaCount": 34
+}

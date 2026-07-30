@@ -1,0 +1,699 @@
+{
+ "report": "ProfitLossHz",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 225,
+     "objects": []
+    },
+    {
+     "name": "Section2",
+     "kind": "ReportHeader",
+     "height": 435,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 45,
+       "top": 120,
+       "width": 3044,
+       "height": 200,
+       "text": "INCOME"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 30,
+       "top": 375,
+       "width": 5250,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "GroupHeader",
+     "height": 395,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 6600,
+       "top": 0,
+       "width": 720,
+       "height": 200,
+       "dataSource": "{@FirstGrCode}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 45,
+       "top": 120,
+       "width": 457,
+       "height": 200,
+       "dataSource": "{AC_GROUP.AC_GR}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 480,
+       "top": 120,
+       "width": 3840,
+       "height": 200,
+       "dataSource": "{AC_GROUP.AC_GR_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 3248,
+       "top": 120,
+       "width": 2032,
+       "height": 221,
+       "dataSource": "Sum ({@AcAmt}, {@gr1})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 45,
+       "top": 345,
+       "width": 3195,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupHeader",
+     "height": 270,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 480,
+       "top": 30,
+       "width": 3360,
+       "height": 180,
+       "dataSource": "{@AcName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 3370,
+       "top": 30,
+       "width": 1910,
+       "height": 204,
+       "dataSource": "Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "Detail",
+     "height": 255,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 3240,
+       "top": 15,
+       "width": 2033,
+       "height": 226,
+       "dataSource": "{@AcAmt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "GroupFooter",
+     "height": 223,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupFooter",
+     "height": 230,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "ReportFooter",
+     "height": 420,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 45,
+       "top": 30,
+       "width": 5235,
+       "height": 0
+      }
+     ]
+    },
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 600,
+     "objects": []
+    },
+    {
+     "name": "Section13",
+     "kind": "ReportFooter",
+     "height": 180,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.CR_AMT} - {LEDR_AC_DATA.DR_AMT}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "ADD",
+   "ref": "{@ADD}",
+   "type": "UnknownField",
+   "text": "{COMP_PARM.CO_ADD1}+\" \"+{COMP_PARM.CO_ADD2}+\" \"+{COMP_PARM.CO_ADD3}+\" \"+{COMP_PARM.CO_CITY}"
+  },
+  {
+   "name": "CR_AMT",
+   "ref": "{@CR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DR_AMT",
+   "ref": "{@DR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "FirstGrCode",
+   "ref": "{@FirstGrCode}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; StringVar FirstGrCode := {AC_GROUP.AC_GR};"
+  },
+  {
+   "name": "gr1",
+   "ref": "{@gr1}",
+   "type": "StringField",
+   "text": "left({AC_GROUP.AC_GR},2)"
+  },
+  {
+   "name": "SR_NO",
+   "ref": "{@SR_NO}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; numberVar srno := numberVar srno+1;"
+  },
+  {
+   "name": "TotalAmt",
+   "ref": "{@TotalAmt}",
+   "type": "NumberField",
+   "text": "Sum ({LEDR_AC_DATA.CR_AMT})-Sum ({LEDR_AC_DATA.DR_AMT})"
+  },
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "ADD",
+   "ref": "{@ADD}",
+   "type": "UnknownField",
+   "text": "{COMP_PARM.CO_ADD1}+\" \"+{COMP_PARM.CO_ADD2}+\" \"+{COMP_PARM.CO_ADD3}+\" \"+{COMP_PARM.CO_CITY}"
+  },
+  {
+   "name": "CR_AMT",
+   "ref": "{@CR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DR_AMT",
+   "ref": "{@DR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "FirstGrCode",
+   "ref": "{@FirstGrCode}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; StringVar FirstGrCode := {AC_GROUP.AC_GR};"
+  },
+  {
+   "name": "gr1",
+   "ref": "{@gr1}",
+   "type": "StringField",
+   "text": "left({AC_GROUP.AC_GR},2)"
+  },
+  {
+   "name": "SR_NO",
+   "ref": "{@SR_NO}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; numberVar srno := numberVar srno+1;"
+  },
+  {
+   "name": "TotalAmt",
+   "ref": "{@TotalAmt}",
+   "type": "NumberField",
+   "text": "Sum ({LEDR_AC_DATA.CR_AMT})-Sum ({LEDR_AC_DATA.DR_AMT})"
+  },
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.DR_AMT}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "ADD",
+   "ref": "{@ADD}",
+   "type": "UnknownField",
+   "text": "{COMP_PARM.CO_ADD1}+\" \"+{COMP_PARM.CO_ADD2}+\" \"+{COMP_PARM.CO_ADD3}+\" \"+{COMP_PARM.CO_CITY}"
+  },
+  {
+   "name": "CR_AMT",
+   "ref": "{@CR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DR_AMT",
+   "ref": "{@DR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "FirstGrCode",
+   "ref": "{@FirstGrCode}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; StringVar FirstGrCode := {AC_GROUP.AC_GR};"
+  },
+  {
+   "name": "gr1",
+   "ref": "{@gr1}",
+   "type": "StringField",
+   "text": "left({AC_GROUP.AC_GR},2)"
+  },
+  {
+   "name": "SR_NO",
+   "ref": "{@SR_NO}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; numberVar srno := numberVar srno+1;"
+  },
+  {
+   "name": "TotalAmt",
+   "ref": "{@TotalAmt}",
+   "type": "NumberField",
+   "text": "Sum ({LEDR_AC_DATA.CR_AMT})-Sum ({LEDR_AC_DATA.DR_AMT})"
+  },
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.DR_AMT}-{LEDR_AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "ADD",
+   "ref": "{@ADD}",
+   "type": "UnknownField",
+   "text": "{COMP_PARM.CO_ADD1}+\" \"+{COMP_PARM.CO_ADD2}+\" \"+{COMP_PARM.CO_ADD3}+\" \"+{COMP_PARM.CO_CITY}"
+  },
+  {
+   "name": "CR_AMT",
+   "ref": "{@CR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DR_AMT",
+   "ref": "{@DR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "FirstGrCode",
+   "ref": "{@FirstGrCode}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; StringVar FirstGrCode := {AC_GROUP.AC_GR};"
+  },
+  {
+   "name": "gr1",
+   "ref": "{@gr1}",
+   "type": "StringField",
+   "text": "left({AC_GROUP.AC_GR},2)"
+  },
+  {
+   "name": "SR_NO",
+   "ref": "{@SR_NO}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; numberVar srno := numberVar srno+1;"
+  },
+  {
+   "name": "TotalAmt",
+   "ref": "{@TotalAmt}",
+   "type": "NumberField",
+   "text": "Sum ({LEDR_AC_DATA.DR_AMT})-Sum ({LEDR_AC_DATA.CR_AMT})"
+  },
+  {
+   "name": "Amount",
+   "ref": "{@Amount}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.DR_AMT}-{LEDR_AC_DATA.cR_AMT}"
+  },
+  {
+   "name": "Clprofitlos",
+   "ref": "{@Clprofitlos}",
+   "type": "StringField",
+   "text": "if {@Group1}='M' then if {@CrdAmt}< 0 then \"GROSS LOSS :\" else \"GROSS PROFIT :\""
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+\" \"+{CO_MAST.CO_ADD2}+\" \"+{CO_MAST.CO_ADD3}+\" \"+{CO_MAST.CO_CITY}+\" \"+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CrAmt",
+   "ref": "{@CrAmt}",
+   "type": "NumberField",
+   "text": "if Sum ({@Amount}, {LEDR_AC_DATA.AC_CODE}) <=0 then abs(Sum ({@Amount}, {LEDR_AC_DATA.AC_CODE}))"
+  },
+  {
+   "name": "CrdAmt",
+   "ref": "{@CrdAmt}",
+   "type": "CurrencyField",
+   "text": "if {@Group1}='T' then currencyVar amt := Sum ({@Credite}, {@Group1})-Sum ({@debit}, {@Group1}) else currencyVar amt;"
+  },
+  {
+   "name": "Credite",
+   "ref": "{@Credite}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.cR_AMT}"
+  },
+  {
+   "name": "CreditTot",
+   "ref": "{@CreditTot}",
+   "type": "CurrencyField",
+   "text": "currencyVar caramt :=0 ; if {@Group1}='M' then caramt:=abs({@CrdAmt}); if {@GrossProfit} < 0 then IF caramt <0 THEN ABS({@GrossProfit})+{@TradingSumCr} + {@CrdAmt} ELSE ABS({@GrossProfit})+{@TradingSu"
+  },
+  {
+   "name": "CrTot",
+   "ref": "{@CrTot}",
+   "type": "CurrencyField",
+   "text": "currencyVar caramt :=0 ; if {@Group1}='M' then caramt:=abs({@CrdAmt}); if {@GrossProfit} > 0 then ABS({@GrossProfit})+{@TradingSumDr} ELSE if {@CrdAmt}>0 then {@TradingSumDr} else {@TradingSumDr}+cara"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "debit",
+   "ref": "{@debit}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.DR_AMT}"
+  },
+  {
+   "name": "DebitTot",
+   "ref": "{@DebitTot}",
+   "type": "CurrencyField",
+   "text": "currencyVar caramt :=0 ; if {@Group1}='M' then caramt:=abs({@CrdAmt}); if {@GrossProfit} > 0 then ABS({@GrossProfit})+{@TradingSumDr} ELSE if {@CrdAmt}>0 then {@TradingSumDr} else {@TradingSumDr}+cara"
+  },
+  {
+   "name": "DrAmt",
+   "ref": "{@DrAmt}",
+   "type": "NumberField",
+   "text": "if Sum ({@Amount}, {LEDR_AC_DATA.AC_CODE}) > 0 then Sum ({@Amount}, {LEDR_AC_DATA.AC_CODE})"
+  },
+  {
+   "name": "grcrtot",
+   "ref": "{@grcrtot}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar grcr_amt"
+  },
+  {
+   "name": "grdrtot",
+   "ref": "{@grdrtot}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar grdr_amt"
+  },
+  {
+   "name": "GrossProfit",
+   "ref": "{@GrossProfit}",
+   "type": "CurrencyField",
+   "text": "IF {@Group1}='T' THEN Sum ({@Credite}, {@Group1})-Sum ({@debit}, {@Group1}) ELSE IF {@CrdAmt}>0 THEN Sum ({@Credite}, {@Group1})-Sum ({@debit}, {@Group1})+{@CrdAmt} ELSE (Sum ({@Credite}, {@Group1})-S"
+  },
+  {
+   "name": "Group1",
+   "ref": "{@Group1}",
+   "type": "StringField",
+   "text": "if {AC_GROUP.AC_MAIN_GR} <'5' then \"T\" else \"M\""
+  },
+  {
+   "name": "GroupCr",
+   "ref": "{@GroupCr}",
+   "type": "CurrencyField",
+   "text": "if {@GrossProfit} < 0 then abs({@GrossProfit})"
+  },
+  {
+   "name": "GroupDr",
+   "ref": "{@GroupDr}",
+   "type": "CurrencyField",
+   "text": "if {@GrossProfit} > 0 then abs({@GrossProfit})"
+  },
+  {
+   "name": "GroupRunTotdr",
+   "ref": "{@GroupRunTotdr}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar grdr_amt := currencyVar grdr_amt +{@DrAmt};"
+  },
+  {
+   "name": "GrRunTot",
+   "ref": "{@GrRunTot}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar grcr_amt := currencyVar grcr_amt +{@CrAmt};"
+  },
+  {
+   "name": "GrSign",
+   "ref": "{@GrSign}",
+   "type": "StringField",
+   "text": "if {@GrossProfit}>=0 then \"Cr\" else \"Dr\""
+  },
+  {
+   "name": "NClosing",
+   "ref": "{@NClosing}",
+   "type": "CurrencyField",
+   "text": "if {@CrdAmt}>=0 and {@Group1}='M' then {@CrdAmt}"
+  },
+  {
+   "name": "NDrClosing",
+   "ref": "{@NDrClosing}",
+   "type": "CurrencyField",
+   "text": "if {@CrdAmt}<0 and {@Group1}='M' then abs({@CrdAmt})"
+  },
+  {
+   "name": "net_text",
+   "ref": "{@net_text}",
+   "type": "StringField",
+   "text": "if {@Group1} = 'M' then \"NET PROFIT ::\""
+  },
+  {
+   "name": "NetAmt",
+   "ref": "{@NetAmt}",
+   "type": "CurrencyField",
+   "text": "if {@Group1} = 'M' then {@GrossProfit}+{@NClosing}-{@NDrClosing}"
+  },
+  {
+   "name": "NetCr",
+   "ref": "{@NetCr}",
+   "type": "CurrencyField",
+   "text": "if {@NetAmt} > 0 and {@Group1}='M' then {@NetAmt}"
+  },
+  {
+   "name": "NetDr",
+   "ref": "{@NetDr}",
+   "type": "CurrencyField",
+   "text": "if {@NetAmt} < 0 and {@Group1}='M' then abs({@NetAmt})"
+  },
+  {
+   "name": "NetProffit",
+   "ref": "{@NetProffit}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "PandLGrp",
+   "ref": "{@PandLGrp}",
+   "type": "StringField",
+   "text": "{LEDR_AC_DATA.CO_CODE}"
+  },
+  {
+   "name": "ProfitTaxCr",
+   "ref": "{@ProfitTaxCr}",
+   "type": "StringField",
+   "text": "if {@Group1}='T' then if {@GrossProfit} < 0 then \"GROSS LOSS::\" else \"GROSS PROFIT :\" else if {@GrossProfit} > 0 then \"NET PROFIT :\" else \"NET LOSS :\""
+  },
+  {
+   "name": "ProfitTex",
+   "ref": "{@ProfitTex}",
+   "type": "StringField",
+   "text": "if {@Group1}='T' then if {@GrossProfit} < 0 then \"GROSS LOSS::\" else \"GROSS PROFIT :\" else if {@GrossProfit} > 0 then \"NET PROFIT :\" else \"NET LOSS :\""
+  },
+  {
+   "name": "ReportName",
+   "ref": "{@ReportName}",
+   "type": "StringField",
+   "text": "\" \""
+  },
+  {
+   "name": "ReportTitelName",
+   "ref": "{@ReportTitelName}",
+   "type": "StringField",
+   "text": "if{@CurPag} = 1 then \"TRADING ACCOUNT \" + {@RptTitel} Else \"PROFIT AND LOSS ACCOUNT \" + {@RptTitel}"
+  },
+  {
+   "name": "ResetCrAmt",
+   "ref": "{@ResetCrAmt}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar grcr_amt := 0;"
+  },
+  {
+   "name": "ResetDramt",
+   "ref": "{@ResetDramt}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar grdr_amt := 0;"
+  },
+  {
+   "name": "ResetDrNew",
+   "ref": "{@ResetDrNew}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar trd_dramt :=0 ;"
+  },
+  {
+   "name": "RestetcrNew",
+   "ref": "{@RestetcrNew}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar trd_cramt :=0 ;"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "if{@CurPag} = 1 then \"TRADING ACCOUNT \" + {@ReportName} Else \"PROFIT AND LOSS ACCOUNT \" + {@ReportName}"
+  },
+  {
+   "name": "Scred",
+   "ref": "{@Scred}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; Sum ({@Credite})"
+  },
+  {
+   "name": "Sdred",
+   "ref": "{@Sdred}",
+   "type": "NumberField",
+   "text": "Sum ({@debit})"
+  },
+  {
+   "name": "TaradingCr",
+   "ref": "{@TaradingCr}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar trd_cramt := currencyVar trd_cramt +{@CrAmt};"
+  },
+  {
+   "name": "TradingDr",
+   "ref": "{@TradingDr}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar trd_dramt := currencyVar trd_dramt +{@DrAmt};"
+  },
+  {
+   "name": "TradingSumCr",
+   "ref": "{@TradingSumCr}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar trd_cramt"
+  },
+  {
+   "name": "TradingSumDr",
+   "ref": "{@TradingSumDr}",
+   "type": "CurrencyField",
+   "text": "whileprintingrecords; currencyVar trd_dramt"
+  }
+ ],
+ "sectionCount": 10,
+ "objectCount": 11,
+ "formulaCount": 81
+}

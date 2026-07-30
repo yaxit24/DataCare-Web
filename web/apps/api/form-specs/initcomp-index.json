@@ -1,0 +1,2534 @@
+[
+ {
+  "form": "UT_SETTING_MAIN",
+  "controlCount": 182,
+  "byKind": {
+   "tab": 7,
+   "panel": 5,
+   "button": 59,
+   "label": 55,
+   "combo": 53,
+   "textbox": 1,
+   "grid": 2
+  },
+  "grids": 2,
+  "tabs": 7,
+  "gridColumns": 2
+ },
+ {
+  "form": "TR_SALE",
+  "controlCount": 141,
+  "byKind": {
+   "textbox": 47,
+   "button": 14,
+   "grid": 8,
+   "masked": 1,
+   "check": 6,
+   "panel": 9,
+   "label": 50,
+   "other": 5,
+   "combo": 1
+  },
+  "grids": 8,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_WH_SALE",
+  "controlCount": 133,
+  "byKind": {
+   "textbox": 49,
+   "button": 12,
+   "masked": 1,
+   "combo": 2,
+   "check": 5,
+   "label": 50,
+   "panel": 5,
+   "grid": 6,
+   "other": 3
+  },
+  "grids": 6,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_COMPANY",
+  "controlCount": 129,
+  "byKind": {
+   "button": 11,
+   "tab": 7,
+   "textbox": 45,
+   "panel": 8,
+   "label": 50,
+   "grid": 1,
+   "other": 1,
+   "combo": 4,
+   "masked": 1,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 7,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_ALL",
+  "controlCount": 117,
+  "byKind": {
+   "button": 72,
+   "masked": 2,
+   "textbox": 11,
+   "combo": 5,
+   "panel": 11,
+   "other": 1,
+   "label": 13,
+   "grid": 1,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "TR_TOUR_SALE",
+  "controlCount": 115,
+  "byKind": {
+   "textbox": 42,
+   "button": 8,
+   "masked": 1,
+   "grid": 6,
+   "combo": 1,
+   "check": 4,
+   "label": 45,
+   "panel": 5,
+   "other": 3
+  },
+  "grids": 6,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_PURC",
+  "controlCount": 114,
+  "byKind": {
+   "textbox": 34,
+   "button": 16,
+   "grid": 7,
+   "masked": 1,
+   "panel": 6,
+   "label": 42,
+   "check": 2,
+   "other": 5,
+   "combo": 1
+  },
+  "grids": 7,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_DHRN_REC",
+  "controlCount": 111,
+  "byKind": {
+   "textbox": 41,
+   "button": 10,
+   "masked": 4,
+   "combo": 1,
+   "panel": 2,
+   "label": 46,
+   "other": 4,
+   "grid": 2,
+   "check": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_DHRN_INTREC",
+  "controlCount": 96,
+  "byKind": {
+   "textbox": 35,
+   "button": 9,
+   "masked": 4,
+   "combo": 2,
+   "check": 1,
+   "label": 42,
+   "panel": 2,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_PR_SL_UAE",
+  "controlCount": 95,
+  "byKind": {
+   "textbox": 31,
+   "button": 16,
+   "grid": 4,
+   "masked": 1,
+   "combo": 3,
+   "label": 30,
+   "check": 2,
+   "panel": 4,
+   "other": 4
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_BUL_SALE",
+  "controlCount": 90,
+  "byKind": {
+   "textbox": 31,
+   "button": 8,
+   "masked": 1,
+   "combo": 2,
+   "check": 3,
+   "label": 36,
+   "panel": 3,
+   "grid": 5,
+   "other": 1
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_SETTING",
+  "controlCount": 88,
+  "byKind": {
+   "button": 31,
+   "label": 27,
+   "grid": 1,
+   "textbox": 1,
+   "combo": 26,
+   "panel": 2
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SALE_HM",
+  "controlCount": 87,
+  "byKind": {
+   "textbox": 32,
+   "button": 11,
+   "grid": 7,
+   "masked": 1,
+   "check": 3,
+   "panel": 5,
+   "label": 23,
+   "other": 4,
+   "combo": 1
+  },
+  "grids": 7,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_DHRN_ISU",
+  "controlCount": 85,
+  "byKind": {
+   "textbox": 27,
+   "button": 12,
+   "masked": 3,
+   "combo": 2,
+   "check": 1,
+   "label": 32,
+   "panel": 2,
+   "other": 4,
+   "grid": 2
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SALE_LBR",
+  "controlCount": 82,
+  "byKind": {
+   "textbox": 28,
+   "button": 8,
+   "label": 29,
+   "grid": 8,
+   "masked": 1,
+   "combo": 1,
+   "check": 1,
+   "panel": 3,
+   "other": 3
+  },
+  "grids": 8,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_TAG_WT_DIFF",
+  "controlCount": 81,
+  "byKind": {
+   "textbox": 26,
+   "button": 11,
+   "masked": 1,
+   "combo": 2,
+   "label": 29,
+   "panel": 2,
+   "grid": 6,
+   "other": 4
+  },
+  "grids": 6,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_PURC_HM",
+  "controlCount": 80,
+  "byKind": {
+   "textbox": 26,
+   "button": 11,
+   "grid": 4,
+   "masked": 1,
+   "panel": 5,
+   "label": 25,
+   "check": 4,
+   "other": 3,
+   "combo": 1
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_TAG_SPLIT",
+  "controlCount": 80,
+  "byKind": {
+   "textbox": 29,
+   "button": 10,
+   "masked": 1,
+   "check": 1,
+   "combo": 2,
+   "label": 23,
+   "panel": 2,
+   "grid": 7,
+   "other": 5
+  },
+  "grids": 7,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_TAG_OPBL",
+  "controlCount": 79,
+  "byKind": {
+   "textbox": 25,
+   "button": 20,
+   "masked": 1,
+   "combo": 4,
+   "panel": 2,
+   "label": 20,
+   "grid": 3,
+   "other": 4
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_WHATSAPP",
+  "controlCount": 76,
+  "byKind": {
+   "textbox": 10,
+   "combo": 8,
+   "panel": 1,
+   "button": 22,
+   "label": 27,
+   "other": 4,
+   "grid": 1,
+   "check": 3
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 8
+ },
+ {
+  "form": "MS_LOCT",
+  "controlCount": 72,
+  "byKind": {
+   "tab": 7,
+   "textbox": 26,
+   "panel": 4,
+   "label": 27,
+   "grid": 1,
+   "combo": 1,
+   "button": 5,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 7,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SALE_RTN_UAE",
+  "controlCount": 72,
+  "byKind": {
+   "textbox": 25,
+   "button": 10,
+   "masked": 1,
+   "panel": 3,
+   "label": 22,
+   "check": 2,
+   "grid": 4,
+   "other": 4,
+   "combo": 1
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SL_EBILL",
+  "controlCount": 71,
+  "byKind": {
+   "textbox": 23,
+   "button": 13,
+   "masked": 2,
+   "label": 22,
+   "panel": 3,
+   "grid": 4,
+   "other": 4
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SALE_ORD",
+  "controlCount": 70,
+  "byKind": {
+   "textbox": 22,
+   "button": 12,
+   "grid": 6,
+   "masked": 3,
+   "panel": 4,
+   "label": 19,
+   "check": 1,
+   "other": 3
+  },
+  "grids": 6,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_WH_SALE_RTN",
+  "controlCount": 69,
+  "byKind": {
+   "textbox": 24,
+   "button": 9,
+   "grid": 4,
+   "masked": 1,
+   "combo": 1,
+   "label": 22,
+   "panel": 4,
+   "other": 4
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_CARD_REC",
+  "controlCount": 65,
+  "byKind": {
+   "textbox": 28,
+   "button": 9,
+   "masked": 1,
+   "panel": 2,
+   "label": 24,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_OS",
+  "controlCount": 64,
+  "byKind": {
+   "date": 2,
+   "button": 19,
+   "textbox": 13,
+   "panel": 4,
+   "label": 15,
+   "combo": 4,
+   "other": 1,
+   "grid": 1,
+   "check": 5
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 3
+ },
+ {
+  "form": "TR_TOUR_ORD",
+  "controlCount": 64,
+  "byKind": {
+   "textbox": 21,
+   "button": 11,
+   "masked": 2,
+   "label": 18,
+   "check": 1,
+   "panel": 3,
+   "grid": 5,
+   "other": 3
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MFG_KR_ISU_REC",
+  "controlCount": 63,
+  "byKind": {
+   "textbox": 19,
+   "button": 14,
+   "masked": 1,
+   "label": 17,
+   "panel": 3,
+   "grid": 5,
+   "other": 3,
+   "check": 1
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_KR_ISU",
+  "controlCount": 62,
+  "byKind": {
+   "textbox": 21,
+   "button": 9,
+   "masked": 1,
+   "panel": 3,
+   "label": 21,
+   "check": 1,
+   "other": 3,
+   "grid": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_LEDR",
+  "controlCount": 60,
+  "byKind": {
+   "button": 12,
+   "panel": 5,
+   "other": 2,
+   "check": 5,
+   "grid": 5,
+   "combo": 6,
+   "textbox": 8,
+   "label": 15,
+   "masked": 2
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_TAG",
+  "controlCount": 60,
+  "byKind": {
+   "button": 15,
+   "masked": 2,
+   "other": 4,
+   "combo": 3,
+   "label": 11,
+   "textbox": 9,
+   "grid": 3,
+   "panel": 2,
+   "check": 11
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_ADDRESS",
+  "controlCount": 58,
+  "byKind": {
+   "button": 9,
+   "combo": 10,
+   "textbox": 10,
+   "masked": 3,
+   "other": 1,
+   "panel": 3,
+   "label": 20,
+   "check": 1,
+   "grid": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "TR_REP_REC",
+  "controlCount": 58,
+  "byKind": {
+   "textbox": 18,
+   "button": 11,
+   "masked": 1,
+   "panel": 3,
+   "label": 19,
+   "other": 3,
+   "grid": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_VP",
+  "controlCount": 58,
+  "byKind": {
+   "textbox": 18,
+   "button": 8,
+   "masked": 1,
+   "combo": 2,
+   "label": 20,
+   "panel": 2,
+   "grid": 4,
+   "other": 3
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_WAPP_WITH_API",
+  "controlCount": 58,
+  "byKind": {
+   "textbox": 8,
+   "combo": 6,
+   "panel": 3,
+   "button": 15,
+   "label": 20,
+   "other": 2,
+   "grid": 2,
+   "check": 2
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 8
+ },
+ {
+  "form": "RP_TAG_IMAGE",
+  "controlCount": 57,
+  "byKind": {
+   "date": 2,
+   "combo": 1,
+   "button": 17,
+   "textbox": 11,
+   "panel": 3,
+   "label": 12,
+   "other": 7,
+   "grid": 3,
+   "check": 1
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 3
+ },
+ {
+  "form": "TR_MFG_ISU_REC",
+  "controlCount": 57,
+  "byKind": {
+   "textbox": 17,
+   "button": 12,
+   "masked": 1,
+   "label": 17,
+   "panel": 2,
+   "grid": 5,
+   "other": 3
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MFG_ITEM",
+  "controlCount": 57,
+  "byKind": {
+   "textbox": 18,
+   "button": 12,
+   "masked": 1,
+   "label": 17,
+   "panel": 2,
+   "grid": 4,
+   "other": 3
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MFG_WITH_LOT",
+  "controlCount": 57,
+  "byKind": {
+   "textbox": 18,
+   "button": 12,
+   "masked": 1,
+   "label": 17,
+   "panel": 2,
+   "grid": 4,
+   "other": 3
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SL_PR_ITEM",
+  "controlCount": 56,
+  "byKind": {
+   "textbox": 15,
+   "button": 11,
+   "masked": 1,
+   "label": 17,
+   "panel": 2,
+   "check": 1,
+   "grid": 4,
+   "other": 4,
+   "combo": 1
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_SMS",
+  "controlCount": 56,
+  "byKind": {
+   "textbox": 6,
+   "combo": 5,
+   "panel": 1,
+   "button": 14,
+   "label": 23,
+   "other": 2,
+   "grid": 1,
+   "check": 4
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 7
+ },
+ {
+  "form": "RP_CUST_CRM",
+  "controlCount": 55,
+  "byKind": {
+   "masked": 4,
+   "textbox": 16,
+   "button": 9,
+   "label": 16,
+   "combo": 1,
+   "other": 2,
+   "check": 2,
+   "panel": 2,
+   "grid": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "TR_MFG_ORD_REC",
+  "controlCount": 55,
+  "byKind": {
+   "textbox": 16,
+   "button": 12,
+   "masked": 1,
+   "label": 16,
+   "panel": 2,
+   "grid": 5,
+   "other": 3
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_OTH_DETL",
+  "controlCount": 54,
+  "byKind": {
+   "masked": 2,
+   "button": 16,
+   "textbox": 12,
+   "combo": 5,
+   "other": 1,
+   "label": 13,
+   "panel": 3,
+   "grid": 1,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "TR_FN_INOUT",
+  "controlCount": 53,
+  "byKind": {
+   "textbox": 20,
+   "button": 10,
+   "masked": 1,
+   "label": 13,
+   "panel": 2,
+   "grid": 4,
+   "other": 3
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_JDT_REC",
+  "controlCount": 53,
+  "byKind": {
+   "textbox": 15,
+   "button": 12,
+   "masked": 1,
+   "label": 16,
+   "panel": 2,
+   "grid": 4,
+   "other": 3
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SALE_RTN",
+  "controlCount": 53,
+  "byKind": {
+   "textbox": 19,
+   "button": 9,
+   "masked": 1,
+   "label": 12,
+   "panel": 2,
+   "grid": 7,
+   "other": 3
+  },
+  "grids": 7,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_STOCK",
+  "controlCount": 52,
+  "byKind": {
+   "button": 17,
+   "masked": 2,
+   "grid": 3,
+   "other": 2,
+   "combo": 4,
+   "label": 13,
+   "panel": 3,
+   "check": 1,
+   "textbox": 7
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "RP_TAG_ESTMATE",
+  "controlCount": 51,
+  "byKind": {
+   "other": 5,
+   "button": 17,
+   "panel": 2,
+   "label": 11,
+   "grid": 3,
+   "date": 2,
+   "combo": 1,
+   "textbox": 10
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MLT_PRO",
+  "controlCount": 50,
+  "byKind": {
+   "textbox": 16,
+   "button": 9,
+   "masked": 1,
+   "combo": 1,
+   "label": 16,
+   "panel": 2,
+   "grid": 4,
+   "other": 1
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_OTH_PURC",
+  "controlCount": 50,
+  "byKind": {
+   "textbox": 16,
+   "button": 8,
+   "masked": 2,
+   "label": 16,
+   "panel": 2,
+   "other": 3,
+   "grid": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_SET_ADMIN",
+  "controlCount": 50,
+  "byKind": {
+   "tab": 7,
+   "panel": 4,
+   "button": 16,
+   "label": 12,
+   "combo": 11
+  },
+  "grids": 0,
+  "tabs": 7,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MEMB_ENT",
+  "controlCount": 49,
+  "byKind": {
+   "textbox": 18,
+   "button": 9,
+   "masked": 1,
+   "label": 13,
+   "panel": 2,
+   "grid": 4,
+   "other": 1,
+   "check": 1
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_BILL_TO",
+  "controlCount": 47,
+  "byKind": {
+   "textbox": 13,
+   "button": 11,
+   "masked": 1,
+   "panel": 2,
+   "label": 13,
+   "check": 1,
+   "grid": 5,
+   "other": 1
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_INOUT",
+  "controlCount": 47,
+  "byKind": {
+   "textbox": 18,
+   "button": 9,
+   "masked": 1,
+   "label": 11,
+   "panel": 2,
+   "grid": 3,
+   "other": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_OTH_COMM",
+  "controlCount": 47,
+  "byKind": {
+   "textbox": 14,
+   "button": 8,
+   "masked": 2,
+   "label": 15,
+   "panel": 2,
+   "other": 3,
+   "grid": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_APR_ISU",
+  "controlCount": 46,
+  "byKind": {
+   "textbox": 15,
+   "button": 13,
+   "masked": 1,
+   "label": 8,
+   "panel": 2,
+   "check": 1,
+   "grid": 3,
+   "other": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MFG_GHAT_REC",
+  "controlCount": 46,
+  "byKind": {
+   "textbox": 14,
+   "button": 8,
+   "masked": 1,
+   "label": 14,
+   "check": 1,
+   "panel": 2,
+   "other": 3,
+   "grid": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_IMPORT",
+  "controlCount": 46,
+  "byKind": {
+   "button": 41,
+   "masked": 1,
+   "panel": 1,
+   "label": 2,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_SLPR_ZOOM",
+  "controlCount": 44,
+  "byKind": {
+   "button": 14,
+   "masked": 2,
+   "grid": 4,
+   "other": 2,
+   "combo": 2,
+   "label": 7,
+   "panel": 4,
+   "check": 4,
+   "textbox": 5
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 2
+ },
+ {
+  "form": "TR_FINE_SL_PR",
+  "controlCount": 44,
+  "byKind": {
+   "textbox": 13,
+   "button": 8,
+   "masked": 1,
+   "panel": 2,
+   "label": 13,
+   "grid": 5,
+   "other": 1,
+   "combo": 1
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_ITM_LOT",
+  "controlCount": 44,
+  "byKind": {
+   "textbox": 15,
+   "button": 11,
+   "masked": 1,
+   "panel": 2,
+   "label": 9,
+   "grid": 2,
+   "other": 4
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_MOVEMENT",
+  "controlCount": 43,
+  "byKind": {
+   "button": 15,
+   "masked": 2,
+   "grid": 4,
+   "combo": 5,
+   "label": 8,
+   "other": 1,
+   "panel": 3,
+   "check": 2,
+   "textbox": 3
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "TR_LOCT_AMT",
+  "controlCount": 43,
+  "byKind": {
+   "textbox": 16,
+   "button": 9,
+   "masked": 1,
+   "label": 12,
+   "panel": 2,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MFG_ORD_ISU",
+  "controlCount": 43,
+  "byKind": {
+   "textbox": 12,
+   "button": 12,
+   "masked": 1,
+   "label": 7,
+   "panel": 2,
+   "check": 1,
+   "grid": 5,
+   "other": 3
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_PR_SL_HEDG",
+  "controlCount": 43,
+  "byKind": {
+   "textbox": 12,
+   "button": 8,
+   "masked": 1,
+   "combo": 2,
+   "panel": 2,
+   "label": 14,
+   "grid": 3,
+   "other": 1
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_DHRN_LOAN",
+  "controlCount": 42,
+  "byKind": {
+   "date": 2,
+   "button": 15,
+   "textbox": 8,
+   "panel": 2,
+   "label": 10,
+   "combo": 4,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_BILL_PROFIT",
+  "controlCount": 41,
+  "byKind": {
+   "button": 9,
+   "masked": 2,
+   "grid": 5,
+   "combo": 2,
+   "label": 10,
+   "other": 1,
+   "panel": 4,
+   "textbox": 7,
+   "check": 1
+  },
+  "grids": 5,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "MS_BOOK",
+  "controlCount": 40,
+  "byKind": {
+   "textbox": 12,
+   "button": 6,
+   "combo": 5,
+   "grid": 2,
+   "panel": 1,
+   "label": 14
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_CASH_BANK",
+  "controlCount": 40,
+  "byKind": {
+   "combo": 4,
+   "masked": 2,
+   "other": 2,
+   "textbox": 7,
+   "button": 7,
+   "panel": 3,
+   "label": 11,
+   "check": 2,
+   "grid": 2
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "RP_ORD_TRACK",
+  "controlCount": 40,
+  "byKind": {
+   "other": 5,
+   "panel": 2,
+   "date": 2,
+   "grid": 2,
+   "button": 7,
+   "textbox": 9,
+   "label": 9,
+   "combo": 1,
+   "masked": 2,
+   "check": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_PHYSTK",
+  "controlCount": 40,
+  "byKind": {
+   "textbox": 9,
+   "button": 14,
+   "masked": 1,
+   "panel": 2,
+   "label": 7,
+   "grid": 2,
+   "other": 4,
+   "combo": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_BAL_ZOOM",
+  "controlCount": 38,
+  "byKind": {
+   "button": 5,
+   "panel": 4,
+   "masked": 2,
+   "grid": 4,
+   "check": 3,
+   "textbox": 6,
+   "label": 11,
+   "other": 3
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_LEDR_ADJ",
+  "controlCount": 38,
+  "byKind": {
+   "textbox": 10,
+   "button": 9,
+   "masked": 1,
+   "check": 1,
+   "label": 13,
+   "panel": 2,
+   "grid": 1,
+   "other": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_EMP",
+  "controlCount": 37,
+  "byKind": {
+   "masked": 2,
+   "textbox": 6,
+   "button": 10,
+   "panel": 2,
+   "label": 8,
+   "other": 1,
+   "grid": 2,
+   "combo": 2,
+   "check": 4
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 2
+ },
+ {
+  "form": "RP_TOUR_ZOOM",
+  "controlCount": 37,
+  "byKind": {
+   "button": 5,
+   "panel": 3,
+   "masked": 2,
+   "grid": 3,
+   "textbox": 9,
+   "combo": 1,
+   "label": 11,
+   "other": 1,
+   "check": 2
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_TOUR",
+  "controlCount": 37,
+  "byKind": {
+   "textbox": 12,
+   "button": 9,
+   "masked": 1,
+   "label": 7,
+   "panel": 2,
+   "grid": 3,
+   "other": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_MFG_ZOOM",
+  "controlCount": 36,
+  "byKind": {
+   "button": 6,
+   "panel": 3,
+   "masked": 2,
+   "grid": 3,
+   "textbox": 7,
+   "combo": 2,
+   "label": 12,
+   "other": 1
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_TAG_PRINT",
+  "controlCount": 36,
+  "byKind": {
+   "button": 8,
+   "textbox": 10,
+   "panel": 1,
+   "label": 10,
+   "grid": 1,
+   "other": 2,
+   "combo": 3,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_DESIGN_BOOK",
+  "controlCount": 35,
+  "byKind": {
+   "textbox": 8,
+   "button": 13,
+   "panel": 2,
+   "label": 4,
+   "grid": 4,
+   "other": 4
+  },
+  "grids": 4,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_DHRN_OS",
+  "controlCount": 35,
+  "byKind": {
+   "panel": 3,
+   "masked": 2,
+   "textbox": 5,
+   "button": 7,
+   "combo": 4,
+   "label": 9,
+   "check": 3,
+   "other": 1,
+   "grid": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_CASH",
+  "controlCount": 35,
+  "byKind": {
+   "textbox": 10,
+   "button": 9,
+   "masked": 1,
+   "label": 10,
+   "panel": 2,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_TAG_CAN",
+  "controlCount": 35,
+  "byKind": {
+   "textbox": 11,
+   "button": 8,
+   "masked": 1,
+   "label": 7,
+   "panel": 2,
+   "grid": 3,
+   "other": 3
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_BUL_BOOKING",
+  "controlCount": 34,
+  "byKind": {
+   "textbox": 12,
+   "button": 8,
+   "masked": 1,
+   "label": 8,
+   "panel": 2,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_TAX",
+  "controlCount": 33,
+  "byKind": {
+   "button": 11,
+   "masked": 2,
+   "textbox": 10,
+   "label": 7,
+   "panel": 2,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_AI_TRFR",
+  "controlCount": 33,
+  "byKind": {
+   "masked": 2,
+   "button": 12,
+   "panel": 2,
+   "label": 8,
+   "other": 2,
+   "grid": 2,
+   "textbox": 5
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_UPDATE",
+  "controlCount": 32,
+  "byKind": {
+   "panel": 1,
+   "label": 3,
+   "other": 2,
+   "button": 24,
+   "masked": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_PHY_STOCK",
+  "controlCount": 32,
+  "byKind": {
+   "button": 7,
+   "masked": 2,
+   "combo": 5,
+   "grid": 1,
+   "label": 11,
+   "other": 1,
+   "panel": 2,
+   "textbox": 3
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_REMINDER",
+  "controlCount": 32,
+  "byKind": {
+   "panel": 3,
+   "label": 5,
+   "button": 19,
+   "other": 1,
+   "masked": 2,
+   "grid": 1,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 10
+ },
+ {
+  "form": "RP_MFG",
+  "controlCount": 31,
+  "byKind": {
+   "button": 10,
+   "textbox": 7,
+   "panel": 2,
+   "label": 7,
+   "combo": 1,
+   "other": 1,
+   "masked": 2,
+   "check": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_MFG_LEDR",
+  "controlCount": 31,
+  "byKind": {
+   "masked": 2,
+   "other": 2,
+   "textbox": 8,
+   "grid": 3,
+   "button": 6,
+   "panel": 3,
+   "label": 6,
+   "check": 1
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_GST",
+  "controlCount": 30,
+  "byKind": {
+   "button": 11,
+   "combo": 1,
+   "textbox": 6,
+   "label": 7,
+   "panel": 1,
+   "other": 1,
+   "masked": 2,
+   "grid": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_ROJMEL",
+  "controlCount": 30,
+  "byKind": {
+   "button": 16,
+   "masked": 1,
+   "textbox": 4,
+   "grid": 2,
+   "panel": 2,
+   "label": 4,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_AC_OPBL",
+  "controlCount": 30,
+  "byKind": {
+   "textbox": 7,
+   "grid": 3,
+   "combo": 4,
+   "button": 8,
+   "panel": 2,
+   "label": 6
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_EMP_JV",
+  "controlCount": 30,
+  "byKind": {
+   "textbox": 8,
+   "button": 9,
+   "masked": 1,
+   "label": 7,
+   "panel": 2,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "BtmSchm",
+  "controlCount": 29,
+  "byKind": {
+   "button": 24,
+   "panel": 1,
+   "label": 2,
+   "other": 1,
+   "textbox": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_BALANCE",
+  "controlCount": 29,
+  "byKind": {
+   "button": 12,
+   "masked": 2,
+   "textbox": 4,
+   "panel": 2,
+   "label": 5,
+   "other": 1,
+   "grid": 1,
+   "check": 2
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_GRAPH",
+  "controlCount": 29,
+  "byKind": {
+   "button": 12,
+   "masked": 2,
+   "combo": 4,
+   "panel": 2,
+   "label": 6,
+   "textbox": 3
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_USER",
+  "controlCount": 29,
+  "byKind": {
+   "masked": 2,
+   "combo": 1,
+   "button": 10,
+   "textbox": 3,
+   "panel": 2,
+   "label": 5,
+   "other": 1,
+   "grid": 3,
+   "check": 2
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 2
+ },
+ {
+  "form": "TR_VP_ADJ",
+  "controlCount": 29,
+  "byKind": {
+   "textbox": 8,
+   "button": 8,
+   "masked": 1,
+   "label": 7,
+   "panel": 2,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_VCH_RE_NUMBR",
+  "controlCount": 29,
+  "byKind": {
+   "tab": 7,
+   "panel": 4,
+   "button": 13,
+   "label": 2,
+   "textbox": 2,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 7,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_AUTO_ITEM",
+  "controlCount": 28,
+  "byKind": {
+   "textbox": 10,
+   "grid": 1,
+   "button": 5,
+   "label": 8,
+   "panel": 1,
+   "masked": 2,
+   "combo": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_RATE",
+  "controlCount": 28,
+  "byKind": {
+   "button": 6,
+   "masked": 1,
+   "textbox": 9,
+   "grid": 1,
+   "panel": 1,
+   "other": 1,
+   "label": 9
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_HUID",
+  "controlCount": 28,
+  "byKind": {
+   "button": 8,
+   "masked": 2,
+   "other": 2,
+   "combo": 4,
+   "label": 8,
+   "textbox": 2,
+   "grid": 1,
+   "panel": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_JDTR_ZOOM",
+  "controlCount": 28,
+  "byKind": {
+   "button": 4,
+   "panel": 3,
+   "masked": 2,
+   "grid": 3,
+   "textbox": 4,
+   "combo": 2,
+   "label": 9,
+   "other": 1
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_ORDER",
+  "controlCount": 28,
+  "byKind": {
+   "button": 4,
+   "panel": 3,
+   "masked": 2,
+   "grid": 3,
+   "other": 3,
+   "check": 2,
+   "textbox": 2,
+   "combo": 2,
+   "label": 7
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_STK_MOVE",
+  "controlCount": 28,
+  "byKind": {
+   "button": 7,
+   "masked": 2,
+   "grid": 2,
+   "combo": 1,
+   "label": 7,
+   "other": 1,
+   "panel": 2,
+   "textbox": 6
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_STOCK_VALUE",
+  "controlCount": 28,
+  "byKind": {
+   "button": 6,
+   "masked": 2,
+   "grid": 2,
+   "combo": 5,
+   "label": 9,
+   "other": 1,
+   "panel": 2,
+   "textbox": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_CONTRA",
+  "controlCount": 28,
+  "byKind": {
+   "textbox": 7,
+   "button": 8,
+   "masked": 1,
+   "combo": 1,
+   "panel": 2,
+   "label": 6,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_GOLD_BOOK",
+  "controlCount": 28,
+  "byKind": {
+   "textbox": 8,
+   "button": 8,
+   "masked": 1,
+   "label": 6,
+   "panel": 2,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_SL_ORD_ADJ",
+  "controlCount": 28,
+  "byKind": {
+   "textbox": 8,
+   "button": 8,
+   "masked": 1,
+   "panel": 2,
+   "label": 5,
+   "grid": 3,
+   "other": 1
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_CUST_ENTRY",
+  "controlCount": 28,
+  "byKind": {
+   "button": 8,
+   "textbox": 8,
+   "masked": 1,
+   "panel": 2,
+   "label": 6,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_TRADING",
+  "controlCount": 27,
+  "byKind": {
+   "masked": 2,
+   "textbox": 4,
+   "button": 8,
+   "panel": 2,
+   "label": 6,
+   "other": 1,
+   "grid": 2,
+   "combo": 1,
+   "check": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 1
+ },
+ {
+  "form": "RP_STOCK_FINE",
+  "controlCount": 26,
+  "byKind": {
+   "button": 8,
+   "masked": 2,
+   "grid": 2,
+   "combo": 4,
+   "label": 7,
+   "other": 1,
+   "panel": 2
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_MEMB_ADJ",
+  "controlCount": 26,
+  "byKind": {
+   "textbox": 7,
+   "button": 8,
+   "masked": 1,
+   "panel": 2,
+   "label": 5,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MDI_FORM",
+  "controlCount": 25,
+  "byKind": {
+   "check": 3,
+   "textbox": 2,
+   "other": 3,
+   "panel": 4,
+   "combo": 1,
+   "label": 12
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_USER",
+  "controlCount": 25,
+  "byKind": {
+   "textbox": 5,
+   "combo": 2,
+   "panel": 1,
+   "button": 7,
+   "label": 8,
+   "other": 1,
+   "grid": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 4
+ },
+ {
+  "form": "RP_LC_SALE",
+  "controlCount": 25,
+  "byKind": {
+   "button": 7,
+   "masked": 2,
+   "grid": 3,
+   "combo": 1,
+   "label": 5,
+   "other": 1,
+   "panel": 2,
+   "textbox": 4
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_REMINDER",
+  "controlCount": 25,
+  "byKind": {
+   "textbox": 7,
+   "button": 8,
+   "masked": 1,
+   "label": 4,
+   "panel": 2,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_POINT",
+  "controlCount": 23,
+  "byKind": {
+   "button": 5,
+   "textbox": 7,
+   "combo": 1,
+   "grid": 3,
+   "panel": 1,
+   "label": 6
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_INOUT",
+  "controlCount": 23,
+  "byKind": {
+   "masked": 2,
+   "textbox": 4,
+   "button": 6,
+   "panel": 1,
+   "label": 6,
+   "other": 1,
+   "grid": 1,
+   "combo": 1,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_LC_INOUT",
+  "controlCount": 23,
+  "byKind": {
+   "button": 7,
+   "masked": 2,
+   "grid": 3,
+   "combo": 1,
+   "label": 5,
+   "other": 1,
+   "panel": 2,
+   "textbox": 2
+  },
+  "grids": 3,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_DAY_WORK",
+  "controlCount": 22,
+  "byKind": {
+   "masked": 2,
+   "textbox": 3,
+   "button": 7,
+   "combo": 1,
+   "panel": 1,
+   "label": 5,
+   "other": 1,
+   "grid": 2
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_STK_LEVEL",
+  "controlCount": 22,
+  "byKind": {
+   "masked": 1,
+   "textbox": 3,
+   "combo": 2,
+   "button": 7,
+   "panel": 1,
+   "label": 5,
+   "other": 1,
+   "grid": 1,
+   "check": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_UPI_REC",
+  "controlCount": 21,
+  "byKind": {
+   "textbox": 8,
+   "grid": 1,
+   "button": 3,
+   "label": 7,
+   "panel": 1,
+   "masked": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_CONSI_APR",
+  "controlCount": 19,
+  "byKind": {
+   "other": 3,
+   "panel": 2,
+   "date": 2,
+   "grid": 2,
+   "button": 6,
+   "textbox": 2,
+   "label": 2
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_BANK",
+  "controlCount": 19,
+  "byKind": {
+   "masked": 2,
+   "button": 6,
+   "textbox": 3,
+   "panel": 1,
+   "label": 4,
+   "grid": 2,
+   "other": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_WINDOW",
+  "controlCount": 17,
+  "byKind": {
+   "other": 16,
+   "button": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_STK_LIMIT",
+  "controlCount": 16,
+  "byKind": {
+   "button": 5,
+   "textbox": 5,
+   "panel": 1,
+   "grid": 2,
+   "label": 3
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_PWD_UPDATE",
+  "controlCount": 16,
+  "byKind": {
+   "button": 5,
+   "textbox": 6,
+   "panel": 1,
+   "label": 4
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_YEAR",
+  "controlCount": 15,
+  "byKind": {
+   "button": 5,
+   "textbox": 2,
+   "masked": 2,
+   "panel": 1,
+   "label": 4,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "RP_CUST",
+  "controlCount": 15,
+  "byKind": {
+   "button": 5,
+   "masked": 2,
+   "other": 2,
+   "grid": 1,
+   "panel": 1,
+   "label": 3,
+   "combo": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_BKP",
+  "controlCount": 15,
+  "byKind": {
+   "panel": 1,
+   "label": 2,
+   "textbox": 1,
+   "other": 2,
+   "button": 9
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_HDD",
+  "controlCount": 15,
+  "byKind": {
+   "button": 6,
+   "textbox": 3,
+   "panel": 1,
+   "label": 3,
+   "other": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_EXPORT",
+  "controlCount": 13,
+  "byKind": {
+   "button": 10,
+   "panel": 1,
+   "label": 1,
+   "other": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_E_INVOICE",
+  "controlCount": 13,
+  "byKind": {
+   "masked": 2,
+   "panel": 1,
+   "button": 5,
+   "label": 2,
+   "other": 1,
+   "grid": 2
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_WINDOW_SET",
+  "controlCount": 12,
+  "byKind": {
+   "textbox": 1,
+   "grid": 1,
+   "button": 6,
+   "label": 2,
+   "panel": 1,
+   "combo": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "TR_ITM_OPBL",
+  "controlCount": 12,
+  "byKind": {
+   "textbox": 1,
+   "grid": 2,
+   "button": 5,
+   "label": 2,
+   "combo": 1,
+   "panel": 1
+  },
+  "grids": 2,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_MFG_MAST",
+  "controlCount": 11,
+  "byKind": {
+   "textbox": 1,
+   "grid": 1,
+   "button": 7,
+   "label": 1,
+   "panel": 1
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_ACCT",
+  "controlCount": 10,
+  "byKind": {
+   "textbox": 3,
+   "label": 7
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 2
+ },
+ {
+  "form": "UT_USER_REQUEST",
+  "controlCount": 8,
+  "byKind": {
+   "textbox": 1,
+   "radio": 2,
+   "panel": 1,
+   "label": 2,
+   "button": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_OPNCOMP",
+  "controlCount": 7,
+  "byKind": {
+   "label": 3,
+   "textbox": 4
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_PRINT",
+  "controlCount": 7,
+  "byKind": {
+   "button": 3,
+   "panel": 1,
+   "check": 3
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_TASTING",
+  "controlCount": 6,
+  "byKind": {
+   "panel": 1,
+   "button": 5
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_LOGIN",
+  "controlCount": 5,
+  "byKind": {
+   "textbox": 2,
+   "label": 3
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_BOOKLIST",
+  "controlCount": 4,
+  "byKind": {
+   "grid": 1,
+   "textbox": 1,
+   "label": 2
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_HELP",
+  "controlCount": 4,
+  "byKind": {
+   "grid": 1,
+   "textbox": 1,
+   "label": 2
+  },
+  "grids": 1,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "UT_WEB_CAM",
+  "controlCount": 4,
+  "byKind": {
+   "panel": 1,
+   "other": 1,
+   "button": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_AC_GROUP",
+  "controlCount": 2,
+  "byKind": {
+   "textbox": 1,
+   "combo": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_DM",
+  "controlCount": 2,
+  "byKind": {
+   "textbox": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_EMP",
+  "controlCount": 2,
+  "byKind": {
+   "textbox": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_ITEM",
+  "controlCount": 2,
+  "byKind": {
+   "textbox": 1,
+   "combo": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_MEMB",
+  "controlCount": 2,
+  "byKind": {
+   "textbox": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_PRODUCT",
+  "controlCount": 2,
+  "byKind": {
+   "textbox": 2
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_ADD_MAST",
+  "controlCount": 1,
+  "byKind": {
+   "textbox": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_GROUP",
+  "controlCount": 1,
+  "byKind": {
+   "textbox": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_LBR_TYPE",
+  "controlCount": 1,
+  "byKind": {
+   "textbox": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_STYLE",
+  "controlCount": 1,
+  "byKind": {
+   "textbox": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ },
+ {
+  "form": "MS_TAX",
+  "controlCount": 1,
+  "byKind": {
+   "textbox": 1
+  },
+  "grids": 0,
+  "tabs": 0,
+  "gridColumns": 0
+ }
+]

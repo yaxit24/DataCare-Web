@@ -1,0 +1,283 @@
+import { withTenant } from '@datacare/db';
+import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
+
+/**
+ * Company provisioning seed. A brand-new web company needs the system accounts that the posting engine
+ * references by LITERAL code (CASH/SALES/PURCHASE/GST/…), plus standard taxes, voucher books, the
+ * numbering counter and a settings row, so it can post immediately and show proper ledger names. We
+ * seed exactly the literal codes the web posting uses (sales.ts/purchase.ts/finance.ts/… fallbacks) —
+ * NOT a numeric chart — so no posting default changes and the existing test suite is untouched.
+ * Idempotent: every row is insert-if-absent, so re-provisioning is safe.
+ */
+
+/** System accounts keyed by the literal AC_CODE the posting falls back to. */
+const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string }[] = [
+  { code: 'CASH', name: 'CASH ON HAND', gr: '01' },
+  { code: 'BANK', name: 'BANK A/C', gr: '02' },
+  { code: 'SALES', name: 'SALES A/C', gr: '20' },
+  { code: 'PURCHASE', name: 'PURCHASE A/C', gr: '21' },
+  { code: 'GST', name: 'GST OUTPUT (PAYABLE)', gr: '30' },
+  { code: 'GSTINPUT', name: 'GST INPUT CREDIT', gr: '30' },
+  { code: 'ROUNDOFF', name: 'ROUND OFF', gr: '31' },
+  { code: 'KASAR', name: 'KASAR / WRITE-OFF', gr: '31' },
+  { code: 'TCS', name: 'TCS PAYABLE', gr: '30' },
+  { code: 'HMCHRG', name: 'HALLMARK CHARGES', gr: '22' },
+  { code: 'OLDGOLD', name: 'OLD GOLD EXCHANGE', gr: '21' },
+  { code: 'OG', name: 'OLD GOLD', gr: '21' },
+  { code: 'OS', name: 'OLD SILVER', gr: '21' },
+  { code: 'INTINC', name: 'INTEREST INCOME', gr: '23' },
+  { code: 'BULLION', name: 'BULLION TRADING', gr: '20' },
+  { code: 'FINESALE', name: 'FINE METAL SALE', gr: '20' },
+  { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '21' },
+  { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '21' },
+  { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '25' },
+];
+
+/** Standard GST/TCS taxes (TAX_PRC is the total rate; the CGST/SGST↔IGST split is computed at posting). */
+const TAXES: { code: string; name: string; prc: number }[] = [
+  { code: '00', name: 'TAX FREE', prc: 0 },
+  { code: '10', name: 'GST 3%', prc: 3 },
+  { code: '11', name: 'GST 5%', prc: 5 },
+  { code: '12', name: 'GST 12%', prc: 12 },
+  { code: '13', name: 'GST 18%', prc: 18 },
+  { code: '14', name: 'GST 28%', prc: 28 },
+  { code: '20', name: 'TCS 0.1%', prc: 0.1 },
+];
+
+/** Voucher books the web writes (CO_BOOK literals) → friendly names. */
+/**
+ * Books a new company starts with.
+ *
+ * Each carries the `MAIN_BOOK`, direction and posting account that `bookPolicy` needs, because a book
+ * without them cannot post: `resolveBookAccountTx` reads `BOOK_DETL` for the contra/control account and
+ * fails closed rather than inventing one. Provisioning previously created only `BOOK_DATA`, so a freshly
+ * provisioned company hit `book <X> account row 1 is missing` on its first voucher — found by running the
+ * application, not by any test.
+ */
+const BOOKS: {
+  book: string;
+  name: string;
+  /** When set, MAIN_BOOK and direction come from `workflowPolicy` so they can never drift out of step. */
+  workflow?: BookWorkflow;
+  mainBook?: string;
+  inout?: string;
+  acCode: string;
+}[] = [
+  { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES' },
+  { book: 'PR', name: 'Purchase', workflow: 'PURCHASE', acCode: 'PURCHASE' },
+  { book: 'SRT', name: 'Sales Return', workflow: 'SALES RETURN', acCode: 'SALES' },
+  { book: 'PRT', name: 'Purchase Return', workflow: 'PURCHASE RETURN', acCode: 'PURCHASE' },
+  { book: 'RCT', name: 'Receipt', mainBook: 'RECEIPT', inout: 'I', acCode: 'CASH' },
+  { book: 'PAY', name: 'Payment', mainBook: 'PAYMENT', inout: 'O', acCode: 'CASH' },
+  { book: 'SOR', name: 'Sales Order', mainBook: 'SALES ORDER', inout: 'O', acCode: 'SALES' },
+  { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
+  { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
+  { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
+  { book: 'TTR', name: 'Tag Transfer', mainBook: 'TAG TRANSFER', inout: 'O', acCode: 'KASAR' },
+  { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
+  { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
+  { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
+];
+
+export interface SeedResult {
+  coCode: string;
+  created: {
+    coMast: boolean;
+    accounts: number;
+    taxes: number;
+    books: number;
+    srno: boolean;
+    coSet: boolean;
+    /** The location and fiscal year without which the company cannot be entered at all. */
+    locality: boolean;
+    year: boolean;
+  };
+}
+
+export async function seedCompany(
+  prisma: any,
+  tenantId: string,
+  coCode: string,
+  opts?: { coName?: string; lcCode?: string },
+): Promise<SeedResult> {
+  if (!coCode) throw new Error('coCode is required');
+  const lcCode = opts?.lcCode ?? '01';
+  // The fiscal year the desktop would open: April-to-March around today.
+  const y = new Date().getFullYear();
+  return withTenant(prisma, tenantId, async (tx: any) => {
+    const absent = async (sql: string, ...p: unknown[]): Promise<boolean> =>
+      Number((await tx.$queryRawUnsafe(sql, ...p))[0]?.n ?? 0) === 0;
+    let coMast = false,
+      accounts = 0,
+      taxes = 0,
+      books = 0,
+      srno = false,
+      coSet = false,
+      locality = false,
+      year = false;
+
+    if (await absent(`SELECT count(*)::int n FROM "CO_MAST" WHERE "CO_CODE"=$1`, coCode)) {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE") VALUES ($1,$2,$3,$4)`,
+        tenantId,
+        coCode,
+        opts?.coName ?? `Company ${coCode}`,
+        lcCode,
+      );
+      coMast = true;
+    }
+    for (const a of SYSTEM_ACCOUNTS) {
+      if (
+        await absent(
+          `SELECT count(*)::int n FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2`,
+          coCode,
+          a.code,
+        )
+      ) {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR") VALUES ($1,$2,$3,$4,$5,$6)`,
+          tenantId,
+          coCode,
+          lcCode,
+          a.code,
+          a.name,
+          a.gr,
+        );
+        accounts += 1;
+      }
+    }
+    for (const t of TAXES) {
+      if (
+        await absent(
+          `SELECT count(*)::int n FROM "TAX_MAST" WHERE "CO_CODE"=$1 AND "TAX_CODE"=$2`,
+          coCode,
+          t.code,
+        )
+      ) {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,1,$4,$5,'N')`,
+          tenantId,
+          coCode,
+          t.code,
+          t.name,
+          t.prc,
+        );
+        taxes += 1;
+      }
+    }
+    for (const b of BOOKS) {
+      // MAIN_BOOK / direction come from workflowPolicy when the book backs a workflow, so provisioning
+      // cannot spell them differently from the resolver that validates them.
+      const wf = b.workflow ? workflowPolicy[b.workflow] : undefined;
+      const mainBook = wf?.mainBook ?? b.mainBook ?? b.name.toUpperCase();
+      const inout = wf?.inout ?? b.inout ?? 'I';
+      if (
+        await absent(
+          `SELECT count(*)::int n FROM "BOOK_DATA" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_BOOK"=$3`,
+          coCode,
+          lcCode,
+          b.book,
+        )
+      ) {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y')`,
+          tenantId,
+          coCode,
+          lcCode,
+          b.book,
+          b.name,
+          b.book,
+          mainBook,
+          inout,
+        );
+        // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
+        // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the
+        // cash/bank account a settlement lands in, 3 = the round-off / kasar account. Creating only row 1
+        // produced `book SL account row 2 is missing` on the first cash sale.
+        const legs: Array<{ srNo: number; acCode: string }> = [
+          { srNo: 1, acCode: b.acCode },
+          { srNo: 2, acCode: 'CASH' },
+          { srNo: 3, acCode: 'ROUNDOFF' },
+        ];
+        for (const leg of legs) {
+          await tx.$executeRawUnsafe(
+            `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","BOOK_NAME",
+               "BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","AC_CODE","AC_NAME","DATA_TYPE")
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'L')`,
+            tenantId,
+            coCode,
+            lcCode,
+            b.book,
+            leg.srNo,
+            b.name,
+            b.book,
+            mainBook,
+            inout,
+            leg.acCode,
+            leg.acCode,
+          );
+        }
+        books += 1;
+      }
+    }
+    if (
+      await absent(
+        `SELECT count(*)::int n FROM "SRNO_MAST" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2`,
+        coCode,
+        lcCode,
+      )
+    ) {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "SRNO_MAST"(tenant_id,"CO_CODE","LC_CODE","VCH_SRNO","TAG_SRNO") VALUES ($1,$2,$3,0,0)`,
+        tenantId,
+        coCode,
+        lcCode,
+      );
+      srno = true;
+    }
+    // A company with no LOCATION cannot be selected: resolveLoginScope() cannot build a scope without
+    // one, and /context/select answers `location-unavailable`. Provisioning previously created the books
+    // and accounts but not the location, so a provisioned company was unreachable through the UI.
+    if (
+      await absent(
+        `SELECT count(*)::int n FROM "LOCT_MAST" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2`,
+        coCode,
+        lcCode,
+      )
+    ) {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME") VALUES ($1,$2,$3,$4)`,
+        tenantId,
+        coCode,
+        lcCode,
+        'Main Counter',
+      );
+      locality = true;
+    }
+    // Likewise a fiscal year: businessScope.year() filters by company, and without a row every business
+    // endpoint answers `scope-incomplete`.
+    if (await absent(`SELECT count(*)::int n FROM "YEAR_MAST" WHERE "CO_CODE"=$1`, coCode)) {
+      const startYear = new Date().getMonth() + 1 >= 4 ? y : y - 1;
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,$2,$3,$4,$5)`,
+        tenantId,
+        coCode,
+        `${startYear}-${startYear + 1}`,
+        new Date(Date.UTC(startYear, 3, 1)),
+        new Date(Date.UTC(startYear + 1, 2, 31)),
+      );
+      year = true;
+    }
+    if (await absent(`SELECT count(*)::int n FROM "CO_SET" WHERE "CO_CODE"=$1`, coCode)) {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "CO_SET"(tenant_id,"CO_CODE") VALUES ($1,$2)`,
+        tenantId,
+        coCode,
+      );
+      coSet = true;
+    }
+    return { coCode, created: { coMast, accounts, taxes, books, srno, coSet, locality, year } };
+  });
+}

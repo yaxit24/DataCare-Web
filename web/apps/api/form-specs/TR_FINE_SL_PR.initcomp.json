@@ -1,0 +1,471 @@
+{
+ "form": "TR_FINE_SL_PR",
+ "controlCount": 44,
+ "byKind": {
+  "textbox": 13,
+  "button": 8,
+  "masked": 1,
+  "panel": 2,
+  "label": 13,
+  "grid": 5,
+  "other": 1,
+  "combo": 1
+ },
+ "grids": [
+  "MSG",
+  "MSG_TOT",
+  "MSG_IDTL",
+  "MSG_BILL_TOT",
+  "MSG2_TOTAL"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "FlowLayoutPanel1",
+   "BtnLast",
+   "BtnFirst"
+  ],
+  "this": [
+   "TEXT_ENTRY",
+   "MSG",
+   "tVchDesc",
+   "Label4",
+   "TEXT_ENTRY_2",
+   "MSG2_TOTAL",
+   "cboItemTyp",
+   "Label12",
+   "tMobileNo",
+   "LClSilver",
+   "lClGold",
+   "LClAmt",
+   "MSG_BILL_TOT",
+   "LOpSilver",
+   "LOpGold",
+   "LOpAmt",
+   "tAcCode",
+   "tAcName",
+   "Label1",
+   "tEmpCode",
+   "tEmpName",
+   "Label3",
+   "tHdVchNo",
+   "Cr",
+   "BtnF1",
+   "TEXT_IDTL",
+   "MSG_IDTL",
+   "MSG_TOT",
+   "mDay",
+   "mTime",
+   "mVchDate",
+   "lblBDate",
+   "Label2",
+   "tVchNo",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "104,42",
+   "size": "76,22",
+   "tabIndex": "0",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "mVchDate",
+   "type": "MaskedTextBox",
+   "location": "297,42",
+   "size": "76,22",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "104,71",
+   "size": "76,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "353,133",
+   "size": "100,18",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_IDTL",
+   "type": "TextBox",
+   "location": "521,245",
+   "size": "100,18",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnLast",
+   "type": "SimpleButton",
+   "location": "199,3",
+   "size": "41,37",
+   "tabIndex": "5",
+   "text": ">",
+   "kind": "button"
+  },
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "115,367",
+   "size": "57,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnFirst",
+   "type": "SimpleButton",
+   "location": "152,3",
+   "size": "41,37",
+   "tabIndex": "6",
+   "text": "<",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "7",
+   "text": "Fine Sales",
+   "kind": "label"
+  },
+  {
+   "name": "tHdVchNo",
+   "type": "TextBox",
+   "location": "8,8",
+   "size": "56,15",
+   "tabIndex": "8",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "FlowLayoutPanel1",
+   "type": "FlowLayoutPanel",
+   "location": "246,3",
+   "size": "575,36",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "19,43",
+   "size": "68,20",
+   "tabIndex": "1125",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "227,43",
+   "size": "71,20",
+   "tabIndex": "1126",
+   "text": "Vch Date",
+   "kind": "label"
+  },
+  {
+   "name": "mTime",
+   "type": "TextBox",
+   "location": "378,42",
+   "size": "75,22",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mDay",
+   "type": "TextBox",
+   "location": "458,42",
+   "size": "83,22",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "28,104",
+   "size": "913,67",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "27,173",
+   "size": "617,17",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_IDTL",
+   "type": "AxMSFlexGrid",
+   "location": "23,197",
+   "size": "1140,101",
+   "tabIndex": "1140",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnF1",
+   "type": "SimpleButton",
+   "location": "186,41",
+   "size": "35,23",
+   "tabIndex": "1149",
+   "text": "F1",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1215,171",
+   "size": "28,28",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "29,367",
+   "size": "69,20",
+   "tabIndex": "1161",
+   "text": "Employee",
+   "kind": "label"
+  },
+  {
+   "name": "tEmpName",
+   "type": "TextBox",
+   "location": "178,367",
+   "size": "249,22",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "186,71",
+   "size": "355,23",
+   "tabIndex": "1210",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "19,70",
+   "size": "75,20",
+   "tabIndex": "1211",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "LOpAmt",
+   "type": "Label",
+   "location": "990,43",
+   "size": "168,20",
+   "tabIndex": "1212",
+   "text": "OpAmt",
+   "kind": "label"
+  },
+  {
+   "name": "LOpGold",
+   "type": "Label",
+   "location": "990,63",
+   "size": "168,20",
+   "tabIndex": "1213",
+   "text": "OpGold",
+   "kind": "label"
+  },
+  {
+   "name": "LOpSilver",
+   "type": "Label",
+   "location": "990,83",
+   "size": "168,20",
+   "tabIndex": "1214",
+   "text": "OpSilver",
+   "kind": "label"
+  },
+  {
+   "name": "MSG_BILL_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "28,300",
+   "size": "1134,17",
+   "tabIndex": "1215",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "LClAmt",
+   "type": "Label",
+   "location": "538,490",
+   "size": "177,20",
+   "tabIndex": "1216",
+   "text": "ClAmt",
+   "kind": "label"
+  },
+  {
+   "name": "lClGold",
+   "type": "Label",
+   "location": "538,511",
+   "size": "177,20",
+   "tabIndex": "1217",
+   "text": "ClGold",
+   "kind": "label"
+  },
+  {
+   "name": "LClSilver",
+   "type": "Label",
+   "location": "539,531",
+   "size": "177,20",
+   "tabIndex": "1218",
+   "text": "ClSilver",
+   "kind": "label"
+  },
+  {
+   "name": "tMobileNo",
+   "type": "TextBox",
+   "location": "548,71",
+   "size": "97,23",
+   "tabIndex": "1219",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "632,43",
+   "size": "117,22",
+   "tabIndex": "1220",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "547,42",
+   "size": "74,20",
+   "tabIndex": "1221",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "MSG2_TOTAL",
+   "type": "AxMSFlexGrid",
+   "location": "722,320",
+   "size": "441,239",
+   "tabIndex": "1222",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "TEXT_ENTRY_2",
+   "type": "TextBox",
+   "location": "881,452",
+   "size": "100,18",
+   "tabIndex": "1223",
+   "text": "TAX FREE",
+   "kind": "textbox"
+  },
+  {
+   "name": "tVchDesc",
+   "type": "TextBox",
+   "location": "115,403",
+   "size": "402,53",
+   "tabIndex": "1224",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "17,403",
+   "size": "76,20",
+   "tabIndex": "1225",
+   "text": "Vch Desc",
+   "kind": "label"
+  }
+ ]
+}

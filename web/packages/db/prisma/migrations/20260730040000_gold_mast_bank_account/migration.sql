@@ -1,0 +1,22 @@
+-- DG_GOLD_MAST.BANK_AC_CODE — the bank account the live-rate gold book posts against.
+--
+-- WHY THIS WAS MISSING AND HOW IT WAS FOUND
+-- -----------------------------------------
+-- The desktop declares it as runtime DDL in MS_UPDATE's scheme-data initialiser:
+--
+--   ALTER TABLE DG_GOLD_MAST ADD BANK_AC_CODE VARCHAR(10) NOT NULL DEFAULT '00075'
+--
+-- and MS_GOLD_MAST binds the control `tBankCode` to it. The web migration never added the column, but the
+-- gold-rate master config DID list it as a form field — so the screen rendered a "Bank A/c" input whose save
+-- always failed with:
+--
+--   400 {"error":"invalid-data","detail":"column \"BANK_AC_CODE\" of relation \"DG_GOLD_MAST\" does not exist"}
+--
+-- Found by diffing the schema the desktop's initialisation buttons declare against information_schema, not by
+-- chance: that comparison is now a standing readiness check.
+--
+-- The desktop's NOT NULL DEFAULT '00075' is reproduced as a nullable column with the same default. A hard NOT
+-- NULL would reject every existing row that predates this migration, and the desktop's own default is an
+-- account code that need not exist in every company's ledger.
+ALTER TABLE "DG_GOLD_MAST"
+  ADD COLUMN IF NOT EXISTS "BANK_AC_CODE" VARCHAR(10) DEFAULT '00075';

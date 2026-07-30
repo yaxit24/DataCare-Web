@@ -1,0 +1,172 @@
+{
+ "form": "UT_BKP",
+ "controlCount": 15,
+ "byKind": {
+  "panel": 1,
+  "label": 2,
+  "textbox": 1,
+  "other": 2,
+  "button": 9
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "this": [
+   "btnAttach",
+   "Label1",
+   "BtnRestore",
+   "btnBkp",
+   "ProgressBar1",
+   "BtnF1",
+   "tSavePath",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Backup Data",
+   "kind": "label"
+  },
+  {
+   "name": "tSavePath",
+   "type": "TextBox",
+   "location": "437,183",
+   "size": "311,26",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnF1",
+   "type": "SimpleButton",
+   "location": "535,127",
+   "size": "106,32",
+   "tabIndex": "1151",
+   "text": "Se&lect",
+   "kind": "button"
+  },
+  {
+   "name": "ProgressBar1",
+   "type": "ProgressBar",
+   "location": "378,236",
+   "size": "426,23",
+   "tabIndex": "1152",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "btnBkp",
+   "type": "SimpleButton",
+   "location": "535,279",
+   "size": "106,32",
+   "tabIndex": "1153",
+   "text": "&Backup",
+   "kind": "button"
+  },
+  {
+   "name": "BtnRestore",
+   "type": "SimpleButton",
+   "location": "535,470",
+   "size": "106,32",
+   "tabIndex": "1154",
+   "text": "&Restore",
+   "kind": "button"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "331,187",
+   "size": "90,20",
+   "tabIndex": "1155",
+   "text": "Backup Path",
+   "kind": "label"
+  },
+  {
+   "name": "btnAttach",
+   "type": "SimpleButton",
+   "location": "535,328",
+   "size": "106,32",
+   "tabIndex": "1156",
+   "text": "&Dattach",
+   "kind": "button"
+  }
+ ]
+}

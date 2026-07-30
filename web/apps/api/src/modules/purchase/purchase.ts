@@ -1,0 +1,2006 @@
+import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
+import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
+import { withTenant } from '@datacare/db';
+import { recordFieldChangesTx } from '../vouchers/fieldAudit.js';
+import { stagePurchaseLotDetailTx } from '../stock/lotRegister.js';
+import {
+  formatVoucherNo,
+  nextVoucherNoTx,
+  nextTagNoTx,
+  type VoucherScope,
+} from '../vouchers/numbering.js';
+import {
+  postVoucherTx,
+  reverseVoucherTx,
+  assertBalanced,
+  assertPeriodOpen,
+  insertRowTx,
+  type LedgerLine,
+} from '../posting/posting.js';
+import {
+  deleteVoucherWriteSetTx,
+  nextHiddenVoucherNoTx,
+  persistedVoucherHeaderTx,
+  voucherTimestamp,
+} from '../vouchers/lifecycle.js';
+import { payoutLegs, receiptLegs } from '../finance/tender.js';
+import { fineFor } from '../shared/finePolicy.js';
+import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
+import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
+import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/counterStockPolicy.js';
+import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
+import type { RoundingPolicy } from '../shared/roundingPolicy.js';
+import {
+  cashPurchaseParty,
+  generatedLabourRate,
+  purchaseAmountBase,
+  purchaseExpenseSplit,
+  resolveSettingsBehaviorTx,
+  tagSerialWidth,
+  type LineAmountType,
+} from '../shared/settingsBehavior.js';
+import {
+  metalAmount,
+  labourCharge,
+  lineNet as calcLineNet,
+  billTotals,
+  type LabourType,
+  type BillTotals,
+} from '@datacare/core';
+
+export class PurchaseValidationError extends Error {
+  constructor(msg: string) {
+    super(msg);
+    this.name = 'PurchaseValidationError';
+  }
+}
+
+export interface PurchaseLineInput {
+  itCode: string;
+  tagNo?: string; // tagged item -> created in stock on save (stock-IN), removed on delete
+  vchSrno?: number; // persisted BAR_DETL identity; server verifies it for returns/issues
+  pcs?: number;
+  grossWt?: number;
+  netWt?: number;
+  touch?: number; // % purity; if fineWt absent, fine = (net+ght) * (touch+west) / 100
+  ghtWt?: number;
+  westPct?: number;
+  lesTouch?: number; // old-gold/Kun less-touch adjustment; presence selects that desktop policy
+  kunFine?: number; // old-gold/Kun fine addition; presence selects that desktop policy
+  fineWt?: number;
+  rate?: number; // metal rate (per fine unit)
+  metalAmount?: number;
+  labourType?: LabourType;
+  labourRate?: number;
+  labourPct?: number;
+  labourFixed?: number;
+  otherAmount?: number;
+  /** Metal type for the AC_DATA fine-weight sub-ledger leg (desktop parity); default 'G' (gold). */
+  metal?: 'G' | 'S';
+  otherFineWt?: number; // PR_DETL.ITM_OTH_FINE, added to gold fine leg 29
+  silverFineWt?: number; // PR_DETL.SILVER_FINE, posted to desktop silver account 00009
+  /** Hallmark HUID / hallmark id stamped on this line (TR_PURC_HM → PR_DETL.HM_ID). */
+  huid?: string;
+  // Desktop purchase-grid columns (TR_PURC.cs `mSG_PR[i, c]`), one per PR_DETL column.
+  itDesc?: string; // mSG_PR[i,2]  :13100
+  tblCode?: string; // mSG_PR[i,3]  :13102
+  designNo?: string; // mSG_PR[i,4]  :13103
+  lotNo?: string; // mSG_PR[i,5]  :13104
+  itmLot?: string; // mSG_PR[i,6]  :13105
+  withStock?: string; // mSG_PR[i,7]  :13151
+  bagWt?: number; // mSG_PR[i,8]  :13107
+  lossWt?: number; // mSG_PR[i,14] :13112
+  lessWt?: number; // mSG_PR[i,13] :13111 (ITM_OTH_WT)
+  ghtPct?: number; // mSG_PR[i,19] :13117
+  lessTouch?: number; // mSG_PR[i,23] :13121
+  convRate?: number; // mSG_PR[i,27] :13131
+  convPct?: number; // mSG_PR[i,28] :13132
+  urdRateType?: string; // mSG_PR[i,30] :13137
+  otherRate?: number; // mSG_PR[i,37] :13129
+  mrp?: number; // mSG_PR[i,39] :13139
+  commissionPct?: number; // mSG_PR[i,41] :13140
+  commissionAmount?: number; // mSG_PR[i,42] :13141
+  fineCutPcs?: number; // mSG_PR[i,60] :13189
+  fineCutGrossWt?: number; // mSG_PR[i,61] :13190
+  fineCutNetWt?: number; // mSG_PR[i,62] :13191
+  fineCutFine?: number; // mSG_PR[i,63] :13192
+  prCode?: string; // mSG_PR[i,64] :13147
+  /**
+   * Stone/diamond sub-detail rows for this line (desktop `DtIdtlPr` grid → PR_IDTL,
+   * TR_PURC.cs:13211-13243). An empty grid writes no PR_IDTL rows, so omitting this writes none.
+   */
+  stones?: PurchaseStoneInput[];
+}
+
+/** One PR_IDTL sub-detail row (TR_PURC.cs:13223-13242, `DtIdtlPr.Rows[i][n]` column ordinals). */
+export interface PurchaseStoneInput extends StoneSubDetailInput {
+  /** Extends the shared TblIdtl shape: stone identity plus the karigar side of its valuation. */
+  isrNo?: number; // [0]  ISR_NO
+  itCode?: string; // [1]  IT_CODE
+  dmCode?: string; // [3]  DM_CODE
+  dmName?: string; // [4]  DM_NAME
+  dmColor?: string; // [5]  DM_COLOR
+  dmSize?: string; // [6]  DM_SIZE
+  dmOrigin?: string; // [7]  DM_ORIGIN
+  dmRemark?: string; // [8]  DM_REMARK
+  dmSfNo?: string; // [9]  DM_SFNO
+  pcs?: number; // [12] IT_PCS
+  grossWt?: number; // [14] IT_GWT
+  conPct?: number; // [15] IT_CON_PRC
+  rateType?: string; // [16] IT_RATE_TYPE
+  rate?: number; // [17] IT_RATE
+  amount?: number; // [18] IT_AMT
+  lbrRate?: number; // [19] IT_LBR_RATE
+  lbrAmount?: number; // [20] IT_LBR_AMT
+  netAmount?: number; // [21] IT_NET_AMT
+  conWt?: number; // [22] IT_CON_WT
+  itType?: string; // [23] IT_TYPE
+}
+
+export interface PurchaseInput {
+  scope: VoucherScope;
+  mainUser?: string; // authenticated user; persisted and preserved by edit
+  acCode: string; // supplier account (required)
+  acName?: string;
+  billNo?: string;
+  vchDate?: Date | string;
+  // Desktop PR_DATA header fields (TR_PURC.cs:12982-13046): party address/contact, bank and
+  // cheque reference, credit terms, bill discount %, and the TDS/TCS settlement rows.
+  address1?: string;
+  address2?: string;
+  address3?: string;
+  city?: string;
+  mobile?: string;
+  bankName?: string;
+  chequeNo?: string;
+  cardAc?: string;
+  creditDays?: number;
+  discountPct?: number;
+  tcsCode?: string;
+  tcsPct?: number;
+  tcsAmount?: number;
+  tdsCode?: string;
+  tdsPct?: number;
+  tdsAmount?: number;
+  /** Purchase booked against a sale bill (TR_PURC.cs:13169-13172 tSlBill / tSlBill_DbCd). */
+  saleBillNo?: string;
+  saleBillBook?: string;
+  discountAmount?: number;
+  taxRatePct: number;
+  taxCode?: string;
+  interState: boolean; // checked against persisted AC_MAST.AC_GST_TYPE; never authoritative
+  urd?: boolean; // unregistered-dealer purchase — no input GST (tax forced to 0)
+  rateUnfix?: boolean; // PR_DATA.RATE_UNFIX; gates the workflow-specific fine ledger policy
+  purchaseAc?: string; // purchase expense ledger (default 'PURCHASE')
+  taxAc?: string; // GST input ledger (default 'GST-INPUT')
+  roundAc?: string;
+  // Hallmark purchase (TR_PURC_HM): a hallmarking charge on the bought items + its own input GST.
+  hmAmount?: number; // HM_AMT — hallmark charge (0/absent ⇒ a normal purchase)
+  hmChargeAc?: string; // hallmark-expense ledger (default 'HMCHRG')
+  hmTaxPct?: number; // GST% on the hallmark charge (defaults to the bill taxRatePct)
+  // Settlement/tender (desktop PR_DATA CASH_AMT/CHQ_AMT/CARD_AMT/KASAR_AMT/BILL_OS) — pay the supplier now.
+  cashAmt?: number;
+  chequeAmt?: number;
+  cardAmt?: number;
+  upiAmt?: number;
+  kasar?: number;
+  cashAc?: string; // default 'CASH'
+  bankAc?: string; // default 'BANK' (cheque/card/upi)
+  kasarAc?: string; // default 'KASAR'
+}
+
+type VoucherKey = {
+  CO_CODE: string;
+  LC_CODE: string;
+  CO_YEAR: string;
+  CO_BOOK: string;
+  VCH_NO: string;
+};
+
+const num = (v: unknown): number => (v == null ? 0 : Number(v));
+const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
+const round3 = (n: number): number => Math.round((n + Number.EPSILON) * 1000) / 1000;
+
+/** Resolve a purchase line's 3dp fine: standard items use (net+ght)×(touch+west)/100;
+ * old-gold/Kun inputs use the TR_PURC.cs:7310-7317 less-touch + Kun-fine policy. */
+export function lineFine(line: PurchaseLineInput): number {
+  if (line.fineWt != null) return round3(Number(line.fineWt));
+  const workflow =
+    line.lesTouch != null || line.kunFine != null ? 'purchaseOldGold' : 'purchaseItem';
+  return fineFor(workflow, line);
+}
+
+/** Compute a purchase line's metal/labour/net (pure). */
+export function computeLine(
+  line: PurchaseLineInput,
+  policy?: RoundingPolicy,
+  amountType: LineAmountType = '',
+): {
+  fine: number;
+  metal: number;
+  labour: number;
+  net: number;
+} {
+  const fine = lineFine(line);
+  const rate =
+    line.rate == null
+      ? undefined
+      : policy
+        ? policy.roundPurchaseRate(line.rate)
+        : Number(line.rate);
+  // TR_PURC.cs:7396 selects the rate base from CO_SET.PR_AMT_TYPE; this mode is never accepted
+  // from the request. An explicit metalAmount remains the authoritative desktop-style line value.
+  const amountBase = purchaseAmountBase({ ...line, fineWt: fine }, amountType);
+  const metal =
+    line.metalAmount != null
+      ? Number(line.metalAmount)
+      : rate != null
+        ? metalAmount(amountBase, rate)
+        : 0;
+  const labour = line.labourType
+    ? labourCharge(
+        line.labourType,
+        {
+          netWt: line.netWt,
+          pcs: line.pcs,
+          rate: line.labourRate,
+          pct: line.labourPct,
+          metalAmount: metal,
+          fixed: line.labourFixed,
+        },
+        policy,
+      )
+    : 0;
+  const net = calcLineNet({ metal, labour, other: line.otherAmount });
+  return { fine, metal, labour, net };
+}
+
+/**
+ * Build the balanced double-entry AC_DATA lines for a purchase (pure). Ledger sense is the MIRROR of
+ * sales: credit supplier (total), debit purchase (taxable) + input GST (tax) + round-off (Req 11.2/13.1).
+ */
+export function buildPurchaseLedger(p: {
+  key: VoucherKey;
+  acCode: string;
+  purchaseAc: string;
+  taxAc: string;
+  roundAc: string;
+  controlAc?: string;
+  vchType?: string;
+  totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
+  expenseLegs?: { ac: string; amount: number }[];
+}): LedgerLine[] {
+  const base = { ...p.key, VCH_TYPE: p.vchType ?? 'PURC' };
+  const lines: LedgerLine[] = [];
+  if (p.totals.total !== 0)
+    lines.push({
+      ...base,
+      AC_CODE: p.acCode,
+      LD_CODE: p.controlAc ?? p.purchaseAc,
+      DR_AMT: 0,
+      CR_AMT: p.totals.total,
+      SIGN: 'C',
+    });
+  const expense =
+    p.expenseLegs && p.expenseLegs.length
+      ? p.expenseLegs
+      : [{ ac: p.purchaseAc, amount: p.totals.taxable }];
+  for (const leg of expense)
+    if (leg.amount !== 0)
+      lines.push({
+        ...base,
+        AC_CODE: leg.ac,
+        LD_CODE: p.acCode,
+        DR_AMT: leg.amount,
+        CR_AMT: 0,
+        SIGN: 'D',
+      });
+  if (p.totals.tax !== 0)
+    lines.push({
+      ...base,
+      AC_CODE: p.taxAc,
+      LD_CODE: p.acCode,
+      DR_AMT: p.totals.tax,
+      CR_AMT: 0,
+      SIGN: 'D',
+    });
+  if (p.totals.roundOff > 0)
+    lines.push({
+      ...base,
+      AC_CODE: p.roundAc,
+      LD_CODE: p.acCode,
+      DR_AMT: p.totals.roundOff,
+      CR_AMT: 0,
+      SIGN: 'D',
+    });
+  else if (p.totals.roundOff < 0)
+    lines.push({
+      ...base,
+      AC_CODE: p.roundAc,
+      LD_CODE: p.acCode,
+      DR_AMT: 0,
+      CR_AMT: Math.abs(p.totals.roundOff),
+      SIGN: 'C',
+    });
+  return lines;
+}
+
+/** Allocate the bill taxable across distinct per-group expense accounts, proportional to each group's
+ *  line-net share; the last account absorbs the rounding remainder so Σ legs == taxable exactly. */
+export function buildExpenseLegs(
+  items: { net: number; ac: string }[],
+  taxable: number,
+  lineNetTotal: number,
+): { ac: string; amount: number }[] {
+  const R2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
+  const byAc = new Map<string, number>();
+  for (const it of items) byAc.set(it.ac, R2((byAc.get(it.ac) ?? 0) + it.net));
+  const acs = [...byAc.keys()];
+  if (acs.length <= 1) return [{ ac: acs[0] ?? 'PURCHASE', amount: R2(taxable) }];
+  const legs: { ac: string; amount: number }[] = [];
+  let allocated = 0;
+  for (let i = 0; i < acs.length; i++) {
+    const ac = acs[i] as string;
+    const amount =
+      i === acs.length - 1
+        ? R2(taxable - allocated)
+        : lineNetTotal > 0
+          ? R2((taxable * (byAc.get(ac) as number)) / lineNetTotal)
+          : 0;
+    if (i < acs.length - 1) allocated = R2(allocated + amount);
+    legs.push({ ac, amount });
+  }
+  return legs;
+}
+
+export function buildPurchaseFineLedger(p: {
+  key: VoucherKey;
+  acCode: string;
+  purchaseAc: string;
+  vchType?: string;
+  rateUnfix?: boolean;
+  purcAcByItem?: Record<string, string>;
+  lines: Array<{
+    itCode: string;
+    metal?: 'G' | 'S';
+    fine: number;
+    metalAmount: number;
+    otherFineWt?: number;
+    silverFineWt?: number;
+  }>;
+}): LedgerLine[] {
+  if (p.rateUnfix) return [];
+  const legs = new Map<string, { metal: 'G' | 'S'; ldCode: string; fine: number }>();
+  for (const line of p.lines) {
+    if (round2(line.metalAmount) !== 0) continue;
+    const metal = line.metal ?? 'G';
+    const ldCode = metal === 'S' ? '00009' : (p.purcAcByItem?.[line.itCode.trim()] ?? p.purchaseAc);
+    const fine =
+      metal === 'S' ? round3(num(line.silverFineWt)) : round3(line.fine + num(line.otherFineWt));
+    if (fine === 0) continue;
+    const id = `${metal}|${ldCode}`;
+    const prior = legs.get(id);
+    legs.set(id, { metal, ldCode, fine: round3((prior?.fine ?? 0) + fine) });
+  }
+  return [...legs.values()].map((leg) => ({
+    ...p.key,
+    VCH_TYPE: p.vchType ?? 'PURC',
+    AC_CODE: p.acCode,
+    LD_CODE: leg.ldCode,
+    IT_TYPE: leg.metal,
+    SIGN: '+',
+    FINE_WT: leg.fine,
+    FINE_RATE: 0,
+    DR_AMT: 0,
+    CR_AMT: 0,
+  }));
+}
+
+function keyOf(s: VoucherScope, vchNo: number | string): VoucherKey {
+  return {
+    CO_CODE: s.coCode,
+    LC_CODE: s.lcCode,
+    CO_YEAR: s.coYear ?? '',
+    CO_BOOK: s.coBook ?? 'PUR',
+    VCH_NO: formatVoucherNo(vchNo),
+  };
+}
+
+export interface PurchaseResult {
+  vchNo: number;
+  totals: BillTotals;
+}
+
+interface WritePurchaseContext {
+  vchNo: number;
+  hdVchNo: string;
+  mainUser: string;
+  persistedClock?: unknown;
+  isEdit: boolean;
+  /** Persisted header read back before the rewrite, for the USER_DATA per-field edit audit. */
+  persistedHeader?: Record<string, unknown>;
+  /** User performing the edit (desktop NEW_USER). */
+  editingUser?: string | null;
+}
+
+function completePurchaseScope(
+  scope: VoucherScope,
+): asserts scope is VoucherScope & { coYear: string; coBook: string } {
+  if (!scope.tenantId || !scope.coCode || !scope.lcCode || !scope.coYear || !scope.coBook) {
+    throw new PurchaseValidationError(
+      'purchase requires tenant, company, location, fiscal year, and configured book',
+    );
+  }
+}
+
+async function configuredPurchaseBookNameTx(
+  tx: any,
+  scope: VoucherScope & { coBook: string },
+): Promise<string> {
+  const rows: Array<{ BOOK_NAME: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "BOOK_NAME" FROM "BOOK_DATA"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+        AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
+      ORDER BY row_id`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+  );
+  if (rows.length !== 1) {
+    throw new PurchaseValidationError(`purchase book configuration is ambiguous: ${scope.coBook}`);
+  }
+  return String(rows[0]?.BOOK_NAME ?? '').trim();
+}
+
+async function authoritativePurchaseAccountNameTx(
+  tx: any,
+  scope: VoucherScope,
+  acCode: string,
+): Promise<string> {
+  const rows: Array<{ AC_NAME: unknown }> = await tx.$queryRawUnsafe(
+    `WITH candidates AS (
+       SELECT "AC_NAME",row_id,CASE WHEN "LC_CODE"::text=$4 THEN 0 ELSE 1 END priority
+         FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3
+          AND ("LC_CODE" IS NULL OR btrim("LC_CODE"::text)='' OR "LC_CODE"::text=$4)
+     )
+     SELECT "AC_NAME" FROM candidates
+      WHERE priority=(SELECT min(priority) FROM candidates) ORDER BY row_id LIMIT 2`,
+    scope.tenantId,
+    scope.coCode,
+    acCode,
+    scope.lcCode,
+  );
+  if (rows.length !== 1) {
+    throw new PurchaseValidationError(
+      rows.length
+        ? `supplier account is ambiguous: ${acCode}`
+        : `supplier account not found: ${acCode}`,
+    );
+  }
+  return text(rows[0]?.AC_NAME);
+}
+
+/**
+ * Desktop TR_PURC write core. Main numbering is MAX(PR_DATA.VCH_NO)+1 by company/location/year/book
+ * (TR_PURC.cs:12911); hidden numbering is MAX(TEMP_BOOK_DATA.VCH_NO)+1 without year, five digits
+ * (TR_PURC.cs:12100,12108,12923,12927). Edits call this after removing the prior write set.
+ */
+async function writePurchaseTx(
+  tx: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+  ctx: WritePurchaseContext,
+): Promise<PurchaseResult> {
+  completePurchaseScope(input.scope);
+  const behavior = await resolveSettingsBehaviorTx(tx, input.scope);
+  // TR_PURC.cs:11977: enabled cash purchase defaults the persisted party to desktop account 00050.
+  input = { ...input, acCode: cashPurchaseParty(input.acCode, behavior.cashPurchaseAccount) };
+  if (!input.acCode) throw new PurchaseValidationError('supplier account (acCode) is required');
+  if (!lines || lines.length === 0)
+    throw new PurchaseValidationError('at least one line item is required');
+
+  const purchaseAc = input.purchaseAc ?? 'PURCHASE';
+  const fallbackTaxAc = input.taxAc ?? 'GSTINPUT';
+  const requestedRoundAc = input.roundAc;
+  const taxPct = input.urd ? 0 : input.taxRatePct;
+  const tenantId = input.scope.tenantId;
+  const vchNo = ctx.vchNo;
+  const key = keyOf(input.scope, vchNo);
+  const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'PURCHASE');
+  const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
+
+  // TR_PURC.cs refuses a voucher whose footer totals are ALL zero — labour amount, pieces, gross weight
+  // and net amount together. Summing the same four quantities across the request's lines reproduces the
+  // footer test without needing the grid.
+  const contentTotal = lines.reduce(
+    (sum, l) =>
+      sum +
+      Math.abs(Number(l.labourFixed ?? 0)) +
+      Math.abs(Number(l.labourRate ?? 0)) +
+      Math.abs(Number(l.pcs ?? 0)) +
+      Math.abs(Number(l.grossWt ?? 0)) +
+      Math.abs(Number(l.metalAmount ?? 0)),
+    0,
+  );
+  if (contentTotal === 0) throw new PurchaseValidationError(DESKTOP_MESSAGES.PARTY_ENTRY_REQUIRED);
+
+  // TR_PURC.cs:12868 — counter code is mandatory only when CO_SET_NEW.COUNTER_STK='Y'; the flag is read
+  // server-side per transaction, never from the request.
+  const counterPolicy = await resolveCounterStockPolicyTx(tx, {
+    tenantId: input.scope.tenantId,
+    coCode: input.scope.coCode,
+  });
+  assertCounterCodes(
+    counterPolicy,
+    lines.map((l) => ({ itCode: l.itCode, tblCode: l.tblCode })),
+  );
+  // TR_PURC's HmId2..4 weight rule lives on header controls (tHmId2/nHmWt2), which the purchase input
+  // does not carry: PR_DETL keeps a single HM_ID per line. Enforced on sales, where the four ID slots
+  // and their weights both exist.
+  const configuredBookName = await configuredPurchaseBookNameTx(
+    tx,
+    input.scope as VoucherScope & { coBook: string },
+  );
+  const taxPolicy = await resolveTaxPolicyTx(tx, input.scope, {
+    acCode: input.acCode,
+    taxPct,
+    taxCode: input.taxCode,
+  });
+  const supplierName = await authoritativePurchaseAccountNameTx(tx, input.scope, input.acCode);
+  if (input.interState !== taxPolicy.interState) {
+    throw new PurchaseValidationError('interState does not match the persisted supplier GST type');
+  }
+  const interState = taxPolicy.interState;
+  const taxAc = taxPolicy.taxAc ?? fallbackTaxAc;
+
+  const computed = lines.map((line) => {
+    const rounded =
+      line.rate == null ? line : { ...line, rate: roundingPolicy.roundPurchaseRate(line.rate) };
+    const calc = computeLine(rounded, roundingPolicy, behavior.purchaseAmountType);
+    const basis = rounded.labourType === 'per_piece' ? num(rounded.pcs) : num(rounded.netWt);
+    const generated = generatedLabourRate(calc.labour, basis, behavior.labourRateGeneration);
+    return {
+      in: generated == null ? rounded : { ...rounded, labourRate: generated },
+      calc,
+    };
+  });
+  const lineNetTotal = computed.reduce((s, c) => s + c.calc.net, 0);
+  const totals = billTotals(
+    {
+      lineNetTotal,
+      discountAmount: input.discountAmount,
+      taxRatePct: taxPct,
+      interState: interState,
+    },
+    roundingPolicy,
+  );
+
+  // Hallmark purchase (TR_PURC_HM): a hallmarking charge + its own input GST. 0 ⇒ a normal purchase
+  // (identical output). Mirror of the sale-HM: here Dr hallmark-expense + Dr input-GST / Cr supplier.
+  const hmAmt = round2(num(input.hmAmount));
+  const hmTaxPct = input.hmTaxPct ?? taxPct;
+  const hmTax = roundingPolicy.roundTaxAmount((hmAmt * hmTaxPct) / 100);
+  const hmCgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax / 2);
+  const hmSgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax - hmCgst);
+  const hmIgst = interState ? hmTax : 0;
+  const grandTotal = roundingPolicy.roundBillTotal(totals.total + hmAmt + hmTax);
+
+  const validateConfiguredAccount = (
+    label: string,
+    requested: string | undefined,
+    configured: string,
+  ): string => {
+    if (requested && requested.trim() !== configured)
+      throw new PurchaseValidationError(`${label} does not match BOOK_DETL configuration`);
+    return configured;
+  };
+  const controlAc =
+    totals.total === 0 ? purchaseAc : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
+  let cashAc = input.cashAc ?? 'CASH';
+  if (round2(num(input.cashAmt)) !== 0) {
+    cashAc = validateConfiguredAccount(
+      'cash account',
+      input.cashAc,
+      await resolveBookAccountTx(tx, input.scope, bookPolicy, 2),
+    );
+  }
+  let roundAc = requestedRoundAc ?? 'ROUNDOFF';
+  let kasarAc = input.kasarAc ?? 'KASAR';
+  if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
+    const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
+    roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
+    kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
+  }
+
+  // Per-group expense accounts (desktop GROUP_MAST.PURC_AC): map each item → its group's purchase
+  // account, fall back to the single purchaseAc when unmapped. Σ legs == taxable.
+  const itCodes = Array.from(
+    new Set(lines.map((l) => String(l.itCode ?? '').trim()).filter(Boolean)),
+  );
+  const purcAcByItem: Record<string, string> = {};
+  const itemTypeByItem: Record<string, 'G' | 'S'> = {};
+  if (itCodes.length) {
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT i."IT_CODE" ic,i."IT_TYPE" typ,g."PURC_AC" pac FROM "ITEM_MAST" i
+         LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
+          AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
+         WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text = ANY($3::text[])`,
+      input.scope.tenantId,
+      input.scope.coCode,
+      itCodes,
+    );
+    for (const r of rows) {
+      const item = String(r.ic ?? '').trim();
+      const account = String(r.pac ?? '').trim();
+      const itemType = String(r.typ ?? '')
+        .trim()
+        .toUpperCase();
+      if (!item || !account)
+        throw new PurchaseValidationError(`missing GROUP_MAST.PURC_AC for item ${item || '?'}`);
+      if (itemType !== 'G' && itemType !== 'S') {
+        throw new PurchaseValidationError(`invalid ITEM_MAST.IT_TYPE for item ${item || '?'}`);
+      }
+      purcAcByItem[item] = account;
+      itemTypeByItem[item] = itemType;
+    }
+    const missing = itCodes.filter((item) => !purcAcByItem[item]);
+    if (missing.length)
+      throw new PurchaseValidationError(
+        `item/group posting configuration missing: ${missing.join(', ')}`,
+      );
+  }
+  // Ac_Ledr.cs:520-532: PURC_WITH_LBR='Y' keeps labour/other in the primary purchase leg; 'N'
+  // separates those charges to BOOK_DETL row 4. Discount remains in the primary allocation so the
+  // web ledger remains exactly balanced without inventing an additional desktop discount account.
+  const splits = computed.map((c) =>
+    purchaseExpenseSplit(
+      c.calc.net,
+      c.calc.labour,
+      num(c.in.otherAmount),
+      behavior.purchaseWithLabour,
+    ),
+  );
+  const labourOtherTotal = round2(splits.reduce((sum, split) => sum + split.labourOther, 0));
+  const primaryTotal = splits.reduce((sum, split) => sum + split.primary, 0);
+  const expenseLegs = buildExpenseLegs(
+    computed.map((c, index) => ({
+      net: splits[index]?.primary ?? 0,
+      ac: purcAcByItem[String(c.in.itCode ?? '').trim()] ?? purchaseAc,
+    })),
+    round2(totals.taxable - labourOtherTotal),
+    primaryTotal,
+  );
+  if (labourOtherTotal !== 0) {
+    expenseLegs.push({
+      ac: await resolveBookAccountTx(tx, input.scope, bookPolicy, 4),
+      amount: labourOtherTotal,
+    });
+  }
+
+  // Each purchased tag receives the desktop VCH_SRNO identity even when TAG_NO is manual.
+  const tagSrnos = new Map<number, number>();
+  for (const [index, c] of computed.entries()) {
+    if (!c.in.tagNo) continue;
+    const allocated = await nextTagNoTx(tx, input.scope, {
+      prefix: String(c.in.itCode ?? '').slice(0, 3),
+      pad: tagSerialWidth(behavior),
+    });
+    tagSrnos.set(index, allocated.srno);
+  }
+
+  const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  // TR_PURC.cs:12134-12135,13051,13066,13148,13173 preserve the opened wall clock on edit.
+  const sharedVoucherTime = voucherTimestamp(vchDate, ctx.persistedClock);
+  const detl = computed.map((c, idx) => ({
+    ...key,
+    VCH_DATE: vchDate,
+    VCH_TIME: sharedVoucherTime,
+    VCH_TYPE: bookPolicy.vchType,
+    INOUT_TYPE: 'I',
+    ENTRY_TYPE: 'P',
+    BOOK_NAME: bookPolicy.bookName,
+    AC_CODE: input.acCode,
+    MAIN_USER: ctx.mainUser || null,
+    HD_VCH_NO: ctx.hdVchNo,
+    SR_NO: idx + 1,
+    IT_CODE: c.in.itCode,
+    IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+    TAG_NO: c.in.tagNo ?? 'N',
+    VCH_SRNO: tagSrnos.get(idx) ?? 0,
+    ITM_PCS: num(c.in.pcs),
+    ITM_GWT: num(c.in.grossWt),
+    ITM_NWT: num(c.in.netWt),
+    ITM_TOUCH: num(c.in.touch),
+    ITM_GHT_WT: num(c.in.ghtWt),
+    ITM_WEST_PRC: num(c.in.westPct),
+    ITM_FINE: c.calc.fine,
+    ITM_OTH_FINE: num(c.in.otherFineWt),
+    SILVER_FINE: num(c.in.silverFineWt),
+    ITM_RATE: num(c.in.rate),
+    ITM_AMT: c.calc.metal,
+    LBR_TYPE: c.in.labourType
+      ? (
+          {
+            per_gram: 'G',
+            per_piece: 'P',
+            percentage: '%',
+            fixed: 'N',
+          } as Record<string, string>
+        )[c.in.labourType]
+      : null,
+    LBR_PRC: num(c.in.labourPct),
+    LBR_RATE: num(c.in.labourRate),
+    LBR_AMT: c.calc.labour,
+    OTH_AMT: num(c.in.otherAmount),
+    // TR_PURC.cs:13142 — TOT_AMT <- mSG_PR[i,40], computed as
+    //   mSG_PR[Row,40] = Format(Val([Row,35]) + Val([Row,36]) + Val([Row,31]), "0.00")
+    // where 35 = cPrLbrAmt, 36 = cPrOthAmt, 31 = cPrItAmt. Unlike the SALE line total this uses NO
+    // Math.Round, so paise are preserved at two decimals — do not copy the sale's whole-rupee rule here.
+    TOT_AMT: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
+    // TR_PURC.cs:13144 — NET_AMT <- mSG_PR[i,44]. With tax% = 0 the desktop sets
+    //   mSG_PR[Row,44] = Format(Val([Row,40]) + Val([Row,42]), "0.00")   // total + commission
+    // A second branch back-calculates a tax-exclusive net from a tax-INCLUSIVE total, but it is gated on
+    // `Val([Row,43]) <> Val([Row,58])` — column 58 is a shadow copy of the previous tax %, i.e. a UI
+    // change-detection flag. Its outcome therefore depends on the operator's edit sequence and is not
+    // reproducible from a request payload, so it is recorded as an ambiguity rather than guessed at.
+    NET_AMT: round2(
+      round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)) + num(c.in.commissionAmount),
+    ),
+    TAX_PRC: taxPct,
+    HM_ID: c.in.huid ?? null,
+    // Desktop PR_DETL columns (TR_PURC.cs:13100-13192). Grid cells left blank persist as ''/0,
+    // which is what an absent input reproduces here.
+    IT_DESC: text(c.in.itDesc).slice(0, 100) || null, // mSG_PR[i,2]  :13100
+    TBL_CODE: text(c.in.tblCode).slice(0, 3) || null, // mSG_PR[i,3]  :13102
+    DESIGN_NO: text(c.in.designNo).slice(0, 20) || null, // mSG_PR[i,4]  :13103
+    LOT_NO: text(c.in.lotNo).slice(0, 10) || null, // mSG_PR[i,5]  :13104
+    ITM_LOT: text(c.in.itmLot).slice(0, 10) || null, // mSG_PR[i,6]  :13105
+    WITH_STOCK: text(c.in.withStock).slice(0, 1) || null, // mSG_PR[i,7]  :13151
+    BAG_WT: num(c.in.bagWt), // mSG_PR[i,8]  :13107
+    ITM_OTH_WT: num(c.in.lessWt), // mSG_PR[i,13] :13111
+    ITM_LOSS_WT: num(c.in.lossWt), // mSG_PR[i,14] :13112
+    ITM_GHT_PRC: num(c.in.ghtPct), // mSG_PR[i,19] :13117
+    ITM_LESS_TCH: num(c.in.lessTouch ?? c.in.lesTouch), // mSG_PR[i,23] :13121
+    CONV_RATE: num(c.in.convRate), // mSG_PR[i,27] :13131
+    CONV_PRC: num(c.in.convPct), // mSG_PR[i,28] :13132
+    URD_RATE_TYPE: text(c.in.urdRateType).slice(0, 1) || null, // mSG_PR[i,30] :13137
+    ITM_OTH_RATE: num(c.in.otherRate), // mSG_PR[i,37] :13129
+    ITM_MRP: num(c.in.mrp), // mSG_PR[i,39] :13139
+    COMM_PRC: num(c.in.commissionPct), // mSG_PR[i,41] :13140
+    COMM_AMT: round2(num(c.in.commissionAmount)), // mSG_PR[i,42] :13141
+    FINE_CUT_PCS: num(c.in.fineCutPcs), // mSG_PR[i,60] :13189
+    FINE_CUT_GWT: num(c.in.fineCutGrossWt), // mSG_PR[i,61] :13190
+    FINE_CUT_NWT: num(c.in.fineCutNetWt), // mSG_PR[i,62] :13191
+    FINE_CUT_FINE: num(c.in.fineCutFine), // mSG_PR[i,63] :13192
+    PR_CODE: text(c.in.prCode).slice(0, 2) || null, // mSG_PR[i,64] :13147
+    // Sale-bill linkage for a purchase against a sale (tSlBill / tSlBill_DbCd header fields).
+    SL_BILL_NO: text(input.saleBillNo).slice(0, 10) || null, // tSlBill.Text      :13169
+    SL_BILL_LC: input.scope.lcCode, // MLc_code          :13170
+    SL_BILL_YRCD: input.scope.coYear ?? '', // MCo_year          :13171
+    SL_BILL_DBCD: text(input.saleBillBook).slice(0, 3) || null, // tSlBill_DbCd.Text :13172
+    // Desktop writes these as literal blanks/zeros on the purchase book.
+    ITM_SIZE: '', // literal :13106
+    KR_NAME: '', // literal :13186
+    MCX_RATE: 0, // literal :13133
+    PRM_AMT: 0, // literal :13134
+    PRM_DISC: 0, // literal :13135
+    TAG_TOUCH: 0, // literal :13177
+    TAG_WEST_PRC: 0, // literal :13178
+    TAG_FINE: 0, // literal :13179
+    TAG_LBR_PRC: 0, // literal :13180
+    TAG_LBR_RATE: 0, // literal :13181
+    TAG_LBR_AMT: 0, // literal :13182
+    TAG_OTH_AMT: 0, // literal :13183
+    TAG_COST: 0, // literal :13184
+    TAG_MRP: 0, // literal :13185
+  }));
+
+  /**
+   * Stone/diamond sub-detail (TR_PURC.cs:13211-13243). One row per sub-grid row, keyed by the
+   * parent line's SR_NO plus ISR_NO. The desktop writes nothing when the sub-grid is empty.
+   * PR_IDTL is already part of PURCHASE_WRITE_TABLES, so edit and delete reverse these rows.
+   */
+  const prIdtl = computed.flatMap((c, idx) =>
+    (c.in.stones ?? []).map((stone, sIdx) => ({
+      ...key,
+      VCH_DATE: vchDate,
+      VCH_TYPE: bookPolicy.vchType, // FormBookSname :13217
+      INOUT_TYPE: 'I', // FormBookInOut :13218
+      ENTRY_TYPE: 'P', // literal       :13219
+      BOOK_NAME: bookPolicy.bookName, // FormMainBook  :13220
+      AC_CODE: input.acCode, // tAcCode.Text  :13221
+      SR_NO: idx + 1, // parent line   :13222
+      ISR_NO: stone.isrNo ?? sIdx + 1, // [0]           :13223
+      IT_CODE: text(stone.itCode).slice(0, 10) || null, // [1]  :13224
+      DM_CODE: text(stone.dmCode).slice(0, 10) || null, // [3]  :13225
+      DM_NAME: text(stone.dmName).slice(0, 50) || null, // [4]  :13226
+      DM_COLOR: text(stone.dmColor).slice(0, 15) || null, // [5]  :13227
+      DM_SIZE: text(stone.dmSize).slice(0, 15) || null, // [6]  :13228
+      DM_ORIGIN: text(stone.dmOrigin).slice(0, 15) || null, // [7]  :13229
+      DM_REMARK: text(stone.dmRemark).slice(0, 50) || null, // [8]  :13230
+      DM_SFNO: text(stone.dmSfNo).slice(0, 15) || null, // [9]  :13231
+      IT_PCS: num(stone.pcs), // [12] :13232
+      IT_GWT: num(stone.grossWt), // [14] :13233
+      IT_CON_PRC: num(stone.conPct), // [15] :13234
+      IT_RATE_TYPE: text(stone.rateType).slice(0, 1) || null, // [16] :13235
+      IT_RATE: num(stone.rate), // [17] :13236
+      IT_AMT: round2(num(stone.amount)), // [18] :13237
+      IT_LBR_RATE: num(stone.lbrRate), // [19] :13238
+      IT_LBR_AMT: round2(num(stone.lbrAmount)), // [20] :13239
+      IT_NET_AMT: round2(num(stone.netAmount)), // [21] :13240
+      IT_CON_WT: num(stone.conWt), // [22] :13241
+      IT_TYPE: text(stone.itType).slice(0, 1) || null, // [23] :13242
+      // Karigar side of the same stone (the desktop's shared TblIdtl block). A job-work settlement
+      // prices the stone portion from these columns.
+      DM_LEB: text(stone.dmLeb).slice(0, 15) || null,
+      IT_PCS_WT: num(stone.pcsWt),
+      KR_WT: num(stone.karigarWt),
+      KR_LESS_PRC: num(stone.karigarLessPct),
+      KR_CON_PRC: num(stone.karigarConPct),
+      KR_CON_WT: num(stone.karigarConWt),
+      KR_RATE: num(stone.karigarRate),
+      KR_AMT: num(stone.karigarAmount),
+      KR_LBR_RATE: num(stone.karigarLabourRate),
+      KR_LBR_AMT: num(stone.karigarLabourAmount),
+      KR_NET_AMT: num(stone.karigarNetAmount),
+      MAIN_USER: ctx.mainUser || null, // MainUser :13243
+    })),
+  );
+
+  const barDetl = computed.flatMap((c, idx) => {
+    if (!c.in.tagNo) return [];
+    return [
+      {
+        ...key,
+        SR_NO: idx + 1,
+        OLD_SRNO: idx + 1,
+        VCH_DATE: vchDate,
+        VCH_TIME: sharedVoucherTime,
+        VCH_TYPE: bookPolicy.vchType,
+        INOUT_TYPE: 'I',
+        ENTRY_TYPE: 'P',
+        BOOK_NAME: bookPolicy.bookName,
+        AC_CODE: input.acCode,
+        MAIN_USER: ctx.mainUser || null,
+        HD_VCH_NO: ctx.hdVchNo,
+        TAG_NO: c.in.tagNo,
+        VCH_SRNO: tagSrnos.get(idx) ?? 0,
+        IT_CODE: c.in.itCode,
+        ITM_PCS: num(c.in.pcs),
+        ITM_GWT: num(c.in.grossWt),
+        ITM_NWT: num(c.in.netWt),
+        ITM_TOUCH: num(c.in.touch),
+        ITM_WEST_PRC: num(c.in.westPct),
+        ITM_FINE: c.calc.fine,
+        ITM_RATE: num(c.in.rate),
+        ITM_AMT: c.calc.metal,
+        LBR_AMT: c.calc.labour,
+        OTH_AMT: num(c.in.otherAmount),
+        RATE_TYPE: c.in.metalAmount != null ? 'A' : 'P',
+        IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+        HM_ID: c.in.huid ?? null,
+      },
+    ];
+  });
+  const barIdtl = computed.flatMap((c, idx) => {
+    if (!c.in.tagNo) return [];
+    return [
+      {
+        ...key,
+        SR_NO: idx + 1,
+        ISR_NO: 1,
+        VCH_DATE: vchDate,
+        VCH_TYPE: bookPolicy.vchType,
+        INOUT_TYPE: 'I',
+        ENTRY_TYPE: 'P',
+        BOOK_NAME: bookPolicy.bookName,
+        AC_CODE: input.acCode,
+        TAG_NO: c.in.tagNo,
+        VCH_SRNO: tagSrnos.get(idx) ?? 0,
+        IT_CODE: c.in.itCode,
+        IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+        IT_PCS: num(c.in.pcs),
+        IT_GWT: num(c.in.grossWt),
+        IT_RATE: num(c.in.rate),
+        IT_AMT: c.calc.metal,
+        IT_LBR_AMT: c.calc.labour,
+        IT_NET_AMT: c.calc.net,
+      },
+    ];
+  });
+
+  const header = {
+    ...key,
+    BILL_NO: input.billNo ?? formatVoucherNo(vchNo),
+    AC_CODE: input.acCode,
+    AC_NAME: supplierName || null,
+    VCH_DATE: vchDate,
+    // TR_PURC.cs:12134-12135,12234,13051,13066,13148,13173 preserve identity on rewrite.
+    VCH_TIME: sharedVoucherTime,
+    HD_VCH_NO: ctx.hdVchNo,
+    MAIN_USER: ctx.mainUser || null,
+    IT_TYPE: itemTypeByItem[String(computed[0]?.in.itCode ?? '').trim()] ?? 'G',
+    PARTY_FINE: round3(computed.reduce((sum, row) => sum + row.calc.fine, 0)),
+    LBR_AMT: round2(computed.reduce((sum, row) => sum + row.calc.labour, 0)),
+    OTH_AMT: round2(computed.reduce((sum, row) => sum + num(row.in.otherAmount), 0)),
+    NET_AMT: totals.net,
+    DISC_AMT: totals.discount,
+    TAX_PRC: taxPct,
+    TAX_CODE: taxPolicy.taxCode,
+    AC_GST_TYPE: taxPolicy.accountGstType,
+    TAX_AMT: totals.tax,
+    CGST_TAX: totals.cgst,
+    SGST_TAX: totals.sgst,
+    IGST_TAX: totals.igst,
+    ROF_AMT: totals.roundOff,
+    TOT_AMT: grandTotal,
+    RATE_UNFIX: input.rateUnfix ? 'Y' : 'N',
+    // Desktop PR_DATA header columns (TR_PURC.cs:12982-13056). Party address/bank/cheque come from
+    // the header fields, TDS/TCS from the settlement grid MSG2_TOTAL rows 3-4, and FX/OZ/metal-rate
+    // are persisted as the desktop's literal zeros/blanks on this book.
+    ADD1: text(input.address1).slice(0, 50) || null, // tAdd1.Text     :13017
+    ADD2: text(input.address2).slice(0, 50) || null, // tAdd2.Text     :13018
+    ADD3: text(input.address3).slice(0, 50) || null, // tAdd3.Text     :13019
+    CITY: text(input.city).slice(0, 25) || null, // tCity.Text     :13020
+    MOBILE: text(input.mobile).slice(0, 15) || null, // tMobile.Text   :13021
+    BANK_NAME: text(input.bankName).slice(0, 50) || null, // tBankName.Text :13016
+    CHQ_NO: text(input.chequeNo).slice(0, 20) || null, // MSG2_TOTAL[6,2]:13015
+    CARD_AC: text(input.cardAc).slice(0, 10) || null, // MSG2_TOTAL[7,4]:13013
+    CR_DAYS: num(input.creditDays), // nCrDays.Text   :13046
+    DISC_PRC: num(input.discountPct), // MSG2_TOTAL[1,2]:12982
+    TCS_CODE: text(input.tcsCode).slice(0, 10) || null, // MSG2_TOTAL[3,4]:12987
+    TCS_PRC: num(input.tcsPct), // MSG2_TOTAL[3,2]:12988
+    TCS_AMT: round2(num(input.tcsAmount)), // MSG2_TOTAL[3,3]:12989
+    TDS_CODE: text(input.tdsCode).slice(0, 10) || null, // MSG2_TOTAL[4,4]:12993
+    TDS_PRC: num(input.tdsPct), // MSG2_TOTAL[4,2]:12994
+    TDS_AMT: round2(num(input.tdsAmount)), // MSG2_TOTAL[4,3]:12995
+    OZ_RATE: 0, // literal            :13052
+    OZ_CONV: 0, // literal            :13053
+    FX_RATE: 0, // literal            :13054
+    FX_CODE: '', // literal            :13055
+    MTL_RATE: 0, // literal            :13056
+    ...(hmAmt > 0 ? { HM_AMT: hmAmt, HM_TAX_PRC: hmTaxPct, HM_TAX_AMT: hmTax } : {}),
+  };
+
+  const ledger = buildPurchaseLedger({
+    key,
+    acCode: input.acCode,
+    purchaseAc,
+    taxAc,
+    roundAc,
+    controlAc,
+    vchType: bookPolicy.vchType,
+    totals,
+    expenseLegs,
+  });
+  if (hmAmt > 0) {
+    const hb = { ...key, VCH_TYPE: bookPolicy.vchType };
+    ledger.push({
+      ...hb,
+      AC_CODE: input.hmChargeAc ?? 'HMCHRG',
+      LD_CODE: input.acCode,
+      DR_AMT: hmAmt,
+      CR_AMT: 0,
+      SIGN: 'D',
+    }); // Dr hallmark expense
+    if (hmTax > 0)
+      ledger.push({
+        ...hb,
+        AC_CODE: taxAc,
+        LD_CODE: input.acCode,
+        DR_AMT: hmTax,
+        CR_AMT: 0,
+        SIGN: 'D',
+      }); // Dr input GST on HM
+    ledger.push({
+      ...hb,
+      AC_CODE: input.acCode,
+      LD_CODE: input.hmChargeAc ?? 'HMCHRG',
+      DR_AMT: 0,
+      CR_AMT: round2(hmAmt + hmTax),
+      SIGN: 'C',
+    }); // Cr supplier (HM owed)
+  }
+  assertBalanced(ledger); // money legs only — metal legs (DR=CR=0) are appended below and never unbalance it
+
+  // Settlement/tender (F2 payoutLegs): pay the supplier now → Dr supplier / Cr cash|bank + kasar (discount received).
+  // No tender ⇒ no legs ⇒ full payable (unchanged). Self-balanced pairs keep the ledger balanced.
+  const tender = payoutLegs(
+    { ...key, VCH_TYPE: bookPolicy.vchType },
+    {
+      partyAc: input.acCode,
+      cashAmt: input.cashAmt,
+      chequeAmt: input.chequeAmt,
+      cardAmt: input.cardAmt,
+      upiAmt: input.upiAmt,
+      kasar: input.kasar,
+      cashAc,
+      bankAc: input.bankAc,
+      kasarAc,
+    },
+  );
+  ledger.push(...tender.legs);
+
+  ledger.push(
+    ...buildPurchaseFineLedger({
+      key,
+      acCode: input.acCode,
+      purchaseAc,
+      vchType: bookPolicy.vchType,
+      rateUnfix: input.rateUnfix,
+      purcAcByItem,
+      lines: computed.map((c) => ({
+        itCode: c.in.itCode,
+        metal: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+        fine: c.calc.fine,
+        metalAmount: c.calc.metal,
+        otherFineWt: c.in.otherFineWt,
+        silverFineWt: c.in.silverFineWt,
+      })),
+    }),
+  );
+
+  // Satellite tables the desktop TR_PURC also writes: tax register (input) + bill outstanding (payable).
+  const r2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
+  const taxBase = {
+    ...key,
+    TRAN_TYPE: 'P',
+    BOOK_NAME: bookPolicy.bookName,
+    VCH_DATE: header.VCH_DATE,
+    AC_CODE: input.acCode,
+    PARTY_NAME: supplierName || null,
+    NET_AMT: totals.taxable,
+    DISC_AMT: totals.discount,
+    TOT_AMT: totals.total,
+    TAX_SIGN: '-',
+    TAX_CODE: taxPolicy.taxCode,
+  };
+  const taxRows: Record<string, unknown>[] = [];
+  if (totals.tax !== 0) {
+    if (interState)
+      taxRows.push({
+        ...taxBase,
+        SR_NO: 1,
+        TAX_TYPE: taxPolicy.taxGroup,
+        TAX_PRC: taxPct,
+        TAX_AMT: totals.igst,
+      });
+    else {
+      taxRows.push({
+        ...taxBase,
+        SR_NO: 1,
+        TAX_TYPE: taxPolicy.taxGroup,
+        TAX_PRC: r2(taxPct / 2),
+        TAX_AMT: totals.cgst,
+      });
+      taxRows.push({
+        ...taxBase,
+        SR_NO: 2,
+        TAX_TYPE: taxPolicy.taxGroup,
+        TAX_PRC: r2(taxPct / 2),
+        TAX_AMT: totals.sgst,
+      });
+    }
+  }
+  if (hmAmt > 0 && hmTax > 0) {
+    const hmB = { ...taxBase, NET_AMT: hmAmt };
+    if (interState)
+      taxRows.push({
+        ...hmB,
+        SR_NO: taxRows.length + 1,
+        TAX_TYPE: taxPolicy.taxGroup,
+        TAX_PRC: hmTaxPct,
+        TAX_AMT: hmIgst,
+      });
+    else {
+      taxRows.push({
+        ...hmB,
+        SR_NO: taxRows.length + 1,
+        TAX_TYPE: taxPolicy.taxGroup,
+        TAX_PRC: r2(hmTaxPct / 2),
+        TAX_AMT: hmCgst,
+      });
+      taxRows.push({
+        ...hmB,
+        SR_NO: taxRows.length + 1,
+        TAX_TYPE: taxPolicy.taxGroup,
+        TAX_PRC: r2(hmTaxPct / 2),
+        TAX_AMT: hmSgst,
+      });
+    }
+  }
+  Object.assign(header, {
+    CASH_AMT: tender.cashAmt,
+    CHQ_AMT: round2(num(input.chequeAmt)),
+    CARD_AMT: round2(num(input.cardAmt)),
+    KASAR_AMT: tender.kasar,
+    BILL_OS: round2(grandTotal - tender.paidNow - tender.kasar),
+    BANK_AC: input.bankAc ?? null,
+  });
+  const osRow = {
+    ...key,
+    VCH_TYPE: bookPolicy.vchType,
+    INOUT_TYPE: 'I',
+    ENTRY_TYPE: 'N',
+    BOOK_NAME: bookPolicy.bookName,
+    SR_NO: 1,
+    VCH_DATE: header.VCH_DATE,
+    AC_CODE: input.acCode,
+    BILL_AMT: grandTotal,
+    REC_AMT: tender.paidNow,
+    KASAR_AMT: tender.kasar,
+  };
+
+  // Every purchase detail moves stock; loose inventory uses TAG_NO=N/VCH_SRNO=0.
+  const mainStock = computed.map((c, idx) => ({
+    ...key,
+    SR_NO: idx + 1,
+    VCH_DATE: header.VCH_DATE,
+    VCH_TYPE: bookPolicy.vchType,
+    BOOK_NAME: bookPolicy.bookName,
+    AC_CODE: input.acCode,
+    IT_CODE: c.in.itCode,
+    TAG_NO: c.in.tagNo ?? 'N',
+    VCH_SRNO: tagSrnos.get(idx) ?? 0,
+    TR_TYPE: 'P',
+    ITM_SIGN: '+',
+    ITM_QTY: num(c.in.netWt) || num(c.in.pcs) || 1,
+    ITM_PCS: num(c.in.pcs) || 1,
+    ITM_GWT: num(c.in.grossWt),
+    ITM_NWT: num(c.in.netWt),
+    ITM_TOUCH: num(c.in.touch),
+    ITM_FINE: c.calc.fine,
+    ITM_RATE: num(c.in.rate),
+    ITM_AMT: c.calc.metal,
+    LBR_AMT: c.calc.labour,
+    NET_AMT: c.calc.net,
+  }));
+
+  // TR_PURC.cs:12100,12108,12923,12927: hidden voucher evidence uses configured BOOK_DATA name.
+  await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
+    CO_CODE: input.scope.coCode,
+    LC_CODE: input.scope.lcCode,
+    CO_BOOK: input.scope.coBook,
+    VCH_NO: ctx.hdVchNo,
+    BOOK_NAME: configuredBookName,
+  });
+
+  // TR_PURC shares TR_SALE_RTN's edit-audit block: one USER_DATA row per changed header column.
+  if (ctx.isEdit && ctx.persistedHeader) {
+    await recordFieldChangesTx(tx, tenantId, {
+      key: {
+        CO_CODE: String(key.CO_CODE),
+        LC_CODE: String(key.LC_CODE),
+        CO_YEAR: String(key.CO_YEAR),
+        CO_BOOK: String(key.CO_BOOK),
+        VCH_NO: String(key.VCH_NO),
+      },
+      acCode: input.acCode,
+      vchDate,
+      bookName: bookPolicy.bookName,
+      originalUser: ctx.mainUser,
+      editingUser: ctx.editingUser ?? input.mainUser ?? null,
+      before: ctx.persistedHeader,
+      after: header,
+    });
+  }
+
+  await postVoucherTx(tx, tenantId, {
+    ledger: { table: 'AC_DATA', lines: ledger },
+    bookName: bookPolicy.bookName,
+    writes: [
+      { table: 'PR_DATA', rows: [header] },
+      { table: 'PR_DETL', rows: detl },
+      ...(prIdtl.length ? [{ table: 'PR_IDTL', rows: prIdtl }] : []),
+      ...(barDetl.length ? [{ table: 'BAR_DETL', rows: barDetl }] : []),
+      ...(barIdtl.length ? [{ table: 'BAR_IDTL', rows: barIdtl }] : []),
+      ...(mainStock.length ? [{ table: 'MAIN_STOCK', rows: mainStock }] : []),
+      ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
+      { table: 'BILL_OS_DATA', rows: [osRow] },
+    ],
+  });
+
+  // Lot register (LOT_DETL): desktop Ac_Stock.PrKr_Lot runs after the voucher rows exist and copies
+  // them through the same joins (Ac_Stock.cs:624). Narrowed to this voucher so a save never rebuilds
+  // the whole company register. LOT_DETL is in PURCHASE_WRITE_TABLES, so edit/delete reverse it.
+  await stagePurchaseLotDetailTx(
+    tx,
+    tenantId,
+    {
+      coCode: String(key.CO_CODE),
+      lcCode: String(key.LC_CODE),
+      coYear: String(key.CO_YEAR),
+    },
+    String(key.CO_BOOK),
+    String(key.VCH_NO),
+  );
+
+  if (behavior.touchAutoSave) {
+    // TR_BUL_SALE.cs:7684 and purchase equivalents persist party/item defaults in the voucher tx.
+    for (const c of computed) {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "TOUCH_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_IT_CODE","AC_TOUCH","AC_WEST","AC_LBR_RATE","AC_LBR_TYPE","MAIN_USER")
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         ON CONFLICT (tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_IT_CODE") DO UPDATE SET
+          "AC_TOUCH"=excluded."AC_TOUCH","AC_WEST"=excluded."AC_WEST",
+          "AC_LBR_RATE"=excluded."AC_LBR_RATE","AC_LBR_TYPE"=excluded."AC_LBR_TYPE","MAIN_USER"=excluded."MAIN_USER"`,
+        tenantId,
+        key.CO_CODE,
+        key.LC_CODE,
+        input.acCode,
+        String(c.in.itCode).slice(0, 5),
+        num(c.in.touch),
+        num(c.in.westPct),
+        num(c.in.labourRate),
+        c.in.labourType
+          ? (
+              { per_gram: 'G', per_piece: 'P', percentage: '%', fixed: 'N' } as Record<
+                string,
+                string
+              >
+            )[c.in.labourType]
+          : null,
+        ctx.mainUser || null,
+      );
+    }
+  }
+
+  return { vchNo, totals };
+}
+
+/** Create a purchase with independent main and hidden desktop voucher numbering. */
+export async function createPurchase(
+  prisma: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+): Promise<PurchaseResult> {
+  completePurchaseScope(input.scope);
+  const scope = input.scope;
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    // TR_PURC.cs:12911 allocates the main number from PR_DATA with year in scope.
+    const vchNo = await nextVoucherNoTx(tx, scope);
+    // TR_PURC.cs:12100,12108,12923,12927 allocate hidden numbering without fiscal year.
+    const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
+    return writePurchaseTx(tx, input, lines, {
+      vchNo,
+      hdVchNo,
+      mainUser: String(input.mainUser ?? '').trim(),
+      persistedClock: undefined,
+      isEdit: false,
+    });
+  });
+}
+
+export interface DeletePurchaseInput {
+  scope: VoucherScope;
+  vchNo: number | string;
+  deleteUser?: string;
+}
+
+const PURCHASE_WRITE_TABLES = [
+  'PR_DATA',
+  'PR_DETL',
+  'PR_IDTL',
+  'BAR_DATA',
+  'BAR_DETL',
+  'BAR_IDTL',
+  'SL_PR_DETL',
+  'ITM_LOT_DETL',
+  'MAIN_STOCK',
+  'AC_DATA',
+  'TAX_DATA',
+  'BILL_OS_DATA',
+  'ROJ_MEL_DATA',
+  'DM_DATA',
+  'LOT_DETL',
+  'REMARK_DATA',
+] as const;
+
+type CompletePurchaseScope = VoucherScope & { coYear: string; coBook: string };
+const text = (value: unknown): string => String(value ?? '').trim();
+const purchaseParams = (scope: CompletePurchaseScope, voucherNo: string): unknown[] => [
+  scope.tenantId,
+  scope.coCode,
+  scope.lcCode,
+  scope.coYear,
+  scope.coBook,
+  voucherNo,
+];
+
+async function persistedPurchaseHeaderTx(
+  tx: any,
+  scope: CompletePurchaseScope,
+  voucherNo: string,
+  extraColumns: readonly string[] = [],
+): Promise<Record<string, unknown>> {
+  try {
+    return await persistedVoucherHeaderTx(tx, {
+      table: 'PR_DATA',
+      scope,
+      voucherNo,
+      extraColumns,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'PersistedVoucherNotFoundError') {
+      throw new PurchaseValidationError(`purchase voucher not found: ${voucherNo}`);
+    }
+    if (error instanceof Error && error.name === 'PersistedVoucherAmbiguousError') {
+      throw new PurchaseValidationError(`purchase voucher is ambiguous: ${voucherNo}`);
+    }
+    throw error;
+  }
+}
+
+/** Reject removal/rewrite when a tag created by this purchase was consumed by another voucher. */
+async function assertPurchaseTagsUnconsumedTx(
+  tx: any,
+  scope: CompletePurchaseScope,
+  voucherNo: string,
+  action: 'edited' | 'deleted',
+): Promise<void> {
+  const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "TAG_NO","VCH_SRNO","IT_CODE" FROM "BAR_DETL"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+        AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+        AND NULLIF(btrim(coalesce("TAG_NO"::text,'')),'') IS NOT NULL
+        AND "TAG_NO"::text <> 'N' ORDER BY "TAG_NO","VCH_SRNO","IT_CODE" FOR UPDATE`,
+    ...purchaseParams(scope, voucherNo),
+  );
+  for (const tag of tags) {
+    // Serialize with issueTagTx so a concurrent sale cannot pass this check and commit after the
+    // purchase source rows have been replaced or deleted.
+    await tx.$executeRawUnsafe(
+      'SELECT pg_advisory_xact_lock(hashtext($1))',
+      `tag-issue|${scope.coCode}|${scope.lcCode}|${text(tag.TAG_NO)}`,
+    );
+    const issued: Array<{ n: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT count(*)::int AS n FROM "MAIN_STOCK"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"::text=$4
+          AND coalesce("VCH_SRNO",0)=coalesce($5::numeric,0)
+          AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'')
+          AND "ITM_SIGN"::text='-'
+          AND NOT (coalesce("CO_YEAR"::text,'')=$7 AND coalesce("CO_BOOK"::text,'')=$8
+                   AND coalesce("VCH_NO"::text,'')=$9)`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      text(tag.TAG_NO),
+      tag.VCH_SRNO ?? 0,
+      tag.IT_CODE ?? '',
+      scope.coYear,
+      scope.coBook,
+      voucherNo,
+    );
+    if (Number(issued[0]?.n ?? 0) > 0) {
+      throw new PurchaseValidationError(
+        `tag already issued and purchase cannot be ${action}: ${text(tag.TAG_NO)}`,
+      );
+    }
+  }
+}
+
+/** Restore desktop approval/order source flags before BAR_DETL is removed. */
+async function releasePurchaseReferencesTx(
+  tx: any,
+  scope: CompletePurchaseScope,
+  voucherNo: string,
+): Promise<void> {
+  const params = purchaseParams(scope, voucherNo);
+  await tx.$executeRawUnsafe(
+    `UPDATE "APR_DETL" a SET "ISU_REC"='N' FROM "BAR_DETL" b
+      WHERE a.tenant_id=$1 AND b.tenant_id=$1 AND b."CO_CODE"=$2 AND b."LC_CODE"=$3
+        AND b."CO_YEAR"=$4 AND b."CO_BOOK"=$5 AND b."VCH_NO"=$6
+        AND a."CO_CODE"=b."CO_CODE" AND a."LC_CODE"=b."ORD_LC_CODE"
+        AND a."ISU_YRCD"=b."ORD_YRCD" AND a."ISU_DBCD"=b."ORD_DBCD"
+        AND a."ISU_NO"=b."ORD_NO" AND coalesce(a."ISU_SRNO",0)=coalesce(b."ORD_SRNO",0)`,
+    ...params,
+  );
+  await tx.$executeRawUnsafe(
+    `UPDATE "SL_ORD_DETL" o SET "TAG_GEN"='N' FROM "BAR_DETL" b
+      WHERE o.tenant_id=$1 AND b.tenant_id=$1 AND b."CO_CODE"=$2 AND b."LC_CODE"=$3
+        AND b."CO_YEAR"=$4 AND b."CO_BOOK"=$5 AND b."VCH_NO"=$6
+        AND o."CO_CODE"=b."CO_CODE" AND o."LC_CODE"=b."ORD_LC_CODE"
+        AND o."CO_YEAR"=b."ORD_YRCD" AND o."CO_BOOK"=b."ORD_DBCD"
+        AND o."VCH_NO"=b."ORD_NO" AND coalesce(o."OLD_SRNO",0)=coalesce(b."ORD_SRNO",0)`,
+    ...params,
+  );
+}
+
+/** Open a persisted purchase by voucher number using server-derived tenant scope only. */
+export async function getPurchase(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<Record<string, unknown>> {
+  completePurchaseScope(scope);
+  const voucherNo = formatVoucherNo(requestedVoucherNo);
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const params = purchaseParams(scope, voucherNo);
+    const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
+              "AC_CODE","AC_NAME","NET_AMT","DISC_AMT","TAX_CODE","TAX_PRC","TAX_AMT",
+              "AC_GST_TYPE","CGST_TAX","SGST_TAX","IGST_TAX","ROF_AMT","TOT_AMT",
+              "RATE_UNFIX","CASH_AMT","CARD_AMT","CHQ_AMT","KASAR_AMT","BILL_OS",
+              "BANK_AC","HM_AMT","HM_TAX_PRC","HM_TAX_AMT","IT_TYPE","PARTY_FINE","VCH_DESC"
+         FROM "PR_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      ...params,
+    );
+    if (headers.length !== 1) {
+      throw new PurchaseValidationError(
+        headers.length
+          ? `purchase voucher is ambiguous: ${voucherNo}`
+          : `purchase voucher not found: ${voucherNo}`,
+      );
+    }
+    const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","IT_CODE","IT_TYPE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT",
+              "ITM_NWT","ITM_TOUCH","ITM_GHT_WT","ITM_WEST_PRC","ITM_FINE",
+              "ITM_OTH_FINE","SILVER_FINE","ITM_RATE","ITM_AMT","LBR_TYPE","LBR_PRC",
+              "LBR_RATE","LBR_AMT","OTH_AMT","NET_AMT","HM_ID"
+         FROM "PR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
+      ...params,
+    );
+    const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","IT_CODE","IT_TYPE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT",
+              "ITM_NWT","ITM_TOUCH","ITM_WEST_PRC","ITM_FINE","ITM_RATE","ITM_AMT",
+              "LBR_AMT","OTH_AMT","HM_ID"
+         FROM "BAR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
+      ...params,
+    );
+    const h = headers[0]!;
+    const labourType = (value: unknown): LabourType | undefined =>
+      ({ G: 'per_gram', P: 'per_piece', '%': 'percentage', N: 'fixed' })[text(value)] as
+        LabourType | undefined;
+    return {
+      voucherNo: text(h.VCH_NO),
+      hiddenVoucherNo: text(h.HD_VCH_NO),
+      mainUser: text(h.MAIN_USER),
+      vchDate: text(h.VCH_DATE).slice(0, 10),
+      billNo: text(h.BILL_NO),
+      acCode: text(h.AC_CODE),
+      acName: text(h.AC_NAME),
+      taxCode: text(h.TAX_CODE),
+      taxRatePct: num(h.TAX_PRC),
+      interState: num(h.IGST_TAX) !== 0 || text(h.AC_GST_TYPE).toUpperCase() !== 'L',
+      urd: num(h.TAX_PRC) === 0 && num(h.TAX_AMT) === 0,
+      discountAmount: num(h.DISC_AMT),
+      rateUnfix: text(h.RATE_UNFIX).toUpperCase() === 'Y',
+      cashAmt: num(h.CASH_AMT),
+      cardAmt: num(h.CARD_AMT),
+      upiAmt: 0,
+      chequeAmt: num(h.CHQ_AMT),
+      kasar: num(h.KASAR_AMT),
+      billOutstanding: num(h.BILL_OS),
+      bankAc: text(h.BANK_AC),
+      hmAmount: num(h.HM_AMT),
+      hmTaxPct: num(h.HM_TAX_PRC),
+      hmTaxAmount: num(h.HM_TAX_AMT),
+      metal: text(h.IT_TYPE) === 'S' ? 'S' : 'G',
+      partyFine: num(h.PARTY_FINE),
+      description: text(h.VCH_DESC),
+      totals: {
+        net: num(h.NET_AMT),
+        discount: num(h.DISC_AMT),
+        taxable: round2(num(h.NET_AMT) - num(h.DISC_AMT)),
+        tax: num(h.TAX_AMT),
+        cgst: num(h.CGST_TAX),
+        sgst: num(h.SGST_TAX),
+        igst: num(h.IGST_TAX),
+        roundOff: num(h.ROF_AMT),
+        total: num(h.TOT_AMT),
+      },
+      lines: details.map((row) => ({
+        srNo: num(row.SR_NO),
+        itCode: text(row.IT_CODE),
+        metal: text(row.IT_TYPE) === 'S' ? 'S' : 'G',
+        tagNo: text(row.TAG_NO) === 'N' ? '' : text(row.TAG_NO),
+        vchSrno: num(row.VCH_SRNO),
+        pcs: num(row.ITM_PCS),
+        grossWt: num(row.ITM_GWT),
+        netWt: num(row.ITM_NWT),
+        touch: num(row.ITM_TOUCH),
+        ghtWt: num(row.ITM_GHT_WT),
+        westPct: num(row.ITM_WEST_PRC),
+        fineWt: num(row.ITM_FINE),
+        otherFineWt: num(row.ITM_OTH_FINE),
+        silverFineWt: num(row.SILVER_FINE),
+        rate: num(row.ITM_RATE),
+        metalAmount: num(row.ITM_AMT),
+        labourType: labourType(row.LBR_TYPE),
+        labourPct: num(row.LBR_PRC),
+        labourRate: num(row.LBR_RATE),
+        labourFixed: text(row.LBR_TYPE) === 'N' ? num(row.LBR_AMT) : undefined,
+        labourAmount: num(row.LBR_AMT),
+        otherAmount: num(row.OTH_AMT),
+        netAmount: num(row.NET_AMT),
+        huid: text(row.HM_ID),
+      })),
+      tags: tags.map((row) => ({
+        srNo: num(row.SR_NO),
+        itCode: text(row.IT_CODE),
+        metal: text(row.IT_TYPE) === 'S' ? 'S' : 'G',
+        tagNo: text(row.TAG_NO),
+        vchSrno: num(row.VCH_SRNO),
+        pcs: num(row.ITM_PCS),
+        grossWt: num(row.ITM_GWT),
+        netWt: num(row.ITM_NWT),
+        touch: num(row.ITM_TOUCH),
+        fineWt: num(row.ITM_FINE),
+        rate: num(row.ITM_RATE),
+        metalAmount: num(row.ITM_AMT),
+        labourAmount: num(row.LBR_AMT),
+        otherAmount: num(row.OTH_AMT),
+        huid: text(row.HM_ID),
+      })),
+    };
+  });
+}
+
+/** Replace a purchase in-place, preserving desktop header identity and audit-free edit semantics. */
+export async function editPurchase(
+  prisma: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+  requestedVoucherNo: number | string,
+): Promise<PurchaseResult> {
+  completePurchaseScope(input.scope);
+  const scope = input.scope;
+  const voucherNo = formatVoucherNo(requestedVoucherNo);
+  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo, ['SL_BILL_NO']);
+    // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
+    const priorHeaderRow: Record<string, unknown> | undefined = (
+      await tx.$queryRawUnsafe(
+        `SELECT * FROM "PR_DATA" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3
+           AND "CO_BOOK"=$4 AND "VCH_NO"=$5 LIMIT 1`,
+        scope.coCode,
+        scope.lcCode,
+        scope.coYear,
+        scope.coBook,
+        voucherNo,
+      )
+    )[0];
+    // TR_PURC.cs `ItCodeLock`: a line that already produced a tag has its item code frozen, because the
+    // tag is in stock under that item. Compared against the PERSISTED detail rows, never the request.
+    const priorLines: Array<{ SR_NO: unknown; IT_CODE: unknown; TAG_NO: unknown }> =
+      await tx.$queryRawUnsafe(
+        `SELECT "SR_NO","IT_CODE","TAG_NO" FROM "PR_DETL"
+           WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5
+           ORDER BY "SR_NO"`,
+        scope.coCode,
+        scope.lcCode,
+        scope.coYear,
+        scope.coBook,
+        voucherNo,
+      );
+    for (const prior of priorLines) {
+      const tagNo = String(prior.TAG_NO ?? '').trim();
+      if (!tagNo || tagNo === 'N') continue; // untagged lines may still change item
+      const srNo = Number(prior.SR_NO);
+      const incoming = lines[srNo - 1];
+      if (!incoming) continue;
+      const before = String(prior.IT_CODE ?? '').trim();
+      const after = String(incoming.itCode ?? '').trim();
+      if (after && before && after !== before) {
+        throw new PurchaseValidationError(DESKTOP_MESSAGES.ITEM_CODE_LOCKED_IN_EDIT);
+      }
+    }
+
+    // Fail closed before any source flags or voucher rows move: both old and requested dates matter.
+    await assertPeriodOpen(tx, scope.tenantId, {
+      ledger: {
+        table: 'AC_DATA',
+        lines: [{ CO_CODE: scope.coCode, VCH_DATE: persisted.VCH_DATE }],
+      },
+    });
+    await assertPeriodOpen(tx, scope.tenantId, {
+      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: requestedDate }] },
+    });
+    if (text(persisted.SL_BILL_NO)) {
+      throw new PurchaseValidationError('purchase is linked to a sale bill and cannot be edited');
+    }
+
+    await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'edited');
+    const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
+    await releasePurchaseReferencesTx(tx, scope, voucherNo);
+    // TR_PURC.cs:12939-12944,13252,13297-13299,13548 replaces the full write set and temp row.
+    // Desktop edit never writes DELETE_DATA.
+    await deleteVoucherWriteSetTx(tx, {
+      tables: PURCHASE_WRITE_TABLES,
+      key: { scope, voucherNo },
+      tempBook: { voucherNo: hiddenVoucherNo },
+    });
+    // TR_PURC.cs:12134-12135,12234,13051,13066,13148,13173 preserve no/user/clock.
+    return writePurchaseTx(tx, input, lines, {
+      vchNo: Number(voucherNo),
+      hdVchNo: hiddenVoucherNo,
+      mainUser: text(persisted.MAIN_USER),
+      persistedClock: persisted.VCH_CLOCK,
+      isEdit: true,
+      // Desktop compares the FULL reloaded header (SELECT * FROM PR_DATA); the projection used for
+      // identity is too narrow to diff against.
+      persistedHeader: priorHeaderRow,
+      editingUser: input.mainUser ?? null,
+    });
+  });
+}
+
+/** Reverse a purchase and write the desktop TR_PURC 1-header + N-detail DELETE_DATA audit. */
+export async function deletePurchase(
+  prisma: any,
+  input: DeletePurchaseInput,
+): Promise<{ reversed: true }> {
+  completePurchaseScope(input.scope);
+  const scope = input.scope;
+  const tenantId = scope.tenantId;
+  const voucherNo = formatVoucherNo(input.vchNo);
+  const key = keyOf(scope, voucherNo);
+  return withTenant(prisma, tenantId, async (tx: any) => {
+    const bookPolicy = await resolveBookPolicyTx(tx, scope, 'PURCHASE');
+    const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);
+    const header = await persistedPurchaseHeaderTx(tx, scope, voucherNo, [
+      'AC_CODE',
+      'AC_NAME',
+      'TOT_AMT',
+      'CASH_AMT',
+      'CARD_AMT',
+      'CHQ_AMT',
+      'IT_TYPE',
+      'PARTY_FINE',
+      'VCH_DESC',
+      'SL_BILL_NO',
+    ]);
+    await assertPeriodOpen(tx, tenantId, {
+      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
+    });
+    if (text(header.SL_BILL_NO)) {
+      throw new PurchaseValidationError('purchase is linked to a sale bill and cannot be deleted');
+    }
+    const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","IT_CODE","NET_AMT","IT_TYPE","ITM_FINE"
+         FROM "PR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
+      ...purchaseParams(scope, voucherNo),
+    );
+    await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'deleted');
+    await releasePurchaseReferencesTx(tx, scope, voucherNo);
+    await reverseVoucherTx(tx, tenantId, { tables: [...PURCHASE_WRITE_TABLES], key });
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+        AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coBook,
+      text(header.HD_VCH_NO),
+    );
+    const deletedAt = new Date();
+    const common = {
+      ...key,
+      VCH_DATE: header.VCH_DATE,
+      VCH_TIME: header.VCH_TIME,
+      DELETE_DATE: deletedAt,
+      DELETE_TIME: deletedAt,
+      VCH_TYPE: bookPolicy.vchType,
+      BOOK_NAME: configuredBookName,
+      AC_CODE: header.AC_CODE,
+      AC_NAME: header.AC_NAME,
+      HD_VCH_NO: header.HD_VCH_NO,
+      MAIN_USER: header.MAIN_USER,
+      DELETE_USER: input.deleteUser ?? 'system',
+    };
+    // TR_PURC.cs:13861: one header row; tender debit excludes UPI and description is 149 chars.
+    await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+      ...common,
+      SR_NO: 0,
+      VCH_VAL_DR: round2(num(header.CASH_AMT) + num(header.CARD_AMT) + num(header.CHQ_AMT)),
+      VCH_VAL_CR: num(header.TOT_AMT),
+      FINE_TYPE: text(header.IT_TYPE),
+      VCH_FINE_DR: 0,
+      VCH_FINE_CR: num(header.PARTY_FINE),
+      VCH_DESC: text(header.VCH_DESC).slice(0, 149),
+    });
+    // TR_PURC.cs:13863: one credit/fine audit row per PR_DETL line.
+    for (const detail of details) {
+      await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+        ...common,
+        SR_NO: num(detail.SR_NO),
+        VCH_VAL_DR: 0,
+        VCH_VAL_CR: num(detail.NET_AMT),
+        FINE_TYPE: text(detail.IT_TYPE),
+        VCH_FINE_DR: 0,
+        VCH_FINE_CR: num(detail.ITM_FINE),
+        VCH_DESC: `ItCode/${text(detail.IT_CODE)}`.slice(0, 150),
+      });
+    }
+    return { reversed: true };
+  });
+}
+
+// ───────────────────────── Other / expense purchase (TR_OTH_PURC) ─────────────────────────
+// A NON-STOCK purchase: buying expenses/services (packing, freight, repairs…) from a supplier,
+// with GST input credit. Ledger is purchase-sense (Dr expense + Dr input-GST + Dr round-off / Cr
+// supplier) but NO inventory is touched. Header → PAY_DATA (desktop TR_OTH_PURC), + TAX_DATA
+// (input register) + BILL_OS_DATA (payable). Book 'OPR', VCH_TYPE 'OPUR'.
+
+export interface OtherPurchaseLine {
+  expenseAc: string; // expense ledger to debit (required)
+  amount: number; // F: taxable base for this line; R: tax-inclusive gross
+  description?: string;
+  hsnCode?: string;
+  taxPct?: number; // per-line GST% (defaults to the bill taxRatePct)
+  taxType?: 'F' | 'R'; // F=forward (amount is taxable, tax added on top); R=reverse/inclusive (amount includes tax)
+}
+
+export interface OtherPurchaseInput {
+  scope: VoucherScope;
+  acCode: string; // supplier account (required)
+  acName?: string;
+  billNo?: string;
+  vchDate?: Date | string;
+  taxRatePct: number;
+  interState: boolean;
+  taxAc?: string; // GST input ledger (default 'GSTINPUT')
+  roundAc?: string;
+  lines: OtherPurchaseLine[];
+  cashAmt?: number;
+  chequeAmt?: number;
+  cardAmt?: number;
+  upiAmt?: number;
+  kasar?: number;
+  cashAc?: string;
+  bankAc?: string;
+  kasarAc?: string;
+}
+
+function otherKeyOf(s: VoucherScope, vchNo: number): VoucherKey {
+  return {
+    CO_CODE: s.coCode,
+    LC_CODE: s.lcCode,
+    CO_YEAR: s.coYear ?? '',
+    CO_BOOK: s.coBook ?? 'OPR',
+    VCH_NO: formatVoucherNo(vchNo),
+  };
+}
+
+export async function createOtherPurchase(
+  prisma: any,
+  input: OtherPurchaseInput,
+): Promise<PurchaseResult> {
+  if (!input.acCode) throw new PurchaseValidationError('supplier account (acCode) is required');
+  const lines = (input.lines ?? []).filter((l) => l && l.expenseAc && Number(l.amount) > 0);
+  if (!lines.length)
+    throw new PurchaseValidationError('at least one expense line (account + amount) is required');
+
+  const taxAc = input.taxAc ?? 'GSTINPUT';
+  const roundAc = input.roundAc ?? 'ROUNDOFF';
+  const tenantId = input.scope.tenantId;
+
+  return withTenant(prisma, tenantId, async (tx: any) => {
+    const vchNo = await nextVoucherNoTx(tx, input.scope);
+    const key = otherKeyOf(input.scope, vchNo);
+    const r2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
+    const inter = !!input.interState;
+
+    // Per-line tax: F = forward (amount is the taxable base, tax added on top); R = reverse/inclusive
+    // (amount includes tax → taxable = amount×100/(100+rate)). Rate defaults to the bill taxRatePct.
+    const calc = lines.map((l) => {
+      const pct = l.taxPct != null ? Number(l.taxPct) : input.taxRatePct;
+      const amount = round2(Number(l.amount));
+      const isR = String(l.taxType ?? 'F').toUpperCase() === 'R';
+      const base = isR ? r2((amount * 100) / (100 + pct)) : amount;
+      const gross = isR ? amount : r2(amount * (1 + pct / 100));
+      const tax = r2(gross - base);
+      return {
+        ac: l.expenseAc,
+        pct,
+        base,
+        gross,
+        tax,
+        hsn: l.hsnCode ?? null,
+        itName: l.description ?? null,
+        type: isR ? 'R' : 'F',
+      };
+    });
+    const sumBase = r2(calc.reduce((s, c) => s + c.base, 0));
+    const sumTax = r2(calc.reduce((s, c) => s + c.tax, 0));
+    const total = Math.round(sumBase + sumTax);
+    const roundOff = r2(total - (sumBase + sumTax));
+    const cgst = inter ? 0 : r2(sumTax / 2);
+    const sgst = inter ? 0 : r2(sumTax - cgst);
+    const igst = inter ? sumTax : 0;
+    const totals = {
+      net: sumBase,
+      taxable: sumBase,
+      discount: 0,
+      tax: sumTax,
+      cgst,
+      sgst,
+      igst,
+      roundOff,
+      total,
+    } as unknown as BillTotals;
+
+    const byAc = new Map<string, number>();
+    for (const c of calc) byAc.set(c.ac, r2((byAc.get(c.ac) ?? 0) + c.base));
+
+    const base = { ...key, VCH_TYPE: 'OPUR' };
+    const ledger: LedgerLine[] = [
+      { ...base, AC_CODE: input.acCode, DR_AMT: 0, CR_AMT: total, SIGN: 'C' },
+    ]; // Cr supplier
+    for (const [ac, amount] of byAc)
+      if (amount !== 0) ledger.push({ ...base, AC_CODE: ac, DR_AMT: amount, CR_AMT: 0, SIGN: 'D' }); // Dr expense (taxable base)
+    if (sumTax !== 0)
+      ledger.push({ ...base, AC_CODE: taxAc, DR_AMT: sumTax, CR_AMT: 0, SIGN: 'D' }); // Dr input GST
+    if (roundOff !== 0)
+      ledger.push({ ...base, AC_CODE: roundAc, DR_AMT: roundOff, CR_AMT: 0, SIGN: 'D' });
+    assertBalanced(ledger);
+
+    const tender = payoutLegs(base, {
+      partyAc: input.acCode,
+      cashAmt: input.cashAmt,
+      chequeAmt: input.chequeAmt,
+      cardAmt: input.cardAmt,
+      upiAmt: input.upiAmt,
+      kasar: input.kasar,
+      cashAc: input.cashAc,
+      bankAc: input.bankAc,
+      kasarAc: input.kasarAc,
+    });
+    ledger.push(...tender.legs);
+
+    const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
+    const header = {
+      ...key,
+      VCH_TYPE: 'OPUR',
+      BILL_NO: input.billNo ?? formatVoucherNo(vchNo),
+      VCH_DATE: vchDate,
+      AC_CODE: input.acCode,
+      AC_NAME: input.acName ?? null,
+      NET_AMT: sumBase,
+      CGST_TAX: cgst,
+      SGST_TAX: sgst,
+      IGST_TAX: igst,
+      TOT_AMT: total,
+      CASH_AMT: tender.cashAmt,
+      CHQ_AMT: round2(num(input.chequeAmt)),
+      CARD_AMT: round2(num(input.cardAmt)),
+      KASAR_AMT: tender.kasar,
+      BANK_AC: input.bankAc ?? null,
+      BILL_OS: round2(total - tender.paidNow - tender.kasar),
+    };
+    // Per-line detail with HSN + F/R + CGST/SGST/IGST split (PAY_DETL).
+    const detl = calc.map((c, i) => {
+      const cg = inter ? 0 : r2(c.tax / 2);
+      const sg = inter ? 0 : r2(c.tax - cg);
+      const ig = inter ? c.tax : 0;
+      return {
+        ...key,
+        SR_NO: i + 1,
+        VCH_DATE: vchDate,
+        VCH_TYPE: 'OPUR',
+        BOOK_NAME: 'OTH PURC',
+        AC_CODE: c.ac,
+        HSN_CODE: c.hsn,
+        IT_NAME: c.itName,
+        TAX_TYPE: c.type,
+        TAX_PRC: c.pct,
+        TAXABLE_AMT: c.base,
+        NET_AMT: c.base,
+        CGST_PRC: inter ? 0 : r2(c.pct / 2),
+        CGST_TAX: cg,
+        SGST_PRC: inter ? 0 : r2(c.pct / 2),
+        SGST_TAX: sg,
+        IGST_PRC: inter ? c.pct : 0,
+        IGST_TAX: ig,
+        TOT_AMT: c.gross,
+      };
+    });
+    // TAX_DATA grouped per distinct rate (a bill may mix HSN rates).
+    const taxBase = {
+      ...key,
+      TRAN_TYPE: 'P',
+      BOOK_NAME: 'OTH PURC',
+      VCH_DATE: vchDate,
+      AC_CODE: input.acCode,
+      PARTY_NAME: input.acName ?? null,
+      TAX_SIGN: '-',
+    };
+    const byRate = new Map<number, { base: number; tax: number }>();
+    for (const c of calc) {
+      const e = byRate.get(c.pct) ?? { base: 0, tax: 0 };
+      e.base = r2(e.base + c.base);
+      e.tax = r2(e.tax + c.tax);
+      byRate.set(c.pct, e);
+    }
+    const taxRows: any[] = [];
+    let sr = 1;
+    for (const [pct, e] of byRate) {
+      if (e.tax === 0) continue;
+      if (inter)
+        taxRows.push({
+          ...taxBase,
+          SR_NO: sr++,
+          TAX_TYPE: 'IGST',
+          TAX_PRC: pct,
+          NET_AMT: e.base,
+          TAX_AMT: e.tax,
+          TOT_AMT: r2(e.base + e.tax),
+        });
+      else {
+        const cg = r2(e.tax / 2);
+        taxRows.push({
+          ...taxBase,
+          SR_NO: sr++,
+          TAX_TYPE: 'CGST',
+          TAX_PRC: r2(pct / 2),
+          NET_AMT: e.base,
+          TAX_AMT: cg,
+          TOT_AMT: r2(e.base + e.tax),
+        });
+        taxRows.push({
+          ...taxBase,
+          SR_NO: sr++,
+          TAX_TYPE: 'SGST',
+          TAX_PRC: r2(pct / 2),
+          NET_AMT: e.base,
+          TAX_AMT: r2(e.tax - cg),
+          TOT_AMT: r2(e.base + e.tax),
+        });
+      }
+    }
+    const osRow = {
+      ...key,
+      VCH_TYPE: 'OPUR',
+      INOUT_TYPE: 'I',
+      ENTRY_TYPE: 'N',
+      BOOK_NAME: 'OTH PURC',
+      SR_NO: 1,
+      VCH_DATE: vchDate,
+      AC_CODE: input.acCode,
+      BILL_AMT: total,
+      REC_AMT: tender.paidNow,
+      KASAR_AMT: tender.kasar,
+    };
+
+    await postVoucherTx(tx, tenantId, {
+      ledger: { table: 'AC_DATA', lines: ledger },
+      bookName: 'OTH PURC',
+      writes: [
+        { table: 'PAY_DATA', rows: [header] },
+        { table: 'PAY_DETL', rows: detl },
+        ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
+        { table: 'BILL_OS_DATA', rows: [osRow] },
+      ],
+    });
+    return { vchNo, totals };
+  });
+}
+
+export async function deleteOtherPurchase(
+  prisma: any,
+  input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string },
+): Promise<{ reversed: true }> {
+  const tenantId = input.scope.tenantId;
+  const key = otherKeyOf(input.scope, Number(input.vchNo));
+  return withTenant(prisma, tenantId, async (tx: any) => {
+    await reverseVoucherTx(tx, tenantId, {
+      tables: ['PAY_DATA', 'PAY_DETL', 'AC_DATA', 'TAX_DATA', 'BILL_OS_DATA'],
+      key,
+      deleteLog: {
+        table: 'DELETE_DATA',
+        row: { ...key, VCH_TYPE: 'OPUR', DELETE_USER: input.deleteUser ?? 'system' },
+      },
+    });
+    return { reversed: true };
+  });
+}

@@ -1,0 +1,63 @@
+{
+ "form": "MS_GROUP",
+ "controlCount": 1,
+ "byKind": {
+  "textbox": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "nTochAdd",
+   "chkRateDisplay",
+   "Label11",
+   "nTaxPrc",
+   "tHsnCode",
+   "Label10",
+   "PnlBotam",
+   "cboItemTyp",
+   "Label6",
+   "nWest",
+   "Label7",
+   "tPurcAc",
+   "nMelting",
+   "Label5",
+   "nGrPrTouch",
+   "Label4",
+   "tSalesAc",
+   "nGrTouch",
+   "Label3",
+   "tGTradTyp",
+   "DGV",
+   "Text1",
+   "Label9",
+   "Label8",
+   "Label1",
+   "tPurcAcName",
+   "Label2",
+   "tSaleAcName",
+   "tGrCode",
+   "tGrName",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  }
+ ]
+}

@@ -1,0 +1,117 @@
+# DataCareNext — full application stack (Postgres + API + Web). Right-sized, ADR-0002.
+#
+# Brings up:
+#   postgres : PostgreSQL 16 (healthcheck + persistent volume), host port 5433
+#   api      : @datacare/api (Fastify) on 4000  — built from Dockerfile.api
+#   web      : @datacare/web (Next.js 15) on 4001 — built from Dockerfile.web
+#
+# Copy .env.example -> .env and fill in the secrets before `docker compose up`.
+# First-run database bootstrap (migrate + RLS + app_user) is documented in DEPLOY.md.
+#
+# NOTE: this replaces the previous dev-only compose (Postgres + Redis). Redis is
+# omitted because the API consumes no REDIS_URL today; add it back when a queue lands.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: datacare
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: datacare
+    ports:
+      # host 5433 keeps parity with the prior dev convention (container "web-postgres-1").
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U datacare -d datacare']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [datacare]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      NODE_ENV: production
+      PORT: '4000'
+      # Runtime connects as the NON-superuser app_user so Row-Level Security is enforced.
+      # app_user is created by packages/db/setup_roles.sql (see DEPLOY.md). DDL/migrations
+      # use the superuser role instead (MIGRATE_DATABASE_URL in .env).
+      DATABASE_URL: postgresql://app_user:${APP_DB_PASSWORD:?set APP_DB_PASSWORD in .env}@postgres:5432/datacare?schema=public
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      APP_VERSION: ${APP_VERSION:-0.0.0}
+      APP_TENANT_ID: ${APP_TENANT_ID:-default}
+      DEMO_TENANT: ${DEMO_TENANT:-default}
+      SEED_DEMO: ${SEED_DEMO:-0}
+      # --- Integrations: empty by default -> Fake/no-op senders; fill in .env to go live ---
+      GSP_ASPID: ${GSP_ASPID:-}
+      GSP_PASSWORD: ${GSP_PASSWORD:-}
+      GSP_GSTIN: ${GSP_GSTIN:-}
+      GSP_USER: ${GSP_USER:-}
+      GSP_EINV_PWD: ${GSP_EINV_PWD:-}
+      GSP_SANDBOX: ${GSP_SANDBOX:-1}
+      WA_PHONE_ID: ${WA_PHONE_ID:-}
+      WA_TOKEN: ${WA_TOKEN:-}
+      WA_API_VERSION: ${WA_API_VERSION:-}
+      SMS_URL_TEMPLATE: ${SMS_URL_TEMPLATE:-}
+      SMS_KEY: ${SMS_KEY:-}
+      SMS_SENDER: ${SMS_SENDER:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '4000:4000'
+    healthcheck:
+      # Readiness verifies DB connectivity, a non-bypass runtime role, and FORCE RLS coverage.
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(''http://127.0.0.1:4000/ready'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks: [datacare]
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        # Baked into the Next /api rewrite at build time (see Dockerfile.web).
+        API_ORIGIN: http://api:4000
+    environment:
+      NODE_ENV: production
+      # Runtime copy (safety net); the effective value is the build-time one above.
+      API_ORIGIN: http://api:4000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '4001:4001'
+    healthcheck:
+      # Liveness: any HTTP response (incl. redirects) means the server is up.
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(''http://127.0.0.1:4001/'').then(()=>process.exit(0)).catch(()=>process.exit(1))"',
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks: [datacare]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+
+networks:
+  datacare:
+    driver: bridge

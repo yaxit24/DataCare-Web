@@ -1,0 +1,338 @@
+{
+ "report": "BillRecVch",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section6",
+     "kind": "ReportHeader",
+     "height": 304,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 225,
+       "top": 15,
+       "width": 735,
+       "height": 255,
+       "text": "It Code"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 1245,
+       "top": 15,
+       "width": 735,
+       "height": 255,
+       "text": "It Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 4365,
+       "top": 15,
+       "width": 660,
+       "height": 255,
+       "text": "Gr Wt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 5250,
+       "top": 15,
+       "width": 660,
+       "height": 255,
+       "text": "Net Wt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 6060,
+       "top": 15,
+       "width": 660,
+       "height": 255,
+       "text": "Touch"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 7035,
+       "top": 15,
+       "width": 660,
+       "height": 255,
+       "text": "Fine"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 7965,
+       "top": 15,
+       "width": 660,
+       "height": 255,
+       "text": "Rate"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 8920,
+       "top": 15,
+       "width": 860,
+       "height": 255,
+       "text": "Net Amt"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 180,
+       "top": 285,
+       "width": 9780,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 258,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 225,
+       "top": 30,
+       "width": 615,
+       "height": 226,
+       "dataSource": "{SL_PR_DETL.IT_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 1245,
+       "top": 30,
+       "width": 2955,
+       "height": 226,
+       "dataSource": "{SL_PR_DETL.IT_DESC}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 4241,
+       "top": 30,
+       "width": 784,
+       "height": 228,
+       "dataSource": "{SL_PR_DETL.ITM_GWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 5133,
+       "top": 30,
+       "width": 777,
+       "height": 228,
+       "dataSource": "{SL_PR_DETL.ITM_NWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 5985,
+       "top": 30,
+       "width": 735,
+       "height": 228,
+       "dataSource": "{SL_PR_DETL.ITM_TOUCH}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 6840,
+       "top": 30,
+       "width": 855,
+       "height": 228,
+       "dataSource": "{SL_PR_DETL.ITM_FINE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 7787,
+       "top": 30,
+       "width": 838,
+       "height": 228,
+       "dataSource": "{SL_PR_DETL.ITM_RATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 8700,
+       "top": 30,
+       "width": 1080,
+       "height": 228,
+       "dataSource": "{SL_PR_DETL.NET_AMT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 240,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "UnknownField",
+   "text": "'Gst No : ' + {AC_MAST.AC_LSTNO}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_MOBILE} <> '' then 'Mo : ' + {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then 'Ph : ' + {AC_MAST.AC_MOBILE} else 'Mo : ' + {AC_MAST.AC_MOBILE2}"
+  },
+  {
+   "name": "ClAmt",
+   "ref": "{@ClAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "CoAdd1",
+   "ref": "{@CoAdd1}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD1} else {CO_MAST.CO_ADD1}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD2} + ' , ' + {LOCT_MAST.LC_ADD3} else {CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_CITY} + ' Mo : ' + {LOCT_MAST.LC_MOBILE} + ' Ph : ' + {LOCT_MAST.LC_PHONE} else {CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE} + ' Ph : ' + {CO_M"
+  },
+  {
+   "name": "CoName",
+   "ref": "{@CoName}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_NAME} ELSE {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CrDrType",
+   "ref": "{@CrDrType}",
+   "type": "StringField",
+   "text": "if {@ClAmt} < 0 then 'Dr' else 'Cr'"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "InVoiceType",
+   "ref": "{@InVoiceType}",
+   "type": "StringField",
+   "text": "'ORIGINAL'"
+  },
+  {
+   "name": "OpAmt",
+   "ref": "{@OpAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpAmtCrDr",
+   "ref": "{@OpAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@OpAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "RecAmt",
+   "ref": "{@RecAmt}",
+   "type": "NumberField",
+   "text": "if {CASH_DATA.KASAR_AMT} < 0 then 0 else {CASH_DATA.REC_AMT}"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "Tax",
+   "ref": "{@Tax}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{CASH_DATA.CO_YEAR}+{CASH_DATA.CO_BOOK}+{CASH_DATA.VCH_NO}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "StringField",
+   "text": "if {CASH_DATA.REC_AMT} <> 0 then 'Ruppes : ' & ucase(ToWords ({CASH_DATA.REC_AMT},0 ))"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 17,
+ "formulaCount": 21
+}

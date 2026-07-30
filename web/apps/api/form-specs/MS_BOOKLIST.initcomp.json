@@ -1,0 +1,60 @@
+{
+ "form": "MS_BOOKLIST",
+ "controlCount": 4,
+ "byKind": {
+  "grid": 1,
+  "textbox": 1,
+  "label": 2
+ },
+ "grids": [
+  "MSG"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "this": [
+   "LblHelpName",
+   "LblExit",
+   "MSG",
+   "tSearchText"
+  ]
+ },
+ "controls": [
+  {
+   "name": "MSG",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "16,28",
+   "size": "705,209",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tSearchText",
+   "type": "TextBox",
+   "location": "18,244",
+   "size": "701,16",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "LblExit",
+   "type": "Label",
+   "location": "706,5",
+   "size": "18,18",
+   "tabIndex": "3",
+   "text": "X",
+   "kind": "label"
+  },
+  {
+   "name": "LblHelpName",
+   "type": "Label",
+   "location": "12,5",
+   "size": "115,18",
+   "tabIndex": "4",
+   "text": "DataCare Help",
+   "kind": "label"
+  }
+ ]
+}

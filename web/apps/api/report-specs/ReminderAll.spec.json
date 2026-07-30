@@ -1,0 +1,528 @@
+{
+ "report": "ReminderAll",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 216,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 120,
+       "top": 16,
+       "width": 2540,
+       "height": 200,
+       "text": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1056,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 120,
+       "top": 90,
+       "width": 15960,
+       "height": 372,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 120,
+       "top": 480,
+       "width": 15960,
+       "height": 270,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 120,
+       "top": 750,
+       "width": 15960,
+       "height": 264,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 15570,
+       "top": 750,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 528,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 120,
+       "top": 30,
+       "width": 15960,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 435,
+       "top": 120,
+       "width": 525,
+       "height": 226,
+       "dataSource": "{@Hd_01}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 1170,
+       "top": 120,
+       "width": 2790,
+       "height": 226,
+       "dataSource": "{@Hd_02}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 4200,
+       "top": 120,
+       "width": 1080,
+       "height": 226,
+       "dataSource": "{@Hd_03}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 5460,
+       "top": 120,
+       "width": 1080,
+       "height": 226,
+       "dataSource": "{@Hd_04}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 6660,
+       "top": 120,
+       "width": 1020,
+       "height": 226,
+       "dataSource": "{@Hd_05}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 7845,
+       "top": 120,
+       "width": 1035,
+       "height": 226,
+       "dataSource": "{@Hd_06}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 9105,
+       "top": 120,
+       "width": 1095,
+       "height": 226,
+       "dataSource": "{@Hd_07}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 10440,
+       "top": 120,
+       "width": 1080,
+       "height": 226,
+       "dataSource": "{@Hd_08}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 11850,
+       "top": 120,
+       "width": 1056,
+       "height": 226,
+       "dataSource": "{@Hd_09}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 13065,
+       "top": 120,
+       "width": 960,
+       "height": 226,
+       "dataSource": "{@Hd_10}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 14190,
+       "top": 120,
+       "width": 1320,
+       "height": 226,
+       "dataSource": "{@Hd_11}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 120,
+       "top": 480,
+       "width": 15960,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "Detail",
+     "height": 288,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 435,
+       "top": 24,
+       "width": 525,
+       "height": 226,
+       "dataSource": "{@Col_01}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 1170,
+       "top": 24,
+       "width": 2790,
+       "height": 226,
+       "dataSource": "{@Col_02}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 4200,
+       "top": 24,
+       "width": 1080,
+       "height": 226,
+       "dataSource": "{@Col_03}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 5460,
+       "top": 24,
+       "width": 1080,
+       "height": 226,
+       "dataSource": "{@Col_04}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 6660,
+       "top": 24,
+       "width": 1020,
+       "height": 226,
+       "dataSource": "{@Col_05}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 7845,
+       "top": 24,
+       "width": 1035,
+       "height": 226,
+       "dataSource": "{@Col_06}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 9105,
+       "top": 24,
+       "width": 1095,
+       "height": 226,
+       "dataSource": "{@Col_07}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 10440,
+       "top": 24,
+       "width": 1080,
+       "height": 226,
+       "dataSource": "{@Col_08}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 11850,
+       "top": 24,
+       "width": 1056,
+       "height": 226,
+       "dataSource": "{@Col_09}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 13065,
+       "top": 24,
+       "width": 960,
+       "height": 226,
+       "dataSource": "{@Col_10}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 14190,
+       "top": 24,
+       "width": 1320,
+       "height": 226,
+       "dataSource": "{@Col_11}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area12",
+   "sections": [
+    {
+     "name": "Section14",
+     "kind": "ReportFooter",
+     "height": 345,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line10",
+       "left": 120,
+       "top": 15,
+       "width": 11190,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area13",
+   "sections": [
+    {
+     "name": "Section15",
+     "kind": "PageFooter",
+     "height": 175,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+\" \"+{CO_MAST.CO_ADD2}+\" \"+{CO_MAST.CO_ADD3}+\" \"+{CO_MAST.CO_CITY}+\" Ph-\"+{CO_MAST.CO_PHONE}"
+  },
+  {
+   "name": "Col_01",
+   "ref": "{@Col_01}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_1}"
+  },
+  {
+   "name": "Col_02",
+   "ref": "{@Col_02}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_2}"
+  },
+  {
+   "name": "Col_03",
+   "ref": "{@Col_03}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_3}"
+  },
+  {
+   "name": "Col_04",
+   "ref": "{@Col_04}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_4}"
+  },
+  {
+   "name": "Col_05",
+   "ref": "{@Col_05}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_5}"
+  },
+  {
+   "name": "Col_06",
+   "ref": "{@Col_06}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_6}"
+  },
+  {
+   "name": "Col_07",
+   "ref": "{@Col_07}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_7}"
+  },
+  {
+   "name": "Col_08",
+   "ref": "{@Col_08}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_8}"
+  },
+  {
+   "name": "Col_09",
+   "ref": "{@Col_09}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_9}"
+  },
+  {
+   "name": "Col_10",
+   "ref": "{@Col_10}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_10}"
+  },
+  {
+   "name": "Col_11",
+   "ref": "{@Col_11}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} <> '0' then {REPORT_DATA.COL_11}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2001,05,01)"
+  },
+  {
+   "name": "Hd_01",
+   "ref": "{@Hd_01}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_1}"
+  },
+  {
+   "name": "Hd_02",
+   "ref": "{@Hd_02}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_2}"
+  },
+  {
+   "name": "Hd_03",
+   "ref": "{@Hd_03}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_3}"
+  },
+  {
+   "name": "Hd_04",
+   "ref": "{@Hd_04}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_4}"
+  },
+  {
+   "name": "Hd_05",
+   "ref": "{@Hd_05}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_5}"
+  },
+  {
+   "name": "Hd_06",
+   "ref": "{@Hd_06}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_6}"
+  },
+  {
+   "name": "Hd_07",
+   "ref": "{@Hd_07}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_7}"
+  },
+  {
+   "name": "Hd_08",
+   "ref": "{@Hd_08}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_8}"
+  },
+  {
+   "name": "Hd_09",
+   "ref": "{@Hd_09}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_9}"
+  },
+  {
+   "name": "Hd_10",
+   "ref": "{@Hd_10}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_10}"
+  },
+  {
+   "name": "Hd_11",
+   "ref": "{@Hd_11}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.COL_11}"
+  },
+  {
+   "name": "Hd_Sr",
+   "ref": "{@Hd_Sr}",
+   "type": "StringField",
+   "text": "if{REPORT_DATA.SR_NO} = '0' then {REPORT_DATA.SR_NO}"
+  },
+  {
+   "name": "RptShow",
+   "ref": "{@RptShow}",
+   "type": "StringField",
+   "text": "'R'"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "\"STOCK LEDGER FOR PERIOD FROM DATE TO DATE\""
+  },
+  {
+   "name": "SrNo",
+   "ref": "{@SrNo}",
+   "type": "StringField",
+   "text": "{REPORT_DATA.SR_NO}"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "beforereadingrecords; date(2006,07,21)"
+  }
+ ],
+ "sectionCount": 6,
+ "objectCount": 30,
+ "formulaCount": 30
+}

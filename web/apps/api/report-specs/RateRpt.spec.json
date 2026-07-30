@@ -1,0 +1,227 @@
+{
+ "report": "RateRpt",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 765,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 0,
+       "top": 30,
+       "width": 10770,
+       "height": 412,
+       "dataSource": "{@Company}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 0,
+       "top": 480,
+       "width": 10560,
+       "height": 240,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 10290,
+       "top": 480,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 420,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 0,
+       "top": 15,
+       "width": 10905,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 720,
+       "top": 120,
+       "width": 960,
+       "height": 285,
+       "text": "Date"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 2160,
+       "top": 120,
+       "width": 3180,
+       "height": 285,
+       "text": "Group Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 7275,
+       "top": 120,
+       "width": 1485,
+       "height": 270,
+       "text": "Rate 10gm"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 0,
+       "top": 420,
+       "width": 10905,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 320,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 720,
+       "top": 30,
+       "width": 2686,
+       "height": 263,
+       "dataSource": "{RATE_MAST.VCH_DATE}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 720,
+       "top": 300,
+       "width": 10200,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 280,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 2160,
+       "top": 2,
+       "width": 4440,
+       "height": 226,
+       "dataSource": "{GROUP_MAST.GR_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 6960,
+       "top": 2,
+       "width": 1800,
+       "height": 228,
+       "dataSource": "{RATE_MAST.GR_RATE}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupFooter",
+     "height": 585,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 625,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "PageFooter",
+     "height": 450,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'Daily Rate Report'"
+  }
+ ],
+ "sectionCount": 8,
+ "objectCount": 12,
+ "formulaCount": 3
+}

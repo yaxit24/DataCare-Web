@@ -1,0 +1,380 @@
+{
+ "report": "AngdiyaIsuRpt",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1100,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 165,
+       "top": 75,
+       "width": 11085,
+       "height": 324,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 165,
+       "top": 465,
+       "width": 11085,
+       "height": 315,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 165,
+       "top": 780,
+       "width": 11085,
+       "height": 230,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 10740,
+       "top": 780,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 468,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 180,
+       "top": 30,
+       "width": 11220,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 255,
+       "top": 90,
+       "width": 930,
+       "height": 230,
+       "text": "Ord.No."
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 1185,
+       "top": 90,
+       "width": 1170,
+       "height": 230,
+       "text": "Party Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 2310,
+       "top": 90,
+       "width": 1665,
+       "height": 230,
+       "text": "Party Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 6555,
+       "top": 90,
+       "width": 1170,
+       "height": 240,
+       "text": "Bill Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 7935,
+       "top": 90,
+       "width": 1170,
+       "height": 240,
+       "text": "Vp Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 9150,
+       "top": 90,
+       "width": 1170,
+       "height": 240,
+       "text": "Ins Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 10440,
+       "top": 90,
+       "width": 810,
+       "height": 240,
+       "text": "Vp Charg"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 165,
+       "top": 375,
+       "width": 11235,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 395,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 255,
+       "top": 60,
+       "width": 1440,
+       "height": 226,
+       "dataSource": "{RATE_CUT_DATA.AC_ANGDIYA}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 1785,
+       "top": 60,
+       "width": 4575,
+       "height": 226,
+       "dataSource": "{AC_MAST_ANG.AC_NAME}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 135,
+       "top": 345,
+       "width": 11265,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 285,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 255,
+       "top": 45,
+       "width": 1140,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 1395,
+       "top": 45,
+       "width": 780,
+       "height": 230,
+       "dataSource": "{RATE_CUT_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 2310,
+       "top": 45,
+       "width": 4470,
+       "height": 230,
+       "dataSource": "{RATE_CUT_DATA.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 6553,
+       "top": 45,
+       "width": 1172,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.SL_BILL_OS}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 7920,
+       "top": 45,
+       "width": 1185,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.VP_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 9240,
+       "top": 45,
+       "width": 1080,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.VP_INS_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 10440,
+       "top": 45,
+       "width": 810,
+       "height": 204,
+       "dataSource": "{RATE_CUT_DATA.VP_CHARG_AMT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupFooter",
+     "height": 230,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 360,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 1164,
+       "top": 15,
+       "width": 10236,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 5040,
+       "top": 120,
+       "width": 1170,
+       "height": 240,
+       "text": "Grand Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 6526,
+       "top": 120,
+       "width": 1199,
+       "height": 216,
+       "dataSource": "Sum ({RATE_CUT_DATA.SL_BILL_OS})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 7893,
+       "top": 120,
+       "width": 1212,
+       "height": 216,
+       "dataSource": "Sum ({RATE_CUT_DATA.VP_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 9215,
+       "top": 120,
+       "width": 1105,
+       "height": 216,
+       "dataSource": "Sum ({RATE_CUT_DATA.VP_INS_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 10422,
+       "top": 120,
+       "width": 828,
+       "height": 216,
+       "dataSource": "Sum ({RATE_CUT_DATA.VP_CHARG_AMT})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "PageFooter",
+     "height": 105,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+' '+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'KARIGAR ISSUE REGISTER'"
+  }
+ ],
+ "sectionCount": 8,
+ "objectCount": 29,
+ "formulaCount": 3
+}

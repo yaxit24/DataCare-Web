@@ -1,0 +1,612 @@
+{
+ "form": "RP_ADDRESS",
+ "controlCount": 58,
+ "byKind": {
+  "button": 9,
+  "combo": 10,
+  "textbox": 10,
+  "masked": 3,
+  "other": 1,
+  "panel": 3,
+  "label": 20,
+  "check": 1,
+  "grid": 1
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 1,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "PanelDhrn": [
+   "Btn2Add",
+   "BtnPhBook",
+   "Btn3Add"
+  ],
+  "PnlAc": [
+   "tSearchText",
+   "btnOk",
+   "DGV"
+  ],
+  "this": [
+   "cboAcType",
+   "lblAcType",
+   "PnlAc",
+   "Label13",
+   "mToBDate",
+   "mAnDate",
+   "mBhDate",
+   "chkAcSelect",
+   "cboPartyName",
+   "Label12",
+   "cboCustGroup",
+   "Label11",
+   "Label9",
+   "nSkipLbl",
+   "tMobile",
+   "lblMoNo",
+   "tPhone",
+   "lblPhone",
+   "cboAdd3",
+   "Label10",
+   "cboAdd1",
+   "cboA",
+   "cboDistrict",
+   "Label8",
+   "cboState",
+   "Label5",
+   "Label7",
+   "CboAddType",
+   "Label4",
+   "PanelDhrn",
+   "tLcCode",
+   "tLcName",
+   "Label6",
+   "cboArea",
+   "Label17",
+   "cboCity",
+   "lblCity",
+   "tAcCode",
+   "tAcName",
+   "Label3",
+   "Label2",
+   "tAcGroup",
+   "tAcGrName",
+   "Label1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "Btn2Add",
+   "type": "QButton",
+   "location": "30,6",
+   "size": "143,37",
+   "tabIndex": "0",
+   "text": "2 Address",
+   "kind": "button"
+  },
+  {
+   "name": "CboAddType",
+   "type": "ComboBox",
+   "location": "474,50",
+   "size": "159,22",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "475,78",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnPhBook",
+   "type": "QButton",
+   "location": "213,6",
+   "size": "143,37",
+   "tabIndex": "1",
+   "text": "Phone Book",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "475,106",
+   "size": "76,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Btn3Add",
+   "type": "QButton",
+   "location": "397,6",
+   "size": "143,37",
+   "tabIndex": "2",
+   "text": "3 Address",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "tAcGroup",
+   "type": "TextBox",
+   "location": "475,134",
+   "size": "76,23",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "mBhDate",
+   "type": "MaskedTextBox",
+   "location": "475,163",
+   "size": "76,23",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "mToBDate",
+   "type": "MaskedTextBox",
+   "location": "607,164",
+   "size": "76,23",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mAnDate",
+   "type": "MaskedTextBox",
+   "location": "763,163",
+   "size": "76,23",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "cboDistrict",
+   "type": "ComboBox",
+   "location": "474,192",
+   "size": "271,22",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboCity",
+   "type": "ComboBox",
+   "location": "475,220",
+   "size": "270,22",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboArea",
+   "type": "ComboBox",
+   "location": "475,248",
+   "size": "270,22",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboState",
+   "type": "ComboBox",
+   "location": "475,276",
+   "size": "270,22",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboAdd1",
+   "type": "ComboBox",
+   "location": "475,304",
+   "size": "270,22",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboAdd3",
+   "type": "ComboBox",
+   "location": "475,332",
+   "size": "270,22",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboCustGroup",
+   "type": "ComboBox",
+   "location": "475,360",
+   "size": "270,22",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboPartyName",
+   "type": "ComboBox",
+   "location": "475,387",
+   "size": "270,22",
+   "tabIndex": "14",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "15",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tMobile",
+   "type": "TextBox",
+   "location": "475,414",
+   "size": "158,22",
+   "tabIndex": "15",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "16",
+   "text": "Address Print",
+   "kind": "label"
+  },
+  {
+   "name": "tPhone",
+   "type": "TextBox",
+   "location": "475,441",
+   "size": "158,22",
+   "tabIndex": "16",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PanelDhrn",
+   "type": "Panel",
+   "location": "300,473",
+   "size": "568,49",
+   "tabIndex": "17",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "chkAcSelect",
+   "type": "CheckBox",
+   "location": "845,106",
+   "size": "141,19",
+   "tabIndex": "18",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "11,11",
+   "size": "688,229",
+   "tabIndex": "1156",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "btnOk",
+   "type": "QButton",
+   "location": "270,252",
+   "size": "159,38",
+   "tabIndex": "1157",
+   "text": "Ok",
+   "kind": "button"
+  },
+  {
+   "name": "tSearchText",
+   "type": "TextBox",
+   "location": "11,252",
+   "size": "172,19",
+   "tabIndex": "1158",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "349,136",
+   "size": "119,20",
+   "tabIndex": "1160",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "tAcGrName",
+   "type": "TextBox",
+   "location": "557,135",
+   "size": "282,23",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "364,166",
+   "size": "102,20",
+   "tabIndex": "1162",
+   "text": "Birth Date",
+   "kind": "label"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "557,106",
+   "size": "282,23",
+   "tabIndex": "1164",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "377,106",
+   "size": "91,20",
+   "tabIndex": "1165",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "lblCity",
+   "type": "Label",
+   "location": "409,219",
+   "size": "58,19",
+   "tabIndex": "1166",
+   "text": "City",
+   "kind": "label"
+  },
+  {
+   "name": "Label17",
+   "type": "Label",
+   "location": "420,249",
+   "size": "47,19",
+   "tabIndex": "1168",
+   "text": "Area",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "408,78",
+   "size": "60,20",
+   "tabIndex": "1176",
+   "text": "Lc Code",
+   "kind": "label"
+  },
+  {
+   "name": "tLcName",
+   "type": "TextBox",
+   "location": "557,77",
+   "size": "282,23",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "365,49",
+   "size": "101,19",
+   "tabIndex": "1182",
+   "text": "Address Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "689,165",
+   "size": "65,20",
+   "tabIndex": "1184",
+   "text": "Anv Date",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "376,277",
+   "size": "92,19",
+   "tabIndex": "1186",
+   "text": "State",
+   "kind": "label"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "374,193",
+   "size": "92,19",
+   "tabIndex": "1188",
+   "text": "District",
+   "kind": "label"
+  },
+  {
+   "name": "cboA",
+   "type": "Label",
+   "location": "376,305",
+   "size": "92,19",
+   "tabIndex": "1190",
+   "text": "Address 1",
+   "kind": "label"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "376,333",
+   "size": "92,19",
+   "tabIndex": "1192",
+   "text": "Address 3",
+   "kind": "label"
+  },
+  {
+   "name": "lblPhone",
+   "type": "Label",
+   "location": "390,439",
+   "size": "77,19",
+   "tabIndex": "1195",
+   "text": "Phone No",
+   "kind": "label"
+  },
+  {
+   "name": "lblMoNo",
+   "type": "Label",
+   "location": "376,413",
+   "size": "92,19",
+   "tabIndex": "1196",
+   "text": "Mobile No",
+   "kind": "label"
+  },
+  {
+   "name": "nSkipLbl",
+   "type": "TextBox",
+   "location": "706,442",
+   "size": "39,22",
+   "tabIndex": "1197",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "638,442",
+   "size": "63,19",
+   "tabIndex": "1198",
+   "text": "Skip Lbl",
+   "kind": "label"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "376,361",
+   "size": "92,19",
+   "tabIndex": "1200",
+   "text": "Cust Group",
+   "kind": "label"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "376,388",
+   "size": "92,19",
+   "tabIndex": "1202",
+   "text": "Ref By",
+   "kind": "label"
+  },
+  {
+   "name": "PnlAc",
+   "type": "Panel",
+   "location": "890,205",
+   "size": "713,302",
+   "tabIndex": "1204",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label13",
+   "type": "Label",
+   "location": "557,166",
+   "size": "44,20",
+   "tabIndex": "1206",
+   "text": "To Bd",
+   "kind": "label"
+  },
+  {
+   "name": "cboAcType",
+   "type": "ComboBox",
+   "location": "747,50",
+   "size": "93,22",
+   "tabIndex": "1207",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblAcType",
+   "type": "Label",
+   "location": "642,49",
+   "size": "97,19",
+   "tabIndex": "1208",
+   "text": "Ac Type",
+   "kind": "label"
+  }
+ ]
+}

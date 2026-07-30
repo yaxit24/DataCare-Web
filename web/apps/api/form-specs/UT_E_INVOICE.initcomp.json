@@ -1,0 +1,156 @@
+{
+ "form": "UT_E_INVOICE",
+ "controlCount": 13,
+ "byKind": {
+  "masked": 2,
+  "panel": 1,
+  "button": 5,
+  "label": 2,
+  "other": 1,
+  "grid": 2
+ },
+ "grids": [
+  "DGV",
+  "DGV_DETL"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave"
+  ],
+  "this": [
+   "DGV_DETL",
+   "BtnOk",
+   "Cr",
+   "lblBook",
+   "PnlBotam",
+   "DGV",
+   "Label4",
+   "mToDt",
+   "mFromDt"
+  ]
+ },
+ "controls": [
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "82,44",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "164,44",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "E - Invoice Data ",
+   "kind": "label"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,80",
+   "size": "1159,257",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "32,45",
+   "size": "44,20",
+   "tabIndex": "1159",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "BtnOk",
+   "type": "QButton",
+   "location": "278,39",
+   "size": "94,32",
+   "tabIndex": "1160",
+   "text": "&Get List",
+   "kind": "button"
+  },
+  {
+   "name": "DGV_DETL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,343",
+   "size": "1159,209",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "grid"
+  }
+ ]
+}

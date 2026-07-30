@@ -1,0 +1,350 @@
+{
+ "form": "RP_REMINDER",
+ "controlCount": 32,
+ "byKind": {
+  "panel": 3,
+  "label": 5,
+  "button": 19,
+  "other": 1,
+  "masked": 2,
+  "grid": 1,
+  "check": 1
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 10,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "SimpleButton1",
+   "Cr"
+  ],
+  "Panel1": [
+   "Button1",
+   "btnUserReqest",
+   "btnWebData",
+   "btnTodaySale",
+   "btnPurc",
+   "btnItmInOut",
+   "btnReminder",
+   "btnSchm",
+   "btnBirthday",
+   "btnDhrn",
+   "btnWhSales",
+   "BtnSales",
+   "btnOrder",
+   "Panel2"
+  ],
+  "Panel2": [
+   "lblDay",
+   "lblClock"
+  ],
+  "this": [
+   "chkKrOrdRec",
+   "DGV",
+   "Label1",
+   "mToDt",
+   "mFromDt",
+   "Label2",
+   "Panel1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "Panel2",
+   "type": "Panel",
+   "location": "0,0",
+   "size": "151,72",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "lblClock",
+   "type": "Label",
+   "location": "0,0",
+   "size": "151,37",
+   "tabIndex": "0",
+   "text": "Clock",
+   "kind": "label"
+  },
+  {
+   "name": "btnOrder",
+   "type": "Button",
+   "location": "0,72",
+   "size": "151,35",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "lblDay",
+   "type": "Label",
+   "location": "0,37",
+   "size": "151,30",
+   "tabIndex": "1",
+   "text": "Day",
+   "kind": "label"
+  },
+  {
+   "name": "BtnSales",
+   "type": "Button",
+   "location": "0,107",
+   "size": "151,35",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "btnWhSales",
+   "type": "Button",
+   "location": "0,142",
+   "size": "151,35",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "btnDhrn",
+   "type": "Button",
+   "location": "0,177",
+   "size": "151,35",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "btnBirthday",
+   "type": "Button",
+   "location": "0,212",
+   "size": "151,35",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "btnSchm",
+   "type": "Button",
+   "location": "0,247",
+   "size": "151,35",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "btnReminder",
+   "type": "Button",
+   "location": "0,282",
+   "size": "151,35",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "8",
+   "text": "Reminder Report",
+   "kind": "label"
+  },
+  {
+   "name": "btnItmInOut",
+   "type": "Button",
+   "location": "0,317",
+   "size": "151,35",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "1158,32",
+   "size": "151,534",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "btnPurc",
+   "type": "Button",
+   "location": "0,352",
+   "size": "151,35",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "btnTodaySale",
+   "type": "Button",
+   "location": "0,387",
+   "size": "151,35",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "btnWebData",
+   "type": "Button",
+   "location": "0,422",
+   "size": "151,35",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "btnUserReqest",
+   "type": "Button",
+   "location": "0,457",
+   "size": "151,35",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "Button1",
+   "type": "Button",
+   "location": "0,492",
+   "size": "151,35",
+   "tabIndex": "14",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "940,3",
+   "size": "87,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1033,3",
+   "size": "87,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1126,3",
+   "size": "87,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1219,3",
+   "size": "87,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "847,3",
+   "size": "87,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "716,3",
+   "size": "28,28",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "SimpleButton1",
+   "type": "SimpleButton",
+   "location": "750,3",
+   "size": "91,37",
+   "tabIndex": "28",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "12,49",
+   "size": "80,20",
+   "tabIndex": "123",
+   "text": "From Date",
+   "kind": "label"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "96,49",
+   "size": "76,23",
+   "tabIndex": "124",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "245,49",
+   "size": "76,23",
+   "tabIndex": "125",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "177,49",
+   "size": "62,20",
+   "tabIndex": "1157",
+   "text": "To Date",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "11,84",
+   "size": "840,269",
+   "tabIndex": "1158",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "chkKrOrdRec",
+   "type": "CheckBox",
+   "location": "363,47",
+   "size": "229,27",
+   "tabIndex": "1159",
+   "text": "",
+   "kind": "check"
+  }
+ ]
+}

@@ -1,0 +1,212 @@
+{
+ "report": "LoanWisePacket",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section6",
+     "kind": "ReportHeader",
+     "height": 616,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 241,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 210,
+       "top": 15,
+       "width": 3480,
+       "height": 226,
+       "dataSource": "{DHRN_ISU_DETL.CUST_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 3825,
+       "top": 15,
+       "width": 1335,
+       "height": 226,
+       "dataSource": "{DHRN_ISU_DETL.PACKET_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 5460,
+       "top": 15,
+       "width": 1095,
+       "height": 185,
+       "dataSource": "{DHRN_ISU_DETL.ITM_GWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 7185,
+       "top": 15,
+       "width": 2760,
+       "height": 226,
+       "dataSource": "{DHRN_ISU_DETL.IT_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 9840,
+       "top": 15,
+       "width": 840,
+       "height": 226,
+       "dataSource": "{DHRN_ISU_DETL.PACKET_REC}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 226,
+     "objects": []
+    },
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 630,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcPan",
+   "ref": "{@AcPan}",
+   "type": "NumberField",
+   "text": "{@AcTot}-(Sum({DHRN_DATA.INT_REC_AMT}, {DHRN_ISU_DATA.AC_CODE})+Sum ({DHRN_DATA.DHRN_REC_AMT}, {DHRN_ISU_DATA.AC_CODE})+Sum ({DHRN_DATA.UNCHAK_DHRN_REC}, {DHRN_ISU_DATA.AC_CODE}))"
+  },
+  {
+   "name": "AcTot",
+   "ref": "{@AcTot}",
+   "type": "NumberField",
+   "text": "{#RTotal5}+Sum ({DHRN_DATA.INT_AMT}, {DHRN_ISU_DATA.AC_CODE})"
+  },
+  {
+   "name": "BillAmt",
+   "ref": "{@BillAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+' '+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DhrnPan",
+   "ref": "{@DhrnPan}",
+   "type": "NumberField",
+   "text": "{@DhrnTot}-(Sum ({DHRN_DATA.INT_REC_AMT})+Sum ({DHRN_DATA.DHRN_REC_AMT})+Sum ({DHRN_DATA.UNCHAK_DHRN_REC})-Sum ({DHRN_DATA.ADJ_DHRN}))"
+  },
+  {
+   "name": "DhrnRec",
+   "ref": "{@DhrnRec}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.UNCHAK_DHRN_REC} <> 0 then if {DHRN_DATA.DHRN_REC_AMT} <> 0 then {DHRN_DATA.DHRN_REC_AMT}-{DHRN_DATA.UNCHAK_DHRN_REC} else {DHRN_DATA.UNCHAK_DHRN_REC} else {DHRN_DATA.DHRN_REC_AMT}"
+  },
+  {
+   "name": "DhrnTot",
+   "ref": "{@DhrnTot}",
+   "type": "NumberField",
+   "text": "{#RTotal6}+Sum ({DHRN_DATA.INT_AMT})"
+  },
+  {
+   "name": "IsuRec",
+   "ref": "{@IsuRec}",
+   "type": "StringField",
+   "text": "''"
+  },
+  {
+   "name": "LabourAmt",
+   "ref": "{@LabourAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "NetWt",
+   "ref": "{@NetWt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "PanAmt",
+   "ref": "{@PanAmt}",
+   "type": "NumberField",
+   "text": "{@TotAmt}-(Sum ({DHRN_DATA.INT_REC_AMT}, {@VchGroup})+Sum ({DHRN_DATA.DHRN_REC_AMT}, {@VchGroup})+Sum ({DHRN_DATA.UNCHAK_DHRN_REC}, {@VchGroup})-Sum ({DHRN_DATA.ADJ_DHRN}, {@VchGroup}))"
+  },
+  {
+   "name": "PandingDhiran",
+   "ref": "{@PandingDhiran}",
+   "type": "NumberField",
+   "text": "{#RTotal6}-Sum ({DHRN_DATA.DHRN_REC_AMT})"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'DHIRAN ISSUE REPORT'"
+  },
+  {
+   "name": "SalesTax",
+   "ref": "{@SalesTax}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "TaxAmt",
+   "ref": "{@TaxAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "TotAmt",
+   "ref": "{@TotAmt}",
+   "type": "NumberField",
+   "text": "{DHRN_ISU_DATA.DHRN_AMT}+Sum ({DHRN_DATA.INT_AMT}, {@VchGroup})"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{DHRN_ISU_DATA.CO_YEAR}+{DHRN_ISU_DATA.CO_BOOK}+{DHRN_ISU_DATA.VCH_NO}"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 5,
+ "formulaCount": 18
+}

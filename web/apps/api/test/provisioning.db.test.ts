@@ -1,0 +1,167 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { PrismaClient } from '@prisma/client';
+import { seedCompany } from '../src/modules/ops/seedCompany.js';
+import { resolveBookAccountTx, resolveBookPolicyTx } from '../src/modules/shared/bookPolicy.js';
+import { withTenant } from '@datacare/db';
+
+const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
+const d = RUN ? describe : describe.skip;
+
+/**
+ * Company provisioning must leave a company that can actually POST a voucher.
+ *
+ * This exists because running the application exposed a defect no unit test caught: provisioning created
+ * `BOOK_DATA` but never `BOOK_DETL`, so the very first cash sale on a newly provisioned company failed
+ * with `book SL account row 1 is missing`. `bookPolicy.resolveBookAccountTx` reads `BOOK_DETL` for the
+ * posting account and fails closed rather than inventing one — correct behaviour that made a provisioning
+ * gap look like a transaction bug.
+ *
+ * The assertion is behavioural, not structural: it resolves the same accounts the sale path resolves, so
+ * it fails if any leg the sale needs is absent.
+ *
+ * EVERY statement here runs inside `withTenant`. The RLS policy is
+ * `tenant_id::text = current_setting('app.tenant_id', true)`, and outside a tenant context that setting is
+ * NULL, so the comparison is NULL and the table looks EMPTY: reads return 0 and DELETEs silently affect no
+ * rows. An earlier draft of this test cleaned and counted outside the context and reported 0 rows for data
+ * that was present, which looks exactly like a provisioning failure.
+ */
+d('company provisioning produces a postable company', () => {
+  const prisma = new PrismaClient();
+  // Short kebab tenant: tenant_id is varchar(24) on all 170 tables.
+  const tenantId = 'provision-db';
+  const CO = '01';
+  const LC = '01';
+
+  const clean = () =>
+    withTenant(prisma, tenantId, async (tx: any) => {
+      for (const t of [
+        'BOOK_DETL',
+        'BOOK_DATA',
+        'AC_MAST',
+        'TAX_MAST',
+        'SRNO_MAST',
+        'CO_SET',
+        'LOCT_MAST',
+        'YEAR_MAST',
+        'CO_MAST',
+      ]) {
+        await tx.$executeRawUnsafe(`DELETE FROM "${t}" WHERE tenant_id=$1`, tenantId);
+      }
+    });
+
+  const count = (table: string) =>
+    withTenant(prisma, tenantId, async (tx: any) => {
+      const r: any[] = await tx.$queryRawUnsafe(
+        `SELECT count(*)::int n FROM "${table}" WHERE "CO_CODE"=$1`,
+        CO,
+      );
+      return Number(r[0]?.n ?? 0);
+    });
+
+  beforeAll(async () => {
+    await clean();
+    await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
+  });
+  afterAll(async () => {
+    await clean();
+    await prisma.$disconnect();
+  });
+
+  it('creates the accounts the posting engine references by literal code', async () => {
+    expect(await count('AC_MAST')).toBe(19);
+  });
+
+  it('creates every book with its posting legs', async () => {
+    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK", count(*)::int n FROM "BOOK_DETL" WHERE "CO_CODE"=$1 GROUP BY "CO_BOOK"`,
+        CO,
+      ),
+    );
+    expect(rows.length).toBe(14);
+    // Three legs per book: 1 = control/sales, 2 = cash/bank, 3 = round-off / kasar.
+    for (const r of rows) expect(Number(r.n)).toBe(3);
+  });
+
+  /**
+   * Every workflow-backed book must resolve under its OWN workflow.
+   *
+   * This is the assertion that matters most: `workflowPolicy` demands the desktop's literal strings
+   * `SALES RETURNE` and `PURC RETURN`. A provisioning table that spelled them `SALES RETURN` and
+   * `PURCHASE RETURN` created books that looked right in the UI and failed only when a return was saved.
+   * Seeding now derives from `workflowPolicy`, and this test fails if the two ever diverge again.
+   */
+  it.each([
+    ['SL', 'SALES'],
+    ['PR', 'PURCHASE'],
+    ['SRT', 'SALES RETURN'],
+    ['PRT', 'PURCHASE RETURN'],
+  ])('book %s resolves under workflow %s', async (coBook, workflow) => {
+    const scope = { tenantId, coCode: CO, lcCode: LC, coBook, coYear: '2024-2025' } as any;
+    await withTenant(prisma, tenantId, async (tx: any) => {
+      const policy = await resolveBookPolicyTx(tx, scope, workflow as any);
+      // Row 1 is the control account every one of these workflows resolves first.
+      expect(await resolveBookAccountTx(tx, scope, policy, 1)).toBeTruthy();
+    });
+  });
+
+  it('resolves the exact accounts the sale path resolves', async () => {
+    const scope = { tenantId, coCode: CO, lcCode: LC, coBook: 'SL', coYear: '2024-2025' } as any;
+    const resolved = await withTenant(prisma, tenantId, async (tx: any) => {
+      const policy = await resolveBookPolicyTx(tx, scope, 'SALES');
+      // These are the three SR_NOs createSale() asks for; a missing row throws here.
+      return {
+        control: await resolveBookAccountTx(tx, scope, policy, 1),
+        cash: await resolveBookAccountTx(tx, scope, policy, 2),
+        round: await resolveBookAccountTx(tx, scope, policy, 3),
+      };
+    });
+    expect(resolved).toEqual({ control: 'SALES', cash: 'CASH', round: 'ROUNDOFF' });
+  });
+
+  it('names every posting account as a real AC_MAST row', async () => {
+    // A book pointing at an account that does not exist would post to a dangling ledger.
+    const orphans: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT DISTINCT d."AC_CODE" FROM "BOOK_DETL" d
+          WHERE d."CO_CODE"=$1
+            AND NOT EXISTS (SELECT 1 FROM "AC_MAST" a
+                             WHERE a."CO_CODE"=d."CO_CODE" AND a."AC_CODE"=d."AC_CODE")`,
+        CO,
+      ),
+    );
+    expect(orphans).toEqual([]);
+  });
+
+  /**
+   * A provisioned company must be REACHABLE, not merely present.
+   *
+   * `resolveLoginScope` needs a location or `/context/select` answers `location-unavailable`, and
+   * `businessScope.year()` needs a fiscal year or every business endpoint answers `scope-incomplete`.
+   * Provisioning created books and accounts but neither of these, so a company created through the admin
+   * screen could not be entered — found by provisioning a company in the running application.
+   */
+  it('creates the location and fiscal year the scope resolver needs', async () => {
+    const loc: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(`SELECT "LC_CODE" FROM "LOCT_MAST" WHERE "CO_CODE"=$1`, CO),
+    );
+    expect(loc.map((r) => r.LC_CODE)).toEqual([LC]);
+    const yr: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_YEAR","OP_DATE","CL_DATE" FROM "YEAR_MAST" WHERE "CO_CODE"=$1`,
+        CO,
+      ),
+    );
+    expect(yr.length).toBe(1);
+    // April-to-March, the desktop's fiscal window.
+    expect(new Date(yr[0].OP_DATE).getUTCMonth()).toBe(3);
+    expect(new Date(yr[0].CL_DATE).getUTCMonth()).toBe(2);
+    expect(String(yr[0].CO_YEAR)).toMatch(/^\d{4}-\d{4}$/);
+  });
+
+  it('is idempotent', async () => {
+    const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
+    expect(again.created.books).toBe(0);
+    expect(await count('BOOK_DETL')).toBe(42); // 14 books x 3 legs, not doubled
+  });
+});

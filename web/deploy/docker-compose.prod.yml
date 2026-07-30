@@ -1,0 +1,63 @@
+# Right-sized production stack (ADR-0002: scale-ready, not scaled).
+# One small managed host: API + Postgres + Redis. Scale levers (read replica, object store,
+# autoscaling) are documented in ADR-0002 and deferred until load warrants.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: datacare
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: datacare
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/perf-indexes.sql:/docker-entrypoint-initdb.d/20-perf-indexes.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U datacare -d datacare']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--save', '60', '1', '--appendonly', 'no']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # runtime connects as the NON-superuser app_user so RLS is enforced
+      DATABASE_URL: postgresql://app_user:${APP_DB_PASSWORD:?set in .env}@postgres:5432/datacare
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?set in .env}
+      APP_VERSION: ${APP_VERSION:-0.0.0}
+      APP_TENANT_ID: ${APP_TENANT_ID:?set in .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(\"http://localhost:3000/ready\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:

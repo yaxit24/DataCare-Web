@@ -1,0 +1,274 @@
+{
+ "form": "MDI_FORM",
+ "controlCount": 25,
+ "byKind": {
+  "check": 3,
+  "textbox": 2,
+  "other": 3,
+  "panel": 4,
+  "combo": 1,
+  "label": 12
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "cboTheme",
+   "chkLiveRate",
+   "nCurrncyRate",
+   "lblLiveRate",
+   "LblUserRequest",
+   "tAmcDate",
+   "chkWappId",
+   "tSoftDemoType",
+   "chkNextAi"
+  ],
+  "PanelImage": [
+   "LblSilverSl",
+   "LblGoldSl",
+   "Rate_7",
+   "Rate_6",
+   "Rate_5",
+   "Rate_4",
+   "Rate_3",
+   "Rate_2",
+   "Rate_1"
+  ],
+  "this": [
+   "PanelImage",
+   "PnlBotam",
+   "SideTrip",
+   "Panel1",
+   "Panel_Side",
+   "MainTrip"
+  ]
+ },
+ "controls": [
+  {
+   "name": "chkLiveRate",
+   "type": "CheckBox",
+   "location": "81,1",
+   "size": "93,19",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "nCurrncyRate",
+   "type": "TextBox",
+   "location": "180,3",
+   "size": "11,18",
+   "tabIndex": "5",
+   "text": "  Usd/Inr Rate : ",
+   "kind": "textbox"
+  },
+  {
+   "name": "MainTrip",
+   "type": "ToolStrip",
+   "location": "0,0",
+   "size": "1350,38",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Panel_Side",
+   "type": "Panel",
+   "location": "0,38",
+   "size": "0,673",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "0,38",
+   "size": "0,673",
+   "tabIndex": "14",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "SideTrip",
+   "type": "AccordionControl",
+   "location": "0,38",
+   "size": "170,673",
+   "tabIndex": "15",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "170,693",
+   "size": "1180,18",
+   "tabIndex": "17",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "cboTheme",
+   "type": "ComboBox",
+   "location": "3,0",
+   "size": "72,25",
+   "tabIndex": "19",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "PanelImage",
+   "type": "Panel",
+   "location": "171,39",
+   "size": "1181,650",
+   "tabIndex": "19",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tSoftDemoType",
+   "type": "TextBox",
+   "location": "566,0",
+   "size": "50,18",
+   "tabIndex": "21",
+   "text": "- -",
+   "kind": "textbox"
+  },
+  {
+   "name": "chkWappId",
+   "type": "CheckBox",
+   "location": "426,0",
+   "size": "134,21",
+   "tabIndex": "22",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "LblUserRequest",
+   "type": "Label",
+   "location": "280,1",
+   "size": "53,17",
+   "tabIndex": "24",
+   "text": "UReq :",
+   "kind": "label"
+  },
+  {
+   "name": "lblLiveRate",
+   "type": "Label",
+   "location": "197,1",
+   "size": "77,17",
+   "tabIndex": "25",
+   "text": "Live Rate :",
+   "kind": "label"
+  },
+  {
+   "name": "tAmcDate",
+   "type": "Label",
+   "location": "339,1",
+   "size": "81,17",
+   "tabIndex": "26",
+   "text": "Amc Date :",
+   "kind": "label"
+  },
+  {
+   "name": "chkNextAi",
+   "type": "CheckBox",
+   "location": "622,0",
+   "size": "84,19",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "Rate_1",
+   "type": "Label",
+   "location": "826,42",
+   "size": "340,20",
+   "tabIndex": "1137",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "Rate_2",
+   "type": "Label",
+   "location": "826,65",
+   "size": "340,20",
+   "tabIndex": "1138",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "Rate_3",
+   "type": "Label",
+   "location": "826,88",
+   "size": "340,20",
+   "tabIndex": "1139",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "Rate_4",
+   "type": "Label",
+   "location": "826,111",
+   "size": "340,20",
+   "tabIndex": "1140",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "Rate_5",
+   "type": "Label",
+   "location": "826,134",
+   "size": "340,20",
+   "tabIndex": "1141",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "Rate_6",
+   "type": "Label",
+   "location": "826,157",
+   "size": "340,20",
+   "tabIndex": "1142",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "Rate_7",
+   "type": "Label",
+   "location": "826,180",
+   "size": "340,20",
+   "tabIndex": "1143",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "LblGoldSl",
+   "type": "Label",
+   "location": "45,42",
+   "size": "511,20",
+   "tabIndex": "1144",
+   "text": "Gold Sales  :",
+   "kind": "label"
+  },
+  {
+   "name": "LblSilverSl",
+   "type": "Label",
+   "location": "46,69",
+   "size": "511,20",
+   "tabIndex": "1145",
+   "text": "Silver Sales :",
+   "kind": "label"
+  },
+  {
+   "name": "bar6",
+   "type": "Bar",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "PaintStyle",
+   "kind": "other"
+  }
+ ]
+}

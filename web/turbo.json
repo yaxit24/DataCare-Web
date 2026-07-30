@@ -1,0 +1,19 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".next/**"] },
+    "typecheck": { "dependsOn": ["^build"] },
+    "test": {
+      "dependsOn": ["^build"],
+      "env": [
+        "DATABASE_URL",
+        "MIGRATE_DATABASE_URL",
+        "RUN_DB_INTEGRITY_TESTS",
+        "RUN_DB_SECURITY_TESTS"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "lint": {},
+    "dev": { "cache": false, "persistent": true }
+  }
+}

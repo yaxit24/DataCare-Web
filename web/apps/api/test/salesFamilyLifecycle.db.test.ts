@@ -1,0 +1,1161 @@
+import { PrismaClient } from '@prisma/client';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
+import {
+  createLabourInvoice,
+  editLabourInvoice,
+  getLabourInvoice,
+} from '../src/modules/sales/labourInvoice.js';
+import {
+  cancelSalesOrder,
+  cancelSalesOrderAdjust,
+  createSalesOrder,
+  editSalesOrder,
+  editSalesOrderAdjustment,
+  getSalesOrder,
+  getSalesOrderAdjustment,
+} from '../src/modules/sales/salesOrder.js';
+import {
+  createSaleReturn,
+  deleteSaleReturn,
+  editSaleReturn,
+  getSaleReturn,
+} from '../src/modules/sales/salesReturn.js';
+import {
+  deleteSchemeInstallment,
+  editSchemeInstallment,
+  enrollScheme,
+  editSchemeMaturity,
+  getSchemeInstallment,
+  getSchemeMaturity,
+  schemeInstallment,
+  schemeMaturity,
+} from '../src/modules/membership/scheme.js';
+import { schemePassbookData } from '../src/modules/scheme/passbook.js';
+import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
+
+const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
+const databaseDescribe = RUN ? describe : describe.skip;
+const TENANT = 'sales-family-lifecycle';
+const CO = '01';
+const LC = '01';
+const YEAR = '2024-2025';
+const DAY = '2024-04-10';
+const EDIT_DAY = '2024-04-11';
+
+const scope = (coBook: string): VoucherScope => ({
+  tenantId: TENANT,
+  coCode: CO,
+  lcCode: LC,
+  coYear: YEAR,
+  coBook,
+});
+
+const returnInput = (overrides: Record<string, unknown> = {}) => ({
+  scope: scope('SRT'),
+  mainUser: 'return-owner',
+  acCode: 'CUST',
+  acName: 'Lifecycle Customer',
+  origBook: 'SAL',
+  origVchNo: 1,
+  vchDate: DAY,
+  taxRatePct: 3,
+  interState: false,
+  ...overrides,
+});
+const returnLines = [
+  {
+    itCode: 'GOLD',
+    tagNo: 'TAGRT',
+    pcs: 1,
+    grossWt: 3,
+    netWt: 3,
+    touch: 100,
+    metalAmount: 300,
+  },
+  { itCode: 'LOOSE', pcs: 1, grossWt: 1, netWt: 1, touch: 90, metalAmount: 100 },
+];
+const editedReturnLines = [
+  {
+    itCode: 'GOLD',
+    tagNo: 'TAGRT',
+    pcs: 1,
+    grossWt: 3,
+    netWt: 2.5,
+    touch: 92,
+    metalAmount: 325,
+  },
+];
+
+const orderInput = (overrides: Record<string, unknown> = {}) => ({
+  scope: scope('SOR'),
+  mainUser: 'order-owner',
+  acCode: 'CUST',
+  acName: 'Lifecycle Customer',
+  vchDate: DAY,
+  taxRatePct: 3,
+  advanceAmount: 100,
+  lines: [
+    {
+      itCode: 'GOLD',
+      pcs: 1,
+      grossWt: 2,
+      netWt: 2,
+      touch: 100,
+      rate: 100,
+      making: 10,
+      remark: 'first order line',
+    },
+    { itCode: 'LOOSE', pcs: 1, netWt: 1, touch: 100, rate: 50, making: 5 },
+  ],
+  ...overrides,
+});
+
+const installmentInput = (overrides: Record<string, unknown> = {}) => ({
+  scope: scope('074'),
+  mainUser: 'scheme-owner',
+  schmCode: 'S01',
+  membCode: '00001',
+  amount: 500,
+  vchDate: DAY,
+  ...overrides,
+});
+
+const asNumber = (value: unknown): number => Number(value ?? 0);
+
+databaseDescribe('database-backed sales-family voucher lifecycles', () => {
+  let owner: PrismaClient;
+  let runtime: PrismaClient;
+
+  const cleanup = async (): Promise<void> => {
+    for (const table of [
+      'DELETE_DATA',
+      'REMARK_DATA',
+      'DM_DATA',
+      'TAX_DATA',
+      'BILL_OS_DATA',
+      'UPI_DATA',
+      'CARD_DATA',
+      'ROJ_MEL_DATA',
+      'AC_DATA',
+      'AD_OS',
+      'AD_ADJ',
+      'AD_DATA',
+      'TEMP_AD_DATA',
+      'AD_MEMB',
+      'AD_MAST',
+      'SL_ORD_ADJ',
+      'SL_ORD_IDTL',
+      'SL_ORD_DETL',
+      'SL_ORD_DATA',
+      'LBR_REC_DETL',
+      'LBR_ISU_IDTL',
+      'LBR_ISU_DETL',
+      'LBR_DATA',
+      'SL_DETL_RTN',
+      'SL_DETL',
+      'SL_DATA',
+      'MAIN_STOCK',
+      'BAR_DETL',
+      'TEMP_BOOK_DATA',
+      'BOOK_DETL',
+      'BOOK_DATA',
+      'ITEM_MAST',
+      'GROUP_MAST',
+      'TAX_MAST',
+      'AC_MAST',
+      'CO_SET_NEW',
+      'CO_SET',
+    ]) {
+      await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
+    }
+  };
+
+  const seed = async (): Promise<void> => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
+       VALUES ($1,$2,$3,'CUST','Lifecycle Customer','L')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
+       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED')`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       VALUES ($1,$2,'G01','Gold','SALEAC')`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
+       VALUES ($1,$2,'GOLD','Gold','G','G01'),($1,$2,'LOOSE','Loose Gold','G','G01')`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(
+         tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+       VALUES
+         ($1,$2,$3,'SAL','Sales','SALE','SALES','O','Y','SL_DATA'),
+         ($1,$2,$3,'SRT','Sales Return','SRTN','SALES RETURNE','I','Y','SL_DATA'),
+         ($1,$2,$3,'SOR','Sales Order','SORD','SALES ORDER','O','Y','SL_ORD_DATA'),
+         ($1,$2,$3,'ORC','Order Cancel','SADJ','ORDER CANCEL','O','Y','SL_ORD_ADJ'),
+         ($1,$2,$3,'LBR','Labour','LBRI','LABOUR','O','Y','LBR_DATA'),
+         ($1,$2,$3,'074','Member Entry','MBENT','MEMB ENTRY','I','Y','AD_DATA'),
+         ($1,$2,$3,'076','Member Adjust','MBADJ','MEMB ADJUST','O','Y','AD_ADJ')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'SRT',1,'CTRL','SALES RETURNE','I'),
+              ($1,$2,$3,'SRT',2,'CASH','SALES RETURNE','I'),
+              ($1,$2,$3,'SRT',3,'ROUND','SALES RETURNE','I')`,
+      TENANT,
+      CO,
+      LC,
+    );
+
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "TEMP_BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","VCH_NO","BOOK_NAME")
+       SELECT $1,$2,$3,b,'00040','seed' FROM unnest(ARRAY['SRT','SOR','ORC','LBR','074','076']) b`,
+      TENANT,
+      CO,
+      LC,
+    );
+
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DATA"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","VCH_TIME","AC_CODE")
+       VALUES
+         ($1,$2,$3,$4,'SAL','00001',$5::date,$5::timestamp,'CUST'),
+         ($1,$2,$3,$4,'SRT','00007',$5::date,$5::timestamp,'CUST')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DETL"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE",
+         "AC_CODE","IT_CODE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT","ITM_NWT","ITM_TOUCH","NET_AMT")
+       VALUES ($1,$2,$3,$4,'SAL','00001',1,$5::date,'CUST','GOLD','TAGRT',1,1,3,3,100,300)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BAR_DETL"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE",
+         "IT_CODE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT","ITM_NWT","ITM_FINE","EMP_ISU")
+       VALUES ($1,$2,$3,$4,'TOP','00001',1,$5::date,'GOLD','TAGRT',1,1,3,3,3,'N')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "MAIN_STOCK"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE",
+         "IT_CODE","TAG_NO","VCH_SRNO","ITM_SIGN","ITM_PCS","ITM_GWT","ITM_NWT")
+       VALUES
+         ($1,$2,$3,$4,'TOP','00001',1,$5::date,'GOLD','TAGRT',1,'+',1,3,3),
+         ($1,$2,$3,$4,'SAL','00001',1,$5::date,'GOLD','TAGRT',1,'-',1,3,3)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_ORD_DATA"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","VCH_TIME","AC_CODE")
+       VALUES ($1,$2,$3,$4,'SOR','00007',$5::date,$5::timestamp,'CUST')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_ORD_ADJ"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","VCH_TIME")
+       VALUES ($1,$2,$3,$4,'ORC','00007',1,$5::date,$5::timestamp)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "LBR_DATA"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","VCH_TIME","AC_CODE")
+       VALUES ($1,$2,$3,$4,'LBR','00007',$5::date,$5::timestamp,'CUST')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AD_MAST"(tenant_id,"CO_CODE","SCHM_CODE","SCHM_NAME","SCHM_AC")
+       VALUES ($1,$2,'S01','Lifecycle Scheme','SCHEME')`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AD_MEMB"(tenant_id,"CO_CODE","LC_CODE","SCHM_CODE","MEMB_CODE","MEMB_NAME","MEMB_AMT")
+       VALUES ($1,$2,$3,'S01','00001','Lifecycle Member',500)`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AD_DATA"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","VCH_TIME")
+       VALUES ($1,$2,$3,$4,'074','00007',1,$5::date,$5::date)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AD_ADJ"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","VCH_TIME")
+       VALUES ($1,$2,$3,$4,'076','00007',1,$5::date,$5::timestamp)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
+    );
+  };
+
+  const clock = async (table: string, book: string, voucherNo = '00008'): Promise<string> => {
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT to_char("VCH_TIME",'HH24:MI:SS.MS') clock FROM "${table}"
+        WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
+      TENANT,
+      book,
+      voucherNo,
+    )) as Array<{ clock: string }>;
+    return rows[0]!.clock;
+  };
+
+  const ledgerBalance = async (book: string, voucherNo = '00008'): Promise<[number, number]> => {
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT coalesce(sum("DR_AMT"),0)::float dr,coalesce(sum("CR_AMT"),0)::float cr
+         FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      TENANT,
+      book,
+      voucherNo,
+    )) as Array<{ dr: number; cr: number }>;
+    return [asNumber(rows[0]?.dr), asNumber(rows[0]?.cr)];
+  };
+
+  beforeAll(async () => {
+    const ownerUrl = process.env.MIGRATE_DATABASE_URL;
+    const runtimeUrl = process.env.DATABASE_URL;
+    if (!ownerUrl || !runtimeUrl) {
+      throw new Error('RUN_DB_INTEGRITY_TESTS requires MIGRATE_DATABASE_URL and DATABASE_URL');
+    }
+    owner = new PrismaClient({ datasources: { db: { url: ownerUrl } } });
+    runtime = new PrismaClient({ datasources: { db: { url: runtimeUrl } } });
+  });
+
+  beforeEach(async () => {
+    await cleanup();
+    await seed();
+  });
+
+  afterAll(async () => {
+    if (owner) await cleanup();
+    if (runtime) await runtime.$disconnect();
+    if (owner) await owner.$disconnect();
+  });
+
+  it('creates, gets and replaces a sales return while preserving identity and balance', async () => {
+    const created = await createSaleReturn(runtime, returnInput(), returnLines);
+    expect(created.vchNo).toBe(8);
+
+    const persisted = (await owner.$queryRawUnsafe(
+      `SELECT h."VCH_NO",h."HD_VCH_NO",h."MAIN_USER",h."VCH_TIME"::date::text time_date,
+              to_char(h."VCH_TIME",'HH24:MI:SS.MS') clock,t."BOOK_NAME"
+         FROM "SL_DATA" h JOIN "TEMP_BOOK_DATA" t
+           ON t.tenant_id=h.tenant_id AND t."CO_CODE"=h."CO_CODE" AND t."LC_CODE"=h."LC_CODE"
+          AND t."CO_BOOK"=h."CO_BOOK" AND t."VCH_NO"=h."HD_VCH_NO"
+        WHERE h.tenant_id=$1 AND h."CO_BOOK"='SRT' AND h."VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(persisted[0]).toMatchObject({
+      VCH_NO: '00008',
+      HD_VCH_NO: '00041',
+      MAIN_USER: 'return-owner',
+      time_date: DAY,
+      BOOK_NAME: 'SALES RETURNE',
+    });
+    const originalClock = String(persisted[0]?.clock);
+
+    await expect(getSaleReturn(runtime, scope('SRT'), 8)).resolves.toMatchObject({
+      voucherNo: '00008',
+      hiddenVoucherNo: '00041',
+      mainUser: 'return-owner',
+      vchDate: DAY,
+      lines: [{ itCode: 'GOLD', tagNo: 'TAGRT', vchSrno: 1 }, { itCode: 'LOOSE' }],
+    });
+
+    await editSaleReturn(
+      runtime,
+      returnInput({ mainUser: 'ignored-editor', vchDate: EDIT_DAY }),
+      editedReturnLines,
+      8,
+    );
+    const edited = (await owner.$queryRawUnsafe(
+      `SELECT h."HD_VCH_NO",h."MAIN_USER",h."VCH_TIME"::date::text time_date,
+              to_char(h."VCH_TIME",'HH24:MI:SS.MS') clock,
+              (SELECT count(*)::int FROM "SL_DETL_RTN" d WHERE d.tenant_id=$1 AND d."CO_BOOK"='SRT' AND d."VCH_NO"='00008') details,
+              (SELECT count(*)::int FROM "TAX_DATA" x WHERE x.tenant_id=$1 AND x."CO_BOOK"='SRT' AND x."VCH_NO"='00008') taxes,
+              (SELECT count(*)::int FROM "DELETE_DATA" x WHERE x.tenant_id=$1) audits
+         FROM "SL_DATA" h WHERE h.tenant_id=$1 AND h."CO_BOOK"='SRT' AND h."VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(edited[0]).toMatchObject({
+      HD_VCH_NO: '00041',
+      MAIN_USER: 'return-owner',
+      time_date: EDIT_DAY,
+      clock: originalClock,
+      details: 1,
+      taxes: 2,
+      audits: 0,
+    });
+    const [dr, cr] = await ledgerBalance('SRT');
+    expect(dr).toBeCloseTo(cr, 6);
+  });
+
+  it('rejects a persisted-date-locked sales-return edit without changing its write set', async () => {
+    const created = await createSaleReturn(runtime, returnInput(), returnLines);
+    const before = await getSaleReturn(runtime, scope('SRT'), created.vchNo);
+    const balanceBefore = await ledgerBalance('SRT');
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "LOCK_DATE"=$1 WHERE tenant_id=$2 AND "CO_CODE"=$3`,
+      DAY,
+      TENANT,
+      CO,
+    );
+    await expect(
+      editSaleReturn(
+        runtime,
+        returnInput({ vchDate: '2024-04-20' }),
+        editedReturnLines,
+        created.vchNo,
+      ),
+    ).rejects.toBeInstanceOf(PeriodLockValidationError);
+    expect(await getSaleReturn(runtime, scope('SRT'), created.vchNo)).toEqual(before);
+    expect(await ledgerBalance('SRT')).toEqual(balanceBefore);
+    const audits = await owner.$queryRawUnsafe(
+      `SELECT 1 FROM "DELETE_DATA" WHERE tenant_id=$1`,
+      TENANT,
+    );
+    expect(audits).toHaveLength(0);
+  });
+
+  it('rejects atomically when editing a return whose admitted tag was resold', async () => {
+    const created = await createSaleReturn(runtime, returnInput(), returnLines);
+    const before = await getSaleReturn(runtime, scope('SRT'), created.vchNo);
+    const balanceBefore = await ledgerBalance('SRT');
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE")
+       VALUES ($1,$2,$3,$4,'SAL','00002',$5::date,'CUST')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      EDIT_DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DETL"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE",
+         "AC_CODE","IT_CODE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_NWT")
+       VALUES ($1,$2,$3,$4,'SAL','00002',1,$5::date,'CUST','GOLD','TAGRT',1,1,2.5)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      EDIT_DAY,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "MAIN_STOCK"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE",
+         "IT_CODE","TAG_NO","VCH_SRNO","ITM_SIGN","ITM_PCS","ITM_NWT")
+       VALUES ($1,$2,$3,$4,'SAL','00002',1,$5::date,'GOLD','TAGRT',1,'-',1,2.5)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      EDIT_DAY,
+    );
+
+    await expect(
+      editSaleReturn(runtime, returnInput({ vchDate: EDIT_DAY }), editedReturnLines, created.vchNo),
+    ).rejects.toThrow(/returned tag TAGRT was sold again/);
+    expect(await getSaleReturn(runtime, scope('SRT'), created.vchNo)).toEqual(before);
+    expect(await ledgerBalance('SRT')).toEqual(balanceBefore);
+    const state = (await owner.$queryRawUnsafe(
+      `SELECT
+         (SELECT count(*)::int FROM "SL_DETL_RTN" WHERE tenant_id=$1 AND "CO_BOOK"='SRT' AND "VCH_NO"='00008') details,
+         (SELECT count(*)::int FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='SRT' AND "VCH_NO"='00008' AND "ITM_SIGN"='+') returns,
+         (SELECT count(*)::int FROM "DELETE_DATA" WHERE tenant_id=$1) audits`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(state[0]).toEqual({ details: 2, returns: 2, audits: 0 });
+  });
+
+  it('creates, gets and replaces a sales order and its adjustment with balanced ledgers', async () => {
+    const created = await createSalesOrder(runtime, orderInput());
+    expect(created.vchNo).toBe(8);
+    const originalClock = await clock('SL_ORD_DATA', 'SOR');
+    await expect(getSalesOrder(runtime, scope('SOR'), 8)).resolves.toMatchObject({
+      voucherNo: '00008',
+      hiddenVoucherNo: '00041',
+      mainUser: 'order-owner',
+      vchDate: DAY,
+      lines: [{ itCode: 'GOLD' }, { itCode: 'LOOSE' }],
+    });
+
+    await editSalesOrder(
+      runtime,
+      orderInput({
+        mainUser: 'ignored-editor',
+        vchDate: EDIT_DAY,
+        advanceAmount: 80,
+        lines: [{ itCode: 'GOLD', pcs: 1, netWt: 4, touch: 100, rate: 90, making: 12 }],
+      }),
+      8,
+    );
+    const order = (await owner.$queryRawUnsafe(
+      `SELECT h."HD_VCH_NO",h."MAIN_USER",h."VCH_TIME"::date::text time_date,
+              to_char(h."VCH_TIME",'HH24:MI:SS.MS') clock,
+              (SELECT count(*)::int FROM "SL_ORD_DETL" d WHERE d.tenant_id=$1 AND d."CO_BOOK"='SOR' AND d."VCH_NO"='00008') details,
+              (SELECT count(*)::int FROM "DELETE_DATA" x WHERE x.tenant_id=$1) audits
+         FROM "SL_ORD_DATA" h WHERE h.tenant_id=$1 AND h."CO_BOOK"='SOR' AND h."VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(order[0]).toMatchObject({
+      HD_VCH_NO: '00041',
+      MAIN_USER: 'order-owner',
+      time_date: EDIT_DAY,
+      clock: originalClock,
+      details: 1,
+      audits: 0,
+    });
+    let [dr, cr] = await ledgerBalance('SOR');
+    expect(dr).toBeCloseTo(cr, 6);
+
+    const adjustment = await cancelSalesOrderAdjust(runtime, {
+      scope: scope('SOR'),
+      vchNo: 8,
+      paidAmt: 60,
+      paidAc: 'CASH',
+      vchDate: EDIT_DAY,
+      mainUser: 'adjust-owner',
+    });
+    expect(adjustment.vchNo).toBe(8);
+    await expect(getSalesOrderAdjustment(runtime, scope('SOR'), 8)).resolves.toMatchObject({
+      hiddenVoucherNo: '00041',
+      mainUser: 'adjust-owner',
+      paidAmt: 60,
+    });
+    const adjustmentClock = await clock('SL_ORD_ADJ', 'ORC');
+    await editSalesOrderAdjustment(
+      runtime,
+      {
+        scope: scope('SOR'),
+        vchNo: 8,
+        paidAmt: 50,
+        paidAc: 'BANK',
+        vchDate: '2024-04-12',
+        mainUser: 'ignored-editor',
+      },
+      8,
+    );
+    await expect(getSalesOrderAdjustment(runtime, scope('SOR'), 8)).resolves.toMatchObject({
+      hiddenVoucherNo: '00041',
+      mainUser: 'adjust-owner',
+      vchDate: '2024-04-12',
+      paidAmt: 50,
+      paidAc: 'BANK',
+    });
+    expect(await clock('SL_ORD_ADJ', 'ORC')).toBe(adjustmentClock);
+    [dr, cr] = await ledgerBalance('ORC');
+    expect(dr).toBeCloseTo(cr, 6);
+  });
+
+  it('rejects a persisted-date-locked sales-order edit without changing it', async () => {
+    const created = await createSalesOrder(runtime, orderInput());
+    const before = await getSalesOrder(runtime, scope('SOR'), created.vchNo);
+    const balanceBefore = await ledgerBalance('SOR');
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "LOCK_DATE"=$1 WHERE tenant_id=$2 AND "CO_CODE"=$3`,
+      DAY,
+      TENANT,
+      CO,
+    );
+    await expect(
+      editSalesOrder(runtime, orderInput({ vchDate: '2024-04-20', advanceAmount: 10 }), 8),
+    ).rejects.toBeInstanceOf(PeriodLockValidationError);
+    expect(await getSalesOrder(runtime, scope('SOR'), 8)).toEqual(before);
+    expect(await ledgerBalance('SOR')).toEqual(balanceBefore);
+  });
+
+  it('creates, gets and replaces a scheme installment while preserving identity and balance', async () => {
+    const created = await schemeInstallment(runtime, installmentInput());
+    expect(created.vchNo).toBe(8);
+    const originalClock = await clock('AD_DATA', '074');
+    await expect(getSchemeInstallment(runtime, scope('074'), 8)).resolves.toMatchObject({
+      voucherNo: '00008',
+      hiddenVoucherNo: '00041',
+      mainUser: 'scheme-owner',
+      vchDate: DAY,
+      schmCode: 'S01',
+      membCode: '00001',
+      amount: 500,
+    });
+
+    await editSchemeInstallment(
+      runtime,
+      installmentInput({ amount: 650, vchDate: EDIT_DAY, mainUser: 'ignored-editor' }),
+      8,
+    );
+    const edited = (await owner.$queryRawUnsafe(
+      `SELECT d."HD_VCH_NO",d."MAIN_USER",d."VCH_DATE"::text time_date,
+              to_char(d."VCH_TIME",'HH24:MI:SS.MS') clock,d."MEMB_AMT"::float amount,
+              (SELECT count(*)::int FROM "AD_OS" o WHERE o.tenant_id=$1 AND o."CO_BOOK"='074' AND o."VCH_NO"='00008') os_rows,
+              (SELECT count(*)::int FROM "DELETE_DATA" x WHERE x.tenant_id=$1) audits
+         FROM "AD_DATA" d WHERE d.tenant_id=$1 AND d."CO_BOOK"='074' AND d."VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(edited[0]).toMatchObject({
+      HD_VCH_NO: '00041',
+      MAIN_USER: 'scheme-owner',
+      time_date: EDIT_DAY,
+      clock: originalClock,
+      amount: 650,
+      os_rows: 1,
+      audits: 0,
+    });
+    const [dr, cr] = await ledgerBalance('074');
+    expect(dr).toBeCloseTo(cr, 6);
+  });
+
+  it('rejects a persisted-date-locked scheme-installment edit without changing it', async () => {
+    const created = await schemeInstallment(runtime, installmentInput());
+    const before = await getSchemeInstallment(runtime, scope('074'), created.vchNo);
+    const balanceBefore = await ledgerBalance('074');
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "LOCK_DATE"=$1 WHERE tenant_id=$2 AND "CO_CODE"=$3`,
+      DAY,
+      TENANT,
+      CO,
+    );
+    await expect(
+      editSchemeInstallment(runtime, installmentInput({ amount: 700, vchDate: '2024-04-20' }), 8),
+    ).rejects.toBeInstanceOf(PeriodLockValidationError);
+    expect(await getSchemeInstallment(runtime, scope('074'), 8)).toEqual(before);
+    expect(await ledgerBalance('074')).toEqual(balanceBefore);
+  });
+
+  // Desktop grep -c 'INSERT INTO DELETE_DATA': TR_SALE_RTN.cs=1, TR_SALE_ORD.cs=1,
+  // TR_MEMB_ENT.cs=1. Each statement is one header/member-detail SELECT, so these fixtures emit one row.
+  it('deletes with exactly the desktop-shaped sales return, order and member-entry audit rows', async () => {
+    const saleReturn = await createSaleReturn(runtime, returnInput(), returnLines);
+    const order = await createSalesOrder(runtime, orderInput());
+    const installment = await schemeInstallment(runtime, installmentInput());
+
+    await deleteSaleReturn(runtime, {
+      scope: scope('SRT'),
+      vchNo: saleReturn.vchNo,
+      deleteUser: 'return-deleter',
+    });
+    await cancelSalesOrder(runtime, {
+      scope: scope('SOR'),
+      vchNo: order.vchNo,
+      deleteUser: 'order-deleter',
+    });
+    await deleteSchemeInstallment(runtime, {
+      scope: scope('074'),
+      vchNo: installment.vchNo,
+      deleteUser: 'scheme-deleter',
+    });
+
+    const audits = (await owner.$queryRawUnsafe(
+      `SELECT "CO_BOOK" book,"VCH_NO" voucher,"SR_NO"::int sr,"VCH_TYPE" type,
+              "BOOK_NAME" book_name,"AC_CODE" ac,"AC_NAME" name,
+              "VCH_VAL_DR"::float dr,"VCH_VAL_CR"::float cr,"FINE_TYPE" fine_type,
+              "VCH_FINE_DR"::float fine_dr,"VCH_FINE_CR"::float fine_cr,
+              "HD_VCH_NO" hidden,"MAIN_USER" main_user,"DELETE_USER" delete_user,"VCH_DESC" description
+         FROM "DELETE_DATA" WHERE tenant_id=$1 ORDER BY "CO_BOOK","SR_NO"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(audits).toHaveLength(3);
+    expect(audits.find((row) => row.book === 'SRT')).toMatchObject({
+      voucher: '00008',
+      sr: 0,
+      type: 'SRTN',
+      book_name: 'Sales Return',
+      ac: 'CUST',
+      name: 'Lifecycle Customer',
+      fine_type: 'A',
+      fine_dr: 0,
+      fine_cr: 0,
+      hidden: '00041',
+      main_user: 'return-owner',
+      delete_user: 'return-deleter',
+    });
+    expect(audits.find((row) => row.book === 'SOR')).toMatchObject({
+      voucher: '00008',
+      sr: 0,
+      type: 'SORD',
+      book_name: 'Sales Order',
+      ac: 'CUST',
+      name: 'Lifecycle Customer',
+      dr: 0,
+      cr: 100,
+      fine_type: 'A',
+      hidden: '00041',
+      main_user: 'order-owner',
+      delete_user: 'order-deleter',
+    });
+    expect(audits.find((row) => row.book === '074')).toMatchObject({
+      voucher: '00008',
+      sr: 1,
+      type: 'MBENT',
+      book_name: 'Member Entry',
+      ac: '00001',
+      name: 'Lifecycle Member',
+      dr: 0,
+      cr: 500,
+      fine_type: 'A',
+      fine_dr: 0,
+      fine_cr: 0,
+      hidden: '00041',
+      main_user: 'scheme-owner',
+      delete_user: 'scheme-deleter',
+    });
+  });
+
+  it('round-trips labour-invoice and scheme-maturity edits with preserved identity', async () => {
+    const labour = await createLabourInvoice(runtime, {
+      scope: scope('LBR'),
+      acCode: 'CUST',
+      acName: 'Lifecycle Customer',
+      vchDate: DAY,
+      mainUser: 'labour-owner',
+      lines: [
+        { itCode: 'GOLD', pcs: 1, netWt: 2, metalAmount: 200, labourAmount: 40 },
+        { itCode: 'LOOSE', pcs: 1, netWt: 1, metalAmount: 50, labourAmount: 10 },
+      ],
+    });
+    expect(labour.vchNo).toBe(8);
+    const labourClock = await clock('LBR_DATA', 'LBR');
+    await expect(getLabourInvoice(runtime, scope('LBR'), 8)).resolves.toMatchObject({
+      hiddenVoucherNo: '00041',
+      mainUser: 'labour-owner',
+      lines: [{ itCode: 'GOLD' }, { itCode: 'LOOSE' }],
+    });
+    await editLabourInvoice(
+      runtime,
+      {
+        scope: scope('LBR'),
+        acCode: 'CUST',
+        vchDate: EDIT_DAY,
+        mainUser: 'ignored-editor',
+        lines: [{ itCode: 'GOLD', pcs: 1, netWt: 3, metalAmount: 330, labourAmount: 75 }],
+      },
+      8,
+    );
+    await expect(getLabourInvoice(runtime, scope('LBR'), 8)).resolves.toMatchObject({
+      hiddenVoucherNo: '00041',
+      mainUser: 'labour-owner',
+      vchDate: EDIT_DAY,
+      lines: [{ itCode: 'GOLD', netWt: 3, metalAmount: 330, labourAmount: 75 }],
+    });
+    expect(await clock('LBR_DATA', 'LBR')).toBe(labourClock);
+    let [dr, cr] = await ledgerBalance('LBR');
+    expect(dr).toBeCloseTo(cr, 6);
+
+    const maturity = await schemeMaturity(runtime, {
+      scope: scope('076'),
+      schmCode: 'S01',
+      membCode: '00001',
+      amount: 500,
+      bonus: 20,
+      less: 5,
+      vchDate: DAY,
+      mainUser: 'maturity-owner',
+    });
+    expect(maturity).toEqual({ vchNo: 8, payout: 515 });
+    const maturityClock = await clock('AD_ADJ', '076');
+    await expect(getSchemeMaturity(runtime, scope('076'), 8)).resolves.toMatchObject({
+      hiddenVoucherNo: '00041',
+      mainUser: 'maturity-owner',
+      payout: 515,
+    });
+    await editSchemeMaturity(
+      runtime,
+      {
+        scope: scope('076'),
+        schmCode: 'S01',
+        membCode: '00001',
+        amount: 600,
+        bonus: 25,
+        less: 10,
+        vchDate: EDIT_DAY,
+        mainUser: 'ignored-editor',
+      },
+      8,
+    );
+    await expect(getSchemeMaturity(runtime, scope('076'), 8)).resolves.toMatchObject({
+      hiddenVoucherNo: '00041',
+      mainUser: 'maturity-owner',
+      vchDate: EDIT_DAY,
+      amount: 600,
+      bonus: 25,
+      less: 10,
+      payout: 615,
+    });
+    expect(await clock('AD_ADJ', '076')).toBe(maturityClock);
+    [dr, cr] = await ledgerBalance('076');
+    expect(dr).toBeCloseTo(cr, 6);
+  });
+
+  // Depth gate (Phase B): the desktop sales order persists tender rows, old-metal and rate-cut
+  // adjustment, delivery/function dates, the party address block and 40 further grid columns on the
+  // line (TR_SALE_ORD.cs:9120-9161 header, 9205-9306 detail).
+  it('persists every desktop sales-order header and line column', async () => {
+    const created = await createSalesOrder(
+      runtime,
+      orderInput({
+        taxCode: 'G3',
+        upiAmount: 250.5,
+        bankAc: 'BANKAC',
+        chequeNo: 'CHQ-42',
+        bankName: 'Union Bank',
+        cardAc: 'CARDAC',
+        cardAdj: 'Y',
+        oldGoldFine: 3.25,
+        oldGoldAmount: 19_500,
+        oldSilverFine: 12.5,
+        oldSilverAmount: 900,
+        schemeAmount: 1_000,
+        rateCutRate: 6_400,
+        rateCutFine: 2.5,
+        rateCutAmount: 16_000,
+        adjustGold: 1.75,
+        adjustSilver: 4.5,
+        orderAdjustAmount: 500,
+        deliveryDate: '2024-05-01',
+        functionDate: '2024-05-15',
+        address1: 'Plot 8',
+        address2: 'Jewel Street',
+        address3: 'Opp Bank',
+        city: 'Surat',
+        mobile: '9812345670',
+        empCode: 'E07',
+        lines: [
+          {
+            itCode: 'GOLD',
+            pcs: 1,
+            grossWt: 2,
+            netWt: 2,
+            touch: 100,
+            rate: 100,
+            making: 10,
+            tblCode: '001',
+            itmColor: 'YELLOW',
+            itmSize: 'L',
+            bagWt: 0.2,
+            lessWt: 0.1,
+            ghtPct: 1.5,
+            ghtWt: 0.05,
+            westPct: 2,
+            rateFix: 'Y',
+            labourPct: 5,
+            labourType: 'G',
+            labourRate: 45,
+            otherAmount: 30,
+            mrp: 12_500,
+            orderDeliveryDate: '2024-05-02',
+            karigarNetWt: 1.9,
+            karigarTouch: 91.5,
+            karigarWestPct: 1.5,
+            karigarFine: 1.78,
+            karigarName: 'KARY',
+            tagCost: 900,
+            vchSrno: 4,
+            oldSrNo: 7,
+            rateType: 'R',
+            itType: 'G',
+            prCode: 'PR',
+            oldTblCode: '002',
+            tagStockLess: 'N',
+            designImageId: 'IMG-9',
+            huid: 'HUID999',
+            hallmarkId2: 'H2',
+            hallmarkId3: 'H3',
+            hallmarkId4: 'H4',
+            hallmarkIdWt: 1.1,
+            hallmarkId2Wt: 2.2,
+            hallmarkId3Wt: 3.3,
+            hallmarkId4Wt: 4.4,
+          },
+        ],
+      }),
+    );
+    const vchNo = String(created.vchNo).padStart(5, '0');
+
+    const heads = (await owner.$queryRawUnsafe(
+      `SELECT "TAX_CODE","BANK_AC","CHQ_NO","BANK_NAME","CARD_AC","CARD_ADJ","ADD1","ADD2","ADD3",
+              "CITY","MOBILE","UPI_AMT"::float upi,"OLD_GL"::float old_gl,
+              "OLD_GL_AMT"::float old_gl_amt,"OLD_SL"::float old_sl,"OLD_SL_AMT"::float old_sl_amt,
+              "SCHM_AMT"::float schm,"RCUT_RATE"::float rc_rate,"RCUT_FINE"::float rc_fine,
+              "RCUT_AMT"::float rc_amt,"ADJ_GOLD"::float adj_gold,"ADJ_SILVER"::float adj_silver,
+              "ORD_ADJ_AMT"::float ord_adj,"DEL_DATE"::text del_date,"FUN_DATE"::text fun_date
+         FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      vchNo,
+    )) as Array<Record<string, any>>;
+    expect(heads).toHaveLength(1);
+    const h = heads[0]!;
+    expect(String(h.TAX_CODE).trim()).toBe('G3');
+    expect(String(h.BANK_AC).trim()).toBe('BANKAC');
+    expect(String(h.CHQ_NO).trim()).toBe('CHQ-42');
+    expect(String(h.BANK_NAME).trim()).toBe('Union Bank');
+    expect(String(h.CARD_AC).trim()).toBe('CARDAC');
+    expect(String(h.CARD_ADJ).trim()).toBe('Y');
+    expect(String(h.ADD1).trim()).toBe('Plot 8');
+    expect(String(h.ADD2).trim()).toBe('Jewel Street');
+    expect(String(h.ADD3).trim()).toBe('Opp Bank');
+    expect(String(h.CITY).trim()).toBe('Surat');
+    expect(String(h.MOBILE).trim()).toBe('9812345670');
+    expect(h.upi).toBeCloseTo(250.5, 2);
+    expect(h.old_gl).toBeCloseTo(3.25, 2);
+    expect(h.old_gl_amt).toBeCloseTo(19_500, 2);
+    expect(h.old_sl).toBeCloseTo(12.5, 2);
+    expect(h.old_sl_amt).toBeCloseTo(900, 2);
+    expect(h.schm).toBeCloseTo(1_000, 2);
+    expect(h.rc_rate).toBeCloseTo(6_400, 2);
+    expect(h.rc_fine).toBeCloseTo(2.5, 2);
+    expect(h.rc_amt).toBeCloseTo(16_000, 2);
+    expect(h.adj_gold).toBeCloseTo(1.75, 2);
+    expect(h.adj_silver).toBeCloseTo(4.5, 2);
+    expect(h.ord_adj).toBeCloseTo(500, 2);
+    expect(String(h.del_date)).toContain('2024-05-01');
+    expect(String(h.fun_date)).toContain('2024-05-15');
+
+    const dets = (await owner.$queryRawUnsafe(
+      `SELECT "TBL_CODE","ITM_COLOR","ITM_SIZE","RATE_FIX","LBR_TYPE","KR_NAME","RATE_TYPE",
+              "IT_TYPE","PR_CODE","OLD_TBL_CODE","TAG_STK_LESS","DESIGN_IMG_ID","HM_ID","HM_ID2",
+              "TAG_NO","EMP_CODE","BAG_WT"::float bag_wt,"ITM_OTH_WT"::float oth_wt,
+              "ITM_GHT_PRC"::float ght_prc,"ITM_WEST_PRC"::float west,"LBR_PRC"::float lbr_prc,
+              "LBR_RATE"::float lbr_rate,"OTH_AMT"::float oth_amt,"ITM_MRP"::float mrp,
+              "KR_NET_WT"::float kr_nwt,"KR_TOUCH"::float kr_touch,"KR_FINE"::float kr_fine,
+              "TAG_COST"::float tag_cost,"VCH_SRNO"::int vch_srno,"OLD_SRNO"::int old_srno,
+              "HM_ID_WT"::float hm_wt,"ORD_REC_AMT"::float ord_rec,"ORD_DEL_DATE"::text ord_del
+         FROM "SL_ORD_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+      TENANT,
+      vchNo,
+    )) as Array<Record<string, any>>;
+    expect(dets).toHaveLength(1);
+    const d = dets[0]!;
+    expect(String(d.TBL_CODE).trim()).toBe('001');
+    expect(String(d.ITM_COLOR).trim()).toBe('YELLOW');
+    expect(String(d.ITM_SIZE).trim()).toBe('L');
+    expect(String(d.RATE_FIX).trim()).toBe('Y');
+    expect(String(d.LBR_TYPE).trim()).toBe('G');
+    expect(String(d.KR_NAME).trim()).toBe('KARY');
+    expect(String(d.RATE_TYPE).trim()).toBe('R');
+    expect(String(d.IT_TYPE).trim()).toBe('G');
+    expect(String(d.PR_CODE).trim()).toBe('PR');
+    expect(String(d.OLD_TBL_CODE).trim()).toBe('002');
+    expect(String(d.TAG_STK_LESS).trim()).toBe('N');
+    expect(String(d.DESIGN_IMG_ID).trim()).toBe('IMG-9');
+
+    expect(String(d.HM_ID).trim()).toBe('HUID999');
+    expect(String(d.HM_ID2).trim()).toBe('H2');
+    expect(String(d.EMP_CODE).trim()).toBe('E07');
+    expect(String(d.TAG_NO).trim()).toBe('N'); // desktop literal
+    expect(d.bag_wt).toBeCloseTo(0.2, 3);
+    expect(d.oth_wt).toBeCloseTo(0.1, 3);
+    expect(d.ght_prc).toBeCloseTo(1.5, 2);
+    expect(d.west).toBeCloseTo(2, 2);
+    expect(d.lbr_prc).toBeCloseTo(5, 2);
+    expect(d.lbr_rate).toBeCloseTo(45, 2);
+    expect(d.oth_amt).toBeCloseTo(30, 2);
+    expect(d.mrp).toBeCloseTo(12_500, 2);
+    expect(d.kr_nwt).toBeCloseTo(1.9, 2);
+    expect(d.kr_touch).toBeCloseTo(91.5, 2);
+    expect(d.kr_fine).toBeCloseTo(1.78, 2);
+    expect(d.tag_cost).toBeCloseTo(900, 2);
+    expect(d.vch_srno).toBe(4);
+    expect(d.old_srno).toBe(7); // explicit OLD_SRNO honoured
+    expect(d.hm_wt).toBeCloseTo(1.1, 2);
+    expect(d.ord_rec).toBe(0); // desktop literal
+    expect(String(d.ord_del)).toContain('2024-05-02');
+  }, 30_000);
+
+  // Depth gate (Phase B): AD_MEMB is the scheme member record — identity, contact, KYC, key dates,
+  // bank details and scheme linkage (Module_Schm.cs:489, the shared writer TR_MEMB_ENT calls). The
+  // web previously wrote 9 of its 36 columns, so an enrolled member carried almost no detail.
+  it('persists the full desktop scheme member record on enrolment', async () => {
+    const enrolled = await enrollScheme(runtime, {
+      scope: scope('074'),
+      schmCode: 'S01',
+      membCode: '00777',
+      membName: 'Depth Member',
+      monthlyAmt: 1_500,
+      itemGrossWt: 12.5,
+      empCode: 'E01',
+      phone: '0281-111111',
+      phone2: '0281-222222',
+      mobile: '9811122233',
+      mobile2: '9822233344',
+      address1: 'House 21',
+      address2: 'Gold Lane',
+      address3: 'Near Temple',
+      city: 'Rajkot',
+      district: 'Rajkot',
+      area: 'Kalawad Road',
+      pin: '360005',
+      email: 'member@example.com',
+      idProof: 'AADHAAR-XXXX-1234',
+      nomineeName: 'Nominee One',
+      birthDate: '1985-06-15',
+      anniversaryDate: '2010-11-20',
+      lastBrokenDate: '2023-03-01',
+      joinDate: '2024-04-01',
+      expiryDate: '2025-03-31',
+      bankName: 'State Bank',
+      bankArea: 'Main Branch',
+      bankAcNo: '1234567890',
+      bankRtgsNo: 'SBIN0001234',
+      refCode: 'REF01',
+      schemeShort: 'LS',
+      membBonus: 250,
+      mainUser: 'memb-user',
+    });
+    expect(enrolled.membNo).toBe('00777');
+
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "MEMB_NAME","EMP_CODE","AC_PHONE","AC_PHONE2","AC_MOBILE","AC_MOBILE2","AC_ADD1",
+              "AC_ADD2","AC_ADD3","AC_CITY","AC_DISTRICT","AC_AREA","AC_PIN","AC_EMAIL","ID_PROF",
+              "NOMINEE_NAME","BANK_NAME","BANK_AREA","BANK_AC_NO","BANK_RTGS_NO","AC_REF_CODE",
+              "SCHM_SHORT","DATA_TRFR","MAIN_USER",
+              "MEMB_AMT"::float memb_amt,"ITM_GWT"::float itm_gwt,"MEMB_BONUS"::float bonus,
+              "BIRTH_DATE"::text birth,"ANV_DATE"::text anv,"L_BR_DATE"::text lbr,
+              "JOIN_DATE"::text join_date,"EXP_DATE"::text exp_date
+         FROM "AD_MEMB" WHERE tenant_id=$1 AND "SCHM_CODE"='S01' AND "MEMB_CODE"='00777'`,
+      TENANT,
+    )) as Array<Record<string, any>>;
+    expect(rows).toHaveLength(1);
+    const m = rows[0]!;
+    expect(String(m.MEMB_NAME).trim()).toBe('Depth Member');
+    expect(String(m.EMP_CODE).trim()).toBe('E01');
+    expect(String(m.AC_PHONE).trim()).toBe('0281-111111');
+    expect(String(m.AC_PHONE2).trim()).toBe('0281-222222');
+    expect(String(m.AC_MOBILE).trim()).toBe('9811122233');
+    expect(String(m.AC_MOBILE2).trim()).toBe('9822233344');
+    expect(String(m.AC_ADD1).trim()).toBe('House 21');
+    expect(String(m.AC_ADD2).trim()).toBe('Gold Lane');
+    expect(String(m.AC_ADD3).trim()).toBe('Near Temple');
+    expect(String(m.AC_CITY).trim()).toBe('Rajkot');
+    expect(String(m.AC_DISTRICT).trim()).toBe('Rajkot');
+    expect(String(m.AC_AREA).trim()).toBe('Kalawad Road');
+    expect(String(m.AC_PIN).trim()).toBe('360005');
+    expect(String(m.AC_EMAIL).trim()).toBe('member@example.com');
+    expect(String(m.ID_PROF).trim()).toBe('AADHAAR-XXXX-1234');
+    expect(String(m.NOMINEE_NAME).trim()).toBe('Nominee One');
+    expect(String(m.BANK_NAME).trim()).toBe('State Bank');
+    expect(String(m.BANK_AREA).trim()).toBe('Main Branch');
+    expect(String(m.BANK_AC_NO).trim()).toBe('1234567890');
+    expect(String(m.BANK_RTGS_NO).trim()).toBe('SBIN0001234');
+    expect(String(m.AC_REF_CODE).trim()).toBe('REF01');
+    expect(String(m.SCHM_SHORT).trim()).toBe('LS');
+    expect(String(m.DATA_TRFR).trim()).toBe('N'); // desktop literal
+    expect(String(m.MAIN_USER).trim()).toBe('memb-user');
+    expect(m.memb_amt).toBeCloseTo(1_500, 2);
+    expect(m.itm_gwt).toBeCloseTo(12.5, 2);
+    expect(m.bonus).toBeCloseTo(250, 2);
+    expect(String(m.birth)).toContain('1985-06-15');
+    expect(String(m.anv)).toContain('2010-11-20');
+    expect(String(m.lbr)).toContain('2023-03-01');
+    expect(String(m.join_date)).toContain('2024-04-01');
+    expect(String(m.exp_date)).toContain('2025-03-31');
+  }, 30_000);
+
+  // Depth gate (Phase B): TEMP_AD_DATA is the scheme-passbook report staging table. Desktop clears
+  // it by company and repopulates it from the member's installments before Crystal reads it
+  // (TR_MEMB_ENT.cs:5381,5402); SchmPassBook.spec.json binds 11 of its columns, so the report
+  // renders blank unless it is populated.
+  it('stages the scheme passbook report rows from the member installments', async () => {
+    // Create a real installment so AD_DATA carries the scheme/member keys the staging copies.
+    await schemeInstallment(runtime, installmentInput());
+    const staged = await schemePassbookData(runtime, {
+      tenantId: TENANT,
+      coCode: CO,
+      schmCode: 'S01',
+      membCode: '00001',
+    });
+    expect(staged).not.toBeNull();
+
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "SCHM_CODE","MEMB_CODE","CHQ_NO","REC_AC","CO_BOOK","VCH_NO",
+              "REC_AMT"::float rec_amt,"ITM_GWT"::float itm_gwt,"ITM_RATE"::float itm_rate,
+              "VCH_DATE"::text vch_date,"SCHM_DATE"::text schm_date
+         FROM "TEMP_AD_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY "SR_NO"`,
+      TENANT,
+      CO,
+    )) as Array<Record<string, any>>;
+    // One staged row per seeded installment of this member.
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(String(row.SCHM_CODE).trim()).toBe('S01');
+      expect(String(row.MEMB_CODE).trim()).toBe('00001');
+      // SCHM_DATE mirrors the installment date, as the desktop staging does.
+      expect(String(row.schm_date ?? '')).toBe(String(row.vch_date ?? ''));
+    }
+
+    // Re-staging clears first: the row count must not grow on a second report run.
+    const before = rows.length;
+    await schemePassbookData(runtime, {
+      tenantId: TENANT,
+      coCode: CO,
+      schmCode: 'S01',
+      membCode: '00001',
+    });
+    const again = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "TEMP_AD_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    )) as Array<{ n: number }>;
+    expect(again[0]!.n).toBe(before);
+  }, 30_000);
+});

@@ -1,0 +1,38 @@
+{
+ "form": "MS_STYLE",
+ "controlCount": 1,
+ "byKind": {
+  "textbox": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "PnlBotam",
+   "DGV",
+   "Text1",
+   "Label1",
+   "tStyleName",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  }
+ ]
+}

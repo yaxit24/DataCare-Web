@@ -1,0 +1,223 @@
+{
+ "report": "ChqPrint010",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 360,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 1245,
+       "top": 0,
+       "width": 1679,
+       "height": 226,
+       "text": "AXIS BANK"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "GroupHeader",
+     "height": 10,
+     "objects": []
+    },
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 1260,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 9030,
+       "top": 330,
+       "width": 1290,
+       "height": 226,
+       "dataSource": "{@DateDtMonth}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 6240,
+       "top": 585,
+       "width": 1710,
+       "height": 226,
+       "dataSource": "{@AcPayeeOnly}"
+      }
+     ]
+    },
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 2670,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 1200,
+       "top": 90,
+       "width": 8955,
+       "height": 226,
+       "dataSource": "{@AcName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 1800,
+       "top": 555,
+       "width": 8775,
+       "height": 1101,
+       "dataSource": "{@WordAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 9000,
+       "top": 870,
+       "width": 2121,
+       "height": 308,
+       "dataSource": "{@ChqAmt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "Detail",
+     "height": 255,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 465,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "ReportFooter",
+     "height": 199,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "PageFooter",
+     "height": 400,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{CASH_DATA.CHQ_PRINT_NAME}"
+  },
+  {
+   "name": "AcPayeeOnly",
+   "ref": "{@AcPayeeOnly}",
+   "type": "StringField",
+   "text": "'A/c Payee`s Only'"
+  },
+  {
+   "name": "ChqAmt",
+   "ref": "{@ChqAmt}",
+   "type": "NumberField",
+   "text": "{CASH_DATA.REC_AMT}"
+  },
+  {
+   "name": "cr_amt",
+   "ref": "{@cr_amt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DateDtMonth",
+   "ref": "{@DateDtMonth}",
+   "type": "DateField",
+   "text": "{CASH_DATA.VCH_DATE}"
+  },
+  {
+   "name": "DateYear",
+   "ref": "{@DateYear}",
+   "type": "StringField",
+   "text": "mid(totext({CASH_DATA.VCH_DATE},'yyyy'),4,1)"
+  },
+  {
+   "name": "dr_amt",
+   "ref": "{@dr_amt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "group_1",
+   "ref": "{@group_1}",
+   "type": "StringField",
+   "text": "{CASH_DATA.CO_YEAR}+{CASH_DATA.CO_BOOK}+{CASH_DATA.VCH_NO}+totext({CASH_DATA.SR_NO})"
+  },
+  {
+   "name": "WordAmt",
+   "ref": "{@WordAmt}",
+   "type": "StringField",
+   "text": "UpperCase({@words});"
+  },
+  {
+   "name": "words",
+   "ref": "{@words}",
+   "type": "StringField",
+   "text": "whileprintingrecords; numberVar z :=InStr (totext({CASH_DATA.REC_AMT}),\".\" ) ; if tonumber(Mid (totext({CASH_DATA.REC_AMT}),z+1 ,2 )) <> 0 then stringVar paise := \" and \"+ towords(tonumber(Mid (totext"
+  }
+ ],
+ "sectionCount": 9,
+ "objectCount": 6,
+ "formulaCount": 10
+}

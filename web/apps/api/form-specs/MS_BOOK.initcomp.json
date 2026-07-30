@@ -1,0 +1,426 @@
+{
+ "form": "MS_BOOK",
+ "controlCount": 40,
+ "byKind": {
+  "textbox": 12,
+  "button": 6,
+  "combo": 5,
+  "grid": 2,
+  "panel": 1,
+  "label": 14
+ },
+ "grids": [
+  "MSG",
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "lblMobilEmtry",
+   "tMobileEntry",
+   "tEmpCode",
+   "tEmpName",
+   "Label12",
+   "btnReSet",
+   "Label11",
+   "tTrfrBook",
+   "tDataType",
+   "Label9",
+   "tResetBook",
+   "DGV",
+   "PnlBotam",
+   "TEXT_ENTRY",
+   "MSG",
+   "cboTrnsNm",
+   "cboInvoTyp",
+   "cboTranInOut",
+   "cboItmTyp",
+   "cboCurUse",
+   "Label6",
+   "Label5",
+   "Label7",
+   "Label4",
+   "tVchSer",
+   "Label3",
+   "Text1",
+   "Label8",
+   "Label10",
+   "Label1",
+   "Label2",
+   "tBkShort",
+   "tBkCode",
+   "tBkName",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tBkCode",
+   "type": "TextBox",
+   "location": "734,69",
+   "size": "65,22",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "tDataType",
+   "type": "TextBox",
+   "location": "805,69",
+   "size": "39,22",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tBkName",
+   "type": "TextBox",
+   "location": "734,96",
+   "size": "301,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tBkShort",
+   "type": "TextBox",
+   "location": "734,123",
+   "size": "65,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "cboCurUse",
+   "type": "ComboBox",
+   "location": "734,150",
+   "size": "65,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "cboTrnsNm",
+   "type": "ComboBox",
+   "location": "734,177",
+   "size": "216,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboItmTyp",
+   "type": "ComboBox",
+   "location": "734,204",
+   "size": "125,22",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboTranInOut",
+   "type": "ComboBox",
+   "location": "734,231",
+   "size": "125,22",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboInvoTyp",
+   "type": "ComboBox",
+   "location": "734,258",
+   "size": "125,22",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "548,341",
+   "size": "599,197",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tResetBook",
+   "type": "TextBox",
+   "location": "734,286",
+   "size": "65,22",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tVchSer",
+   "type": "TextBox",
+   "location": "734,313",
+   "size": "125,22",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "826,406",
+   "size": "100,18",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "64,42",
+   "size": "402,18",
+   "tabIndex": "13",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "101",
+   "text": "Book Master",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "597,69",
+   "size": "124,20",
+   "tabIndex": "104",
+   "text": "Book Code",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "597,95",
+   "size": "127,20",
+   "tabIndex": "105",
+   "text": "Book Name",
+   "kind": "label"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "597,122",
+   "size": "127,20",
+   "tabIndex": "105",
+   "text": "Book Short",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "597,150",
+   "size": "127,20",
+   "tabIndex": "106",
+   "text": "Cur In Use",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "597,176",
+   "size": "127,20",
+   "tabIndex": "107",
+   "text": "Transaction Name",
+   "kind": "label"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "597,205",
+   "size": "127,20",
+   "tabIndex": "108",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "597,232",
+   "size": "127,20",
+   "tabIndex": "108",
+   "text": "Tran In / Out",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "597,258",
+   "size": "127,20",
+   "tabIndex": "108",
+   "text": "Invoice Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "597,312",
+   "size": "127,20",
+   "tabIndex": "109",
+   "text": "Vch Serice",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "63,69",
+   "size": "404,469",
+   "tabIndex": "111",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "597,285",
+   "size": "127,20",
+   "tabIndex": "113",
+   "text": "ReSet Book",
+   "kind": "label"
+  },
+  {
+   "name": "tTrfrBook",
+   "type": "TextBox",
+   "location": "938,285",
+   "size": "54,22",
+   "tabIndex": "114",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "864,285",
+   "size": "71,20",
+   "tabIndex": "115",
+   "text": "Trfr Book",
+   "kind": "label"
+  },
+  {
+   "name": "btnReSet",
+   "type": "SimpleButton",
+   "location": "850,67",
+   "size": "185,24",
+   "tabIndex": "1167",
+   "text": "Reset All Book to A",
+   "kind": "button"
+  },
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "938,312",
+   "size": "54,23",
+   "tabIndex": "1168",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "864,313",
+   "size": "72,20",
+   "tabIndex": "1169",
+   "text": "Employee",
+   "kind": "label"
+  },
+  {
+   "name": "tEmpName",
+   "type": "TextBox",
+   "location": "998,312",
+   "size": "148,23",
+   "tabIndex": "1170",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tMobileEntry",
+   "type": "TextBox",
+   "location": "1087,258",
+   "size": "59,22",
+   "tabIndex": "1171",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblMobilEmtry",
+   "type": "Label",
+   "location": "957,258",
+   "size": "124,20",
+   "tabIndex": "1172",
+   "text": "With Mobile Entry",
+   "kind": "label"
+  }
+ ]
+}

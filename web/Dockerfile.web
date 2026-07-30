@@ -1,0 +1,56 @@
+# syntax=docker/dockerfile:1
+###############################################################################
+# DataCareNext Web — multi-stage image (Next.js 15 App Router, pnpm workspace).
+#
+# IMPORTANT: apps/web/next.config.mjs bakes API_ORIGIN into the `/api/:path*`
+# rewrite at BUILD time — the destination is serialized into
+# .next/routes-manifest.json by `next build`, NOT read at runtime. So API_ORIGIN
+# must be supplied as a build ARG before `next build`. We also set it at runtime
+# as a harmless safety net.
+#
+#   build context: the `web/` repo root (pnpm workspace)
+#   exposed port : 4001  (package.json "start" = `next start -p 4001`)
+###############################################################################
+
+# ---- Stage 1: build the web app ----------------------------------------------
+FROM node:20-alpine AS build
+
+RUN corepack enable
+WORKDIR /repo
+
+# Workspace manifests first (install-layer caching).
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml turbo.json tsconfig.base.json ./
+COPY packages ./packages
+COPY apps ./apps
+
+RUN pnpm install --frozen-lockfile
+
+# Bake the API origin into the Next rewrite. In docker-compose this is set to
+# http://api:4000; the default keeps a plain local `next start` working.
+ARG API_ORIGIN=http://localhost:4000
+ENV API_ORIGIN=${API_ORIGIN}
+
+# @datacare/web has no @datacare/* workspace deps, so build it directly.
+RUN pnpm --filter @datacare/web run build
+
+# ---- Stage 2: runtime --------------------------------------------------------
+FROM node:20-alpine AS runtime
+
+ENV NODE_ENV=production
+# Re-assert at runtime (no-op for the baked manifest, but correct if a future
+# build wires runtime middleware that reads API_ORIGIN).
+ARG API_ORIGIN=http://localhost:4000
+ENV API_ORIGIN=${API_ORIGIN}
+
+WORKDIR /repo
+# Copy the installed + built workspace (pnpm symlinks remain valid: same paths).
+COPY --from=build /repo /repo
+
+WORKDIR /repo/apps/web
+EXPOSE 4001
+USER node
+
+# Equivalent to the package "start" script: `next start -p 4001`. Invoking the
+# local next binary directly avoids needing pnpm/corepack (and any network) at
+# runtime.
+CMD ["node_modules/.bin/next", "start", "-p", "4001"]

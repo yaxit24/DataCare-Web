@@ -1,0 +1,181 @@
+{
+ "form": "UT_PWD_UPDATE",
+ "controlCount": 16,
+ "byKind": {
+  "button": 5,
+  "textbox": 6,
+  "panel": 1,
+  "label": 4
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "Label4",
+   "Label3",
+   "Label1",
+   "Label2",
+   "tConPasword",
+   "tPasword",
+   "tUserName",
+   "tOldPasword",
+   "tSrNo2",
+   "tSrNo1",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "847,3",
+   "size": "87,37",
+   "tabIndex": "0",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "940,3",
+   "size": "87,37",
+   "tabIndex": "1",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "tSrNo1",
+   "type": "TextBox",
+   "location": "278,99",
+   "size": "344,19",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1033,3",
+   "size": "87,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tSrNo2",
+   "type": "TextBox",
+   "location": "780,97",
+   "size": "351,19",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1126,3",
+   "size": "87,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1219,3",
+   "size": "87,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "tUserName",
+   "type": "TextBox",
+   "location": "505,158",
+   "size": "184,22",
+   "tabIndex": "121",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tOldPasword",
+   "type": "TextBox",
+   "location": "505,193",
+   "size": "184,22",
+   "tabIndex": "122",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tPasword",
+   "type": "TextBox",
+   "location": "505,229",
+   "size": "184,22",
+   "tabIndex": "123",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tConPasword",
+   "type": "TextBox",
+   "location": "505,266",
+   "size": "184,22",
+   "tabIndex": "124",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "369,158",
+   "size": "124,20",
+   "tabIndex": "125",
+   "text": "Create New User",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "369,193",
+   "size": "124,20",
+   "tabIndex": "126",
+   "text": "Old Password",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "369,229",
+   "size": "124,20",
+   "tabIndex": "127",
+   "text": "New Password",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "369,266",
+   "size": "124,20",
+   "tabIndex": "128",
+   "text": "Confirm Password",
+   "kind": "label"
+  }
+ ]
+}

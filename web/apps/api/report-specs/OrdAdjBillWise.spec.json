@@ -1,0 +1,396 @@
+{
+ "report": "OrdAdjBillWise",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 995,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 165,
+       "top": 75,
+       "width": 11115,
+       "height": 324,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 165,
+       "top": 420,
+       "width": 11115,
+       "height": 330,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 165,
+       "top": 750,
+       "width": 11115,
+       "height": 230,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 10770,
+       "top": 750,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 453,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 180,
+       "top": 30,
+       "width": 11220,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 408,
+       "top": 90,
+       "width": 960,
+       "height": 230,
+       "text": "Ord.No."
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 1155,
+       "top": 90,
+       "width": 1170,
+       "height": 230,
+       "text": "Ord.Date"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 3720,
+       "top": 90,
+       "width": 3480,
+       "height": 230,
+       "text": "Bill Party Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text19",
+       "left": 6960,
+       "top": 90,
+       "width": 1320,
+       "height": 255,
+       "text": "Total Adv."
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 8415,
+       "top": 90,
+       "width": 1275,
+       "height": 255,
+       "text": "Adjust Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 9780,
+       "top": 90,
+       "width": 1380,
+       "height": 255,
+       "text": "Panding Amt"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 165,
+       "top": 375,
+       "width": 11235,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 395,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 165,
+       "top": 60,
+       "width": 5616,
+       "height": 230,
+       "dataSource": "{SL_ORD_DATA.AC_NAME}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 135,
+       "top": 345,
+       "width": 11265,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "GroupHeader",
+     "height": 240,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 408,
+       "top": 0,
+       "width": 747,
+       "height": 230,
+       "dataSource": "{SL_ORD_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 1155,
+       "top": 0,
+       "width": 993,
+       "height": 221,
+       "dataSource": "{SL_ORD_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 6960,
+       "top": 0,
+       "width": 1320,
+       "height": 221,
+       "dataSource": "{SL_ORD_DATA.ADV_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 8535,
+       "top": 0,
+       "width": 1155,
+       "height": 216,
+       "dataSource": "Sum ({@AdjAmt}, {SL_ORD_DATA.VCH_NO})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 9840,
+       "top": 0,
+       "width": 1320,
+       "height": 221,
+       "dataSource": "{@PandingTot}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 300,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 1155,
+       "top": 60,
+       "width": 645,
+       "height": 230,
+       "dataSource": "{SL_ORD_ADJ.CO_BOOK}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 1905,
+       "top": 60,
+       "width": 795,
+       "height": 230,
+       "dataSource": "{SL_ORD_ADJ.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 2700,
+       "top": 60,
+       "width": 840,
+       "height": 211,
+       "dataSource": "{SL_ORD_ADJ.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 3720,
+       "top": 60,
+       "width": 3315,
+       "height": 230,
+       "dataSource": "{@AcName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 6960,
+       "top": 60,
+       "width": 1320,
+       "height": 211,
+       "dataSource": "{SL_DATA.TOT_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 8520,
+       "top": 60,
+       "width": 1170,
+       "height": 204,
+       "dataSource": "{@AdjAmt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section10",
+     "kind": "GroupFooter",
+     "height": 43,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupFooter",
+     "height": 230,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 160,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 165,
+       "top": 30,
+       "width": 11235,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "PageFooter",
+     "height": 120,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "if{SL_ORD_ADJ.CO_BOOK} = '081' then 'ORDER CANCEL' ELSE if{SL_ORD_ADJ.CO_BOOK} = '001' then 'CASH PAYMENT' ELSE if{SL_ORD_ADJ.CO_BOOK} = '088' then {SL_ORD_ADJ.AC_NAME} else {AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "AdjAmt",
+   "ref": "{@AdjAmt}",
+   "type": "NumberField",
+   "text": "if {SL_ORD_ADJ.ORD_SIGN} = '-' then {SL_ORD_ADJ.ORD_AMT}"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+' '+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "PandingTot",
+   "ref": "{@PandingTot}",
+   "type": "NumberField",
+   "text": "{SL_ORD_DATA.ADV_AMT}-Sum ({@AdjAmt}, {SL_ORD_DATA.VCH_NO})"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'ORDER REPORT'"
+  }
+ ],
+ "sectionCount": 10,
+ "objectCount": 26,
+ "formulaCount": 6
+}

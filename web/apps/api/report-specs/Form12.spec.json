@@ -1,0 +1,838 @@
+{
+ "report": "Form12",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 347,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 120,
+       "top": 120,
+       "width": 10995,
+       "height": 227,
+       "text": "205 - 23 GUJARAT GORVERMENT GAZETTE 12/07/2013 FORM NO - 15 (See Rule - 15)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "PageHeader",
+     "height": 1200,
+     "objects": [
+      {
+       "type": "BoxObject",
+       "name": "Box1",
+       "left": 105,
+       "top": 120,
+       "width": 11025,
+       "height": 1080
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 285,
+       "top": 180,
+       "width": 10695,
+       "height": 360,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 285,
+       "top": 600,
+       "width": 10695,
+       "height": 226,
+       "dataSource": "{@CoAdd2}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 312,
+       "top": 885,
+       "width": 10668,
+       "height": 226,
+       "dataSource": "{@Phone}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 405,
+       "top": 1155,
+       "width": 0,
+       "height": 6325
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 10680,
+       "top": 1155,
+       "width": 0,
+       "height": 6315
+      }
+     ]
+    },
+    {
+     "name": "Section7",
+     "kind": "PageHeader",
+     "height": 735,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 600,
+       "top": 75,
+       "width": 5980,
+       "height": 285,
+       "text": "Statement of Yearly Account At The End Of The Year : -"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 6600,
+       "top": 75,
+       "width": 1296,
+       "height": 226,
+       "dataSource": "{DHRN_DATA.CO_YEAR}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 1480,
+       "top": 435,
+       "width": 1880,
+       "height": 300,
+       "text": "Reg No :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 3600,
+       "top": 435,
+       "width": 4680,
+       "height": 240,
+       "dataSource": "{CO_MAST.DHIRAN_NO}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupHeader",
+     "height": 226,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 0,
+       "top": 0,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "GroupName ({AC_MAST.AC_NAME})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupHeader",
+     "height": 2070,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 420,
+       "top": 0,
+       "width": 10260,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 1065,
+       "top": 0,
+       "width": 2295,
+       "height": 315,
+       "text": "Name :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 3600,
+       "top": 0,
+       "width": 7080,
+       "height": 244,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 1065,
+       "top": 285,
+       "width": 2295,
+       "height": 315,
+       "text": "Address :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 3600,
+       "top": 285,
+       "width": 7080,
+       "height": 300,
+       "dataSource": "{@AcAdd1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 3600,
+       "top": 555,
+       "width": 7080,
+       "height": 270,
+       "dataSource": "{@AcAdd2}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 3600,
+       "top": 795,
+       "width": 4571,
+       "height": 290,
+       "dataSource": "{@AcMobile}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 1710,
+       "top": 1110,
+       "width": 3075,
+       "height": 285,
+       "text": "Occupation :"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 510,
+       "top": 1425,
+       "width": 4275,
+       "height": 285,
+       "text": "Catagory ot Witch The Debtor Belong :"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 6013,
+       "top": 1740,
+       "width": 1175,
+       "height": 255,
+       "text": "Princapal"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 960,
+       "top": 1755,
+       "width": 3825,
+       "height": 285,
+       "text": "Ledger Folio No :"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 7545,
+       "top": 1755,
+       "width": 955,
+       "height": 255,
+       "text": "Interest"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text11",
+       "left": 9120,
+       "top": 1755,
+       "width": 735,
+       "height": 255,
+       "text": "Total"
+      }
+     ]
+    },
+    {
+     "name": "Section10",
+     "kind": "GroupHeader",
+     "height": 1605,
+     "objects": [
+      {
+       "type": "BoxObject",
+       "name": "Box3",
+       "left": 660,
+       "top": 30,
+       "width": 9780,
+       "height": 1530
+      },
+      {
+       "type": "LineObject",
+       "name": "Line8",
+       "left": 5760,
+       "top": 30,
+       "width": 0,
+       "height": 1500
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 7320,
+       "top": 30,
+       "width": 0,
+       "height": 1500
+      },
+      {
+       "type": "LineObject",
+       "name": "Line9",
+       "left": 8640,
+       "top": 30,
+       "width": 0,
+       "height": 1500
+      },
+      {
+       "type": "TextObject",
+       "name": "Text12",
+       "left": 825,
+       "top": 180,
+       "width": 4815,
+       "height": 255,
+       "text": "Total Amount of Loans Advance During The Year"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 5959,
+       "top": 180,
+       "width": 1283,
+       "height": 216,
+       "dataSource": "Sum ({@OpDhiran}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 7440,
+       "top": 180,
+       "width": 1110,
+       "height": 216,
+       "dataSource": "Sum ({@OpInt}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 8761,
+       "top": 180,
+       "width": 1529,
+       "height": 216,
+       "dataSource": "{@OpTotal}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line7",
+       "left": 675,
+       "top": 480,
+       "width": 9750,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text13",
+       "left": 825,
+       "top": 495,
+       "width": 4455,
+       "height": 390,
+       "text": "Total Amount of Repayment During The Year"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 5959,
+       "top": 555,
+       "width": 1283,
+       "height": 216,
+       "dataSource": "Sum ({@DhrnAmt}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 7440,
+       "top": 555,
+       "width": 1110,
+       "height": 216,
+       "dataSource": "Sum ({@DhrnIntAmt}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 8760,
+       "top": 555,
+       "width": 1530,
+       "height": 216,
+       "dataSource": "{@DhrnTot}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 675,
+       "top": 810,
+       "width": 9750,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text14",
+       "left": 825,
+       "top": 885,
+       "width": 4815,
+       "height": 270,
+       "text": "Total Amount of Received During The Year"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 5880,
+       "top": 885,
+       "width": 1365,
+       "height": 216,
+       "dataSource": "Sum ({@DhrnRec}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 7450,
+       "top": 885,
+       "width": 1100,
+       "height": 216,
+       "dataSource": "Sum ({@DhrnIntRec}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 8761,
+       "top": 885,
+       "width": 1529,
+       "height": 216,
+       "dataSource": "{@DhrnRecTot}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 675,
+       "top": 1230,
+       "width": 9750,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text16",
+       "left": 825,
+       "top": 1260,
+       "width": 5215,
+       "height": 255,
+       "text": "Principal Amount and Interest Due At The end of Year"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 5960,
+       "top": 1260,
+       "width": 1281,
+       "height": 216,
+       "dataSource": "Sum ({@TotDhrn}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 7440,
+       "top": 1260,
+       "width": 1110,
+       "height": 216,
+       "dataSource": "Sum ({@TotDhrnInt}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 8761,
+       "top": 1260,
+       "width": 1529,
+       "height": 216,
+       "dataSource": "{@TotPanDhrn}"
+      }
+     ]
+    },
+    {
+     "name": "Section11",
+     "kind": "GroupHeader",
+     "height": 945,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text17",
+       "left": 825,
+       "top": 105,
+       "width": 9600,
+       "height": 255,
+       "text": "Particulars of Location of artical as a pawn,pledge or security where it is kept."
+      },
+      {
+       "type": "TextObject",
+       "name": "Text18",
+       "left": 825,
+       "top": 390,
+       "width": 8675,
+       "height": 285,
+       "text": "Bank - Shop - Home"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text19",
+       "left": 825,
+       "top": 660,
+       "width": 735,
+       "height": 255,
+       "text": "TFZLB o"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 271,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 675,
+       "top": 45,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@OpDhiran}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 1769,
+       "top": 45,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@OpInt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 2729,
+       "top": 45,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@DhrnAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 3720,
+       "top": 45,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@DhrnIntAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 4889,
+       "top": 45,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{@DhrnRec}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 5880,
+       "top": 45,
+       "width": 937,
+       "height": 204,
+       "dataSource": "{@DhrnIntRec}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 6916,
+       "top": 45,
+       "width": 1004,
+       "height": 204,
+       "dataSource": "{@TotDhrn}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 8100,
+       "top": 45,
+       "width": 1095,
+       "height": 204,
+       "dataSource": "{@TotDhrnInt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "GroupFooter",
+     "height": 1125,
+     "objects": [
+      {
+       "type": "BoxObject",
+       "name": "Box2",
+       "left": 120,
+       "top": 0,
+       "width": 11025,
+       "height": 1080
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field38",
+       "left": 6600,
+       "top": 120,
+       "width": 4398,
+       "height": 316,
+       "dataSource": "{@for}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text15",
+       "left": 998,
+       "top": 675,
+       "width": 4724,
+       "height": 375,
+       "text": "Signature of Debtors"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text23",
+       "left": 7028,
+       "top": 675,
+       "width": 3262,
+       "height": 345,
+       "text": "Signature of Money Landers"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area10",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 331,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageFooter",
+     "height": 0,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD1} + ' ' + {AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "IF {AC_MAST.AC_ADD3} <> '' THEN {AC_MAST.AC_ADD3} + ' ' + {AC_MAST.AC_CITY} ELSE {AC_MAST.AC_CITY}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_MOBILE} <> '' then 'Mo : ' + {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then 'Ph : ' + {AC_MAST.AC_MOBILE} else 'Mo : ' + {AC_MAST.AC_MOBILE2}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1} + ' ' + {CO_MAST.CO_ADD2} + ' ' + {CO_MAST.CO_CITY}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DhrnAmt",
+   "ref": "{@DhrnAmt}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.VCH_DATE} >={@FromDate} and {BOOK_DATA.MAIN_BOOK} = 'DHIRAN ISSUE' then {DHRN_DATA.DHRN_AMT} else 0"
+  },
+  {
+   "name": "DhrnIntAmt",
+   "ref": "{@DhrnIntAmt}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.VCH_DATE} >= {@FromDate}then {DHRN_DATA.INT_AMT} else 0"
+  },
+  {
+   "name": "DhrnIntRec",
+   "ref": "{@DhrnIntRec}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.VCH_DATE} >={@FromDate} then -{DHRN_DATA.INT_REC_AMT} else 0"
+  },
+  {
+   "name": "DhrnRec",
+   "ref": "{@DhrnRec}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.VCH_DATE} >={@FromDate} then -({DHRN_DATA.DHRN_REC_AMT}+{DHRN_DATA.UNCHAK_DHRN_REC}) else 0"
+  },
+  {
+   "name": "DhrnRecTot",
+   "ref": "{@DhrnRecTot}",
+   "type": "NumberField",
+   "text": "Sum ({@DhrnRec}, {@VchGroup})+Sum ({@DhrnIntRec}, {@VchGroup})"
+  },
+  {
+   "name": "DhrnTot",
+   "ref": "{@DhrnTot}",
+   "type": "NumberField",
+   "text": "Sum ({@DhrnAmt}, {@VchGroup})+Sum ({@DhrnIntAmt}, {@VchGroup})"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "Date(2011,04,01)"
+  },
+  {
+   "name": "OpDhiran",
+   "ref": "{@OpDhiran}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.VCH_DATE} <{@FromDate} and {BOOK_DATA.MAIN_BOOK} = 'DHIRAN ISSUE' then {DHRN_DATA.DHRN_AMT} else if {DHRN_DATA.VCH_DATE} <{@FromDate} then -{DHRN_DATA.DHRN_REC_AMT} else 0"
+  },
+  {
+   "name": "OpInt",
+   "ref": "{@OpInt}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.VCH_DATE} <{@FromDate} then {DHRN_DATA.INT_AMT}-{DHRN_DATA.INT_REC_AMT} else 0"
+  },
+  {
+   "name": "OpTotal",
+   "ref": "{@OpTotal}",
+   "type": "NumberField",
+   "text": "Sum ({@OpDhiran}, {@VchGroup}) +Sum ({@OpInt}, {@VchGroup})"
+  },
+  {
+   "name": "Phone",
+   "ref": "{@Phone}",
+   "type": "StringField",
+   "text": "If {CO_MAST.CO_PHONE} <> '' then 'Ph : ' & {CO_MAST.CO_PHONE} + ' Mo : '+ {CO_MAST.CO_MOBILE} else 'Mo : '+ {CO_MAST.CO_MOBILE}"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "Date(2011,04,01)"
+  },
+  {
+   "name": "TotDhrn",
+   "ref": "{@TotDhrn}",
+   "type": "NumberField",
+   "text": "IF {BOOK_DATA.MAIN_BOOK} = 'DHIRAN ISSUE' THEN {DHRN_DATA.DHRN_AMT} ELSE -({DHRN_DATA.DHRN_REC_AMT}+{DHRN_DATA.UNCHAK_DHRN_REC})"
+  },
+  {
+   "name": "TotDhrnInt",
+   "ref": "{@TotDhrnInt}",
+   "type": "NumberField",
+   "text": "{DHRN_DATA.INT_AMT}-{DHRN_DATA.INT_REC_AMT}"
+  },
+  {
+   "name": "TotPanDhrn",
+   "ref": "{@TotPanDhrn}",
+   "type": "NumberField",
+   "text": "Sum ({@TotDhrn}, {@VchGroup})+Sum ({@TotDhrnInt}, {@VchGroup})"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{DHRN_DATA.AC_CODE}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "StringField",
+   "text": "if {DHRN_DATA.DHRN_AMT} <> 0 then 'Ruppes : ' & ucase(ToWords (Sum ({DHRN_DATA.DHRN_AMT}, {@VchGroup}),0 )) & 'ONLY'"
+  }
+ ],
+ "sectionCount": 12,
+ "objectCount": 63,
+ "formulaCount": 23
+}

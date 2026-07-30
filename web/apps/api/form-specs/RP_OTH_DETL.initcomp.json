@@ -1,0 +1,572 @@
+{
+ "form": "RP_OTH_DETL",
+ "controlCount": 54,
+ "byKind": {
+  "masked": 2,
+  "button": 16,
+  "textbox": 12,
+  "combo": 5,
+  "other": 1,
+  "label": 13,
+  "panel": 3,
+  "grid": 1,
+  "check": 1
+ },
+ "grids": [
+  "DGV_ITM"
+ ],
+ "tabs": [],
+ "gridColumns": 1,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "PanelInOut": [
+   "btnKrin",
+   "btnKrInout",
+   "btnKrIsu",
+   "btnlosItmOut",
+   "btnlosItmIn",
+   "btnlosItmInout",
+   "BrnItmInWord",
+   "BtnItmInOut",
+   "BtnItmOutWord"
+  ],
+  "PnlIt": [
+   "btnItCancel",
+   "btnOk",
+   "DGV_ITM"
+  ],
+  "this": [
+   "Label8",
+   "tItCode",
+   "tItName",
+   "PnlIt",
+   "mToDt",
+   "cboState",
+   "Label9",
+   "chkBookSelect",
+   "PanelInOut",
+   "tGrCode",
+   "tGrName",
+   "Label7",
+   "mFromDt",
+   "tLcCode",
+   "tLcName",
+   "Label6",
+   "cboItemTyp",
+   "Label5",
+   "tPrCode",
+   "tPrName",
+   "Label4",
+   "cboArea",
+   "Label17",
+   "cboCity",
+   "lblCity",
+   "tAcCode",
+   "tAcName",
+   "Label3",
+   "Label2",
+   "tBookCode",
+   "tBookName",
+   "Label1",
+   "lblBook",
+   "PnlBotam",
+   "cboEmploy",
+   "lblemp"
+  ]
+ },
+ "controls": [
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "475,56",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BrnItmInWord",
+   "type": "QButton",
+   "location": "102,24",
+   "size": "143,37",
+   "tabIndex": "0",
+   "text": "Stud Itm In",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "557,56",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnItmInOut",
+   "type": "QButton",
+   "location": "285,24",
+   "size": "143,37",
+   "tabIndex": "1",
+   "text": "Stud In Out",
+   "kind": "button"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "475,87",
+   "size": "76,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnItmOutWord",
+   "type": "QButton",
+   "location": "471,24",
+   "size": "143,37",
+   "tabIndex": "2",
+   "text": "Stud Itm Out",
+   "kind": "button"
+  },
+  {
+   "name": "tBookCode",
+   "type": "TextBox",
+   "location": "475,117",
+   "size": "76,23",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnlosItmInout",
+   "type": "QButton",
+   "location": "285,81",
+   "size": "143,37",
+   "tabIndex": "3",
+   "text": "Loose In Out",
+   "kind": "button"
+  },
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "475,145",
+   "size": "76,23",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnlosItmIn",
+   "type": "QButton",
+   "location": "102,81",
+   "size": "143,37",
+   "tabIndex": "4",
+   "text": "Loose Itm In",
+   "kind": "button"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "475,174",
+   "size": "76,23",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnlosItmOut",
+   "type": "QButton",
+   "location": "471,81",
+   "size": "143,37",
+   "tabIndex": "5",
+   "text": "Loose Itm Out",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "475,203",
+   "size": "76,23",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnKrIsu",
+   "type": "QButton",
+   "location": "102,140",
+   "size": "143,37",
+   "tabIndex": "6",
+   "text": "Kr Isu",
+   "kind": "button"
+  },
+  {
+   "name": "btnKrInout",
+   "type": "QButton",
+   "location": "285,140",
+   "size": "143,37",
+   "tabIndex": "7",
+   "text": "Kr In Out",
+   "kind": "button"
+  },
+  {
+   "name": "cboCity",
+   "type": "ComboBox",
+   "location": "475,261",
+   "size": "148,22",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnKrin",
+   "type": "QButton",
+   "location": "471,140",
+   "size": "143,37",
+   "tabIndex": "8",
+   "text": "Kr Rec",
+   "kind": "button"
+  },
+  {
+   "name": "cboArea",
+   "type": "ComboBox",
+   "location": "692,262",
+   "size": "147,22",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "475,289",
+   "size": "148,22",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "11",
+   "text": "Report All",
+   "kind": "label"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "DGV_ITM",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "11,11",
+   "size": "433,229",
+   "tabIndex": "1156",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "btnOk",
+   "type": "QButton",
+   "location": "106,248",
+   "size": "100,38",
+   "tabIndex": "1157",
+   "text": "Ok",
+   "kind": "button"
+  },
+  {
+   "name": "btnItCancel",
+   "type": "QButton",
+   "location": "255,248",
+   "size": "100,38",
+   "tabIndex": "1158",
+   "text": "Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "370,117",
+   "size": "97,20",
+   "tabIndex": "1160",
+   "text": "Book",
+   "kind": "label"
+  },
+  {
+   "name": "tBookName",
+   "type": "TextBox",
+   "location": "557,116",
+   "size": "282,23",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "367,57",
+   "size": "102,20",
+   "tabIndex": "1162",
+   "text": "From / To Date",
+   "kind": "label"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "557,203",
+   "size": "282,23",
+   "tabIndex": "1164",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "382,201",
+   "size": "85,20",
+   "tabIndex": "1165",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "lblCity",
+   "type": "Label",
+   "location": "407,262",
+   "size": "58,19",
+   "tabIndex": "1166",
+   "text": "City",
+   "kind": "label"
+  },
+  {
+   "name": "Label17",
+   "type": "Label",
+   "location": "638,263",
+   "size": "47,19",
+   "tabIndex": "1168",
+   "text": "Area",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "395,144",
+   "size": "72,20",
+   "tabIndex": "1171",
+   "text": "Pr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tPrName",
+   "type": "TextBox",
+   "location": "557,145",
+   "size": "282,23",
+   "tabIndex": "1172",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "370,291",
+   "size": "99,20",
+   "tabIndex": "1174",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "408,87",
+   "size": "60,20",
+   "tabIndex": "1176",
+   "text": "lc Code",
+   "kind": "label"
+  },
+  {
+   "name": "tLcName",
+   "type": "TextBox",
+   "location": "557,86",
+   "size": "282,23",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "395,173",
+   "size": "72,20",
+   "tabIndex": "1183",
+   "text": "Gr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tGrName",
+   "type": "TextBox",
+   "location": "557,174",
+   "size": "282,23",
+   "tabIndex": "1184",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PanelInOut",
+   "type": "Panel",
+   "location": "268,328",
+   "size": "712,212",
+   "tabIndex": "1185",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "cboEmploy",
+   "type": "ComboBox",
+   "location": "692,291",
+   "size": "148,22",
+   "tabIndex": "1191",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblemp",
+   "type": "Label",
+   "location": "626,292",
+   "size": "57,19",
+   "tabIndex": "1192",
+   "text": "Employ",
+   "kind": "label"
+  },
+  {
+   "name": "PnlIt",
+   "type": "Panel",
+   "location": "1021,56",
+   "size": "456,299",
+   "tabIndex": "1207",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "chkBookSelect",
+   "type": "CheckBox",
+   "location": "859,119",
+   "size": "141,19",
+   "tabIndex": "1208",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "cboState",
+   "type": "ComboBox",
+   "location": "692,56",
+   "size": "148,22",
+   "tabIndex": "1209",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "627,57",
+   "size": "58,19",
+   "tabIndex": "1210",
+   "text": "State",
+   "kind": "label"
+  },
+  {
+   "name": "tItCode",
+   "type": "TextBox",
+   "location": "475,232",
+   "size": "76,23",
+   "tabIndex": "1211",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tItName",
+   "type": "TextBox",
+   "location": "557,232",
+   "size": "282,23",
+   "tabIndex": "1212",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "382,232",
+   "size": "85,20",
+   "tabIndex": "1213",
+   "text": "It Code",
+   "kind": "label"
+  }
+ ]
+}

@@ -1,0 +1,96 @@
+# =====================================================================================================
+# Repository scope
+#
+# This repository contains the WEB application only. It deliberately excludes the decompiled desktop
+# source, the installer, and the Crystal report definitions that sit alongside it in the working tree.
+#
+# Those excluded directories are the DataCareNext desktop product: decompiled C# (~969k lines), the
+# extracted installer, and 35 .rpt files. They are the owner's intellectual property and there is no
+# reason for them to leave the working machine — nothing in this repository needs them at runtime, and
+# the parity extraction that runs on the Windows box reads the live SQL Server rather than any source.
+#
+# If they are ever needed in version control, that is a separate, deliberate decision about a separate
+# private repository — not a side effect of publishing the web application.
+# =====================================================================================================
+
+# ---- Decompiled desktop product and installer: never published --------------------------------------
+/unified/
+/DataCareSetup/
+/DataCareSetup_extracted/
+/extracted_code/
+/extraction_output/
+/zip_contents/
+*.rpt
+*.exe
+*.dll
+*.msi
+*.cab
+
+# The desktop product's own source tree and a zipped copy of it. The Windows box already has the
+# application installed, so putting its source in a repository adds no capability and does move a copy of
+# the owner's product off the machine. Excluded by default; a deliberate decision could include it.
+/DataCareNext_Source/
+/new/
+/build_test/
+/extracted/
+/decompiled/
+
+# ---- Working notes and analysis output --------------------------------------------------------------
+# The audit scripts and gap register quote decompiled logic, so they stay local by default. The parity
+# BUNDLE directory is kept (empty) because the extractors write into it.
+/project-memory/*
+!/project-memory/parity/
+/project-memory/parity/*
+!/project-memory/parity/bundles/
+/project-memory/parity/bundles/*
+!/project-memory/parity/bundles/README.md
+!/project-memory/parity/bundles/.gitkeep
+!/project-memory/parity/g5/
+/project-memory/parity/g5/*
+!/project-memory/parity/g5/.gitkeep
+
+# ---- Assistant and editor state --------------------------------------------------------------------
+/.kiro/
+/.verify_*.md
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# ---- Dependencies and build output -----------------------------------------------------------------
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+out/
+coverage/
+*.tsbuildinfo
+
+# ---- Secrets: never commit -------------------------------------------------------------------------
+# `.env.example` files ARE committed; real ones are not.
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+
+# 14 MB of compiler output from a prior build attempt; noise, not source.
+/build_errors.txt
+/build_test/
+
+# ---- Local runtime artifacts -----------------------------------------------------------------------
+*.log
+pgdata/
+tmp/
+.pnpm-store/
+
+# ---- Parity captures: data, not code ---------------------------------------------------------------
+# A bundle contains real voucher rows from a live database. Captures are evidence for a review, not
+# repository content, and a desktop bundle may carry customer data.
+/project-memory/parity/bundles/*.json
+/project-memory/parity/g5/*.json

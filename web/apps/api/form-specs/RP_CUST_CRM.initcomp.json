@@ -1,0 +1,581 @@
+{
+ "form": "RP_CUST_CRM",
+ "controlCount": 55,
+ "byKind": {
+  "masked": 4,
+  "textbox": 16,
+  "button": 9,
+  "label": 16,
+  "combo": 1,
+  "other": 2,
+  "check": 2,
+  "panel": 2,
+  "grid": 3
+ },
+ "grids": [
+  "DGV_DETL",
+  "DGV",
+  "btn"
+ ],
+ "tabs": [],
+ "gridColumns": 1,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "BtnJmaUdhar"
+  ],
+  "pnlEdit": [
+   "chkItmSale",
+   "btnRemClose",
+   "Label18",
+   "tRemCustName",
+   "tCoYear",
+   "nSrNo",
+   "nIsrNo",
+   "btnRemUpdate",
+   "chkReminderClose",
+   "tItRemark",
+   "Label11",
+   "mUpdDate",
+   "mUpdTime",
+   "Label10",
+   "tUpdateEmpCode",
+   "tUpdateEmpName",
+   "Label9",
+   "mVchDate",
+   "lblBDate",
+   "Label8",
+   "tVchNo"
+  ],
+  "this": [
+   "Label13",
+   "tMainRemark",
+   "DGV",
+   "PicImage",
+   "tNewRemark",
+   "Label12",
+   "pnlEdit",
+   "tEmpCode",
+   "tEmpName",
+   "Label7",
+   "btnOk",
+   "Label6",
+   "Label5",
+   "tCustCode",
+   "Label1",
+   "cboValType",
+   "Label3",
+   "Label2",
+   "Cr",
+   "tAcCode",
+   "tAcName",
+   "lblBook",
+   "PnlBotam",
+   "DGV_DETL",
+   "Label4",
+   "mToDt",
+   "mFromDt"
+  ]
+ },
+ "controls": [
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "82,46",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "82,75",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "251,46",
+   "size": "71,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tCustCode",
+   "type": "TextBox",
+   "location": "251,76",
+   "size": "71,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "390,46",
+   "size": "250,23",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "391,76",
+   "size": "58,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Customer Report",
+   "kind": "label"
+  },
+  {
+   "name": "cboValType",
+   "type": "ComboBox",
+   "location": "745,46",
+   "size": "103,22",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnOk",
+   "type": "QButton",
+   "location": "1041,48",
+   "size": "103,37",
+   "tabIndex": "7",
+   "text": "&Ok",
+   "kind": "button"
+  },
+  {
+   "name": "mUpdDate",
+   "type": "MaskedTextBox",
+   "location": "115,112",
+   "size": "76,22",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "tItRemark",
+   "type": "TextBox",
+   "location": "115,142",
+   "size": "392,69",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnJmaUdhar",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "10",
+   "text": "&JmUdr",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "chkItmSale",
+   "type": "CheckBox",
+   "location": "114,224",
+   "size": "137,27",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "chkReminderClose",
+   "type": "CheckBox",
+   "location": "273,224",
+   "size": "137,27",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "btnRemUpdate",
+   "type": "QButton",
+   "location": "114,260",
+   "size": "103,37",
+   "tabIndex": "12",
+   "text": "&Update",
+   "kind": "button"
+  },
+  {
+   "name": "btnRemClose",
+   "type": "QButton",
+   "location": "247,260",
+   "size": "103,37",
+   "tabIndex": "13",
+   "text": "&Close",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "14",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "15",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "16",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "17",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "114,25",
+   "size": "76,22",
+   "tabIndex": "1126",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "26,26",
+   "size": "68,20",
+   "tabIndex": "1127",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "178,48",
+   "size": "67,20",
+   "tabIndex": "1132",
+   "text": "Ac Code",
+   "kind": "label"
+  },
+  {
+   "name": "DGV_DETL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,108",
+   "size": "1159,319",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "mVchDate",
+   "type": "MaskedTextBox",
+   "location": "273,26",
+   "size": "77,22",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "203,27",
+   "size": "71,20",
+   "tabIndex": "1134",
+   "text": "Vch Date",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "5,44",
+   "size": "71,20",
+   "tabIndex": "1159",
+   "text": "From Dt",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "658,46",
+   "size": "82,19",
+   "tabIndex": "1161",
+   "text": "Value Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "3,73",
+   "size": "71,20",
+   "tabIndex": "1162",
+   "text": "To Date",
+   "kind": "label"
+  },
+  {
+   "name": "tUpdateEmpCode",
+   "type": "TextBox",
+   "location": "114,54",
+   "size": "76,22",
+   "tabIndex": "1163",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "162,76",
+   "size": "83,20",
+   "tabIndex": "1164",
+   "text": "Cust Code",
+   "kind": "label"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "26,54",
+   "size": "69,20",
+   "tabIndex": "1164",
+   "text": "Employee",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "329,50",
+   "size": "55,20",
+   "tabIndex": "1165",
+   "text": "Party",
+   "kind": "label"
+  },
+  {
+   "name": "tUpdateEmpName",
+   "type": "TextBox",
+   "location": "196,54",
+   "size": "263,22",
+   "tabIndex": "1165",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "329,78",
+   "size": "50,20",
+   "tabIndex": "1167",
+   "text": "Emp",
+   "kind": "label"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "25,113",
+   "size": "101,20",
+   "tabIndex": "1167",
+   "text": "Rem Date",
+   "kind": "label"
+  },
+  {
+   "name": "tEmpName",
+   "type": "TextBox",
+   "location": "455,76",
+   "size": "185,22",
+   "tabIndex": "1168",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mUpdTime",
+   "type": "TextBox",
+   "location": "196,112",
+   "size": "75,22",
+   "tabIndex": "1168",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "pnlEdit",
+   "type": "Panel",
+   "location": "640,108",
+   "size": "532,317",
+   "tabIndex": "1169",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "28,140",
+   "size": "72,20",
+   "tabIndex": "1170",
+   "text": "Remark",
+   "kind": "label"
+  },
+  {
+   "name": "tNewRemark",
+   "type": "TextBox",
+   "location": "82,507",
+   "size": "302,49",
+   "tabIndex": "1171",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "16,504",
+   "size": "60,20",
+   "tabIndex": "1172",
+   "text": "Remark",
+   "kind": "label"
+  },
+  {
+   "name": "nIsrNo",
+   "type": "TextBox",
+   "location": "332,112",
+   "size": "49,22",
+   "tabIndex": "1173",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nSrNo",
+   "type": "TextBox",
+   "location": "277,112",
+   "size": "49,22",
+   "tabIndex": "1174",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tCoYear",
+   "type": "TextBox",
+   "location": "374,24",
+   "size": "85,22",
+   "tabIndex": "1175",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tRemCustName",
+   "type": "TextBox",
+   "location": "114,82",
+   "size": "345,23",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label18",
+   "type": "Label",
+   "location": "25,83",
+   "size": "81,20",
+   "tabIndex": "1180",
+   "text": "Cust Name",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "570,440",
+   "size": "602,116",
+   "tabIndex": "1235",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tMainRemark",
+   "type": "TextBox",
+   "location": "82,438",
+   "size": "302,59",
+   "tabIndex": "1236",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label13",
+   "type": "Label",
+   "location": "14,439",
+   "size": "60,48",
+   "tabIndex": "1237",
+   "text": "Main Remark",
+   "kind": "label"
+  },
+  {
+   "name": "btn",
+   "type": "DataGridViewButtonColumn",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Update",
+   "kind": "grid"
+  },
+  {
+   "name": "PicImage",
+   "type": "PictureBox",
+   "location": "398,439",
+   "size": "159,117",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  }
+ ]
+}

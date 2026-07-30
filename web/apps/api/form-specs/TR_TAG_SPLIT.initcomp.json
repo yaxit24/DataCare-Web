@@ -1,0 +1,834 @@
+{
+ "form": "TR_TAG_SPLIT",
+ "controlCount": 80,
+ "byKind": {
+  "textbox": 29,
+  "button": 10,
+  "masked": 1,
+  "check": 1,
+  "combo": 2,
+  "label": 23,
+  "panel": 2,
+  "grid": 7,
+  "other": 5
+ },
+ "grids": [
+  "MSG",
+  "MSG_TOT",
+  "MSG_IDTL",
+  "MSG2_TOTAL",
+  "MSG_PR",
+  "MSG_PR_TOT",
+  "MSG_RTN_IDTL"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "btnVchPrint",
+   "BtnPrint",
+   "FlowLayoutPanel1",
+   "BtnLast",
+   "BtnFirst"
+  ],
+  "this": [
+   "Label16",
+   "nLableSkip",
+   "PictureBox2",
+   "btnTagSet",
+   "cboPrintfile",
+   "Label15",
+   "nHmWt4",
+   "Label11",
+   "tHmId4",
+   "nHmWt3",
+   "Label12",
+   "tHmId3",
+   "nHmWt2",
+   "Label13",
+   "nHmWt",
+   "tHmId2",
+   "Label14",
+   "cboItemTyp",
+   "Label10",
+   "chkSameTag",
+   "PictureBox1",
+   "Label9",
+   "nDrFine",
+   "Label8",
+   "nDrTouch",
+   "Label7",
+   "nCrLbrAmt",
+   "Label6",
+   "nCrTouch",
+   "Label5",
+   "nCrFine",
+   "Label23",
+   "nCrWt",
+   "Label20",
+   "nDrWt",
+   "TEXT_RTN_IDTL",
+   "MSG_RTN_IDTL",
+   "LClAmt",
+   "LOpAmt",
+   "TEXT_ENTRY",
+   "MSG_PR_TOT",
+   "MSG",
+   "TEXT_PR",
+   "TEXT_ENTRY_2",
+   "MSG_PR",
+   "MSG2_TOTAL",
+   "tVchDesc",
+   "Label4",
+   "tEmpCode",
+   "tEmpName",
+   "Label3",
+   "tHdVchNo",
+   "tAcCode",
+   "tAcName",
+   "Label1",
+   "Cr",
+   "BtnF1",
+   "PicZoom",
+   "TEXT_IDTL",
+   "MSG_IDTL",
+   "lblItem",
+   "PicImage",
+   "MSG_TOT",
+   "mDay",
+   "mTime",
+   "mVchDate",
+   "lblBDate",
+   "Label2",
+   "tVchNo",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "95,37",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "mVchDate",
+   "type": "MaskedTextBox",
+   "location": "298,37",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&TagPrn",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "chkSameTag",
+   "type": "CheckBox",
+   "location": "566,38",
+   "size": "174,21",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "841,38",
+   "size": "103,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "394,95",
+   "size": "100,18",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnLast",
+   "type": "SimpleButton",
+   "location": "193,3",
+   "size": "41,37",
+   "tabIndex": "5",
+   "text": ">",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_IDTL",
+   "type": "TextBox",
+   "location": "246,191",
+   "size": "100,18",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Tag Split",
+   "kind": "label"
+  },
+  {
+   "name": "BtnFirst",
+   "type": "SimpleButton",
+   "location": "146,3",
+   "size": "41,37",
+   "tabIndex": "6",
+   "text": "<",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_PR",
+   "type": "TextBox",
+   "location": "405,295",
+   "size": "100,18",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nHmWt",
+   "type": "TextBox",
+   "location": "94,361",
+   "size": "65,23",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tHmId2",
+   "type": "TextBox",
+   "location": "226,361",
+   "size": "65,23",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nHmWt2",
+   "type": "TextBox",
+   "location": "293,361",
+   "size": "65,23",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tHmId3",
+   "type": "TextBox",
+   "location": "422,361",
+   "size": "65,23",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nHmWt3",
+   "type": "TextBox",
+   "location": "489,361",
+   "size": "65,23",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tHmId4",
+   "type": "TextBox",
+   "location": "620,361",
+   "size": "65,23",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nHmWt4",
+   "type": "TextBox",
+   "location": "687,361",
+   "size": "65,23",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "TEXT_RTN_IDTL",
+   "type": "TextBox",
+   "location": "514,418",
+   "size": "100,18",
+   "tabIndex": "14",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "93,482",
+   "size": "90,23",
+   "tabIndex": "15",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCrWt",
+   "type": "TextBox",
+   "location": "93,510",
+   "size": "90,22",
+   "tabIndex": "16",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCrTouch",
+   "type": "TextBox",
+   "location": "93,539",
+   "size": "90,22",
+   "tabIndex": "17",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCrFine",
+   "type": "TextBox",
+   "location": "279,511",
+   "size": "90,22",
+   "tabIndex": "18",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCrLbrAmt",
+   "type": "TextBox",
+   "location": "279,539",
+   "size": "90,22",
+   "tabIndex": "19",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nDrWt",
+   "type": "TextBox",
+   "location": "514,484",
+   "size": "83,22",
+   "tabIndex": "20",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nDrTouch",
+   "type": "TextBox",
+   "location": "514,511",
+   "size": "83,22",
+   "tabIndex": "21",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nDrFine",
+   "type": "TextBox",
+   "location": "514,539",
+   "size": "83,22",
+   "tabIndex": "22",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "908,483",
+   "size": "60,23",
+   "tabIndex": "23",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tVchDesc",
+   "type": "TextBox",
+   "location": "908,512",
+   "size": "263,49",
+   "tabIndex": "24",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "25",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "189,482",
+   "size": "238,23",
+   "tabIndex": "26",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "FlowLayoutPanel1",
+   "type": "FlowLayoutPanel",
+   "location": "240,3",
+   "size": "484,36",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "TEXT_ENTRY_2",
+   "type": "TextBox",
+   "location": "1238,463",
+   "size": "100,18",
+   "tabIndex": "27",
+   "text": "TAX FREE",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnVchPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "29",
+   "text": "VchPrn",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "22,39",
+   "size": "62,20",
+   "tabIndex": "1125",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "222,38",
+   "size": "71,20",
+   "tabIndex": "1126",
+   "text": "Vch Date",
+   "kind": "label"
+  },
+  {
+   "name": "mTime",
+   "type": "TextBox",
+   "location": "380,37",
+   "size": "83,23",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mDay",
+   "type": "TextBox",
+   "location": "469,37",
+   "size": "83,23",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "12,65",
+   "size": "1158,84",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "14,147",
+   "size": "1155,15",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "lblItem",
+   "type": "Label",
+   "location": "952,40",
+   "size": "218,20",
+   "tabIndex": "1139",
+   "text": "Item Name",
+   "kind": "label"
+  },
+  {
+   "name": "MSG_IDTL",
+   "type": "AxMSFlexGrid",
+   "location": "12,167",
+   "size": "934,87",
+   "tabIndex": "1140",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnF1",
+   "type": "SimpleButton",
+   "location": "177,37",
+   "size": "35,23",
+   "tabIndex": "1149",
+   "text": "F1",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1222,307",
+   "size": "28,28",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "11,481",
+   "size": "75,20",
+   "tabIndex": "1157",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "tHdVchNo",
+   "type": "TextBox",
+   "location": "8,8",
+   "size": "56,15",
+   "tabIndex": "1159",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "828,483",
+   "size": "69,20",
+   "tabIndex": "1161",
+   "text": "Employee",
+   "kind": "label"
+  },
+  {
+   "name": "tEmpName",
+   "type": "TextBox",
+   "location": "970,483",
+   "size": "200,23",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "824,510",
+   "size": "73,20",
+   "tabIndex": "1163",
+   "text": "Vch Desc",
+   "kind": "label"
+  },
+  {
+   "name": "MSG2_TOTAL",
+   "type": "AxMSFlexGrid",
+   "location": "1222,373",
+   "size": "541,185",
+   "tabIndex": "1167",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_PR",
+   "type": "AxMSFlexGrid",
+   "location": "12,259",
+   "size": "1159,84",
+   "tabIndex": "1168",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_PR_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "15,343",
+   "size": "1153,15",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "LOpAmt",
+   "type": "Label",
+   "location": "1222,40",
+   "size": "66,20",
+   "tabIndex": "1205",
+   "text": "OpAmt",
+   "kind": "label"
+  },
+  {
+   "name": "LClAmt",
+   "type": "Label",
+   "location": "1222,274",
+   "size": "84,20",
+   "tabIndex": "1208",
+   "text": "ClAmt",
+   "kind": "label"
+  },
+  {
+   "name": "MSG_RTN_IDTL",
+   "type": "AxMSFlexGrid",
+   "location": "12,388",
+   "size": "934,88",
+   "tabIndex": "1213",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Label20",
+   "type": "Label",
+   "location": "433,486",
+   "size": "76,20",
+   "tabIndex": "1224",
+   "text": "Weight Dr",
+   "kind": "label"
+  },
+  {
+   "name": "Label23",
+   "type": "Label",
+   "location": "9,510",
+   "size": "79,20",
+   "tabIndex": "1225",
+   "text": "Weight Cr",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "195,511",
+   "size": "79,20",
+   "tabIndex": "1227",
+   "text": "Fine Cr",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "9,538",
+   "size": "79,20",
+   "tabIndex": "1229",
+   "text": "Touch Cr",
+   "kind": "label"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "195,539",
+   "size": "79,20",
+   "tabIndex": "1231",
+   "text": "Lbr Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "433,513",
+   "size": "76,20",
+   "tabIndex": "1233",
+   "text": "Touch Dr",
+   "kind": "label"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "433,539",
+   "size": "76,20",
+   "tabIndex": "1235",
+   "text": "Fine Dr",
+   "kind": "label"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "761,37",
+   "size": "74,20",
+   "tabIndex": "1238",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label14",
+   "type": "Label",
+   "location": "38,361",
+   "size": "52,20",
+   "tabIndex": "1247",
+   "text": "HuWt",
+   "kind": "label"
+  },
+  {
+   "name": "Label13",
+   "type": "Label",
+   "location": "169,362",
+   "size": "54,20",
+   "tabIndex": "1248",
+   "text": "HuId2",
+   "kind": "label"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "365,363",
+   "size": "54,20",
+   "tabIndex": "1249",
+   "text": "HuId3",
+   "kind": "label"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "563,362",
+   "size": "54,20",
+   "tabIndex": "1250",
+   "text": "HuId4",
+   "kind": "label"
+  },
+  {
+   "name": "cboPrintfile",
+   "type": "ComboBox",
+   "location": "677,485",
+   "size": "101,24",
+   "tabIndex": "1251",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "609,486",
+   "size": "65,20",
+   "tabIndex": "1252",
+   "text": "Print file",
+   "kind": "label"
+  },
+  {
+   "name": "btnTagSet",
+   "type": "SimpleButton",
+   "location": "783,485",
+   "size": "36,24",
+   "tabIndex": "1253",
+   "text": "Set",
+   "kind": "button"
+  },
+  {
+   "name": "nLableSkip",
+   "type": "TextBox",
+   "location": "783,515",
+   "size": "36,22",
+   "tabIndex": "1255",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label16",
+   "type": "Label",
+   "location": "697,516",
+   "size": "80,20",
+   "tabIndex": "1256",
+   "text": "Lable Skip",
+   "kind": "label"
+  },
+  {
+   "name": "PicImage",
+   "type": "PictureBox",
+   "location": "952,167",
+   "size": "108,87",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PicZoom",
+   "type": "PictureBox",
+   "location": "1222,341",
+   "size": "35,20",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PictureBox1",
+   "type": "PictureBox",
+   "location": "952,388",
+   "size": "108,87",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PictureBox2",
+   "type": "PictureBox",
+   "location": "1215,191",
+   "size": "56,48",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  }
+ ]
+}

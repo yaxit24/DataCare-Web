@@ -1,0 +1,792 @@
+{
+ "report": "DhrnKhataVahiSumm",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 888,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 0,
+       "top": 15,
+       "width": 16320,
+       "height": 324,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 120,
+       "top": 360,
+       "width": 16200,
+       "height": 255,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 0,
+       "top": 615,
+       "width": 16320,
+       "height": 230,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 15795,
+       "top": 615,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 470,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 30,
+       "top": 60,
+       "width": 16290,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text14",
+       "left": 120,
+       "top": 165,
+       "width": 3090,
+       "height": 255,
+       "text": "Party Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 4395,
+       "top": 165,
+       "width": 1230,
+       "height": 270,
+       "text": "Dhiran Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 5575,
+       "top": 165,
+       "width": 950,
+       "height": 270,
+       "text": "Int amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 6525,
+       "top": 165,
+       "width": 900,
+       "height": 270,
+       "text": "Dhrn Rec"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 7476,
+       "top": 165,
+       "width": 954,
+       "height": 270,
+       "text": "Int Rec"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 8348,
+       "top": 165,
+       "width": 1252,
+       "height": 270,
+       "text": "TotalAmt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 9451,
+       "top": 165,
+       "width": 1064,
+       "height": 270,
+       "text": "Panding"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 10351,
+       "top": 165,
+       "width": 1064,
+       "height": 270,
+       "text": "TotWt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 11445,
+       "top": 165,
+       "width": 750,
+       "height": 270,
+       "text": "Gold Wt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text11",
+       "left": 12225,
+       "top": 165,
+       "width": 750,
+       "height": 270,
+       "text": "SilverWt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 13050,
+       "top": 165,
+       "width": 3000,
+       "height": 270,
+       "text": "Item Detail"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 45,
+       "top": 465,
+       "width": 16275,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area10",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "GroupHeader",
+     "height": 226,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 0,
+       "top": 0,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "GroupName ({AC_MAST.AC_NAME})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 331,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 105,
+       "top": 265,
+       "width": 11400,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 300,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 120,
+       "top": 8,
+       "width": 16200,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 3840,
+       "top": 8,
+       "width": 720,
+       "height": 230,
+       "dataSource": "{DHRN_ISU_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 120,
+       "top": 45,
+       "width": 2910,
+       "height": 220,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 3030,
+       "top": 45,
+       "width": 757,
+       "height": 204,
+       "dataSource": "{DHRN_ISU_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 4496,
+       "top": 45,
+       "width": 1129,
+       "height": 204,
+       "dataSource": "{DHRN_ISU_DATA.DHRN_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 5653,
+       "top": 45,
+       "width": 872,
+       "height": 204,
+       "dataSource": "Sum ({DHRN_DATA.INT_AMT}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 6651,
+       "top": 45,
+       "width": 774,
+       "height": 204,
+       "dataSource": "Sum ({@DhrnRec}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 7410,
+       "top": 45,
+       "width": 1020,
+       "height": 204,
+       "dataSource": "Sum ({DHRN_DATA.INT_REC_AMT}, {@VchGroup})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 8450,
+       "top": 45,
+       "width": 1150,
+       "height": 204,
+       "dataSource": "{@TotAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 9538,
+       "top": 45,
+       "width": 977,
+       "height": 204,
+       "dataSource": "{@PanAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field37",
+       "left": 10410,
+       "top": 45,
+       "width": 1005,
+       "height": 204,
+       "dataSource": "{DHRN_ISU_DATA.GOLD_WT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field38",
+       "left": 11445,
+       "top": 45,
+       "width": 750,
+       "height": 204,
+       "dataSource": "{DHRN_ISU_DATA.GOLD_NWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field39",
+       "left": 12105,
+       "top": 45,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{DHRN_ISU_DATA.SILVER_NWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field36",
+       "left": 13080,
+       "top": 45,
+       "width": 3240,
+       "height": 226,
+       "dataSource": "{DHRN_ISU_DATA.GOLD_DESC}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "Detail",
+     "height": 226,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 270,
+       "top": 0,
+       "width": 1035,
+       "height": 204,
+       "dataSource": "{DHRN_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 1305,
+       "top": 0,
+       "width": 720,
+       "height": 226,
+       "dataSource": "{DHRN_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 5575,
+       "top": 0,
+       "width": 950,
+       "height": 204,
+       "dataSource": "{DHRN_DATA.INT_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 6600,
+       "top": 0,
+       "width": 824,
+       "height": 204,
+       "dataSource": "{@DhrnRec}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 7476,
+       "top": 0,
+       "width": 954,
+       "height": 204,
+       "dataSource": "{DHRN_DATA.INT_REC_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 9486,
+       "top": 0,
+       "width": 1029,
+       "height": 204,
+       "dataSource": "{DHRN_DATA.ADJ_DHRN}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 76,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 975,
+       "top": 0,
+       "width": 10530,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupFooter",
+     "height": 315,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 4395,
+       "top": 30,
+       "width": 1230,
+       "height": 204,
+       "dataSource": "{#RTotal5}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field33",
+       "left": 5575,
+       "top": 30,
+       "width": 950,
+       "height": 204,
+       "dataSource": "Sum ({DHRN_DATA.INT_AMT}, {DHRN_ISU_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 6651,
+       "top": 30,
+       "width": 774,
+       "height": 204,
+       "dataSource": "Sum ({@DhrnRec}, {DHRN_ISU_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 7476,
+       "top": 30,
+       "width": 954,
+       "height": 204,
+       "dataSource": "Sum ({DHRN_DATA.INT_REC_AMT}, {DHRN_ISU_DATA.AC_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 8348,
+       "top": 30,
+       "width": 1252,
+       "height": 204,
+       "dataSource": "{@AcTot}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 9451,
+       "top": 30,
+       "width": 1064,
+       "height": 204,
+       "dataSource": "{@AcPan}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 225,
+       "top": 315,
+       "width": 11055,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area11",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "GroupFooter",
+     "height": 223,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "ReportFooter",
+     "height": 975,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line7",
+       "left": 90,
+       "top": 120,
+       "width": 16230,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text13",
+       "left": 1830,
+       "top": 180,
+       "width": 2400,
+       "height": 255,
+       "text": "Total Amount :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 4395,
+       "top": 180,
+       "width": 1230,
+       "height": 216,
+       "dataSource": "{#RTotal6}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field34",
+       "left": 5575,
+       "top": 180,
+       "width": 950,
+       "height": 216,
+       "dataSource": "Sum ({DHRN_DATA.INT_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 7476,
+       "top": 180,
+       "width": 954,
+       "height": 216,
+       "dataSource": "Sum ({DHRN_DATA.INT_REC_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field31",
+       "left": 8348,
+       "top": 180,
+       "width": 1252,
+       "height": 216,
+       "dataSource": "{@DhrnTot}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field32",
+       "left": 9451,
+       "top": 180,
+       "width": 1064,
+       "height": 216,
+       "dataSource": "{@DhrnPan}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field40",
+       "left": 10387,
+       "top": 180,
+       "width": 1028,
+       "height": 216,
+       "dataSource": "Sum ({DHRN_ISU_DATA.GOLD_WT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field41",
+       "left": 11428,
+       "top": 180,
+       "width": 767,
+       "height": 216,
+       "dataSource": "Sum ({DHRN_ISU_DATA.GOLD_NWT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field42",
+       "left": 12085,
+       "top": 180,
+       "width": 890,
+       "height": 216,
+       "dataSource": "Sum ({DHRN_ISU_DATA.SILVER_NWT})"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 1830,
+       "top": 600,
+       "width": 2400,
+       "height": 255,
+       "text": "Total Panding Dhiran :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 4394,
+       "top": 600,
+       "width": 1231,
+       "height": 216,
+       "dataSource": "{@PandingDhiran}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field35",
+       "left": 9374,
+       "top": 600,
+       "width": 1030,
+       "height": 223,
+       "dataSource": "Sum ({DHRN_DATA.ADJ_DHRN})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section10",
+     "kind": "PageFooter",
+     "height": 660,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcPan",
+   "ref": "{@AcPan}",
+   "type": "NumberField",
+   "text": "{@AcTot}-(Sum({DHRN_DATA.INT_REC_AMT}, {DHRN_ISU_DATA.AC_CODE})+Sum ({DHRN_DATA.DHRN_REC_AMT}, {DHRN_ISU_DATA.AC_CODE})+Sum ({DHRN_DATA.UNCHAK_DHRN_REC}, {DHRN_ISU_DATA.AC_CODE}))"
+  },
+  {
+   "name": "AcTot",
+   "ref": "{@AcTot}",
+   "type": "NumberField",
+   "text": "{#RTotal5}+Sum ({DHRN_DATA.INT_AMT}, {DHRN_ISU_DATA.AC_CODE})"
+  },
+  {
+   "name": "BillAmt",
+   "ref": "{@BillAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+' '+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DhrnPan",
+   "ref": "{@DhrnPan}",
+   "type": "NumberField",
+   "text": "{@DhrnTot}-(Sum ({DHRN_DATA.INT_REC_AMT})+Sum ({DHRN_DATA.DHRN_REC_AMT})+Sum ({DHRN_DATA.UNCHAK_DHRN_REC})-Sum ({DHRN_DATA.ADJ_DHRN}))"
+  },
+  {
+   "name": "DhrnRec",
+   "ref": "{@DhrnRec}",
+   "type": "NumberField",
+   "text": "if {DHRN_DATA.UNCHAK_DHRN_REC} <> 0 then if {DHRN_DATA.DHRN_REC_AMT} <> 0 then {DHRN_DATA.DHRN_REC_AMT}-{DHRN_DATA.UNCHAK_DHRN_REC} else {DHRN_DATA.UNCHAK_DHRN_REC} else {DHRN_DATA.DHRN_REC_AMT}"
+  },
+  {
+   "name": "DhrnTot",
+   "ref": "{@DhrnTot}",
+   "type": "NumberField",
+   "text": "{#RTotal6}+Sum ({DHRN_DATA.INT_AMT})"
+  },
+  {
+   "name": "LabourAmt",
+   "ref": "{@LabourAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "NetWt",
+   "ref": "{@NetWt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "PanAmt",
+   "ref": "{@PanAmt}",
+   "type": "NumberField",
+   "text": "{@TotAmt}-(Sum ({DHRN_DATA.INT_REC_AMT}, {@VchGroup})+Sum ({DHRN_DATA.DHRN_REC_AMT}, {@VchGroup})+Sum ({DHRN_DATA.UNCHAK_DHRN_REC}, {@VchGroup})-Sum ({DHRN_DATA.ADJ_DHRN}, {@VchGroup}))"
+  },
+  {
+   "name": "PandingDhiran",
+   "ref": "{@PandingDhiran}",
+   "type": "NumberField",
+   "text": "{#RTotal6}-Sum ({DHRN_DATA.DHRN_REC_AMT})"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'DHIRAN ISSUE REPORT'"
+  },
+  {
+   "name": "SalesTax",
+   "ref": "{@SalesTax}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "TaxAmt",
+   "ref": "{@TaxAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "TotAmt",
+   "ref": "{@TotAmt}",
+   "type": "NumberField",
+   "text": "{DHRN_ISU_DATA.DHRN_AMT}+Sum ({DHRN_DATA.INT_AMT}, {@VchGroup})"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{DHRN_ISU_DATA.CO_YEAR}+{DHRN_ISU_DATA.CO_BOOK}+{DHRN_ISU_DATA.VCH_NO}"
+  }
+ ],
+ "sectionCount": 12,
+ "objectCount": 60,
+ "formulaCount": 17
+}
