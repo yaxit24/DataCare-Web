@@ -244,3 +244,56 @@ green suite is not evidence that a write exists.
 3. **`TAG_IMAGE_BLOB`** — still an empty orphan on the dev database awaiting a decision to drop.
 
 Both of the first two change the ordering materially, and neither can be inferred from the data alone.
+
+---
+
+## Status 2026-07-31: P0 scheme done, P1 Rojmel done for the sale
+
+### Scheme (P0) — closed for the instalment path
+
+Six defects fixed, each verified against every real row and each with a control proven failing:
+`AD_DATA.TOT_AMT` and `AD_OS.MEMB_AMT` both held the amount where the desktop holds 0 (the second would
+have **doubled every member balance**); `AD_OS.LD_CODE` held the scheme liability where the desktop holds
+the receipt account; the route forwarded 6 of 14 documented inputs so four columns were unreachable; and
+the desktop's member entry is a **grid** posting a **ledger pair per line** where the web posted one
+member per voucher.
+
+Still open on the scheme: `AD_ADJ` write path exists but its field fidelity is unverified, and the
+passbook/maturity reads have not been checked against populated `AD_DATA`/`AD_OS`.
+
+### Rojmel (P1) — written on every sale
+
+`modules/shared/rojmel.ts`. `LEDR_KEY` is reproduced **byte-exactly** against real desktop keys, which
+matters because the primary key is `LEDR_KEY` **alone** in both systems — the layout is the only thing
+making a row unique.
+
+**Verified:** 13 unit vectors, and a DB test that posts a real sale and asserts metal rows carry weight,
+money rows do not, metal signs out, and the party row equals the `AC_DATA` party debit. Four controls
+proven failing, including one that reproduces exactly the money-only day book the web had before.
+
+**Not verified:** the HTTP hop — see below. The route only forwards input and does not touch Rojmel logic.
+
+Still open: the same projection for sales return, sales order, estimate, labour invoice and rate cut
+(their `SALE_WRITE_TABLES` already list `ROJ_MEL_DATA`, so the delete side is ready), the purchase side,
+and a real Rojmel **report** to replace the money-only day book behind `F11`.
+
+### New finding: the demo seed cannot post a sale
+
+Attempting a sale over the API on `SEED_DEMO=1` fails with `BookPolicyValidationError: book SAL account
+row 1 is missing`. Reaching even that point required inserting a customer into `AC_MAST` by hand. The
+seed provisions a login, company and books, but not the book-account rows or any customer, so **the
+primary transaction cannot be demonstrated**.
+
+That is an obstacle for evaluation, onboarding and any manual UI check, and it is why the Rojmel's HTTP
+path is untested. Worth fixing on its own: the seed should provision enough for one sale end to end.
+
+### Verification hole: test files are never typechecked
+
+`tsc -p tsconfig.json` covers `src` only. No test file in this repository has ever been typechecked, and
+vitest transpiles without checking. Added `apps/api/tsconfig.test.json`, which surfaces **112 errors
+across 121 files**. 64 are benign strictness (`Object is possibly undefined`); the six that looked
+dangerous are `created.voucherNo ?? created.vchNo` fallbacks where `voucherNo` does not exist, so they
+always take the second branch and assert correctly.
+
+Not wired as a blocking gate — that needs the 112 cleared first — so **the suite is still not
+typechecked**, and this document does not claim otherwise.
