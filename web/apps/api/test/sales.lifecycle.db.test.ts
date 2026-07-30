@@ -1054,4 +1054,71 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     // Absent, not zero: the shop has chosen not to show margins.
     expect(hidden.billProfit).toBeUndefined();
   });
+
+  it('writes exactly the declared set of tables, so a dropped write cannot pass unnoticed', async () => {
+    // WHY THIS EXISTS
+    // The lifecycle tests assert the CONTENT of rows they look at, but nothing asserted the SET of tables that
+    // received rows. Proven by inverting the sale's write set to emit `{ table: 'TAX_DATA', rows: [] }`:
+    // 26 tests across three files, INCLUDING the GST suite, all passed with no tax rows written at all.
+    //
+    // That is the same failure the desktop comparison reports as "WEB NEVER WROTE THIS TABLE" - the most
+    // consequential kind of parity defect, because the voucher looks right on screen and in its own detail
+    // rows while an entire ledger or tax table is absent.
+    //
+    // The probe is schema-driven: every table carrying a VCH_NO column is checked, so a table nobody thought
+    // to list is still covered.
+    const created = await createSale(runtime, saleInput(), firstLines);
+    const vch = created.voucherNo ?? String(created.vchNo).padStart(5, '0');
+
+    const tables = (await owner.$queryRawUnsafe(
+      `SELECT table_name AS name FROM information_schema.columns
+        WHERE table_schema='public' AND upper(column_name)='VCH_NO'
+        GROUP BY table_name ORDER BY table_name`,
+    )) as { name: string }[];
+    expect(tables.length, 'the schema must expose voucher tables to probe').toBeGreaterThan(30);
+
+    const touched: string[] = [];
+    for (const { name } of tables) {
+      const rows = (await owner
+        .$queryRawUnsafe(
+          `SELECT count(*)::int AS n FROM "${name}" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+          TENANT,
+          vch,
+        )
+        .catch(() => [{ n: 0 }])) as { n: number }[];
+      if ((rows[0]?.n ?? 0) > 0) touched.push(name);
+    }
+
+    // Established empirically, not from a hand-written list: a sale was posted through the real service and
+    // every VCH_NO table that received rows was enumerated. Asserted as an exact SET so both directions fail -
+    // a table that stops receiving rows, and a table that starts receiving them unexpectedly, which is how a
+    // duplicate ledger posting would appear.
+    // The footprint is INPUT-dependent and that is correct: these fixture lines carry stone sub-details, so
+    // SL_IDTL is written, and the voucher is created with field auditing, so USER_DATA is too. A line without
+    // stones would not write SL_IDTL. The value of pinning it is that any change to the set - in either
+    // direction - has to be deliberate.
+    expect(touched.sort()).toEqual(
+      [
+        'AC_DATA',
+        'BILL_OS_DATA',
+        'MAIN_STOCK',
+        'SL_DATA',
+        'SL_DETL',
+        'SL_IDTL',
+        'TAX_DATA',
+        'USER_DATA',
+      ].sort(),
+    );
+
+    // A footprint check alone would pass if AC_DATA received rows that did not balance, so both properties are
+    // asserted: the table is present AND the postings are complete.
+    const legs = (await owner.$queryRawUnsafe(
+      `SELECT coalesce(sum("DR_AMT"),0)::float dr, coalesce(sum("CR_AMT"),0)::float cr
+         FROM "AC_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      vch,
+    )) as { dr: number; cr: number }[];
+    expect(legs[0]!.dr, 'the ledger must actually be posted').toBeGreaterThan(0);
+    expect(legs[0]!.dr, 'and it must balance').toBeCloseTo(legs[0]!.cr, 2);
+  });
 });
