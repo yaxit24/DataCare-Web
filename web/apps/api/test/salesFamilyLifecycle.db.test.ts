@@ -627,6 +627,68 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(await ledgerBalance('SOR')).toEqual(balanceBefore);
   });
 
+  // ---------------------------------------------------------------------------------------------
+  // Desktop row shapes, measured against the real DataCareNext database (Live24, 8160 AD_DATA rows
+  // and 8194 AD_OS rows). Each assertion below records the count it was verified against, because
+  // a shape guessed from a handful of sampled rows is how three of these fields came to be wrong.
+  // ---------------------------------------------------------------------------------------------
+  it('AD_DATA matches the desktop instalment shape (TOT_AMT is 0 on all 8160 real rows)', async () => {
+    await schemeInstallment(runtime, installmentInput());
+    const [row] = (await owner.$queryRawUnsafe(
+      `SELECT "ENT_TYPE","INOUT_TYPE","MEMB_AMT"::float memb,"TOT_AMT"::float tot,"REC_AC","SCHM_CODE"
+         FROM "AD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(row).toBeDefined();
+    expect(row!.ENT_TYPE).toBe('E'); // 'E' monthly entry; 'O' is the 075 opening
+    expect(row!.INOUT_TYPE).toBe('I'); // 'I' on all 8160 real rows — money in
+    expect(asNumber(row!.memb)).toBe(500);
+    // The instalment value lives in MEMB_AMT alone. TOT_AMT is 0 on every real row; writing the
+    // amount here as well double-counts in any report that sums it.
+    expect(asNumber(row!.tot)).toBe(0);
+  });
+
+  it('AD_OS is a signed movement row: amount in ADJ_AMT, MEMB_AMT 0 on all 8194 real rows', async () => {
+    await schemeInstallment(runtime, installmentInput());
+    const [row] = (await owner.$queryRawUnsafe(
+      `SELECT "OS_TYPE","SIGN","DATA_TYPE","LD_CODE","ADJ_AMT"::float adj,"MEMB_AMT"::float memb
+         FROM "AD_OS" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(row).toBeDefined();
+    expect(row!.OS_TYPE).toBe('A'); // A accrual (+), D principal adjusted (-), B bonus (-)
+    expect(row!.SIGN).toBe('+');
+    expect(row!.DATA_TYPE).toBe('A'); // 'A' on all 8194 real rows
+    // A member's balance is SUM(A '+') - SUM(D '-') - SUM(B '-') over ADJ_AMT. MEMB_AMT is 0 on
+    // every real AD_OS row regardless of movement type.
+    expect(asNumber(row!.adj)).toBe(500);
+    expect(asNumber(row!.memb)).toBe(0);
+    // LD_CODE is the account the money ARRIVED IN, not the scheme liability. Verified across the
+    // real rows: 00001 CASH ON HAND 7162, 000754 OLD AXIS BANK 714, 000418 OLD HDFC 163.
+    expect(row!.LD_CODE).toBe('CASH');
+  });
+
+  it('forwards the desktop grid inputs the route used to drop (BANK_NAME/EMP_CODE/MONTH_CODE/WITH_UPI)', async () => {
+    await schemeInstallment(
+      runtime,
+      installmentInput({
+        bankName: 'AXIS BANK',
+        empCode: 'E7',
+        monthCode: '03',
+        withUpi: true,
+      }),
+    );
+    const [row] = (await owner.$queryRawUnsafe(
+      `SELECT "BANK_NAME","EMP_CODE","MONTH_CODE","WITH_UPI" FROM "AD_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(row!.BANK_NAME).toBe('AXIS BANK');
+    expect(row!.EMP_CODE).toBe('E7');
+    expect(row!.MONTH_CODE).toBe('03');
+    expect(row!.WITH_UPI).toBe('Y');
+  });
+
   it('creates, gets and replaces a scheme installment while preserving identity and balance', async () => {
     const created = await schemeInstallment(runtime, installmentInput());
     expect(created.vchNo).toBe(8);

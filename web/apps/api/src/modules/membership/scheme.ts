@@ -341,7 +341,10 @@ async function postMemberEntry(
               SCHM_DATE: vchDate,
               MEMB_CODE: membCode,
               MEMB_AMT: amount,
-              TOT_AMT: amount,
+              // TOT_AMT is 0 on all 8160 AD_DATA rows of the real desktop database (Live24). The
+              // instalment value lives in MEMB_AMT alone; writing it here too would double-count in any
+              // report that sums TOT_AMT.
+              TOT_AMT: 0,
               IT_DESC: `Scheme ${schmCode} ${isOpening ? 'opening balance' : 'installment'}`,
               ENT_TYPE: tags.entType, // desktop TR_MEMB_ENT (L4567): 'E' = monthly entry, 'O' = MEMB OPENING
               REC_AC: recAc,
@@ -372,8 +375,13 @@ async function postMemberEntry(
             {
               // TR_MEMB_ENT.cs carries the collecting employee, the ledger account the outstanding
               // posts to, and the gold weight side of a metal scheme.
+              //
+              // LD_CODE is the account the money ARRIVED IN, not the scheme liability. Verified across
+              // 8194 real AD_OS rows: 00001 CASH ON HAND (7162), 000754 OLD AXIS BANK CURRENT (714),
+              // 000418 OLD HDFC (163), 001023 AXIS CURRENT (33), 000207 SBI (17), blank (91). Writing
+              // the liability account here would break any grouping of collections by cash/bank.
               EMP_CODE: (input.empCode ?? '').trim().slice(0, 3) || null,
-              LD_CODE: (input.liabAc ?? '').trim().slice(0, 8) || null,
+              LD_CODE: recAc.trim().slice(0, 8) || null,
               GOLD_WT: 0,
               ...key,
               SR_NO: 1,
@@ -385,7 +393,11 @@ async function postMemberEntry(
               SCHM_CODE: schmCode,
               SCHM_DATE: vchDate,
               MEMB_CODE: membCode,
-              MEMB_AMT: amount,
+              // MEMB_AMT is 0 on all 8194 AD_OS rows of the real desktop database; the movement value
+              // lives in ADJ_AMT regardless of OS_TYPE. A member's balance is
+              // SUM(A '+') - SUM(D '-') - SUM(B '-') over ADJ_AMT, so populating MEMB_AMT here would
+              // make any balance that reads it double the true figure.
+              MEMB_AMT: 0,
               ADJ_AMT: amount,
               SIGN: '+',
               OS_TYPE: 'A', // 'A' = scheme amount accrued (+) ; redemption later books 'D' (-)

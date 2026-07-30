@@ -4380,6 +4380,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         mode: b.mode,
         chqNo: b.chqNo,
         vchDate: b.vchDate,
+        // The desktop's TR_MEMB_ENT grid also captures the settling bank, the collecting employee, the
+        // scheme month, UPI settlement and the two account overrides. Without these the AD_DATA
+        // columns BANK_NAME / EMP_CODE / MONTH_CODE / WITH_UPI could never be populated over the API.
+        liabAc: b.liabAc,
+        bankAc: b.bankAc,
+        bankName: b.bankName,
+        empCode: b.empCode,
+        monthCode: b.monthCode,
+        withUpi: b.withUpi === true || b.withUpi === 'Y',
       }),
     );
   });
@@ -4396,6 +4405,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         mode: b.mode,
         chqNo: b.chqNo,
         vchDate: b.vchDate,
+        // The desktop's TR_MEMB_ENT grid also captures the settling bank, the collecting employee, the
+        // scheme month, UPI settlement and the two account overrides. Without these the AD_DATA
+        // columns BANK_NAME / EMP_CODE / MONTH_CODE / WITH_UPI could never be populated over the API.
+        liabAc: b.liabAc,
+        bankAc: b.bankAc,
+        bankName: b.bankName,
+        empCode: b.empCode,
+        monthCode: b.monthCode,
+        withUpi: b.withUpi === true || b.withUpi === 'Y',
       }),
     );
   });
