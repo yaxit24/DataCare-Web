@@ -84,11 +84,16 @@ field-by-field comparison against real data answers it.
 | `ROJ_MEL_DATA` | 3179      | VP parcel, wholesale return, other-commission, location-amount, gold book, VP adjust | **sale, purchase, cash, contra** — the desktop writes 4 rows per sale |
 | `OP_LDR`       | 7011      | `configTables.ts` only (a config surface)                                            | every voucher path; the desktop writes 2 rows per sale                |
 
-The Rojmel is not a ledger copy. Its rows carry `IT_TYPE` separating **S**tock from **A**mount, with pieces and
-gross weight on the stock rows:
+The Rojmel is not a ledger copy. `IT_TYPE` is the **metal** — `G` gold (335 real rows), `S` silver (130), `O`
+other (3), `A` a money row (2711) — metal rows carry pieces and gross weight, and `SIGN` gives direction (`-`
+out, `+` in). Confirmed by book: Gold Tax Invoice → `G`, Silver Tax Invoice → `S`, Gold Purchase → `G` `+`.
+`LD_CODE` is the **contra** account, not a stock ledger. (An earlier version of this document read `IT_TYPE` as
+Stock-vs-Amount and `LD_CODE 000888` as a stock ledger; both were wrong — `000888` is the party.)
 
-    LD_CODE 000888  CR 1087.00  IT_TYPE S  SIGN -  PCS 1  GWT 10.360
-    LD_CODE 00004   DR 1560.00  IT_TYPE A
+A sale's three ledger legs become four Rojmel rows, the revenue leg splitting per line:
+
+    AC_CODE 00004 sales   LD_CODE 000888 party  CR 1087.00  IT_TYPE S  SIGN -  PCS 1  GWT 10.360
+    AC_CODE 000888 party  LD_CODE 00004 sales   DR 1560.00  IT_TYPE A
 
 The web's `F11`, labelled "Rojmel", opens `/reports/day-book`, which reads `AC_DATA` — money only, no weights.
 **Not the same report.**
@@ -158,8 +163,10 @@ redeems that balance.
 ### P1.1 A shared Rojmel writer
 
 One function, called from sale, purchase, cash, contra and the rest, mirroring the six paths that already write
-it. Row shape from the real data: `LD_CODE`, `IT_TYPE` (S/A), `SIGN`, `DR_AMT`, `CR_AMT`, `ITM_PCS`, `ITM_GWT`,
-`VCH_TYPE`, `BOOK_NAME`.
+it. The full row spec is in `project-memory/parity/ROJMEL-MODEL-VERIFIED.md`: `AC_CODE` (this row's ledger
+account), `AC_NAME` (denormalised to the **party's** name on every row), `LD_CODE` (the contra account),
+`DR_AMT`/`CR_AMT`, `IT_TYPE` (G/S/O metal, or A for money), `SIGN` (`-` out, `+` in, blank on money rows),
+`ITM_PCS`, `ITM_GWT`, `VCH_TYPE`, `BOOK_NAME`.
 Establish the `LD_CODE` derivation from real rows before writing: `000888` and `00004` both appear, so it is an
 account or ledger code, not a constant.
 **Accept:** the sale footprint test includes `ROJ_MEL_DATA`; a real desktop sale and the replayed web sale

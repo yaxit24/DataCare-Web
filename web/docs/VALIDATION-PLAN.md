@@ -113,9 +113,11 @@ Two of those the web has **never written on a sale**:
 | `ROJ_MEL_DATA` | 4 rows per sale | 0 rows ever; written only by the VP-parcel path |
 | `OP_LDR`       | 2 rows per sale | 0 rows ever; exists only as a config table      |
 
-The Rojmel rows are a **combined stock-and-money day book**, not a ledger copy: `IT_TYPE` separates **S**tock
-from **A**mount, and the stock rows carry pieces and gross weight beside the amounts. That is what a jeweller's
-Rojmel is.
+The Rojmel rows are a **combined metal-and-money day book**. `IT_TYPE` is the **metal** — `G` gold, `S` silver,
+`O` other, `A` a money row — the metal rows carry pieces and gross weight, and `SIGN` gives direction. (An
+earlier version of this document read `IT_TYPE` as Stock-vs-Amount; that was wrong, though the conclusion
+stands.) A sale's three ledger legs become four Rojmel rows: the revenue leg splits into one metal row per
+line, and the party and tax legs become amount rows.
 
 The web's `F11` — labelled "Rojmel" — opens `/reports/day-book`, which reads `AC_DATA`: a money-only ledger
 listing with no weights or pieces. **They are not the same report.**
