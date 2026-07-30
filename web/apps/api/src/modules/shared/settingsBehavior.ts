@@ -34,6 +34,12 @@ export interface SettingsBehavior {
    * on. Loaded here so the settlement engine can never take it from a request body.
    */
   rateBasis: 'G' | 'T' | 'K';
+  /**
+   * `CO_SET.LBR_TYPE` — the company's default labour BASIS: G gross wise, N net wise, K kg wise, P pcs wise.
+   * Used when a line does not name a basis, and when the API's `percentage`/`fixed` modes have no desktop code
+   * of their own.
+   */
+  labourType: string;
   allRoundingRemoved: boolean;
   accountCodeLength: number | null;
   vbImport: boolean;
@@ -199,6 +205,15 @@ export function resolveSettingsBehavior(values: Record<string, unknown>): Settin
         .slice(0, 1);
       return c === 'T' || c === 'K' ? c : 'G';
     })(),
+    // CO_SET.LBR_TYPE is varchar(1) with options G/N/K/P. An unrecognised value yields '' rather than a
+    // guessed basis: writing the wrong basis code changes the amount the desktop recomputes on reopen.
+    labourType: ((): string => {
+      const c = String(values.LBR_TYPE ?? '')
+        .trim()
+        .toUpperCase()
+        .slice(0, 1);
+      return ['G', 'N', 'K', 'P'].includes(c) ? c : '';
+    })(),
     allRoundingRemoved: enumValue(values.ALL_ROF_REMOVE, 'ALL_ROF_REMOVE', ['Y', 'N'], 'N') === 'Y',
     // Desktop load/consumer citations: MS_OPNCOMP.cs:665,673-720. Blank sentinels deliberately
     // retain the pre-batch web path; configured values are closed enums/numbers and fail closed.
@@ -253,7 +268,7 @@ export async function resolveSettingsBehaviorTx(
               "CASH_LIMIT", "PAN_CARD_VAL", "LAST_DAY_LOCK", "INT_YEAR_DAYS", "INT_DAY",
               "LOAN_INT_TYPE", "DHRN_INT_TYPE", "DHIRN_COMPOUND",
               "FINE_STK_TYPE", "SL_AMT_TYPE", "PR_AMT_TYPE", "PURC_WITH_LBR",
-              "OZ_CON_VAL", "RATE_PAR", "ALL_ROF_REMOVE", "AC_LC_CODE_LEN", "VB_IMPORT", "TAG_RPT",
+              "OZ_CON_VAL", "RATE_PAR", "LBR_TYPE", "ALL_ROF_REMOVE", "AC_LC_CODE_LEN", "VB_IMPORT", "TAG_RPT",
               "LBR_RATE_GEN", "OP_DHRN", "WEIGHT_PORT", "LDR_SUMM", "SMS_LINK", "OP_LOAN",
               "STK_RPT_TYPE", "TOUCH_AUTO_SAVE", "DHRN_PRC", "IP_WITH_PC",
               "CO_STK_MERGE", "CARD_COM_ADJ", "CASH_PURC_AC", "STOCK_RPT_TYPE",

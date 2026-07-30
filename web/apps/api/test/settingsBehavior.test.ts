@@ -84,6 +84,8 @@ describe('CO_SET behavior defaults', () => {
       ounceConversion: DEFAULT_OUNCE_CONVERSION,
       // MsRatePar defaults to per-gram when CO_SET.RATE_PAR is blank (MS_OPNCOMP.cs:747).
       rateBasis: 'G',
+      // CO_SET.LBR_TYPE default: blank means no company basis configured.
+      labourType: '',
       allRoundingRemoved: false,
       accountCodeLength: null,
       vbImport: false,

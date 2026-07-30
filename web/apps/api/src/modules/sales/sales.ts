@@ -1,4 +1,5 @@
 import { resolveOldGoldValuation } from './oldGoldValuation.js';
+import { desktopLabourTypeFor, effectiveLabourRate } from '../shared/labourDesktop.js';
 import {
   averageTouchByItemTx,
   billProfit,
@@ -850,12 +851,29 @@ async function writeSaleTx(
       ITM_WEST_PRC: num(c.in.westPct),
       ITM_FINE: c.calc.fine,
       LBR_PRC: num(c.in.labourPct),
-      LBR_RATE: num(c.in.labourRate),
-      LBR_TYPE: c.in.labourType
-        ? ((
-            { per_gram: 'G', per_piece: 'P', percentage: '%', fixed: 'N' } as Record<string, string>
-          )[c.in.labourType] ?? '')
-        : '',
+      // LBR_RATE is DERIVED when the operator gave a percentage instead of a rate.
+      //
+      // TR_SALE.cs:11021 computes `LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof)`, and every one
+      // of the six labour-amount branches then multiplies by that column. Writing the request value verbatim
+      // stored 0 on every percentage line — verified live: ITM_RATE 6200, LBR_PRC 12, LBR_RATE 0.00 where the
+      // desktop writes 744. The column is read back when a voucher is reopened, so a zero there silently
+      // changes the recomputed amount.
+      LBR_RATE: effectiveLabourRate(
+        num(c.in.labourRate),
+        num(c.in.rate),
+        num(c.in.labourPct),
+        roundingPolicy.labourDecimals,
+      ),
+      // LBR_TYPE selects the weight BASIS, it is not a pricing mode. CO_SET.LBR_TYPE offers exactly
+      // G "Gorss Wise", N "Net Wise", K "Kg Wise", P "Pcs Wise", and the column is varchar(1).
+      //
+      // The previous map sent `per_gram` to 'G', but G is GROSS weight — a per-gram charge on net weight is
+      // 'N' (TR_SALE.cs:11119 vs :11104). It also emitted '%' for a percentage, which is not a value the
+      // column ever holds, and sent `fixed` to 'N', which the desktop reads as net-weight-times-rate.
+      //
+      // A percentage is not a type: it derives the rate above and keeps whatever basis applies, which is why
+      // it maps to the company default rather than to a code of its own.
+      LBR_TYPE: desktopLabourTypeFor(c.in.labourType, behavior.labourType),
       LBR_AMT: c.calc.labour,
       DISC_PRC: num(c.in.discountPct),
       DISC_AMT: num(c.in.discountAmount),

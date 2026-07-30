@@ -235,6 +235,8 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       purchaseWithLabour: true,
       ounceConversion: 31.1034768,
       rateBasis: 'G',
+      // CO_SET.LBR_TYPE default: blank means no company basis configured.
+      labourType: '',
       allRoundingRemoved: false,
       accountCodeLength: null,
       vbImport: false,
