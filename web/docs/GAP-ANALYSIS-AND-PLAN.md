@@ -38,30 +38,44 @@ Row counts reinforce it — the two largest tables in the entire database are th
 
 ---
 
-## Gap A — the web has NO write path at all
+## CORRECTION (2026-07-31): Gap A was overstated — 3 tables, not 15
 
-15 tables carry data in the real database and have no `INSERT` anywhere in the web:
+The first version of this document claimed 15 populated desktop tables had no write path in the web. **The
+real number is 3.** The detection was wrong: it required `{ table: '…'` on a single line, and this codebase
+writes multi-line object literals, so it missed every write of that form.
 
-| Table          | Real rows | What it is                    | Consequence                                    |
-| -------------- | --------- | ----------------------------- | ---------------------------------------------- |
-| `AD_OS`        | 8194      | scheme outstanding per member | no balance, no passbook, no maturity figure    |
-| `AD_DATA`      | 8160      | scheme instalment detail      | **no record of who paid what**                 |
-| `COL_MAST`     | 697       | collection/column master      | referenced in 2 files, never written           |
-| `COUNTRY_MAST` | 151       | country list                  | referenced nowhere                             |
-| `AD_ADJ`       | 26        | scheme advance adjustment     | book 076 has no data table                     |
-| `KR_DETL`      | 22        | karigar detail                | verify: the web's karigar may use other tables |
-| `KR_IDTL`      | 8         | karigar sub-detail            | as above                                       |
-| `REM_DATA`     | 15        | reminders                     | referenced nowhere                             |
-| `PRINT_MAST`   | 9         | print/layout config           | referenced in 2 files, never written           |
-| `BAL_GR`       | 5         | group balances                | **read by `closingStock.ts`, never written**   |
-| `AD_MAST`      | 4         | scheme master                 | no way to define a scheme                      |
-| `IMAGE_DATA`   | 4         | image index                   | referenced nowhere                             |
-| `CONV_MAST`    | 4         | conversion master             | referenced in 2 files                          |
-| `UPI_DATA`     | 1         | UPI receipts                  | referenced in 5 files, never written           |
-| `TABLE_MAST`   | 1         | counter/table master          | referenced in 3 files                          |
+Re-run with a multi-line-aware scan, the tables with **no write path anywhere** are:
 
-`BAL_GR` deserves separate mention because it is self-inflicted: my own `closingStock.ts` reads it to value
-non-metal stock, and nothing populates it. The balance sheet's non-metal leg therefore has no data source.
+| Table          | Real rows | Status                        |
+| -------------- | --------- | ----------------------------- |
+| `COUNTRY_MAST` | 151       | referenced nowhere in the web |
+| `REM_DATA`     | 15        | referenced nowhere            |
+| `IMAGE_DATA`   | 4         | referenced nowhere            |
+
+`AD_DATA`, `AD_OS`, `AD_ADJ`, `AD_MAST`, `BAL_GR`, `KR_DETL`, `KR_IDTL`, `COL_MAST` and `UPI_DATA` **all have
+write paths**. The scheme module in particular already carried `OS_TYPE: 'A'` with a comment predicting `'D'`
+for redemption — exactly what the real data shows.
+
+So the scheme gap was never "no write path". It was **field-level fidelity**, which is a subtler problem and
+would not have been found by counting tables at all. What was actually wrong, each verified against every real
+row rather than a sample:
+
+- `AD_DATA.TOT_AMT` held the amount; it is **0 on all 8160 real rows**. Double-counted in any report summing it.
+- `AD_OS.MEMB_AMT` held the amount; it is **0 on all 8194 real rows**. The value lives in `ADJ_AMT` alone, so
+  every member balance reading `MEMB_AMT` would have doubled.
+- `AD_OS.LD_CODE` held the scheme liability; the desktop stores **the account the money arrived in**
+  (`00001` CASH ON HAND 7162 times, `000754` OLD AXIS BANK 714, `000418` OLD HDFC 163).
+- The route forwarded **6 of 14** documented inputs, so `BANK_NAME`, `EMP_CODE`, `MONTH_CODE` and `WITH_UPI`
+  could not be populated over the API at all.
+- The desktop's member entry is a **grid** — 812 of 1428 real vouchers carry more than one member, one carries
+  175 — and it posts a **ledger pair per line** (11 members → 22 legs). The web posted one member per voucher.
+
+All six are fixed, each with a control proven failing first. `KR_DETL`/`KR_IDTL` and `BAL_GR` still need the
+same field-level treatment; having a write path says nothing about whether it writes the right values.
+
+**The lesson, recorded because it cost real work:** a table-level inventory answers "does anything write here",
+which is almost never the question. The question is "does it write what the desktop writes", and only a
+field-by-field comparison against real data answers it.
 
 ## Gap B — write path exists, but not on the paths that matter
 
