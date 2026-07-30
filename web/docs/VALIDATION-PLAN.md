@@ -71,6 +71,65 @@ the G5 job reports success without a desktop capture.
 
 ---
 
+## UPDATE 2026-07-30: Phase 1 is no longer blocked
+
+The real DataCareNext SQL Server databases were already in the working tree, under
+`unified/database/backups/` — `Next23`, `Next24`, `Next25`, `NextMain`, `NextImage` as both `.mdf`/`.ldf` and
+`.BAK`. SQL Server 2022 runs under emulation in Docker on arm64, so **the desktop comparison does not need the
+Windows box**.
+
+`Next24.mdf`, attached as `Live24`, carries genuine desktop-created transactions: **190 sales, 245 sale lines,
+74 purchases, 5150 ledger rows, 184 tax rows, 1329 tags, 1856 stock movements, 918 accounts.**
+
+One trap worth recording: the `.BAK` files restore to **seed** databases — full schema, masters populated, and
+**no vouchers at all**. Restoring one and stopping there would have produced an empty comparison that read as
+agreement.
+
+This is real business data. It stays local: bundles and the schema snapshot are git-ignored (verified with
+`git check-ignore`) and the snapshot holds column names only.
+
+### Schema parity against the real database: 145/145 tables, 5231/5231 columns
+
+The web schema is a complete superset of the real desktop schema.
+
+**This also corrects a measurement of my own.** The contract in `DESKTOP-INIT-SCHEMA.json`, extracted from
+decompiled DDL strings, claimed 155 tables and 3343 columns. The real database has 145 and 5231. That contract
+over-claimed 19 tables belonging to initialisers this company never ran, **missed 9 tables** the installer
+script creates, and found only **64%** of the real columns. So the earlier `3241/3343 = 96.9%` was measured
+against a partly fictional denominator. Every one of the 102 columns the readiness gate reports absent is
+absent from the real database too — checked individually.
+
+### Finding: the web does not maintain the Rojmel
+
+Extracting one real desktop sale (book 027, voucher 00001) gives its actual write set:
+
+    AC_DATA 3   BILL_OS_DATA 1   MAIN_STOCK 2   OP_LDR 2   ROJ_MEL_DATA 4
+    SL_DATA 1   SL_DETL 2        TAX_DATA 2     TEMP_BOOK_DATA 1
+
+Two of those the web has **never written on a sale**:
+
+| Table          | Desktop         | Web                                             |
+| -------------- | --------------- | ----------------------------------------------- |
+| `ROJ_MEL_DATA` | 4 rows per sale | 0 rows ever; written only by the VP-parcel path |
+| `OP_LDR`       | 2 rows per sale | 0 rows ever; exists only as a config table      |
+
+The Rojmel rows are a **combined stock-and-money day book**, not a ledger copy: `IT_TYPE` separates **S**tock
+from **A**mount, and the stock rows carry pieces and gross weight beside the amounts. That is what a jeweller's
+Rojmel is.
+
+The web's `F11` — labelled "Rojmel" — opens `/reports/day-book`, which reads `AC_DATA`: a money-only ledger
+listing with no weights or pieces. **They are not the same report.**
+
+Reading the decompiled source could not have revealed this. It took seeing what the desktop actually writes,
+which is the whole argument for this layer of the plan.
+
+### Immediate next step, now purely local
+
+Replay these real vouchers through the web and diff them field by field. The bundle exists, the differ has 24
+tests, and the line inputs are recoverable from `SL_DETL`.
+
+---
+
 ## Phase 1 — Establish the desktop baseline (the centrepiece)
 
 Everything else in this plan is calibration. This is measurement. Until it exists, the honest statement about
