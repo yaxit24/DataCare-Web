@@ -1094,4 +1094,70 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     expect(legs.dr, 'the ledger must actually be posted').toBeGreaterThan(0);
     expect(legs.dr, 'and it must balance').toBeCloseTo(legs.cr, 2);
   });
+
+  // ---------------------------------------------------------------------------------------------------
+  // L6 configuration matrix: a setting that changes a PERSISTED value.
+  //
+  // A suite that only exercises defaults tests one shop. `CO_SET.SL_AMT_TYPE` selects the weight the item rate
+  // is multiplied by, so it changes the money on every line:
+  //
+  //   ''  fine weight                     (pre-setting web behaviour, preserved deliberately)
+  //   'F' fine, or net+ghat when fine is 0
+  //   'G' gross + ghat
+  //   'N' net + ghat
+  //   'P' net + ghat  (same basis as N)
+  //
+  // `saleAmountBase` in settingsBehavior.ts. The fixture line below has gross 12.000, net 10.000 and touch
+  // 91.6, so fine is 9.160 and all three bases give different amounts - which is what makes the matrix able
+  // to fail.
+  // ---------------------------------------------------------------------------------------------------
+  it.each([
+    ['', 9160],
+    ['F', 9160],
+    ['G', 12000],
+    ['N', 10000],
+    ['P', 10000],
+  ] as const)(
+    'SL_AMT_TYPE=%s prices the line off the declared weight basis',
+    async (type, expected) => {
+      await owner.$executeRawUnsafe(
+        `UPDATE "CO_SET" SET "SL_AMT_TYPE"=$1 WHERE tenant_id=$2 AND "CO_CODE"=$3`,
+        type,
+        TENANT,
+        CO,
+      );
+      const created = await createSale(runtime, saleInput(), [
+        {
+          itCode: 'GOLD',
+          tagNo: 'TAG001',
+          vchSrno: 1,
+          pcs: 1,
+          grossWt: 12,
+          netWt: 10,
+          touch: 91.6,
+          rate: 1000,
+        },
+      ]);
+      const vch = created.voucherNo ?? String(created.vchNo).padStart(5, '0');
+      const rows = (await owner.$queryRawUnsafe(
+        `SELECT coalesce("ITM_AMT",0)::float amt FROM "SL_DETL"
+        WHERE tenant_id=$1 AND "VCH_NO"=$2 LIMIT 1`,
+        TENANT,
+        vch,
+      )) as { amt: number }[];
+      expect(rows[0]?.amt, `SL_AMT_TYPE=${type} must price off its own basis`).toBeCloseTo(
+        expected,
+        2,
+      );
+    },
+  );
+
+  it('the amount bases are genuinely distinct, so the matrix can fail', async () => {
+    // Guards the matrix itself. If gross, net and fine ever coincided in the fixture, every row above would
+    // pass regardless of whether the setting was read at all - the matrix would be vacuous.
+    const gross = 12;
+    const net = 10;
+    const fine = Number(((net * 91.6) / 100).toFixed(3));
+    expect(new Set([gross, net, fine]).size, 'all three bases must differ').toBe(3);
+  });
 });
