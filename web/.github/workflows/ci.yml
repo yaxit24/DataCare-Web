@@ -95,6 +95,47 @@ jobs:
         working-directory: web
         run: pnpm test:browser
 
+      # ----------------------------------------------------------------------------------------------
+      # Parity gates.
+      #
+      # These existed and passed for weeks without being invoked here, which made them checklist items
+      # rather than gates: nothing stopped a change from silently regressing configuration coverage,
+      # the desktop-declared schema, or a report layout. Each runs as its OWN step so a failure names
+      # itself in the job summary instead of hiding inside a composite command.
+      # ----------------------------------------------------------------------------------------------
+      - name: 'Gate: configuration coverage (all 128 settings typed and reachable)'
+        working-directory: web
+        run: pnpm settings:parity
+
+      - name: 'Gate: desktop-declared schema present'
+        working-directory: web
+        # MIGRATE_DATABASE_URL comes from the workflow-level env, which already carries ?schema=public.
+        run: pnpm schema:readiness
+
+      - name: 'Gate: fresh provision produces a tenant-isolated schema'
+        working-directory: web
+        # Provisions a scratch database from the migration chain and asserts every table carrying tenant_id
+        # has RLS enabled AND forced with a policy, then diffs the schema against the working database.
+        #
+        # This exists because `message_attempt_log` shipped with tenant_id, no RLS and no policy: it was
+        # created by a migration that ran after the blanket security pass, so the pass never covered it, and
+        # two queries relied on RLS for isolation. Every test passed. It was invisible on a long-lived
+        # database that had acquired RLS through unrelated history, and was found only by provisioning a
+        # fresh one and diffing. Any future late-added table escapes the same way; this catches it.
+        run: pnpm fresh:provision
+
+      - name: 'Gate: report layouts unchanged'
+        working-directory: web
+        # Never pass --write here: that would rewrite the baselines and make the gate self-approving.
+        run: node scripts/report-baselines.mjs
+
+      - name: 'Gate: desktop comparison (expected RED until a real capture exists)'
+        working-directory: web
+        # This gate is red by design until someone runs the Windows procedure. It is reported rather than
+        # enforced so the main job stays actionable, but the status is always visible.
+        continue-on-error: true
+        run: pnpm g5:parity
+
       - name: Smoke production readiness
         working-directory: web
         env:
@@ -176,24 +217,69 @@ jobs:
         working-directory: web
         run: pnpm --filter @datacare/api build
 
-      - name: Run G5 desktop comparison harness
+      # ------------------------------------------------------------------------------------------------
+      # Desktop comparison.
+      #
+      # This job previously ran `g5-compare.mjs`, which had six defects that each made the comparison
+      # unable to fail — every date canonicalised to the empty string (so 64 date columns across 42
+      # tables always matched), 3-decimal rounding, NULL equal to blank, numeric agreement judged by
+      # column sums, text upper-cased, and the table set taken as the INTERSECTION of both schemas so a
+      # write the web never performed was silently discarded. A green result from it meant nothing, and
+      # that file has been deleted.
+      #
+      # The replacement separates extraction from comparison: each side writes a self-describing bundle,
+      # and the differ runs on two files. That is why the differ can be unit tested (24 tests) without a
+      # SQL Server, and why a capture is retained as re-examinable evidence.
+      # ------------------------------------------------------------------------------------------------
+      - name: Detect desktop credentials
+        id: desktop
+        run: |
+          if [ -n "${{ secrets.DESKTOP_SOURCE_DATABASE }}" ]; then
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+            echo '::notice title=Desktop comparison skipped::No DESKTOP_SOURCE_DATABASE secret is configured, so no SQL Server is reachable from CI. This is a SKIP, not a pass: g5:parity stays red until a capture exists. Run web/docs/PARITY-WINDOWS-PROCEDURE.md on the machine with the desktop install.'
+          fi
+
+      - name: Extract the desktop bundle
+        if: steps.desktop.outputs.available == 'true'
         working-directory: web
         env:
-          CUTOVER_SOURCE_HOST: ${{ secrets.DESKTOP_SOURCE_HOST }}
-          CUTOVER_SOURCE_PORT: ${{ secrets.DESKTOP_SOURCE_PORT }}
-          CUTOVER_SOURCE_USER: ${{ secrets.DESKTOP_SOURCE_USER }}
-          CUTOVER_SOURCE_PASSWORD: ${{ secrets.DESKTOP_SOURCE_PASSWORD }}
-          CUTOVER_SOURCE_DATABASE: ${{ secrets.DESKTOP_SOURCE_DATABASE }}
-          CUTOVER_SOURCE_ENCRYPT: ${{ vars.DESKTOP_SOURCE_ENCRYPT }}
-          CUTOVER_SOURCE_TRUST_SERVER_CERTIFICATE: ${{ vars.DESKTOP_SOURCE_TRUST_SERVER_CERTIFICATE }}
-          G5_TARGET_TENANT: ci-default
-          G5_FORMS: ${{ secrets.DESKTOP_G5_FORMS }}
-          G5_TABLES: ${{ vars.DESKTOP_G5_TABLES }}
-        run: node apps/api/integration/g5-compare.mjs
+          PARITY_MSSQL_HOST: ${{ secrets.DESKTOP_SOURCE_HOST }}
+          PARITY_MSSQL_PORT: ${{ secrets.DESKTOP_SOURCE_PORT }}
+          PARITY_MSSQL_USER: ${{ secrets.DESKTOP_SOURCE_USER }}
+          PARITY_MSSQL_PASSWORD: ${{ secrets.DESKTOP_SOURCE_PASSWORD }}
+          PARITY_MSSQL_DATABASE: ${{ secrets.DESKTOP_SOURCE_DATABASE }}
+          PARITY_MSSQL_ENCRYPT: ${{ vars.DESKTOP_SOURCE_ENCRYPT }}
+          PARITY_COMPANY: ${{ vars.DESKTOP_G5_COMPANY }}
+          PARITY_CASES: ${{ secrets.DESKTOP_PARITY_CASES }}
+        run: |
+          pnpm add -w -D mssql
+          node apps/api/integration/parity-extract-mssql.mjs
 
-      - name: Require G5 report artifact
+      - name: Extract the web bundle
+        if: steps.desktop.outputs.available == 'true'
         working-directory: web
-        run: test -s ../project-memory/parity/g5/latest.json
+        env:
+          PARITY_TENANT: ci-default
+          PARITY_COMPANY: ${{ vars.DESKTOP_G5_COMPANY }}
+          PARITY_CASES: ${{ secrets.WEB_PARITY_CASES }}
+        run: node apps/api/integration/parity-extract-pg.mjs
+
+      - name: Compare the two bundles
+        if: steps.desktop.outputs.available == 'true'
+        working-directory: web
+        run: |
+          node apps/api/integration/parity-compare.mjs \
+            ../project-memory/parity/bundles/desktop-latest.json \
+            ../project-memory/parity/bundles/web-latest.json
+
+      - name: 'Gate: desktop comparison certifies parity'
+        if: steps.desktop.outputs.available == 'true'
+        working-directory: web
+        # Requires a real Microsoft SQL Server banner in the artifact's provenance, so a hand-made or
+        # synthetic bundle cannot be promoted to evidence by renaming a file.
+        run: pnpm g5:parity
 
       - name: Upload G5 comparison artifacts
         if: always()

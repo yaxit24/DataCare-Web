@@ -21,7 +21,8 @@
     "report-baselines": "node scripts/report-baselines.mjs",
     "settings:parity": "node scripts/check-settings-parity.mjs",
     "schema:readiness": "node scripts/check-schema-readiness.mjs",
-    "g5:parity": "node scripts/check-g5-parity.mjs"
+    "g5:parity": "node scripts/check-g5-parity.mjs",
+    "fresh:provision": "node scripts/check-fresh-provision.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.0",

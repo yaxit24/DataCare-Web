@@ -68,13 +68,13 @@ find a real one.
 Enter these five vouchers **by hand, in the desktop UI**, exactly as a shop would. Record the book and voucher
 number the desktop allocates for each.
 
-| caseId | What to enter |
-|---|---|
+| caseId                  | What to enter                                                                     |
+| ----------------------- | --------------------------------------------------------------------------------- |
 | `sale-cash-single-line` | Cash sale, one gold line: net weight, touch, a rate, a making charge, GST applied |
-| `sale-credit-old-gold` | Credit sale to a party, with an old-gold exchange line |
-| `purchase-basic` | Purchase from a party, one line, GST applied |
-| `sale-return` | Return against the sale above |
-| `rate-cut` | A rate-cut voucher settling metal against money |
+| `sale-credit-old-gold`  | Credit sale to a party, with an old-gold exchange line                            |
+| `purchase-basic`        | Purchase from a party, one line, GST applied                                      |
+| `sale-return`           | Return against the sale above                                                     |
+| `rate-cut`              | A rate-cut voucher settling metal against money                                   |
 
 Write down, for every case: **the exact values you typed**, including the date. You will need to type the same
 values into the web application, and the date is compared — do not let one side default to today while the
@@ -150,7 +150,7 @@ sides.
 
 1. Did both sides receive identical input? Re-read your notes, especially the date and the rate.
 2. Is the configuration the same? Rounding, labour type and rate basis come from `CO_SET` and `CO_SET_NEW`. If
-   the desktop company is configured differently, the two *should* disagree.
+   the desktop company is configured differently, the two _should_ disagree.
 3. Only then is it a real divergence — and the artifact names the field and both values, which is enough to
    locate the responsible line.
 
