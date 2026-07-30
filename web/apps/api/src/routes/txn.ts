@@ -4389,6 +4389,22 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         empCode: b.empCode,
         monthCode: b.monthCode,
         withUpi: b.withUpi === true || b.withUpi === 'Y',
+        // The desktop enters a whole collection round as one voucher (812 of 1428 real member-entry
+        // vouchers carry more than one member). Amounts are coerced here; the module validates each
+        // line and rejects a non-positive one naming its index.
+        lines: Array.isArray(b.lines)
+          ? b.lines.map((l: Record<string, unknown>) => ({
+              schmCode: l.schmCode as string,
+              membCode: l.membCode as string,
+              amount: Number(l.amount),
+              liabAc: l.liabAc as string | undefined,
+              chqNo: l.chqNo as string | undefined,
+              bankName: l.bankName as string | undefined,
+              empCode: l.empCode as string | undefined,
+              monthCode: l.monthCode as string | undefined,
+              withUpi: l.withUpi === true || l.withUpi === 'Y',
+            }))
+          : undefined,
       }),
     );
   });
@@ -4414,6 +4430,22 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         empCode: b.empCode,
         monthCode: b.monthCode,
         withUpi: b.withUpi === true || b.withUpi === 'Y',
+        // The desktop enters a whole collection round as one voucher (812 of 1428 real member-entry
+        // vouchers carry more than one member). Amounts are coerced here; the module validates each
+        // line and rejects a non-positive one naming its index.
+        lines: Array.isArray(b.lines)
+          ? b.lines.map((l: Record<string, unknown>) => ({
+              schmCode: l.schmCode as string,
+              membCode: l.membCode as string,
+              amount: Number(l.amount),
+              liabAc: l.liabAc as string | undefined,
+              chqNo: l.chqNo as string | undefined,
+              bankName: l.bankName as string | undefined,
+              empCode: l.empCode as string | undefined,
+              monthCode: l.monthCode as string | undefined,
+              withUpi: l.withUpi === true || l.withUpi === 'Y',
+            }))
+          : undefined,
       }),
     );
   });

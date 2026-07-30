@@ -689,6 +689,82 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(row!.WITH_UPI).toBe('Y');
   });
 
+  it('posts a whole collection round as ONE voucher with a ledger pair per line', async () => {
+    // The desktop's TR_MEMB_ENT is a grid: 812 of 1428 real member-entry vouchers carry more than one
+    // member, and one opening voucher carries 175. Verified leg counts on real 074 vouchers:
+    // 11 members → 22 legs, 7 → 14, 6 → 12. So the ledger is a Dr/Cr PAIR PER LINE.
+    await schemeInstallment(
+      runtime,
+      installmentInput({
+        schmCode: undefined,
+        membCode: undefined,
+        amount: undefined,
+        lines: [
+          { schmCode: 'S01', membCode: '00001', amount: 500 },
+          { schmCode: 'S01', membCode: '00002', amount: 700 },
+          { schmCode: 'S01', membCode: '00003', amount: 300 },
+        ],
+      }),
+    );
+    const detail = (await owner.$queryRawUnsafe(
+      `SELECT "SR_NO"::int sr,"MEMB_CODE","MEMB_AMT"::float amt FROM "AD_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008' ORDER BY "SR_NO"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(detail.map((r) => [r.sr, r.MEMB_CODE, asNumber(r.amt)])).toEqual([
+      [1, '00001', 500],
+      [2, '00002', 700],
+      [3, '00003', 300],
+    ]);
+    // AD_OS mirrors it line for line.
+    const os = (await owner.$queryRawUnsafe(
+      `SELECT "SR_NO"::int sr,"ADJ_AMT"::float adj FROM "AD_OS"
+        WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008' ORDER BY "SR_NO"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(os.map((r) => [r.sr, asNumber(r.adj)])).toEqual([
+      [1, 500],
+      [2, 700],
+      [3, 300],
+    ]);
+    // Two legs per line, not one aggregate pair. An aggregate pair balances just as well, so the
+    // count is the only thing that distinguishes them — a balance assertion alone cannot.
+    const [legs] = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<{ n: number }>;
+    expect(legs!.n).toBe(6);
+    expect(await ledgerBalance('074')).toEqual([1500, 1500]);
+  });
+
+  it('rejects a bad grid line naming its index, and writes nothing', async () => {
+    // The seed already carries one AD_DATA row (an instalment the passbook/maturity tests redeem),
+    // so the invariant is that the rejected call leaves the count UNCHANGED — not that it is zero.
+    const count = async (): Promise<number> => {
+      const [r] = (await owner.$queryRawUnsafe(
+        `SELECT count(*)::int n FROM "AD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074'`,
+        TENANT,
+      )) as Array<{ n: number }>;
+      return r!.n;
+    };
+    const before = await count();
+    await expect(
+      schemeInstallment(
+        runtime,
+        installmentInput({
+          schmCode: undefined,
+          membCode: undefined,
+          amount: undefined,
+          lines: [
+            { schmCode: 'S01', membCode: '00001', amount: 500 },
+            { schmCode: 'S01', membCode: '00002', amount: 0 },
+          ],
+        }),
+      ),
+    ).rejects.toThrow(/line 2/);
+    expect(await count()).toBe(before);
+  });
+
   it('creates, gets and replaces a scheme installment while preserving identity and balance', async () => {
     const created = await schemeInstallment(runtime, installmentInput());
     expect(created.vchNo).toBe(8);

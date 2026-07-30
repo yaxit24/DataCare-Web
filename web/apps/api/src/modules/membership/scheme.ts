@@ -246,6 +246,31 @@ export interface SchemeInstallmentInput {
   monthCode?: string;
   /** WITH_UPI — 'Y' when the money arrived over UPI. */
   withUpi?: boolean;
+  /**
+   * A day's collection round as ONE voucher, which is what the desktop's TR_MEMB_ENT grid produces.
+   * Measured on the real database: 812 of 1428 member-entry vouchers carry more than one member and
+   * one opening voucher carries 175. The desktop posts a Dr/Cr ledger PAIR PER LINE, not one
+   * aggregate pair — verified at 11 members/22 legs, 7/14 and 6/12 — so each line settles against its
+   * own scheme's liability account and the lines may span different schemes.
+   *
+   * When omitted, the flat schmCode/membCode/amount fields above are treated as a single line, so the
+   * one-member call shape stays valid.
+   */
+  lines?: SchemeInstallmentLine[];
+}
+
+/** One member's instalment within a member-entry voucher (AD_DATA/AD_OS SR_NO 1..n). */
+export interface SchemeInstallmentLine {
+  schmCode: string;
+  membCode: string;
+  amount: number;
+  /** Overrides the scheme's AD_MAST.SCHM_AC for this line only. */
+  liabAc?: string;
+  chqNo?: string;
+  bankName?: string;
+  empCode?: string;
+  monthCode?: string;
+  withUpi?: boolean;
 }
 
 export interface SchemeInstallmentResult {
@@ -275,11 +300,30 @@ async function postMemberEntry(
   tags: MemberEntryTags,
   lifecycle?: SchemeWriteContext,
 ): Promise<SchemeInstallmentResult> {
-  const { scope, schmCode, membCode } = input;
-  if (!schmCode) throw new SchemeError('scheme code is required');
-  if (!membCode) throw new SchemeError('member code is required');
-  const amount = numv(input.amount);
-  if (!(amount > 0)) throw new SchemeError('amount must be positive');
+  const { scope } = input;
+  // Normalise to the grid shape. A single-member call is a one-line voucher.
+  const lines: SchemeInstallmentLine[] = input.lines?.length
+    ? input.lines
+    : [
+        {
+          schmCode: input.schmCode,
+          membCode: input.membCode,
+          amount: input.amount,
+          liabAc: input.liabAc,
+          chqNo: input.chqNo,
+          bankName: input.bankName,
+          empCode: input.empCode,
+          monthCode: input.monthCode,
+          withUpi: input.withUpi,
+        },
+      ];
+  if (!lines.length) throw new SchemeError('at least one member line is required');
+  lines.forEach((l, i) => {
+    const at = input.lines?.length ? ` (line ${i + 1})` : '';
+    if (!l.schmCode) throw new SchemeError(`scheme code is required${at}`);
+    if (!l.membCode) throw new SchemeError(`member code is required${at}`);
+    if (!(numv(l.amount) > 0)) throw new SchemeError(`amount must be positive${at}`);
+  });
 
   const mode: PayMode = input.mode ?? 'cash';
   const recAc = settlementAc(mode, input.bankAc); // money IN ⇒ debited (cash/bank)
@@ -287,16 +331,21 @@ async function postMemberEntry(
   const isOpening = tags.entType === 'O';
 
   const run = async (tx: any): Promise<SchemeInstallmentResult> => {
-    const sch: any[] = await tx.$queryRawUnsafe(
-      `SELECT "SCHM_AC","SCHM_NAME" FROM "AD_MAST" WHERE "CO_CODE"=$1 AND "SCHM_CODE"=$2 LIMIT 1`,
-      scope.coCode,
-      schmCode,
-    );
-    if (!sch.length) throw new SchemeError(`scheme ${schmCode} not found`);
-    const liabAc =
-      (input.liabAc ?? '').trim() ||
-      (sch[0]?.SCHM_AC != null ? String(sch[0].SCHM_AC).trim() : '') ||
-      DEFAULT_SCHEME_AC;
+    // Resolve each distinct scheme once; a grid line may belong to a different scheme than its
+    // neighbour, and each settles against its own liability account.
+    const liabOf = new Map<string, string>();
+    for (const code of new Set(lines.map((l) => l.schmCode))) {
+      const sch: any[] = await tx.$queryRawUnsafe(
+        `SELECT "SCHM_AC","SCHM_NAME" FROM "AD_MAST" WHERE "CO_CODE"=$1 AND "SCHM_CODE"=$2 LIMIT 1`,
+        scope.coCode,
+        code,
+      );
+      if (!sch.length) throw new SchemeError(`scheme ${code} not found`);
+      liabOf.set(
+        code,
+        (sch[0]?.SCHM_AC != null ? String(sch[0].SCHM_AC).trim() : '') || DEFAULT_SCHEME_AC,
+      );
+    }
 
     const book = scope.coBook ?? tags.book;
     const sc: VoucherScope = { ...scope, coBook: book };
@@ -311,13 +360,94 @@ async function postMemberEntry(
       lifecycle?.persistedClock,
     );
 
-    // Balanced ledger: Dr cash/bank (money in) / Cr scheme liability (owed back at maturity). EXCEPT a
-    // MEMB OPENING (entType 'O') posts NO money ledger — desktop TR_MEMB_ENT.cs#L4660 only writes the
-    // AD_OS carry-forward for openings (the opening balance is migrated, not a fresh cash receipt).
+    // A Dr/Cr PAIR PER LINE, mirroring the desktop (11 members → 22 AC_DATA legs). One aggregate
+    // pair would balance too, so this cannot be caught by a balance assertion alone — the leg count
+    // is asserted separately.
+    // EXCEPT a MEMB OPENING (entType 'O') posts NO money ledger — desktop TR_MEMB_ENT.cs#L4660 only
+    // writes the AD_OS carry-forward for openings, and the real 175-member opening voucher 00086 has
+    // 0 AC_DATA legs, confirming it.
     const ledger: LedgerLine[] = isOpening
       ? []
-      : buildTransferLedger(key, tags.vchType, recAc, liabAc, amount);
+      : lines.flatMap((l) =>
+          buildTransferLedger(
+            key,
+            tags.vchType,
+            recAc,
+            (l.liabAc ?? '').trim() || liabOf.get(l.schmCode)!,
+            numv(l.amount),
+          ),
+        );
     if (ledger.length) assertBalanced(ledger);
+
+    const adDataRows = lines.map((l, i) => ({
+      ...key,
+      SR_NO: i + 1,
+      VCH_DATE: vchDate,
+      SCHM_CODE: l.schmCode,
+      SCHM_DATE: vchDate,
+      MEMB_CODE: l.membCode,
+      MEMB_AMT: numv(l.amount),
+      // TOT_AMT is 0 on all 8160 AD_DATA rows of the real desktop database (Live24). The
+      // instalment value lives in MEMB_AMT alone; writing it here too would double-count in any
+      // report that sums TOT_AMT.
+      TOT_AMT: 0,
+      IT_DESC: `Scheme ${l.schmCode} ${isOpening ? 'opening balance' : 'installment'}`,
+      ENT_TYPE: tags.entType, // desktop TR_MEMB_ENT (L4567): 'E' = monthly entry, 'O' = MEMB OPENING
+      REC_AC: recAc,
+      CHQ_NO: l.chqNo ?? null,
+      ENTRY_TIME: vchDate,
+      VCH_TIME: vchDate,
+      VCH_TYPE: tags.vchType,
+      INOUT_TYPE: 'I',
+      BOOK_NAME: tags.bookName,
+      MAIN_USER: mainUser,
+      HD_VCH_NO: hdVchNo,
+      DATA_TRFR: 'N',
+      // TR_MEMB_ENT.cs also records the settlement bank name, the collecting employee, the
+      // instalment's month code and whether it came in over UPI. USER_DELETE/USER_UPDATE are the
+      // desktop's row-state flags, 'N' until an edit or delete touches the row.
+      BANK_NAME: (l.bankName ?? '').trim().slice(0, 50) || null,
+      EMP_CODE: (l.empCode ?? '').trim().slice(0, 3) || null,
+      MONTH_CODE: (l.monthCode ?? '').trim().slice(0, 2) || null,
+      WITH_UPI: l.withUpi ? 'Y' : 'N',
+      USER_DELETE: 'N',
+      USER_UPDATE: 'N',
+    }));
+
+    const adOsRows = lines.map((l, i) => ({
+      // TR_MEMB_ENT.cs carries the collecting employee, the ledger account the outstanding
+      // posts to, and the gold weight side of a metal scheme.
+      //
+      // LD_CODE is the account the money ARRIVED IN, not the scheme liability. Verified across
+      // 8194 real AD_OS rows: 00001 CASH ON HAND (7162), 000754 OLD AXIS BANK CURRENT (714),
+      // 000418 OLD HDFC (163), 001023 AXIS CURRENT (33), 000207 SBI (17), blank (91). Writing
+      // the liability account here would break any grouping of collections by cash/bank.
+      EMP_CODE: (l.empCode ?? '').trim().slice(0, 3) || null,
+      LD_CODE: recAc.trim().slice(0, 8) || null,
+      GOLD_WT: 0,
+      ...key,
+      SR_NO: i + 1,
+      VCH_DATE: vchDate,
+      VCH_TYPE: tags.vchType,
+      INOUT_TYPE: 'I',
+      ENTRY_TYPE: 'I',
+      BOOK_NAME: tags.bookName,
+      SCHM_CODE: l.schmCode,
+      SCHM_DATE: vchDate,
+      MEMB_CODE: l.membCode,
+      // MEMB_AMT is 0 on all 8194 AD_OS rows of the real desktop database; the movement value
+      // lives in ADJ_AMT regardless of OS_TYPE. A member's balance is
+      // SUM(A '+') - SUM(D '-') - SUM(B '-') over ADJ_AMT, so populating MEMB_AMT here would
+      // make any balance that reads it double the true figure.
+      MEMB_AMT: 0,
+      ADJ_AMT: numv(l.amount),
+      SIGN: '+',
+      OS_TYPE: 'A', // 'A' = scheme amount accrued (+) ; redemption later books 'D' (-)
+      MAIN_USER: mainUser,
+      HD_VCH_NO: hdVchNo,
+      DATA_TRFR: 'N',
+      DATA_TYPE: 'A',
+    }));
 
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
       CO_CODE: scope.coCode,
@@ -330,88 +460,13 @@ async function postMemberEntry(
       bookName: tags.bookName,
       ledger: { table: 'AC_DATA', lines: ledger },
       writes: [
-        {
-          table: 'AD_DATA',
-          rows: [
-            {
-              ...key,
-              SR_NO: 1,
-              VCH_DATE: vchDate,
-              SCHM_CODE: schmCode,
-              SCHM_DATE: vchDate,
-              MEMB_CODE: membCode,
-              MEMB_AMT: amount,
-              // TOT_AMT is 0 on all 8160 AD_DATA rows of the real desktop database (Live24). The
-              // instalment value lives in MEMB_AMT alone; writing it here too would double-count in any
-              // report that sums TOT_AMT.
-              TOT_AMT: 0,
-              IT_DESC: `Scheme ${schmCode} ${isOpening ? 'opening balance' : 'installment'}`,
-              ENT_TYPE: tags.entType, // desktop TR_MEMB_ENT (L4567): 'E' = monthly entry, 'O' = MEMB OPENING
-              REC_AC: recAc,
-              CHQ_NO: input.chqNo ?? null,
-              ENTRY_TIME: vchDate,
-              VCH_TIME: vchDate,
-              VCH_TYPE: tags.vchType,
-              INOUT_TYPE: 'I',
-              BOOK_NAME: tags.bookName,
-              MAIN_USER: mainUser,
-              HD_VCH_NO: hdVchNo,
-              DATA_TRFR: 'N',
-              // TR_MEMB_ENT.cs also records the settlement bank name, the collecting employee, the
-              // instalment's month code and whether it came in over UPI. USER_DELETE/USER_UPDATE are the
-              // desktop's row-state flags, 'N' until an edit or delete touches the row.
-              BANK_NAME: (input.bankName ?? '').trim().slice(0, 50) || null,
-              EMP_CODE: (input.empCode ?? '').trim().slice(0, 3) || null,
-              MONTH_CODE: (input.monthCode ?? '').trim().slice(0, 2) || null,
-              WITH_UPI: input.withUpi ? 'Y' : 'N',
-              USER_DELETE: 'N',
-              USER_UPDATE: 'N',
-            },
-          ],
-        },
-        {
-          table: 'AD_OS',
-          rows: [
-            {
-              // TR_MEMB_ENT.cs carries the collecting employee, the ledger account the outstanding
-              // posts to, and the gold weight side of a metal scheme.
-              //
-              // LD_CODE is the account the money ARRIVED IN, not the scheme liability. Verified across
-              // 8194 real AD_OS rows: 00001 CASH ON HAND (7162), 000754 OLD AXIS BANK CURRENT (714),
-              // 000418 OLD HDFC (163), 001023 AXIS CURRENT (33), 000207 SBI (17), blank (91). Writing
-              // the liability account here would break any grouping of collections by cash/bank.
-              EMP_CODE: (input.empCode ?? '').trim().slice(0, 3) || null,
-              LD_CODE: recAc.trim().slice(0, 8) || null,
-              GOLD_WT: 0,
-              ...key,
-              SR_NO: 1,
-              VCH_DATE: vchDate,
-              VCH_TYPE: tags.vchType,
-              INOUT_TYPE: 'I',
-              ENTRY_TYPE: 'I',
-              BOOK_NAME: tags.bookName,
-              SCHM_CODE: schmCode,
-              SCHM_DATE: vchDate,
-              MEMB_CODE: membCode,
-              // MEMB_AMT is 0 on all 8194 AD_OS rows of the real desktop database; the movement value
-              // lives in ADJ_AMT regardless of OS_TYPE. A member's balance is
-              // SUM(A '+') - SUM(D '-') - SUM(B '-') over ADJ_AMT, so populating MEMB_AMT here would
-              // make any balance that reads it double the true figure.
-              MEMB_AMT: 0,
-              ADJ_AMT: amount,
-              SIGN: '+',
-              OS_TYPE: 'A', // 'A' = scheme amount accrued (+) ; redemption later books 'D' (-)
-              MAIN_USER: mainUser,
-              HD_VCH_NO: hdVchNo,
-              DATA_TRFR: 'N',
-              DATA_TYPE: 'A',
-            },
-          ],
-        },
+        { table: 'AD_DATA', rows: adDataRows },
+        { table: 'AD_OS', rows: adOsRows },
       ],
     });
     return { vchNo };
   };
+
   return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
 }
 
