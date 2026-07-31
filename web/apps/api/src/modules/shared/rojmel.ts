@@ -190,6 +190,66 @@ const blank = (ctx: RojmelContext, ledrKey: string): RojmelRow => ({
 });
 
 /**
+ * Project a money-only voucher (no metal) into its Rojmel rows.
+ *
+ * Derived from the desktop's member-entry book 074, which carries 1635 real Rojmel rows against 1311
+ * instalment lines — the mismatch is the whole rule, and it is not a rounding artifact:
+ *
+ *   type `01`, one per line: the LIABILITY leg. AC_CODE the liability account, LD_CODE the account the
+ *   money arrived in, amount on the CREDIT side. 1311 rows, exactly one per line.
+ *
+ *   type `02`, one per line BUT ONLY WHEN THE MONEY LANDS IN A BANK: the receipt leg, AC_CODE the bank,
+ *   LD_CODE the liability, amount on the DEBIT side. 324 rows over 216 vouchers, and every one of the
+ *   four accounts involved is a bank (OLD AXIS CURRENT 288, AXIS CURRENT 33, AXIS OD 2, AXIS B K
+ *   DHAKAN 1). Decisive check: of the bank-receipt vouchers, **216 have a type-02 row and 0 do not**.
+ *
+ * A cash receipt gets no second row, which is what you would expect of a book that IS the cash book —
+ * cash movement is implicit in it, a bank movement is a contra that has to be stated.
+ *
+ * Both rows follow the ledger's own direction, unlike the cash-payment books, where the Rojmel inverts
+ * the cash leg's sign; that convention is NOT implemented here because it has not been derived.
+ */
+export function buildMoneyRojmel(
+  ctx: RojmelContext,
+  lines: {
+    lineNo: number;
+    /** The liability / control account this voucher credits. */
+    controlAc: string;
+    /** The cash or bank account the money arrived in. */
+    receiptAc: string;
+    amount: number;
+    /** True when the money landed in a bank rather than cash — drives the second row. */
+    banked: boolean;
+  }[],
+): RojmelRow[] {
+  const rows: RojmelRow[] = [];
+  for (const l of lines) {
+    if (!l.amount) continue;
+    rows.push({
+      ...blank(
+        ctx,
+        rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.ITEM, l.lineNo),
+      ),
+      AC_CODE: l.controlAc,
+      LD_CODE: l.receiptAc,
+      CR_AMT: l.amount,
+    });
+    if (l.banked) {
+      rows.push({
+        ...blank(
+          ctx,
+          rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.PARTY, l.lineNo),
+        ),
+        AC_CODE: l.receiptAc,
+        LD_CODE: l.controlAc,
+        DR_AMT: l.amount,
+      });
+    }
+  }
+  return rows;
+}
+
+/**
  * Project a sale (or any outward voucher) into its Rojmel rows.
  *
  * `outward` selects the direction: a sale sends metal out (`SIGN` '-') and debits the party; a purchase

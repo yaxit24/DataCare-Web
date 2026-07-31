@@ -30,6 +30,7 @@ import {
   getSchemeMaturity,
   schemeInstallment,
   schemeMaturity,
+  schemeOpening,
 } from '../src/modules/membership/scheme.js';
 import { schemePassbookData } from '../src/modules/scheme/passbook.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
@@ -642,6 +643,56 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
   // and 8194 AD_OS rows). Each assertion below records the count it was verified against, because
   // a shape guessed from a handful of sampled rows is how three of these fields came to be wrong.
   // ---------------------------------------------------------------------------------------------
+  it('a cash instalment writes ONE Rojmel row per line; a banked one writes TWO', async () => {
+    // Book 074 carries 1635 real day-book rows against 1311 instalment lines. The extra rows are the
+    // receipt leg, written only when the money lands in a bank: of the bank-receipt vouchers, 216 have
+    // a type-02 row and 0 do not, and all four accounts involved are banks. A cash receipt gets no
+    // second row — the Rojmel IS the cash book, so cash movement is implicit and a bank movement is a
+    // contra that has to be stated.
+    const rojmel = async (vch: string): Promise<Array<Record<string, unknown>>> =>
+      (await owner.$queryRawUnsafe(
+        `SELECT "AC_CODE","LD_CODE","IT_TYPE","LEDR_KEY",
+                "DR_AMT"::float dr,"CR_AMT"::float cr
+           FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"=$2
+          ORDER BY "LEDR_KEY"`,
+        TENANT,
+        vch,
+      )) as Array<Record<string, unknown>>;
+
+    // Cash: one row, the liability credited, contra = the receipt account.
+    const cash = await schemeInstallment(runtime, installmentInput());
+    const cashRows = await rojmel(String(cash.vchNo).padStart(5, '0'));
+    expect(cashRows).toHaveLength(1);
+    expect(cashRows[0]!.IT_TYPE).toBe('A'); // money row, never a metal letter
+    expect(Number(cashRows[0]!.cr ?? 0)).toBe(500);
+    expect(Number(cashRows[0]!.dr ?? 0)).toBe(0);
+    expect(String(cashRows[0]!.LEDR_KEY).slice(21, 23)).toBe('01');
+
+    // Banked: two rows — the liability credit plus the bank debit, keyed 01 and 02 on the same line.
+    const bank = await schemeInstallment(
+      runtime,
+      installmentInput({ mode: 'bank', bankAc: 'BANK' }),
+    );
+    const bankRows = await rojmel(String(bank.vchNo).padStart(5, '0'));
+    expect(bankRows).toHaveLength(2);
+    expect(bankRows.map((r) => String(r.LEDR_KEY).slice(21, 23))).toEqual(['01', '02']);
+    // The receipt leg is a DEBIT on the bank, mirroring the ledger rather than inverting it.
+    const receipt = bankRows[1]!;
+    expect(receipt.AC_CODE).toBe('BANK');
+    expect(Number(receipt.dr ?? 0)).toBe(500);
+    expect(Number(receipt.cr ?? 0)).toBe(0);
+  });
+
+  it('an opening entry writes no Rojmel row at all (no money moves)', async () => {
+    const open = await schemeOpening(runtime, installmentInput({ scope: scope('075') }));
+    const [n] = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='075' AND "VCH_NO"=$2`,
+      TENANT,
+      String(open.vchNo).padStart(5, '0'),
+    )) as Array<{ n: number }>;
+    expect(n!.n).toBe(0);
+  });
+
   it('AD_DATA matches the desktop instalment shape (TOT_AMT is 0 on all 8160 real rows)', async () => {
     await schemeInstallment(runtime, installmentInput());
     const [row] = (await owner.$queryRawUnsafe(

@@ -1,4 +1,5 @@
 import { withTenant } from '@datacare/db';
+import { buildMoneyRojmel } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -456,12 +457,39 @@ async function postMemberEntry(
       VCH_NO: hdVchNo,
       BOOK_NAME: tags.bookName,
     });
+    // The Rojmel. Book 074 carries 1635 real day-book rows against 1311 instalment lines: one per line
+    // for the liability leg, plus a second row per line ONLY when the money landed in a bank. An
+    // opening (075) moves no money, so it produces no day-book row at all.
+    const rojmelRows = isOpening
+      ? []
+      : buildMoneyRojmel(
+          {
+            scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: sc.coYear! },
+            key,
+            coBook: book,
+            vchNo: key.VCH_NO,
+            vchDate,
+            vchType: tags.vchType,
+            bookName: tags.bookName,
+            partyName: '',
+            partyCode: recAc,
+          },
+          lines.map((l, i) => ({
+            lineNo: i + 1,
+            controlAc: (l.liabAc ?? '').trim() || liabOf.get(l.schmCode)!,
+            receiptAc: recAc,
+            amount: numv(l.amount),
+            banked: mode !== 'cash',
+          })),
+        );
+
     await postVoucherTx(tx, tenantId, {
       bookName: tags.bookName,
       ledger: { table: 'AC_DATA', lines: ledger },
       writes: [
         { table: 'AD_DATA', rows: adDataRows },
         { table: 'AD_OS', rows: adOsRows },
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return { vchNo };
