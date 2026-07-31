@@ -727,3 +727,29 @@ context before the code.**
 Which found one stale set: the export line-number table had shifted by up to 220 lines because the rate-cut
 additions moved everything after them. Regenerated from the file. This is the second time verifying a plan
 against the code it describes has caught something — the first was five wrong directions.
+
+---
+
+## Read `docs/ROJMEL-HANDBOOK.md` first
+
+The two per-piece plans duplicated about 60% of their content — environment, invariants, traps, the method,
+the verification sequence. That shared material now lives in one handbook written for a session with **no
+memory of any previous one**, and the per-piece plans assume it has been read.
+
+It also carries two things the plans could not:
+
+**A measured coverage figure.** Grouping the real 3179 Rojmel rows by `MAIN_BOOK` rather than by book code
+gives **2965 written, 93%**, with **210 rows** left in six families. The earlier "88%" in this document was
+computed from a book-code list rather than measured, and book codes share families — so it understated the
+position. The handbook carries the query.
+
+**A flakiness section, with the discipline that goes with it.** `vitest.config.ts` already bounds
+concurrency to 4 threads because ~half of 123 test files each open a `PrismaClient` against one Postgres
+with `max_connections` 100 — its comment records failures that "moved between files run to run", the
+signature of contention rather than a logic error. It still recurs occasionally when other processes hold
+connections: on 2026-07-31 a run failed 9 tests across 5 files, then passed 1015/1015 three times running.
+
+The handbook gives a table for telling contention from a real defect, and states plainly: **do not commit
+while the suite is red, even believing it is contention**, and **do not overwrite the failure log before
+reading it**. Both rules exist because I broke them that day — the commit was docs-only so nothing broken
+shipped, but the identity of those nine tests was lost.
