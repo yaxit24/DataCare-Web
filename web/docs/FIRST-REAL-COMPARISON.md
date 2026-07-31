@@ -89,116 +89,109 @@ RED is correct even though the underlying agreement is much closer than 118 sugg
 
 ---
 
-## 3. The substantive differences
+## 3. The substantive differences, triaged
 
-### 3.1 The desktop rounds amounts to whole rupees; the web keeps paise
+Every row below is measured against the real customer database, and each is placed in one of four
+categories: **fixed**, **deliberate divergence**, **unresolved**, or **owner decision**. The distinction
+matters more than the count — "93 differences" is not a to-do list.
 
-The single largest source of real difference.
+### 3.1 Fixed
 
-| Field                                                | Desktop     | Web     |
-| ---------------------------------------------------- | ----------- | ------- |
-| line 2 metal (4.600 × 77)                            | **354.00**  | 354.20  |
-| line 2 labour (4.600 × 16.09)                        | **74.00**   | 74.01   |
-| line 2 net                                           | **428.00**  | 428.21  |
-| header `NET_AMT`                                     | **1515.00** | 1515.21 |
-| header `TOT_AMT`, `BILL_OS`, `BILL_OS_DATA.BILL_AMT` | **1560.00** | 1560.67 |
+| What                 | Desktop                 | Web was                 | Evidence                                                          |
+| -------------------- | ----------------------- | ----------------------- | ----------------------------------------------------------------- |
+| `AC_DATA.LEDR_KEY`   | 23 chars, `VCH_NO` in 5 | 24 chars, `VCH_NO` in 6 | real key `01002024-20250270000101`; `ROJ_MEL_DATA` already used 5 |
+| `MAIN_STOCK.ITM_QTY` | `1`                     | net weight (10.360)     | all 267 sale-book rows are `1`; integer on all 1856               |
+| `SL_DATA.LBR_AMT`    | `0.00`                  | 1161.01 (sum of lines)  | `0.00` on all 190 headers, though 100 carry line labour           |
+| tax resolution       | pins `SR_NO 0`          | rejected the code       | all five GST codes collide parent-against-IGST                    |
 
-Measured across the whole real dataset, not inferred from this voucher:
+### 3.2 Deliberate divergence — keep, and know why
+
+**`SL_DETL.ITM_CGST_AMT` / `ITM_SGST_AMT`.** Zero on all 245 real rows; the web populates them. **Not
+"fixed", deliberately.** The web reads these columns in four places the desktop has no equivalent for —
+`gst/gst.ts:200` sums them for the GST return, `einvoice/einvoice.ts:699` builds the e-invoice payload, and
+`documents/docChrome.ts:214` prints the invoice. The desktop keeps only a per-line _total_ (`IT_TAX_AMT`,
+non-zero on 132 rows) and splits at the header (`SL_DATA.CGST_TAX` / `SGST_TAX`).
+
+Zeroing them for byte parity would break the GST return and e-invoicing. The cleaner long-term shape is to
+derive the split from `IT_TAX_AMT` at read time and stop storing it, which is a four-site refactor and not
+worth doing before more vouchers are compared. **Recorded as a divergence with a reason rather than logged as
+a defect.**
+
+**`SL_DATA.ROF_AMT` and the fourth ledger leg.** The desktop stores `ROF_AMT 0.00` on all 190 headers and
+posts three legs; the web computes `roundOff -0.45` and posts a fourth leg to kasar (`00057`). See §3.4.
+
+### 3.3 Unresolved — measured, not derivable, deliberately not guessed
+
+**`SL_DETL.TOT_AMT`.** The desktop is internally inconsistent and no rule fits.
 
 ```
-SL_DETL  245 rows: ITM_AMT non-integer 0   LBR_AMT non-integer 0   NET_AMT non-integer 0
-SL_DATA  190 rows: NET_AMT non-integer 0   TOT_AMT non-integer 0
-                   TAX_AMT non-integer 91  ROF_AMT non-zero 0
+untaxed lines (113):  TOT_AMT = NET_AMT on all 113          consistent
+taxed lines   (132):  TOT = NET+tax on 36,  TOT = NET on 94  NOT consistent
+  book 026:  3 as NET+tax,  74 as NET
+  book 027: 32 as NET+tax,   8 as NET
 ```
 
-So the rule is precise and consistent: **amounts are rounded to whole rupees, tax is not, and the round-off
-column is never used.** Rounding, not truncation — 354.20 → 354 and 7436.80 → 7437.
+The 8 exceptions in book 027 are whole vouchers (00009 all six lines, 00013, 00014), and their headers,
+tax code, tax percentage, book and even operator match vouchers that follow the other convention. The
+**headers are uniform** — `TOT_AMT = NET_AMT + tax` on every one of the five checked — so only the line
+column varies. That is consistent with a grid display column that is not always recalculated before save.
 
-The desktop's own labour _rate_ is rounded to 2 dp by `CO_SET.LBR_ROF = 2`, applied as the decimal-place
-argument to `Math.Round` (`TR_SALE.cs:11017`). `LBR_RATE = 16.09` is consistent with that. The amount
-rounding is separate and this customer's `CO_SET` has **no `TOT_AMT_ROF` column at all**, though
-`MS_OPNCOMP.cs:991` reads one — another instance of the source being a later version than the data.
+**No rule is implementable from this evidence, so none was written.** The web currently writes `NET_AMT`,
+which matches the 94-row majority and the untaxed 113.
 
-**What this means for parity:** the web needs a whole-rupee amount mode. It cannot be hardcoded, because the
-desktop plainly supports 2 dp elsewhere; it is configuration this customer sets. **The setting that drives it
-has not been located in this database, so the mechanism is unresolved and is recorded as such rather than
-guessed.**
+**`MAIN_STOCK.SR_NO`.** The desktop writes `1` on **both** rows of a two-line sale and distinguishes them by
+`TAG_NO`; the web numbers them 1 and 2. Across 63 multi-row sale vouchers, 41 have all serials identical and
+20 increment — **mixed, so not a single rule.** Left alone; the differ's pairing key deliberately excludes
+`SR_NO` so this stays visible rather than being papered over.
 
-### 3.2 The desktop leaves 89 sale vouchers out of balance, and the web will not
+**`SL_DETL.KR_NET_WT` / `KR_TOUCH` / `KR_FINE`.** Populated on the desktop (`KR_FINE` non-zero on 102 of 245
+rows), zero in the web. These are karigar attribution on the sold item. The replay supplied no karigar, so
+part of this is an input difference — but 102 of 245 is too many to dismiss, and it needs a voucher whose
+karigar is known before the write path can be judged.
 
-Because `TOT_AMT` is rounded to a whole rupee while `TAX_AMT` keeps paise, the residue goes nowhere:
+**`SL_DETL.TAG_GWT` / `TAG_NWT`.** The reverse: zero on the desktop for this voucher, populated by the web.
+`TAG_NWT` is non-zero on 103 of 245 real rows, so the column is used — the question is when, and that needs a
+tagged replay.
+
+### 3.4 Owner decision
+
+**89 sale vouchers are out of balance on the desktop.** `TOT_AMT` is a whole rupee while `TAX_AMT` keeps
+paise, and the residue is posted nowhere:
 
 ```
 027/00001   Dr 1560.00   Cr 1560.45   diff -0.45
+1567 vouchers: balanced 1468, UNBALANCED 99
+  026: 55 (max 0.50)   027: 25 (0.47)   029: 8 (0.45)   041: 3   032: 2   035/036/030: 1 each
+  052:  2 (max 250 - karigar, a different problem)   000: 1 (the opening carry, already known)
 ```
 
-Across the whole real ledger:
+The web posts the residue to kasar (`BOOK_DETL` slot 3, `00057`) and balances. **The web is arguably more
+correct and definitely more auditable.** Reproducing the desktop means deliberately writing an unbalanced
+ledger. Same class of question as the reproduced fine double-count on overpaid purchases.
+
+**The desktop does use that kasar account** — book 027's `AC_DATA` has 15 rows of leg type `26` naming
+`00057` — just not for this residue.
+
+### 3.5 Leg type codes — measured, mapping not yet written
+
+A plain credit sale writes leg types **01 / 03 / 04** (party, sales account, tax). The web writes a bare
+sequence **01 / 02 / 03**. Book 027 also uses `09/10`, `19/20` and `25/26` for other settlement shapes:
 
 ```
-1567 vouchers: balanced 1468   UNBALANCED 99
-  book 026  55 vouchers  max |diff| 0.50     book 041   3   0.37
-  book 027  25 vouchers  max |diff| 0.47     book 032   2   0.17
-  book 029   8 vouchers  max |diff| 0.45     books 035/036/030  1 each  <= 0.24
-  book 052   2 vouchers  max |diff| 250      (karigar - a different problem, not rounding)
-  book 000   1 voucher   max |diff| 1121150  (the opening carry, already known to be unbalanced)
+type 01  25 rows  party        type 09   5   type 19  15   type 25  15
+type 03  25 rows  sales a/c    type 10   5   type 20  15   type 26  15  (00057 kasar)
+type 04  25 rows  tax
 ```
 
-**89 sale vouchers carry a sub-rupee imbalance with no round-off leg.** A kasar account exists — `BOOK_DETL`
-slot 3 is `00057 KASAR A/C` — and is simply not used for this.
+So the codes are **semantic per leg role and per settlement shape**, not a sequence. Deriving a mapping from
+one voucher would pin a wrong answer for the other six shapes. **Needs measuring per family first** — the
+same discipline that cut rate cut from 40 row types to 9.
 
-This is a **direct conflict with a web invariant**: the web balances every voucher. Reproducing the
-desktop's arithmetic exactly means writing a knowingly unbalanced ledger. **This needs an owner decision**
-and is the same class of question as the reproduced fine double-count: parity with a defect, or correctness.
+### 3.6 Harness artifacts, not findings
 
-### 3.3 `TAX_DATA` rows carry the wrong type and a rounded amount
-
-```
-TAX_DATA.TAX_TYPE  desktop=SGST   web=N       TAX_DATA.TAX_AMT  desktop=22.725  web=22.730
-TAX_DATA.TAX_TYPE  desktop=CGST   web=N       TAX_DATA.TAX_AMT  desktop=22.725  web=22.730
-```
-
-Two distinct defects in one place:
-
-**The type.** The desktop writes one row per component, typed `SGST` and `CGST`. The web writes the parent
-group `N` on both. So a tax report grouping by `TAX_TYPE` cannot split the halves at all.
-
-**The amount.** The desktop stores the half **unrounded** at `22.725`; the web rounds to `22.730`. This
-confirms from the opposite direction a fact already recorded about the Postgres schema — `SL_DATA.CGST_TAX`
-and `SGST_TAX` are `double precision` with no scale precisely so the unrounded half fits. The web's own
-schema was built for the right value and the code puts a rounded one in it.
-
-### 3.4 Columns the web leaves NULL — 58 of them
-
-The largest count, the least individually severe, and worth working through because a NULL where the desktop
-has a value can break a report filter. Examples, each verified present on the desktop row:
-
-`SL_DATA.OS_ADJ_AMT` `CR_DAYS` `EMP_CODE` · `TAX_DATA.R_CHARG` `ISR_NO` `TAX_FREE_AMT` ·
-`BILL_OS_DATA.USER_DELETE` · `MAIN_STOCK.ITM_WEST` `TBL_CODE` `ISR_NO`
-
-Some are replay-harness omissions rather than web defects — `EMP_CODE` was never supplied as an input, for
-instance. **These need separating one by one before any is called a defect.**
-
-### 3.5 Stock tagging
-
-```
-MAIN_STOCK.TAG_NO    desktop=MAS00013            web=N
-MAIN_STOCK.VCH_SRNO  desktop=100211101051.000000 web=0.000000
-```
-
-The desktop sold a **tagged** stock instance and recorded which one. The replay sold untagged, so this may be
-an input difference rather than a behavioural one — but `VCH_SRNO` being a 12-digit composite is worth
-understanding before assuming so.
-
-### 3.6 Known and accepted
-
-`OP_LDR: WEB NEVER WROTE THIS TABLE (2 desktop rows)` — the year-end carry model difference already recorded
-in `TECHNICAL-REFERENCE.md` §7. Not a new finding, and the two rows appearing under this voucher's key are an
-extractor filter artifact rather than a per-voucher write.
-
-`SL_DATA.BILL_NO` desktop blank, web `00001`; `AC_NAME` and `BOOK_NAME` differ because the replay seeds
-placeholder masters — live customer names are deliberately not copied into fixtures.
-
----
+`AC_NAME`, `PARTY_NAME`, `LDR_NAME`, `BOOK_NAME` differ because the replay seeds placeholder masters — live
+customer names are deliberately never copied into fixtures. `EMP_CODE` and the `TAG_NO` / `VCH_SRNO` pair
+differ because the replay supplied no employee and sold untagged stock.
 
 ## 4. Four defects found before the diff even ran
 
