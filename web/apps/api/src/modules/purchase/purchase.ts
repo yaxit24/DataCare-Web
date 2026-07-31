@@ -30,6 +30,7 @@ import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.
 import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/counterStockPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
 import type { RoundingPolicy } from '../shared/roundingPolicy.js';
+import { buildSaleRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import {
   desktopLabourTypeFor,
   effectiveLabourRate,
@@ -1192,6 +1193,39 @@ async function writePurchaseTx(
     });
   }
 
+  // The Rojmel, inward. A purchase is the mirror of a sale: metal comes IN (SIGN '+'), the expense
+  // account is debited and the party credited. Confirmed against the real desktop database — books 035
+  // and 037 (gold purchase) write IT_TYPE 'G' with SIGN '+', 036 and 038 (silver) write 'S' with '+',
+  // against 'G'/'S' with '-' on the tax-invoice books.
+  const rojmelRows = buildSaleRojmel(
+    {
+      scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
+      key,
+      coBook: key.CO_BOOK,
+      vchNo: key.VCH_NO,
+      vchDate,
+      vchType: bookPolicy.vchType,
+      bookName: bookPolicy.bookName,
+      partyName: input.acName ?? '',
+      partyCode: input.acCode,
+    },
+    computed.map((c, idx) => {
+      const item = String(c.in.itCode ?? '').trim();
+      return {
+        lineNo: idx + 1,
+        revenueAc: purcAcByItem[item] ?? purchaseAc,
+        amount: c.calc.net,
+        metal: rojmelMetalFor(itemTypeByItem[item]),
+        pcs: num(c.in.pcs),
+        grossWt: num(c.in.grossWt),
+        netWt: num(c.in.netWt),
+        rate: num(c.in.rate),
+      };
+    }),
+    { taxAc, taxAmount: totals.tax, partyAmount: totals.total },
+    false, // inward: metal in, party credited
+  );
+
   await postVoucherTx(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
     bookName: bookPolicy.bookName,
@@ -1204,6 +1238,7 @@ async function writePurchaseTx(
       ...(mainStock.length ? [{ table: 'MAIN_STOCK', rows: mainStock }] : []),
       ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
       { table: 'BILL_OS_DATA', rows: [osRow] },
+      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
     ],
   });
 

@@ -35,6 +35,8 @@ const FOOTPRINT_PURCHASE: string[] = [
   'MAIN_STOCK',
   'PR_DATA',
   'PR_DETL',
+  // The day book. A purchase brings metal IN, so these rows carry SIGN '+' where a sale's carry '-'.
+  'ROJ_MEL_DATA',
   'TAX_DATA',
 ];
 const DAY = '2024-04-10';
@@ -867,6 +869,26 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       expect(String(row.LEDR_KEY).trim().length).toBeGreaterThan(10);
     }
   }, 30_000);
+
+  it('projects the purchase into an INWARD Rojmel (metal in, party credited)', async () => {
+    // The mirror of the sale case. Verified against the real desktop database: books 035/037 (gold
+    // purchase) write IT_TYPE 'G' with SIGN '+' and 036/038 (silver) write 'S' '+', where the
+    // tax-invoice books write '-'. Getting the sign wrong would make a purchase look like a sale in
+    // the day book and reverse the shop's metal position.
+    await createPurchase(runtime, purchaseInput(), firstLines);
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "AC_CODE","IT_TYPE","SIGN","DR_AMT"::float dr,"CR_AMT"::float cr,"ITM_GWT"::float gwt
+         FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(rows.length).toBeGreaterThan(0);
+    const metal = rows.filter((r) => r.IT_TYPE !== 'A');
+    expect(metal.length).toBeGreaterThan(0);
+    expect(metal.every((r) => r.SIGN === '+')).toBe(true); // metal IN
+    expect(metal.every((r) => Number(r.gwt ?? 0) > 0)).toBe(true);
+    // Expense debited on an inward voucher, the opposite of a sale's credited revenue.
+    expect(metal.every((r) => Number(r.dr ?? 0) > 0 && Number(r.cr ?? 0) === 0)).toBe(true);
+  });
 
   it('writes exactly the declared set of tables, so a dropped write cannot pass unnoticed', async () => {
     // Same guard as the sales suite, for the reason established there: dropping every tax row from a voucher

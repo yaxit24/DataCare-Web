@@ -14,6 +14,7 @@ import { payoutLegs } from '../finance/tender.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
+import { buildSaleRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import {
   deleteVoucherWriteSetTx,
   nextHiddenVoucherNoTx,
@@ -533,6 +534,38 @@ export async function createSaleReturn(
       VCH_NO: hdVchNo,
       BOOK_NAME: bookPolicy.bookName,
     });
+    // The Rojmel, inward. A sales return brings metal BACK IN, so its rows carry SIGN '+' and mirror the
+    // original sale: the revenue account is debited and the party credited. IT_TYPE comes from the
+    // line's own item type, which SL_DETL_RTN already records.
+    const rojmelRows = buildSaleRojmel(
+      {
+        scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
+        key,
+        coBook: key.CO_BOOK,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: bookPolicy.vchType,
+        bookName: bookPolicy.bookName,
+        partyName: input.acName ?? '',
+        partyCode: input.acCode,
+      },
+      computed.map((line, index) => {
+        const item = String(line.in.itCode ?? '').trim();
+        return {
+          lineNo: index + 1,
+          revenueAc: saleAcByItem[item] ?? salesAc,
+          amount: line.calc.net,
+          metal: rojmelMetalFor(line.in.itType),
+          pcs: num(line.in.pcs),
+          grossWt: num(line.in.grossWt),
+          netWt: num(line.in.netWt),
+          rate: num(line.in.rate),
+        };
+      }),
+      { taxAc, taxAmount: totals.tax, partyAmount: totals.total },
+      false, // inward: metal returns to stock, party credited
+    );
+
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: bookPolicy.bookName,
@@ -541,6 +574,7 @@ export async function createSaleReturn(
         { table: 'SL_DETL_RTN', rows: detl },
         { table: 'MAIN_STOCK', rows: mainStock },
         ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return { vchNo, totals };

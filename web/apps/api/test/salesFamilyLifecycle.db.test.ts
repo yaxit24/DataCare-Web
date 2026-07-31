@@ -41,6 +41,16 @@ const TENANT = 'sales-family-lifecycle';
 const CO = '01';
 const LC = '01';
 const YEAR = '2024-2025';
+/** Exact write set of a sale return, pinned so an extra or dropped write fails by name. */
+const FOOTPRINT_SALE_RETURN: string[] = [
+  'AC_DATA',
+  'MAIN_STOCK',
+  // The day book. A return brings metal BACK IN, so its rows carry SIGN '+' where a sale's carry '-'.
+  'ROJ_MEL_DATA',
+  'SL_DATA',
+  'SL_DETL_RTN',
+  'TAX_DATA',
+];
 const DAY = '2024-04-10';
 const EDIT_DAY = '2024-04-11';
 
@@ -1307,12 +1317,30 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(tables.length).toBeGreaterThan(30);
     const touched = await footprintOf(owner, tables, TENANT, vch);
     expect(touched.length, 'a return must write something').toBeGreaterThan(0);
-    for (const required of ['SL_DETL_RTN', 'AC_DATA']) {
-      expect(touched, `a sale return must write ${required}`).toContain(required);
-    }
+    // Asserted as an exact SET, not a subset. This used to be a `toContain` loop over two tables,
+    // which is why adding the Rojmel write here failed nothing - a subset assertion cannot see an
+    // unexpected EXTRA write, and an extra write is how a duplicate ledger posting appears.
+    expect(touched).toEqual(FOOTPRINT_SALE_RETURN);
     const legs = await ledgerLegs(owner, TENANT, vch);
     expect(legs.dr, 'the reversal must be posted').toBeGreaterThan(0);
     expect(legs.dr, 'and it must balance').toBeCloseTo(legs.cr, 2);
+  });
+
+  it('a return’s Rojmel reverses direction: metal comes back IN', async () => {
+    const created = await createSaleReturn(runtime, returnInput(), returnLines);
+    const vch = String(created.vchNo).padStart(5, '0');
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "IT_TYPE","SIGN","DR_AMT"::float dr,"CR_AMT"::float cr,"ITM_GWT"::float gwt
+         FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      vch,
+    )) as Array<Record<string, unknown>>;
+    const metal = rows.filter((r) => r.IT_TYPE !== 'A');
+    expect(metal.length).toBeGreaterThan(0);
+    // '+' not '-': the shop's metal position goes UP on a return. Inverting this would make a return
+    // look like another sale in the day book and double the metal sold.
+    expect(metal.every((r) => r.SIGN === '+')).toBe(true);
+    expect(metal.every((r) => Number(r.gwt ?? 0) > 0)).toBe(true);
   });
 
   it('a sales order posts the ledger only when it carries an advance', async () => {
