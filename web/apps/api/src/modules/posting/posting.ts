@@ -83,7 +83,12 @@ function enrichLedgerLine(
     ...line,
     LEDR_KEY:
       line.LEDR_KEY ??
-      `${line.CO_CODE ?? ''}${line.LC_CODE ?? ''}${line.CO_YEAR ?? ''}${line.CO_BOOK ?? ''}${pad(line.VCH_NO, 6)}${pad(srno, 2)}`,
+      // VCH_NO is FIVE characters, not six. Measured on the real customer database: AC_DATA keys for a sale
+      // are 23 characters and decompose as CO_CODE(2) LC_CODE(2) CO_YEAR(9) CO_BOOK(3) VCH_NO(5) TYPE(2) -
+      // `01002024-20250270000101` - which is the same layout already verified byte-for-byte for
+      // ROJ_MEL_DATA. Padding to six produced a 24-character key with an extra zero, so every web ledger
+      // key differed from the desktop's in a column that is part of the primary key.
+      `${line.CO_CODE ?? ''}${line.LC_CODE ?? ''}${line.CO_YEAR ?? ''}${line.CO_BOOK ?? ''}${pad(line.VCH_NO, 5)}${pad(srno, 2)}`,
     VCH_DATE: line.VCH_DATE ?? rowDate,
     IT_TYPE: line.IT_TYPE ?? 'A',
     DATA_TYPE: line.DATA_TYPE ?? 'A',
