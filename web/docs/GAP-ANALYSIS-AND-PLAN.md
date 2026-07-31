@@ -380,3 +380,39 @@ points and UPI per line. Beyond the sale, `Ac_Rojmel.cs` holds about 25 more nam
 issue and receipt, dhrn issue/receipt/interest, loans, VP, tag weight difference, employee JV,
 bill-to-bill and the repair paths — each a defined recipe rather than something to infer. Rate cut 064 and
 the non-cash settlement pairs, both deferred earlier for want of a derivation, are among them.
+
+---
+
+## Rate cut resolved: the routine named after it is dead code here
+
+Rate cut (book 064) was deferred twice for want of a derivation. The source resolves it, and not where I
+expected — which turns out to be the more useful finding.
+
+`Fine_CUT_Rojmel` is the obvious candidate and is **the wrong routine**. It reads `CUT_DETL` and
+`CUT_DATA`, and both tables hold **0 rows** in the real database. This company never used them, so that
+routine cannot be what produced book 064's 66 Rojmel rows.
+
+Book 064 writes `RATE_CUT_DATA` (40 rows). In `Ac_Rojmel.cs` that table is read by exactly three routines:
+**`Wh_Sales_Rojmel`**, `Wh_Sales_Rtn_Rojmel` and `VP_Rojmel`. Corroborated independently by `RP_ROJMEL`'s
+own union query, which pulls `RATE_CUT_DATA` filtered to
+`MAIN_BOOK IN ('WH SALES','RATE CUT','BUL WH SALE','TOUR SALES')`. **Rate cut and wholesale sales are one
+family to the desktop**, because they share a table.
+
+So the recipe is `Wh_Sales_Rojmel`, and the web already writes `ROJ_MEL_DATA` from the sibling
+`wholesaleSaleReturn.ts`. `rateCut.ts` already lists `ROJ_MEL_DATA` in its cleanup set, so the delete side
+is ready and only the write is missing.
+
+### The correction to my own method
+
+An hour earlier I concluded "read the source first" after finding that sampling could not enumerate code
+paths which never fired. That lesson is right but incomplete, and following it alone would have led me
+straight into transcribing `Fine_CUT_Rojmel` faithfully against tables that hold no data.
+
+The rule is **source for what EXISTS, data for what RUNS**. Neither is sufficient alone:
+
+- sampling data cannot enumerate code paths that never fired — that is how the settlement rows hid;
+- reading source cannot tell you which paths are live — that is how `Fine_CUT_Rojmel` nearly caught me.
+
+The check that separated them cost one query: **count the rows in the tables a routine reads.** That is
+now the first thing to do with any of the ~25 remaining routines, before writing a line of code against
+one.
