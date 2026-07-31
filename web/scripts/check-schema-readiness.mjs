@@ -36,7 +36,26 @@ import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
-const CONTRACT = path.resolve(repo, '..', 'project-memory', 'parity', 'DESKTOP-INIT-SCHEMA.json');
+// PRIMARY denominator: the schema of the REAL customer database (Live24), 145 tables / 5231 columns,
+// captured by querying it. This replaced DESKTOP-INIT-SCHEMA.json as the contract on 2026-08-01.
+//
+// Why: DESKTOP-INIT-SCHEMA.json was extracted from decompiled DDL strings in MS_UPDATE's runtime
+// table-creation buttons. Measured against the real database it OVER-CLAIMS 19 tables belonging to
+// initialisers this company never ran, MISSES 9 tables the installer script creates, and finds only ~64%
+// of the real columns. So it reported "96.9%" against a partly fictional denominator while the true
+// figure against the real schema is 100%. A gate that prints a misleading number every run is worse than
+// no gate, because the number gets quoted.
+//
+// The old contract is still checked and reported SECOND, so the runtime-DDL surface is not lost sight of —
+// but it no longer decides the headline figure.
+const CONTRACT = path.resolve(repo, '..', 'project-memory', 'parity', 'DESKTOP-REAL-SCHEMA.json');
+const INIT_CONTRACT = path.resolve(
+  repo,
+  '..',
+  'project-memory',
+  'parity',
+  'DESKTOP-INIT-SCHEMA.json',
+);
 const BASELINE = path.resolve(repo, 'parity', 'schema-readiness-baseline.json');
 
 const url = process.env.MIGRATE_DATABASE_URL || process.env.DATABASE_URL;
@@ -46,6 +65,7 @@ if (!url) {
 }
 
 const contract = JSON.parse(readFileSync(CONTRACT, 'utf8'));
+const initContract = JSON.parse(readFileSync(INIT_CONTRACT, 'utf8'));
 const baseline = JSON.parse(readFileSync(BASELINE, 'utf8'));
 
 // pnpm hoists nothing to the workspace root, so the client is resolved from the package that depends on it.
@@ -82,8 +102,13 @@ for (const [table, cols] of Object.entries(contract.tables)) {
 
 const allowed = new Set(Object.keys(baseline.absentColumns ?? {}));
 const unexpected = missingColumns.filter((k) => !allowed.has(k));
-// A baselined column that now exists must be removed from the baseline, or the list silently rots and stops
-// describing reality.
+// A baselined entry the contract no longer reports as missing must be removed, or the list silently rots.
+//
+// The wording matters. This message used to say "now exist", which is wrong and briefly misled a reader:
+// an entry stops appearing in `missingColumns` either because the column was ADDED or because the CONTRACT
+// no longer expects it. Those were the same thing while the contract was fixed; they diverged the moment it
+// was repointed at the real schema, when all 102 baselined entries fell out at once and the old message
+// claimed they had all appeared.
 const staleBaseline = [...allowed].filter((k) => !missingColumns.includes(k));
 
 const presentColumns = expectedColumns - missingColumns.length;
@@ -99,10 +124,34 @@ if (unexpected.length) {
 }
 if (staleBaseline.length) {
   console.error(
-    `SCHEMA_READINESS_FAIL baseline lists ${staleBaseline.length} column(s) that now exist; remove them:\n  ${staleBaseline.join('\n  ')}`,
+    `SCHEMA_READINESS_FAIL baseline lists ${staleBaseline.length} column(s) the contract no longer reports missing (either added, or no longer expected); remove them:\n  ${staleBaseline.join('\n  ')}`,
   );
 }
 if (missingTables.length || unexpected.length || staleBaseline.length) process.exit(1);
+
+// Secondary, informational only: how the web measures against the runtime-DDL contract. Reported so the
+// surface MS_UPDATE can create is still visible, but it does not gate.
+{
+  let it = 0,
+    ic = 0,
+    missT = 0,
+    missC = 0;
+  for (const [table, cols] of Object.entries(initContract.tables)) {
+    it += 1;
+    if (!liveTables.has(table)) {
+      missT += 1;
+      continue;
+    }
+    for (const col of cols) {
+      ic += 1;
+      if (!live.has(`${table}.${col}`)) missC += 1;
+    }
+  }
+  console.log(
+    `SCHEMA_READINESS_INFO runtime-DDL contract: tables ${it - missT}/${it}, ` +
+      `columns ${ic - missC}/${ic} (informational; over-claims 19 tables and misses 9 the installer creates)`,
+  );
+}
 
 console.log(
   `SCHEMA_READINESS_OK tables ${expectedTables}/${expectedTables}, ` +
