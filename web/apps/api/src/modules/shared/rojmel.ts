@@ -62,6 +62,17 @@ export const ROJMEL_ROW_TYPE = {
   KASAR: '13',
   ADVANCE: '14',
   OLD_METAL: '16',
+  /**
+   * Round-off. **SOURCE-DERIVED, NOT VERIFIED AGAINST DATA** — unlike every other type here.
+   *
+   * This company's database has `ROF_AMT` non-zero on ZERO of 190 sales, so there is no real row to
+   * check against; the same is true of `CARD_AMT`, `DISC_AMT` and `TCS_AMT`. The shape below comes from
+   * `Ac_Rojmel.Sales_Rojmel` alone, and that file has already been shown to be a LATER version than the
+   * code which wrote this data (its sale item rows are type `'02'`, the data's are `'01'`). So the
+   * amount, account and direction are trustworthy; the type code is a best reading and cannot be
+   * confirmed until a database that actually uses round-off is available.
+   */
+  ROUND_OFF: '22',
 } as const;
 
 export type RojmelRowType = (typeof ROJMEL_ROW_TYPE)[keyof typeof ROJMEL_ROW_TYPE];
@@ -172,7 +183,7 @@ export interface RojmelContext {
  * `BOOK_DETL` slot rather than being chosen by the caller.
  */
 export interface RojmelSettlement {
-  kind: 'cheque' | 'kasar' | 'advance' | 'oldMetal';
+  kind: 'cheque' | 'kasar' | 'advance' | 'oldMetal' | 'roundOff';
   account: string;
   amount: number;
   /** Old-metal rows carry the line's weight; the others do not. */
@@ -401,9 +412,25 @@ export function buildSaleRojmel(
     kasar: ROJMEL_ROW_TYPE.KASAR,
     advance: ROJMEL_ROW_TYPE.ADVANCE,
     oldMetal: ROJMEL_ROW_TYPE.OLD_METAL,
+    roundOff: ROJMEL_ROW_TYPE.ROUND_OFF,
   };
   for (const st of legs.settlements ?? []) {
     if (!st.amount) continue; // the desktop guards every settlement insert with `<> 0`
+    if (st.kind === 'roundOff') {
+      // Round-off is shaped differently from the other settlements: it names the PARTY in AC_CODE with
+      // the book's slot-5 account as contra, and it splits on its own sign rather than on the voucher
+      // direction — `CASE WHEN ROF_AMT > 0 THEN ROF_AMT ELSE 0` on the credit side and the mirror on the
+      // debit. Note the desktop puts the NEGATIVE value straight into DR_AMT rather than its absolute
+      // value; that is preserved here rather than tidied, because a report summing DR_AMT depends on it.
+      rows.push({
+        ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.ROUND_OFF)),
+        AC_CODE: ctx.partyCode,
+        LD_CODE: st.account,
+        CR_AMT: st.amount > 0 ? st.amount : 0,
+        DR_AMT: st.amount < 0 ? st.amount : 0,
+      });
+      continue;
+    }
     rows.push({
       ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, TYPE_OF[st.kind], st.lineNo)),
       AC_CODE: st.account,

@@ -1560,6 +1560,9 @@ async function writeSaleTx(
         { kind: 'cheque' as const, account: text(input.bankAc) || 'BANK', amount: chequeAmt },
         { kind: 'kasar' as const, account: kasarAc, amount: kasar },
         { kind: 'advance' as const, account: advanceAc, amount: orderAdjust },
+        // Slot 5 is the book's round-off/discount account. SOURCE-ONLY: this company's data has ROF_AMT
+        // non-zero on zero of 190 sales, so there is no real row to check the shape against.
+        { kind: 'roundOff' as const, account: roundAc, amount: totals.roundOff },
         ...oldGoldDetl.map((g, i) => ({
           kind: 'oldMetal' as const,
           account: String((g as any).AC_CODE ?? input.acCode),

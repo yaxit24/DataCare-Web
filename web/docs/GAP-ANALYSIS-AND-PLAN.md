@@ -337,3 +337,46 @@ A Rojmel-backed day book would now cover most families but still not cash, which
 frequent kind of voucher in this shop (546 ledger rows across books 001 and 002). Until cash is written,
 switching `F11` would show fewer vouchers than the current `AC_DATA`-backed day book — more faithful per
 row, less complete overall. That is a regression a shop would notice immediately.
+
+---
+
+## Rojmel row types: what is verified, and what is not
+
+Eight of the sale's row types are implemented. The distinction between the first seven and the eighth
+matters more than the count:
+
+| Type      | Meaning                         | Evidence                                               |
+| --------- | ------------------------------- | ------------------------------------------------------ |
+| `01`+line | item lines                      | reproduces the reference sale byte for byte            |
+| `02`      | party, conditional on `BILL_OS` | 47 sales at zero carry none; all 42 non-zero carry one |
+| `04`      | tax                             | 91 real rows                                           |
+| `11`      | cheque                          | 17/17 equal `CHQ_AMT`                                  |
+| `13`      | kasar                           | 100/100 equal `KASAR_AMT`                              |
+| `14`      | advance                         | 23/23 equal `ADV_AMT`                                  |
+| `16`      | old metal                       | `SL_PR_DETL` lines, weight on a money row              |
+| `22`      | round-off                       | **SOURCE ONLY — no real row exists to check**          |
+
+**The boundary is worth stating plainly.** This company's database has `ROF_AMT`, `CARD_AMT`, `DISC_AMT`
+and `TCS_AMT` non-zero on **zero** of 190 sales. For those families the only authority is
+`Ac_Rojmel.cs`, and that file has already been shown to be a **later version** than the code which wrote
+this data — its sale item rows are type `'02'` where the data's are `'01'`. So for round-off the amount,
+account and direction are trustworthy while the type code is a best reading, and that is recorded in the
+code rather than smoothed over.
+
+Card, discount and TCS are **not** implemented. Implementing three more row types on unverifiable type
+codes would add surface without adding confidence.
+
+### Why sampling could not have found any of the settlement rows
+
+Every settlement insert in `Sales_Rojmel` is guarded by `AND <column> <> 0`. A sale settled wholly in cash
+emits none of them, so in the data those code paths never fired. **Absence in output is
+indistinguishable from absence in code**, and only reading the source separates the two. Measurement
+verifies rules already suspected; it cannot enumerate rules nobody knew to look for.
+
+### Still available from the source
+
+`Sales_Rojmel` can also emit TCS, hallmarking + its tax, TDS, cash-paid, card in two variants, discount,
+points and UPI per line. Beyond the sale, `Ac_Rojmel.cs` holds about 25 more named routines — karigar
+issue and receipt, dhrn issue/receipt/interest, loans, VP, tag weight difference, employee JV,
+bill-to-bill and the repair paths — each a defined recipe rather than something to infer. Rate cut 064 and
+the non-cash settlement pairs, both deferred earlier for want of a derivation, are among them.

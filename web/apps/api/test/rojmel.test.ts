@@ -356,3 +356,45 @@ describe('settlement rows appear only when their amount is non-zero', () => {
     expect(rows.filter((r) => r.IT_TYPE !== 'A')).toHaveLength(2);
   });
 });
+
+describe('round-off (SOURCE-DERIVED, unverified against data)', () => {
+  // Everything else in this file is checked against real rows. This is not: the company's database has
+  // ROF_AMT non-zero on ZERO of 190 sales, and the same holds for CARD_AMT, DISC_AMT and TCS_AMT. The
+  // shape comes from Ac_Rojmel.Sales_Rojmel alone, and that file is a LATER version than the code that
+  // wrote the data. Amount, account and direction are trustworthy; the type code is a best reading.
+  it('names the PARTY with the book account as contra, unlike the other settlements', () => {
+    const rows = buildSaleRojmel(ctx, lines, {
+      partyAmount: 1560,
+      settlements: [{ kind: 'roundOff', account: '00076', amount: 0.4 }],
+    });
+    const rof = rows.find((r) => String(r.LEDR_KEY).slice(21, 23) === '22')!;
+    expect(rof.AC_CODE).toBe(ctx.partyCode); // the party, not the round-off account
+    expect(rof.LD_CODE).toBe('00076'); // the book's slot-5 account as contra
+  });
+
+  it('splits on its OWN sign, not the voucher direction', () => {
+    const up = buildSaleRojmel(ctx, lines, {
+      partyAmount: 1560,
+      settlements: [{ kind: 'roundOff', account: '00076', amount: 0.4 }],
+    }).find((r) => String(r.LEDR_KEY).slice(21, 23) === '22')!;
+    expect(up.CR_AMT).toBe(0.4);
+    expect(up.DR_AMT).toBe(0);
+
+    const down = buildSaleRojmel(ctx, lines, {
+      partyAmount: 1560,
+      settlements: [{ kind: 'roundOff', account: '00076', amount: -0.35 }],
+    }).find((r) => String(r.LEDR_KEY).slice(21, 23) === '22')!;
+    // The desktop puts the NEGATIVE value straight into DR_AMT rather than its absolute value. Preserved
+    // rather than tidied: a report summing DR_AMT depends on it.
+    expect(down.DR_AMT).toBe(-0.35);
+    expect(down.CR_AMT).toBe(0);
+  });
+
+  it('is omitted when the bill rounds to nothing', () => {
+    const rows = buildSaleRojmel(ctx, lines, {
+      partyAmount: 1560,
+      settlements: [{ kind: 'roundOff', account: '00076', amount: 0 }],
+    });
+    expect(rows.some((r) => String(r.LEDR_KEY).slice(21, 23) === '22')).toBe(false);
+  });
+});
