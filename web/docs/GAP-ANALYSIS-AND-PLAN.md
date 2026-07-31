@@ -494,25 +494,25 @@ arrived one step after I wrote the rule down.
 The measure with no inference in it at all is simply: **count the real `ROJ_MEL_DATA` rows per book.**
 3179 rows across 38 books.
 
-| Book                                           | Rows           | Web                 |
-| ---------------------------------------------- | -------------- | ------------------- |
-| 074 Member Monthly Entry                       | 1635           | written             |
-| 026 Gold Tax Invoice Old                       | 222            | written             |
-| 032 Estimate                                   | 208            | written             |
-| 002 Cash Payment                               | 185            | written             |
-| 001 Cash Received                              | 106            | written             |
-| 027 Silver Tax Invoice Old                     | 94             | written             |
-| 017 Contra Entry                               | 74             | written             |
-| **064 Rate Cut / Fine issue-receipt**          | **66**         | **not written**     |
-| 035 Gold Purchase                              | 64             | written             |
-| **020 Sales Order**                            | **55**         | **not written**     |
-| 012 / 009 / 014 / 005 / 013 bank pay & receipt | 46+42+40+22+20 | written (cash path) |
-| **076 Member Advance Adjust**                  | **37**         | **not written**     |
-| **034 Wh Sales**                               | **32**         | partly              |
-| 029 Gold Tax Invoice                           | 29             | written             |
-| **052 Karigar Receipt**                        | **28**         | **not written**     |
-| **078 Fine Jv**                                | **28**         | **not written**     |
-| **043 Gold URD Purchase Old**                  | **27**         | **not written**     |
+| Book                                           | Rows           | Web                     |
+| ---------------------------------------------- | -------------- | ----------------------- |
+| 074 Member Monthly Entry                       | 1635           | written                 |
+| 026 Gold Tax Invoice Old                       | 222            | written                 |
+| 032 Estimate                                   | 208            | written                 |
+| 002 Cash Payment                               | 185            | written                 |
+| 001 Cash Received                              | 106            | written                 |
+| 027 Silver Tax Invoice Old                     | 94             | written                 |
+| 017 Contra Entry                               | 74             | written                 |
+| 064 Rate Cut / Fine issue-receipt              | 66             | **written** (sale side) |
+| 035 Gold Purchase                              | 64             | written                 |
+| **020 Sales Order**                            | **55**         | **not written**         |
+| 012 / 009 / 014 / 005 / 013 bank pay & receipt | 46+42+40+22+20 | written (cash path)     |
+| **076 Member Advance Adjust**                  | **37**         | **not written**         |
+| **034 Wh Sales**                               | **32**         | partly                  |
+| 029 Gold Tax Invoice                           | 29             | written                 |
+| **052 Karigar Receipt**                        | **28**         | **not written**         |
+| **078 Fine Jv**                                | **28**         | **not written**         |
+| **043 Gold URD Purchase Old**                  | **27**         | **not written**         |
 
 ### Where that leaves coverage
 
