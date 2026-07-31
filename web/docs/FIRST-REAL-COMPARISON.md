@@ -18,11 +18,11 @@ acting on.
 
 Reporting "118 differences" would overstate the case. Broken down by what each actually is:
 
-| Class                             | Count  | What it means                                                                     |
-| --------------------------------- | ------ | --------------------------------------------------------------------------------- |
-| **Differ artifact**               | **19** | Not differences. The two sides canonicalise the same number to different strings. |
-| **Column unpopulated by the web** | **58** | Real, but a distinct class: the desktop writes a value, the web writes NULL.      |
-| **Genuine value difference**      | **41** | Of which roughly half are the differ pairing the wrong rows — see §2.             |
+| Class                             | Count  | What it means                                                                |
+| --------------------------------- | ------ | ---------------------------------------------------------------------------- |
+| **Schema type mismatch**          | **19** | _Was written up as a differ artifact. It is not — see the retraction below._ |
+| **Column unpopulated by the web** | **58** | Real, but a distinct class: the desktop writes a value, the web writes NULL. |
+| **Genuine value difference**      | **41** | Of which roughly half are the differ pairing the wrong rows — see §2.        |
 
 So the honest headline is **≈20 substantive behavioural differences**, concentrated in three rules, plus 58
 unpopulated columns, plus two defects in the comparison tool itself.
@@ -34,7 +34,35 @@ unpopulated columns, plus two defects in the comparison tool itself.
 Both inflate and obscure the result, and neither was visible while the harness had never run on real data.
 The 24 existing unit tests pass because they use synthetic bundles where both sides share a schema.
 
-### 2.1 Numeric scale is applied per side, not commonly
+### 2.1 RETRACTED — this was not a differ defect
+
+**What I wrote first:** that `canonicalise` applies each side's own numeric scale, so an identical zero
+renders `0.000000` against `0.00`.
+
+**Why it was wrong:** `comparisonScale` already takes `Math.min` of the two declared scales, deliberately, so
+neither side is held to precision it does not store. The differ was behaving correctly.
+
+**What is actually happening:** the two columns are genuinely different types.
+
+```
+SL_DATA.ADV_AMT   desktop float   web character varying
+```
+
+The desktop value takes the numeric branch and renders `0.000000`; the web value takes the **text** branch and
+renders `0`. The differ reported a real difference and I misattributed it to the tool.
+
+Measured across the whole schema this is systematic: **226 of 5231 shared columns (4.3%) are numeric on the
+desktop and text in Postgres — 226 in that direction, zero in the other.** Worst affected:
+`RATE_CUT_DATA` 40, `SL_DATA` 22, `BAR_DETL` 16, `GROUP_MAST` 14, `SL_DETL` 14, `RATE_CUT_ISU` 14.
+
+It matters because `SUM` needs a cast that can throw at query time, `ORDER BY` sorts `'9'` after `'10'`, and
+the column carries no domain guarantee. `pnpm type:parity` now gates it: the 226 are baselined so a NEW one
+fails, exit code 1, control proven by removing one from the baseline.
+
+**The lesson is one already recorded twice:** the first explanation that fits is not evidence. I had a
+plausible mechanism and did not check the column metadata until the numbers refused to add up.
+
+### 2.2 Row pairing cannot tell two lines apart
 
 `canonicalise(value, type, scale)` in `parity/bundle.ts:188` formats with `fixed(n, scale)` using **each
 side's own declared scale**. SQL Server `numeric(18,6)` against Postgres `numeric(_,2)` turns an identical

@@ -185,6 +185,18 @@ depends on it.
 
 Types were read from `information_schema`, never assumed.
 
+⚠️ **Correction, and it changes how the rest of this section reads.** These varchar-where-you-expect-numeric
+columns were described here as schema facts to work around, with the implication that they mirror the desktop.
+**They do not.** Measured against the real database, **226 of 5231 shared columns (4.3%) are numeric on the
+desktop and text in Postgres, and the direction is entirely one-way — 226 desktop-numeric to web-text, zero
+the reverse.** `BAL_GR.AVG_FINE` is `float` on the desktop. `RATE_CUT_DATA.CONV_RATE` is `float`.
+`YEAR_MAST.OP_DATE` is `datetime`. So the `VAL()` cast in `closingStock.ts` is compensating for a migration
+defect, not reproducing desktop behaviour.
+
+`pnpm schema:readiness` reports 100% while this is true, because its contract
+(`DESKTOP-REAL-SCHEMA.json`) is a list of column **names** with no type information — it measures presence and
+has never compared a type. `pnpm type:parity` now measures types, with the 226 baselined so a new one fails.
+
 | Fact                                                                                                                      | Consequence                                                                                                                                  |
 | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `BAL_GR.AVG_FINE/AVG_AMT/AVG_RATE/AVG_NWT/TRAD_AMT/AVG_TOUCH` are **varchar** while `PCS_RATE/TOT_PCS/OP_AMT` are numeric | `closingStock.ts` needs a `VAL()` regex cast                                                                                                 |

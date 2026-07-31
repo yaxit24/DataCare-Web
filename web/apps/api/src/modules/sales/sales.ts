@@ -1004,7 +1004,15 @@ async function writeSaleTx(
       VCH_SRNO: issuedTags.get(idx)?.VCH_SRNO ?? 0,
       TR_TYPE: 'S',
       ITM_SIGN: '-',
-      ITM_QTY: num(c.in.netWt) || num(c.in.pcs) || 1,
+      // ITM_QTY is a stock-MOVEMENT count, not a weight. Measured on the real customer database: every one
+      // of the 267 MAIN_STOCK rows on the sale books (026/027/029/030/032) holds exactly 1, and across all
+      // 1856 rows it is an integer without exception - 1792 are 1, the rest small signed counts on other
+      // books. It coincides with ITM_PCS on 95% of rows only because most lines are a single piece; where
+      // pieces is 2 the desktop still writes 1.
+      //
+      // This previously wrote netWt, so a 10.360 g line put 10.360 in a column whose real domain is a small
+      // signed integer. Found by replaying a real voucher: desktop 1 against web 10.360.
+      ITM_QTY: 1,
       ITM_PCS: num(c.in.pcs) || 1,
       ITM_GWT: movementWeight.grossWt,
       ITM_NWT: movementWeight.netWt,
@@ -1352,7 +1360,9 @@ async function writeSaleTx(
     IT_CODE: g.itCode ?? 'OG',
     TR_TYPE: 'P',
     ITM_SIGN: '+',
-    ITM_QTY: num(g.netWt) || 1,
+    // Same rule as the sale line above - a movement count, not a weight. Old-metal inward rows on the sale
+    // books are inside the 267 measured and are also all 1.
+    ITM_QTY: 1,
     ITM_PCS: num(g.pcs) || 1,
   }));
 

@@ -47,7 +47,14 @@ export const ROW_KEYS: Record<string, readonly string[]> = {
   MFG_DETL: ['SR_NO'],
   // Tag rows are identified by the tag instance.
   BAR_DETL: ['TAG_NO', 'VCH_SRNO'],
-  MAIN_STOCK: ['TAG_NO', 'VCH_SRNO', 'ITM_SIGN'],
+  // IT_CODE leads, because the other three cannot tell two lines apart on an UNTAGGED sale - TAG_NO 'N',
+  // VCH_SRNO 0 and ITM_SIGN '-' are constant across every line, so a real two-line invoice had desktop line 2
+  // compared against web line 1 and every numeric column in both rows reported a difference.
+  //
+  // SR_NO deliberately does NOT lead: the desktop writes SR_NO 1 on BOTH rows of a two-line sale and
+  // distinguishes them by TAG_NO, while the web numbers them 1 and 2. Keying on it would preserve the
+  // mispairing and hide the numbering difference itself, which is a finding worth keeping visible.
+  MAIN_STOCK: ['IT_CODE', 'TAG_NO', 'VCH_SRNO', 'ITM_SIGN'],
   BAR_CAN_DETL: ['TAG_NO', 'VCH_SRNO'],
   // Ledger rows are identified by account and side. Several rows can share an account, so the amount pair is
   // part of the key.
