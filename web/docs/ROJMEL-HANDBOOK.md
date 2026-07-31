@@ -446,14 +446,14 @@ A control that **passes** when inverted means the test does not cover that case.
 
 Ranked by **counted real Rojmel rows**, which is the only ranking that has survived.
 
-| Book                      | Rows | Routine               | `Ac_Rojmel.cs` line | Status                                                                    |
-| ------------------------- | ---- | --------------------- | ------------------- | ------------------------------------------------------------------------- |
-| 020 Sales Order           | 55   | `Order_Rojmel`        | 9                   | **written** — 4 live types of 8                                           |
-| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel`     | 458                 | **written** — 3 live types of 8                                           |
-| 034 Wh Sales              | 32   | `Wh_Sales_Rojmel`     | 221                 | purchase-side types already in the builder                                |
-| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel`       | 364                 | Rojmel only — the `KR_DETL` write gap was a false positive, now retracted |
-| 078 Fine Jv               | 28   | —                     | —                   | identify the routine first                                                |
-| 043 Gold URD Purchase Old | 27   | `Purc_Rojmel` variant | 115                 | check `MAIN_BOOK`                                                         |
+| Book                      | Rows | Routine           | `Ac_Rojmel.cs` line | Status                                                                    |
+| ------------------------- | ---- | ----------------- | ------------------- | ------------------------------------------------------------------------- |
+| 020 Sales Order           | 55   | `Order_Rojmel`    | 9                   | **written** — 4 live types of 8                                           |
+| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel` | 458                 | **written** — 3 live types of 8                                           |
+| 034 Wh Sales              | 32   | `Wh_Sales_Rojmel` | 221                 | **blocked** — the web has no wholesale-SALE path at all                   |
+| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel`   | 364                 | Rojmel only — the `KR_DETL` write gap was a false positive, now retracted |
+| 078 Fine Jv               | 28   | —                 | —                   | identify the routine first                                                |
+| 043 Gold URD Purchase Old | 27   | —                 | —                   | **not a gap** — retired book, `CUR_USE='N'`                               |
 
 ### Dead for this customer — do not build without evidence
 
@@ -498,3 +498,48 @@ The two existing plans are the template. A good one contains:
 Then execute it, expecting the plan itself to be wrong somewhere. On the rate-cut work the plan's own rules
 were wrong on five of nine types, and the plan caught that **because it instructed the implementer to verify
 against data before coding**. A plan that cannot be falsified by its own procedure is not much of a plan.
+
+---
+
+## Queue closed down to two families — `docs/PLAN-ROJMEL-FINAL-THREE.md`
+
+Measuring the last four families reduced them to **two implementable ones**, and the reductions are more
+interesting than the implementations.
+
+| Family                    | Rows | Verdict                                                |
+| ------------------------- | ---- | ------------------------------------------------------ |
+| Fine JV 078               | 28   | **ready** — 2 types, source and data agree exactly     |
+| Karigar Receipt 052       | 28   | **ready** — 4 types, one guard still to derive         |
+| Wh Sales 034              | 32   | **blocked** — no wholesale-sale path exists in the web |
+| Gold URD Purchase Old 043 | 27   | **not a gap** — retired book                           |
+
+### Wholesale is a missing FORM, not a missing projection
+
+`sales/wholesaleSaleReturn.ts` exists; there is no wholesale _sale_ module, function or route — only
+`POST /sales/wholesale-sale-return`. A day book for book 034 would serve a voucher the web cannot create.
+That belongs in the register at a different level than a Rojmel row type, alongside the standing note that
+`TR_TOUR_SALE` and `TR_BUL_SALE` are builds rather than wiring.
+
+It is also the most fragmented family in the file — 11 row types across 32 rows — so it is not cheap even
+once the form exists. Seven of those types are already built in `buildRateCutRojmel`; only `05`, `06`, `25`
+and `28` would be new.
+
+### Book 043 is not a gap at all
+
+`CUR_USE = 'N'` — the book is **disabled**, with `MAIN_BOOK` and `BOOK_TBL_NAME` cleared. Only 2 of 210
+books are in that state. Its name ends in "Old", this company's convention for a superseded book, the same
+as "Gold Tax Invoice Old" (026) which was replaced by 029.
+
+So its 27 rows are historical, and **the web is right not to write them**: an operator cannot select a
+disabled book, so no code path should produce them. They matter only for reading migrated history, which
+`rojmelReport.ts` already does — it reads whatever the table contains regardless of which book wrote it.
+
+This is the first family in the workstream that is **not** a gap, and the coverage arithmetic should treat
+it as out of scope rather than outstanding. Realistic target is therefore **3113 of 3179 (97.9%)**, not 3140.
+
+### A draft error worth recording
+
+The first draft of that plan said book 043 "has no `BOOK_DATA` row" and concluded the book had been deleted.
+It has a row; reading its columns is what revealed `CUR_USE='N'` and changed the decision from "do it last"
+to "drop it". **Fourth time verifying a plan against the data has changed something material** — the
+earlier three were five reversed directions, a stale export table, and the retracted `KR_DETL` gap.
