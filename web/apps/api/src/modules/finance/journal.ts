@@ -1,4 +1,5 @@
 import { withTenant } from '@datacare/db';
+import { buildJournalRojmel } from '../shared/rojmel.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
   assertBalanced,
@@ -43,7 +44,10 @@ export interface JournalResult {
   vchNo: number;
 }
 type Context = { tx: any; identity: VoucherIdentity };
-const WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA'] as const;
+// ROJ_MEL_DATA belongs here, not just in the write set: its primary key is LEDR_KEY alone, so an edit
+// that rewrites the voucher without first deleting the old day-book rows fails on unique constraint
+// 23505 rather than replacing them.
+const WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
 const finite = (v: unknown) => (Number.isFinite(Number(v ?? 0)) ? Number(v ?? 0) : 0);
 
 async function writeJournalTx(
@@ -103,11 +107,41 @@ async function writeJournalTx(
       DATA_TRFR: 'N',
     };
   });
+  // The Rojmel. Every one of the 74 real Rojmel rows on contra book 017 carries the same DR/CR as its
+  // own AC_CODE's ledger leg (100%), and the same test gives 100% on the scheme's 1635 rows — so a
+  // journal projects one day-book row per line. The cash books are excluded deliberately: the same
+  // test matches only 47.2% of book 001 and 5.4% of book 002, so they use a convention not yet derived.
+  const rojmelRows = buildJournalRojmel(
+    {
+      scope: {
+        coCode: input.scope.coCode,
+        lcCode: input.scope.lcCode,
+        coYear: input.scope.coYear!,
+      },
+      key,
+      coBook: key.CO_BOOK,
+      vchNo: key.VCH_NO,
+      vchDate: identity.voucherDate,
+      vchType: book.shortName,
+      bookName: book.name,
+      partyName: '',
+      partyCode: '',
+    },
+    raw.map((line, index) => ({
+      lineNo: index + 1,
+      acCode: line.acCode,
+      drAmt: finite(line.drAmt),
+      crAmt: finite(line.crAmt),
+    })),
+  );
   await insertHiddenIdentityTx(tx, input.scope, identity, book.name);
   await postVoucherTx(tx, input.scope.tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
     bookName: book.name,
-    writes: [{ table: 'CONTRA_DATA', rows }],
+    writes: [
+      { table: 'CONTRA_DATA', rows },
+      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
+    ],
   });
   return { vchNo: identity.vchNo };
 }

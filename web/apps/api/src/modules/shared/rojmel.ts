@@ -315,3 +315,49 @@ export function buildSaleRojmel(
   }
   return rows;
 }
+
+/**
+ * Project a journal / contra voucher into its Rojmel rows.
+ *
+ * Rule established by measurement, not inference: **every one of the 74 real Rojmel rows on contra book
+ * 017 carries the same DR/CR as its own AC_CODE's ledger leg** (100%). The same test on the scheme book
+ * 074 also gives 100% over 1635 rows, so the two families share one rule and this builder is a
+ * generalisation of a verified pattern rather than a new guess.
+ *
+ * The same test is why the CASH books are not implemented: book 001 matches on only 47.2% of rows and
+ * book 002 on 5.4%, so they follow a different convention that has not been derived.
+ *
+ * `LD_CODE` is the contra account. All 37 real contra vouchers carry exactly two rows, so "the other
+ * side" is unambiguous there. For a journal with more than two lines this takes the first account on the
+ * opposite side, consistent with how a sale's party row names the first revenue account — but note that
+ * the multi-line case is NOT covered by the real data examined.
+ */
+export function buildJournalRojmel(
+  ctx: RojmelContext,
+  lines: { lineNo: number; acCode: string; drAmt: number; crAmt: number }[],
+): RojmelRow[] {
+  const firstDr = lines.find((l) => l.drAmt > 0);
+  const firstCr = lines.find((l) => l.crAmt > 0);
+  return lines
+    .filter((l) => l.drAmt > 0 || l.crAmt > 0)
+    .map((l) => {
+      // The contra is the first account on the OTHER side of the entry.
+      const other = l.drAmt > 0 ? firstCr : firstDr;
+      return {
+        ...blank(
+          ctx,
+          rojmelLedrKey(
+            ctx.scope,
+            ctx.coBook,
+            ctx.vchNo,
+            l.drAmt > 0 ? ROJMEL_ROW_TYPE.PARTY : ROJMEL_ROW_TYPE.ITEM,
+            l.lineNo,
+          ),
+        ),
+        AC_CODE: l.acCode,
+        LD_CODE: other?.acCode ?? '',
+        DR_AMT: l.drAmt,
+        CR_AMT: l.crAmt,
+      };
+    });
+}

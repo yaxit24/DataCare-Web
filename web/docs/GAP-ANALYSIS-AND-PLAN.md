@@ -297,3 +297,43 @@ always take the second branch and assert correctly.
 
 Not wired as a blocking gate — that needs the 112 cleared first — so **the suite is still not
 typechecked**, and this document does not claim otherwise.
+
+---
+
+## Rojmel coverage as of 2026-07-31
+
+Derived per family by measurement. The test that settled each: **does a Rojmel row carry the same DR/CR as
+its own `AC_CODE`'s ledger leg?**
+
+| Family                         | Rule                                            | Evidence                                    | Status          |
+| ------------------------------ | ----------------------------------------------- | ------------------------------------------- | --------------- |
+| Sale (and Estimate, same path) | metal row per line + party + tax                | reproduces the reference sale byte for byte | **written**     |
+| Purchase                       | inward mirror, `SIGN` `+`                       | books 035/037 → `G` `+`, 036/038 → `S` `+`  | **written**     |
+| Sales return                   | inward mirror                                   | same rule as purchase                       | **written**     |
+| Scheme instalment 074          | liability row per line, plus a bank receipt row | **1635/1635 rows match (100%)**             | **written**     |
+| Scheme opening 075             | no row — no money moves                         | real 175-member voucher has 0 ledger legs   | **written**     |
+| Contra / journal 017           | one row per line                                | **74/74 rows match (100%)**                 | **written**     |
+| Cash received 001              | not derived                                     | only **50/106 match (47.2%)**               | **not written** |
+| Cash payment 002               | not derived                                     | only **10/185 match (5.4%)**                | **not written** |
+| Rate cut 064                   | not derived                                     | 66 rows, `IT_TYPE` `G`, key type 26         | **not written** |
+
+Already written before this work: VP parcel, wholesale sale return, other commission, gold book, location
+amount, VP adjustment and four repair paths.
+
+### Why cash is deliberately unfinished
+
+Real book 002 voucher 00001 has the Rojmel **debiting** cash 730.00 where `AC_DATA` **credits** it. Book 001
+is stranger still: its first row carries the _counter-party's_ direction while its second and third carry
+their own. A plausible reading is that the cash books use day-book columns — receipts one side, payments
+the other — rather than accounting Dr/Cr.
+
+Plausible is not derived. Guessing a sign on a cash book would misstate the shop's cash position in both
+directions at once, so these three families wait for the convention to be established rather than
+approximated. The 47.2% and 5.4% figures are the measurement that justifies the refusal.
+
+### The report still comes last
+
+A Rojmel-backed day book would now cover most families but still not cash, which is the single most
+frequent kind of voucher in this shop (546 ledger rows across books 001 and 002). Until cash is written,
+switching `F11` would show fewer vouchers than the current `AC_DATA`-backed day book — more faithful per
+row, less complete overall. That is a regression a shop would notice immediately.

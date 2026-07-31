@@ -216,6 +216,8 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
       'EMP_DATA',
       'LDR_ADJ_DATA',
       'CONTRA_DATA',
+      // Its PK is LEDR_KEY alone, so a leftover row makes a reused voucher number collide (23505).
+      'ROJ_MEL_DATA',
       'TEMP_BOOK_DATA',
       'BOOK_DATA',
       'CO_SET',
