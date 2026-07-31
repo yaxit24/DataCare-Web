@@ -416,3 +416,65 @@ The rule is **source for what EXISTS, data for what RUNS**. Neither is sufficien
 The check that separated them cost one query: **count the rows in the tables a routine reads.** That is
 now the first thing to do with any of the ~25 remaining routines, before writing a line of code against
 one.
+
+---
+
+## All 44 Rojmel routines, classified live or dead
+
+Produced by applying the rule from the previous section to every routine in `Ac_Rojmel.cs`: extract the
+tables it reads, then count their rows in the real database. One query settles each.
+
+### Live — the routine's primary table has data (26)
+
+| Routine                                                     | Source rows        | Web status                                   |
+| ----------------------------------------------------------- | ------------------ | -------------------------------------------- |
+| `Schm_RojMel`                                               | `AD_DATA` 8160     | **written**                                  |
+| `Cash_Rojmel` / `Bank_Rojmel`                               | `CASH_DATA` 335    | **written**                                  |
+| `Bill_To_Bill_Rojmel`                                       | `CASH_DATA` 335    | not written                                  |
+| `Sales_Rojmel`                                              | `SL_DATA` 190      | **written** (8 of ~20 row types)             |
+| `SaleReturn_RojMel`                                         | `SL_DATA` 190      | **written**                                  |
+| `EInvoice_Rojmel` · `Item_Sl_Rojmel`                        | `SL_DATA` 190      | not written                                  |
+| `Order_Adj_Rojmel`                                          | `SL_ORD_ADJ` 110   | not written                                  |
+| `Contra_Rojmel`                                             | `CONTRA_DATA` 102  | **written**                                  |
+| `Order_Rojmel`                                              | `SL_ORD_DATA` 76   | not written                                  |
+| `Purc_Rojmel`                                               | `PR_DATA` 74       | **written**                                  |
+| `Purc_Rtn_Rojmel` · `Item_Pr_Rojmel`                        | `PR_DATA` 74       | not written                                  |
+| `Wh_Sales_Rojmel` · `Wh_Sales_Rtn_Rojmel` · `VP_Rojmel`     | `RATE_CUT_DATA` 40 | partly — the wholesale-return path writes it |
+| `Schm_Adj_RojMel`                                           | `AD_ADJ` 26        | not written                                  |
+| `Kr_Isu_Rojmel` · `Kr_Rec_Rojmel` · `OldSale_RojMel`        | `KR_DATA` 17       | not written                                  |
+| `Labour_RojMel` · `Tag_Wt_Diff_Rojmel` · `Tag_Split_Rojmel` | `LBR_DATA` 3       | not written                                  |
+| `Oth_Purc_Rojmel` · `Oth_Comm_Rojmel`                       | `PAY_DATA` 3       | partly — other-commission writes it          |
+
+### Dead for this customer — primary table empty (15)
+
+`DhrnIsu_RojMel`, `DhrnRec_RojMel`, `DhrnIntRec_RojMel`, `Loan_Rec_RojMel`, `Loan_IntRec_RojMel`,
+`Loan_Isu_RojMel` (all `DHRN_*` = 0) · `Rep_CustRec_KrIsu_Rojmel`, `Rep_KrRec_CustIsu_Rojmel`
+(`REP_DATA` = 0) · `Emp_Jv_Rojmel` · `Card_Adj_RojMel` · `VpAdj_Rojmel` · `Jdt_Rec_Rojmel` ·
+`Loct_Amt_Rojmel` · `Stk_InOut_Rojmel` · `Fine_CUT_Rojmel`.
+
+### Tables absent from the schema entirely (3)
+
+`Dg_Gold_Booking_Rojmel` (`DG_GOLD_DATA`), `Fan_Sale_Rojmel` and `Fan_Purc_Rojmel` (`FAN_DATA`,
+`FAN_DETL`). These reference tables that do not exist in this database at all — features never installed.
+
+### The uncomfortable observation
+
+**The web already writes the Rojmel from six paths this customer has never used** — location amount, VP
+adjustment and the four repair paths all sit in the dead list — while not writing it for order adjust
+(110 rows), sales order (76), scheme adjust (26) or karigar (17), which the customer does use.
+
+That is not a coincidence, it is a symptom: those six were implemented because a sibling feature needed
+them, not because anything indicated they mattered. Effort went where the code led rather than where the
+business was. This table is the correction, and it is worth consulting before the next Rojmel commit
+rather than after.
+
+### Priority, by rows rather than by convenience
+
+1. `Order_Adj_Rojmel` — `SL_ORD_ADJ` 110 rows
+2. `Order_Rojmel` — `SL_ORD_DATA` 76
+3. `Wh_Sales_Rojmel` — `RATE_CUT_DATA` 40, and it is the rate-cut recipe
+4. `Schm_Adj_RojMel` — `AD_ADJ` 26
+5. `Kr_Isu_Rojmel` / `Kr_Rec_Rojmel` — `KR_DATA` 17, alongside the `KR_DETL` write gap already recorded
+
+The dhrn and loan families — six routines, the largest single block — can wait until a customer database
+shows them in use. Same for repair, card adjust and manufacturing JDT.
