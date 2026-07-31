@@ -1,4 +1,5 @@
 import { withTenant } from '@datacare/db';
+import { buildFineJvRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/posting.js';
 import {
@@ -35,7 +36,9 @@ export interface FineJvInput {
 export interface FineJvResult {
   vchNo: number;
 }
-const T = ['CONTRA_DATA', 'AC_DATA'] as const,
+// ROJ_MEL_DATA belongs in the reversal set, not only the write set: its primary key is LEDR_KEY alone,
+// so an edit that rewrites without deleting first fails on unique constraint 23505.
+const T = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const,
   r3 = (n: number) => Math.round((n + Number.EPSILON) * 1000) / 1000;
 async function write(tx: any, i: FineJvInput, id: VoucherIdentity) {
   completeFinanceScope(i.scope);
@@ -112,10 +115,42 @@ async function write(tx: any, i: FineJvInput, id: VoucherIdentity) {
     },
   ];
   await insertHiddenIdentityTx(tx, i.scope, id, b.name);
+  // The Rojmel. Book 078 carries 28 real rows in two types, both money-free and both carrying ITM_FINE with
+  // NO gross weight - a fine JV moves pure fine between accounts, so there is nothing to weigh and no cash
+  // involved. Derived from Ac_Rojmel.Contra_Rojmel lines 342/344, where one routine serves both
+  // MAIN_BOOK 'CONTRA' (book 017) and 'FINE JV' (book 078). Source and data agree exactly.
+  //
+  // Built from `rows` - the same CONTRA_DATA rows the write set uses - so the two projections of this
+  // voucher cannot drift apart.
+  const rojmelRows = buildFineJvRojmel(
+    {
+      scope: { coCode: i.scope.coCode, lcCode: i.scope.lcCode, coYear: i.scope.coYear! },
+      key: k,
+      coBook: String(k.CO_BOOK),
+      vchNo: String(k.VCH_NO),
+      vchDate: id.voucherDate,
+      vchType: b.shortName,
+      bookName: b.name,
+      partyName: '',
+      partyCode: '',
+    },
+    rows.map((r: Record<string, unknown>, idx: number) => ({
+      lineNo: Number(r.SR_NO ?? idx + 1),
+      acCode: String(r.AC_CODE ?? ''),
+      ldCode: String(r.LD_CODE ?? ''),
+      metal: rojmelMetalFor(r.IT_TYPE as string),
+      creditFine: Number(r.CR_FINE ?? 0),
+      debitFine: Number(r.DR_FINE ?? 0),
+      description: String(r.IT_DESC ?? '') || undefined,
+    })),
+  );
   await postVoucherTx(tx, i.scope.tenantId, {
     bookName: b.name,
     ledger: { table: 'AC_DATA', lines: ledger },
-    writes: [{ table: 'CONTRA_DATA', rows }],
+    writes: [
+      { table: 'CONTRA_DATA', rows },
+      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
+    ],
   });
   return { vchNo: id.vchNo };
 }

@@ -114,7 +114,12 @@ export function rojmelLedrKey(
   scope: RojmelKeyScope,
   coBook: string,
   vchNo: string,
-  rowType: RojmelRowType | RojmelRateCutRowType | RojmelOrderRowType | RojmelSchemeAdjRowType,
+  rowType:
+    | RojmelRowType
+    | RojmelRateCutRowType
+    | RojmelOrderRowType
+    | RojmelSchemeAdjRowType
+    | RojmelFineJvRowType,
   lineNo?: number,
 ): string {
   const head =
@@ -1011,6 +1016,96 @@ export function buildSchemeAdjRojmel(
         AC_CODE: l.settlementAc,
         LD_CODE: l.schemeAc,
         CR_AMT: l.adjustedAmount,
+      });
+    }
+  }
+  return rows;
+}
+
+/**
+ * Fine-JV row types (book 078), from `Ac_Rojmel.Contra_Rojmel` **lines 342 and 344**.
+ *
+ * One desktop routine serves two books: `MAIN_BOOK = 'CONTRA'` (book 017, see `buildJournalRojmel`) and
+ * `MAIN_BOOK = 'FINE JV'` (book 078, here). Both read `CONTRA_DATA`; the contra book uses its money
+ * columns and the fine JV its `DR_FINE`/`CR_FINE` columns.
+ *
+ * Measured on book 078 — 28 rows, and source and data agree exactly:
+ *
+ *   `01` 14 rows  `SIGN '+'`  `ITM_FINE = CR_FINE`  guard `CR_FINE <> 0`
+ *   `02` 14 rows  `SIGN '-'`  `ITM_FINE = DR_FINE`  guard `DR_FINE <> 0`
+ *
+ * **Both types carry no money and no gross weight**: `DR_AMT`, `CR_AMT` and `ITM_GWT` are zero on all 28
+ * real rows. A fine JV moves pure fine between two accounts — there is no physical article to weigh and
+ * no cash involved, which is exactly what distinguishes it from every other family in this file.
+ *
+ * The equal counts (14 and 14) reflect one pair per voucher: a JV debits one fine position and credits
+ * another, so both guards fire on every well-formed voucher.
+ */
+export const ROJMEL_FINEJV_ROW_TYPE = {
+  /** Fine credited into an account — `SIGN '+'`, metal in. */
+  CREDIT_FINE: '01',
+  /** Fine debited out of an account — `SIGN '-'`, metal out. */
+  DEBIT_FINE: '02',
+} as const;
+
+export type RojmelFineJvRowType =
+  (typeof ROJMEL_FINEJV_ROW_TYPE)[keyof typeof ROJMEL_FINEJV_ROW_TYPE];
+
+/** One `CONTRA_DATA` line of a fine JV. */
+export interface FineJvRojmelLine {
+  lineNo: number;
+  /** `CONTRA_DATA.AC_CODE`. */
+  acCode: string;
+  /** `CONTRA_DATA.LD_CODE` — the contra account. */
+  ldCode: string;
+  metal: Exclude<RojmelMetal, 'A'>;
+  /** `CR_FINE` → type `01`. */
+  creditFine: number;
+  /** `DR_FINE` → type `02`. */
+  debitFine: number;
+  description?: string;
+}
+
+/**
+ * Project a fine JV into its Rojmel rows.
+ *
+ * Sampled real rows: `ac=000939 ld=000275 G '+' fine 36.200`, `ac=000939 ld=000258 G '+' fine 42.240`.
+ * Accounts are copied straight from the `CONTRA_DATA` line — unlike most families in this file, there is
+ * no account flip between row types and no `BOOK_DETL` slot involved.
+ *
+ * A single line can legitimately produce **both** rows: one `CONTRA_DATA` row may carry a debit fine and a
+ * credit fine at once, and the desktop's two inserts are independently guarded.
+ *
+ * Keys are 33 characters — both types carry `Str(A.SR_NO)`, because a JV can move fine across several
+ * account pairs in one voucher and `LEDR_KEY` is the whole primary key.
+ */
+export function buildFineJvRojmel(ctx: RojmelContext, lines: FineJvRojmelLine[]): RojmelRow[] {
+  const rows: RojmelRow[] = [];
+  const key = (t: RojmelFineJvRowType, lineNo: number): string =>
+    rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, t, lineNo);
+
+  for (const l of lines) {
+    // Fine only: no DR_AMT, no CR_AMT, no ITM_GWT. Verified zero on all 28 real rows.
+    if (l.creditFine) {
+      rows.push({
+        ...blank(ctx, key(ROJMEL_FINEJV_ROW_TYPE.CREDIT_FINE, l.lineNo)),
+        AC_CODE: l.acCode,
+        LD_CODE: l.ldCode,
+        IT_TYPE: l.metal,
+        SIGN: '+',
+        ITM_FINE: l.creditFine,
+        IT_DESC: l.description ?? '',
+      });
+    }
+    if (l.debitFine) {
+      rows.push({
+        ...blank(ctx, key(ROJMEL_FINEJV_ROW_TYPE.DEBIT_FINE, l.lineNo)),
+        AC_CODE: l.acCode,
+        LD_CODE: l.ldCode,
+        IT_TYPE: l.metal,
+        SIGN: '-',
+        ITM_FINE: l.debitFine,
+        IT_DESC: l.description ?? '',
       });
     }
   }

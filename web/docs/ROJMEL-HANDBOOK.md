@@ -40,7 +40,7 @@ Five builders written — `buildSaleRojmel`, `buildMoneyRojmel`, `buildCashRojme
 `sales/rateCut.ts`, `purchase/purchase.ts`, `finance/finance.ts`, `finance/journal.ts`,
 `membership/scheme.ts`.
 
-**Coverage: 3057 of the 3179 real Rojmel rows — 96%.** Counted by grouping the real rows by `MAIN_BOOK`,
+**Coverage: 3085 of the 3179 real Rojmel rows — 97%.** Counted by grouping the real rows by `MAIN_BOOK`,
 which is the right granularity: several book codes share one family, so counting by book code
 double-counts effort. Reproduce with:
 
@@ -66,13 +66,13 @@ SELECT '  '+RIGHT(CAST(count(*)+100000 AS varchar),5)+'  '+ISNULL(MAX(b.MAIN_BOO
 | MEMB ADJUST                             | 37     | **written**     |
 | **WH SALES**                            | **32** | partly          |
 | **KARIGAR RECEIPT**                     | **28** | **not written** |
-| **FINE JV**                             | **28** | **not written** |
+| FINE JV                                 | 28     | **written**     |
 | **(no `BOOK_DATA` row — book 043)**     | **27** | **not written** |
 | OTH EXP / OTH INC                       | 2 + 2  | partly          |
 | SALES RETURNE                           | 1      | written         |
 | KARIGAR ISSUE / ORDER CANCEL / BILL REC | 1 each | not written     |
 
-**118 rows remain**, in the four bold families. Note that an earlier figure of "88%" in
+**90 rows remain**: karigar receipt 28 (ready), wholesale 32 (blocked - no web form), URD 27 (not a gap - retired book), plus 3 stragglers. Note that an earlier figure of "88%" in
 `GAP-ANALYSIS-AND-PLAN.md` was computed from a book-code list rather than measured this way; this table
 supersedes it.
 

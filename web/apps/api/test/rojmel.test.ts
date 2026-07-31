@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ROJMEL_ROW_TYPE,
+  buildFineJvRojmel,
   buildSchemeAdjRojmel,
   buildOrderRojmel,
   buildRateCutRojmel,
@@ -791,5 +792,77 @@ describe('scheme adjustment (book 076) — 3 live types of 8', () => {
   it('never emits the five gold-scheme types', () => {
     const types = buildSchemeAdjRojmel(adjCtx, [line()]).map(typeOf);
     for (const dead of ['04', '05', '06', '07', '08']) expect(types).not.toContain(dead);
+  });
+});
+
+describe('fine JV (book 078) — 2 types, the only wholly money-free family', () => {
+  // 14 + 14 = 28, matching the book exactly. Source (Ac_Rojmel.Contra_Rojmel lines 342/344) and data agree.
+  // Sampled real rows: ac=000939 ld=000275 G '+' fine 36.200; ac=000939 ld=000258 G '+' fine 42.240.
+  const jvCtx: RojmelContext = { ...ctx, coBook: '078', partyCode: '' };
+  const line = (over: Record<string, unknown> = {}) => ({
+    lineNo: 1,
+    acCode: '000939',
+    ldCode: '000275',
+    metal: 'G' as const,
+    creditFine: 0,
+    debitFine: 0,
+    ...over,
+  });
+  const typeOf = (r: { LEDR_KEY: unknown }) => String(r.LEDR_KEY).slice(21, 23);
+
+  it('carries fine and NOTHING else — no money, no gross weight', () => {
+    // This is the defining property and what separates a fine JV from every other family here: it moves
+    // pure fine between two accounts, so there is no article to weigh and no cash.
+    const [row] = buildFineJvRojmel(jvCtx, [line({ creditFine: 36.2 })]);
+    expect(row!.ITM_FINE).toBe(36.2);
+    expect(row!.DR_AMT).toBe(0);
+    expect(row!.CR_AMT).toBe(0);
+    expect(row!.ITM_GWT).toBe(0);
+    expect(row!.ITM_NWT).toBe(0);
+    expect(row!.ITM_TOUCH).toBe(0);
+    expect(row!.ITM_RATE).toBe(0);
+  });
+
+  it('credit fine is type 01 with SIGN +, debit fine is type 02 with SIGN -', () => {
+    const cr = buildFineJvRojmel(jvCtx, [line({ creditFine: 5 })])[0]!;
+    expect(typeOf(cr)).toBe('01');
+    expect(cr.SIGN).toBe('+');
+    const dr = buildFineJvRojmel(jvCtx, [line({ debitFine: 5 })])[0]!;
+    expect(typeOf(dr)).toBe('02');
+    expect(dr.SIGN).toBe('-');
+  });
+
+  it('copies the accounts straight across — no flip, no book slot', () => {
+    // Unlike most families in this file there is no account reversal between row types and no BOOK_DETL
+    // slot involved; both rows name the CONTRA_DATA line's own accounts.
+    const rows = buildFineJvRojmel(jvCtx, [line({ creditFine: 5, debitFine: 3 })]);
+    for (const r of rows) {
+      expect(r.AC_CODE).toBe('000939');
+      expect(r.LD_CODE).toBe('000275');
+    }
+  });
+
+  it('one line can produce BOTH rows — the desktop guards the two inserts independently', () => {
+    const rows = buildFineJvRojmel(jvCtx, [line({ creditFine: 5, debitFine: 3 })]);
+    expect(rows.map(typeOf)).toEqual(['01', '02']);
+    expect(rows[0]!.ITM_FINE).toBe(5);
+    expect(rows[1]!.ITM_FINE).toBe(3);
+  });
+
+  it('writes nothing when a line carries no fine at all', () => {
+    expect(buildFineJvRojmel(jvCtx, [line()])).toEqual([]);
+  });
+
+  it('keys are 33 characters and two lines do not collide', () => {
+    const rows = buildFineJvRojmel(jvCtx, [
+      line({ lineNo: 1, creditFine: 5 }),
+      line({ lineNo: 2, creditFine: 7 }),
+    ]);
+    expect(rows.every((r) => String(r.LEDR_KEY).length === 33)).toBe(true);
+    expect(new Set(rows.map((r) => r.LEDR_KEY)).size).toBe(2);
+  });
+
+  it('the metal letter comes from the line, not a default', () => {
+    expect(buildFineJvRojmel(jvCtx, [line({ metal: 'S', creditFine: 1 })])[0]!.IT_TYPE).toBe('S');
   });
 });
