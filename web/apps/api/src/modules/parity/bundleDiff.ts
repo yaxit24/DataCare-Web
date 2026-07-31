@@ -161,16 +161,28 @@ function rowKeyOf(
   row: unknown[],
   index: Map<string, { column: BundleColumn; at: number }>,
   comparedColumns: string[],
+  // The COUNTERPART side's columns, so a key is built at the scale both sides can express.
+  //
+  // Without this the key was built with `comparisonScale(hit.column, hit.column)` - the same column twice,
+  // i.e. that side's own scale - and SQL Server numeric(18,6) against Postgres numeric(_,2) rendered the same
+  // serial as `SR_NO=1` on one side and `SR_NO=1.000000` on the other. The keys never matched, so the rows
+  // never paired.
+  //
+  // That silently disabled comparison of the two most important tables. AC_DATA (all three ledger legs) and
+  // SL_DETL (both lines) were reported as "missing" plus "extra" instead of being diffed, and a real
+  // difference in SL_DETL.ITM_AMT - 354.00 against 354.20 - went unreported through three consecutive runs
+  // while the field count looked healthy at 271.
+  otherIndex?: Map<string, { column: BundleColumn; at: number }>,
 ): string {
+  const scaleFor = (name: string, hit: { column: BundleColumn; at: number }) =>
+    comparisonScale(hit.column, otherIndex?.get(upper(name))?.column ?? hit.column);
   const declared = ROW_KEYS[upper(table)];
   const parts: string[] = [];
   if (declared) {
     for (const name of declared) {
       const hit = index.get(upper(name));
       if (!hit) continue;
-      parts.push(
-        `${name}=${canonicalise(row[hit.at], hit.column.type, comparisonScale(hit.column, hit.column))}`,
-      );
+      parts.push(`${name}=${canonicalise(row[hit.at], hit.column.type, scaleFor(name, hit))}`);
     }
     if (parts.length) return parts.join(' ');
   }
@@ -179,7 +191,7 @@ function rowKeyOf(
     .map((name) => {
       const hit = index.get(upper(name));
       if (!hit) return `${name}=`;
-      return `${name}=${canonicalise(row[hit.at], hit.column.type, comparisonScale(hit.column, hit.column))}`;
+      return `${name}=${canonicalise(row[hit.at], hit.column.type, scaleFor(name, hit))}`;
     })
     .sort();
   return `content:${fields.join('|')}`;
@@ -217,7 +229,7 @@ function diffTable(
     const bucket = (t: BundleTable, idx: typeof dIndex) => {
       const m = new Map<string, unknown[][]>();
       for (const row of t.rows) {
-        const k = rowKeyOf(table, row, idx, comparedColumns);
+        const k = rowKeyOf(table, row, idx, comparedColumns, idx === dIndex ? wIndex : dIndex);
         const list = m.get(k);
         if (list) list.push(row);
         else m.set(k, [row]);
@@ -271,7 +283,7 @@ function diffTable(
       for (let i = pairs; i < dList.length; i += 1) unpairedD.push(dList[i]!);
     }
     for (const [, wList] of wRows) {
-      const key = rowKeyOf(table, wList[0]!, wIndex, comparedColumns);
+      const key = rowKeyOf(table, wList[0]!, wIndex, comparedColumns, dIndex);
       const dCount = dRows.get(key)?.length ?? 0;
       for (let i = dCount; i < wList.length; i += 1) unpairedW.push(wList[i]!);
     }
@@ -279,8 +291,10 @@ function diffTable(
     if (unpairedD.length === 1 && unpairedW.length === 1) {
       forcedPairs.push([unpairedD[0]!, unpairedW[0]!, 'single unmatched row']);
     } else {
-      for (const row of unpairedD) missingRows.push(rowKeyOf(table, row, dIndex, comparedColumns));
-      for (const row of unpairedW) extraRows.push(rowKeyOf(table, row, wIndex, comparedColumns));
+      for (const row of unpairedD)
+        missingRows.push(rowKeyOf(table, row, dIndex, comparedColumns, wIndex));
+      for (const row of unpairedW)
+        extraRows.push(rowKeyOf(table, row, wIndex, comparedColumns, dIndex));
     }
 
     for (const [dRow, wRow, label] of forcedPairs) {

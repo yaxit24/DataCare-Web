@@ -71,6 +71,18 @@ async function seed() {
     TENANT,
     CO,
   );
+  // CO_SET_NEW carries the rounding precisions, and TOT_AMT_ROF lives HERE rather than in CO_SET. The real
+  // database holds 0 for all four companies - zero decimals, i.e. whole rupees - which is precisely why every
+  // money column in 245 SL_DETL rows and 190 SL_DATA headers is an integer.
+  //
+  // Omitting this row was a harness defect that looked exactly like a web rounding defect: with TOT_AMT_ROF
+  // absent the loader keeps its documented 2dp default, so the replay produced 1515.21 against the desktop's
+  // 1515.00 and I began writing it up as a missing whole-rupee mode. The mode is implemented.
+  await exec(
+    `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF","PR_RATE_ROF") VALUES ($1,$2,0,2)`,
+    TENANT,
+    CO,
+  );
   await exec(
     `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME") VALUES ($1,$2,'Parity Replay Co')`,
     TENANT,
