@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ROJMEL_ROW_TYPE,
+  buildOrderRojmel,
   buildRateCutRojmel,
   buildCashRojmel,
   buildSaleRojmel,
@@ -555,5 +556,147 @@ describe('rate cut / wholesale (book 064) — 9 live types of 40', () => {
     const rows = buildRateCutRojmel({ ...rcCtx }, legs({ metal: 'S' as const, crFine: 1 }));
     expect(rows[0]!.IT_TYPE).toBe('S');
     expect(rows.map(typeOf)).toEqual(['03']);
+  });
+});
+
+describe('sales order (book 020) — 4 live types of 8', () => {
+  // Shapes from the real rows of book 020. Unlike the rate-cut routine, the source and the data AGREE here
+  // on all four types - checked one by one, because the version divergence in Ac_Rojmel.cs is real but not
+  // uniform across routines. Sampled real rows:
+  //   t01 ac=party   ld=00001  A      cr 25000
+  //   t02 ac=bank    ld=party  A      dr <cheque>
+  //   t04 ac=00010   ld=party  A      dr 9300   gwt  1.690 fine  1.268  'OLD GOLD'
+  //   t06 ac=party   ld=00010  G '+'  dr 0 cr 0 gwt 18.310 fine 18.000  'OLD GOLD'
+  const ordCtx: RojmelContext = { ...ctx, coBook: '020', partyCode: '000519' };
+  const SLOT1 = '00001'; // BOOK_DETL slot 1 on book 020 - verified as every real type-01 row's LD_CODE
+  const legs = (over: Record<string, unknown> = {}) => ({
+    advanceContraAc: SLOT1,
+    bankAc: '000755',
+    advanceAmount: 0,
+    chequeAmount: 0,
+    ...over,
+  });
+  const typeOf = (r: { LEDR_KEY: unknown }) => String(r.LEDR_KEY).slice(21, 23);
+  const metalLine = (over: Record<string, unknown> = {}) => ({
+    lineNo: 1,
+    purchaseAc: '00010',
+    netAmount: 0,
+    metal: 'G' as const,
+    pcs: 1,
+    grossWt: 18.31,
+    netWt: 18.31,
+    touch: 98.3,
+    fine: 18,
+    itemCode: 'OG',
+    itemName: 'OLD GOLD',
+    ...over,
+  });
+
+  it('writes nothing when the order carries no money and no metal', () => {
+    expect(buildOrderRojmel(ordCtx, legs())).toEqual([]);
+  });
+
+  it('the advance is a CREDIT on the party, contra = the book’s slot-1 account', () => {
+    const [row] = buildOrderRojmel(ordCtx, legs({ advanceAmount: 25000 }));
+    expect(typeOf(row!)).toBe('01');
+    expect(row!.AC_CODE).toBe('000519'); // the party
+    expect(row!.LD_CODE).toBe(SLOT1);
+    expect(row!.CR_AMT).toBe(25000);
+    expect(row!.DR_AMT).toBe(0);
+    expect(row!.IT_TYPE).toBe('A'); // money row
+  });
+
+  it('the cheque row REVERSES the accounts and is a DEBIT', () => {
+    const [row] = buildOrderRojmel(ordCtx, legs({ chequeAmount: 4000 }));
+    expect(typeOf(row!)).toBe('02');
+    expect(row!.AC_CODE).toBe('000755'); // the bank, not the party
+    expect(row!.LD_CODE).toBe('000519'); // party moves to LD_CODE
+    expect(row!.DR_AMT).toBe(4000);
+    expect(row!.CR_AMT).toBe(0);
+    // Assert the flip explicitly against the advance row - misreading it misfiles every row.
+    const [adv] = buildOrderRojmel(ordCtx, legs({ advanceAmount: 1 }));
+    expect(row!.AC_CODE).not.toBe(adv!.AC_CODE);
+    expect(row!.LD_CODE).toBe(adv!.AC_CODE);
+  });
+
+  it('valued old metal is a money row that STILL carries weight', () => {
+    const rows = buildOrderRojmel(ordCtx, {
+      ...legs(),
+      oldMetal: [metalLine({ netAmount: 9300, grossWt: 1.69, fine: 1.268 })],
+    });
+    const row = rows.find((r) => typeOf(r) === '04')!;
+    // IT_TYPE stays 'A' deliberately: the day book shows metal taken in exchange WITHOUT counting it as a
+    // metal sale. The report's buckets key on IT_TYPE, so 'G' here would double-count the shop's gold.
+    expect(row.IT_TYPE).toBe('A');
+    expect(row.DR_AMT).toBe(9300);
+    expect(row.ITM_GWT).toBe(1.69);
+    expect(row.ITM_FINE).toBe(1.268);
+    expect(row.ITM_TOUCH).toBeGreaterThan(0);
+    expect(row.IT_DESC).toBe('OLD GOLD');
+    expect(row.AC_CODE).toBe('00010'); // purchase account
+    expect(row.LD_CODE).toBe('000519'); // party
+  });
+
+  it('unvalued old metal is a money-free FINE row that feeds the report', () => {
+    const rows = buildOrderRojmel(ordCtx, { ...legs(), oldMetal: [metalLine()] });
+    const row = rows.find((r) => typeOf(r) === '06')!;
+    expect(row.DR_AMT).toBe(0);
+    expect(row.CR_AMT).toBe(0);
+    expect(row.IT_TYPE).toBe('G'); // the metal letter, so RP_ROJMEL's fine summary sees it
+    expect(row.SIGN).toBe('+'); // metal coming IN
+    expect(row.ITM_FINE).toBe(18);
+    // Accounts flip back to party-first on a fine row, the opposite of the valued row above.
+    expect(row.AC_CODE).toBe('000519');
+    expect(row.LD_CODE).toBe('00010');
+  });
+
+  it('the two old-metal types are mutually exclusive per line', () => {
+    const valued = buildOrderRojmel(ordCtx, {
+      ...legs(),
+      oldMetal: [metalLine({ netAmount: 9300 })],
+    }).map(typeOf);
+    expect(valued).toContain('04');
+    expect(valued).not.toContain('06');
+    const unvalued = buildOrderRojmel(ordCtx, { ...legs(), oldMetal: [metalLine()] }).map(typeOf);
+    expect(unvalued).toContain('06');
+    expect(unvalued).not.toContain('04');
+  });
+
+  it('header rows are 23-character keys; detail rows are 33 with the line number', () => {
+    const rows = buildOrderRojmel(ordCtx, {
+      ...legs({ advanceAmount: 100, chequeAmount: 50 }),
+      oldMetal: [metalLine({ netAmount: 1 })],
+    });
+    for (const r of rows) {
+      const len = String(r.LEDR_KEY).length;
+      expect(['01', '02'].includes(typeOf(r)) ? len : 33).toBe(len === 23 ? 23 : 33);
+    }
+    expect(String(rows.find((r) => typeOf(r) === '01')!.LEDR_KEY)).toHaveLength(23);
+    expect(String(rows.find((r) => typeOf(r) === '02')!.LEDR_KEY)).toHaveLength(23);
+    expect(String(rows.find((r) => typeOf(r) === '04')!.LEDR_KEY)).toHaveLength(33);
+  });
+
+  it('two detail lines produce DISTINCT keys — the direct guard against 23505', () => {
+    // ROJ_MEL_DATA's primary key is LEDR_KEY alone, so two lines sharing a key collide outright.
+    const rows = buildOrderRojmel(ordCtx, {
+      ...legs(),
+      oldMetal: [metalLine({ lineNo: 1 }), metalLine({ lineNo: 2 })],
+    });
+    expect(rows).toHaveLength(2);
+    expect(rows[0]!.LEDR_KEY).not.toBe(rows[1]!.LEDR_KEY);
+    expect(new Set(rows.map((r) => r.LEDR_KEY)).size).toBe(2);
+  });
+
+  it('never emits the dead or unexplained types 03, 05, 07 or 08', () => {
+    // 03 card and 07 rate-cut fine are cleanly dead (CARD_AMT and RCUT_FINE are 0 of 76 orders); 08 UPI has
+    // one row company-wide. 05 scheme adjust is an ANOMALY: SCHM_AMT is non-zero on 7 of 76 orders yet
+    // there are ZERO type-05 rows, so emitting it would add rows the desktop does not have.
+    const rows = buildOrderRojmel(ordCtx, {
+      ...legs({ advanceAmount: 100, chequeAmount: 50 }),
+      oldMetal: [metalLine({ netAmount: 1, lineNo: 1 }), metalLine({ lineNo: 2 })],
+    });
+    const types = rows.map(typeOf);
+    for (const dead of ['03', '05', '07', '08']) expect(types).not.toContain(dead);
+    expect(types.sort()).toEqual(['01', '02', '04', '06']);
   });
 });

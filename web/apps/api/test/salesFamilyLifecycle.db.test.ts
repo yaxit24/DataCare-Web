@@ -1394,6 +1394,70 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(metal.every((r) => Number(r.gwt ?? 0) > 0)).toBe(true);
   });
 
+  it('an order with an advance writes a type-01 Rojmel CREDIT; one without writes none', async () => {
+    // Book 020 carries 41 real type-01 rows, all credits, with LD_CODE = the book's slot-1 account (00001
+    // on the desktop). The row exists only when there is an advance - the same conditionality the ledger
+    // already has, since an order is a commitment and only the advance is real money.
+    const rojmelFor = async (vch: string): Promise<Array<Record<string, unknown>>> =>
+      (await owner.$queryRawUnsafe(
+        `SELECT "LEDR_KEY","AC_CODE","LD_CODE","IT_TYPE","SIGN",
+                "DR_AMT"::float dr,"CR_AMT"::float cr
+           FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SOR' AND "VCH_NO"=$2
+          ORDER BY "LEDR_KEY"`,
+        TENANT,
+        vch,
+      )) as Array<Record<string, unknown>>;
+
+    const withAdv = await createSalesOrder(runtime, orderInput());
+    const vchA = String(withAdv.vchNo).padStart(5, '0');
+    const rowsA = await rojmelFor(vchA);
+    expect(rowsA).toHaveLength(1);
+    expect(String(rowsA[0]!.LEDR_KEY).slice(21, 23)).toBe('01');
+    expect(rowsA[0]!.AC_CODE).toBe('CUST'); // the party
+    expect(Number(rowsA[0]!.cr)).toBe(100); // the fixture's advance
+    expect(Number(rowsA[0]!.dr)).toBe(0);
+    expect(rowsA[0]!.IT_TYPE).toBe('A'); // money row, no metal
+    // Header rows carry no line number: all real type-01 keys are 23 characters.
+    expect(String(rowsA[0]!.LEDR_KEY)).toHaveLength(23);
+
+    const noAdv = await createSalesOrder(runtime, orderInput({ advanceAmount: 0 }));
+    expect(await rojmelFor(String(noAdv.vchNo).padStart(5, '0'))).toEqual([]);
+  });
+
+  it('the order footprint is an exact SET, so an extra write cannot pass unnoticed', async () => {
+    // Asserted with toEqual, not toContain. A subset assertion cannot see an unexpected EXTRA write, and
+    // an extra write is how a duplicate ledger posting appears - the weakness found in the sales-return
+    // test and fixed there for the same reason.
+    const created = await createSalesOrder(runtime, orderInput());
+    const vch = String(created.vchNo).padStart(5, '0');
+    const tables = await voucherTables(owner);
+    const touched = await footprintOf(owner, tables, TENANT, vch);
+    expect(touched).toEqual([
+      'AC_DATA',
+      // The day book. Added when the order projection was implemented from the real book-020 rows.
+      'ROJ_MEL_DATA',
+      'SL_ORD_DATA',
+      'SL_ORD_DETL',
+      // The fixture's line carries a stone sub-detail, so the order writes SL_ORD_IDTL too. Pinned
+      // because the set is what the assertion is for - discovering it by failing is the intended loop.
+      'SL_ORD_IDTL',
+    ]);
+  });
+
+  it('re-posting an order does not collide on LEDR_KEY', async () => {
+    // ROJ_MEL_DATA's primary key is LEDR_KEY alone. Two orders must produce distinct keys, and an edit
+    // must delete before rewriting - 23505 is the failure mode, and it has bitten four times elsewhere.
+    const a = await createSalesOrder(runtime, orderInput());
+    const b = await createSalesOrder(runtime, orderInput());
+    expect(b.vchNo).not.toBe(a.vchNo);
+    const [n] = (await owner.$queryRawUnsafe(
+      `SELECT count(DISTINCT "LEDR_KEY")::int n FROM "ROJ_MEL_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='SOR'`,
+      TENANT,
+    )) as Array<{ n: number }>;
+    expect(n!.n).toBe(2);
+  });
+
   it('a sales order posts the ledger only when it carries an advance', async () => {
     // My first version of this asserted an order NEVER posts to AC_DATA. That was wrong, and the source says
     // so: TR_SALE_ORD.cs:9558,9729 delete and rewrite AC_DATA rows, and the form carries ADV_AMT. An advance

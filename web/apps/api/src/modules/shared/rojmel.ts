@@ -114,7 +114,7 @@ export function rojmelLedrKey(
   scope: RojmelKeyScope,
   coBook: string,
   vchNo: string,
-  rowType: RojmelRowType | RojmelRateCutRowType,
+  rowType: RojmelRowType | RojmelRateCutRowType | RojmelOrderRowType,
   lineNo?: number,
 ): string {
   const head =
@@ -731,6 +731,166 @@ export function buildRateCutRojmel(ctx: RojmelContext, legs: RateCutRojmelLegs):
       LD_CODE: ctx.partyCode,
       CR_AMT: legs.purchaseKasarAmount,
     });
+  }
+  return rows;
+}
+
+/**
+ * Sales-order row types (book 020), from `Ac_Rojmel.Order_Rojmel` (lines 9–28).
+ *
+ * That routine has eight row types. Only these **four** ever fired, established by grouping the 55 real
+ * rows of book 020 by `LEDR_KEY` type and matching each against a non-zero source column:
+ *
+ *   `01` 41 rows  advance            `ADV_AMT` non-zero on 74 of 76 orders
+ *   `02` 11 rows  cheque             `CHQ_AMT` on 21
+ *   `04`  2 rows  old metal, valued  `SL_PR_DETL.NET_AMT <> 0`
+ *   `06`  1 row   old metal, unvalued `SL_PR_DETL.ITM_FINE <> 0 AND NET_AMT = 0`
+ *
+ * 41 + 11 + 2 + 1 = 55, matching the book exactly.
+ *
+ * **Unlike the rate-cut routine, the source and the data AGREE here on all four types** — checked one by
+ * one. `Ac_Rojmel.cs` is a later version than the code that wrote this data, but the divergence is not
+ * uniform across routines, so each type is verified rather than assumed either way.
+ *
+ * Dead and deliberately not built: `03` card (`CARD_AMT` is 0 of 76), `07` rate-cut fine (`RCUT_FINE` 0 of
+ * 76), `08` UPI (`UPI_DATA` has 1 row company-wide).
+ *
+ * **`05` scheme adjustment is an unresolved ANOMALY and must not be implemented on a guess.** `SCHM_AMT` is
+ * non-zero on **7 of 76** orders, yet there are **zero** type-05 Rojmel rows — seven populated source rows
+ * produced no output. Writing it would add rows the desktop does not have, which is a parity failure in the
+ * opposite direction from a missing row and considerably harder to notice.
+ */
+export const ROJMEL_ORDER_ROW_TYPE = {
+  /** Advance received against the order. CREDIT, contra = `BOOK_DETL` slot 1 (book 020: `00001`). */
+  ADVANCE: '01',
+  /** Cheque tendered. DEBIT, and `AC_CODE` is the BANK — the reverse account order from the advance row. */
+  CHEQUE: '02',
+  /** Old metal taken in WITH a value. Per line. */
+  OLD_METAL_VALUED: '04',
+  /** Old metal taken in with NO value assigned. Per line, money-free. */
+  OLD_METAL_UNVALUED: '06',
+} as const;
+
+export type RojmelOrderRowType = (typeof ROJMEL_ORDER_ROW_TYPE)[keyof typeof ROJMEL_ORDER_ROW_TYPE];
+
+/** One `SL_PR_DETL` line: old metal taken in against the order. */
+export interface OrderOldMetalLine {
+  lineNo: number;
+  /** The group's purchase account (`GROUP_MAST.PURC_AC`). */
+  purchaseAc: string;
+  /** Non-zero routes the line to type 04; zero with fine routes it to type 06. */
+  netAmount: number;
+  metal: Exclude<RojmelMetal, 'A'>;
+  pcs?: number;
+  grossWt?: number;
+  netWt?: number;
+  touch?: number;
+  fine?: number;
+  itemCode?: string;
+  itemName?: string;
+}
+
+export interface OrderRojmelLegs {
+  /** `BOOK_DETL` slot 1 — the contra on the advance row. Book 020: `00001`. Resolve, never hardcode. */
+  advanceContraAc: string;
+  bankAc: string;
+  advanceAmount: number;
+  chequeAmount: number;
+  oldMetal?: OrderOldMetalLine[];
+}
+
+/**
+ * Project a sales order into its Rojmel rows.
+ *
+ * Sampled real rows, one per type, from book 020:
+ *
+ *   t01  ac=party    ld=00001   A       cr 25000                          (also 100000 on another)
+ *   t02  ac=bank     ld=party   A       dr <cheque>
+ *   t04  ac=00010    ld=000519  A       dr 9300     gwt 1.690  fine 1.268  'OLD GOLD'
+ *   t06  ac=000633   ld=00010   G '+'   dr 0 cr 0   gwt 18.310 fine 18.000 'OLD GOLD'
+ *
+ * ## The account order flips between the two header rows
+ * Type 01 names the **party** in `AC_CODE` with the book slot as contra. Type 02 is the reverse — the
+ * **bank** in `AC_CODE` and the party in `LD_CODE`. Same flip appears between the fine and amount families
+ * elsewhere in this file; getting it backwards misfiles every row.
+ *
+ * ## Type 04 is a money row that carries metal
+ * `IT_TYPE` is `'A'` yet `ITM_PCS`, `ITM_GWT`, `ITM_NWT`, `ITM_TOUCH` and `ITM_FINE` are all populated.
+ * Deliberate: the day book shows metal taken in exchange **without counting it as a metal sale**. The
+ * report's metal buckets key on `IT_TYPE`, so labelling this `'G'` would double-count the shop's gold.
+ *
+ * ## Type 06 is a true fine row and feeds the report
+ * Both amounts zero, `IT_TYPE` the metal letter, `SIGN '+'`. It is metal accepted with no price agreed yet,
+ * and it is what `RP_ROJMEL`'s gold/silver fine summaries read — they filter `ITM_FINE <> 0` split by
+ * `SIGN`.
+ *
+ * ## The two old-metal types are mutually exclusive per line
+ * By construction: one requires `NET_AMT <> 0`, the other `NET_AMT = 0`. A line cannot produce both.
+ *
+ * ## Line numbers
+ * Types `01`/`02` are header rows — one per voucher, keys 23 characters, **no** line number. Types
+ * `04`/`06` are per detail line — keys **33** characters with the line number right-aligned in 10.
+ * Verified against all 55 real keys. Omitting it on the detail rows collides with `23505`, since
+ * `LEDR_KEY` is the whole primary key.
+ */
+export function buildOrderRojmel(ctx: RojmelContext, legs: OrderRojmelLegs): RojmelRow[] {
+  const rows: RojmelRow[] = [];
+  const key = (t: RojmelOrderRowType, lineNo?: number): string =>
+    rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, t, lineNo);
+
+  // Advance: the party is credited with money received before delivery. 41 of the book's 55 rows.
+  if (legs.advanceAmount) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_ORDER_ROW_TYPE.ADVANCE)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.advanceContraAc,
+      CR_AMT: legs.advanceAmount,
+    });
+  }
+
+  // Cheque: the bank is named here, not the party — the reverse of the advance row.
+  if (legs.chequeAmount) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_ORDER_ROW_TYPE.CHEQUE)),
+      AC_CODE: legs.bankAc,
+      LD_CODE: ctx.partyCode,
+      DR_AMT: legs.chequeAmount,
+    });
+  }
+
+  for (const l of legs.oldMetal ?? []) {
+    if (l.netAmount) {
+      // Valued: a money row that keeps its weight. IT_TYPE stays 'A' on purpose.
+      rows.push({
+        ...blank(ctx, key(ROJMEL_ORDER_ROW_TYPE.OLD_METAL_VALUED, l.lineNo)),
+        AC_CODE: l.purchaseAc,
+        LD_CODE: ctx.partyCode,
+        DR_AMT: l.netAmount,
+        ITM_PCS: l.pcs ?? 0,
+        ITM_GWT: l.grossWt ?? 0,
+        ITM_NWT: l.netWt ?? 0,
+        ITM_TOUCH: l.touch ?? 0,
+        ITM_FINE: l.fine ?? 0,
+        IT_DESC: l.itemName ?? '',
+        IT_CODE: l.itemCode ?? '',
+      });
+    } else if (l.fine) {
+      // Unvalued: metal in, no price agreed. Money-free, and the accounts flip back to party-first.
+      rows.push({
+        ...blank(ctx, key(ROJMEL_ORDER_ROW_TYPE.OLD_METAL_UNVALUED, l.lineNo)),
+        AC_CODE: ctx.partyCode,
+        LD_CODE: l.purchaseAc,
+        IT_TYPE: l.metal,
+        SIGN: '+', // metal coming IN
+        ITM_PCS: l.pcs ?? 0,
+        ITM_GWT: l.grossWt ?? 0,
+        ITM_NWT: l.netWt ?? 0,
+        ITM_TOUCH: l.touch ?? 0,
+        ITM_FINE: l.fine,
+        IT_DESC: l.itemName ?? '',
+        IT_CODE: l.itemCode ?? '',
+      });
+    }
   }
   return rows;
 }

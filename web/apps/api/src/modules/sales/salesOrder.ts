@@ -11,6 +11,7 @@ import {
 import { billTotals } from '@datacare/core';
 import { SaleValidationError } from './sales.js';
 import { fineWt } from '../shared/fine.js';
+import { buildOrderRojmel } from '../shared/rojmel.js';
 import {
   deleteVoucherWriteSetTx,
   nextHiddenVoucherNoTx,
@@ -374,6 +375,49 @@ export async function createSalesOrder(
           ]
         : [];
     if (ledger.length) assertBalanced(ledger);
+
+    // The Rojmel (day book). Book 020 carries 55 real rows across four types; the other four in
+    // Ac_Rojmel.Order_Rojmel never fired here. Type 01 is the advance as a CREDIT with the book's slot-1
+    // account as contra - verified: slot 1 on book 020 is 00001 and every real type-01 row has LD_CODE
+    // 00001. Type 02 is a cheque, and note it names the BANK in AC_CODE with the party in LD_CODE, the
+    // reverse of the advance row.
+    //
+    // NOT written, on evidence: type 03 card (CARD_AMT is 0 of 76 orders), type 07 rate-cut fine
+    // (RCUT_FINE 0 of 76), type 08 UPI (UPI_DATA has 1 row company-wide), and type 05 scheme adjustment -
+    // which is an unresolved ANOMALY: SCHM_AMT is non-zero on 7 of 76 orders yet there are ZERO type-05
+    // rows. Emitting it would add rows the desktop does not have, which is harder to notice than a
+    // missing row and equally a parity failure. See docs/PLAN-SALESORDER-ROJMEL.md section 2.4.
+    //
+    // The old-metal detail rows (types 04 and 06) come from SL_PR_DETL, which this function does not
+    // currently write on an order - so they cannot fire yet. They are implemented in the shared builder
+    // and will be exercised when an order accepts metal in part-exchange.
+    const rojmelRows = buildOrderRojmel(
+      {
+        scope: {
+          coCode: input.scope.coCode,
+          lcCode: input.scope.lcCode,
+          coYear: input.scope.coYear!,
+        },
+        key,
+        coBook: key.CO_BOOK,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: 'SORD',
+        bookName: 'SALES ORDER',
+        partyName: input.acName ?? '',
+        partyCode: input.acCode,
+      },
+      {
+        // Slot 1 is the book's advance contra. `cashAc` is what the ledger already debits for the
+        // advance, which is the same account the desktop names in LD_CODE.
+        advanceContraAc: cashAc,
+        bankAc: cashAc,
+        advanceAmount: adv,
+        // An order's cheque tender is not modelled separately from the advance here, so type 02 stays
+        // dormant rather than being fed a value it does not have.
+        chequeAmount: 0,
+      },
+    );
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
       CO_CODE: input.scope.coCode,
       LC_CODE: input.scope.lcCode,
@@ -387,6 +431,7 @@ export async function createSalesOrder(
         { table: 'SL_ORD_DATA', rows: [header] },
         ...(detl.length ? [{ table: 'SL_ORD_DETL', rows: detl }] : []),
         ...(idtl.length ? [{ table: 'SL_ORD_IDTL', rows: idtl }] : []),
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return { vchNo: no, total: totals.total, advance: adv };
