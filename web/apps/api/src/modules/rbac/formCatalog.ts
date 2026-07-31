@@ -130,6 +130,8 @@ const groups: Record<string, readonly string[]> = {
     'Sales Register',
     'Purchase Register',
     'Day Book',
+    // The desktop's F11 day book (RP_ROJMEL): metal weights beside money.
+    'Rojmel',
     'Trial Balance',
     'Balance Sheet',
     'Account Ledger',

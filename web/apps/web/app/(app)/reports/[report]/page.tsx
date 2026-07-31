@@ -11,6 +11,7 @@ const TITLES: Record<string, string> = {
   'sales-register': 'Sales Register',
   'purchase-register': 'Purchase Register',
   'day-book': 'Day Book',
+  rojmel: 'Rojmel (Day Book)',
   // RP_CASH_BANK, reached by Ctrl+F11 on the desktop (MDI_FORM.cs handler F11CtrlCashBank).
   'cash-book': 'Cash / Bank Book',
   'cash-day-summary': 'Cash Day Summary',

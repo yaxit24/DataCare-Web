@@ -584,7 +584,9 @@ try {
   await page.goto(`${origin}/txn/sales`, { waitUntil: 'domcontentloaded' });
   await readyForFormKeys();
   await page.keyboard.press('F11');
-  await page.waitForURL('**/reports/day-book');
+  // F11 is the Rojmel. It used to land on /reports/day-book, which reads AC_DATA and shows money only -
+  // not the same report as the desktop's, which carries metal weights beside the money.
+  await page.waitForURL('**/reports/rojmel');
   await page.goto(`${origin}/txn/sales`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('heading', { name: 'Sales Invoice' }).waitFor();
   await page.getByLabel('Configured book').selectOption('SAL');

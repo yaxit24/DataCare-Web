@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 import { createSale, deleteSale, editSale, getSale } from '../src/modules/sales/sales.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
+import { rojmel } from '../src/modules/reports/rojmelReport.js';
 import { footprintOf, ledgerLegs, voucherTables } from './support/footprint.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -1054,6 +1055,44 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     ]);
     // Absent, not zero: the shop has chosen not to show margins.
     expect(hidden.billProfit).toBeUndefined();
+  });
+
+  it('the Rojmel report shows metal beside money, which the AC_DATA day book cannot', async () => {
+    // This is the whole reason the report exists. The desktop's RP_ROJMEL reads ROJ_MEL_DATA for its
+    // summary sections, keyed on ITM_FINE and split by SIGN and IT_TYPE. The existing dayBook report
+    // reads AC_DATA, which has no weight columns at all, so it can never show this.
+    await createSale(runtime, saleInput(), firstLines);
+    const report = await rojmel(runtime, {
+      tenantId: TENANT,
+      coCode: CO,
+      lcCode: LC,
+      coYear: YEAR,
+    } as any);
+
+    expect(report.rows.length).toBeGreaterThan(0);
+    const metal = report.rows.filter((r) => r.itType !== 'A');
+    const money = report.rows.filter((r) => r.itType === 'A');
+    expect(metal.length).toBe(firstLines.length);
+    expect(money.length).toBeGreaterThan(0);
+
+    // Weight only on metal rows — the distinction AC_DATA cannot express.
+    expect(metal.every((r) => r.grossWt > 0)).toBe(true);
+    expect(money.every((r) => r.grossWt === 0)).toBe(true);
+
+    // The money side must balance, exactly as the ledger does.
+    expect(report.totals.dr).toBeCloseTo(report.totals.cr, 2);
+    expect(report.totals.balanced).toBe(true);
+
+    // A sale sends metal OUT, so it lands in the outward bucket for its metal.
+    const bucket = metal[0]!.itType === 'G' ? report.totals.gold : report.totals.silver;
+    expect(bucket.outGrossWt).toBeCloseTo(
+      metal.reduce((t, r) => t + r.grossWt, 0),
+      3,
+    );
+    // Sale books populate NO fine: 0 of 115 estimate rows and 0 of 79 gold-invoice rows in the real
+    // desktop database. Fine belongs to the settlement families (gold purchase 42/55, rate cut 32/32),
+    // so an empty fine total here is correct rather than a missing value.
+    expect(bucket.outFine).toBe(0);
   });
 
   it('projects the sale into a Rojmel that reconciles with the ledger', async () => {

@@ -27,8 +27,8 @@ function declaredRoutes(): Array<{ method: string; path: string }> {
 describe('route policy registry', () => {
   it('classifies every declared endpoint and preserves the current exact route universe', () => {
     const routes = declaredRoutes();
-    expect(routes).toHaveLength(382);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(382);
+    expect(routes).toHaveLength(383);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(383);
 
     const policies = routes.map((route) => ({
       ...route,

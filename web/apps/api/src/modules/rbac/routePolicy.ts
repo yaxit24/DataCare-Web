@@ -456,6 +456,7 @@ route('Reports/Sales Register', [
 ]);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
 route('Reports/Day Book', ['GET /reports/day-book']);
+route('Reports/Rojmel', ['GET /reports/rojmel']);
 route('Reports/Trial Balance', ['GET /reports/trial-balance', 'GET /reports/trial-balance-doc']);
 route('Reports/Trial Balance (Full)', ['GET /reports/trial-balance-full']);
 route('Reports/Balance Sheet', ['GET /reports/balance-sheet', 'GET /reports/balance-sheet-doc']);

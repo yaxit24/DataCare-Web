@@ -382,6 +382,7 @@ import { customerCrm, areaWiseSales, locationWiseSales } from '../modules/report
 import { gstInputRegister } from '../modules/reports/reports10.js';
 import { orderLotZoom, tagEstimate } from '../modules/reports/orderTagReports.js';
 import { toCsv } from '../modules/reports/reportCsv.js';
+import { rojmel } from '../modules/reports/rojmelReport.js';
 import {
   readFilters,
   REPORT_FILTER_BINDINGS,
@@ -2495,6 +2496,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     'daily-sales': dailySalesSummary as ReportBuilder,
     'day-book': dayBook as ReportBuilder,
     'dhrn-outstanding': dhrnOutstandingList as ReportBuilder,
+    // The day book the desktop binds to F11: metal weights beside money, which AC_DATA cannot carry.
+    rojmel: rojmel as ReportBuilder,
     'employee-sales': employeeSales as ReportBuilder,
     'group-summary': groupSummary as ReportBuilder,
     'gst-input-register': gstInputRegister as ReportBuilder,
@@ -3987,6 +3990,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     purchaseRegister(prisma, readScope(req), range(req)),
   );
   app.get('/reports/day-book', auth, async (req) => dayBook(prisma, readScope(req), range(req)));
+  // The Rojmel: the desktop's F11 day book, metal weights beside money. Registered as its own literal
+  // route because route-policy analysis reads literal path strings - a loop would be invisible to it.
+  app.get('/reports/rojmel', auth, async (req) => rojmel(prisma, readScope(req)));
   app.get('/reports/trial-balance', auth, async (req) => trialBalance(prisma, readScope(req)));
   app.get('/reports/account-ledger/:acCode', auth, async (req) =>
     accountLedger(prisma, readScope(req), (req.params as any).acCode, range(req)),

@@ -156,7 +156,9 @@ export function desktopGlobalFormKeyActions(navigate: (href: string) => void): F
     F7: { id: 'purchase-bill', label: 'Purchase bill', run: () => navigate('/txn/purchase') },
     F8: { id: 'cash-received', label: 'Cash received', run: () => navigate('/txn/receipt') },
     F9: { id: 'cash-payment', label: 'Cash payment', run: () => navigate('/txn/payment') },
-    F11: { id: 'rojmel', label: 'Rojmel', run: () => navigate('/reports/day-book') },
+    // Points at the real Rojmel now. It used to open /reports/day-book, which reads AC_DATA and shows
+    // money only - not the same report: the desktop's Rojmel carries metal weights beside the money.
+    F11: { id: 'rojmel', label: 'Rojmel', run: () => navigate('/reports/rojmel') },
     F12: { id: 'tag-stock', label: 'Tag stock', run: () => navigate('/reports/tag-stock') },
 
     // ---- Ctrl-modified accelerators (MDI_FORM.cs:12458-12530) ----

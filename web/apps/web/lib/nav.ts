@@ -171,6 +171,8 @@ export const NAV: NavGroup[] = [
       { label: 'Sales Register', href: '/reports/sales-register', ready: true },
       { label: 'Purchase Register', href: '/reports/purchase-register', ready: true },
       { label: 'Day Book', href: '/reports/day-book', ready: true },
+      // The desktop's F11 report: metal weights beside money, which the AC_DATA day book omits.
+      { label: 'Rojmel (Day Book)', href: '/reports/rojmel', ready: true },
       { label: 'Trial Balance', href: '/reports/trial-balance', ready: true },
       { label: 'Balance Sheet', href: '/reports/balance-sheet', ready: true },
       { label: 'Account Ledger', href: '/reports/account-ledger', ready: true },
