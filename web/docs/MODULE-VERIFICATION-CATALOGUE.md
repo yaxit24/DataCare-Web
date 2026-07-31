@@ -283,8 +283,26 @@ idempotently, as `AC_DATA` legs with `VCH_TYPE 'ACOP'`.
 account ledger's opening balance. The web's `accountLedger` must derive an equivalent opening from the
 `ACOP` rows. **Whether the two agree has never been checked.**
 
-**Next measurement:** pick an account with prior-year activity, compute its opening from `OP_LDR`, compute
-the web's from `ACOP`, compare. This is a small, high-value check.
+**DONE 2026-08-01 — and it found something worse than a mismatch.** `yearEndPreview` and `yearEndClose`
+are reachable through `POST /year-end/preview` and `POST /year-end/close`, policed as
+`Utilities/Year-End Close`, and had **no test of any kind**. A 280-line module setting every account's
+opening balance for a new year, untested — the sort of defect nobody notices until the annual close, by
+which time the prior year is shut. Now covered by `test/yearEndCarry.db.test.ts` (11 tests, 4 controls
+proven).
+
+**The two models differ by design, and that is recorded rather than "fixed".** `OP_LDR` holds prior-year
+**detail** — 7011 rows over 117 accounts, one account with 2566, carrying real `VCH_TYPE`s and books. The
+web carries the **net**: one `ACOP` leg per account. The opening _figure_ must agree, since summing detail
+gives the net, and the tests pin that. What the web cannot do is **drill from an opening balance into last
+year's transactions**. `OP_LDR` is also not balanced on its own (86,510,920.77 Dr against 87,615,844.46 Cr,
+117 of 918 accounts), so it is a partial copy rather than a ledger — which is a further reason the web's
+model is not merely a lossy version of it.
+
+**Verified by test:** `ΣDR − ΣCR` per account, one leg each · zero-balance accounts excluded · book **999**
+excluded (the closing-stock valuation figure, mirroring the desktop's `AND A.CO_BOOK <> '999'`) · idempotent
+re-run, including that a correction posted afterwards produces the corrected figure not the stale one ·
+metal fine and its letter carried, money accounts `0`/`'A'` · only the closed year read · preview writes
+nothing · the carry self-balances in aggregate.
 
 ### 2.10 Settings and behaviour
 
