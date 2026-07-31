@@ -114,7 +114,7 @@ export function rojmelLedrKey(
   scope: RojmelKeyScope,
   coBook: string,
   vchNo: string,
-  rowType: RojmelRowType,
+  rowType: RojmelRowType | RojmelRateCutRowType,
   lineNo?: number,
 ): string {
   const head =
@@ -513,6 +513,226 @@ export function buildCashRojmel(
       DR_AMT: receipt ? 0 : p.partyLegAmount,
     },
   ];
+}
+
+/**
+ * Rate cut / wholesale row types (books 064 and 034), from `Ac_Rojmel.Wh_Sales_Rojmel`.
+ *
+ * That routine contains 40+ row types. Only these **nine** ever fired in a year of this shop's trading,
+ * established by grouping the 66 real rows of book 064 by their `LEDR_KEY` type code and matching each
+ * against a non-zero source column in `RATE_CUT_DATA`:
+ *
+ *   `01` 19 rows  purchase fine   `DR_FINE` non-zero on 20 of 40
+ *   `02` 19 rows  purchase amount `CR_AMT` on 20
+ *   `03`  5 rows  sale fine       `CR_FINE` on 6
+ *   `04`  5 rows  sale amount     `DR_AMT` on 6
+ *   `07`  4 rows  kasar fine out  `KSR_FINE_DR` on 4
+ *   `08`  2 rows  kasar fine in   `KSR_FINE_CR` on 3
+ *   `13`  2 rows  overpaid purch. `PR_BILL_OS` negative
+ *   `22`  5 rows  purchase cheque `PR_CHQ_AMT` on 5
+ *   `26`  5 rows  purchase kasar  `PR_KASAR_AMT` on 5
+ *
+ * Sums to 66, matching the book exactly. Everything else in the routine is dead here: **all 40
+ * `RATE_CUT_DATA` rows are `IT_TYPE` `'G'`**, so every silver family is unused, as are interest fine, tax,
+ * TDS, card and labour. They are not implemented — three more families resting on unverifiable shapes
+ * would add surface without adding confidence.
+ */
+export const ROJMEL_RATECUT_ROW_TYPE = {
+  PURCHASE_FINE: '01',
+  PURCHASE_AMOUNT: '02',
+  SALE_FINE: '03',
+  SALE_AMOUNT: '04',
+  KASAR_FINE_OUT: '07',
+  KASAR_FINE_IN: '08',
+  PURCHASE_OVERPAID: '13',
+  PURCHASE_CHEQUE: '22',
+  PURCHASE_KASAR: '26',
+} as const;
+
+export type RojmelRateCutRowType =
+  (typeof ROJMEL_RATECUT_ROW_TYPE)[keyof typeof ROJMEL_RATECUT_ROW_TYPE];
+
+export interface RateCutRojmelLegs {
+  /** `BOOK_DETL` slot 2 — the purchase-side control. On book 064 this is `00008`. */
+  purchaseAc: string;
+  /** `BOOK_DETL` slot 1 — the sale-side control. On book 064 this is `00003`. */
+  saleAc: string;
+  /** `BOOK_DETL` slot 12 — kasar FINE. On book 064 this is `00098`. */
+  kasarFineAc: string;
+  /** `BOOK_DETL` slot 5 — purchase kasar AMOUNT. On book 064 this is `00042`. */
+  purchaseKasarAc: string;
+  /** The bank the cheque was drawn on; named in `AC_CODE` of the type-22 row. */
+  bankAc: string;
+  metal: Exclude<RojmelMetal, 'A'>;
+  /** `FINE_RATE` — appears on the fine rows of types 01, 03 and 13, but not 07 or 08. */
+  fineRate: number;
+  /** `DR_FINE` — the purchase-side fine. */
+  drFine: number;
+  /** `CR_FINE` — the sale-side fine. */
+  crFine: number;
+  /** `PR_BILL_OS`. Positive lands on type 01 as a credit; negative on type 13 as a debit. */
+  purchaseBillOs: number;
+  /** `SL_BILL_OS`. Positive lands on type 03 as a debit. */
+  saleBillOs: number;
+  /** `CR_AMT + PR_ITM_AMT` — type 02, a DEBIT. */
+  purchaseAmount: number;
+  /** `DR_AMT + SL_ITM_AMT` — type 04, a CREDIT. */
+  saleAmount: number;
+  kasarFineDr: number;
+  kasarFineCr: number;
+  purchaseChequeAmount: number;
+  purchaseKasarAmount: number;
+}
+
+/**
+ * Project a rate-cut / wholesale voucher into its Rojmel rows.
+ *
+ * ## Every direction below was taken from the real rows, not from the source
+ * `Ac_Rojmel.cs` is a later version than the code that wrote this data — independently proven by sale item
+ * rows being type `'02'` in the source and `'01'` in the data. On five of these nine types the source's
+ * debit/credit assignment is the OPPOSITE of what the data holds, so the data is authoritative throughout.
+ * Sample rows, one per type, from book 064:
+ *
+ *   t01  ac=party  ld=00008  G '-'  dr 0        cr 0/cond  fine 36.200  rate 7578.00
+ *   t02  ac=00008  ld=party  A      dr 274324   cr 0       fine 0
+ *   t03  ac=party  ld=00003  G '+'  dr 8000     cr 0       fine  1.169  rate 6844.00
+ *   t04  ac=00003  ld=party  A      dr 0        cr 8000    fine 0
+ *   t07  ac=party  ld=00098  G '-'  dr 0        cr 0       fine  0.110  rate 0
+ *   t08  ac=party  ld=00098  G '+'  dr 0        cr 0       fine  0.031  rate 0
+ *   t13  ac=party  ld=00008  G '-'  dr 850      cr 0       fine  2.050  rate 7300.00
+ *   t22  ac=bank   ld=party  A      dr 0        cr 274324  fine 0
+ *   t26  ac=00042  ld=party  A      dr 0        cr 15      fine 0
+ *
+ * Note the account order flips: **fine rows name the party in `AC_CODE`**, while amount rows 02/04/26 name
+ * the slot account there and the party in `LD_CODE`. Getting that backwards would misfile every row.
+ *
+ * ## Only types 07 and 08 are money-free
+ * A plan draft asserted all fine rows carry no money. Wrong: type 03 carries a debit on 5 of 5 rows, type
+ * 13 on 2 of 2, and type 01 a conditional credit on 9 of 19. Only the kasar-fine pair has both amounts
+ * zero. The money-free fine row is a feature of `Fine_CUT_Rojmel`, which is dead code here.
+ *
+ * ## The purchase and sale sides are mutually exclusive
+ * Across all 25 real vouchers, no voucher carries both type 01 and type 03. A rate cut is a fine purchase
+ * or a fine sale, never both, so the two branches below cannot both fire on well-formed input.
+ *
+ * ## The desktop double-counts fine on an overpaid purchase, and this reproduces it
+ * When `PR_BILL_OS` is negative the desktop writes the fine TWICE — once on type 01 and again on type 13.
+ * Verified on both occurrences: voucher 00004 has `PR_BILL_OS` -850.00 and `DR_FINE` 2.050, and 2.050
+ * appears on both rows; voucher 00020 has -122.00 and 3.814, likewise.
+ *
+ * That inflates the day book's fine total for those vouchers, and it is very likely a defect in the
+ * desktop. It is reproduced deliberately, because parity with the desktop's report output is the
+ * requirement and silently "fixing" it would make the two systems disagree on a figure the shop
+ * reconciles against. **Do not deduplicate this without a decision from the owner.**
+ */
+export function buildRateCutRojmel(ctx: RojmelContext, legs: RateCutRojmelLegs): RojmelRow[] {
+  const rows: RojmelRow[] = [];
+  const key = (t: RojmelRateCutRowType): string =>
+    // No rate-cut type carries a line number: all 66 real keys are 23 characters, unlike the sale's item
+    // rows at 33. Passing one would produce a key that matches nothing.
+    rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, t);
+
+  // ---- purchase side (the shop buys fine metal) ------------------------------------------------
+  // Emitted when there is fine to record OR money outstanding, mirroring the source's
+  // `(A.DR_FINE <> 0 OR A.PR_BILL_OS > 0)` guard.
+  if (legs.drFine || legs.purchaseBillOs > 0) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.PURCHASE_FINE)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.purchaseAc,
+      // Credit only when the bill is outstanding in the shop's favour; 9 of 19 real rows carry one.
+      CR_AMT: legs.purchaseBillOs > 0 ? legs.purchaseBillOs : 0,
+      IT_TYPE: legs.metal,
+      SIGN: '-', // fine metal coming IN is recorded as an outward sign on the purchase side
+      ITM_FINE: legs.drFine,
+      ITM_RATE: legs.fineRate,
+    });
+  }
+  if (legs.purchaseAmount) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.PURCHASE_AMOUNT)),
+      AC_CODE: legs.purchaseAc, // the slot account, NOT the party — the flip described above
+      LD_CODE: ctx.partyCode,
+      DR_AMT: legs.purchaseAmount,
+    });
+  }
+  if (legs.purchaseBillOs < 0) {
+    // Overpaid purchase. Carries the fine a second time; see the note above before changing this.
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.PURCHASE_OVERPAID)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.purchaseAc,
+      DR_AMT: Math.abs(legs.purchaseBillOs),
+      IT_TYPE: legs.metal,
+      SIGN: '-',
+      ITM_FINE: legs.drFine,
+      ITM_RATE: legs.fineRate,
+    });
+  }
+
+  // ---- sale side (the shop sells fine metal) ---------------------------------------------------
+  if (legs.crFine || legs.saleBillOs > 0) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.SALE_FINE)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.saleAc,
+      DR_AMT: legs.saleBillOs > 0 ? legs.saleBillOs : 0,
+      IT_TYPE: legs.metal,
+      SIGN: '+',
+      ITM_FINE: legs.crFine,
+      ITM_RATE: legs.fineRate,
+    });
+  }
+  if (legs.saleAmount) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.SALE_AMOUNT)),
+      AC_CODE: legs.saleAc,
+      LD_CODE: ctx.partyCode,
+      CR_AMT: legs.saleAmount,
+    });
+  }
+
+  // ---- kasar on the fine itself (slot 12) — the only money-free rows ---------------------------
+  if (legs.kasarFineDr) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.KASAR_FINE_OUT)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.kasarFineAc,
+      IT_TYPE: legs.metal,
+      SIGN: '-',
+      ITM_FINE: legs.kasarFineDr,
+      // No rate on the kasar-fine rows: 0 of 6 real rows carry one, unlike types 01/03/13.
+    });
+  }
+  if (legs.kasarFineCr) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.KASAR_FINE_IN)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.kasarFineAc,
+      IT_TYPE: legs.metal,
+      SIGN: '+',
+      ITM_FINE: legs.kasarFineCr,
+    });
+  }
+
+  // ---- settlement on the purchase side ---------------------------------------------------------
+  if (legs.purchaseChequeAmount) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.PURCHASE_CHEQUE)),
+      AC_CODE: legs.bankAc,
+      LD_CODE: ctx.partyCode,
+      CR_AMT: legs.purchaseChequeAmount,
+    });
+  }
+  if (legs.purchaseKasarAmount) {
+    rows.push({
+      ...blank(ctx, key(ROJMEL_RATECUT_ROW_TYPE.PURCHASE_KASAR)),
+      AC_CODE: legs.purchaseKasarAc,
+      LD_CODE: ctx.partyCode,
+      CR_AMT: legs.purchaseKasarAmount,
+    });
+  }
+  return rows;
 }
 
 /**

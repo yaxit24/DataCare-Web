@@ -613,3 +613,68 @@ Three facts were corrected while verifying the plan's own references, which is t
 The plan also states what it will _not_ build and why, lists six controls that must be demonstrated failing
 before the work is trusted, and records that this family will be the first to make the report's
 `totals.gold.outFine` non-zero — which is the end-to-end proof that the fine summaries work at all.
+
+---
+
+## Rate cut implemented (2026-07-31) — plan executed, with three plan errors caught
+
+`docs/PLAN-RATECUT-ROJMEL.md` executed. `buildRateCutRojmel` in `modules/shared/rojmel.ts`, wired into
+`sales/rateCut.ts`. **1015 tests** (was 1000): 10 unit vectors and 5 database assertions.
+
+### The plan's own §4 rules were wrong on five of nine types
+
+§4 was written from `Ac_Rojmel.cs`. The plan told the implementer to verify against data first, and doing so
+found that the source has the debit/credit assignment **reversed** on types `02`, `04`, `22` and `26`, and
+that types `01`, `03` and `13` are **not** money-free as the plan claimed. Only the kasar-fine pair
+(`07`/`08`) has both amounts zero.
+
+Corrected shapes, from the real rows of book 064:
+
+    t01 ac=party ld=00008 G '-' dr 0      cr 0/cond fine 36.200 rate 7578
+    t02 ac=00008 ld=party A     dr 274324 cr 0      fine 0
+    t03 ac=party ld=00003 G '+' dr 8000   cr 0      fine  1.169 rate 6844
+    t04 ac=00003 ld=party A     dr 0      cr 8000   fine 0
+    t07 ac=party ld=00098 G '-' dr 0      cr 0      fine  0.110 rate 0
+    t08 ac=party ld=00098 G '+' dr 0      cr 0      fine  0.031 rate 0
+    t13 ac=party ld=00008 G '-' dr 850    cr 0      fine  2.050 rate 7300
+    t22 ac=bank  ld=party A     dr 0      cr 274324 fine 0
+    t26 ac=00042 ld=party A     dr 0      cr 15     fine 0
+
+**The account order flips between families**: fine rows name the party in `AC_CODE`; amount rows name the
+slot account there and the party in `LD_CODE`. A control proves it — swapping them fails
+`expected '000939' to be '00008'`.
+
+### The desktop double-counts fine on an overpaid purchase, and this reproduces it
+
+When `PR_BILL_OS` is negative the desktop writes the fine **twice**, on types `01` and `13`. Verified on
+both occurrences: voucher 00004 has `PR_BILL_OS` -850.00 with `DR_FINE` 2.050 appearing on both rows, and
+voucher 00020 -122.00 with 3.814.
+
+This inflates the day book's fine total and is very likely a defect in the desktop. **It is reproduced
+deliberately.** Parity with the desktop's report output is the requirement, and silently correcting it
+would make the two systems disagree on a figure the shop reconciles against. A test pins the duplication so
+nobody "fixes" it by accident. Changing it needs an owner decision.
+
+### The report's fine summaries now work at all
+
+`totals.gold.inFine` is non-zero for the first time. Every previously implemented family left `ITM_FINE` at
+zero, so `RP_ROJMEL`'s gold and silver summaries — which filter `ITM_FINE <> 0` split by `SIGN` — could only
+ever have reported nothing. A test asserts the report's bucket equals the sum of the `SIGN '+'` fine rows.
+
+### Two RLS traps hit while writing the tests
+
+Both are invariant #4 in the plan, and both produced **silent zeros rather than errors**:
+
+1. A query helper read outside `withTenant` and reported 0 rows while the report — which scopes internally
+   — correctly saw fine of 10. The contradiction is what exposed it.
+2. `footprintOf` reads directly and expects an owner client. Handed an RLS-bound one, its internal
+   `.catch(() => [{ n: 0 }])` turned every blocked read into a count of zero, so the footprint came back
+   **empty** rather than failing. It is now passed a tenant-scoped transaction.
+
+A helper that swallows an error into a plausible-looking zero is worse than one that throws.
+
+### Scope honoured
+
+Nine live types implemented; the ~31 dead ones left alone. All 40 `RATE_CUT_DATA` rows are `IT_TYPE 'G'`,
+so no silver family was built. The purchase-side types are implemented in the shared builder but cannot
+fire from `rateCut.ts`, which books only the sale side — noted in code rather than papered over.

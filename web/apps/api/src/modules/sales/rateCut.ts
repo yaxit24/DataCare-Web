@@ -1,6 +1,7 @@
 import { withTenant } from '@datacare/db';
 import { settleMoneyMetal, type SettlementResult } from './settlement.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
+import { buildRateCutRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/posting.js';
 
@@ -573,7 +574,8 @@ function buildLineRows(
  * transaction. assertBalanced (Σ DR = Σ CR) and the period-lock check run inside postVoucherTx.
  *
  * Phase-1 writes RATE_CUT_DATA (header) + RATE_CUT_ISU (lines) + the balanced AC_DATA ledger.
- * PHASE-2 TODO: project SL_IDTL (stone/diamond sub-lines), ROJ_MEL_DATA (day-book), MAIN_STOCK
+ * PHASE-2 TODO: project SL_IDTL (stone/diamond sub-lines), MAIN_STOCK
+ * (ROJ_MEL_DATA is DONE — the sale-side day-book projection, types 03/04, from the real book-064 rows.)
  * (tag/stock movement) and DM_DATA (diamond stock) — deferred (spec §5.3). The delete path already
  * reverses those tables so a phase-2 voucher cleans up fully.
  */
@@ -619,6 +621,58 @@ export async function postRateCut(prisma: any, input: RateCutInput): Promise<Rat
     const no = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, no, RCT_BOOK);
     const lines = buildRateCutLedger(key, { customer, itType, totals, pay, accounts, vchDate });
+    // The Rojmel (day book). This module books the SALE side of a rate cut - CR_FINE carries the fixed
+    // fine and DR_FINE is 0 - so it emits the sale-side row family: type 03 for the fine and 04 for the
+    // amount, plus the kasar-fine pair when kasar applies to the metal rather than the money.
+    //
+    // Row shapes are taken from the real desktop rows of book 064, NOT from Ac_Rojmel.cs, which is a
+    // later version and has the debit/credit assignment reversed on five of the nine live types. See
+    // modules/shared/rojmel.ts `buildRateCutRojmel` for the sampled rows and the account-order flip.
+    //
+    // The purchase-side types (01, 02, 13, 22, 26) are the dominant pattern in the real data - 19 of 25
+    // vouchers - but this module does not book fine PURCHASES, so they cannot fire here. They are
+    // implemented in the shared builder and will be exercised when a fine-purchase path exists.
+    const rojmelRows = buildRateCutRojmel(
+      {
+        scope: {
+          coCode: input.scope.coCode,
+          lcCode: input.scope.lcCode,
+          coYear: input.scope.coYear!,
+        },
+        key,
+        coBook: key.CO_BOOK,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: RCT_TYPE,
+        bookName: RCT_BOOK_NAME,
+        partyName: input.acName ?? '',
+        partyCode: customer,
+      },
+      {
+        // BOOK_DETL slots are PER-BOOK: on the desktop's 064 slot 1 is 00003 and slot 2 is 00008, where
+        // on book 026 slot 2 is 00001. Resolved rather than hardcoded for that reason.
+        saleAc: accounts.goldAc,
+        purchaseAc: accounts.goldAc,
+        kasarFineAc: accounts.kasarAc,
+        purchaseKasarAc: accounts.kasarAc,
+        bankAc: pay.bankAc,
+        metal: rojmelMetalFor(itType),
+        fineRate: num(totals.rate),
+        // Sale side: the fixed fine moves out. The purchase-side inputs stay 0 because this module
+        // does not book a fine purchase - passing totals here would invent a leg the voucher has not got.
+        drFine: 0,
+        crFine: num(totals.totalFine),
+        purchaseBillOs: 0,
+        // billOs is on the raw payment payload; `pay` normalises only the settled amounts.
+        saleBillOs: num((p as Record<string, unknown>).billOs),
+        purchaseAmount: 0,
+        saleAmount: num(settlement.drAmt) + num(totals.totalItmAmt),
+        kasarFineDr: 0,
+        kasarFineCr: 0,
+        purchaseChequeAmount: 0,
+        purchaseKasarAmount: 0,
+      },
+    );
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines },
       bookName: RCT_BOOK_NAME,
@@ -628,6 +682,7 @@ export async function postRateCut(prisma: any, input: RateCutInput): Promise<Rat
           rows: [buildHeader(key, input, totals, vchDate, behavior.rateBasis, settlement)],
         },
         { table: 'RATE_CUT_ISU', rows: buildLineRows(key, input, totals, vchDate) },
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return no;
@@ -647,7 +702,7 @@ export interface DeleteRateCutInput {
  * Delete/reverse a RATE CUT voucher: remove its rows from every table it can touch (incl. the
  * phase-2 projections) by voucher key and write a DELETE_DATA audit row — all in one transaction.
  * Reversing tables that have no matching rows is a harmless no-op, so this is forward-compatible
- * with the phase-2 SL_IDTL/ROJ_MEL_DATA/MAIN_STOCK/DM_DATA writes.
+ * with the phase-2 SL_IDTL/MAIN_STOCK/DM_DATA writes (ROJ_MEL_DATA is done).
  */
 export async function deleteRateCut(
   prisma: any,

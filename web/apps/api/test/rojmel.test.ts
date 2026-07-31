@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ROJMEL_ROW_TYPE,
+  buildRateCutRojmel,
   buildCashRojmel,
   buildSaleRojmel,
   rojmelLedrKey,
@@ -396,5 +397,163 @@ describe('round-off (SOURCE-DERIVED, unverified against data)', () => {
       settlements: [{ kind: 'roundOff', account: '00076', amount: 0 }],
     });
     expect(rows.some((r) => String(r.LEDR_KEY).slice(21, 23) === '22')).toBe(false);
+  });
+});
+
+describe('rate cut / wholesale (book 064) — 9 live types of 40', () => {
+  // Every direction below is taken from the REAL desktop rows of book 064, not from Ac_Rojmel.cs. That
+  // file is a later version and has the debit/credit assignment reversed on five of these nine types, so
+  // a plan draft written from the source alone had 02, 04, 22 and 26 backwards and wrongly claimed the
+  // fine rows were money-free. Sampled real rows, one per type:
+  //   t01 ac=party ld=00008 G '-' dr 0      cr 0/cond fine 36.200 rate 7578
+  //   t02 ac=00008 ld=party A     dr 274324 cr 0      fine 0
+  //   t03 ac=party ld=00003 G '+' dr 8000   cr 0      fine  1.169 rate 6844
+  //   t04 ac=00003 ld=party A     dr 0      cr 8000   fine 0
+  //   t07 ac=party ld=00098 G '-' dr 0      cr 0      fine  0.110 rate 0
+  //   t08 ac=party ld=00098 G '+' dr 0      cr 0      fine  0.031 rate 0
+  //   t13 ac=party ld=00008 G '-' dr 850    cr 0      fine  2.050 rate 7300
+  //   t22 ac=bank  ld=party A     dr 0      cr 274324 fine 0
+  //   t26 ac=00042 ld=party A     dr 0      cr 15     fine 0
+  const rcCtx: RojmelContext = { ...ctx, coBook: '064', partyCode: '000939' };
+  const SLOTS = {
+    purchaseAc: '00008', // slot 2 on book 064 — NOT 00001, which is what slot 2 is on book 026
+    saleAc: '00003', // slot 1
+    kasarFineAc: '00098', // slot 12
+    purchaseKasarAc: '00042', // slot 5
+    bankAc: '000755',
+  };
+  const legs = (over: Record<string, unknown> = {}) => ({
+    ...SLOTS,
+    metal: 'G' as const,
+    fineRate: 7578,
+    drFine: 0,
+    crFine: 0,
+    purchaseBillOs: 0,
+    saleBillOs: 0,
+    purchaseAmount: 0,
+    saleAmount: 0,
+    kasarFineDr: 0,
+    kasarFineCr: 0,
+    purchaseChequeAmount: 0,
+    purchaseKasarAmount: 0,
+    ...over,
+  });
+  const typeOf = (r: { LEDR_KEY: unknown }) => String(r.LEDR_KEY).slice(21, 23);
+
+  it('writes nothing when every amount is zero', () => {
+    expect(buildRateCutRojmel(rcCtx, legs())).toEqual([]);
+  });
+
+  it('no rate-cut type carries a line number — all 66 real keys are 23 characters', () => {
+    const rows = buildRateCutRojmel(
+      rcCtx,
+      legs({ drFine: 36.2, purchaseAmount: 274324, purchaseChequeAmount: 274324 }),
+    );
+    expect(rows.length).toBe(3);
+    expect(rows.every((r) => String(r.LEDR_KEY).length === 23)).toBe(true);
+  });
+
+  it('purchase side: type 01 fine names the PARTY, type 02 amount names the SLOT — the accounts flip', () => {
+    const rows = buildRateCutRojmel(rcCtx, legs({ drFine: 36.2, purchaseAmount: 274324 }));
+    const fine = rows.find((r) => typeOf(r) === '01')!;
+    const amount = rows.find((r) => typeOf(r) === '02')!;
+    expect(fine.AC_CODE).toBe('000939'); // party
+    expect(fine.LD_CODE).toBe('00008'); // slot 2
+    expect(amount.AC_CODE).toBe('00008'); // reversed
+    expect(amount.LD_CODE).toBe('000939');
+    // Getting this backwards would misfile every row in the day book.
+    expect(fine.AC_CODE).toBe(amount.LD_CODE);
+    expect(fine.LD_CODE).toBe(amount.AC_CODE);
+  });
+
+  it('type 02 is a DEBIT and type 04 a CREDIT — the source has both reversed', () => {
+    const purchase = buildRateCutRojmel(rcCtx, legs({ purchaseAmount: 274324 }));
+    expect(purchase[0]!.DR_AMT).toBe(274324);
+    expect(purchase[0]!.CR_AMT).toBe(0);
+    const sale = buildRateCutRojmel(rcCtx, legs({ saleAmount: 8000 }));
+    expect(sale[0]!.CR_AMT).toBe(8000);
+    expect(sale[0]!.DR_AMT).toBe(0);
+  });
+
+  it('only the kasar-fine pair is money-free; types 01, 03 and 13 all carry money', () => {
+    const kasar = buildRateCutRojmel(rcCtx, legs({ kasarFineDr: 0.11, kasarFineCr: 0.031 }));
+    expect(kasar).toHaveLength(2);
+    for (const r of kasar) {
+      expect(r.DR_AMT).toBe(0);
+      expect(r.CR_AMT).toBe(0);
+      expect(r.ITM_RATE).toBe(0); // 0 of 6 real kasar-fine rows carry a rate
+      expect(r.ITM_FINE).toBeGreaterThan(0);
+    }
+    // Type 03 carries a debit on 5 of 5 real rows, and 13 on 2 of 2.
+    expect(
+      buildRateCutRojmel(rcCtx, legs({ crFine: 1.169, saleBillOs: 8000 })).find(
+        (r) => typeOf(r) === '03',
+      )!.DR_AMT,
+    ).toBe(8000);
+    expect(
+      buildRateCutRojmel(rcCtx, legs({ drFine: 2.05, purchaseBillOs: -850 })).find(
+        (r) => typeOf(r) === '13',
+      )!.DR_AMT,
+    ).toBe(850);
+  });
+
+  it('direction: 01 and 07 send metal out, 03 and 08 bring it in', () => {
+    expect(buildRateCutRojmel(rcCtx, legs({ drFine: 1 }))[0]!.SIGN).toBe('-');
+    expect(buildRateCutRojmel(rcCtx, legs({ kasarFineDr: 1 }))[0]!.SIGN).toBe('-');
+    expect(buildRateCutRojmel(rcCtx, legs({ crFine: 1 }))[0]!.SIGN).toBe('+');
+    expect(buildRateCutRojmel(rcCtx, legs({ kasarFineCr: 1 }))[0]!.SIGN).toBe('+');
+  });
+
+  it('type 01 credits only when the bill is outstanding in the shop’s favour', () => {
+    // 9 of 19 real type-01 rows carry a credit; the rest are fine-only.
+    expect(buildRateCutRojmel(rcCtx, legs({ drFine: 5, purchaseBillOs: 1200 }))[0]!.CR_AMT).toBe(
+      1200,
+    );
+    expect(buildRateCutRojmel(rcCtx, legs({ drFine: 5, purchaseBillOs: 0 }))[0]!.CR_AMT).toBe(0);
+    // Negative goes to type 13 instead, absolute, on the debit side.
+    const overpaid = buildRateCutRojmel(rcCtx, legs({ drFine: 5, purchaseBillOs: -850 }));
+    expect(overpaid.find((r) => typeOf(r) === '01')!.CR_AMT).toBe(0);
+    expect(overpaid.find((r) => typeOf(r) === '13')!.DR_AMT).toBe(850);
+  });
+
+  it('reproduces the desktop’s DOUBLE-COUNTED fine on an overpaid purchase', () => {
+    // Verified on both real occurrences: voucher 00004 has PR_BILL_OS -850.00 and DR_FINE 2.050, and
+    // 2.050 appears on BOTH the type-01 and type-13 rows; voucher 00020 has -122.00 and 3.814, likewise.
+    // This inflates the day book's fine total and is very likely a desktop defect. It is reproduced
+    // because parity with the desktop's report output is the requirement - "fixing" it would make the
+    // two systems disagree on a figure the shop reconciles against. Do not deduplicate without a
+    // decision from the owner.
+    const rows = buildRateCutRojmel(rcCtx, legs({ drFine: 2.05, purchaseBillOs: -850 }));
+    const fineRows = rows.filter((r) => r.ITM_FINE === 2.05);
+    expect(fineRows).toHaveLength(2);
+    expect(fineRows.map(typeOf).sort()).toEqual(['01', '13']);
+  });
+
+  it('settlement rows: cheque names the bank, kasar names the book slot, both CREDITS', () => {
+    const rows = buildRateCutRojmel(
+      rcCtx,
+      legs({ purchaseChequeAmount: 274324, purchaseKasarAmount: 15 }),
+    );
+    const chq = rows.find((r) => typeOf(r) === '22')!;
+    const ksr = rows.find((r) => typeOf(r) === '26')!;
+    expect(chq.AC_CODE).toBe('000755');
+    expect(chq.CR_AMT).toBe(274324);
+    expect(ksr.AC_CODE).toBe('00042');
+    expect(ksr.CR_AMT).toBe(15);
+    for (const r of [chq, ksr]) {
+      expect(r.DR_AMT).toBe(0);
+      expect(r.IT_TYPE).toBe('A');
+      expect(r.LD_CODE).toBe('000939');
+    }
+  });
+
+  it('the metal letter comes from the caller, and no silver family exists to fire', () => {
+    // All 40 real RATE_CUT_DATA rows are IT_TYPE 'G' — this shop never rate-cut silver — so the silver
+    // row families (types 09-12, 15-20, 33-36) are deliberately not implemented. Passing 'S' produces
+    // silver-labelled rows of the SAME nine types rather than a different family, which is the honest
+    // behaviour: the shape is unverified for silver and inventing one would be a guess.
+    const rows = buildRateCutRojmel({ ...rcCtx }, legs({ metal: 'S' as const, crFine: 1 }));
+    expect(rows[0]!.IT_TYPE).toBe('S');
+    expect(rows.map(typeOf)).toEqual(['03']);
   });
 });
