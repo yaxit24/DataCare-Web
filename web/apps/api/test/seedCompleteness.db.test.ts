@@ -1,0 +1,106 @@
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { PrismaClient } from '@prisma/client';
+import { seedCompany } from '../src/modules/ops/seedCompany.js';
+
+/**
+ * The demo/provisioning seed must leave a company able to post its primary transaction.
+ *
+ * This gate exists because it did not. `SEED_DEMO=1` hand-rolled a thin subset — company, year,
+ * location, settings and a single BOOK_DATA row — and stopped. A sale then failed with
+ * `book SAL account row 1 is missing`, because `resolveBookAccountTx` reads BOOK_DETL for the control
+ * account and fails closed rather than inventing one. Reaching even that error needed a customer
+ * inserted by hand.
+ *
+ * Nothing caught it: every voucher test seeds its own fixtures, so the seed path was exercised by
+ * nobody. A demo that cannot demonstrate a sale is an obstacle for evaluation and onboarding, and the
+ * gap was found by running the application rather than by any test — the same way the identical bug in
+ * `seedCompany` was found (see the comment at seedCompany.ts:54).
+ *
+ * The assertions below are the preconditions a sale actually has, each traced to what enforces it.
+ */
+
+const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
+const databaseDescribe = RUN ? describe : describe.skip;
+const TENANT = 'seed-completeness';
+const CO = '01';
+
+databaseDescribe('provisioning leaves a company able to trade', () => {
+  let owner: PrismaClient;
+
+  const wipe = async (): Promise<void> => {
+    const tables = (await owner.$queryRawUnsafe(
+      `SELECT table_name FROM information_schema.columns
+        WHERE column_name='tenant_id' AND table_schema='public'`,
+    )) as Array<{ table_name: string }>;
+    for (const t of tables) {
+      await owner.$executeRawUnsafe(`DELETE FROM "${t.table_name}" WHERE tenant_id=$1`, TENANT);
+    }
+  };
+
+  const count = async (table: string, where = ''): Promise<number> => {
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 ${where}`,
+      TENANT,
+    )) as Array<{ n: number }>;
+    return rows[0]?.n ?? 0;
+  };
+
+  beforeAll(async () => {
+    const url = process.env.MIGRATE_DATABASE_URL;
+    if (!url) throw new Error('RUN_DB_INTEGRITY_TESTS requires MIGRATE_DATABASE_URL');
+    owner = new PrismaClient({ datasources: { db: { url } } });
+    await wipe();
+    await seedCompany(owner, TENANT, CO, { coName: 'Seed Gate Co', lcCode: '01' });
+  });
+
+  afterAll(async () => {
+    await wipe();
+    await owner.$disconnect();
+  });
+
+  it('provisions the identity a login and scope need', async () => {
+    expect(await count('CO_MAST')).toBeGreaterThan(0);
+    // Without a location, resolveLoginScope() throws and the client sees 'invalid-credentials',
+    // which looks like a wrong password.
+    expect(await count('LOCT_MAST')).toBeGreaterThan(0);
+    // businessScope filters YEAR_MAST by company; a company-less row yields 'scope-incomplete'.
+    expect(await count('YEAR_MAST', `AND "CO_CODE"='${CO}'`)).toBeGreaterThan(0);
+    // settingsBehavior fails closed unless exactly one CO_SET row exists.
+    expect(await count('CO_SET')).toBe(1);
+  });
+
+  it('provisions a book WITH its BOOK_DETL account row — the defect this gate was written for', async () => {
+    const books = await count('BOOK_DATA');
+    expect(books).toBeGreaterThan(0);
+    // The original bug in one line: books existed, their account rows did not.
+    expect(await count('BOOK_DETL')).toBeGreaterThan(0);
+
+    // Every book that can post must have at least one account row, or its first voucher fails with
+    // `book <X> account row 1 is missing`.
+    const orphans = (await owner.$queryRawUnsafe(
+      `SELECT d."CO_BOOK" FROM "BOOK_DATA" d
+        WHERE d.tenant_id=$1
+          AND NOT EXISTS (SELECT 1 FROM "BOOK_DETL" t
+                           WHERE t.tenant_id=d.tenant_id AND t."CO_CODE"=d."CO_CODE"
+                             AND t."CO_BOOK"=d."CO_BOOK")`,
+      TENANT,
+    )) as Array<{ CO_BOOK: string }>;
+    expect(orphans.map((o) => o.CO_BOOK)).toEqual([]);
+  });
+
+  it('provisions the accounts a sale posts to', async () => {
+    for (const ac of ['CASH', 'SALES']) {
+      expect(await count('AC_MAST', `AND "AC_CODE"='${ac}'`)).toBe(1);
+    }
+    expect(await count('TAX_MAST')).toBeGreaterThan(0);
+    // Voucher numbering reads SRNO_MAST; without it the first voucher cannot be numbered.
+    expect(await count('SRNO_MAST')).toBeGreaterThan(0);
+  });
+
+  it('is idempotent — running it twice neither duplicates nor throws', async () => {
+    const before = await count('AC_MAST');
+    await seedCompany(owner, TENANT, CO, { coName: 'Seed Gate Co', lcCode: '01' });
+    expect(await count('AC_MAST')).toBe(before);
+    expect(await count('CO_SET')).toBe(1); // still exactly one, or settings fail closed
+  });
+});

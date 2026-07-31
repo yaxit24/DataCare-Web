@@ -6,11 +6,29 @@ import { withTenant } from '@datacare/db';
 import { buildApp } from './app.js';
 import { hashPassword } from './modules/auth/password.js';
 import { resolveRuntimeConfig, type RuntimeConfig } from './modules/ops/runtimeConfig.js';
+import { seedCompany } from './modules/ops/seedCompany.js';
 
 /** Dev-only convenience: ensure a demo company + admin login exist so you can log in immediately. */
 async function seedDemo(prisma: PrismaClient, config: RuntimeConfig) {
   if (!config.seedDemo || !config.demoPassword) return;
   const pwd = await hashPassword(config.demoPassword);
+
+  /**
+   * Provision the company through the same path a real one uses.
+   *
+   * This used to hand-roll CO_MAST / YEAR_MAST / LOCT_MAST / CO_SET / BOOK_DATA and stop there, which
+   * made the demo unable to post its primary transaction: a sale failed with
+   * `book SAL account row 1 is missing`, because `resolveBookAccountTx` reads BOOK_DETL for the control
+   * account and fails closed rather than inventing one. `seedCompany` already solved exactly that for
+   * provisioned companies — the comment at seedCompany.ts:54 records the same bug being found by
+   * running the application — so the demo now reuses it instead of keeping a thinner parallel copy that
+   * can drift.
+   *
+   * It is idempotent (each insert is guarded by an existence check) and brings the full book set with
+   * BOOK_DETL rows, the standard accounts, tax codes and SRNO_MAST counters.
+   */
+  await seedCompany(prisma, config.demoTenant, '01', { coName: 'Demo Jeweller', lcCode: '01' });
+
   await withTenant(prisma, config.demoTenant, async (tx) => {
     await tx.$executeRawUnsafe(
       `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG")
@@ -18,41 +36,43 @@ async function seedDemo(prisma: PrismaClient, config: RuntimeConfig) {
       config.demoTenant,
       pwd,
     );
-    await tx.$executeRawUnsafe(
-      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME") SELECT $1,'01','Demo Jeweller' WHERE NOT EXISTS (SELECT 1 FROM "CO_MAST" WHERE "CO_CODE"='01')`,
-      config.demoTenant,
-    );
-    // YEAR_MAST must carry CO_CODE: businessScope.year() filters by company, so a company-less row
-    // resolves to no fiscal year and every business endpoint then answers 'scope-incomplete'.
+    // seedCompany opens the fiscal year around today. The demo also keeps 2024-2025 so any data seeded
+    // against that year stays reachable from the year selector.
     await tx.$executeRawUnsafe(
       `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
        SELECT $1,'01','2024-2025','2024-04-01','2025-03-31'
         WHERE NOT EXISTS (SELECT 1 FROM "YEAR_MAST" WHERE "CO_CODE"='01' AND "CO_YEAR"='2024-2025')`,
       config.demoTenant,
     );
-    // A location is mandatory: resolveLoginScope() cannot resolve a scope without one, and the
-    // resulting ScopeError surfaces to the client as 'invalid-credentials', which looks like a
-    // wrong password. Without this row the seeded demo account can never sign in.
+
+    // Trading masters, so the demo can actually sell something. Item codes are clipped to the real
+    // width: ITEM_MAST.IT_CODE is varchar(5), so 'SILVER' fails with 22001. A sale needs an item whose group
+    // carries a SALE_AC (income account) and a party to bill; seedCompany provisions neither, because a
+    // real company enters its own. Without these the demo stops at
+    // `account not found for tax policy` or an unmapped income account.
     await tx.$executeRawUnsafe(
-      `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME")
-       SELECT $1,'01','01','Main Counter'
-        WHERE NOT EXISTS (SELECT 1 FROM "LOCT_MAST" WHERE "CO_CODE"='01' AND "LC_CODE"='01')`,
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       SELECT $1,'01','01','GOLD JEWELLERY','SALES'
+        WHERE NOT EXISTS (SELECT 1 FROM "GROUP_MAST" WHERE "CO_CODE"='01' AND "GR_CODE"='01')`,
       config.demoTenant,
     );
-    // CO_SET is mandatory: modules/shared/settingsBehavior.ts fails closed unless exactly one
-    // company settings row exists, so without this every business endpoint errors. All flags are
-    // left blank on purpose, which the loader maps to the documented default behavior.
     await tx.$executeRawUnsafe(
-      `INSERT INTO "CO_SET"(tenant_id,"CO_CODE")
-       SELECT $1,'01' WHERE NOT EXISTS (SELECT 1 FROM "CO_SET" WHERE "CO_CODE"='01')`,
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
+       SELECT $1,'01','GOLD','GOLD ORNAMENT','G','01'
+        WHERE NOT EXISTS (SELECT 1 FROM "ITEM_MAST" WHERE "CO_CODE"='01' AND "IT_CODE"='GOLD')`,
       config.demoTenant,
     );
-    // One active book, so a voucher screen has something selectable out of the box.
     await tx.$executeRawUnsafe(
-      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-                               "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-       SELECT $1,'01','01','SAL','Sales','SALE','SALES','O','Y','SL_DATA'
-        WHERE NOT EXISTS (SELECT 1 FROM "BOOK_DATA" WHERE "CO_CODE"='01' AND "CO_BOOK"='SAL')`,
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
+       SELECT $1,'01','SILVR','SILVER ORNAMENT','S','01'
+        WHERE NOT EXISTS (SELECT 1 FROM "ITEM_MAST" WHERE "CO_CODE"='01' AND "IT_CODE"='SILVR')`,
+      config.demoTenant,
+    );
+    // A local (intra-state) customer, so GST splits into CGST/SGST as it would in the shop.
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE","AC_GR")
+       SELECT $1,'01','01','CUST01','DEMO CUSTOMER','L','30'
+        WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE "CO_CODE"='01' AND "AC_CODE"='CUST01')`,
       config.demoTenant,
     );
   });

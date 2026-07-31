@@ -105,8 +105,24 @@ export async function seedCompany(
   // The fiscal year the desktop would open: April-to-March around today.
   const y = new Date().getFullYear();
   return withTenant(prisma, tenantId, async (tx: any) => {
-    const absent = async (sql: string, ...p: unknown[]): Promise<boolean> =>
-      Number((await tx.$queryRawUnsafe(sql, ...p))[0]?.n ?? 0) === 0;
+    /**
+     * Does this company lack the row we are about to create?
+     *
+     * The tenant predicate is written into every query explicitly rather than left to RLS. Relying on
+     * RLS made this function silently do nothing when handed an owner connection: the owner bypasses
+     * row-level security, so `WHERE "CO_CODE"='01'` matched some OTHER tenant's company, every check
+     * reported "already present", nothing was inserted, and the result came back
+     * `created: {…all false}` — indistinguishable from a company that was genuinely already
+     * provisioned. It worked in the running application only because the app connects as a non-owner.
+     *
+     * Same defect class as the message-log isolation bug: a query that filters on a business key and
+     * leans on RLS for the tenant is correct under one connection type only. An explicit predicate is
+     * correct under both.
+     */
+    const absent = async (table: string, where: string, ...p: unknown[]): Promise<boolean> => {
+      const sql = `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND ${where}`;
+      return Number((await tx.$queryRawUnsafe(sql, tenantId, ...p))[0]?.n ?? 0) === 0;
+    };
     let coMast = false,
       accounts = 0,
       taxes = 0,
@@ -116,7 +132,7 @@ export async function seedCompany(
       locality = false,
       year = false;
 
-    if (await absent(`SELECT count(*)::int n FROM "CO_MAST" WHERE "CO_CODE"=$1`, coCode)) {
+    if (await absent('CO_MAST', '"CO_CODE"=$2', coCode)) {
       await tx.$executeRawUnsafe(
         `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE") VALUES ($1,$2,$3,$4)`,
         tenantId,
@@ -127,13 +143,7 @@ export async function seedCompany(
       coMast = true;
     }
     for (const a of SYSTEM_ACCOUNTS) {
-      if (
-        await absent(
-          `SELECT count(*)::int n FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2`,
-          coCode,
-          a.code,
-        )
-      ) {
+      if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR") VALUES ($1,$2,$3,$4,$5,$6)`,
           tenantId,
@@ -147,13 +157,7 @@ export async function seedCompany(
       }
     }
     for (const t of TAXES) {
-      if (
-        await absent(
-          `SELECT count(*)::int n FROM "TAX_MAST" WHERE "CO_CODE"=$1 AND "TAX_CODE"=$2`,
-          coCode,
-          t.code,
-        )
-      ) {
+      if (await absent('TAX_MAST', '"CO_CODE"=$2 AND "TAX_CODE"=$3', coCode, t.code)) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,1,$4,$5,'N')`,
           tenantId,
@@ -173,7 +177,8 @@ export async function seedCompany(
       const inout = wf?.inout ?? b.inout ?? 'I';
       if (
         await absent(
-          `SELECT count(*)::int n FROM "BOOK_DATA" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_BOOK"=$3`,
+          'BOOK_DATA',
+          '"CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4',
           coCode,
           lcCode,
           b.book,
@@ -222,13 +227,7 @@ export async function seedCompany(
         books += 1;
       }
     }
-    if (
-      await absent(
-        `SELECT count(*)::int n FROM "SRNO_MAST" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2`,
-        coCode,
-        lcCode,
-      )
-    ) {
+    if (await absent('SRNO_MAST', '"CO_CODE"=$2 AND "LC_CODE"=$3', coCode, lcCode)) {
       await tx.$executeRawUnsafe(
         `INSERT INTO "SRNO_MAST"(tenant_id,"CO_CODE","LC_CODE","VCH_SRNO","TAG_SRNO") VALUES ($1,$2,$3,0,0)`,
         tenantId,
@@ -240,13 +239,7 @@ export async function seedCompany(
     // A company with no LOCATION cannot be selected: resolveLoginScope() cannot build a scope without
     // one, and /context/select answers `location-unavailable`. Provisioning previously created the books
     // and accounts but not the location, so a provisioned company was unreachable through the UI.
-    if (
-      await absent(
-        `SELECT count(*)::int n FROM "LOCT_MAST" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2`,
-        coCode,
-        lcCode,
-      )
-    ) {
+    if (await absent('LOCT_MAST', '"CO_CODE"=$2 AND "LC_CODE"=$3', coCode, lcCode)) {
       await tx.$executeRawUnsafe(
         `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME") VALUES ($1,$2,$3,$4)`,
         tenantId,
@@ -258,7 +251,7 @@ export async function seedCompany(
     }
     // Likewise a fiscal year: businessScope.year() filters by company, and without a row every business
     // endpoint answers `scope-incomplete`.
-    if (await absent(`SELECT count(*)::int n FROM "YEAR_MAST" WHERE "CO_CODE"=$1`, coCode)) {
+    if (await absent('YEAR_MAST', '"CO_CODE"=$2', coCode)) {
       const startYear = new Date().getMonth() + 1 >= 4 ? y : y - 1;
       await tx.$executeRawUnsafe(
         `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,$2,$3,$4,$5)`,
@@ -270,7 +263,7 @@ export async function seedCompany(
       );
       year = true;
     }
-    if (await absent(`SELECT count(*)::int n FROM "CO_SET" WHERE "CO_CODE"=$1`, coCode)) {
+    if (await absent('CO_SET', '"CO_CODE"=$2', coCode)) {
       await tx.$executeRawUnsafe(
         `INSERT INTO "CO_SET"(tenant_id,"CO_CODE") VALUES ($1,$2)`,
         tenantId,
