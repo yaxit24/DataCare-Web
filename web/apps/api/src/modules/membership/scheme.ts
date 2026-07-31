@@ -1,5 +1,5 @@
 import { withTenant } from '@datacare/db';
-import { buildMoneyRojmel } from '../shared/rojmel.js';
+import { buildMoneyRojmel, buildSchemeAdjRojmel } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -815,10 +815,45 @@ export async function schemeMaturity(
       VCH_NO: hdVchNo,
       BOOK_NAME: MEMB_ADJUST.bookName,
     });
+    // The Rojmel (day book). Book 076 carries 37 real rows across three types; the other five in
+    // Ac_Rojmel.Schm_Adj_RojMel are dead here, and two independent facts say so - they all require
+    // GOLD_WT or GOLD_AMT, which is 0 on all 26 AD_ADJ rows, and they require SCHM_TYPE 'G'/'S' while all
+    // four of this company's schemes are 'A'.
+    //
+    // The bonus is carried on its own row against a different account, so type 01 takes ADJ_AMT less the
+    // bonus rather than the whole figure. Type 03 is the settlement mirror and is suppressed when the
+    // balance went onto a sales bill, because that bill's own rows already carry it.
+    const rojmelRows = buildSchemeAdjRojmel(
+      {
+        scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: sc.coYear! },
+        key,
+        coBook: book,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: MEMB_ADJUST.vchType,
+        bookName: MEMB_ADJUST.bookName,
+        partyName: acName ?? '',
+        partyCode: payAc,
+      },
+      [
+        {
+          lineNo: 1,
+          schemeAc: liabAc,
+          // The desktop charges the bonus to BOOK_DETL slot 1. This module does not resolve that slot,
+          // so the scheme account is used and the divergence stated rather than an account invented.
+          bonusAc: liabAc,
+          settlementAc: payAc,
+          adjustedAmount: payout,
+          bonus,
+          memberName: acName ?? undefined,
+        },
+      ],
+    );
     await postVoucherTx(tx, tenantId, {
       bookName: MEMB_ADJUST.bookName,
       ledger: { table: 'AC_DATA', lines: ledger },
       writes: [
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
         {
           table: 'AD_ADJ',
           rows: [

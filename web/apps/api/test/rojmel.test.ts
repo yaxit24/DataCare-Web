@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ROJMEL_ROW_TYPE,
+  buildSchemeAdjRojmel,
   buildOrderRojmel,
   buildRateCutRojmel,
   buildCashRojmel,
@@ -698,5 +699,97 @@ describe('sales order (book 020) — 4 live types of 8', () => {
     const types = rows.map(typeOf);
     for (const dead of ['03', '05', '07', '08']) expect(types).not.toContain(dead);
     expect(types.sort()).toEqual(['01', '02', '04', '06']);
+  });
+});
+
+describe('scheme adjustment (book 076) — 3 live types of 8', () => {
+  // 21 + 8 + 8 = 37, matching the book exactly. The five unbuilt types all require GOLD_WT or GOLD_AMT,
+  // which is 0 on all 26 AD_ADJ rows, and SCHM_TYPE 'G'/'S' while all four of this company's schemes are
+  // 'A'. Two independent facts, same conclusion.
+  const adjCtx: RojmelContext = { ...ctx, coBook: '076', partyCode: '00004' };
+  const line = (over: Record<string, unknown> = {}) => ({
+    lineNo: 1,
+    schemeAc: '000858', // AD_MAST.SCHM_AC
+    bonusAc: '00079', // BOOK_DETL slot 1 on the desktop
+    settlementAc: '00004',
+    adjustedAmount: 26000,
+    bonus: 18000,
+    memberName: 'A MEMBER',
+    ...over,
+  });
+  const typeOf = (r: { LEDR_KEY: unknown }) => String(r.LEDR_KEY).slice(21, 23);
+
+  it('splits the principal from the bonus, so type 01 is ADJ_AMT LESS the bonus', () => {
+    // Real arithmetic: ADJ_AMT = MEMB_AMT + MEMB_BONUS - MEMB_LESS, verified on every row. The bonus is
+    // an expense the shop grants, not scheme money the member paid in, so it is charged separately.
+    const rows = buildSchemeAdjRojmel(adjCtx, [line()]);
+    const principal = rows.find((r) => typeOf(r) === '01')!;
+    const bonus = rows.find((r) => typeOf(r) === '02')!;
+    expect(principal.DR_AMT).toBe(8000); // 26000 - 18000
+    expect(bonus.DR_AMT).toBe(18000);
+    // The pair sums to the settlement credit, which is what makes the voucher hang together.
+    expect(principal.DR_AMT + bonus.DR_AMT).toBe(rows.find((r) => typeOf(r) === '03')!.CR_AMT);
+  });
+
+  it('the scheme-side rows are debits; the settlement row is the credit mirror', () => {
+    const rows = buildSchemeAdjRojmel(adjCtx, [line()]);
+    const p = rows.find((r) => typeOf(r) === '01')!;
+    const s3 = rows.find((r) => typeOf(r) === '03')!;
+    expect(p.AC_CODE).toBe('000858'); // scheme liability named
+    expect(p.LD_CODE).toBe('00004'); // settlement account as contra
+    expect(s3.AC_CODE).toBe('00004'); // and the mirror reverses them
+    expect(s3.LD_CODE).toBe('000858');
+    expect(s3.CR_AMT).toBe(26000);
+    expect(s3.DR_AMT).toBe(0);
+  });
+
+  it('the bonus row charges a DIFFERENT account from the principal', () => {
+    const rows = buildSchemeAdjRojmel(adjCtx, [line()]);
+    const p = rows.find((r) => typeOf(r) === '01')!;
+    const b = rows.find((r) => typeOf(r) === '02')!;
+    expect(b.AC_CODE).toBe('00079');
+    expect(b.AC_CODE).not.toBe(p.AC_CODE);
+  });
+
+  it('omits type 01 when the whole adjustment was bonus', () => {
+    // 21 type-01 rows against 26 AD_ADJ rows: on five, ADJ_AMT - MEMB_BONUS came to zero.
+    const rows = buildSchemeAdjRojmel(adjCtx, [line({ adjustedAmount: 18000, bonus: 18000 })]);
+    expect(rows.map(typeOf)).toEqual(['02', '03']);
+  });
+
+  it('omits the bonus row when no bonus was granted', () => {
+    const rows = buildSchemeAdjRojmel(adjCtx, [line({ adjustedAmount: 7500, bonus: 0 })]);
+    expect(rows.map(typeOf)).toEqual(['01', '03']);
+    expect(rows.find((r) => typeOf(r) === '01')!.DR_AMT).toBe(7500);
+  });
+
+  it('suppresses the settlement row when the balance went onto a sales bill', () => {
+    // SBILL_AMT <> 0 means the bill's own Rojmel rows carry the settlement; emitting here would
+    // double-count it in the day book.
+    const rows = buildSchemeAdjRojmel(adjCtx, [line({ settledAgainstBillAmount: 26000 })]);
+    expect(rows.map(typeOf)).toEqual(['01', '02']);
+  });
+
+  it('carries no metal — a scheme adjustment moves money only', () => {
+    for (const r of buildSchemeAdjRojmel(adjCtx, [line()])) {
+      expect(r.IT_TYPE).toBe('A');
+      expect(r.SIGN).toBe('');
+      expect(r.ITM_GWT).toBe(0);
+      expect(r.ITM_FINE).toBe(0);
+    }
+  });
+
+  it('all three keys are 33 characters and two members do not collide', () => {
+    // Every one of the 37 real keys is 33 characters: all three types carry STR(SR_NO), because one
+    // voucher can adjust several members and LEDR_KEY is the whole primary key.
+    const rows = buildSchemeAdjRojmel(adjCtx, [line({ lineNo: 1 }), line({ lineNo: 2 })]);
+    expect(rows.every((r) => String(r.LEDR_KEY).length === 33)).toBe(true);
+    expect(new Set(rows.map((r) => r.LEDR_KEY)).size).toBe(rows.length);
+    expect(rows).toHaveLength(6); // three types × two members
+  });
+
+  it('never emits the five gold-scheme types', () => {
+    const types = buildSchemeAdjRojmel(adjCtx, [line()]).map(typeOf);
+    for (const dead of ['04', '05', '06', '07', '08']) expect(types).not.toContain(dead);
   });
 });

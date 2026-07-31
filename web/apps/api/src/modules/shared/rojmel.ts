@@ -114,7 +114,7 @@ export function rojmelLedrKey(
   scope: RojmelKeyScope,
   coBook: string,
   vchNo: string,
-  rowType: RojmelRowType | RojmelRateCutRowType | RojmelOrderRowType,
+  rowType: RojmelRowType | RojmelRateCutRowType | RojmelOrderRowType | RojmelSchemeAdjRowType,
   lineNo?: number,
 ): string {
   const head =
@@ -889,6 +889,128 @@ export function buildOrderRojmel(ctx: RojmelContext, legs: OrderRojmelLegs): Roj
         ITM_FINE: l.fine,
         IT_DESC: l.itemName ?? '',
         IT_CODE: l.itemCode ?? '',
+      });
+    }
+  }
+  return rows;
+}
+
+/**
+ * Scheme-adjustment row types (book 076, "Member Advance Adjust"), from `Ac_Rojmel.Schm_Adj_RojMel`
+ * (lines 458–478).
+ *
+ * That routine has eight row types. Only these **three** ever fired, from grouping the 37 real rows of
+ * book 076 by `LEDR_KEY` type and matching each against a non-zero source column in `AD_ADJ`:
+ *
+ *   `01` 21 rows  the principal adjusted   `ADJ_AMT - MEMB_BONUS <> 0`
+ *   `02`  8 rows  the bonus portion        `MEMB_BONUS <> 0` — and `MEMB_BONUS` is non-zero on exactly 8
+ *   `03`  8 rows  the settlement side      `ADJ_AMT <> 0 AND AC_CODE <> '00001' AND SBILL_AMT = 0`
+ *
+ * 21 + 8 + 8 = 37, matching the book exactly. Source and data agree on all three directions, checked
+ * individually.
+ *
+ * **Types `04` to `08` are dead here, and two independent facts say so.** All five require
+ * `GOLD_WT <> 0` or `GOLD_AMT <> 0`, and `GOLD_WT` is **0 on all 26 `AD_ADJ` rows**. They also require
+ * `AD_MAST.SCHM_TYPE IN ('G','S')`, and all four of this company's schemes are `SCHM_TYPE 'A'` —
+ * amount-based, not metal-based. A gold savings scheme would light them up; this shop does not run one.
+ */
+export const ROJMEL_SCHEME_ADJ_ROW_TYPE = {
+  /** The principal being adjusted, net of any bonus. DEBIT on the scheme liability. */
+  PRINCIPAL: '01',
+  /** The bonus portion, separated out. DEBIT on the book's slot-1 account. */
+  BONUS: '02',
+  /** The settlement side — the account the balance was applied to. CREDIT. */
+  SETTLEMENT: '03',
+} as const;
+
+export type RojmelSchemeAdjRowType =
+  (typeof ROJMEL_SCHEME_ADJ_ROW_TYPE)[keyof typeof ROJMEL_SCHEME_ADJ_ROW_TYPE];
+
+export interface SchemeAdjRojmelLine {
+  lineNo: number;
+  /** `AD_MAST.SCHM_AC` — the scheme liability account being released. */
+  schemeAc: string;
+  /** `BOOK_DETL` slot 1 — where the bonus is charged. */
+  bonusAc: string;
+  /** `AD_ADJ.AC_CODE` — the account the matured balance is applied to. */
+  settlementAc: string;
+  /** `AD_ADJ.ADJ_AMT` = `MEMB_AMT + MEMB_BONUS - MEMB_LESS`, verified on every real row. */
+  adjustedAmount: number;
+  bonus: number;
+  /** `AD_ADJ.SBILL_AMT`. Non-zero suppresses the settlement row — the bill carries it instead. */
+  settledAgainstBillAmount?: number;
+  memberName?: string;
+}
+
+/**
+ * Project a scheme adjustment (maturity / advance adjust) into its Rojmel rows.
+ *
+ * ## Shapes, taken from the source and confirmed against the real rows
+ *
+ *   t01  AC_CODE = scheme liability   LD_CODE = settlement account   DEBIT   `ADJ_AMT - MEMB_BONUS`
+ *   t02  AC_CODE = book slot 1        LD_CODE = settlement account   DEBIT   `MEMB_BONUS`
+ *   t03  AC_CODE = settlement account LD_CODE = scheme liability     CREDIT  `ADJ_AMT`
+ *
+ * Types `01` and `02` are the **scheme side** — they name a scheme or bonus account and put the
+ * settlement account in `LD_CODE`. Type `03` is the **mirror**: the settlement account named, the scheme
+ * liability as contra. That pairing is the same shape contra and the member instalment use.
+ *
+ * ## The bonus is separated deliberately
+ * Type `01` carries `ADJ_AMT - MEMB_BONUS`, not `ADJ_AMT`. The bonus is charged to a different account
+ * (book slot 1) because it is an expense the shop grants, not scheme money the member paid in. Summing
+ * `01` and `02` gives `ADJ_AMT`, which is why type `03` — the single settlement credit — balances against
+ * the pair. **21 type-01 rows against 26 `AD_ADJ` rows**: on five rows the whole adjustment was bonus, so
+ * `ADJ_AMT - MEMB_BONUS` came to zero and the guard suppressed the row.
+ *
+ * ## The settlement row is conditional in two ways
+ * `AC_CODE <> '00001'` excludes a cash settlement — cash is implicit in a day book, the same reasoning
+ * that gives a cash receipt no second row in `buildMoneyRojmel`. And `SBILL_AMT = 0` excludes a balance
+ * applied to a sales bill, because the bill's own Rojmel rows already carry it. Both are honoured below;
+ * the cash test is left to the caller, which knows its own account codes.
+ *
+ * ## Line numbers
+ * All three types carry `STR(A.SR_NO)` and all 37 real keys are **33** characters. One voucher can adjust
+ * several members, so the line number is what keeps the keys distinct — `LEDR_KEY` is the whole primary
+ * key and two members sharing one would collide with `23505`.
+ */
+export function buildSchemeAdjRojmel(
+  ctx: RojmelContext,
+  lines: SchemeAdjRojmelLine[],
+): RojmelRow[] {
+  const rows: RojmelRow[] = [];
+  const key = (t: RojmelSchemeAdjRowType, lineNo: number): string =>
+    rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, t, lineNo);
+
+  for (const l of lines) {
+    const principal = l.adjustedAmount - l.bonus;
+    const label = l.memberName ? ` - ${l.memberName}` : '';
+
+    if (principal) {
+      rows.push({
+        ...blank(ctx, key(ROJMEL_SCHEME_ADJ_ROW_TYPE.PRINCIPAL, l.lineNo)),
+        AC_CODE: l.schemeAc,
+        LD_CODE: l.settlementAc,
+        DR_AMT: principal,
+        IT_DESC: `S-ADJ${label}`,
+      });
+    }
+    if (l.bonus) {
+      rows.push({
+        ...blank(ctx, key(ROJMEL_SCHEME_ADJ_ROW_TYPE.BONUS, l.lineNo)),
+        AC_CODE: l.bonusAc,
+        LD_CODE: l.settlementAc,
+        DR_AMT: l.bonus,
+        IT_DESC: `S-BONUS${label}`,
+      });
+    }
+    // Suppressed when the balance went onto a sales bill: that bill's own rows already carry it, and
+    // emitting here would double-count the settlement in the day book.
+    if (l.adjustedAmount && !l.settledAgainstBillAmount) {
+      rows.push({
+        ...blank(ctx, key(ROJMEL_SCHEME_ADJ_ROW_TYPE.SETTLEMENT, l.lineNo)),
+        AC_CODE: l.settlementAc,
+        LD_CODE: l.schemeAc,
+        CR_AMT: l.adjustedAmount,
       });
     }
   }

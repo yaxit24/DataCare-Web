@@ -40,7 +40,7 @@ Five builders written — `buildSaleRojmel`, `buildMoneyRojmel`, `buildCashRojme
 `sales/rateCut.ts`, `purchase/purchase.ts`, `finance/finance.ts`, `finance/journal.ts`,
 `membership/scheme.ts`.
 
-**Coverage: 3020 of the 3179 real Rojmel rows — 95%.** Counted by grouping the real rows by `MAIN_BOOK`,
+**Coverage: 3057 of the 3179 real Rojmel rows — 96%.** Counted by grouping the real rows by `MAIN_BOOK`,
 which is the right granularity: several book codes share one family, so counting by book code
 double-counts effort. Reproduce with:
 
@@ -63,7 +63,7 @@ SELECT '  '+RIGHT(CAST(count(*)+100000 AS varchar),5)+'  '+ISNULL(MAX(b.MAIN_BOO
 | CONTRA                                  | 74     | written         |
 | RATE CUT                                | 66     | written         |
 | SALES ORDER                             | 55     | **written**     |
-| **MEMB ADJUST**                         | **37** | **not written** |
+| MEMB ADJUST                             | 37     | **written**     |
 | **WH SALES**                            | **32** | partly          |
 | **KARIGAR RECEIPT**                     | **28** | **not written** |
 | **FINE JV**                             | **28** | **not written** |
@@ -72,7 +72,7 @@ SELECT '  '+RIGHT(CAST(count(*)+100000 AS varchar),5)+'  '+ISNULL(MAX(b.MAIN_BOO
 | SALES RETURNE                           | 1      | written         |
 | KARIGAR ISSUE / ORDER CANCEL / BILL REC | 1 each | not written     |
 
-**155 rows remain**, in the five bold families — sales order's 55 are now written. Note that an earlier figure of "88%" in
+**118 rows remain**, in the four bold families. Note that an earlier figure of "88%" in
 `GAP-ANALYSIS-AND-PLAN.md` was computed from a book-code list rather than measured this way; this table
 supersedes it.
 
@@ -449,7 +449,7 @@ Ranked by **counted real Rojmel rows**, which is the only ranking that has survi
 | Book                      | Rows | Routine               | `Ac_Rojmel.cs` line | Status                                     |
 | ------------------------- | ---- | --------------------- | ------------------- | ------------------------------------------ |
 | 020 Sales Order           | 55   | `Order_Rojmel`        | 9                   | **written** — 4 live types of 8            |
-| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel`     | 458                 | next to plan                               |
+| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel`     | 458                 | **written** — 3 live types of 8            |
 | 034 Wh Sales              | 32   | `Wh_Sales_Rojmel`     | 221                 | purchase-side types already in the builder |
 | 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel`       | 364                 | also closes the `KR_DETL` write gap        |
 | 078 Fine Jv               | 28   | —                     | —                   | identify the routine first                 |
