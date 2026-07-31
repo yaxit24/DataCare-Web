@@ -63,6 +63,20 @@ export async function resolveTaxPolicyTx(
   if (args.srNo != null) {
     params.push(args.srNo);
     rowSelector = `AND coalesce("SR_NO",0)::numeric=$${params.length}::numeric`;
+  } else if (args.taxCode?.trim()) {
+    // Selecting BY CODE pins the PARENT row, SR_NO 0. The rows at SR_NO 1..n are not alternative
+    // configurations of the code - they are its component breakdown (SGST / CGST / IGST), and comparing the
+    // parent against a component is comparing a total to one of its parts.
+    //
+    // Without this the web could not post a sale against ANY real GST tax master. Measured on the real
+    // customer database: every one of the five GST codes has its parent colliding with its IGST row on
+    // percentage with a different account - 10 at 3%, 11 at 5%, 12 at 12%, 13 at 18%, 14 at 28% - and each
+    // also has SGST and CGST colliding at the half rate. So the conflict check fired on all of them and the
+    // first attempt to replay a real desktop voucher failed with "tax code has conflicting configuration: 10".
+    //
+    // The desktop pins the parent the same way: its tax queries carry `AND D.SR_NO = 0`, in the sale
+    // (Ac_Rojmel.Sales_Rojmel type 05), the TCS row, and the rate-cut tax rows.
+    rowSelector = `AND coalesce("SR_NO",0)::numeric=0`;
   }
   const taxes: Array<{
     tax_code: unknown;
@@ -84,6 +98,9 @@ export async function resolveTaxPolicyTx(
         : `tax rate is not configured: ${pct}`,
     );
   }
+  // The conflict check still matters on the percentage-only path: two different tax CODES sharing a rate
+  // with different accounts is a genuine ambiguity the caller must resolve. What it must not do is treat a
+  // code's own component rows as rivals.
   const identities = new Set(
     taxes.map((row) =>
       [row.tax_code, row.tax_group, row.tax_ac, Number(row.tax_pct)].map(String).join('|'),

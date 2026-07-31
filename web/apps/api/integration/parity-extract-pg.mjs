@@ -71,6 +71,19 @@ async function main() {
   const { PrismaClient } = req('@prisma/client');
   const prisma = new PrismaClient({ datasources: { db: { url } } });
 
+  // Every read below must carry the tenant context. DATABASE_URL is the RLS-BOUND application role, and
+  // without `app.tenant_id` set, row-level security filters every table to nothing - so this script reported
+  // "voucher wrote no rows" for a voucher that was sitting right there. It reads as a missing voucher, not as
+  // a permissions failure, which is the whole danger of it.
+  //
+  // Transaction-local set_config is what packages/db/withTenant does; doing it per statement here would not
+  // survive, so the reads are wrapped in one interactive transaction instead.
+  const inTenant = (fn) =>
+    prisma.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe("SELECT set_config('app.tenant_id', $1, true)", tenant);
+      return fn(tx);
+    });
+
   try {
     const tableRows = await prisma.$queryRawUnsafe(`
       SELECT table_name AS name FROM information_schema.columns
@@ -118,11 +131,12 @@ async function main() {
         }
         let rows;
         try {
-          // Read as the owner: RLS is not the subject of this comparison and a policy miss would look like a
-          // missing write, which would be a misleading finding.
-          rows = await prisma.$queryRawUnsafe(
-            `SELECT * FROM ${qpg(table)} WHERE ${where}`,
-            ...params,
+          // RLS is not the subject of this comparison, and a policy miss would look like a missing write -
+          // which is a misleading finding, so guard against it from both directions. Setting the tenant
+          // context is required if DATABASE_URL names the RLS-bound application role and harmless if it names
+          // the owner, so the script works either way rather than reporting an empty voucher.
+          rows = await inTenant((tx) =>
+            tx.$queryRawUnsafe(`SELECT * FROM ${qpg(table)} WHERE ${where}`, ...params),
           );
         } catch (e) {
           console.error(`  ! ${table}: ${e instanceof Error ? e.message : String(e)}`);
