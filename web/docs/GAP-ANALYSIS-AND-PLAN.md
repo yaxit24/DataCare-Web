@@ -678,3 +678,52 @@ A helper that swallows an error into a plausible-looking zero is worse than one 
 Nine live types implemented; the ~31 dead ones left alone. All 40 `RATE_CUT_DATA` rows are `IT_TYPE 'G'`,
 so no silver family was built. The purchase-side types are implemented in the shared builder but cannot
 fire from `rateCut.ts`, which books only the sale side — noted in code rather than papered over.
+
+---
+
+## Next piece planned: `docs/PLAN-SALESORDER-ROJMEL.md`
+
+Sales order (book 020, **55** real Rojmel rows) analysed and written up as a self-contained plan, same
+standard as the rate-cut one.
+
+The column-count step cut it from **8 row types to 4** before anything was written:
+
+| Type | Rows | Shape                                                        | Guard                           |
+| ---- | ---- | ------------------------------------------------------------ | ------------------------------- |
+| `01` | 41   | credit, contra = `BOOK_DETL` slot 1                          | `ADV_AMT <> 0`                  |
+| `02` | 11   | debit, `AC_CODE` = the bank                                  | `CHQ_AMT <> 0`                  |
+| `04` | 2    | debit, `IT_TYPE 'A'` **carrying weight**, per line           | `NET_AMT <> 0`                  |
+| `06` | 1    | money-free fine row, `IT_TYPE` = metal, `SIGN '+'`, per line | `ITM_FINE <> 0 AND NET_AMT = 0` |
+
+41 + 11 + 2 + 1 = 55, matching the book exactly.
+
+### This time the source and the data AGREE
+
+Checked type by type. That matters because on the rate-cut work the source had debit and credit **reversed
+on four types** and the plan wrongly called three families money-free. So the rule is not "distrust the
+source" — it is **verify per type, and let the data settle disagreements**. `Ac_Rojmel.cs` is a later version
+than the code that wrote this data, and the divergence is not uniform across routines.
+
+### An anomaly the plan refuses to guess at
+
+`SCHM_AMT` is non-zero on **7 of 76** orders, yet there are **zero** type-05 Rojmel rows. Seven populated
+source rows produced no output. Type `05` is therefore **not** to be implemented until that is explained —
+writing it would add rows the desktop does not have, which is a parity failure in the opposite direction from
+a missing row and considerably harder to notice. The plan lists the three likely causes and the query to
+investigate.
+
+Types `03` (card) and `07` (rate-cut fine) are cleanly dead: `CARD_AMT` and `RCUT_FINE` are 0 of 76.
+
+### Two traps carried forward as their own section
+
+`footprintOf` swallows a blocked read into a count of zero, so calling it with an RLS-bound client reports an
+**empty footprint rather than failing**. And on the rate-cut work a helper reading outside `withTenant`
+reported 0 rows while the report, which scopes internally, saw a fine of 10 — the contradiction is what
+exposed it. Both are now written up with the rule: **when a count is unexpectedly zero, suspect the tenant
+context before the code.**
+
+### The plan's own references were checked against the tree
+
+Which found one stale set: the export line-number table had shifted by up to 220 lines because the rate-cut
+additions moved everything after them. Regenerated from the file. This is the second time verifying a plan
+against the code it describes has caught something — the first was five wrong directions.
