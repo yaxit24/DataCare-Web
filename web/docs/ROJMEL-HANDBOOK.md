@@ -371,6 +371,13 @@ failed 9 tests across 5 files, then passed 1015/1015 on three consecutive re-run
 stray `psql` sessions, then re-run. Check pressure with
 `psql … -tAc "SELECT count(*) FROM pg_stat_activity"`.
 
+**Never put `vitest run` and `git commit` in the same shell block.** This is the rule that actually
+prevents the mistake, and it took three occurrences to work out. The instruction "do not commit while the
+suite is red" is not self-enforcing: if both commands are in one block, the commit has already run by the
+time the test output can be read. Run the suite, read the result, _then_ commit in a separate step. All
+three violations on 2026-07-31/08-01 had exactly that shape, and all three were docs-only by luck rather
+than by design.
+
 **Do not commit while the suite is red**, even if you believe it is contention. I did that once — the commit
 was docs-only so nothing broken shipped, but the discipline matters more than the outcome. Re-run first,
 and if it fails again, investigate. **Do not overwrite the failure log before reading it**, which is how the
