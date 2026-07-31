@@ -125,6 +125,10 @@ export interface RojmelRow {
   ITM_AMT: number;
   LBR_RATE: number;
   LBR_AMT: number;
+  OTH_AMT: number;
+  NET_AMT: number;
+  IT_DESC: string;
+  IT_CODE: string;
 }
 
 export interface RojmelContext {
@@ -162,6 +166,12 @@ export interface RojmelLine {
   itemAmount?: number;
   labourRate?: number;
   labourAmount?: number;
+  /** OTH_AMT and NET_AMT, copied from SL_DETL as `Sales_Rojmel` does. */
+  otherAmount?: number;
+  netAmount?: number;
+  /** IT_CODE and IT_DESC. All 245 real sale metal rows carry both. */
+  itemCode?: string;
+  itemName?: string;
 }
 
 const blank = (ctx: RojmelContext, ledrKey: string): RojmelRow => ({
@@ -187,6 +197,10 @@ const blank = (ctx: RojmelContext, ledrKey: string): RojmelRow => ({
   ITM_AMT: 0,
   LBR_RATE: 0,
   LBR_AMT: 0,
+  OTH_AMT: 0,
+  NET_AMT: 0,
+  IT_DESC: '',
+  IT_CODE: '',
 });
 
 /**
@@ -289,19 +303,36 @@ export function buildSaleRojmel(
       ITM_AMT: l.itemAmount ?? l.amount,
       LBR_RATE: l.labourRate ?? 0,
       LBR_AMT: l.labourAmount ?? 0,
+      OTH_AMT: l.otherAmount ?? 0,
+      NET_AMT: l.netAmount ?? l.amount,
+      IT_DESC: l.itemName ?? '',
+      IT_CODE: l.itemCode ?? '',
     });
   }
 
-  // The party leg. Contra is the revenue account of the first line, mirroring the real row whose
-  // LD_CODE was the sales account.
+  // The party leg, and it is CONDITIONAL. `Sales_Rojmel` writes it only when the bill is outstanding,
+  // splitting on the sign: one row type for BILL_OS > 0 (debit) and another for BILL_OS < 0 (credit,
+  // absolute). Measured on the real database: of 47 sales with BILL_OS = 0, ZERO carry a party row; of
+  // 42 with BILL_OS <> 0, all 42 do. A fully settled bill leaves no receivable for a day book to show,
+  // so writing one unconditionally overstated the day's debtors.
+  //
+  // Contra is the revenue account of the first line, mirroring the real row whose LD_CODE was the sales
+  // account.
   const revenueAc = lines.find((l) => l.revenueAc)?.revenueAc ?? '';
-  rows.push({
-    ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.PARTY)),
-    AC_CODE: ctx.partyCode,
-    LD_CODE: revenueAc,
-    DR_AMT: outward ? legs.partyAmount : 0,
-    CR_AMT: outward ? 0 : legs.partyAmount,
-  });
+  const outstanding = legs.partyAmount;
+  if (outstanding) {
+    // A negative outstanding means the customer overpaid: the party is credited, not debited, and the
+    // amount is stated absolutely.
+    const owed = outstanding > 0;
+    const amount = Math.abs(outstanding);
+    rows.push({
+      ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, ROJMEL_ROW_TYPE.PARTY)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: revenueAc,
+      DR_AMT: outward === owed ? amount : 0,
+      CR_AMT: outward === owed ? 0 : amount,
+    });
+  }
 
   // The tax leg, only when there is tax — a zero-rated sale has no tax row in the desktop either.
   if (legs.taxAmount && legs.taxAc) {

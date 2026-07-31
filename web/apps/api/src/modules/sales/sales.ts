@@ -614,9 +614,12 @@ async function writeSaleTx(
   );
   const saleAcByItem: Record<string, string> = {};
   const metalByItem: Record<string, 'G' | 'S'> = {};
+  // The Rojmel's IT_DESC carries the item NAME (Ac_Rojmel.Sales_Rojmel selects C.IT_NAME); all 245 real
+  // sale metal rows have it populated.
+  const nameByItem: Record<string, string> = {};
   if (itCodes.length) {
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT i."IT_CODE" ic, i."IT_TYPE" metal, g."SALE_AC" sac FROM "ITEM_MAST" i
+      `SELECT i."IT_CODE" ic, i."IT_TYPE" metal, i."IT_NAME" iname, g."SALE_AC" sac FROM "ITEM_MAST" i
          LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
           AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
          WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text = ANY($3::text[])`,
@@ -634,6 +637,7 @@ async function writeSaleTx(
         throw new SaleValidationError(`missing GROUP_MAST.SALE_AC for item ${item || '?'}`);
       saleAcByItem[item] = account;
       if (metal === 'G' || metal === 'S') metalByItem[item] = metal;
+      nameByItem[item] = r.iname != null ? String(r.iname) : '';
     }
     const missing = itCodes.filter((item) => !saleAcByItem[item]);
     if (missing.length)
@@ -1494,6 +1498,9 @@ async function writeSaleTx(
   // 3179 rows, and a sale's three ledger legs become one metal row per detail line (the revenue leg
   // split, each carrying that line's pieces and weight) plus a party row and a tax row.
   // See project-memory/parity/ROJMEL-MODEL-VERIFIED.md and modules/shared/rojmel.ts.
+  // Built once and shared: the SL_DETL write set and the Rojmel projection must agree, and computing
+  // them twice is how they drift.
+  const detailRows = computed.map((c, idx) => buildSaleDetailRow(c, idx));
   const rojmelRows = buildSaleRojmel(
     {
       scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
@@ -1517,11 +1524,22 @@ async function writeSaleTx(
         grossWt: num(c.in.grossWt),
         netWt: num(c.in.netWt),
         rate: num(c.in.rate),
+        // Ac_Rojmel.Sales_Rojmel copies these from SL_DETL onto the day-book row. All 245 real sale
+        // metal rows carry IT_DESC / IT_CODE / NET_AMT and 237 of 245 carry LBR_AMT, so leaving them
+        // blank was a measurable gap. Reading them off the persisted detail row keeps the two
+        // projections from drifting apart.
+        itemCode: item,
+        itemName: nameByItem[item] ?? '',
+        labourRate: num((detailRows[idx] as any)?.LBR_RATE),
+        labourAmount: num((detailRows[idx] as any)?.LBR_AMT),
+        otherAmount: num((detailRows[idx] as any)?.OTH_AMT),
+        netAmount: num((detailRows[idx] as any)?.NET_AMT) || c.calc.net,
       };
     }),
-    // partyAmount is the payable the party's ledger leg carries (net + tax, after round-off). The
-    // lifecycle test asserts it equals the AC_DATA party debit rather than trusting this field name.
-    { taxAc, taxAmount: totals.tax, partyAmount: totals.total },
+    // The party row exists ONLY when the bill is outstanding, and its side follows the sign. Measured
+    // on the real database: of 47 sales with BILL_OS = 0, ZERO carry a party row; of 42 with
+    // BILL_OS <> 0, all 42 do. A fully settled bill leaves no receivable for a day book to show.
+    { taxAc, taxAmount: totals.tax, partyAmount: billOS },
     bookPolicy.inout !== 'I', // outward for a sale; an inward book mirrors the direction
   );
 
@@ -1530,7 +1548,7 @@ async function writeSaleTx(
     bookName: bookPolicy.bookName,
     writes: [
       { table: 'SL_DATA', rows: [header] },
-      { table: 'SL_DETL', rows: computed.map((c, idx) => buildSaleDetailRow(c, idx)) },
+      { table: 'SL_DETL', rows: detailRows },
       ...(idtl.length ? [{ table: 'SL_IDTL', rows: idtl }] : []),
       ...(mainStock.length ? [{ table: 'MAIN_STOCK', rows: mainStock }] : []),
       ...(oldGoldDetl.length ? [{ table: 'SL_PR_DETL', rows: oldGoldDetl }] : []),

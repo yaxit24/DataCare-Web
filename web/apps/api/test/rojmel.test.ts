@@ -216,3 +216,73 @@ describe('the cash books take the PARTY’s direction, not the cash account’s'
     ).toEqual([]);
   });
 });
+
+describe('the party row is conditional on the bill being outstanding', () => {
+  // Ac_Rojmel.Sales_Rojmel writes the party row only for a non-zero BILL_OS, splitting the sign across
+  // two row types. Measured on the real database: of 47 sales with BILL_OS = 0, ZERO carry a party row;
+  // of 42 with BILL_OS <> 0, all 42 do. Writing one unconditionally overstated the day's debtors.
+  it('a fully settled sale writes no party row', () => {
+    const rows = buildSaleRojmel(ctx, lines, { partyAmount: 0 });
+    expect(rows.filter((r) => r.AC_CODE === ctx.partyCode)).toEqual([]);
+    // The item rows are still there — the sale happened, the metal moved, nothing is owed.
+    expect(rows.filter((r) => r.IT_TYPE !== 'A')).toHaveLength(2);
+  });
+
+  it('an overpaid sale credits the party and states the amount absolutely', () => {
+    // BILL_OS < 0 is the customer in credit. The desktop uses ABS(BILL_OS) on a separate row type.
+    const rows = buildSaleRojmel(ctx, lines, { partyAmount: -250 });
+    const party = rows.find((r) => r.AC_CODE === ctx.partyCode)!;
+    expect(party).toBeDefined();
+    expect(party.CR_AMT).toBe(250);
+    expect(party.DR_AMT).toBe(0);
+  });
+
+  it('an outstanding sale debits the party, as before', () => {
+    const rows = buildSaleRojmel(ctx, lines, { partyAmount: 1560 });
+    const party = rows.find((r) => r.AC_CODE === ctx.partyCode)!;
+    expect(party.DR_AMT).toBe(1560);
+    expect(party.CR_AMT).toBe(0);
+  });
+});
+
+describe('item rows carry the detail columns the desktop copies from SL_DETL', () => {
+  it('populates IT_CODE, IT_DESC, NET_AMT, LBR_AMT and OTH_AMT', () => {
+    // All 245 real sale metal rows carry IT_DESC / IT_CODE / NET_AMT; 237 of 245 carry LBR_AMT.
+    const rows = buildSaleRojmel(
+      ctx,
+      [
+        {
+          lineNo: 1,
+          revenueAc: '00004',
+          amount: 1087,
+          metal: 'S' as const,
+          pcs: 1,
+          grossWt: 10.36,
+          itemCode: 'MA925',
+          itemName: 'SILVER PAYAL',
+          labourRate: 12,
+          labourAmount: 124.32,
+          otherAmount: 5,
+          netAmount: 1087,
+        },
+      ],
+      { partyAmount: 1087 },
+    );
+    const item = rows.find((r) => r.IT_TYPE !== 'A')!;
+    expect(item.IT_CODE).toBe('MA925');
+    expect(item.IT_DESC).toBe('SILVER PAYAL');
+    expect(item.NET_AMT).toBe(1087);
+    expect(item.LBR_RATE).toBe(12);
+    expect(item.LBR_AMT).toBe(124.32);
+    expect(item.OTH_AMT).toBe(5);
+  });
+
+  it('leaves them blank rather than guessing when the caller omits them', () => {
+    const rows = buildSaleRojmel(ctx, lines, { partyAmount: 1560 });
+    const item = rows.find((r) => r.IT_TYPE !== 'A')!;
+    expect(item.IT_CODE).toBe('');
+    expect(item.IT_DESC).toBe('');
+    // NET_AMT falls back to the line amount, which is what the desktop stores for a plain line.
+    expect(item.NET_AMT).toBe(1087);
+  });
+});
