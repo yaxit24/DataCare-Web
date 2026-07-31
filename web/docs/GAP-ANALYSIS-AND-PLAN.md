@@ -207,6 +207,13 @@ arrives. Treat each as: find the desktop form that maintains it, add a master su
 `BAR_DETL` and `TEMP_BOOK_DATA`, but **not** `KR_DETL` or `KR_IDTL`. The desktop has all three: `KR_DATA` 23,
 `KR_DETL` 22, `KR_IDTL` 8.
 
+> **RETRACTED 2026-07-31 — this was wrong, and it was recorded as "verified".** `karigar.ts` writes
+> `KR_DETL` and `KR_IDTL` from **six sites** across three paths (lines 496, 520, 712, 736, 1093, 1117), and
+> `mfgLifecycle.db.test.ts` asserts the detail rows exist and reads their `ITM_FINE`. The claim came from the
+> same single-line grep that produced the "15 unwritten tables" error — it required `{ table:` adjacent on
+> one line, and this codebase writes multi-line object literals. A karigar voucher does **not** have a
+> header with no lines. Nothing needs building here.
+
 So a karigar voucher records its **header with no line detail**. Every karigar report that lists what was issued
 or received reads the detail table and would find nothing.
 **Accept:** the karigar footprint test includes `KR_DETL` (and `KR_IDTL` where sub-details exist); removing
@@ -474,7 +481,8 @@ rather than after.
 2. `Order_Rojmel` — `SL_ORD_DATA` 76
 3. `Wh_Sales_Rojmel` — `RATE_CUT_DATA` 40, and it is the rate-cut recipe
 4. `Schm_Adj_RojMel` — `AD_ADJ` 26
-5. `Kr_Isu_Rojmel` / `Kr_Rec_Rojmel` — `KR_DATA` 17, alongside the `KR_DETL` write gap already recorded
+5. `Kr_Isu_Rojmel` / `Kr_Rec_Rojmel` — `KR_DATA` 17. Rojmel only: the `KR_DETL` write gap recorded
+   earlier was a false positive and is retracted above.
 
 The dhrn and loan families — six routines, the largest single block — can wait until a customer database
 shows them in use. Same for repair, card adjust and manufacturing JDT.
@@ -529,7 +537,7 @@ wrote rather than routines that exist or tables that have data.
 2. **Sales Order 020** — 55 rows, `Order_Rojmel`
 3. **Member Advance Adjust 076** — 37 rows, `Schm_Adj_RojMel`
 4. **Wh Sales 034** — 32 rows, same recipe as rate cut
-5. **Karigar Receipt 052** — 28 rows, `Kr_Rec_Rojmel`, alongside the `KR_DETL` write gap
+5. **Karigar Receipt 052** — 28 rows, `Kr_Rec_Rojmel`. Rojmel only; the `KR_DETL` gap was retracted.
 6. **Fine Jv 078** — 28 rows
 7. **URD Purchase 043** — 27 rows
 

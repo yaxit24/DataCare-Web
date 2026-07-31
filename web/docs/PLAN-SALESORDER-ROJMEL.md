@@ -563,13 +563,13 @@ unexpectedly zero, **suspect the tenant context before suspecting the code**.
 
 ## 11. Queue after this
 
-| Book                      | Rows | Routine               | Line | First step                                               |
-| ------------------------- | ---- | --------------------- | ---- | -------------------------------------------------------- |
-| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel`     | 458  | count non-zero in `AD_ADJ` (26 rows)                     |
-| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel`       | 364  | also closes the `KR_DETL` write gap                      |
-| 078 Fine Jv               | 28   | —                     | —    | identify the routine first                               |
-| 043 Gold URD Purchase Old | 27   | `Purc_Rojmel` variant | 115  | check `MAIN_BOOK`                                        |
-| 034 Wh Sales              | 32   | `Wh_Sales_Rojmel`     | 221  | purchase-side types, already built in the shared builder |
+| Book                      | Rows | Routine               | Line | First step                                                                |
+| ------------------------- | ---- | --------------------- | ---- | ------------------------------------------------------------------------- |
+| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel`     | 458  | count non-zero in `AD_ADJ` (26 rows)                                      |
+| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel`       | 364  | Rojmel only — the `KR_DETL` write gap was a false positive, now retracted |
+| 078 Fine Jv               | 28   | —                     | —    | identify the routine first                                                |
+| 043 Gold URD Purchase Old | 27   | `Purc_Rojmel` variant | 115  | check `MAIN_BOOK`                                                         |
+| 034 Wh Sales              | 32   | `Wh_Sales_Rojmel`     | 221  | purchase-side types, already built in the shared builder                  |
 
 **Always run the column-count step first.** It removed `Order_Adj_Rojmel` from the queue entirely, cut rate
 cut from 40 row types to 9, and cut this piece from 8 to 4.

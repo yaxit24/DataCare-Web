@@ -574,13 +574,13 @@ Each of these has caused a real failure in this project.
 
 Ranked by counted Rojmel rows, from `docs/GAP-ANALYSIS-AND-PLAN.md`:
 
-| Book                      | Rows | Routine                      | First step                              |
-| ------------------------- | ---- | ---------------------------- | --------------------------------------- |
-| 020 Sales Order           | 55   | `Order_Rojmel` (line 9)      | count non-zero columns in `SL_ORD_DATA` |
-| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel` (line 458) | count in `AD_ADJ` — 26 rows exist       |
-| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel` (line 364)   | also closes the `KR_DETL` write gap     |
-| 078 Fine Jv               | 28   | in `finance/fineJv.ts`       | identify the routine first              |
-| 043 Gold URD Purchase Old | 27   | `Purc_Rojmel` variant        | check `MAIN_BOOK`                       |
+| Book                      | Rows | Routine                      | First step                                                                |
+| ------------------------- | ---- | ---------------------------- | ------------------------------------------------------------------------- |
+| 020 Sales Order           | 55   | `Order_Rojmel` (line 9)      | count non-zero columns in `SL_ORD_DATA`                                   |
+| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel` (line 458) | count in `AD_ADJ` — 26 rows exist                                         |
+| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel` (line 364)   | Rojmel only — the `KR_DETL` write gap was a false positive, now retracted |
+| 078 Fine Jv               | 28   | in `finance/fineJv.ts`       | identify the routine first                                                |
+| 043 Gold URD Purchase Old | 27   | `Purc_Rojmel` variant        | check `MAIN_BOOK`                                                         |
 
 **Always run the column-count step first.** It removed `Order_Adj_Rojmel` from the list entirely and cut
 this piece of work from 40 row types to 9.

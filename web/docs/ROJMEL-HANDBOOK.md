@@ -446,14 +446,14 @@ A control that **passes** when inverted means the test does not cover that case.
 
 Ranked by **counted real Rojmel rows**, which is the only ranking that has survived.
 
-| Book                      | Rows | Routine               | `Ac_Rojmel.cs` line | Status                                     |
-| ------------------------- | ---- | --------------------- | ------------------- | ------------------------------------------ |
-| 020 Sales Order           | 55   | `Order_Rojmel`        | 9                   | **written** — 4 live types of 8            |
-| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel`     | 458                 | **written** — 3 live types of 8            |
-| 034 Wh Sales              | 32   | `Wh_Sales_Rojmel`     | 221                 | purchase-side types already in the builder |
-| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel`       | 364                 | also closes the `KR_DETL` write gap        |
-| 078 Fine Jv               | 28   | —                     | —                   | identify the routine first                 |
-| 043 Gold URD Purchase Old | 27   | `Purc_Rojmel` variant | 115                 | check `MAIN_BOOK`                          |
+| Book                      | Rows | Routine               | `Ac_Rojmel.cs` line | Status                                                                    |
+| ------------------------- | ---- | --------------------- | ------------------- | ------------------------------------------------------------------------- |
+| 020 Sales Order           | 55   | `Order_Rojmel`        | 9                   | **written** — 4 live types of 8                                           |
+| 076 Member Advance Adjust | 37   | `Schm_Adj_RojMel`     | 458                 | **written** — 3 live types of 8                                           |
+| 034 Wh Sales              | 32   | `Wh_Sales_Rojmel`     | 221                 | purchase-side types already in the builder                                |
+| 052 Karigar Receipt       | 28   | `Kr_Rec_Rojmel`       | 364                 | Rojmel only — the `KR_DETL` write gap was a false positive, now retracted |
+| 078 Fine Jv               | 28   | —                     | —                   | identify the routine first                                                |
+| 043 Gold URD Purchase Old | 27   | `Purc_Rojmel` variant | 115                 | check `MAIN_BOOK`                                                         |
 
 ### Dead for this customer — do not build without evidence
 
