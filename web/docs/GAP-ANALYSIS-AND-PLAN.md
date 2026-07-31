@@ -478,3 +478,69 @@ rather than after.
 
 The dhrn and loan families — six routines, the largest single block — can wait until a customer database
 shows them in use. Same for repair, card adjust and manufacturing JDT.
+
+---
+
+## Correction: the priority list above was wrong, and here is the counted one
+
+The previous section ranked `Order_Adj_Rojmel` first because `SL_ORD_ADJ` has 110 rows. That was wrong.
+`SL_ORD_ADJ` has 110 rows, but `PAID_AMT` is non-zero on **1** of them and `KASAR_AMT` on **0** — and
+those are the only columns the routine reads. It contributes about one Rojmel row in the entire year.
+
+**The live/dead test needs to be column-level, not table-level.** A table with rows tells you nothing if
+the routine's inserts are guarded on columns that are empty, which most of them are. That refinement
+arrived one step after I wrote the rule down.
+
+The measure with no inference in it at all is simply: **count the real `ROJ_MEL_DATA` rows per book.**
+3179 rows across 38 books.
+
+| Book                                           | Rows           | Web                 |
+| ---------------------------------------------- | -------------- | ------------------- |
+| 074 Member Monthly Entry                       | 1635           | written             |
+| 026 Gold Tax Invoice Old                       | 222            | written             |
+| 032 Estimate                                   | 208            | written             |
+| 002 Cash Payment                               | 185            | written             |
+| 001 Cash Received                              | 106            | written             |
+| 027 Silver Tax Invoice Old                     | 94             | written             |
+| 017 Contra Entry                               | 74             | written             |
+| **064 Rate Cut / Fine issue-receipt**          | **66**         | **not written**     |
+| 035 Gold Purchase                              | 64             | written             |
+| **020 Sales Order**                            | **55**         | **not written**     |
+| 012 / 009 / 014 / 005 / 013 bank pay & receipt | 46+42+40+22+20 | written (cash path) |
+| **076 Member Advance Adjust**                  | **37**         | **not written**     |
+| **034 Wh Sales**                               | **32**         | partly              |
+| 029 Gold Tax Invoice                           | 29             | written             |
+| **052 Karigar Receipt**                        | **28**         | **not written**     |
+| **078 Fine Jv**                                | **28**         | **not written**     |
+| **043 Gold URD Purchase Old**                  | **27**         | **not written**     |
+
+### Where that leaves coverage
+
+Books the web now writes account for roughly **2800 of the 3179 real Rojmel rows — about 88%**. The
+remaining ~380 sit in seven books: rate cut, sales order, member advance adjust, wholesale sales, karigar
+receipt, fine JV and URD purchase.
+
+That is a more honest figure than any of the earlier ones, because it counts rows the desktop actually
+wrote rather than routines that exist or tables that have data.
+
+### Corrected priority
+
+1. **Rate Cut 064** — 66 rows, recipe is `Wh_Sales_Rojmel`
+2. **Sales Order 020** — 55 rows, `Order_Rojmel`
+3. **Member Advance Adjust 076** — 37 rows, `Schm_Adj_RojMel`
+4. **Wh Sales 034** — 32 rows, same recipe as rate cut
+5. **Karigar Receipt 052** — 28 rows, `Kr_Rec_Rojmel`, alongside the `KR_DETL` write gap
+6. **Fine Jv 078** — 28 rows
+7. **URD Purchase 043** — 27 rows
+
+`Order_Adj_Rojmel` drops off the list entirely.
+
+### The general lesson, third revision
+
+- Sampling data cannot enumerate code paths that never fired.
+- Reading source cannot tell you which paths are live.
+- Counting rows in a routine's **tables** cannot tell you whether the **columns it reads** are populated.
+
+Each refinement came from being caught by the previous one. The cheapest reliable measure turned out not
+to be about routines or tables at all: count the output rows the desktop actually produced, grouped the way
+the feature is organised.
