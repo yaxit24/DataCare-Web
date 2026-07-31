@@ -780,6 +780,9 @@ async function writeSaleTx(
     throw new SaleValidationError(DESKTOP_MESSAGES.CARD_WITHOUT_BANK);
   }
   let roundAc = requestedRoundAc ?? 'ROUNDOFF';
+  // BOOK_DETL is a per-book account SLOT table: SR_NO 1 sale, 2 cash, 3 kasar, 4 advance, 5 discount,
+  // 6 labour income, 7 cash purchase, 8 scheme bonus. The Rojmel's advance row names slot 4.
+  let advanceAc = '';
   let kasarAc = input.kasarAc ?? 'KASAR';
   if (totals.roundOff !== 0 || kasar !== 0) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
@@ -1498,6 +1501,11 @@ async function writeSaleTx(
   // 3179 rows, and a sale's three ledger legs become one metal row per detail line (the revenue leg
   // split, each carrying that line's pieces and weight) plus a party row and a tax row.
   // See project-memory/parity/ROJMEL-MODEL-VERIFIED.md and modules/shared/rojmel.ts.
+  // Slot 4 is the book's advance account; resolved only when an advance actually applies, so a plain
+  // sale does not pay for a lookup it will not use.
+  if (orderAdjust !== 0) {
+    advanceAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 4);
+  }
   // Built once and shared: the SL_DETL write set and the Rojmel projection must agree, and computing
   // them twice is how they drift.
   const detailRows = computed.map((c, idx) => buildSaleDetailRow(c, idx));
@@ -1539,7 +1547,34 @@ async function writeSaleTx(
     // The party row exists ONLY when the bill is outstanding, and its side follows the sign. Measured
     // on the real database: of 47 sales with BILL_OS = 0, ZERO carry a party row; of 42 with
     // BILL_OS <> 0, all 42 do. A fully settled bill leaves no receivable for a day book to show.
-    { taxAc, taxAmount: totals.tax, partyAmount: billOS },
+    {
+      taxAc,
+      taxAmount: totals.tax,
+      partyAmount: billOS,
+      // Ac_Rojmel.Sales_Rojmel guards each of these with `AND <column> <> 0`, so a sale settled wholly in
+      // cash emits none of them. Identified by matching real amounts against SL_DATA across the sale
+      // books: cheque 17/17 = CHQ_AMT, kasar 100/100 = KASAR_AMT, advance 23/23 = ADV_AMT on the book's
+      // advance slot. Old metal comes from SL_PR_DETL and keeps its weight even though IT_TYPE is 'A',
+      // so the day book shows metal taken in exchange without counting it as a metal sale.
+      settlements: [
+        { kind: 'cheque' as const, account: text(input.bankAc) || 'BANK', amount: chequeAmt },
+        { kind: 'kasar' as const, account: kasarAc, amount: kasar },
+        { kind: 'advance' as const, account: advanceAc, amount: orderAdjust },
+        ...oldGoldDetl.map((g, i) => ({
+          kind: 'oldMetal' as const,
+          account: String((g as any).AC_CODE ?? input.acCode),
+          amount: num((g as any).NET_AMT),
+          lineNo: i + 1,
+          pcs: num((g as any).ITM_PCS),
+          grossWt: num((g as any).ITM_GWT),
+          netWt: num((g as any).ITM_NWT),
+          touch: num((g as any).ITM_TOUCH),
+          fine: num((g as any).ITM_FINE),
+          description: 'OLD GOLD',
+          itemCode: String((g as any).IT_CODE ?? ''),
+        })),
+      ],
+    },
     bookPolicy.inout !== 'I', // outward for a sale; an inward book mirrors the direction
   );
 

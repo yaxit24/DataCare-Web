@@ -46,6 +46,22 @@ export const ROJMEL_ROW_TYPE = {
   PARTY: '02',
   /** The tax leg. 283 real rows. */
   TAX: '04',
+  /**
+   * Settlement and adjustment rows, each identified by matching real amounts against `SL_DATA` columns
+   * across the sale books:
+   *   `11` cheque    — 17/17 rows equal `CHQ_AMT`
+   *   `13` kasar     — 100/100 rows equal `KASAR_AMT`
+   *   `14` advance   — 23/23 rows equal `ADV_AMT`, on the book's advance account
+   *   `16` old gold  — `SL_PR_DETL` lines, carrying weight, `IT_DESC` 'OLD GOLD'
+   *
+   * The accounts come from `BOOK_DETL`, which is a per-book account SLOT table — `SR_NO` 1 sale,
+   * 2 cash, 3 kasar, 4 advance, 5 discount, 6 labour income, 7 cash purchase, 8 scheme bonus. That is
+   * what the account literals in `Ac_Rojmel.cs` are selecting.
+   */
+  CHEQUE: '11',
+  KASAR: '13',
+  ADVANCE: '14',
+  OLD_METAL: '16',
 } as const;
 
 export type RojmelRowType = (typeof ROJMEL_ROW_TYPE)[keyof typeof ROJMEL_ROW_TYPE];
@@ -147,6 +163,27 @@ export interface RojmelContext {
   /** Denormalised onto AC_NAME of every row — the day book's display name. */
   partyName: string;
   partyCode: string;
+}
+
+/**
+ * A settlement or adjustment row on a sale: cheque, kasar, advance or old metal.
+ *
+ * `account` is the account the row names, which for kasar/advance/discount comes from the book's own
+ * `BOOK_DETL` slot rather than being chosen by the caller.
+ */
+export interface RojmelSettlement {
+  kind: 'cheque' | 'kasar' | 'advance' | 'oldMetal';
+  account: string;
+  amount: number;
+  /** Old-metal rows carry the line's weight; the others do not. */
+  lineNo?: number;
+  pcs?: number;
+  grossWt?: number;
+  netWt?: number;
+  touch?: number;
+  fine?: number;
+  description?: string;
+  itemCode?: string;
 }
 
 /** A detail line contributing one metal row. */
@@ -273,7 +310,17 @@ export function buildMoneyRojmel(
 export function buildSaleRojmel(
   ctx: RojmelContext,
   lines: RojmelLine[],
-  legs: { taxAc?: string; taxAmount?: number; partyAmount: number },
+  legs: {
+    taxAc?: string;
+    taxAmount?: number;
+    partyAmount: number;
+    /**
+     * Settlement and adjustment rows. Each is written ONLY when its amount is non-zero, exactly as
+     * `Ac_Rojmel.Sales_Rojmel` guards every one of its inserts with `AND <column> <> 0`. A sale settled
+     * wholly in cash produces none of them, which is why sampling vouchers never revealed they exist.
+     */
+    settlements?: RojmelSettlement[];
+  },
   outward = true,
 ): RojmelRow[] {
   const rows: RojmelRow[] = [];
@@ -342,6 +389,34 @@ export function buildSaleRojmel(
       LD_CODE: ctx.partyCode,
       CR_AMT: outward ? legs.taxAmount : 0,
       DR_AMT: outward ? 0 : legs.taxAmount,
+    });
+  }
+
+  // Settlement and adjustment rows. All four are DEBITS on an outward voucher: money or metal coming in
+  // against the bill reduces what the party owes. Old-metal rows keep their weight even though IT_TYPE
+  // is 'A' — the desktop stores pcs, gross, net, touch and fine on them, so the day book can show metal
+  // taken in exchange without counting it as a metal sale.
+  const TYPE_OF: Record<RojmelSettlement['kind'], RojmelRowType> = {
+    cheque: ROJMEL_ROW_TYPE.CHEQUE,
+    kasar: ROJMEL_ROW_TYPE.KASAR,
+    advance: ROJMEL_ROW_TYPE.ADVANCE,
+    oldMetal: ROJMEL_ROW_TYPE.OLD_METAL,
+  };
+  for (const st of legs.settlements ?? []) {
+    if (!st.amount) continue; // the desktop guards every settlement insert with `<> 0`
+    rows.push({
+      ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, TYPE_OF[st.kind], st.lineNo)),
+      AC_CODE: st.account,
+      LD_CODE: ctx.partyCode,
+      DR_AMT: outward ? st.amount : 0,
+      CR_AMT: outward ? 0 : st.amount,
+      ITM_PCS: st.pcs ?? 0,
+      ITM_GWT: st.grossWt ?? 0,
+      ITM_NWT: st.netWt ?? 0,
+      ITM_TOUCH: st.touch ?? 0,
+      ITM_FINE: st.fine ?? 0,
+      IT_DESC: st.description ?? '',
+      IT_CODE: st.itemCode ?? '',
     });
   }
   return rows;

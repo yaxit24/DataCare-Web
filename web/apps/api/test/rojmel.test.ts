@@ -286,3 +286,73 @@ describe('item rows carry the detail columns the desktop copies from SL_DETL', (
     expect(item.NET_AMT).toBe(1087);
   });
 });
+
+describe('settlement rows appear only when their amount is non-zero', () => {
+  // Ac_Rojmel.Sales_Rojmel guards every settlement insert with `AND <column> <> 0`. That is why sampling
+  // vouchers never revealed these rows exist: a sale settled wholly in cash emits none of them. Each was
+  // identified by matching real amounts against SL_DATA across the sale books - cheque 17/17 = CHQ_AMT,
+  // kasar 100/100 = KASAR_AMT, advance 23/23 = ADV_AMT.
+  it('emits nothing extra for a plain sale', () => {
+    const rows = buildSaleRojmel(ctx, lines, {
+      partyAmount: 1560,
+      settlements: [
+        { kind: 'cheque', account: 'BANK', amount: 0 },
+        { kind: 'kasar', account: '00057', amount: 0 },
+        { kind: 'advance', account: '00020', amount: 0 },
+      ],
+    });
+    // Two item rows plus the party row, and nothing else.
+    expect(rows).toHaveLength(3);
+  });
+
+  it('emits cheque, kasar and advance rows with their own key types when they apply', () => {
+    const rows = buildSaleRojmel(ctx, lines, {
+      partyAmount: 1000,
+      settlements: [
+        { kind: 'cheque', account: 'BANK', amount: 400 },
+        { kind: 'kasar', account: '00057', amount: 10 },
+        { kind: 'advance', account: '00020', amount: 150 },
+      ],
+    });
+    const byType = new Map(rows.map((r) => [String(r.LEDR_KEY).slice(21, 23), r]));
+    expect(byType.get('11')!.AC_CODE).toBe('BANK'); // cheque
+    expect(byType.get('11')!.DR_AMT).toBe(400);
+    expect(byType.get('13')!.DR_AMT).toBe(10); // kasar
+    expect(byType.get('14')!.AC_CODE).toBe('00020'); // advance, the book's slot-4 account
+    expect(byType.get('14')!.DR_AMT).toBe(150);
+    // All are debits on an outward voucher: money in against the bill reduces what the party owes.
+    for (const t of ['11', '13', '14']) expect(byType.get(t)!.CR_AMT).toBe(0);
+  });
+
+  it('an old-metal row keeps its weight even though IT_TYPE is a money row', () => {
+    // The desktop stores pcs, gross, net, touch and fine on these rows so the day book can show metal
+    // taken in exchange WITHOUT counting it as a metal sale - hence IT_TYPE 'A' with weight attached.
+    const rows = buildSaleRojmel(ctx, lines, {
+      partyAmount: 500,
+      settlements: [
+        {
+          kind: 'oldMetal',
+          account: '00010',
+          amount: 834,
+          lineNo: 1,
+          pcs: 1,
+          grossWt: 0.15,
+          netWt: 0.15,
+          touch: 75,
+          fine: 0.112,
+          description: 'OLD GOLD',
+          itemCode: 'OG',
+        },
+      ],
+    });
+    const old = rows.find((r) => String(r.LEDR_KEY).slice(21, 23) === '16')!;
+    expect(old.IT_TYPE).toBe('A'); // not a metal sale
+    expect(old.ITM_GWT).toBe(0.15); // but it carries the weight
+    expect(old.ITM_TOUCH).toBe(75);
+    expect(old.ITM_FINE).toBe(0.112);
+    expect(old.IT_DESC).toBe('OLD GOLD');
+    expect(old.DR_AMT).toBe(834);
+    // It must NOT land in the metal buckets of the report, which key on IT_TYPE.
+    expect(rows.filter((r) => r.IT_TYPE !== 'A')).toHaveLength(2);
+  });
+});
