@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ROJMEL_ROW_TYPE,
+  buildCashRojmel,
   buildSaleRojmel,
   rojmelLedrKey,
   rojmelMetalFor,
@@ -156,5 +157,62 @@ describe('a sale projects to the desktop’s four Rojmel rows', () => {
       { partyAmount: 1515 },
     );
     expect(withBlank.filter((r) => r.IT_TYPE !== 'A')).toHaveLength(2);
+  });
+});
+
+describe('the cash books take the PARTY’s direction, not the cash account’s', () => {
+  // This convention was missed on a first pass because the test that settled every other family -
+  // "does a row match its own AC_CODE's ledger leg?" - gives 47.2% on book 001 and 5.4% on book 002.
+  // Grouped by row type it is 100% in every group: types 01 and 04 mirror the COUNTER-PARTY's leg,
+  // types 02/03 and 05/06 mirror their own. The rule was never inconsistent; averaging hid it.
+  const cashCtx: RojmelContext = {
+    ...ctx,
+    coBook: '002',
+    partyCode: '000294',
+    partyName: 'A PARTY',
+  };
+
+  it('a receipt credits the party, so the cash row is a CREDIT (real book 001 type 01)', () => {
+    // Real: AC_CODE 00001 (cash) LD_CODE 000926 CR 60000.00, against a ledger that DEBITS cash.
+    const rows = buildCashRojmel(
+      { ...cashCtx, coBook: '001', partyCode: '000926' },
+      { cashAc: '00001', partyLegAmount: 60000, direction: 'receipt' },
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.AC_CODE).toBe('00001'); // names cash
+    expect(rows[0]!.LD_CODE).toBe('000926'); // contra is the party
+    expect(rows[0]!.CR_AMT).toBe(60000); // but takes the PARTY's credit
+    expect(rows[0]!.DR_AMT).toBe(0);
+    expect(String(rows[0]!.LEDR_KEY).slice(21, 23)).toBe('01');
+  });
+
+  it('a payment debits the party, so the cash row is a DEBIT (real book 002 type 04)', () => {
+    // Real: AC_CODE 00001 (cash) LD_CODE 000294 DR 730.00, against a ledger that CREDITS cash.
+    const rows = buildCashRojmel(cashCtx, {
+      cashAc: '00001',
+      partyLegAmount: 730,
+      direction: 'payment',
+    });
+    expect(rows[0]!.DR_AMT).toBe(730);
+    expect(rows[0]!.CR_AMT).toBe(0);
+    // The type code is book-specific, not semantic: a payment's cash row is 04, a receipt's is 01.
+    expect(String(rows[0]!.LEDR_KEY).slice(21, 23)).toBe('04');
+  });
+
+  it('carries no metal: a cash voucher moves money only', () => {
+    const rows = buildCashRojmel(cashCtx, {
+      cashAc: '00001',
+      partyLegAmount: 730,
+      direction: 'payment',
+    });
+    expect(rows[0]!.IT_TYPE).toBe('A');
+    expect(rows[0]!.SIGN).toBe('');
+    expect(rows[0]!.ITM_GWT).toBe(0);
+  });
+
+  it('writes nothing for a zero-amount voucher', () => {
+    expect(
+      buildCashRojmel(cashCtx, { cashAc: '00001', partyLegAmount: 0, direction: 'receipt' }),
+    ).toEqual([]);
   });
 });

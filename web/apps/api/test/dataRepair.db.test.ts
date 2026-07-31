@@ -48,6 +48,7 @@ d('data repair console', () => {
     'OP_DATA',
     'SRNO_MAST',
     'AC_DATA',
+    'ROJ_MEL_DATA',
     'YEAR_MAST',
     'BOOK_DATA',
     'data_repair_run',

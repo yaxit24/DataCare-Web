@@ -38,6 +38,7 @@ d('data repair operations (batch 2)', () => {
     'CASH_DATA',
     'BANK_RECONCILE',
     'AC_DATA',
+    'ROJ_MEL_DATA',
     'AC_MAST',
     'MAIN_STOCK',
     'SL_DETL',

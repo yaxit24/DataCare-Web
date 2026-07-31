@@ -40,6 +40,7 @@ databaseDescribe('database-backed dhiran receipt', () => {
       'DHRN_ISU_DATA',
       'DHRN_DATA',
       'AC_DATA',
+      'ROJ_MEL_DATA',
       'TEMP_BOOK_DATA',
       'SRNO_MAST',
       'BOOK_DATA',

@@ -44,6 +44,7 @@ databaseDescribe('database-backed desktop utilities', () => {
       'HDD_MAST',
       'MAIN_STOCK',
       'AC_DATA',
+      'ROJ_MEL_DATA',
       'AC_MAST',
     ]) {
       await owner.$executeRawUnsafe(

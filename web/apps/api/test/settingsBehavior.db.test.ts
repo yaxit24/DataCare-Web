@@ -42,6 +42,7 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
   const cleanup = async () => {
     for (const table of [
       'AC_DATA',
+      'ROJ_MEL_DATA',
       'DHRN_DATA',
       'DHRN_ISU_DETL',
       'DHRN_ISU_DATA',

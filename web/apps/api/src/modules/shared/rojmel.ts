@@ -317,6 +317,72 @@ export function buildSaleRojmel(
 }
 
 /**
+ * Project a cash or bank receipt/payment into its Rojmel row.
+ *
+ * The cash books use a different convention from every other family, and it took a row-type breakdown to
+ * see it. Measured across the real data, grouped by the row-type code in `LEDR_KEY`:
+ *
+ *   book 001 (Cash Received)  type `01`  56 rows  → mirrors the COUNTER-PARTY's ledger leg (100%)
+ *                             type `02`  25 rows  → mirrors its own leg (100%)
+ *                             type `03`  25 rows  → mirrors its own leg (100%)
+ *   book 002 (Cash Payment)   type `04` 175 rows  → mirrors the COUNTER-PARTY's leg (100%)
+ *                             type `05`   5 rows  → own leg (100%)
+ *                             type `06`   5 rows  → own leg (100%)
+ *
+ * Ungrouped the same test gives 47.2% and 5.4%, which is why an earlier pass concluded the convention was
+ * "not derived" and declined to implement it. The rule was never inconsistent — it is per row type, and
+ * averaging across types hid it.
+ *
+ * So the cash row names the cash/bank account in `AC_CODE` and the party in `LD_CODE`, but takes its
+ * DEBIT/CREDIT from the PARTY's leg. A receipt credits the party, so the row is a credit; a payment
+ * debits the party, so the row is a debit. That reads naturally as a cash book: one line per movement,
+ * showing who it was with and which way it went.
+ *
+ * The type code is **book-specific**, not semantic: a receipt's cash row is `01` and a payment's is `04`.
+ * Do not reuse the sale's constants here.
+ *
+ * NOT implemented: types `02`/`03` and `05`/`06`, which are contra-style pairs (own leg, like a journal)
+ * for a settlement leg inside the voucher that did not go through cash — 60 rows in total. Their trigger
+ * condition is a multi-settlement voucher, which has not been derived. A voucher carrying only a cash
+ * settlement produces just the one row.
+ */
+export const ROJMEL_CASH_ROW_TYPE = { RECEIPT: '01', PAYMENT: '04' } as const;
+
+export function buildCashRojmel(
+  ctx: RojmelContext,
+  p: {
+    /** The cash or bank account the money moved through. */
+    cashAc: string;
+    /** The amount on the PARTY's ledger leg — not necessarily the cash tendered. */
+    partyLegAmount: number;
+    /** A receipt credits the party; a payment debits it. */
+    direction: 'receipt' | 'payment';
+  },
+): RojmelRow[] {
+  if (!p.partyLegAmount) return [];
+  const receipt = p.direction === 'receipt';
+  return [
+    {
+      ...blank(
+        ctx,
+        rojmelLedrKey(
+          ctx.scope,
+          ctx.coBook,
+          ctx.vchNo,
+          receipt ? ROJMEL_CASH_ROW_TYPE.RECEIPT : ROJMEL_CASH_ROW_TYPE.PAYMENT,
+          1,
+        ),
+      ),
+      AC_CODE: p.cashAc,
+      LD_CODE: ctx.partyCode,
+      // The party's direction, not the cash account's — this is the whole point of the convention.
+      CR_AMT: receipt ? p.partyLegAmount : 0,
+      DR_AMT: receipt ? 0 : p.partyLegAmount,
+    },
+  ];
+}
+
+/**
  * Project a journal / contra voucher into its Rojmel rows.
  *
  * Rule established by measurement, not inference: **every one of the 74 real Rojmel rows on contra book

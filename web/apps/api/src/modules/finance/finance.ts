@@ -1,5 +1,6 @@
 import { withTenant } from '@datacare/db';
 import { DEFAULT_CASH_LIMIT, resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
+import { buildCashRojmel } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -226,6 +227,30 @@ export async function postReceipt(
       SIGN: 'C',
     });
     assertBalanced(ledger);
+    // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's
+    // leg - verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book
+    // 002 type 04, 175 rows). partyLegAmount is therefore the party's ledger figure, which includes
+    // any kasar written off, not the cash actually tendered.
+    const rojmelCtx = {
+      scope: {
+        coCode: input.scope.coCode,
+        lcCode: input.scope.lcCode,
+        coYear: input.scope.coYear!,
+      },
+      key,
+      coBook: key.CO_BOOK,
+      vchNo: key.VCH_NO,
+      vchDate,
+      vchType,
+      bookName: configuredBook.name,
+      partyName: input.partyName ?? '',
+      partyCode: input.partyAc,
+    };
+    const rojmelRows = buildCashRojmel(rojmelCtx, {
+      cashAc: recAc,
+      partyLegAmount: round2(input.amount + kasar),
+      direction: 'receipt',
+    });
     const writes: VoucherWrite[] = [
       {
         table: 'CASH_DATA',
@@ -309,6 +334,7 @@ export async function postReceipt(
       });
     }
     await insertHiddenIdentityTx(tx, input.scope, identity, configuredBook.name);
+    if (rojmelRows.length) writes.push({ table: 'ROJ_MEL_DATA', rows: rojmelRows });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: configuredBook.name,
@@ -368,6 +394,30 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
         SIGN: 'C',
       }); // discount received
     assertBalanced(ledger);
+    // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's
+    // leg - verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book
+    // 002 type 04, 175 rows). partyLegAmount is therefore the party's ledger figure, which includes
+    // any kasar written off, not the cash actually tendered.
+    const rojmelCtx = {
+      scope: {
+        coCode: input.scope.coCode,
+        lcCode: input.scope.lcCode,
+        coYear: input.scope.coYear!,
+      },
+      key,
+      coBook: key.CO_BOOK,
+      vchNo: key.VCH_NO,
+      vchDate: input.vchDate ? new Date(input.vchDate) : new Date(),
+      vchType,
+      bookName: mode === 'cash' ? 'CASH PAY' : 'BANK PAY',
+      partyName: input.partyName ?? '',
+      partyCode: input.partyAc,
+    };
+    const rojmelRows = buildCashRojmel(rojmelCtx, {
+      cashAc: payAc,
+      partyLegAmount: round2(input.amount + kasar),
+      direction: 'payment',
+    });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: mode === 'cash' ? 'CASH PAY' : 'BANK PAY',
@@ -392,6 +442,7 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
             },
           ],
         },
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return { vchNo };

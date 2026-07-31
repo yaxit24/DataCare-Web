@@ -33,6 +33,7 @@ d('rate-cut settlement persistence', () => {
     'RATE_CUT_DATA',
     'RATE_CUT_ISU',
     'AC_DATA',
+    'ROJ_MEL_DATA',
     'CO_SET',
     'SRNO_MAST',
     'BOOK_DATA',

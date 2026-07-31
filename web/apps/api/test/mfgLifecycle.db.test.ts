@@ -28,6 +28,7 @@ const lifecycleTables = [
   'BAR_DETL',
   'MAIN_STOCK',
   'AC_DATA',
+  'ROJ_MEL_DATA',
   'KR_DETL',
   'KR_DATA',
   'MFG_IDTL',

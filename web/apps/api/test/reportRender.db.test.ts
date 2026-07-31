@@ -76,6 +76,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       'TAG_STOCK_PRINT',
       'BAR_DETL',
       'AC_DATA',
+      'ROJ_MEL_DATA',
       'AC_MAST',
       'CO_MAST',
     ]) {
