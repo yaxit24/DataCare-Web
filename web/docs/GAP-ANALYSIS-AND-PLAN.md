@@ -544,3 +544,42 @@ wrote rather than routines that exist or tables that have data.
 Each refinement came from being caught by the previous one. The cheapest reliable measure turned out not
 to be about routines or tables at all: count the output rows the desktop actually produced, grouped the way
 the feature is organised.
+
+---
+
+## `Wh_Sales_Rojmel` analysed, not implemented — and why that is the right call
+
+The corrected priority put rate cut first (book 064, 66 real rows). Its recipe is `Wh_Sales_Rojmel`, and
+reading it changed the estimate: it is **40+ row types**, by far the largest routine in the file.
+
+It is large because rate cut is a **two-sided settlement** — a purchase leg and a sale leg in one voucher —
+and because gold and silver are handled through **separate row families** rather than one parameterised
+path. Most rows therefore appear four times: purchase/sale × gold/silver.
+
+It reads **nine `BOOK_DETL` slots**, and the slot is what distinguishes otherwise identical rows: 1 and 2
+for gold sale/purchase control, 8 and 9 for silver, 4/5 kasar amounts, 6/7 labour, 12 kasar fine. Two
+accounts are hardcoded — `'00061'` interest, `'00007'` the `IT_TYPE = 'A'` control.
+
+The most interesting structural fact: its **fine rows carry no money at all** — `DR_AMT` and `CR_AMT` are
+both zero, with the weight in `ITM_FINE` and direction in `SIGN`. Those are precisely the rows
+`RP_ROJMEL`'s gold and silver fine summaries read, which closes the loop on why those summaries filter
+`ITM_FINE <> 0`.
+
+**Full analysis is in `project-memory/parity/ROJMEL-MODEL-VERIFIED.md`** — slot map, row families, guards.
+
+### Why it is not implemented in this session
+
+Starting a 40-row-type transcription with little context left would produce something half-finished and
+unverified. That is the exact failure this project's gates exist to prevent, and it would be poor practice
+to commit it on a Friday afternoon and call it progress.
+
+### And the first step is not implementation anyway
+
+Per the column-level lesson learned two commits ago: `RATE_CUT_DATA` has 40 rows, `RATE_CUT_ISU` 20 and
+`RATE_CUT_REC` 2, yet only **66** Rojmel rows resulted. So **most of those 40 row types produced nothing
+in a year of trading.** Counting non-zero source columns first will very likely reduce the work to a
+handful of families — as it did for `Order_Adj_Rojmel`, which the same check removed from the list
+entirely.
+
+Doing that counting first is cheap, and it is the difference between implementing 40 row types and
+implementing the four that fire.
