@@ -515,6 +515,14 @@ interesting than the implementations.
 
 ### Wholesale is a missing FORM, not a missing projection
 
+**Now recorded properly in `GAP-ANALYSIS-AND-PLAN.md` under "The wholesale-sale voucher family".** Summary:
+the web can post a wholesale _return_ (1503 lines, complete) but not a wholesale _sale_. There is no
+separate return book type — `TR_WH_SALE_RTN.cs` filters `MAIN_BOOK IN ('WH SALES','TOUR SALES')` — so the
+return can only ever act on migrated desktop data. The desktop form is 18,007 lines with a 13-table write
+set. Also established there: `TOUR SALES` is entirely retired (10 books, **0 active**), so the standing
+"TR_TOUR_SALE is a build not wiring" note is downgraded; and `BUL WH SALE` has 2 active books with **0**
+vouchers.
+
 `sales/wholesaleSaleReturn.ts` exists; there is no wholesale _sale_ module, function or route — only
 `POST /sales/wholesale-sale-return`. A day book for book 034 would serve a voucher the web cannot create.
 That belongs in the register at a different level than a Rojmel row type, alongside the standing note that

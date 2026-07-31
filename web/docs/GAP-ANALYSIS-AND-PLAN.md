@@ -761,3 +761,111 @@ The handbook gives a table for telling contention from a real defect, and states
 while the suite is red, even believing it is contention**, and **do not overwrite the failure log before
 reading it**. Both rules exist because I broke them that day — the commit was docs-only so nothing broken
 shipped, but the identity of those nine tests was lost.
+
+---
+
+# The wholesale-sale voucher family: a missing FORM, not a missing projection
+
+Recorded properly on 2026-07-31, having surfaced as a footnote while planning the last Rojmel families.
+This is a different **kind** of gap from everything else in this register, and it was being tracked at the
+wrong level.
+
+## The finding in one line
+
+**The web can post a wholesale sale RETURN but cannot post a wholesale SALE.** The return module is 1503
+lines and complete; the sale does not exist.
+
+```bash
+grep -oE "app\.(get|post)\('/[a-z/-]*wholesale[a-z/-]*'" apps/api/src/routes/txn.ts
+# app.post('/sales/wholesale-sale-return')     ← the only route
+ls apps/api/src/modules/sales/ | grep -i wholesale
+# wholesaleSaleReturn.ts                        ← the only module
+```
+
+## Why that is worse than it sounds
+
+`TR_WH_SALE_RTN.cs` filters `MAIN_BOOK IN ('WH SALES','TOUR SALES')` — there is **no separate
+`WH SALES RETURNE` book type**. A wholesale return is posted _against the same books as the sale_. The
+web's return module targets those books too.
+
+So the web offers an operation that can only ever act on **migrated desktop data**. A shop running the web
+from a clean start could never create a wholesale sale, and therefore could never legitimately return one.
+The return is reachable and tested, which makes the absence easy to miss — the feature _looks_ present.
+
+## The scale of what is missing
+
+|                       |                                                                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Desktop form          | `TR_WH_SALE.cs`, **18,007 lines** — one of the largest in the application                                                                                                                  |
+| Posting routines      | `Ac_Ledr.Wh_Sales_Ledr`, `Ac_Rojmel.Wh_Sales_Rojmel`                                                                                                                                       |
+| Write set (13 tables) | `AC_DATA`, `DM_DATA`, `IMAGE_DATA`, `LOT_DETL`, `MAIN_STOCK`, `RATE_CUT_DATA`, `RATE_CUT_ISU`, `RATE_CUT_ISU_REC`, `RATE_CUT_REC`, `ROJ_MEL_DATA`, `SL_IDTL`, `TAX_DATA`, `TEMP_BOOK_DATA` |
+| Plus                  | `PRINT_MAST`, `TOUCH_MAST`, `USER_DATA`, `DELETE_DATA`                                                                                                                                     |
+
+Derived from the form's own `DELETE FROM` list, which is the reliable way to read a desktop write set — an
+edit deletes exactly what it writes.
+
+It is a metal-and-money voucher: unfixed metal issued and received (`RATE_CUT_ISU` / `RATE_CUT_REC`), stock
+movement, the lot register, stone sub-details, diamonds, tax and images.
+
+## Real usage, and where it sits against its siblings
+
+```bash
+SQL -d Live24 -Q "SET NOCOUNT ON;
+SELECT '  '+RIGHT('    '+CAST(count(*) AS varchar),4)+' books  active='+RIGHT('   '+CAST(SUM(CASE WHEN CUR_USE='Y' THEN 1 ELSE 0 END) AS varchar),3)+'  '+ISNULL(MAIN_BOOK,'(blank)')
+ FROM BOOK_DATA WHERE CO_CODE='01' AND (MAIN_BOOK LIKE '%SALE%' OR MAIN_BOOK LIKE '%RETURN%')
+ GROUP BY MAIN_BOOK ORDER BY MAIN_BOOK"
+```
+
+| `MAIN_BOOK`   | Books | Active           | Real vouchers | Web          |
+| ------------- | ----- | ---------------- | ------------- | ------------ |
+| `WH SALES`    | 6     | **1** (book 034) | **15**        | **absent**   |
+| `RATE CUT`    | 1     | 1 (book 064)     | 25            | `rateCut.ts` |
+| `TOUR SALES`  | 10    | **0**            | 0             | absent       |
+| `BUL WH SALE` | 2     | 2                | **0**         | absent       |
+
+Detail tables: `RATE_CUT_ISU` 20 rows, `RATE_CUT_REC` 2, `RATE_CUT_ISU_REC` 7.
+
+Two things fall out of that table:
+
+**Tour sales is entirely retired** — ten books, **none active**. The standing note that `TR_TOUR_SALE` is
+"a build not wiring" should be **downgraded**: this shop stopped running tours, so it is not a live gap
+here. It may matter for another customer.
+
+**Bullion (`BUL WH SALE`) is configured but never used** — two active books, zero vouchers. Configured
+optimism, not demand.
+
+So among this family the _only_ live gap is the wholesale sale itself: one active book, 15 real vouchers,
+no web path.
+
+## Why it was built in the wrong order
+
+The same pattern already recorded for the Rojmel: **effort followed the code rather than the business.**
+The return was presumably built because it shares `RATE_CUT_DATA` with rate cut and VP parcel, so it was
+adjacent to work already underway. Nothing in the data suggested the return mattered more than the sale —
+it cannot, since the return has no vouchers of its own to point at.
+
+The register now has three instances of this pattern, which makes it a tendency rather than an accident:
+
+1. Rojmel written from six paths this customer never uses, while four it does use were missing.
+2. `Order_Adj_Rojmel` ranked top of a queue on a table row count, when the columns it reads are empty.
+3. A wholesale return built without its sale.
+
+**The correction in all three cases was the same: count what the desktop actually produced before choosing
+what to build.**
+
+## What implementing it would involve
+
+Not planned in detail here, because it is a form rather than a projection and should be scoped as such.
+The honest sketch:
+
+- The desktop form is 18,007 lines, though much of that is grid plumbing rather than business rules.
+- `wholesaleSaleReturn.ts` (1503 lines) already models the _reverse_ of this voucher against the same
+  tables, so the write-set shape, the `RATE_CUT_*` column semantics and the metal-leg handling are largely
+  established — this is closer to mirroring an existing module than to greenfield work.
+- `buildRateCutRojmel` already covers 7 of the 11 Rojmel row types book 034 uses; only `05`, `06`, `25`
+  and `28` would be new.
+- `Wh_Sales_Ledr` must be read for the ledger legs. It has not been examined.
+
+**Recommendation: scope it against a second customer database before committing to it.** Fifteen vouchers
+in a year is light usage, and the decision to build an 18,000-line form's equivalent should not rest on one
+company's habits — the same caveat that applies to every priority in this register.
