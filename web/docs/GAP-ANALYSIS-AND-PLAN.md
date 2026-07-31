@@ -583,3 +583,33 @@ entirely.
 
 Doing that counting first is cheap, and it is the difference between implementing 40 row types and
 implementing the four that fire.
+
+---
+
+## The next piece is fully planned: `docs/PLAN-RATECUT-ROJMEL.md`
+
+Rate cut and wholesale sales (books 064 and 034, 98 real Rojmel rows between them) are analysed, scoped and
+written up as a **self-contained implementation plan** that assumes no memory of any prior session.
+
+The counting step did its job before a line was written:
+
+- `Wh_Sales_Rojmel` contains **40+ row types**. Only **9** ever fired in a year of this shop's trading —
+  a 78% reduction, established by grouping the 66 real rows by their `LEDR_KEY` type code and matching each
+  against a non-zero source column.
+- **All 40 `RATE_CUT_DATA` rows are `IT_TYPE='G'`.** This company never rate-cut silver, so every silver
+  row family is dead, along with interest, tax, TDS, card and labour.
+
+Three facts were corrected while verifying the plan's own references, which is the reason to verify them:
+
+1. **`BOOK_DETL` slots are per-book, not global.** Book 064's map differs entirely from book 026's —
+   slot 2 is `00008` on 064 and `00001` on 026. Any plan built on the 026 map would have written the wrong
+   contra account on every row.
+2. **Type `13` disagrees between source and data**, and it is the interesting kind of disagreement: the
+   source says a money-only row with `IT_TYPE 'A'`, the data shows a gold fine row carrying `DR_AMT`,
+   `ITM_FINE` _and_ `ITM_RATE` together. It is the only fine row that is not money-free.
+3. **All 66 keys are 23 characters**, so no rate-cut type carries a line number — unlike the sale, whose
+   item rows are 33.
+
+The plan also states what it will _not_ build and why, lists six controls that must be demonstrated failing
+before the work is trusted, and records that this family will be the first to make the report's
+`totals.gold.outFine` non-zero — which is the end-to-end proof that the fine summaries work at all.
