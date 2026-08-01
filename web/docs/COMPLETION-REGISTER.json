@@ -1,0 +1,2001 @@
+{
+  "note": "Authoritative user-facing surface of the desktop application, taken from NextMain.MENU_DATA - the menu the operator actually sees. 198 named items across 13 tabs. This is the register Phase 2 must drive to zero unclassified.",
+  "source": "NextMain.MENU_DATA joined to the MDI_FORM.cs dispatch",
+  "states": {
+    "unclassified": "not yet assessed - the starting state for every item",
+    "verified": "web equivalent exists AND has been compared or tested; evidence path required",
+    "implemented-unverified": "web equivalent exists but nothing proves it matches",
+    "implemented-elsewhere": "covered by a differently-named web feature; note must say which",
+    "dead-in-dataset": "no real rows in Live24; note must carry the count",
+    "scope-excluded": "deliberately out of scope; note must record the decision"
+  },
+  "caveat": "formReferencedInWeb is a WEAK positive and a STRONG negative. A form named in a comment is not implemented, and a function can exist under another name. It orders the work; it does not classify it.",
+  "counts": {
+    "items": 198,
+    "formReferenced": 152,
+    "formNeverReferenced": 34,
+    "unresolvedLabel": 12
+  },
+  "items": [
+    {
+      "tab": "Analysis",
+      "menu": "Bill Os Day",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_INOUT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Analysis",
+      "menu": "Delete Data",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ORDER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Analysis",
+      "menu": "Last Visit",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_CUST"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Analysis",
+      "menu": "Order Zoom",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ORDER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Analysis",
+      "menu": "Party InOut",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_INOUT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Analysis",
+      "menu": "Stock Ledger",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_INOUT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Analysis",
+      "menu": "Stock Move",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_STK_MOVE"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Analysis",
+      "menu": "Tag Detail",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TAG"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Account Group",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_AC_GROUP"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Admin Setting",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_SET_ADMIN"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Balance TrFr",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_BOOK"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Books",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_BOOK"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Company",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_COMPANY"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Data Backup",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_BKP"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Data Refresh",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_UPDATE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Location",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_LOCT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Main Menu",
+      "visibleOnDesktop": false,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Company",
+      "menu": "Menu Set",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_WINDOW_SET"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Setting",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_SETTING"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Setting Main",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_SETTING_MAIN"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Trade Master",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_TRADE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "User Create",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_USER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Year Create",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_YEAR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Company",
+      "menu": "Year Select",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Crm",
+      "menu": "Cust Entry",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_CUST_CRM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Crm",
+      "menu": "Cust Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_CUST_CRM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Dhiran Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_DHRN_LOAN"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Dhrn Due",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_DHRN_OS"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Dhrn Issue",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_DHRN_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Dhrn Os Letter",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_DHRN_INTREC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Dhrn Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_DHRN_REC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Intrest All",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_DHRN_OS"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Intrest Isu All",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_DHRN_OS"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Intrest Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_DHRN_INTREC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Loan Intrest",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_DHRN_INTREC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Loan Issue",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_DHRN_REC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Loan Received",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_DHRN_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Dhiran",
+      "menu": "Loan Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_DHRN_LOAN"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Amt In",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_LOCT_AMT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Amt Out",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_LOCT_AMT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Approval Isu",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_APR_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Approval Rtn",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_APR_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Bill Wise Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_BILL_TO"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Card Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_CARD_REC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Consi Isu",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_APR_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Consi Purc",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PR_SL_UAE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Consi Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_APR_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Employee Jv",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_EMP_JV"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Fine Jv Entry",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_CONTRA"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Fine Purc",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_FINE_SL_PR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Fine Sales",
+      "visibleOnDesktop": false,
+      "desktopForms": ["TR_FINE_SL_PR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Labour Work",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_SALE_LBR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Old Item Sales",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PURC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Other Expenses",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_OTH_PURC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Other Income",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_OTH_PURC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Service Comm",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_OTH_COMM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Tag Wise Purc",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PURC_HM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Vp Adjust",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_VP_ADJ"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "ExtraTran",
+      "menu": "Vp Parcel",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_VP"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Cust Repar Isu",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_REP_REC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Cust Repar Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_REP_REC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Kr Design Isu",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_APR_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Kr Issue",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_KR_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Kr Received",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PURC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Kr Repar Isu",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_REP_REC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Kr Repar Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_REP_REC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Kr Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Reparing Rpt",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Stock Isu",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_TOUR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Stock Rec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_TOUR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Tour Order",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Tour Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TOUR_ZOOM"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Tour Sales",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_TOUR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Karigar",
+      "menu": "Tour Tag",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TOUR_ZOOM"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Address",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_ADD_MAST"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "AutoItem",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_AUTO_ITEM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Counter",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_PRODUCT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Design Book",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_PRODUCT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Diamond",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_DM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Dm Size",
+      "visibleOnDesktop": false,
+      "desktopForms": ["MS_STK_LIMIT"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Employee",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_EMP"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Group",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_GROUP"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Item",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_ITEM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Item Opening",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_ITM_OPBL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Item Touch",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_AUTO_ITEM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "ItStk Limit",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_STK_LIMIT"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Labour",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_AUTO_ITEM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Labour Disc",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_AUTO_ITEM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Labour Type",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_LBR_TYPE"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Lot Opening",
+      "visibleOnDesktop": false,
+      "desktopForms": ["MS_PRODUCT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Party",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_ACCT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Party Opening",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_AC_OPBL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Point Mast",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_POINT"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Product",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_PRODUCT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Style",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_STYLE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Master",
+      "menu": "Tag Opening",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Master",
+      "menu": "Tax",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_TAX"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Mfg",
+      "menu": "Lot IsuRec",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_MFG_ZOOM"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Mfg",
+      "menu": "Mfg InOut",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_MFG_ZOOM"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Mfg",
+      "menu": "Mfg Ledger",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_LEDR", "RP_MFG_LEDR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Mfg",
+      "menu": "Mfg Mast",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_MFG_MAST"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Bill Wise Profit",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_BILL_PROFIT"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Deisgn Move",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_STK_MOVE"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Emp Sale",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_EMP"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Entry Check",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_USER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Graph Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_GRAPH"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "ItStk Level",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_STK_LEVEL"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Lot Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ORDER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Movement",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_MOVEMENT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Order Track",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ORD_TRACK"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Oth Itm Rpt",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_OTH_DETL"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "Point Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ORDER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "More",
+      "menu": "User Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_USER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Bank Reconcile",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_BANK"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Counter Trfr",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PHYSTK"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Daily Rate",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_RATE"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Data Export",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_EXPORT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Data Import",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_IMPORT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "E-Excel",
+      "visibleOnDesktop": false,
+      "desktopForms": ["UT_E_INVOICE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Estimate Reset",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_IMPORT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Labour Update",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_AUTO_ITEM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Ledger Adjust",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_E_INVOICE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Only Tag Entry",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Other",
+      "menu": "Order Cancel",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_SL_ORD_ADJ"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Physical Stock",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Other",
+      "menu": "Reminder Entry",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_REMINDER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Sms",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_SMS"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Stock Adjust",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_TAG_CAN"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Stone/Dm-Cf",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PHYSTK"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Tag Adjust",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_TAG_CAN"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Tag Cancel",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_TAG_PRINT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Tag Print",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_TAG_PRINT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Tag Split",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Other",
+      "menu": "Tag Transfer",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_TAG_CAN"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Tag Wt Change",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Other",
+      "menu": "Vch ReNumber",
+      "visibleOnDesktop": true,
+      "desktopForms": ["UT_VCH_RE_NUMBR"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Other",
+      "menu": "Whatsapp",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Report",
+      "menu": "Address Print",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ADDRESS"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Approval Rpt",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Bul Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Cash Bank",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_CASH_BANK"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Consi Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_CONSI_APR"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Final Reports",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_BALANCE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Gst Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TAX"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "HuId Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_HUID"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Item InOut",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Ledger Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_LEDR"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Old Stock",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_SLPR_ZOOM"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Order Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Party Os",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_OS"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Purc Zoom",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_SLPR_ZOOM"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Purchase Rpt",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Reminder Rpt",
+      "visibleOnDesktop": false,
+      "desktopForms": ["MS_RATE", "RP_REMINDER"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Rojmel",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ROJMEL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Sale Zoom",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_SLPR_ZOOM"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Sales Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Stock Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_STOCK"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Stock With Fine",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_STOCK_FINE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Tag Estmate",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TAG_ESTMATE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Tag Image",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TAG_IMAGE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Tag Stock",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TAG"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Trading Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_TRADING"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Report",
+      "menu": "Vp Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Branch InOut",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_LC_INOUT"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Day Sales",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_LC_SALE"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Gold Adjust",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_MEMB_ADJ"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Memb Adjust",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_MEMB_ADJ"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Memb Entry",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_MEMB_ENT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Memb Opening",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_MEMB_ENT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Member Mast",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_MEMB"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Monthly Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_STK_LEVEL"],
+      "formReferencedInWeb": false,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Scheme Ledger",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_CASH_BANK"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Scheme Mast",
+      "visibleOnDesktop": true,
+      "desktopForms": ["MS_PRODUCT"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Scheme",
+      "menu": "Scheme Report",
+      "visibleOnDesktop": true,
+      "desktopForms": ["RP_ALL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Bank Payment",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_CASH"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Bank Received",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_CASH"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Bul LcBook",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_BUL_BOOKING"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Bul Sales",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_BUL_SALE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Cash Payment",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_CASH"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Cash Received",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_CASH"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Contra Entry",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_CONTRA"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "E CrntNote",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_SL_EBILL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "E Invoice",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_SL_EBILL"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Pr Quotation",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PURC"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Purc Booking",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_BUL_BOOKING"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Purchase",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_PURC", "TR_PURC_HM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Purchase Rtn",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_KR_ISU"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Rate Cut",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_WH_SALE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Sale Booking",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_BUL_BOOKING"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Sales",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_SALE_HM"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Sales Order",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_SALE_ORD"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Sales Return",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Sl Quotation",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_SALE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Stock In",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Stock Out",
+      "visibleOnDesktop": true,
+      "desktopForms": [],
+      "formReferencedInWeb": null,
+      "state": "unclassified",
+      "evidence": null,
+      "note": "menu label not resolvable in the MDI_FORM dispatch - map by hand"
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Wh Quotation",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_WH_SALE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Wh Sales",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_WH_SALE"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    },
+    {
+      "tab": "Transaction",
+      "menu": "Wh Sl Return",
+      "visibleOnDesktop": true,
+      "desktopForms": ["TR_WH_SALE_RTN"],
+      "formReferencedInWeb": true,
+      "state": "unclassified",
+      "evidence": null,
+      "note": null
+    }
+  ]
+}
