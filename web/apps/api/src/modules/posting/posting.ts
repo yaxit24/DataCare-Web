@@ -68,6 +68,13 @@ function enrichLedgerLine(
   srno: number,
   /** Right-aligned line number, or '' for the 23-character form. */
   lineSuffix: string,
+  /**
+   * When true, `lineSuffix` REPLACES the two-character leg type rather than following it.
+   *
+   * The cash books need this: their tail is `<line><leg>` as one field right-aligned in 12, so nothing sits at
+   * positions 22-23 and appending a leg type there would produce a 35-character key.
+   */
+  suffixReplacesLegType: boolean,
   bookName?: string,
   voucherDate?: Date | null,
 ): LedgerLine {
@@ -90,7 +97,9 @@ function enrichLedgerLine(
       // `01002024-20250270000101` - which is the same layout already verified byte-for-byte for
       // ROJ_MEL_DATA. Padding to six produced a 24-character key with an extra zero, so every web ledger
       // key differed from the desktop's in a column that is part of the primary key.
-      `${line.CO_CODE ?? ''}${line.LC_CODE ?? ''}${line.CO_YEAR ?? ''}${line.CO_BOOK ?? ''}${pad(line.VCH_NO, 5)}${pad(srno, 2)}${lineSuffix}`,
+      `${line.CO_CODE ?? ''}${line.LC_CODE ?? ''}${line.CO_YEAR ?? ''}${line.CO_BOOK ?? ''}${pad(line.VCH_NO, 5)}${
+        suffixReplacesLegType ? lineSuffix : `${pad(srno, 2)}${lineSuffix}`
+      }`,
     VCH_DATE: line.VCH_DATE ?? rowDate,
     IT_TYPE: line.IT_TYPE ?? 'A',
     DATA_TYPE: line.DATA_TYPE ?? 'A',
@@ -368,14 +377,36 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
     //
     // Same layout ROJ_MEL_DATA already uses, verified byte-exact there against a real 33-character key.
     const declaredLine = (line as Record<string, unknown>).legLine;
+    // `legKeySuffix` supplies the WHOLE tail after VCH_NO, for families whose layout neither `legType` nor
+    // `legLine` can express.
+    //
+    // Three layouts are now confirmed and no two agree:
+    //   sale   (026/027/...)  23 chars - leg type in the 2 characters at 22-23, no line
+    //   scheme (074)          33 chars - leg type at 22-23, then a bare line right-aligned in 10
+    //   cash   (001/002)      33 chars - <line><leg> as ONE field right-aligned in 12, so nothing sits at 22-23
+    //
+    // The cash form is why this exists: reading `SUBSTRING(LEDR_KEY,22,2)` there returns SPACES, which is how
+    // the difference was noticed at all. A per-family suffix is honest about that; a fourth optional field
+    // trying to cover it would not be.
+    const declaredSuffix = (line as Record<string, unknown>).legKeySuffix;
     // legType is a directive to this function, not a column, so it never reaches the INSERT.
-    const { legType: _legType, legLine: _legLine, ...columns } = line as Record<string, unknown>;
+    const {
+      legType: _legType,
+      legLine: _legLine,
+      legKeySuffix: _legKeySuffix,
+      ...columns
+    } = line as Record<string, unknown>;
     const row =
       input.ledger.table === 'AC_DATA'
         ? enrichLedgerLine(
             columns as typeof line,
             legNo,
-            typeof declaredLine === 'number' ? String(declaredLine).padStart(10, ' ') : '',
+            typeof declaredSuffix === 'string'
+              ? declaredSuffix
+              : typeof declaredLine === 'number'
+                ? String(declaredLine).padStart(10, ' ')
+                : '',
+            typeof declaredSuffix === 'string',
             input.bookName,
             voucherDate,
           )

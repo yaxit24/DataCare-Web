@@ -126,6 +126,34 @@ export function assertCashReceiptCeiling(
 }
 
 /** A balanced two-line transfer ledger: Dr `drAc` / Cr `crAc` for `amount` (Req 13.1). */
+/**
+ * Desktop leg codes for the cash books, measured across all 522 legs of books 001 and 002.
+ *
+ * DIRECTION-SPECIFIC: a receipt and a payment share NO codes, and the same role takes a different number
+ * depending on which way the money moves.
+ *
+ *   book 001 CASH REC   01 party Cr / 02 cash  Dr        03 party Cr / 04 kasar Dr   (kasar 00057 JAVK)
+ *   book 002 CASH PAY   05 party Dr / 06 cash  Cr        07 party Dr / 08 kasar Cr   (kasar 00042 AVAK)
+ *
+ * The kasar ACCOUNT differs too - 00057 KASAR JAVK on a receipt, 00042 KASAR AVAK on a payment. Gujarati
+ * javak is outgoing and avak incoming, so it mirrors the money rather than the voucher. One account for both
+ * would post half the discounts to the wrong ledger.
+ *
+ * Bank books are NOT covered here. They have the same MAIN_BOOK shape but their codes must be measured, not
+ * assumed - the cash codes already differ by direction, so assuming they carry across would be the same error
+ * one level up.
+ */
+const CASH_LEG = {
+  recParty: 1,
+  recCash: 2,
+  recKasarParty: 3,
+  recKasar: 4,
+  payParty: 5,
+  payCash: 6,
+  payKasarParty: 7,
+  payKasar: 8,
+} as const;
+
 export function buildTransferLedger(
   key: VoucherKey,
   vchType: string,
@@ -155,6 +183,14 @@ export interface ReceiptInput {
   amount: number;
   mode: PayMode;
   bankAc?: string; // cash/bank ledger receiving the money (defaults by mode)
+  /**
+   * The CASH_DATA line this movement belongs to, which becomes the leading digits of the ledger key's
+   * 12-character tail.
+   *
+   * Real voucher 002/00029 has nine CASH_DATA lines and eighteen legs keyed 105/106 through 905/906, so the
+   * line is not bounded at one. A single-line caller may omit it and get 1.
+   */
+  lineNo?: number;
   chqNo?: string;
   vchDate?: Date | string;
   // Payment-mode detail (desktop TR_CARD_REC / TR_UPI_REC):
@@ -194,38 +230,95 @@ export async function postReceipt(
       const prior = await partyCashReceivedTx(tx, input.scope, input.partyAc, recAc);
       assertCashReceiptCeiling(input.amount, prior, limit, input.partyName);
     }
+    // The cash/bank account comes from BOOK_DETL slot 1 when the caller names no bank.
+    //
+    // `settlementAc` returns the literal 'CASH', which is a placeholder rather than an account: the real leg-02
+    // rows on book 001 all name 00001, which is that book's slot 1. The same defect was found in the scheme
+    // family, so the placeholder is systemic across the finance paths rather than local to one.
+    //
+    // An explicit bankAc still wins, and the literal stays as a last resort so a book without the slot behaves
+    // as before rather than failing.
+    const slot = (await tx.$queryRawUnsafe(
+      `SELECT "AC_CODE" FROM "BOOK_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+          AND coalesce("SR_NO",0)::numeric=1
+        LIMIT 1`,
+      tenantId,
+      input.scope.coCode,
+      input.scope.lcCode,
+      input.scope.coBook,
+    )) as Array<{ AC_CODE: unknown }>;
+    const recAcResolved =
+      (input.bankAc ?? '').trim() || String(slot[0]?.AC_CODE ?? '').trim() || recAc;
+
     const vchNo = identity.vchNo;
     const key = keyOf(input.scope, vchNo, 'RCT');
     const configuredBook = await configuredBookTx(tx, input.scope);
     const vchType = mode === 'cash' ? 'CREC' : 'BREC';
     const kasar = round2(Number(input.kasar ?? 0));
     const lbase = { ...key, VCH_TYPE: vchType };
+    // A SELF-BALANCED PAIR PER MOVEMENT, with the party leg repeated - not one netted party credit.
+    //
+    // Measured on book 001 (CASH REC), all 162 legs: the amount pair is 01 party Cr / 02 cash Dr (56 each) and
+    // the kasar pair is 03 party Cr / 04 kasar Dr (25 each). Real voucher 001/00001 is one CASH_DATA line with
+    // REC_AMT 60000.00 and KASAR_AMT 771.00, and it writes FOUR legs: the party is credited twice, once against
+    // cash and once against kasar.
+    //
+    // This previously wrote THREE legs with the party credited once for amount + kasar. Both balance, so no
+    // balance assertion could see it - but the leg COUNT differs, so a per-account ledger report showed one
+    // line where the desktop shows two.
+    //
+    // The sale family already does this correctly (`buildSaleLedger`: "Desktop emits a self-balanced
+    // party/tender pair, not a netted party balance"), so the two paths disagreed with each other.
+    //
+    // The key tail is `<line><leg>` as ONE field right-aligned in 12 - not the scheme's bare line number, and
+    // not the sale's two characters at 22-23. `legKeySuffix` states it explicitly because no two families agree.
+    const lineNo = Number(input.lineNo ?? 1);
+    const suffix = (leg: number): string =>
+      `${lineNo}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
     const ledger: LedgerLine[] = [
       {
         ...lbase,
-        AC_CODE: recAc,
+        legKeySuffix: suffix(CASH_LEG.recParty),
+        AC_CODE: input.partyAc,
+        LD_CODE: recAcResolved,
+        DR_AMT: 0,
+        CR_AMT: input.amount,
+        SIGN: 'C',
+      },
+      {
+        ...lbase,
+        legKeySuffix: suffix(CASH_LEG.recCash),
+        AC_CODE: recAcResolved,
         LD_CODE: input.partyAc,
         DR_AMT: input.amount,
         CR_AMT: 0,
         SIGN: 'D',
       },
     ];
-    if (kasar > 0)
-      ledger.push({
-        ...lbase,
-        AC_CODE: input.kasarAc ?? 'KASAR',
-        DR_AMT: kasar,
-        CR_AMT: 0,
-        SIGN: 'D',
-      }); // write-off
-    ledger.push({
-      ...lbase,
-      AC_CODE: input.partyAc,
-      LD_CODE: recAc,
-      DR_AMT: 0,
-      CR_AMT: round2(input.amount + kasar),
-      SIGN: 'C',
-    });
+    if (kasar > 0) {
+      const kasarAc = input.kasarAc ?? 'KASAR';
+      ledger.push(
+        {
+          ...lbase,
+          legKeySuffix: suffix(CASH_LEG.recKasarParty),
+          AC_CODE: input.partyAc,
+          LD_CODE: kasarAc,
+          DR_AMT: 0,
+          CR_AMT: kasar,
+          SIGN: 'C',
+        },
+        {
+          ...lbase,
+          legKeySuffix: suffix(CASH_LEG.recKasar),
+          AC_CODE: kasarAc,
+          LD_CODE: input.partyAc,
+          DR_AMT: kasar,
+          CR_AMT: 0,
+          SIGN: 'D',
+        },
+      );
+    }
     assertBalanced(ledger);
     // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's
     // leg - verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book
@@ -247,7 +340,7 @@ export async function postReceipt(
       partyCode: input.partyAc,
     };
     const rojmelRows = buildCashRojmel(rojmelCtx, {
-      cashAc: recAc,
+      cashAc: recAcResolved,
       partyLegAmount: round2(input.amount + kasar),
       direction: 'receipt',
     });
@@ -262,7 +355,7 @@ export async function postReceipt(
             KASAR_AMT: kasar,
             AC_CODE: input.partyAc,
             AC_NAME: input.partyName ?? null,
-            REC_AC_CODE: recAc,
+            REC_AC_CODE: recAcResolved,
             CHQ_NO: input.chqNo ?? null,
             VCH_DATE: vchDate,
             VCH_TIME: identity.voucherTime,
