@@ -261,6 +261,102 @@ describe.runIf(RUN)('per-line tax allocation', () => {
   });
 });
 
+describe.runIf(RUN)('a tagged line copies the karigar figures from the tag', () => {
+  beforeEach(wipe);
+
+  it('takes KR_TOUCH and KR_FINE from BAR_DETL, and leaves them zero when untagged', async () => {
+    // Measured across all 102 tagged sale lines: SL_DETL.KR_TOUCH equals BAR_DETL.KR_TOUCH and SL_DETL.KR_FINE
+    // equals BAR_DETL.KR_FINE, 102 of 102 for both. They are NOT derived - `KR_NET_WT x KR_TOUCH/100` fits only
+    // 7 of 92 rows and `x (touch + wastage)` only 39 - so a copy from the tag is the whole rule.
+    //
+    // Two defects had to be fixed for this to work, and the second was invisible until the first was done: the
+    // sale path did not ask the tag for them, and `availableBarTags` did not SELECT them, so asking returned
+    // undefined and wrote zeros.
+    await seed(0);
+    const exec = (sql: string, ...p: unknown[]) =>
+      withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...p));
+    await exec(
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
+       VALUES ($1,$2,'MA925','SILVER PAYAL','S','01')`,
+      TENANT,
+      CO,
+    );
+    await exec(
+      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
+       VALUES ($1,$2,'00',0,'N','NO TAX',0,'00085')`,
+      TENANT,
+      CO,
+    );
+    await exec(
+      `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IT_CODE",
+          "ITM_GWT","ITM_NWT","ITM_TOUCH","ITM_PCS","KR_NAME","KR_NET_WT","KR_TOUCH","KR_FINE","APR_ISU","APP_TRFR")
+       VALUES ($1,$2,$3,'TAG1',777,'MA925',10.360,10.360,92.500,1,'VIKAS',10.360,92.500,9.583,'N','N')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+          "TAG_NO","VCH_SRNO","IT_CODE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT","TR_TYPE")
+       VALUES ($1,$2,$3,$4,'900','00001',1,'TAG1',777,'MA925','+',1,1,10.360,10.360,'P')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+    );
+
+    await createSale(
+      runtime,
+      {
+        scope,
+        acCode: '000888',
+        acName: 'ROUNDING PARTY',
+        vchDate: '2024-04-06',
+        taxCode: '00',
+        taxRatePct: 0,
+        interState: false,
+        mainUser: 'tag-test',
+      },
+      [
+        {
+          itCode: 'MA925',
+          metal: 'S',
+          tagNo: 'TAG1',
+          pcs: 1,
+          grossWt: 10.36,
+          netWt: 10.36,
+          touch: 0,
+          rate: 0,
+          labourType: 'fixed',
+          labourFixed: 1087,
+        },
+        line,
+      ],
+    );
+
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "KR_TOUCH"::float t, "KR_FINE"::float f, "TAG_NWT"::float tn, "TAG_GWT"::float tg,
+              coalesce("TAG_NO",'N') tag
+         FROM "SL_DETL" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+      TENANT,
+    )) as { t: number; f: number; tn: number; tg: number; tag: string }[];
+    expect(rows).toHaveLength(2);
+    // The tagged line carries the TAG's figures.
+    expect(rows[0]!.tag).toBe('TAG1');
+    expect(rows[0]!.t).toBeCloseTo(92.5, 3);
+    expect(rows[0]!.f).toBeCloseTo(9.583, 3);
+    expect(rows[0]!.tn).toBeCloseTo(10.36, 3);
+    expect(rows[0]!.tg).toBeCloseTo(10.36, 3);
+    // The untagged line carries none of them - TAG_NWT non-zero on only 1 of 143 real untagged rows.
+    expect(rows[1]!.tag).toBe('N');
+    expect(rows[1]!.t).toBe(0);
+    expect(rows[1]!.f).toBe(0);
+    expect(rows[1]!.tn).toBe(0);
+    // BOTH weights, not just the net. Breaking only TAG_GWT left an earlier version of this test green.
+    expect(rows[1]!.tg).toBe(0);
+  });
+});
+
 describe.runIf(RUN)('persisted line component rounding', () => {
   beforeEach(wipe);
   afterAll(async () => {

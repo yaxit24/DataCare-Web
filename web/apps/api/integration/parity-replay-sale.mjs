@@ -176,6 +176,34 @@ async function seed() {
     );
   }
 
+  // The TAG INSTANCE that line 1 sells, seeded with the real tag's own figures.
+  //
+  // Line 1 of the reference voucher is a TAGGED sale: TAG_NO 'MAS00013', VCH_SRNO 100211101051. Its karigar
+  // figures are not derived from the line - they are copied from the tag. Measured across all 102 tagged sale
+  // lines, SL_DETL.KR_TOUCH equals BAR_DETL.KR_TOUCH and SL_DETL.KR_FINE equals BAR_DETL.KR_FINE, 102 of 102
+  // for both. So the tag has to carry them or the comparison is testing the fixture rather than the code.
+  await exec(
+    `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","TAG_NO","VCH_SRNO","IT_CODE",
+        "ITM_GWT","ITM_NWT","ITM_TOUCH","ITM_PCS","KR_NAME","KR_NET_WT","KR_TOUCH","KR_FINE","APR_ISU","APP_TRFR")
+     VALUES ($1,$2,$3,'MAS00013',100211101051,'MA925',10.360,10.360,92.500,1,'VIKAS',10.360,92.500,9.583,'N','N')`,
+    TENANT,
+    CO,
+    LC,
+  );
+
+  // The tag's INWARD stock movement. A tag is only issuable when MAIN_STOCK shows a net positive balance for
+  // it (stock.ts availableBarTags), which is the web modelling "this tag was received before it was sold" - so
+  // without this row the replay fails with `tag not available for issue`, correctly.
+  await exec(
+    `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+        "TAG_NO","VCH_SRNO","IT_CODE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT","TR_TYPE")
+     VALUES ($1,$2,$3,$4,'900','00001',1,'MAS00013',100211101051,'MA925','+',1,1,10.360,10.360,'P')`,
+    TENANT,
+    CO,
+    LC,
+    YEAR,
+  );
+
   // The book, and all eight BOOK_DETL slots exactly as book 027 holds them. Slot 1 is 00004 SALES SILVER
   // A/C, which is the account the real voucher's ledger names as the party leg's contra - so slot 1 is the
   // right resolution and this replay can confirm it rather than assume it.
@@ -237,6 +265,9 @@ async function main() {
       {
         itCode: 'MA925',
         metal: 'S',
+        // The tag this line sells. Supplying it is what makes the comparison test the WRITE path for the tag
+        // and karigar columns rather than an absent input.
+        tagNo: 'MAS00013',
         pcs: 1,
         grossWt: 10.36,
         netWt: 10.36,

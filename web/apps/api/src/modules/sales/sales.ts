@@ -912,18 +912,27 @@ async function writeSaleTx(
     // GST return and e-invoice read them; the desktop leaves them 0 and splits at the header instead).
     const roundedLineTax = roundingPolicy.roundTaxAmount(lineTax);
     const tagStock = issuedTags.get(idx)?.stock;
+    // TAG_GWT / TAG_NWT carry the TAG INSTANCE's weights, and are ZERO on an untagged line.
+    //
+    // Measured on the real customer database: both are non-zero on 102 of 102 tagged lines and on just 1 of 143
+    // untagged ones. On 92 of the 102 they equal the sold weight, and on the other 10 they do not - which is
+    // what shows they are the tag's own figures rather than a copy of the line.
+    //
+    // The untagged branch fell back to the line weight, so an untagged sale wrote 4.600 where the desktop
+    // writes 0.000. That is not cosmetic: a tag report filtering on TAG_NWT <> 0 would pick up every untagged
+    // line ever sold.
     const tagGross =
       c.in.tagGrossWt != null
         ? num(c.in.tagGrossWt)
         : c.in.tagNo
           ? num(tagStock?.ITM_GWT ?? c.in.grossWt)
-          : num(c.in.grossWt);
+          : 0;
     const tagNet =
       c.in.tagNetWt != null
         ? num(c.in.tagNetWt)
         : c.in.tagNo
           ? num(tagStock?.ITM_NWT ?? c.in.netWt)
-          : num(c.in.netWt);
+          : 0;
     return {
       ...key,
       VCH_DATE: voucherDate,
@@ -1005,10 +1014,23 @@ async function writeSaleTx(
       // customer configured to 2. A test that set the precision to 2 and asserted 428.21 is what exposed it.
       NET_AMT: c.calc.net,
       HM_AMT: 0,
-      KR_NET_WT: num(c.in.karigarNetWt),
-      KR_TOUCH: num(c.in.karigarTouch),
+      // KR_NET_WT defaults to the LINE's net weight, it is not only a karigar-supplied figure.
+      //
+      // Measured: non-zero on all 245 real SL_DETL rows - 143 untagged and 102 tagged - and equal to ITM_NWT on
+      // 235 of them. The 10 that differ carry their own value, which is why an explicit input still wins.
+      KR_NET_WT: c.in.karigarNetWt != null ? num(c.in.karigarNetWt) : num(c.in.netWt),
+      // KR_TOUCH and KR_FINE are COPIED FROM THE TAG INSTANCE, not derived from the line.
+      //
+      // That is why no formula fitted. `KR_NET_WT x KR_TOUCH/100` matched only 7 of 92 rows and
+      // `x (touch + wastage)` only 39, and the samples fitted nothing simple. The answer is that they are not
+      // computed at all: on all 102 tagged sale lines, SL_DETL.KR_TOUCH equals BAR_DETL.KR_TOUCH and
+      // SL_DETL.KR_FINE equals BAR_DETL.KR_FINE - 102 of 102 for both.
+      //
+      // KR_NET_WT is different and stays above: it matches the tag on only 89 of 102, because a partial sale
+      // carries the LINE's weight while the touch and fine stay the tag's.
+      KR_TOUCH: c.in.karigarTouch != null ? num(c.in.karigarTouch) : num(tagStock?.KR_TOUCH),
       KR_WEST_PRC: num(c.in.karigarWestPct),
-      KR_FINE: num(c.in.karigarFine),
+      KR_FINE: c.in.karigarFine != null ? num(c.in.karigarFine) : num(tagStock?.KR_FINE),
       TAG_COST: num(c.in.tagCost),
       KR_NAME: c.in.karigarName ?? '',
       RATE_TYPE: c.in.rateType ?? '',

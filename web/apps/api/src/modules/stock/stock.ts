@@ -85,8 +85,15 @@ async function availableBarTags(tx: any, key: TagKey): Promise<Record<string, un
     filters.push(`b."IT_CODE"::text=$${params.length}`);
   }
   return tx.$queryRawUnsafe(
+    // KR_NET_WT / KR_TOUCH / KR_FINE are selected because a SALE LINE COPIES THEM FROM THE TAG.
+    //
+    // Measured across all 102 tagged sale lines on the real customer database: SL_DETL.KR_TOUCH equals
+    // BAR_DETL.KR_TOUCH and SL_DETL.KR_FINE equals BAR_DETL.KR_FINE, 102 of 102 for both. They are not derived
+    // - `KR_NET_WT x KR_TOUCH/100` fits only 7 of 92 rows - so the tag is the only source, and omitting them
+    // here silently wrote zeros even once the sale path was asking for them.
     `SELECT b."CO_CODE",b."LC_CODE",b."TAG_NO",b."VCH_SRNO",b."IT_CODE",
-            b."ITM_PCS",b."ITM_GWT",b."ITM_NWT",b."ITM_FINE",b."TBL_CODE"
+            b."ITM_PCS",b."ITM_GWT",b."ITM_NWT",b."ITM_FINE",b."TBL_CODE",
+            b."KR_NET_WT",b."KR_TOUCH",b."KR_FINE"
        FROM "BAR_DETL" b
       WHERE ${filters.join(' AND ')}
         AND coalesce((
