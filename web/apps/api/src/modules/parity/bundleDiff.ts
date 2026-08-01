@@ -66,6 +66,16 @@ export const ROW_KEYS: Record<string, readonly string[]> = {
   // item in the same direction would collide, and that case falls through to the content key rather than being
   // mispaired.
   MAIN_STOCK: ['IT_CODE', 'ITM_SIGN'],
+  // ROJ_MEL_DATA's primary key is LEDR_KEY ALONE, and the web reproduces it byte-for-byte - asserted in
+  // rojmel.test.ts against the real 33-character example '01002024-20250270000101         1'. So it is
+  // legitimate identity here rather than a column under test.
+  //
+  // Without this entry the table fell back to the CONTENT key, where any single differing field changes the
+  // key and the row cannot pair. The real comparison therefore reported ROJ_MEL_DATA as 4 rows missing, 5 rows
+  // extra and ZERO differences - which reads as agreement and is nothing of the kind. The most-worked
+  // subsystem in the project, 3179 real rows and nine builders, had never actually been compared field by
+  // field.
+  ROJ_MEL_DATA: ['LEDR_KEY'],
   BAR_CAN_DETL: ['TAG_NO', 'VCH_SRNO'],
   // Ledger rows are identified by account and side. Several rows can share an account, so the amount pair is
   // part of the key.

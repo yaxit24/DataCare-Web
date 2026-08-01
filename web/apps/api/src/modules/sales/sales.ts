@@ -1556,6 +1556,15 @@ async function writeSaleTx(
         itemCode: item,
         itemName: nameByItem[item] ?? '',
         labourRate: num((detailRows[idx] as any)?.LBR_RATE),
+        // ITM_AMT is the METAL amount, not the line total. Verified against the real database: on book 027
+        // ROJ_MEL_DATA.ITM_AMT mirrors SL_DETL.ITM_AMT exactly (354.00 where the line net is 428.00), and it
+        // is 0.00 on a labour-only line where the whole value is making charges.
+        //
+        // This call site read LBR_AMT and NET_AMT from the persisted detail row but omitted ITM_AMT, so the
+        // builder's `l.itemAmount ?? l.amount` fell back to the line NET - writing 1087.00 on a labour-only
+        // line whose metal amount is zero, and 428.21 where the metal is 354.20. Taken from the same place as
+        // its neighbours so the three stay consistent.
+        itemAmount: num((detailRows[idx] as any)?.ITM_AMT),
         labourAmount: num((detailRows[idx] as any)?.LBR_AMT),
         otherAmount: num((detailRows[idx] as any)?.OTH_AMT),
         netAmount: num((detailRows[idx] as any)?.NET_AMT) || c.calc.net,

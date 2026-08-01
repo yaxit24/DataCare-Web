@@ -86,6 +86,57 @@ describe('IT_TYPE is the metal', () => {
   });
 });
 
+describe('ITM_AMT is the metal amount, never the line total', () => {
+  // Verified against the real database on book 027: ROJ_MEL_DATA.ITM_AMT mirrors SL_DETL.ITM_AMT exactly -
+  // 354.00 where the line NET is 428.00 - and it is 0.00 on a labour-only line whose whole value is making
+  // charges. Across all 3179 real Rojmel rows, ITM_AMT is non-zero on 285 and LBR_AMT on 246, so they are
+  // separately populated components rather than either one carrying the total.
+  //
+  // The sale call site read LBR_AMT and NET_AMT from the persisted detail row but omitted ITM_AMT, so the
+  // builder's `l.itemAmount ?? l.amount` fell back to the line net. A labour-only line reported 1087.00 metal
+  // where the desktop has 0.00.
+  //
+  // Nothing caught it: the whole suite passed, and the real comparison could not see it either, because
+  // ROJ_MEL_DATA had no ROW_KEYS entry and so reported 4 rows missing, 5 extra and ZERO differences.
+  const split = [
+    // A labour-only line: no metal value at all.
+    {
+      lineNo: 1,
+      revenueAc: '00004',
+      amount: 1087,
+      itemAmount: 0,
+      labourAmount: 1087,
+      metal: 'S' as const,
+      pcs: 1,
+      grossWt: 10.36,
+    },
+    // Metal plus labour: 354 + 74 = 428.
+    {
+      lineNo: 2,
+      revenueAc: '00004',
+      amount: 428,
+      itemAmount: 354,
+      labourAmount: 74,
+      metal: 'S' as const,
+      pcs: 1,
+      grossWt: 4.6,
+    },
+  ];
+
+  it('keeps the metal amount and the labour amount separate', () => {
+    const rows = buildSaleRojmel(ctx, split, { partyAmount: 1515 });
+    const items = rows.filter((r) => (r.IT_CODE ?? '') !== '' || Number(r.ITM_GWT ?? 0) !== 0);
+    expect(items).toHaveLength(2);
+    // Line 1: zero metal, all labour. The line total 1087 must NOT appear in ITM_AMT.
+    expect(Number(items[0]!.ITM_AMT)).toBe(0);
+    expect(Number(items[0]!.LBR_AMT)).toBe(1087);
+    // Line 2: the components, not the 428 total.
+    expect(Number(items[1]!.ITM_AMT)).toBe(354);
+    expect(Number(items[1]!.LBR_AMT)).toBe(74);
+    expect(Number(items[1]!.ITM_AMT)).not.toBe(428);
+  });
+});
+
 describe('a sale projects to the desktop’s four Rojmel rows', () => {
   const rows = buildSaleRojmel(ctx, lines, {
     taxAc: '00085',
