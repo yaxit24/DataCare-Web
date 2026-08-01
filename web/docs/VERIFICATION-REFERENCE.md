@@ -327,6 +327,16 @@ SQL() {
     echo "SQL_EMPTY - treat as a FAILURE, not as 'no rows'. Check: docker ps | grep dc-mssql" >&2
     return 1
   fi
+  # ^ CAUTION: this test cannot distinguish a dead container from a query that legitimately matched nothing,
+  # and it produced a false alarm within an hour of being written - a filter on 'CASH PAYMENT' returned zero
+  # rows because the real MAIN_BOOK value is 'CASH PAY'. The false alarm was still USEFUL (it stopped an empty
+  # result being read as "this family has no data"), but the honest version tests the EXIT STATUS and looks for
+  # SQL Server's own error markers instead:
+  #
+  #   out=$(docker exec ... 2>&1); rc=$?
+  #   if [ $rc -ne 0 ] || printf '%s' "$out" | grep -qiE "Msg [0-9]+|Login failed|not running"; then fail; fi
+  #
+  # That reports a real failure and stays silent on a genuine zero-row result.
   printf '%s\n' "$out"
 }
 SQL -d Live24 -Q "SET NOCOUNT ON; SELECT 'rojmel='+CAST(count(*) AS varchar) FROM ROJ_MEL_DATA"
