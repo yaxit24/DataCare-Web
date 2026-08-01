@@ -278,8 +278,26 @@ export function computeLine(
         policy,
       )
     : 0;
-  const net = calcLineNet({ metal, labour, other: line.otherAmount });
-  return { fine, metal, labour, net };
+  // Each line COMPONENT is rounded to the bill-amount precision, not just the grand total.
+  //
+  // Measured on the real customer database: every money column in all 245 SL_DETL rows is a whole rupee, and
+  // NET_AMT = ITM_AMT + LBR_AMT + OTH_AMT holds on 244 of them. So the composition is exact and the components
+  // are individually rounded - 4.600 x 77 = 354.20 is stored as 354.00, and 4.600 x 16.09 = 74.014 as 74.00.
+  //
+  // Deliberately NOT asserting a derivation. ITM_AMT equals ROUND(nwt x rate, 0) on only 134 of 220 candidate
+  // rows and LBR_AMT equals ROUND(nwt x rate, 0) on 84 of 166, because the desktop grid lets the operator
+  // overtype an amount. The rule that survives the data is "whatever the component is, it is rounded" - so the
+  // rounding is applied to the computed value rather than the formula being reimplemented.
+  //
+  // Precision comes from CO_SET_NEW.TOT_AMT_ROF, which is 0 for this customer. It is not hardcoded: the same
+  // policy at 2 leaves 354.20 alone, which is what a customer configured that way would expect.
+  const roundAmount = (v: number): number => (policy ? policy.roundBillTotal(v) : v);
+  const metalRounded = roundAmount(metal);
+  const labourRounded = roundAmount(labour);
+  const net = roundAmount(
+    calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount }),
+  );
+  return { fine, metal: metalRounded, labour: labourRounded, net };
 }
 
 /** Build the balanced double-entry AC_DATA lines for a sale (pure, Req 10.8/13.1).
@@ -904,11 +922,11 @@ async function writeSaleTx(
         otherAmount: num(c.in.otherAmount),
       }),
       TAX_PRC: input.taxRatePct,
-      NET_AMT: lineTotalDesktop({
-        itemAmount: c.calc.metal,
-        labourAmount: c.calc.labour,
-        otherAmount: num(c.in.otherAmount),
-      }),
+      // `c.calc.net` already sums the components and rounds them with the company's amount precision, so
+      // `lineTotalDesktop` is not called here. That helper hardcodes roundHalfEven(..., 0) - whole rupees
+      // always - which happens to be right for this customer (TOT_AMT_ROF 0) and would silently ignore a
+      // customer configured to 2. A test that set the precision to 2 and asserted 428.21 is what exposed it.
+      NET_AMT: c.calc.net,
       HM_AMT: 0,
       KR_NET_WT: num(c.in.karigarNetWt),
       KR_TOUCH: num(c.in.karigarTouch),

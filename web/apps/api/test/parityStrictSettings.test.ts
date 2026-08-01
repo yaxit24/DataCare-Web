@@ -78,3 +78,25 @@ describe('PARITY_STRICT rounding settings', () => {
     expect(() => resolveRoundingPolicy({ ...ALL_SET, TOT_AMT_ROF: 0 })).not.toThrow();
   });
 });
+
+describe('line components follow the bill-amount precision', () => {
+  // Measured on the real customer database: every money column in all 245 SL_DETL rows is a whole rupee, and
+  // NET_AMT = ITM_AMT + LBR_AMT + OTH_AMT holds on 244 of them. 4.600 x 77 = 354.20 is stored as 354.00 and
+  // 4.600 x 16.09 = 74.014 as 74.00, so components are rounded individually rather than only at the total.
+  //
+  // Not asserted: a derivation. ITM_AMT equals ROUND(nwt x rate, 0) on only 134 of 220 candidate rows, because
+  // the desktop grid lets the operator overtype an amount. The rule that survives the data is "whatever the
+  // component is, it is rounded".
+  it('rounds to whole rupees when TOT_AMT_ROF is 0', () => {
+    const policy = resolveRoundingPolicy({ ...ALL_SET, TOT_AMT_ROF: 0 });
+    expect(policy.roundBillTotal(354.2)).toBe(354);
+    expect(policy.roundBillTotal(74.014)).toBe(74);
+    expect(policy.roundBillTotal(7436.8)).toBe(7437);
+  });
+
+  it('leaves paise alone when the same setting is 2, so the behaviour is configured not hardcoded', () => {
+    const policy = resolveRoundingPolicy({ ...ALL_SET, TOT_AMT_ROF: 2 });
+    expect(policy.roundBillTotal(354.2)).toBeCloseTo(354.2, 2);
+    expect(policy.roundBillTotal(74.014)).toBeCloseTo(74.01, 2);
+  });
+});

@@ -32,7 +32,7 @@ web/
 | Report slugs             | 48                | `REPORT_BUILDERS` in `routes/txn.ts`                        |
 | Build targets            | 7                 | `pnpm build`                                                |
 
-<!-- verify: ls apps/api/test/*.test.ts | wc -l | tr -d ' ' == 129 -->
+<!-- verify: ls apps/api/test/*.test.ts | wc -l | tr -d ' ' == 130 -->
 
 | Desktop menu items to reproduce | 198 | `NextMain.MENU_DATA`, 13 tabs — the authoritative surface |
 | Classified in the register | 0 of 198 | `pnpm register:check` |
