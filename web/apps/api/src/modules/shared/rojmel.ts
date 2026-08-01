@@ -529,16 +529,27 @@ export function buildCashRojmel(
     kasar?: number;
     /** Receipt uses 00057 KASAR JAVK, payment 00042 KASAR AVAK — the account mirrors the money's direction. */
     kasarAc?: string;
+    /**
+     * The CASH_DATA line this movement belongs to.
+     *
+     * A multi-line voucher writes ONE ROW PER LINE, all of the same type, with the line number distinguishing
+     * them. Real voucher 002/00029 has nine lines and nine type-04 rows keyed `...0002904` + 1 through 9.
+     *
+     * The multi-line paths wrote NO Rojmel rows at all - postReceiptLines and postPaymentLines never called
+     * this builder - so the day book showed nothing for a nine-line cash payment.
+     */
+    lineNo?: number;
   },
 ): RojmelRow[] {
   const receipt = p.direction === 'receipt';
   const T = ROJMEL_CASH_ROW_TYPE;
   const rows: RojmelRow[] = [];
+  const line = Number(p.lineNo ?? 1);
   if (p.cashAmount)
     rows.push({
       ...blank(
         ctx,
-        rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, receipt ? T.RECEIPT : T.PAYMENT, 1),
+        rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, receipt ? T.RECEIPT : T.PAYMENT, line),
       ),
       AC_CODE: p.cashAc,
       LD_CODE: ctx.partyCode,
@@ -559,7 +570,7 @@ export function buildCashRojmel(
             ctx.coBook,
             ctx.vchNo,
             receipt ? T.RECEIPT_KASAR_PARTY : T.PAYMENT_KASAR_PARTY,
-            1,
+            line,
           ),
         ),
         AC_CODE: ctx.partyCode,
@@ -575,7 +586,7 @@ export function buildCashRojmel(
             ctx.coBook,
             ctx.vchNo,
             receipt ? T.RECEIPT_KASAR : T.PAYMENT_KASAR,
-            1,
+            line,
           ),
         ),
         AC_CODE: p.kasarAc,

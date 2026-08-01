@@ -843,10 +843,44 @@ export async function postPaymentLines(
       }
     });
     assertBalanced(ledger);
+
+    // ONE ROJMEL ROW PER LINE. This path wrote NONE at all - postPaymentLines never called the builder - so the
+    // day book showed nothing for a multi-line cash payment. Real voucher 002/00029 has nine lines and nine
+    // type-04 Rojmel rows keyed `...0002904` + 1 through 9; the web produced zero.
+    const linesRojmelRows = lines.flatMap((l, idx) =>
+      buildCashRojmel(
+        {
+          scope: {
+            coCode: input.scope.coCode,
+            lcCode: input.scope.lcCode,
+            coYear: input.scope.coYear!,
+          },
+          key,
+          coBook: input.scope.coBook!,
+          vchNo: String(vchNo).padStart(5, '0'),
+          vchDate: vchDate ?? null,
+          bookName: mode === 'cash' ? 'CASH PAY' : 'BANK PAY',
+          vchType,
+          partyCode: l.partyAc,
+          partyName: '',
+        },
+        {
+          cashAc: payAcLinesResolved,
+          cashAmount: round2(Number(l.amount)),
+          direction: 'payment',
+          kasar: round2(Number(l.kasar ?? 0)),
+          kasarAc: input.kasarAc ?? 'KASAR',
+          lineNo: idx + 1,
+        },
+      ),
+    );
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: mode === 'cash' ? 'CASH PAY' : 'BANK PAY',
       writes: [
+        ...(linesRojmelRows.length
+          ? [{ table: 'ROJ_MEL_DATA' as const, rows: linesRojmelRows }]
+          : []),
         {
           table: 'PAY_DATA',
           rows: [
