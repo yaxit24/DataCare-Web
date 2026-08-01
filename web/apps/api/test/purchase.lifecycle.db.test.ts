@@ -413,7 +413,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       editPurchase(
         runtime,
         purchaseInput(),
-        [{ ...firstLines[0], itCode: 'LOOSE' }, firstLines[1]],
+        [{ ...firstLines[0], itCode: 'LOOSE' }, firstLines[1]!],
         created.vchNo,
       ),
     ).rejects.toThrow(
@@ -427,7 +427,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       runtime,
       purchaseInput(),
       [
-        { ...firstLines[0], netWt: 9.5 },
+        { ...firstLines[0]!, netWt: 9.5 },
         { ...firstLines[1], itCode: 'GOLD' },
       ],
       created.vchNo,

@@ -735,7 +735,9 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
       scope: karigarScope,
       vchNo: created.vchNo,
       deleteUser: 'deleter',
-      karigarAc: 'KRG1',
+      // No karigar account here: DeleteKarigarInput does not accept one, so the value passed previously was
+      // silently discarded. The delete identifies the voucher by scope and number, which is what the desktop
+      // does too. Surfaced by typechecking the test project.
     });
     const after = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "KR_IDTL" WHERE tenant_id=$1 AND "VCH_NO"=$2`,

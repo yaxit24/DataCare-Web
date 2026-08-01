@@ -106,7 +106,7 @@ describe('master form fields', () => {
       const cfg = MASTERS[master];
       expect(cfg, `master ${master} must exist`).toBeTruthy();
       const rendered = new Set(
-        (resolveFormFields(cfg, GENERATED_FORM_FIELDS[cfg.table]) ?? []).map((f) => f.col),
+        (resolveFormFields(cfg!, GENERATED_FORM_FIELDS[cfg!.table]) ?? []).map((f) => f.col),
       );
       for (const col of cols) {
         expect(rendered.has(col), `${master}.${col} must render`).toBe(true);
@@ -116,8 +116,8 @@ describe('master form fields', () => {
 
   it('keeps explicit metadata and explicit ordering', () => {
     const cfg = MASTERS.items;
-    const resolved = resolveFormFields(cfg, GENERATED_FORM_FIELDS[cfg.table]) ?? [];
-    const explicit = cfg.formFields ?? [];
+    const resolved = resolveFormFields(cfg!, GENERATED_FORM_FIELDS[cfg!.table]) ?? [];
+    const explicit = cfg!.formFields ?? [];
     // Explicit fields lead, in their authored order, because that order mirrors the desktop tab layout.
     expect(resolved.slice(0, explicit.length).map((f) => f.col)).toEqual(
       explicit.map((f) => f.col),

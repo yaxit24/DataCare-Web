@@ -64,9 +64,9 @@ describe('gst aggregation', () => {
       { GOLD: '7113' },
     );
     expect(hsn.length).toBe(1);
-    expect(hsn[0].hsn).toBe('7113');
-    expect(hsn[0].qty).toBe(3);
-    expect(hsn[0].taxable).toBe(3000);
+    expect(hsn[0]!.hsn).toBe('7113');
+    expect(hsn[0]!.qty).toBe(3);
+    expect(hsn[0]!.taxable).toBe(3000);
   });
   it('buildGstr1 splits buckets', () => {
     const g = buildGstr1(

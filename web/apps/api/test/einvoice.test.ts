@@ -32,8 +32,8 @@ describe('irn payload', () => {
     expect(p.TranDtls.SupTyp).toBe('B2B');
     expect(p.DocDtls.No).toBe('DF/00005');
     expect(p.DocDtls.Dt).toBe('09/06/2023');
-    expect(p.ItemList[0].HsnCd).toBe('711319');
-    expect(p.ItemList[0].TotItemVal).toBe(22241.82); // 21594 + 647.82
+    expect(p.ItemList[0]!.HsnCd).toBe('711319');
+    expect(p.ItemList[0]!.TotItemVal).toBe(22241.82); // 21594 + 647.82
     expect(p.ValDtls.AssVal).toBe(21594);
     expect(p.ValDtls.IgstVal).toBe(647.82);
     expect(p.ValDtls.TotInvVal).toBe(22241.82);

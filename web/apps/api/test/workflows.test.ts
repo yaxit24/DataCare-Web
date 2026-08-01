@@ -119,8 +119,9 @@ describe('double-entry workflow — sale, purchase, and reversals', () => {
     });
     const net: Record<string, number> = {};
     for (const l of [...sale, ...ret])
-      net[l.AC_CODE] = (net[l.AC_CODE] || 0) + (Number(l.DR_AMT) || 0) - (Number(l.CR_AMT) || 0);
-    for (const ac of Object.keys(net)) expect(Math.abs(net[ac])).toBeLessThan(0.005);
+      net[String(l.AC_CODE)] =
+        (net[String(l.AC_CODE)] || 0) + (Number(l.DR_AMT) || 0) - (Number(l.CR_AMT) || 0);
+    for (const ac of Object.keys(net)) expect(Math.abs(net[ac]!)).toBeLessThan(0.005);
   });
   it('purchase ledger balanced + purchase-return is its mirror', () => {
     const pur = buildPurchaseLedger({
@@ -142,8 +143,9 @@ describe('double-entry workflow — sale, purchase, and reversals', () => {
     expect(() => assertBalanced(pur)).not.toThrow();
     const net: Record<string, number> = {};
     for (const l of [...pur, ...pret])
-      net[l.AC_CODE] = (net[l.AC_CODE] || 0) + (Number(l.DR_AMT) || 0) - (Number(l.CR_AMT) || 0);
-    for (const ac of Object.keys(net)) expect(Math.abs(net[ac])).toBeLessThan(0.005);
+      net[String(l.AC_CODE)] =
+        (net[String(l.AC_CODE)] || 0) + (Number(l.DR_AMT) || 0) - (Number(l.CR_AMT) || 0);
+    for (const ac of Object.keys(net)) expect(Math.abs(net[ac]!)).toBeLessThan(0.005);
   });
   it('assertBalanced throws on an unbalanced ledger', () => {
     expect(() =>

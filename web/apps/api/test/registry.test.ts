@@ -41,14 +41,14 @@ describe('master registry', () => {
     ]);
   });
   it('configs carry correct key columns + guards', () => {
-    expect(MASTERS.rates.keyColumns).toEqual(['CO_CODE', 'LC_CODE', 'VCH_DATE', 'SR_NO']);
-    expect(MASTERS.taxes.keyColumns).toEqual(['CO_CODE', 'TAX_CODE']);
-    expect(MASTERS.groups.references).toEqual(['ITEM_MAST']);
-    expect(MASTERS.customers.table).toBe('AC_MAST');
-    expect(MASTERS.products.table).toBe('PRODUCT_MAST');
-    expect(MASTERS.locations.keyColumns).toEqual(['CO_CODE', 'LC_CODE']);
-    expect(MASTERS.states.keyColumns).toEqual(['STATE_CODE']);
-    expect(MASTERS.touch.keyColumns).toEqual(['CO_CODE', 'LC_CODE', 'AC_CODE', 'AC_IT_CODE']);
+    expect(MASTERS.rates!.keyColumns).toEqual(['CO_CODE', 'LC_CODE', 'VCH_DATE', 'SR_NO']);
+    expect(MASTERS.taxes!.keyColumns).toEqual(['CO_CODE', 'TAX_CODE']);
+    expect(MASTERS.groups!.references).toEqual(['ITEM_MAST']);
+    expect(MASTERS.customers!.table).toBe('AC_MAST');
+    expect(MASTERS.products!.table).toBe('PRODUCT_MAST');
+    expect(MASTERS.locations!.keyColumns).toEqual(['CO_CODE', 'LC_CODE']);
+    expect(MASTERS.states!.keyColumns).toEqual(['STATE_CODE']);
+    expect(MASTERS.touch!.keyColumns).toEqual(['CO_CODE', 'LC_CODE', 'AC_CODE', 'AC_IT_CODE']);
   });
   it('every config requiredColumns include all keyColumns', () => {
     for (const [route, cfg] of Object.entries(MASTERS)) {

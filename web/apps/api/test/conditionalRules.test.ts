@@ -284,10 +284,10 @@ describe('book-gated and value guards', () => {
   it('reports a blank customer code or name with one shared message, as MS_ADD_MAST does', () => {
     // MASTERS key 'addresses' is the ADD_MAST config (desktop MS_ADD_MAST).
     const target = MASTERS.addresses;
-    expect(target.table).toBe('ADD_MAST');
-    expect(target.columnMessages?.AC_NAME).toBe('Please Select Customer name and try....');
-    expect(target.columnMessages?.AC_CODE).toBe('Please Select Customer name and try....');
+    expect(target!.table).toBe('ADD_MAST');
+    expect(target!.columnMessages?.AC_NAME).toBe('Please Select Customer name and try....');
+    expect(target!.columnMessages?.AC_CODE).toBe('Please Select Customer name and try....');
     // The desktop guards code OR name with one message, so both keys must be present and required.
-    expect(target.requiredColumns).toContain('AC_NAME');
+    expect(target!.requiredColumns).toContain('AC_NAME');
   });
 });

@@ -1363,7 +1363,10 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     // Established empirically. A return is the family member most likely to lose a write silently, because it
     // reverses stock and ledger rather than creating them, so an absent table looks like "nothing to reverse".
     const created = await createSaleReturn(runtime, returnInput(), returnLines);
-    const vch = String(created.voucherNo ?? created.vchNo).padStart(5, '0');
+    // `voucherNo` does not exist on these result types, so the `??` first operand was dead and the fallback
+    // was always the real path. Three sites here, three more in sales.lifecycle. Surfaced by typechecking
+    // the test project, which nothing had ever done.
+    const vch = String(created.vchNo).padStart(5, '0');
     const tables = await voucherTables(owner);
     expect(tables.length).toBeGreaterThan(30);
     const touched = await footprintOf(owner, tables, TENANT, vch);
@@ -1467,7 +1470,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     // meaningful: with an advance the ledger is posted and balanced; with none it is not touched at all. An
     // order that posted without an advance would inflate the books with work not yet done.
     const withAdvance = await createSalesOrder(runtime, orderInput());
-    const vchA = String(withAdvance.voucherNo ?? withAdvance.vchNo).padStart(5, '0');
+    const vchA = String(withAdvance.vchNo).padStart(5, '0');
     const tables = await voucherTables(owner);
     expect(tables.length).toBeGreaterThan(30);
 
@@ -1482,7 +1485,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(legsA.dr, 'and it must be non-zero when an advance was taken').toBeGreaterThan(0);
 
     const noAdvance = await createSalesOrder(runtime, orderInput({ advanceAmount: 0 }));
-    const vchB = String(noAdvance.voucherNo ?? noAdvance.vchNo).padStart(5, '0');
+    const vchB = String(noAdvance.vchNo).padStart(5, '0');
     const touchedB = await footprintOf(owner, tables, TENANT, vchB);
     expect(touchedB, 'an order without an advance must still record itself').toContain(
       'SL_ORD_DATA',

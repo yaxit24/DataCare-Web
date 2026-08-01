@@ -115,7 +115,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       LC,
       YEAR,
       VCH_NO,
-      CRITICAL_REPORTS[0].value,
+      CRITICAL_REPORTS[0]!.value,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "SL_DETL"(
@@ -136,7 +136,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       LC,
       YEAR,
       VCH_NO,
-      CRITICAL_REPORTS[1].value,
+      CRITICAL_REPORTS[1]!.value,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "PR_DETL"(
@@ -157,7 +157,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       LC,
       YEAR,
       VCH_NO,
-      CRITICAL_REPORTS[2].value,
+      CRITICAL_REPORTS[2]!.value,
     );
     // TAG_STOCK_PRINT is derived staging, not an authored table: the report binder clears and
     // repopulates it from BAR_DETL at bind time, mirroring RP_PHY_STOCK.cs:1830-1838. Seeding the
@@ -172,7 +172,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       LC,
       YEAR,
       VCH_NO,
-      CRITICAL_REPORTS[3].value,
+      CRITICAL_REPORTS[3]!.value,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "AC_DATA"(
@@ -183,7 +183,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       LC,
       YEAR,
       VCH_NO,
-      CRITICAL_REPORTS[4].value,
+      CRITICAL_REPORTS[4]!.value,
     );
   });
 

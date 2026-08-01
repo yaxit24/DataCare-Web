@@ -55,7 +55,7 @@ const REV: Record<string, string> = Object.fromEntries(
 /** Decode a code39Svg() output back to its text by reading bars + inter-bar gaps (proves scannability). */
 function decode(svg: string): string {
   const bars = [...svg.matchAll(/<rect x="(\d+)" y="0" width="(\d+)"/g)]
-    .map((m) => ({ x: +m[1], w: +m[2] }))
+    .map((m) => ({ x: +m[1]!, w: +m[2]! }))
     .sort((a, b) => a.x - b.x);
   const cls = (w: number) => (w >= 6 ? 'w' : 'n');
   let out = '';
@@ -63,8 +63,8 @@ function decode(svg: string): string {
     const b = bars.slice(k, k + 5);
     const el: string[] = [];
     for (let i = 0; i < 5; i++) {
-      el.push(cls(b[i].w)); // bar
-      if (i < 4) el.push(cls(b[i + 1].x - (b[i].x + b[i].w))); // intra-char space
+      el.push(cls(b[i]!.w)); // bar
+      if (i < 4) el.push(cls(b[i + 1]!.x - (b[i]!.x + b[i]!.w))); // intra-char space
     }
     out += REV[el.join('')] ?? '?';
   }

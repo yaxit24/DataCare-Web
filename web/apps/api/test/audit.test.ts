@@ -30,10 +30,12 @@ describe('audit persistence', () => {
       "SELECT set_config('app.tenant_id', $1, true)",
       'tenant-a',
     );
-    const insert = tx.$executeRawUnsafe.mock.calls[1];
-    expect(insert[0]).toContain('INSERT INTO "audit_log"');
-    expect(insert[4]).toHaveLength(255);
-    expect(insert[5]).toBe(201);
+    // The mock's call tuple is typed `[]`, so indexing it is a type error even though the call really does
+    // carry six arguments. Cast at the boundary rather than at each index.
+    const insert = tx.$executeRawUnsafe.mock.calls[1] as unknown as unknown[];
+    expect(insert![0]).toContain('INSERT INTO "audit_log"');
+    expect(insert![4]).toHaveLength(255);
+    expect(insert![5]).toBe(201);
   });
 
   it('returns an observable failure code without masking the completed request', async () => {

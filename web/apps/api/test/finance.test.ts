@@ -16,8 +16,8 @@ describe('finance builders', () => {
     const b = ledgerBalance(lines);
     expect(b.balanced).toBe(true);
     expect(b.dr).toBe(5000);
-    expect(lines[0].AC_CODE).toBe('CASH'); // debit cash
-    expect(lines[1].AC_CODE).toBe('CUST'); // credit party
+    expect(lines[0]!.AC_CODE).toBe('CASH'); // debit cash
+    expect(lines[1]!.AC_CODE).toBe('CUST'); // credit party
   });
   it('settlementAc routes cash→CASH, others→bank/clearing', () => {
     expect(settlementAc('cash')).toBe('CASH');

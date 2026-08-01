@@ -100,7 +100,7 @@ describe('xlsx writer', () => {
     // Guards against a writer that silently drops data: the amount must actually reach the file.
     const a = await renderXlsx([sheet], 'x');
     const b = await renderXlsx(
-      [{ ...sheet, rows: [{ vch: 'SL/00001', amt: 1250.26, wt: 9.4 }, sheet.rows[1]] }],
+      [{ ...sheet, rows: [{ vch: 'SL/00001', amt: 1250.26, wt: 9.4 }, sheet.rows[1]!] }],
       'x',
     );
     const wsA = Object.entries(unzip(a.buffer)).find(([k]) =>

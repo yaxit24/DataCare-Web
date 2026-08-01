@@ -101,7 +101,7 @@ d('rate-cut settlement persistence', () => {
     async (basis) => {
       await setBasis(basis);
       await postRateCut(prisma, { scope, acCode: 'CASH', lines: [line] });
-      const h: any[] = await header();
+      const h = (await header()) as any[];
       expect(h[0].RATE_PAR).toBe(basis);
     },
   );
@@ -263,7 +263,7 @@ d('rate-cut settlement persistence', () => {
       convRate: 7000,
       settleCrFine: 100,
     });
-    const h: any[] = await header();
+    const h = (await header()) as any[];
     // fineRate = convRate = 7000; drAmt = round(100 x (7000/10), 0) = 70,000.
     expect(Number(h[0].DR_AMT)).toBe(70000);
     expect(Number(h[0].CR_AMT)).toBe(0);
@@ -279,7 +279,7 @@ d('rate-cut settlement persistence', () => {
       convRate: 700000,
       settleCrFine: 100,
     });
-    const h: any[] = await header();
+    const h = (await header()) as any[];
     // drAmt = round(100 x (700000/1000), 0) = 70,000 — the same money from a per-kg quote.
     expect(Number(h[0].DR_AMT)).toBe(70000);
   });
@@ -287,7 +287,7 @@ d('rate-cut settlement persistence', () => {
   it('leaves the settlement at zero when no conversion is supplied', async () => {
     await setBasis('G');
     await postRateCut(prisma, { scope, acCode: 'CASH', lines: [line] });
-    const h: any[] = await header();
+    const h = (await header()) as any[];
     // An ordinary rate-cut voucher must be unchanged by the new feature.
     expect(Number(h[0].DR_AMT)).toBe(0);
     expect(Number(h[0].CR_AMT)).toBe(0);
@@ -304,7 +304,7 @@ d('rate-cut settlement persistence', () => {
       settleCrFine: 100,
       settleDrAmt: 12345, // typed by the operator
     });
-    const h: any[] = await header();
+    const h = (await header()) as any[];
     expect(Number(h[0].DR_AMT)).toBe(12345);
   });
 });

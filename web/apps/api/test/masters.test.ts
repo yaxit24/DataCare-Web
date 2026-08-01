@@ -43,11 +43,11 @@ describe('master builders', () => {
   it('buildDeleteGuards builds a referential check per reference table', () => {
     const guards = buildDeleteGuards(AC_MAST_CONFIG, { CO_CODE: '01', AC_CODE: 'A1' });
     expect(guards).toHaveLength(1);
-    expect(guards[0].ref).toBe('AC_DATA');
-    expect(guards[0].sql).toBe(
+    expect(guards[0]!.ref).toBe('AC_DATA');
+    expect(guards[0]!.sql).toBe(
       'SELECT 1 FROM "AC_DATA" WHERE "CO_CODE"::text=$1::text AND "AC_CODE"::text=$2::text LIMIT 1',
     );
-    expect(guards[0].params).toEqual(['01', 'A1']);
+    expect(guards[0]!.params).toEqual(['01', 'A1']);
   });
 
   it('binds denormalized company/location keys to server scope', () => {

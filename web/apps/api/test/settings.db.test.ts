@@ -65,18 +65,18 @@ describe('settings catalog and inventory', () => {
   it('separates the display label from the persisted code', () => {
     // The desktop stores Strings.Mid(cboLbrType.Text,1,1): "Net Wise" -> "N" (UT_SETTING.cs:4252-4255).
     const lbr = SETTING_CATALOG_BY_KEY.LBR_TYPE;
-    expect(lbr.type).toBe('enum');
-    expect(lbr.options?.map((o) => o.label)).toEqual([
+    expect(lbr!.type).toBe('enum');
+    expect(lbr!.options?.map((o) => o.label)).toEqual([
       'Gorss Wise', // the desktop's own misspelling is the contract
       'Net Wise',
       'Kg Wise',
       'Pcs Wise',
     ]);
-    expect(lbr.options?.map((o) => o.value)).toEqual(['G', 'N', 'K', 'P']);
+    expect(lbr!.options?.map((o) => o.value)).toEqual(['G', 'N', 'K', 'P']);
     // 'Fine Wise' -> 'F' is exactly what closingStock.ts checks for the metal valuation pass.
     const bs = SETTING_CATALOG_BY_KEY.PROFIT_RPT_TYPE;
-    expect(bs.options?.find((o) => o.label === 'Fine Wise')?.value).toBe('F');
-    expect(bs.options?.find((o) => o.label === 'Amount Wise')?.value).toBe('A');
+    expect(bs!.options?.find((o) => o.label === 'Fine Wise')?.value).toBe('F');
+    expect(bs!.options?.find((o) => o.label === 'Amount Wise')?.value).toBe('A');
   });
 
   it('types the numeric and date columns from the real schema', () => {
@@ -108,19 +108,19 @@ describe('settings catalog and inventory', () => {
 
   it('rejects a label submitted where a code is stored', () => {
     const lbr = SETTING_CATALOG_BY_KEY.LBR_TYPE;
-    expect(coerceSettingValue(lbr, 'N').ok).toBe(true);
-    const bad = coerceSettingValue(lbr, 'Net Wise');
+    expect(coerceSettingValue(lbr!, 'N').ok).toBe(true);
+    const bad = coerceSettingValue(lbr!, 'Net Wise');
     expect(bad.ok).toBe(false);
     // A blank clears the setting rather than failing.
-    expect(coerceSettingValue(lbr, '')).toEqual({ ok: true, value: null });
+    expect(coerceSettingValue(lbr!, '')).toEqual({ ok: true, value: null });
   });
 
   it('validates numbers, dates and text width', () => {
-    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.GRID_ROW_HIGHT, '25').ok).toBe(true);
-    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.GRID_ROW_HIGHT, '26').ok).toBe(true);
-    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.GRID_ROW_HIGHT, 'abc').ok).toBe(false);
-    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.F_DISC_DATE, '2026-03-31').ok).toBe(true);
-    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.F_DISC_DATE, '31/03/2026').ok).toBe(false);
+    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.GRID_ROW_HIGHT!, '25').ok).toBe(true);
+    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.GRID_ROW_HIGHT!, '26').ok).toBe(true);
+    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.GRID_ROW_HIGHT!, 'abc').ok).toBe(false);
+    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.F_DISC_DATE!, '2026-03-31').ok).toBe(true);
+    expect(coerceSettingValue(SETTING_CATALOG_BY_KEY.F_DISC_DATE!, '31/03/2026').ok).toBe(false);
     const text = SETTING_CATALOG.find((x) => x.type === 'text' && x.maxLength);
     if (text?.maxLength) {
       expect(coerceSettingValue(text, 'x'.repeat(text.maxLength)).ok).toBe(true);

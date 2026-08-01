@@ -34,11 +34,11 @@ describe('scheme ledger direction', () => {
     const b = ledgerBalance(lines);
     expect(b.balanced).toBe(true);
     expect(b.dr).toBe(2000);
-    expect(lines[0].AC_CODE).toBe('CASH'); // Dr cash (money in)
-    expect(lines[0].DR_AMT).toBe(2000);
-    expect(lines[1].AC_CODE).toBe('000858'); // Cr member/scheme liability
-    expect(lines[1].CR_AMT).toBe(2000);
-    expect(lines[0].VCH_TYPE).toBe('MBENT');
+    expect(lines[0]!.AC_CODE).toBe('CASH'); // Dr cash (money in)
+    expect(lines[0]!.DR_AMT).toBe(2000);
+    expect(lines[1]!.AC_CODE).toBe('000858'); // Cr member/scheme liability
+    expect(lines[1]!.CR_AMT).toBe(2000);
+    expect(lines[0]!.VCH_TYPE).toBe('MBENT');
   });
 
   it('opening entry posts like an installment: Dr cash / Cr scheme-liability, balanced (MBOP)', () => {
@@ -46,20 +46,20 @@ describe('scheme ledger direction', () => {
     const b = ledgerBalance(lines);
     expect(b.balanced).toBe(true);
     expect(b.dr).toBe(5000);
-    expect(lines[0].AC_CODE).toBe('CASH');
-    expect(lines[1].AC_CODE).toBe('000858');
-    expect(lines[0].VCH_TYPE).toBe('MBOP');
+    expect(lines[0]!.AC_CODE).toBe('CASH');
+    expect(lines[1]!.AC_CODE).toBe('000858');
+    expect(lines[0]!.VCH_TYPE).toBe('MBOP');
   });
 
   it('maturity is the mirror image: Dr scheme-liability / Cr cash, balanced', () => {
     const lines = buildTransferLedger(key, MEMB_ADJUST.vchType, '000858', 'CASH', 2000);
     const b = ledgerBalance(lines);
     expect(b.balanced).toBe(true);
-    expect(lines[0].AC_CODE).toBe('000858'); // Dr member/scheme liability (clear it)
-    expect(lines[0].DR_AMT).toBe(2000);
-    expect(lines[1].AC_CODE).toBe('CASH'); // Cr cash (pay member out)
-    expect(lines[1].CR_AMT).toBe(2000);
-    expect(lines[0].VCH_TYPE).toBe('MBADJ');
+    expect(lines[0]!.AC_CODE).toBe('000858'); // Dr member/scheme liability (clear it)
+    expect(lines[0]!.DR_AMT).toBe(2000);
+    expect(lines[1]!.AC_CODE).toBe('CASH'); // Cr cash (pay member out)
+    expect(lines[1]!.CR_AMT).toBe(2000);
+    expect(lines[0]!.VCH_TYPE).toBe('MBADJ');
   });
 
   it('net maturity payout = amount + bonus − less (balanced on the net figure)', () => {

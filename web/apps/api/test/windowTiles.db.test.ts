@@ -82,7 +82,9 @@ d('window tile configuration', () => {
   }, 30_000);
 
   it('is visible through the read path the dashboard uses', async () => {
-    const tiles = await listWindowTiles(runtime, { tenantId: TENANT } as never);
+    // The third argument is the login name and was missing, so it arrived as undefined. Surfaced by
+    // typechecking the test project.
+    const tiles = await listWindowTiles(runtime, { tenantId: TENANT } as never, 'admin');
     expect(Array.isArray(tiles)).toBe(true);
     expect(tiles.length).toBeGreaterThan(0);
   }, 30_000);

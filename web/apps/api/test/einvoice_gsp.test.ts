@@ -102,7 +102,7 @@ describe('Chartered Info GSP IRN transport', () => {
     const res = await t.cancelIRN('IRN'.padEnd(64, 'X'), '3', 'Order cancelled');
     expect(calls[1]).toContain('/eicore/dec/v1.03/Cancel');
     expect(calls[1]).toContain('AuthToken=TOK9');
-    expect(JSON.parse(bodies[0]).CnlRsn).toBe('3');
+    expect(JSON.parse(bodies[0]!).CnlRsn).toBe('3');
     expect(res.Status).toBe('CNL');
   });
 });

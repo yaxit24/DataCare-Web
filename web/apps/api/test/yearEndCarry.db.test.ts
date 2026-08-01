@@ -235,13 +235,13 @@ databaseDescribe('year-end carry-forward', () => {
     expect(preview.totals.dr).toBeCloseTo(2000, 2);
     expect(preview.totals.cr).toBeCloseTo(2000, 2);
     // Read-only: no opening legs should exist for any year.
-    const [{ n }] = (await withTenant(owner, TENANT, (tx: any) =>
+    const [openingCount] = (await withTenant(owner, TENANT, (tx: any) =>
       tx.$queryRawUnsafe(
         `SELECT count(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "VCH_TYPE"='ACOP'`,
         TENANT,
       ),
     )) as Array<{ n: number }>;
-    expect(n).toBe(0);
+    expect(openingCount!.n).toBe(0);
   });
 
   it('refuses a close that would carry a year onto itself', async () => {

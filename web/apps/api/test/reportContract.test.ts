@@ -216,15 +216,15 @@ function parsePrismaTables(schema: string): Map<string, Set<string>> {
   const tables = new Map<string, Set<string>>();
   for (const model of schema.matchAll(/^model\s+(\w+)\s*\{([\s\S]*?)^\}/gm)) {
     const [, modelName, body] = model;
-    const mappedTable = body.match(/@@map\("([^"]+)"\)/)?.[1] ?? modelName;
+    const mappedTable = body!.match(/@@map\("([^"]+)"\)/)?.[1] ?? modelName;
     const columns = new Set<string>();
-    for (const line of body.split('\n')) {
+    for (const line of body!.split('\n')) {
       if (line.trimStart().startsWith('@@')) continue;
       const field = line.match(/^\s*(\w+)\s+[^\s]+/);
       if (!field) continue;
-      columns.add(line.match(/@map\("([^"]+)"\)/)?.[1] ?? field[1]);
+      columns.add(line.match(/@map\("([^"]+)"\)/)?.[1] ?? field[1]!);
     }
-    tables.set(mappedTable.toUpperCase(), new Set([...columns].map((x) => x.toUpperCase())));
+    tables.set(mappedTable!.toUpperCase(), new Set([...columns].map((x) => x.toUpperCase())));
   }
   return tables;
 }
@@ -293,7 +293,7 @@ describe('Crystal report data-source contracts', () => {
     const prisma = parsePrismaTables(readFileSync(SCHEMA_PATH, 'utf8'));
     const unresolvedDatabase = classified.database.filter((token) => {
       const [table, column] = databaseKey(token).split('.');
-      return !prisma.get(table)?.has(column);
+      return !prisma.get(table!)?.has(column!);
     });
     const unexpectedDatabase = unresolvedDatabase.filter(
       (token) => !(databaseKey(token) in UNRESOLVED_DATABASE_FIELD_ALLOWLIST),

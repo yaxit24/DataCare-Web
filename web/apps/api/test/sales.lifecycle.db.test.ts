@@ -1150,7 +1150,10 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     // The probe is schema-driven: every table carrying a VCH_NO column is checked, so a table nobody thought
     // to list is still covered.
     const created = await createSale(runtime, saleInput(), firstLines);
-    const vch = created.voucherNo ?? String(created.vchNo).padStart(5, '0');
+    // This read `created.voucherNo ?? ...`, but SaleResult has no such property - so the fallback was always
+    // the real path and the first operand was dead. Three sites carried it. Typechecking the test project is
+    // what surfaced them; the suite passed either way, which is why nothing had ever flagged it.
+    const vch = String(created.vchNo).padStart(5, '0');
 
     const tables = await voucherTables(owner);
     expect(tables.length, 'the schema must expose voucher tables to probe').toBeGreaterThan(30);
@@ -1222,7 +1225,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
           rate: 1000,
         },
       ]);
-      const vch = created.voucherNo ?? String(created.vchNo).padStart(5, '0');
+      const vch = String(created.vchNo).padStart(5, '0');
       const rows = (await owner.$queryRawUnsafe(
         `SELECT coalesce("ITM_AMT",0)::float amt FROM "SL_DETL"
         WHERE tenant_id=$1 AND "VCH_NO"=$2 LIMIT 1`,
@@ -1285,7 +1288,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         rate: 7131.1,
       },
     ]);
-    const vch = created.voucherNo ?? String(created.vchNo).padStart(5, '0');
+    const vch = String(created.vchNo).padStart(5, '0');
     const rows = (await owner.$queryRawUnsafe(
       `SELECT coalesce("CGST_TAX",0)::float cgst, coalesce("SGST_TAX",0)::float sgst,
               coalesce("TAX_AMT",0)::float "taxAmt"

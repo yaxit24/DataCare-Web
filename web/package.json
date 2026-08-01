@@ -25,7 +25,8 @@
     "fresh:provision": "node scripts/check-fresh-provision.mjs",
     "type:parity": "node scripts/check-type-parity.mjs",
     "register:check": "node scripts/check-completion-register.mjs",
-    "docs:refs": "node scripts/check-doc-references.mjs"
+    "docs:refs": "node scripts/check-doc-references.mjs",
+    "typecheck:tests": "cd apps/api && tsc -p tsconfig.test.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "22.20.0",

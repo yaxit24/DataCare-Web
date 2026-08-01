@@ -102,8 +102,9 @@ describe.runIf(RUN)('AC_DATA ledger key layout', () => {
           ],
         },
         bookName: 'SALES',
-        // The period lock needs a date; it is not part of what this test asserts.
-        vchDate: new Date('2024-04-06T00:00:00Z'),
+        // No vchDate here: PostInput has no such property, so an earlier version of this test passed one that
+        // was silently ignored. The period lock is satisfied by VCH_DATE on the ledger lines themselves, which
+        // is where the desktop carries it too. Surfaced by typechecking the test project.
         writes: [],
       }),
     );

@@ -96,6 +96,9 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       dhrnIntType: 'DHRN_INT_TYPE',
       dhrnCompound: 'DHIRN_COMPOUND',
       fineStockType: 'FINE_STK_TYPE',
+      // labourType was missing from this map, so the helper could not set CO_SET.LBR_TYPE at all - the
+      // key exists on SettingsBehavior and every other key was present. Surfaced by typechecking the tests.
+      labourType: 'LBR_TYPE',
       saleAmountType: 'SL_AMT_TYPE',
       purchaseAmountType: 'PR_AMT_TYPE',
       purchaseWithLabour: 'PURC_WITH_LBR',
@@ -332,12 +335,12 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
     );
     await set({ allRoundingRemoved: 'N' });
     const normalPolicy = await withTenant(runtime, TENANT, (tx: any) =>
-      resolveRoundingPolicyTx(tx, { tenantId: TENANT, coCode: CO }),
+      resolveRoundingPolicyTx(tx, { tenantId: TENANT, coCode: CO, lcCode: LC }),
     );
     await persistOutcome('roundN', normalPolicy.roundTaxAmount(12.5));
     await set({ allRoundingRemoved: 'Y' });
     const forcedPolicy = await withTenant(runtime, TENANT, (tx: any) =>
-      resolveRoundingPolicyTx(tx, { tenantId: TENANT, coCode: CO }),
+      resolveRoundingPolicyTx(tx, { tenantId: TENANT, coCode: CO, lcCode: LC }),
     );
     await persistOutcome('roundY', forcedPolicy.roundTaxAmount(12.5));
 

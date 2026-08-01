@@ -258,7 +258,7 @@ describe('GV-SEQ: in-grid row sequence', () => {
    * a vector so the contract has no blank disposition — the value is derived, just not monetary.
    */
   it('GV-SEQ-001 numbers each new row from the previous one', () => {
-    const nextOldSrNo = (rows: number[]): number => (rows.length ? rows[rows.length - 1] + 1 : 1);
+    const nextOldSrNo = (rows: number[]): number => (rows.length ? rows[rows.length - 1]! + 1 : 1);
     expect(nextOldSrNo([])).toBe(1);
     expect(nextOldSrNo([1])).toBe(2);
     expect(nextOldSrNo([1, 2, 7])).toBe(8);
@@ -331,7 +331,7 @@ describe('GV-PRLINE: purchase per-line formulas', () => {
 
   /** GV-PRLINE-005: `[57] cPrOldSrNo = Val([Row - 1, 57]) + 1` — a row link serial, as in TR_SALE. */
   it('GV-PRLINE-005 numbers each new row from the previous one', () => {
-    const next = (rows: number[]): number => (rows.length ? rows[rows.length - 1] + 1 : 1);
+    const next = (rows: number[]): number => (rows.length ? rows[rows.length - 1]! + 1 : 1);
     expect(next([])).toBe(1);
     expect(next([1, 2, 3])).toBe(4);
   });

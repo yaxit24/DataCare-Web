@@ -93,7 +93,7 @@ d('tag print staging with label skip', () => {
       stageTagPrintRowsTx(tx, tenantId, scope, VCH, undefined, 2),
     );
     expect(n).toBe(2); // the copy returns the number of REAL label rows
-    const rows: any[] = await staged();
+    const rows = (await staged()) as any[];
     const blanks = rows.filter((r) => String(r.IT_CODE) === '00');
     const real = rows.filter((r) => String(r.IT_CODE) !== '00');
     expect(blanks.length).toBe(2);
@@ -105,7 +105,7 @@ d('tag print staging with label skip', () => {
 
   it('stages no placeholder when skip is omitted', async () => {
     await withTenant(prisma, tenantId, (tx: any) => stageTagPrintRowsTx(tx, tenantId, scope, VCH));
-    const rows: any[] = await staged();
+    const rows = (await staged()) as any[];
     expect(rows.filter((r) => String(r.IT_CODE) === '00').length).toBe(0);
     expect(rows.length).toBe(2);
   });
