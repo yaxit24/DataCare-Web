@@ -85,15 +85,27 @@ Two things follow that could not be guessed:
 
 ```
 101,102 (56)   103,104 (25)   105,106 (133)   107,108 (5)
-               205,206 (22)   305,306 (11)    405,406 (4)
+               205,206 (22)   305,306 (11)    405,406 (4)   ... and beyond
 ```
 
-Lines above 1 occur **only** with legs 05/06 — the payment pair. So:
+**CORRECTION.** An earlier version of this file said the line prefix reaches 4, and that a payment voucher
+handles "up to four parties". Both were wrong, and the error was mine rather than the data's: the aggregate
+query's output was piped through `head -14` and the truncated list was read as complete.
 
-- a **receipt** voucher handles one party, optionally with a second pair for the discount (01/02 plus 03/04);
-- a **payment** voucher handles up to **four** parties, each on its own line, all using 05/06.
+Book 002 / 00029 settles it — **18 legs across 9 lines**, keyed `105/106` through `905/906`:
 
-The largest real voucher is book 002 / 00029 with **18 legs**.
+```
+[01002024-202500200029         105]  ac 000760  Dr 5000.00
+[01002024-202500200029         906]  ac 00001   Cr  160.00
+```
+
+So the line prefix is **unbounded in practice** (at least 9), and the correct statements are:
+
+- a **receipt** voucher handles one party, optionally with a second pair for its discount (01/02 plus 03/04);
+- a **payment** voucher handles **many** parties, each on its own line, all using 05/06.
+
+The lesson is the pipe trap in a new costume: `head` on a measurement makes an incomplete answer look
+complete. Read a total first, or ask for the count separately.
 
 ---
 
@@ -105,6 +117,55 @@ The largest real voucher is book 002 / 00029 with **18 legs**.
 4. Then the bank books, which have the same `MAIN_BOOK` shape and need their own leg-code measurement — the
    codes above are for CASH and must not be assumed to carry over.
 
-**Prediction to test, not to assume:** the web's `finance.ts` uses `buildTransferLedger`, which emits debit-first
+## What the web actually does — prediction tested
+
+The prediction was right on three counts and **missed a fourth, which is the largest**.
+
+`postReceipt` in `finance.ts:203` builds three legs:
+
+```
+cash    Dr amount          LD_CODE = party
+kasar   Dr kasar           (no LD_CODE)
+party   Cr amount + kasar  LD_CODE = cash        <- ONE netted credit
+```
+
+The desktop writes **four**, as two self-balanced pairs:
+
+```
+01  party  Cr 60000.00   ld 00001      02  cash   Dr 60000.00   ld party
+03  party  Cr   771.00   ld 00057      04  kasar  Dr   771.00   ld party
+```
+
+| #   | Difference                                                                      | Predicted? |
+| --- | ------------------------------------------------------------------------------- | ---------- |
+| 1   | No leg codes — positional fallback instead of 01–08                             | yes        |
+| 2   | Wrong order — cash first, where the desktop's `01` is the party credit          | yes        |
+| 3   | No line prefix in the key, and no `LD_CODE` on the kasar leg                    | yes        |
+| 4   | **The party credit is NETTED into one leg — 3 legs where the desktop writes 4** | **no**     |
+
+**Difference 4 is the structural one.** The desktop pairs each movement with its own party leg, so a receipt
+with a discount credits the party twice — once against cash, once against kasar. The web credits it once for
+the total. Both balance, so no balance assertion can see it, and the leg _count_ differs, which means a
+per-account ledger report would show one line where the desktop shows two.
+
+The sale family already gets this right — `buildSaleLedger` carries the comment _"Desktop emits a self-balanced
+party/tender pair, not a netted party balance"_. So **the cash path has a defect the sale path had already
+fixed**, and the two disagree with each other inside the same codebase.
+
+`buildTransferLedger` is again not the place to fix it: it is a two-leg helper by construction, and a
+self-balanced pair per movement is a different shape. Family 2 reached the same conclusion for the same reason.
+
+---
+
+## Next steps
+
+1. Build `parity-replay-cash.mjs` for both reference vouchers, run under `PARITY_STRICT=1`.
+2. Implement the measured shape: pair per movement, direction-specific codes, `<line><leg>` suffix.
+3. Compare, triage, prove a control per assertion.
+4. Then the bank books — same `MAIN_BOOK` shape, but their leg codes **must be measured, not assumed** from
+   cash. The cash codes are already known to differ between receipt and payment, so assuming they carry across
+   to bank would be the same error one level up.
+
+**Superseded prediction, kept for the record:** the web's `finance.ts` uses `buildTransferLedger`, which emits debit-first
 with no `LD_CODE` and no leg codes — the same three defects family 2 had. If so, the cash family will show them
 too, and the fix is a per-family measured shape rather than a change to the shared helper.
