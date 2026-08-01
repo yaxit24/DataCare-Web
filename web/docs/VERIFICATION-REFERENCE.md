@@ -186,6 +186,8 @@ pnpm schema:readiness       # 145/145 tables, 5231/5231 columns (100.0%)
 pnpm fresh:provision        # 172 tenant tables, RLS forced + policy, 1 allowed drift
 node scripts/report-baselines.mjs    # 254 layouts unchanged — never pass --write
 node scripts/check-g5-parity.mjs     # G5_RED — correct, see §7
+pnpm type:parity            # 226 numeric->text mismatches baselined; a NEW one fails
+pnpm register:check         # 198 desktop menu items; --strict fails while any is unclassified
 pnpm lint                   # 502 files, 0 policy violations
 pnpm build --force          # 7/7
 (cd apps/web && node test/browser.smoke.mjs)   # AFTER build, exit 0
@@ -200,6 +202,55 @@ contract is still reported second, informationally.
 pass it while verifying.
 
 ---
+
+## 5b. Two measurement methods that failed, and why
+
+Recorded because both produced a confident wrong number, and the second nearly reached a report.
+
+**Matching desktop menu labels to web form names.** Reported 165 of 198 menu items missing — including
+`Sales`, `Purchase`, `Rojmel` and `Rate Cut`, all of which the web demonstrably has. The desktop uses terse
+labels (`Amt In`, `Kr Issue`, `Dhrn Rec`); the web uses expanded ones (`Accounts`, `Books / Series`, `Party
+(rich)`). **Lexical matching between two naming conventions measures the conventions.**
+
+**Grepping a feature's tables to decide whether it exists.** Reported a hit for nearly everything, because an
+incidental mention of `LBR_TYPE` in an unrelated module is indistinguishable from an implementation of the
+Labour Type master.
+
+**The general lesson, now recorded three times in different forms:** a proxy that is cheap to compute is
+usually cheap because it is not measuring the thing. `formReferencedInWeb` survives in the register only
+because its _direction_ is honest — a weak positive and a strong negative — and because the register says so in
+the file.
+
+**What replaced them:** a human classification per item, with an evidence path the gate checks exists on disk.
+
+## 5c. The authoritative surface: `NextMain.MENU_DATA`
+
+```bash
+SQL -d NextMain -Q "SET NOCOUNT ON;
+SELECT ISNULL(BTN_NAME,'')+'|'+ISNULL(SM_NAME,'')+'|'+ISNULL(SM_VIEW,'')
+  FROM MENU_DATA WHERE ISNULL(SM_NAME,'')<>'' ORDER BY BTN_NAME, SM_NAME"
+# 198 named items, 13 tabs, per-item visibility flag
+```
+
+Use this, **not** the count of `.cs` files, whenever the question is _what can a user do_. Form files answer
+_how much code exists_ — 204 files, 969,133 lines — and several back many menu entries while others are
+infrastructure no user reaches.
+
+Menu → form comes from the `MDI_FORM.cs` dispatch: find a quoted label, then the next
+`new (TR|RP|MS|UT)_*(` within ~700 characters. 186 of 198 resolve that way.
+
+## 5d. The databases available
+
+| Database   | Business         | Use it for                                                                   |
+| ---------- | ---------------- | ---------------------------------------------------------------------------- |
+| `Live24`   | DHAKAN JEWELLERS | voucher behaviour — 5150 ledger rows, 3179 Rojmel, 918 accounts              |
+| `Next25`   | NJ GOLD          | **a second business** — two companies, 569 accounts, 2024-25 **and** 2025-26 |
+| `Next23`   | DEMO COMPANY     | 28 ledger rows; a demo, not a customer                                       |
+| `Next24`   | —                | seed, no vouchers                                                            |
+| `NextMain` | —                | `MENU_DATA`, `USER_SET`, the company registry                                |
+
+`Next25` is how the standing single-sample caveat starts getting tested. It has few transactions, so it tests
+**masters, multi-company and multi-year**, not voucher behaviour.
 
 ## 6. Process rules
 

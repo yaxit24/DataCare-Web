@@ -4,14 +4,15 @@ Nine documents. Read in this order depending on what you need.
 
 ## Start here
 
-| If you want to…                         | Read                                                                                                  |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| understand **how the system is built**  | **`TECHNICAL-REFERENCE.md`** — architecture, tenancy, posting, schema traps                           |
-| **verify, measure or test** anything    | **`VERIFICATION-REFERENCE.md`** — method, recipes, controls, gates, process rules                     |
-| know **where a specific module stands** | **`MODULE-VERIFICATION-CATALOGUE.md`** — per-module authority, tables, verified/not, next measurement |
-| know **the overall position**           | **`STATE-OF-PARITY.md`** — measured web-vs-desktop assessment                                         |
-| know **what is left before go-live**    | **`MIGRATION-COMPLETION-PLAN.md`** — nine phases with evidence, tests and exit criteria               |
-| see **the first real comparison**       | **`FIRST-REAL-COMPARISON.md`** — one voucher, triaged four ways                                       |
+| If you want to…                             | Read                                                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| understand **how the system is built**      | **`TECHNICAL-REFERENCE.md`** — architecture, tenancy, posting, schema traps                           |
+| **verify, measure or test** anything        | **`VERIFICATION-REFERENCE.md`** — method, recipes, controls, gates, process rules                     |
+| know **where a specific module stands**     | **`MODULE-VERIFICATION-CATALOGUE.md`** — per-module authority, tables, verified/not, next measurement |
+| know **the overall position**               | **`STATE-OF-PARITY.md`** — measured web-vs-desktop assessment                                         |
+| know **what is left before go-live**        | **`MIGRATION-COMPLETION-PLAN.md`** — nine phases with evidence, tests and exit criteria               |
+| know **what is classified and what is not** | **`COMPLETION-REGISTER.json`** — 198 menu items, gated by `pnpm register:check`                       |
+| see **the first real comparison**           | **`FIRST-REAL-COMPARISON.md`** — one voucher, triaged four ways                                       |
 
 ## Working documents
 

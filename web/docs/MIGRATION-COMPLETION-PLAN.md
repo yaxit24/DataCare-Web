@@ -34,6 +34,55 @@ That single compared voucher produced 4 blockers, 1 primary-key defect, ~10 open
 2 defects in the comparison tool. **The discovery rate on the first sample is the strongest available evidence
 that the remaining surface is not a formality.**
 
+### Correction to this plan's own baseline (2026-08-01)
+
+The plan was written against a count of desktop `.cs` files. **That is the wrong denominator** and is now
+superseded, though both numbers are kept because they answer different questions.
+
+| Measure                          | Value                        | Answers                         |
+| -------------------------------- | ---------------------------- | ------------------------------- |
+| Desktop form files               | 204 forms, 969,133 lines     | how much code exists            |
+| **`NextMain.MENU_DATA` entries** | **198 named items, 13 tabs** | **what a user can actually do** |
+
+`MENU_DATA` is the desktop's real menu, with a per-item visibility flag. It is the authoritative surface for a
+migration that must reproduce _functionality, features and workflows_, because several form files back many
+menu entries (`RP_ALL` backs a dozen reports; `TR_MEMB_ADJ` backs both `Gold Adjust` and `Memb Adjust`) and
+several are infrastructure no user ever reaches.
+
+Chained through the `MDI_FORM.cs` dispatch: **186 of 198 resolve to a form, 152 of those are referenced
+somewhere in web source, 34 never are, 12 labels the dispatch extraction could not resolve.**
+
+**Two measurement attempts failed first and are recorded so they are not repeated:**
+
+1. Matching menu labels against the web form catalog **by name** reported 165 of 198 missing — including
+   `Sales`, `Purchase`, `Rojmel` and `Rate Cut`, which the web demonstrably has. The desktop uses terse labels
+   (`Amt In`, `Kr Issue`), the web expanded ones (`Accounts`, `Books / Series`). The match measured the naming
+   conventions, not the coverage.
+2. Grepping each feature's tables reported a hit for almost everything, because an incidental mention of
+   `LBR_TYPE` is indistinguishable from an implementation of the Labour Type master.
+
+So `formReferencedInWeb` in the register is a **weak positive and a strong negative**. It orders the work. A
+human classifies each item with evidence, and `pnpm register:check` enforces that the classification is
+honest.
+
+### A second business is available, and was here all along
+
+Five SQL Server databases exist in `imodule-extracted`, three already attached:
+
+| Database     | Business         | Contents                                                                |
+| ------------ | ---------------- | ----------------------------------------------------------------------- |
+| `Live24`     | DHAKAN JEWELLERS | 5150 ledger rows, 190 sales, 3179 Rojmel, 918 accounts                  |
+| **`Next25`** | **NJ GOLD**      | **two companies (01, 02)**, 569 accounts, years **2024-25 and 2025-26** |
+| `Next23`     | DEMO COMPANY     | 28 ledger rows, 4 sales, 99 accounts — a demo, not a customer           |
+| `Next24`     | —                | seed, no vouchers                                                       |
+| `NextMain`   | —                | configuration registry, and the source of `MENU_DATA`                   |
+
+**This partly answers the standing caveat.** `Next25` has a different chart of accounts, a second company, and
+a fiscal year `Live24` lacks — so multi-company handling, a second year, and the live/dead classifications can
+all be tested against something other than one sample. It has few transactions, so it tests **masters and
+configuration**, not voucher behaviour. §6.3 (wholesale build-or-exclude) can now be informed rather than
+guessed.
+
 ### The eight things that make "not done" true
 
 | #   | Gap                                              | Measured                                    |
@@ -50,6 +99,22 @@ that the remaining surface is not a formality.**
 ---
 
 ## Phase 0 — Trust the instruments (blocks everything else)
+
+**Progress at 2026-08-01: 3 of 7 items done, each with a control demonstrated failing.**
+
+| Item                                    | State                | Evidence                                                     |
+| --------------------------------------- | -------------------- | ------------------------------------------------------------ |
+| 0.1 differ pairing + forced-pair signal | **done**             | `bundleDiffPairing.test.ts`; fields compared 271 → 540 → 672 |
+| 0.2 `footprintOf` fails loudly          | **done**             | `footprintLoud.db.test.ts`, 4 tests                          |
+| 0.3 replay harness seeds completely     | open                 | `CO_SET_NEW` now seeded; `PARITY_STRICT` not built           |
+| 0.4 type parity closure                 | gated, 226 baselined | `pnpm type:parity`                                           |
+| 0.5 typecheck the tests                 | open                 | 114 errors                                                   |
+| 0.6 doc reference checker               | open                 | —                                                            |
+| 0.7 completion register                 | **done**             | `pnpm register:check`, 198 items                             |
+
+**0.1 and 0.7 each found something the moment they existed** — 0.1 exposed that `ROJ_MEL_DATA` had never been
+compared field-by-field at all, and 0.7 replaced this plan's own denominator. That is the argument for doing
+Phase 0 before anything else, restated as evidence rather than assertion.
 
 Nothing downstream is believable until the measuring tools are sound. This phase is short and must come first.
 
@@ -356,7 +421,13 @@ Real usage: **38 ledger rows, ~15 vouchers/year.** `BUL WH SALE` has 2 active bo
 worth of behaviour for 15 vouchers a year. If a second database shows heavy wholesale use, it becomes a Phase 1
 family. **This is an owner decision (§6.3).**
 
-**Phase 2 exit:** every one of the 204 desktop forms is in exactly one bucket — _implemented and verified_,
+**Phase 2 exit (revised):** driven by `docs/COMPLETION-REGISTER.json` and enforced by
+`pnpm register:check --strict`. Every one of the **198 `MENU_DATA` items** — the user-facing surface, not the
+form-file count — is in exactly one state, with `verified` requiring an evidence path that exists on disk and
+each judgement state requiring a written note. Currently **198 unclassified**.
+
+The form-file view is retained as a secondary check: every one of the 204 desktop forms is in exactly one
+bucket — _implemented and verified_,
 _implemented elsewhere (with the mapping written)_, _dead in this dataset (with the count)_, or _explicit scope
 exclusion (with the decision recorded)_. Zero forms unclassified. This is a written register, checked by a
 script that fails on an unclassified form.
