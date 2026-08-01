@@ -693,38 +693,123 @@ export async function postReceiptLines(
     const vchType = mode === 'cash' ? 'CREC' : 'BREC';
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
     const lbase = { ...key, VCH_TYPE: vchType };
-    const ledger: LedgerLine[] = [
-      {
-        ...lbase,
-        AC_CODE: recAc,
-        LD_CODE: lines[0]!.partyAc,
-        DR_AMT: totalAmt,
-        CR_AMT: 0,
-        SIGN: 'D',
-      },
-    ];
-    if (totalKasar > 0)
-      ledger.push({
-        ...lbase,
-        AC_CODE: input.kasarAc ?? 'KASAR',
-        DR_AMT: totalKasar,
-        CR_AMT: 0,
-        SIGN: 'D',
-      });
-    for (const l of lines)
-      ledger.push({
-        ...lbase,
-        AC_CODE: l.partyAc,
-        LD_CODE: recAc,
-        DR_AMT: 0,
-        CR_AMT: round2(Number(l.amount) + Number(l.kasar ?? 0)),
-        SIGN: 'C',
-      });
+    // A PAIR PER MOVEMENT PER LINE, matching the payment path. This wrote one AGGREGATE cash debit plus one
+    // aggregate kasar debit plus one netted party credit per line.
+    //
+    // The PATTERN is measured on the payment side: real voucher 002/00029 has nine CASH_DATA lines and eighteen
+    // AC_DATA legs - a pair per line, no aggregate. The LEG CODES are measured on the receipt side: book 001's
+    // 162 legs are 01 party Cr / 02 cash Dr and 03 party Cr / 04 kasar Dr.
+    //
+    // INFERRED, and labelled as such: every one of the 56 real receipt vouchers has exactly ONE line, so this
+    // dataset contains no multi-line receipt to measure. What is applied is the measured payment PATTERN with
+    // the measured receipt CODES.
+    //
+    // The alternative was not "leave it safe". postReceiptLines is reachable from a route and wrote NO Rojmel
+    // rows at all, so a multi-line receipt produced an EMPTY DAY BOOK - certainly wrong. A shape that is
+    // probably right beats one that is definitely wrong, and this note is what lets a later measurement
+    // correct it.
+    // Slot 1 of BOOK_DETL. FIFTH occurrence of the same defect: settlementAc returns the literal 'CASH', and
+    // every leg-02 row on book 001 names 00001. The others were postReceipt, postPayment, postPaymentLines and
+    // the scheme instalment - so the placeholder is systemic across every finance entry point, not a slip in
+    // one of them.
+    const recSlot = (await tx.$queryRawUnsafe(
+      `SELECT "AC_CODE" FROM "BOOK_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+          AND coalesce("SR_NO",0)::numeric=1
+        LIMIT 1`,
+      tenantId,
+      input.scope.coCode,
+      input.scope.lcCode,
+      input.scope.coBook,
+    )) as Array<{ AC_CODE: unknown }>;
+    const recAcLines =
+      (input.bankAc ?? '').trim() || String(recSlot[0]?.AC_CODE ?? '').trim() || recAc;
+    const recLineSuffix = (line: number, leg: number): string =>
+      `${line}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
+    const ledger: LedgerLine[] = [];
+    lines.forEach((l, idx) => {
+      const lineNo = idx + 1;
+      const amt = round2(Number(l.amount));
+      const lineKasar = round2(Number(l.kasar ?? 0));
+      ledger.push(
+        {
+          ...lbase,
+          legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recParty),
+          AC_CODE: l.partyAc,
+          LD_CODE: recAcLines,
+          DR_AMT: 0,
+          CR_AMT: amt,
+          SIGN: 'C',
+        },
+        {
+          ...lbase,
+          legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recCash),
+          AC_CODE: recAcLines,
+          LD_CODE: l.partyAc,
+          DR_AMT: amt,
+          CR_AMT: 0,
+          SIGN: 'D',
+        },
+      );
+      if (lineKasar > 0) {
+        const kasarAc = input.kasarAc ?? 'KASAR';
+        ledger.push(
+          {
+            ...lbase,
+            legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recKasarParty),
+            AC_CODE: l.partyAc,
+            LD_CODE: kasarAc,
+            DR_AMT: 0,
+            CR_AMT: lineKasar,
+            SIGN: 'C',
+          },
+          {
+            ...lbase,
+            legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recKasar),
+            AC_CODE: kasarAc,
+            LD_CODE: l.partyAc,
+            DR_AMT: lineKasar,
+            CR_AMT: 0,
+            SIGN: 'D',
+          },
+        );
+      }
+    });
+    const recLinesRojmelRows = lines.flatMap((l, idx) =>
+      buildCashRojmel(
+        {
+          scope: {
+            coCode: input.scope.coCode,
+            lcCode: input.scope.lcCode,
+            coYear: input.scope.coYear!,
+          },
+          key,
+          coBook: input.scope.coBook!,
+          vchNo: String(vchNo).padStart(5, '0'),
+          vchDate,
+          bookName: mode === 'cash' ? 'CASH REC' : 'BANK REC',
+          vchType,
+          partyCode: l.partyAc,
+          partyName: '',
+        },
+        {
+          cashAc: recAcLines,
+          cashAmount: round2(Number(l.amount)),
+          direction: 'receipt',
+          kasar: round2(Number(l.kasar ?? 0)),
+          kasarAc: input.kasarAc ?? 'KASAR',
+          lineNo: idx + 1,
+        },
+      ),
+    );
     assertBalanced(ledger);
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: mode === 'cash' ? 'CASH REC' : 'BANK REC',
       writes: [
+        ...(recLinesRojmelRows.length
+          ? [{ table: 'ROJ_MEL_DATA' as const, rows: recLinesRojmelRows }]
+          : []),
         {
           table: 'CASH_DATA',
           rows: [

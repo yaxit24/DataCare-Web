@@ -26,7 +26,12 @@
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { postPayment, postPaymentLines, postReceipt } from '../src/modules/finance/finance.js';
+import {
+  postPayment,
+  postPaymentLines,
+  postReceipt,
+  postReceiptLines,
+} from '../src/modules/finance/finance.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'cash-legs';
@@ -270,5 +275,84 @@ describe.runIf(RUN)('cash payment ledger legs', () => {
     // Each cash leg carries its OWN line's amount, not the total.
     const cashLegs = rows.filter((r) => r.ac === CASH);
     expect(cashLegs.map((r) => r.cr)).toEqual([5000, 1000, 750]);
+  });
+});
+
+describe.runIf(RUN)('multi-line cash paths write a Rojmel row per line', () => {
+  beforeEach(async () => {
+    await wipe();
+    await seed();
+  });
+  afterAll(async () => {
+    await wipe();
+  });
+
+  it('a multi-line RECEIPT pairs each line and writes its Rojmel rows', async () => {
+    // INFERRED, not measured: every one of the 56 real receipt vouchers has exactly ONE line, so this dataset
+    // has no multi-line receipt. What is asserted is the measured payment PATTERN (a pair per line, no
+    // aggregate — proven by voucher 002/00029's nine lines and eighteen legs) with the measured receipt CODES
+    // (book 001's 01/02 and 03/04).
+    //
+    // The path wrote NO Rojmel rows at all before this, and it is reachable from a route — so a multi-line
+    // receipt produced an empty day book.
+    await postReceiptLines(runtime, {
+      scope,
+      mode: 'cash',
+      vchDate: '2024-04-03',
+      lines: [
+        { partyAc: PARTY, amount: 5000 },
+        { partyAc: PARTY, amount: 1000 },
+      ],
+    } as never);
+
+    const ledger = await legs();
+    expect(ledger).toHaveLength(4);
+    expect(ledger.map((r) => r.k.slice(21).trim())).toEqual(['101', '102', '201', '202']);
+    // Each cash leg carries its OWN line's amount, not the total — the aggregate form gave 6000 then 0.
+    expect(ledger.filter((r) => r.ac === CASH).map((r) => r.dr)).toEqual([5000, 1000]);
+
+    const roj = (await owner.$queryRawUnsafe(
+      `SELECT "LEDR_KEY" k, "CR_AMT"::float cr FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+      TENANT,
+    )) as { k: string; cr: number }[];
+    // TWO Rojmel rows, one per line, both type 01 with the line number distinguishing them.
+    expect(roj).toHaveLength(2);
+    expect(roj.map((r) => r.k.slice(21, 23))).toEqual(['01', '01']);
+    expect(roj.map((r) => r.k.slice(23).trim())).toEqual(['1', '2']);
+    expect(roj.map((r) => r.cr)).toEqual([5000, 1000]);
+  });
+
+  it('a multi-line PAYMENT writes nine type-04 rows for nine lines', async () => {
+    // Measured: real voucher 002/00029 has nine CASH_DATA lines and NINE type-04 Rojmel rows. The web wrote
+    // zero, because postPaymentLines never called the builder.
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+       VALUES ($1,$2,$3,'002','Cash Payment','CPAY','CASH PAY','O','Y','CASH_DATA')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'002',1,$4,'Cash Payment','CASH PAY','O')`,
+      TENANT,
+      CO,
+      LC,
+      CASH,
+    );
+    await postPaymentLines(runtime, {
+      scope: { ...scope, coBook: '002' },
+      mode: 'cash',
+      vchDate: '2024-04-22',
+      lines: [5000, 1000, 750].map((amount) => ({ partyAc: PARTY, amount })),
+    } as never);
+
+    const roj = (await owner.$queryRawUnsafe(
+      `SELECT "LEDR_KEY" k FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+      TENANT,
+    )) as { k: string }[];
+    expect(roj).toHaveLength(3);
+    expect(roj.map((r) => r.k.slice(21, 23))).toEqual(['04', '04', '04']);
+    expect(roj.map((r) => r.k.slice(23).trim())).toEqual(['1', '2', '3']);
   });
 });
