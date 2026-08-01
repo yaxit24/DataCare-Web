@@ -13,6 +13,7 @@ Nine documents. Read in this order depending on what you need.
 | know **what is left before go-live**        | **`MIGRATION-COMPLETION-PLAN.md`** — nine phases with evidence, tests and exit criteria               |
 | know **what is classified and what is not** | **`COMPLETION-REGISTER.json`** — 198 menu items, gated by `pnpm register:check`                       |
 | see **the first real comparison**           | **`FIRST-REAL-COMPARISON.md`** — one voucher, triaged four ways                                       |
+| see a **per-family comparison**             | **`comparisons/family-01-sale.md`** — the template; one file per voucher family                       |
 
 ## Working documents
 

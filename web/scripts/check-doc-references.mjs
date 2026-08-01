@@ -77,6 +77,8 @@ const PREFIXES = [
   'packages/db/',
   'packages/core/',
   'unified/src/csharp/DataCareNext/',
+  // Documents cite their siblings relatively - README points at `comparisons/family-01-sale.md`.
+  'docs/',
 ];
 
 async function resolveCitation(cited) {
@@ -100,14 +102,25 @@ async function lineCount(file) {
 }
 
 async function main() {
-  const files = (await readdir(DOCS)).filter((f) => f.endsWith('.md'));
+  // Recursive, so per-family comparison records under docs/comparisons/ are checked too. The first version
+  // globbed docs/*.md only, which silently left a whole subdirectory unverified the moment one was created.
+  const walk = async (dir) => {
+    const out = [];
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) out.push(...(await walk(full)));
+      else if (entry.name.endsWith('.md')) out.push(full);
+    }
+    return out;
+  };
+  const files = await walk(DOCS);
   const problems = [];
   let checkedFiles = 0;
   let checkedLines = 0;
   let checkedClaims = 0;
 
-  for (const name of files) {
-    const docPath = path.join(DOCS, name);
+  for (const docPath of files) {
+    const name = path.relative(DOCS, docPath);
     const text = await readFile(docPath, 'utf8');
 
     const planned = new Set([...text.matchAll(PLANNED_RE)].map((m) => m[1]));
