@@ -149,6 +149,36 @@ const line = {
   labourType: 'per_gram' as const,
 };
 
+/** The zero-rate seed plus the real GST code 10, for the tax allocation case. */
+async function seedTaxed() {
+  await seed(0);
+  const exec = (sql: string, ...p: unknown[]) =>
+    withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...p));
+  for (const [sr, group, name, prc, ac] of [
+    [0, 'N', 'GST 3%', 3.0, '00085'],
+    [1, 'SGST', 'SGST 1.5%', 1.5, '00085'],
+    [2, 'CGST', 'CGST 1.5%', 1.5, '00085'],
+  ] as const) {
+    await exec(
+      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
+       VALUES ($1,$2,'10',$3,$4,$5,$6,$7)`,
+      TENANT,
+      CO,
+      sr,
+      group,
+      name,
+      prc,
+      ac,
+    );
+  }
+  await exec(
+    `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
+     VALUES ($1,$2,'MA925','SILVER PAYAL','S','01')`,
+    TENANT,
+    CO,
+  );
+}
+
 async function postAndRead() {
   await createSale(
     runtime,
@@ -171,6 +201,65 @@ async function postAndRead() {
   )) as { a: number; l: number; n: number }[];
   return rows[0]!;
 }
+
+/** The reference voucher's two lines: a labour-only line at 1087 and a metal+labour line at 428. */
+const twoLines = [
+  {
+    itCode: 'ORS',
+    metal: 'S' as const,
+    pcs: 1,
+    grossWt: 10.36,
+    netWt: 10.36,
+    touch: 0,
+    rate: 0,
+    labourType: 'fixed' as const,
+    labourFixed: 1087,
+  },
+  line,
+];
+
+describe.runIf(RUN)('per-line tax allocation', () => {
+  beforeEach(wipe);
+
+  it('rounds the line tax ONCE, and the lines sum to the header tax', async () => {
+    // Measured on the real customer database: IT_TAX_AMT equals ROUND(NET_AMT x rate, 2) on all 132 taxed rows,
+    // and the per-line values sum EXACTLY to the header TAX_AMT on all 91 taxed vouchers.
+    //
+    // The web reconstructed it as `half * 2`, which rounds twice: 1087 x 3% = 32.61, halved to 16.305, rounded
+    // to 16.30, doubled back to 32.60. Each line can lose a paisa independently, so the sum-to-header property
+    // cannot hold - which is why that property is asserted here and not just the individual value.
+    await seedTaxed();
+    await createSale(
+      runtime,
+      {
+        scope,
+        acCode: '000888',
+        acName: 'ROUNDING PARTY',
+        vchDate: '2024-04-06',
+        taxCode: '10',
+        taxRatePct: 3,
+        interState: false,
+        mainUser: 'tax-test',
+      },
+      twoLines,
+    );
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "IT_TAX_AMT"::float t FROM "SL_DETL" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+      TENANT,
+    )) as { t: number }[];
+    expect(rows).toHaveLength(2);
+    expect(rows[0]!.t).toBeCloseTo(32.61, 2);
+    expect(rows[1]!.t).toBeCloseTo(12.84, 2);
+
+    const header = (await owner.$queryRawUnsafe(
+      `SELECT "TAX_AMT"::float t FROM "SL_DATA" WHERE tenant_id=$1`,
+      TENANT,
+    )) as { t: number }[];
+    // 32.61 + 12.84 = 45.45 exactly. The double-rounded version gave 32.60 + 12.85, which also sums to 45.45
+    // by accident here - so the individual values matter too, and both are asserted.
+    expect(rows[0]!.t + rows[1]!.t).toBeCloseTo(header[0]!.t, 2);
+  });
+});
 
 describe.runIf(RUN)('persisted line component rounding', () => {
   beforeEach(wipe);

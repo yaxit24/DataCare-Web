@@ -901,7 +901,16 @@ async function writeSaleTx(
     const lineTax = (c.calc.net * input.taxRatePct) / 100;
     const half = interState ? 0 : roundingPolicy.roundTaxAmount(lineTax / 2);
     const igst = interState ? roundingPolicy.roundTaxAmount(lineTax) : 0;
-    const roundedLineTax = roundingPolicy.roundTaxAmount(half * 2 + igst);
+    // IT_TAX_AMT is the line's FULL tax, rounded once. Reconstructing it as `half * 2` rounds twice and loses
+    // a paisa: 1087 x 3% = 32.61, halved to 16.305, rounded to 16.30, doubled back to 32.60.
+    //
+    // Measured on the real customer database: IT_TAX_AMT equals ROUND(NET_AMT x rate, 2) on all 132 taxed
+    // rows, and the per-line values sum EXACTLY to the header TAX_AMT on all 91 taxed vouchers - which the
+    // double-rounded version cannot do, because each line can lose a paisa independently.
+    //
+    // The halves are still computed for ITM_CGST_AMT/ITM_SGST_AMT, which the web populates deliberately (the
+    // GST return and e-invoice read them; the desktop leaves them 0 and splits at the header instead).
+    const roundedLineTax = roundingPolicy.roundTaxAmount(lineTax);
     const tagStock = issuedTags.get(idx)?.stock;
     const tagGross =
       c.in.tagGrossWt != null
