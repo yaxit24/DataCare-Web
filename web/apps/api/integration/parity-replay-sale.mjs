@@ -66,8 +66,11 @@ async function seed() {
   // Settings read from the real CO_SET, not chosen: LBR_TYPE 'N' is what makes a directly-entered labour
   // amount persist as LBR_TYPE 'N' the way the desktop stored it.
   await exec(
-    `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LBR_TYPE","LBR_ROF","SL_AMT_TYPE","TAX_ROF","ALL_ROF_REMOVE","RATE_PAR")
-     VALUES ($1,$2,'N','2','N','2','N','N')`,
+    // ITM_RATE_ROF is 2 on the real database and was missing here. PARITY_STRICT=1 found it on its first run -
+    // the harness had been quietly taking a default for the item-rate precision all along, which is the same
+    // class of omission that made TOT_AMT_ROF look like a product defect for two commits.
+    `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LBR_TYPE","LBR_ROF","SL_AMT_TYPE","TAX_ROF","ALL_ROF_REMOVE","RATE_PAR","ITM_RATE_ROF")
+     VALUES ($1,$2,'N','2','N','2','N','N','2')`,
     TENANT,
     CO,
   );

@@ -109,6 +109,36 @@ export function resolveRoundingPolicy(flags: RoundingFlagValues = {}): RoundingP
   const billTotalDecimals = billTotal.value as StandardRoundingDecimals;
   const purchaseRateDecimals = purchaseRate.value as StandardRoundingDecimals;
 
+  // PARITY_STRICT turns an ABSENT setting from a silent default into a failure.
+  //
+  // An absent setting is indistinguishable from a product defect in a comparison. The replay harness seeded
+  // CO_SET but not CO_SET_NEW, so TOT_AMT_ROF was missing and this function kept its documented 2dp default.
+  // The web produced 1515.21 against the desktop's 1515.00, and that was written up as a MISSING whole-rupee
+  // rounding mode - across two commits - before the cause was found. The mode was implemented correctly the
+  // whole time.
+  //
+  // Off by default, because production genuinely wants a sane default when a customer has not set a flag. On
+  // under PARITY_STRICT=1, where the entire point is that nothing may be assumed.
+  if (process.env.PARITY_STRICT === '1') {
+    const unset = (
+      [
+        ['TAX_ROF', tax],
+        ['LBR_ROF', labour],
+        ['ITM_RATE_ROF', itemRate],
+        ['TOT_AMT_ROF', billTotal],
+        ['PR_RATE_ROF', purchaseRate],
+      ] as const
+    )
+      .filter(([, flag]) => !flag.configured)
+      .map(([name]) => name);
+    if (unset.length) {
+      throw new RoundingPolicyValidationError(
+        `PARITY_STRICT: ${unset.length} rounding setting(s) are not configured and would silently take a ` +
+          `default, which is indistinguishable from a defect in a comparison: ${unset.join(', ')}`,
+      );
+    }
+  }
+
   return {
     taxDecimals,
     labourDecimals,
