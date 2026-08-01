@@ -42,9 +42,23 @@ export async function voucherTables(owner: RawClient): Promise<string[]> {
 /**
  * Which of those tables actually received rows for one voucher.
  *
- * A table that cannot be queried (a permission or shape problem) is treated as untouched rather than throwing,
- * because the alternative is one awkward table aborting the whole probe and hiding every other finding. The
- * count assertion in `voucherTables` is what protects against a wholesale failure going unnoticed.
+ * FAILURES ARE COLLECTED AND THEN THROWN, never swallowed.
+ *
+ * This previously carried `.catch(() => [{ n: 0 }])`, which turned any unreadable table into a count of zero.
+ * The stated reason was sound - one awkward table should not abort the whole probe and hide every other
+ * finding - but treating an error as "untouched" is the wrong mechanism for it, because the realistic failure
+ * here is not an odd table shape. The table list comes from `information_schema`, so every table in it has the
+ * column being queried. The realistic failure is ROW-LEVEL SECURITY: handed an RLS-bound client, every query
+ * returns nothing and the footprint comes back EMPTY rather than failing. An empty footprint reads as "the
+ * module wrote nothing", which is a defect report, not a harness error - so the swallow could turn a
+ * misconfigured probe into a false accusation against working code.
+ *
+ * The original intent is kept by continuing past a failure and reporting them all together at the end, so one
+ * awkward table still does not hide the others - it just cannot hide itself either.
+ *
+ * Pass a TENANT-SCOPED transaction, not a bare RLS-bound client:
+ *
+ *     await withTenant(prisma, tenantId, (tx) => footprintOf(tx, tables, tenantId, vchNo))
  */
 export async function footprintOf(
   owner: RawClient,
@@ -53,15 +67,25 @@ export async function footprintOf(
   vchNo: string,
 ): Promise<string[]> {
   const touched: string[] = [];
+  const failures: string[] = [];
   for (const table of tables) {
-    const rows = (await owner
-      .$queryRawUnsafe(
+    try {
+      const rows = (await owner.$queryRawUnsafe(
         `SELECT count(*)::int AS n FROM "${table}" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
         tenantId,
         vchNo,
-      )
-      .catch(() => [{ n: 0 }])) as { n: number }[];
-    if ((rows[0]?.n ?? 0) > 0) touched.push(table);
+      )) as { n: number }[];
+      if ((rows[0]?.n ?? 0) > 0) touched.push(table);
+    } catch (e) {
+      failures.push(`${table}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  if (failures.length) {
+    throw new Error(
+      `footprintOf could not read ${failures.length} of ${tables.length} table(s); ` +
+        `a footprint built from a partial read would understate the write set.\n  ` +
+        failures.join('\n  '),
+    );
   }
   return touched.sort();
 }
