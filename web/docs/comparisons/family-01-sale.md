@@ -89,10 +89,34 @@ percentage, book **and operator** match vouchers following the other convention.
 `NET + tax`. That fits a grid display column not always recalculated before save. **No rule is implementable,
 so none was written.** The web writes `NET_AMT`, matching the 94-row majority and all 113 untaxed.
 
-**`MAIN_STOCK.SR_NO` (1).** The desktop writes `1` on **both** rows of a two-line sale and distinguishes them
-by `TAG_NO`; the web numbers them 1 and 2. Across 63 multi-row sale vouchers, **41 have all serials identical
-and 20 increment** — mixed, so not a single rule. The differ's pairing key deliberately excludes `SR_NO` so
-this stays visible.
+**`MAIN_STOCK.SR_NO` (1).** The desktop writes `1` on **both** rows of a two-line sale; the web numbers them 1
+and 2.
+
+Two correlations were tested rather than leaving this at "mixed". The first is strong:
+
+```
+all rows tagged (15 vouchers):   identical 15,  incrementing 0
+some rows tagged (13):           identical 13,  incrementing 0
+no rows tagged  (35):            identical 13,  incrementing 20
+```
+
+**Whenever any row is tagged, the serial is identical — 28 of 28.** Incrementing occurs only on all-untagged
+vouchers. That is not a date effect: the two patterns interleave through the year.
+
+The residue is per-book, and only partly:
+
+```
+book 027, untagged multi-row:   5 vouchers, ALL identical
+book 032, untagged multi-row:  30 vouchers, 8 identical and 20 incrementing
+```
+
+So for **book 027 — the reference book — the serial is always 1**, which fully explains the reference voucher's
+difference. Book 032 splits 8/20 with no discriminator found in tagging, date or line count.
+
+**Not implemented, deliberately.** A rule of "1 on book 027, incrementing on 032" has no mechanism behind it,
+and book 032 contradicts itself anyway. Writing it would encode a coincidence as a specification — the same
+error avoided with `ITM_AMT`'s derivation and `KR_FINE`'s formula. The differ's pairing key excludes `SR_NO` so
+this stays visible when a later family or a second database supplies the missing discriminator.
 
 ---
 

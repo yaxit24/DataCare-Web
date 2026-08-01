@@ -318,14 +318,37 @@ cd /Users/yakshitsavaliya/Desktop/imodule-extracted
 docker ps --format '{{.Names}}' | grep -q dc-mssql || docker start dc-mssql
 sleep 25   # amd64 emulation on arm64
 
-SQL() { docker exec dc-mssql /opt/mssql-tools18/bin/sqlcmd \
-          -S localhost -U sa -P 'ParityProbe#2026x' -C -W -s'|' -h -1 "$@"; }
+# ALWAYS capture and test for empty. A stopped container returns NOTHING, which reads as "no rows match".
+SQL() {
+  local out
+  out=$(docker exec dc-mssql /opt/mssql-tools18/bin/sqlcmd \
+          -S localhost -U sa -P 'ParityProbe#2026x' -C -W -s'|' -h -1 "$@" 2>&1)
+  if [ -z "$out" ]; then
+    echo "SQL_EMPTY - treat as a FAILURE, not as 'no rows'. Check: docker ps | grep dc-mssql" >&2
+    return 1
+  fi
+  printf '%s\n' "$out"
+}
 SQL -d Live24 -Q "SET NOCOUNT ON; SELECT 'rojmel='+CAST(count(*) AS varchar) FROM ROJ_MEL_DATA"
 # expect: rojmel=3179
 ```
 
 **The `.BAK` files restore to SEED databases with no vouchers.** Only the loose `.mdf` carries transactions —
 restoring a backup and stopping there produces an empty comparison that reads as agreement.
+
+⚠️ **Docker stopping mid-session has produced a silent wrong answer TWICE in one day.** Both times a
+measurement returned empty and the empty read as a finding — once nearly concluding that a karigar formula had
+no matches, once that a book had no multi-row vouchers. The container is amd64 under emulation and does stop.
+
+The guard above is not optional. When a count is unexpectedly zero, test the connection before believing it:
+
+```bash
+docker ps --format '{{.Names}} {{.Status}}' | grep dc-mssql || docker start dc-mssql && sleep 30
+```
+
+Postgres on **55433** is a separate container (`datacare-test-55433`) from `web-postgres-1` on 5433, and both
+stop with the daemon. A vitest run against an unreachable database **skips** the DB tests rather than failing,
+which is the same trap in a different costume.
 
 **This is real customer data**: 918 accounts, real names. Never commit it, never echo names into output,
 commit messages or fixtures. Extract counts and structure only. Confirm any new artifact path with
