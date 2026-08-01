@@ -206,10 +206,11 @@ async function changeSourceAdjustmentTx(
     );
   }
   await tx.$executeRawUnsafe(
-    `UPDATE "RATE_CUT_DATA" SET "VP_ADJ_AMT"=$1
+    // VP_ADJ_AMT is double precision after the column-type correction.
+    `UPDATE "RATE_CUT_DATA" SET "VP_ADJ_AMT"=$1::double precision
       WHERE tenant_id=$2 AND "CO_CODE"=$3 AND "LC_CODE"=$4
         AND "CO_YEAR"=$5 AND "CO_BOOK"=$6 AND "VCH_NO"=$7`,
-    String(next),
+    next,
     scope.tenantId,
     scope.coCode,
     scope.lcCode,
@@ -217,7 +218,7 @@ async function changeSourceAdjustmentTx(
     key.vpBook,
     key.vpNo,
   );
-  source.VP_ADJ_AMT = String(next);
+  source.VP_ADJ_AMT = next;
   return source;
 }
 

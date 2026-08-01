@@ -238,8 +238,8 @@ export async function stageLedgerAcDataTx(
       CR_AMT: n(row.crAmt),
       // DR_FINE_WT / CR_FINE_WT are varchar(255) too, so the weight is written with its three decimals
       // rather than coerced to a number.
-      DR_FINE_WT: weightText(row.drFineWt),
-      CR_FINE_WT: weightText(row.crFineWt),
+      DR_FINE_WT: Number(row.drFineWt) || 0,
+      CR_FINE_WT: Number(row.crFineWt) || 0,
       // Only the GOLD fine-weight pair is varchar in the restored schema; the SILVER pair is numeric.
       // Mixing them up produced `42804 column is of type numeric but expression is of type text`.
       DR_SL_FINE: n(row.drSilverFine),

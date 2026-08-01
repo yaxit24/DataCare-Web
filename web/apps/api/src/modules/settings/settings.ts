@@ -178,8 +178,28 @@ export async function saveSettings(
         );
       }
       // Write the COLUMN name, not the descriptor id.
+      //
+      // Numeric settings are CAST in SQL. Values arrive as strings from the API surface, and Prisma binds a
+      // JS string as text - which used to be fine because these columns were varchar. Ten CO_SET settings are
+      // numeric after the column-type correction (CASH_LIMIT, TAX_ROF, LBR_ROF, ITM_RATE_ROF, OZ_CON_VAL,
+      // FX_RATE, DHRN_PRC, INT_YEAR_DAYS, PAN_CARD_VAL, THEME), and writing text into them fails with
+      // `42804 column is of type double precision but expression is of type text`.
+      //
+      // The cast is driven by the INVENTORY's declared storage kind rather than by a list here, so a future
+      // column-type change is a one-line inventory edit and not a hunt through SQL builders.
       const sets = mine
-        .map((k, i) => `${qcol(SETTING_CATALOG_BY_ID[k]!.key)}=$${i + 2}`)
+        .map((k, i) => {
+          const key = SETTING_CATALOG_BY_ID[k]!.key;
+          const entry = CONFIGURABLE_SETTINGS.find((e) => e.key === key && e.table === table);
+          const cast =
+            entry?.storage === 'number'
+              ? '::double precision'
+              : entry?.storage === 'date'
+                ? '::date'
+                : '';
+          // NULLIF keeps a cleared setting NULL instead of failing the cast on an empty string.
+          return cast ? `${qcol(key)}=NULLIF($${i + 2}::text,'')${cast}` : `${qcol(key)}=$${i + 2}`;
+        })
         .join(', ');
       await tx.$executeRawUnsafe(
         `UPDATE ${qcol(table)} SET ${sets} WHERE "CO_CODE"=$1`,

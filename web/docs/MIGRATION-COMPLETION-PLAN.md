@@ -100,17 +100,17 @@ guessed.
 
 ## Phase 0 — Trust the instruments (blocks everything else)
 
-**Progress at 2026-08-01: 6 of 7 items done, each with a control demonstrated failing.**
+**PHASE 0 COMPLETE at 2026-08-01: 7 of 7 items done, each with a control demonstrated failing.**
 
-| Item                                    | State                 | Evidence                                                                   |
-| --------------------------------------- | --------------------- | -------------------------------------------------------------------------- |
-| 0.1 differ pairing + forced-pair signal | **done**              | `bundleDiffPairing.test.ts`; fields compared 271 → 540 → 672               |
-| 0.2 `footprintOf` fails loudly          | **done**              | `footprintLoud.db.test.ts`, 4 tests                                        |
-| 0.3 replay harness seeds completely     | **done for rounding** | `PARITY_STRICT=1` throws on any unset flag; `parityStrictSettings.test.ts` |
-| 0.4 type parity closure                 | gated, 226 baselined  | `pnpm type:parity`                                                         |
-| 0.5 typecheck the tests                 | **done**              | `pnpm typecheck:tests` exit 0, was 114 errors; 5 real test defects found   |
-| 0.6 doc reference checker               | **done**              | `pnpm docs:refs` — 131 citations, 11 with line numbers, 3 controls         |
-| 0.7 completion register                 | **done**              | `pnpm register:check`, 198 items                                           |
+| Item                                    | State                 | Evidence                                                                                      |
+| --------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
+| 0.1 differ pairing + forced-pair signal | **done**              | `bundleDiffPairing.test.ts`; fields compared 271 → 540 → 672                                  |
+| 0.2 `footprintOf` fails loudly          | **done**              | `footprintLoud.db.test.ts`, 4 tests                                                           |
+| 0.3 replay harness seeds completely     | **done for rounding** | `PARITY_STRICT=1` throws on any unset flag; `parityStrictSettings.test.ts`                    |
+| 0.4 type parity closure                 | **done**              | 226 → **0**; migration `20260801120000_column_type_parity`; `pnpm type:parity` baseline empty |
+| 0.5 typecheck the tests                 | **done**              | `pnpm typecheck:tests` exit 0, was 114 errors; 5 real test defects found                      |
+| 0.6 doc reference checker               | **done**              | `pnpm docs:refs` — 131 citations, 11 with line numbers, 3 controls                            |
+| 0.7 completion register                 | **done**              | `pnpm register:check`, 198 items                                                              |
 
 **0.1 and 0.7 each found something the moment they existed** — 0.1 exposed that `ROJ_MEL_DATA` had never been
 compared field-by-field at all, and 0.7 replaced this plan's own denominator. That is the argument for doing

@@ -163,7 +163,7 @@ export async function postBatchReceipt(
         // BANK_CHARGES, CHQ_PRINT_NAME and MOB_ENTRY_SAVE are varchar(255) in the restored schema, so
         // they are written as text. IT_DESC is NUMERIC here despite the name — an oddity of the restored
         // schema, so a numeric value is written rather than a caption.
-        BANK_CHARGES: String(round2(num(l.bankCharges))),
+        BANK_CHARGES: Number(round2(num(l.bankCharges))) || 0,
         CHQ_PRINT_NAME: (l.chqPrintName ?? '').trim().slice(0, 255) || null,
         CLR_DATE: l.clearDate ? new Date(l.clearDate) : null,
         IT_DESC: num(l.itemDescriptionCode),

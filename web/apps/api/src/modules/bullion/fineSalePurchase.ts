@@ -145,7 +145,7 @@ export async function createFineSalePurchase(
     // Validate cuts against open balance on the source PR_DETL line.
     for (const cut of input.cuts ?? []) {
       const rows: any[] = await tx.$queryRawUnsafe(
-        `SELECT coalesce("ITM_FINE",0)::float itf, coalesce(NULLIF("FINE_CUT_FINE",'')::numeric,0)::float fcf FROM "PR_DETL"
+        `SELECT coalesce("ITM_FINE",0)::float itf, coalesce("FINE_CUT_FINE",0)::float fcf FROM "PR_DETL"
          WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "SR_NO"=$4 LIMIT 1`,
         input.scope.coCode,
         cut.coBook,
@@ -335,8 +335,8 @@ export async function createFineSalePurchase(
     // draw down open fine on each linked purchase line (rate-cut / fixing).
     for (const cut of input.cuts ?? []) {
       await tx.$executeRawUnsafe(
-        `UPDATE "PR_DETL" SET "FINE_CUT_FINE"=(coalesce(NULLIF("FINE_CUT_FINE",'')::numeric,0)+$5)::text, "FINE_CUT_NWT"=(coalesce(NULLIF("FINE_CUT_NWT",'')::numeric,0)+$6)::text,
-           "FINE_CUT_GWT"=(coalesce(NULLIF("FINE_CUT_GWT",'')::numeric,0)+$7)::text, "FINE_CUT_PCS"=(coalesce(NULLIF("FINE_CUT_PCS",'')::numeric,0)+$8)::text
+        `UPDATE "PR_DETL" SET "FINE_CUT_FINE"=(coalesce("FINE_CUT_FINE",0)+$5)::text, "FINE_CUT_NWT"=(coalesce("FINE_CUT_NWT",0)+$6)::text,
+           "FINE_CUT_GWT"=(coalesce("FINE_CUT_GWT",0)+$7)::text, "FINE_CUT_PCS"=(coalesce("FINE_CUT_PCS",0)+$8)::text
          WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "SR_NO"=$4`,
         input.scope.coCode,
         cut.coBook,
@@ -387,8 +387,8 @@ export async function deleteFineSalePurchase(
     });
     for (const c of cuts) {
       await tx.$executeRawUnsafe(
-        `UPDATE "PR_DETL" SET "FINE_CUT_FINE"=greatest(coalesce(NULLIF("FINE_CUT_FINE",'')::numeric,0)-$5,0)::text, "FINE_CUT_NWT"=greatest(coalesce(NULLIF("FINE_CUT_NWT",'')::numeric,0)-$6,0)::text,
-           "FINE_CUT_GWT"=greatest(coalesce(NULLIF("FINE_CUT_GWT",'')::numeric,0)-$7,0)::text, "FINE_CUT_PCS"=greatest(coalesce(NULLIF("FINE_CUT_PCS",'')::numeric,0)-$8,0)::text
+        `UPDATE "PR_DETL" SET "FINE_CUT_FINE"=greatest(coalesce("FINE_CUT_FINE",0)-$5,0)::text, "FINE_CUT_NWT"=greatest(coalesce("FINE_CUT_NWT",0)-$6,0)::text,
+           "FINE_CUT_GWT"=greatest(coalesce("FINE_CUT_GWT",0)-$7,0)::text, "FINE_CUT_PCS"=greatest(coalesce("FINE_CUT_PCS",0)-$8,0)::text
          WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "SR_NO"=$4`,
         key.CO_CODE,
         String(c.db ?? ''),

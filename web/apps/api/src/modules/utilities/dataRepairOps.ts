@@ -403,11 +403,11 @@ registerRepair({
     for (const [ac, e] of want) {
       const c = cur.get(ac);
       const target = {
-        OP_AMT: String(Math.abs(Number(e.amount)).toFixed(2)),
+        OP_AMT: Number(Math.abs(Number(e.amount)).toFixed(2)) || 0,
         OP_SIGN: sign(Number(e.amount)),
-        FINE_BAL: String(Math.abs(Number(e.gold)).toFixed(3)),
+        FINE_BAL: Number(Math.abs(Number(e.gold)).toFixed(3)) || 0,
         FINE_SIGN: sign(Number(e.gold)),
-        SL_FINE_BAL: String(Math.abs(Number(e.silver)).toFixed(3)),
+        SL_FINE_BAL: Number(Math.abs(Number(e.silver)).toFixed(3)) || 0,
         SL_FINE_SIGN: sign(Number(e.silver)),
       };
       if (!c) {
@@ -457,12 +457,15 @@ registerRepair({
       const silver = Math.abs(Number(e.silver)).toFixed(3);
       const n: number = await tx.$executeRawUnsafe(
         `UPDATE "OP_DATA"
-            SET "OP_AMT"=$4,"OP_SIGN"=$5,"FINE_BAL"=$6,"FINE_SIGN"=$7,"SL_FINE_BAL"=$8,"SL_FINE_SIGN"=$9,
+            SET "OP_AMT"=$4::double precision,"OP_SIGN"=$5,
+                "FINE_BAL"=$6::double precision,"FINE_SIGN"=$7,
+                "SL_FINE_BAL"=$8::double precision,"SL_FINE_SIGN"=$9,
                 "DATA_TYPE"='B',"DATA_TRFR"='Y'
           WHERE tenant_id=current_setting('app.tenant_id', true)
             AND "CO_CODE"=$1 AND "LC_CODE"=$2 AND "AC_CODE"=$3
-            AND (coalesce("OP_AMT",'')<>$4 OR coalesce("OP_SIGN",'')<>$5
-              OR coalesce("FINE_BAL",'')<>$6 OR coalesce("SL_FINE_BAL",'')<>$8)`,
+            AND (coalesce("OP_AMT",0)<>$4::double precision OR coalesce("OP_SIGN",'')<>$5
+              OR coalesce("FINE_BAL",0)<>$6::double precision
+              OR coalesce("SL_FINE_BAL",0)<>$8::double precision)`,
         scope.coCode,
         lc,
         ac,
@@ -489,7 +492,8 @@ registerRepair({
       await tx.$executeRawUnsafe(
         `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE",
            "OP_AMT","OP_SIGN","FINE_BAL","FINE_SIGN","SL_FINE_BAL","SL_FINE_SIGN","DATA_TYPE","DATA_TRFR")
-         VALUES (current_setting('app.tenant_id', true),$1,$2,$3,'000','00000',$4,$5,$6,$7,$8,$9,$10,'B','Y')`,
+         VALUES (current_setting('app.tenant_id', true),$1,$2,$3,'000','00000',$4,
+                 $5::double precision,$6,$7::double precision,$8,$9::double precision,$10,'B','Y')`,
         scope.coCode,
         lc,
         scope.coYear ?? null,

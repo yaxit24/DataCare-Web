@@ -668,7 +668,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       BANK_NAME: 'Lifecycle Bank',
       CARD_COM_AMT: 1.5,
       CASH_PAID: 2,
-      CRNT_ADJ_AMT: '3',
+      CRNT_ADJ_AMT: 3,
       SCHM_AC: 'SCHEME',
       SCHM_AMT: 4,
       POINT_VAL: 5,
@@ -678,24 +678,24 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       USER_UPDATE: 'N',
       USER_DELETE: 'N',
       MOB_ENTRY_SAVE: 'Y',
-      OZ_RATE: '0',
-      OZ_CONV: '0',
-      FX_RATE: '0',
+      OZ_RATE: 0,
+      OZ_CONV: 0,
+      FX_RATE: 0,
       FX_CODE: '',
-      MTL_RATE: '0',
+      MTL_RATE: 0,
       VCH_DESC: 'full column sale',
     });
     expect(detail).toMatchObject({
       BAG_WT: 0.3,
-      TAG_GWT: '5.1',
-      TAG_NWT: '4.9',
+      TAG_GWT: 5.1,
+      TAG_NWT: 4.9,
       ITM_GHT_PRC: 2,
       ITM_STYLE: 'Classic',
       ITM_LOT: 'LOT-8',
       ITM_REMARK: 'detail remark',
       DISC_PRC: 1,
       DISC_AMT: 5,
-      GHT_AMT: '6',
+      GHT_AMT: 6,
       RATE_WITH: 'N',
       RATE_TYPE: 'F',
       TAG_COST: 450,
@@ -716,7 +716,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       HM_ID2_WT: 0,
       HM_ID3_WT: 0,
       HM_ID4_WT: 0,
-      ITM_OTH: '0',
+      ITM_OTH: 0,
       MAIN_USER: 'original-user',
     });
     expect(billOs).toMatchObject({
@@ -1267,7 +1267,9 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     allRofRemove: string;
   }): Promise<{ cgst: number; sgst: number; taxAmt: number }> => {
     await owner.$executeRawUnsafe(
-      `UPDATE "CO_SET" SET "TAX_ROF"=$1, "ALL_ROF_REMOVE"=$2 WHERE tenant_id=$3 AND "CO_CODE"=$4`,
+      // TAX_ROF is `integer` after the column-type correction, so the text parameter needs a cast.
+      `UPDATE "CO_SET" SET "TAX_ROF"=NULLIF($1::text,'')::integer, "ALL_ROF_REMOVE"=$2
+         WHERE tenant_id=$3 AND "CO_CODE"=$4`,
       settings.taxRof,
       settings.allRofRemove,
       TENANT,

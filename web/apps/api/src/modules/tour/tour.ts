@@ -249,10 +249,10 @@ export async function tourIssue(prisma: any, input: TourIssueInput): Promise<Tou
       HM_ID2_WT: num(c.in.hallmarkId2Wt),
       HM_ID3_WT: num(c.in.hallmarkId3Wt),
       HM_ID4_WT: num(c.in.hallmarkId4Wt),
-      ADJ_GWT: c.in.adjustGrossWt == null ? null : String(c.in.adjustGrossWt),
-      ADJ_NWT: c.in.adjustNetWt == null ? null : String(c.in.adjustNetWt),
-      ITM_LESS_TCH: c.in.lessTouch == null ? null : String(c.in.lessTouch),
-      ITM_LOSS_WT: c.in.lossWt == null ? null : String(c.in.lossWt),
+      ADJ_GWT: c.in.adjustGrossWt == null ? null : Number(c.in.adjustGrossWt),
+      ADJ_NWT: c.in.adjustNetWt == null ? null : Number(c.in.adjustNetWt),
+      ITM_LESS_TCH: c.in.lessTouch == null ? null : Number(c.in.lessTouch),
+      ITM_LOSS_WT: c.in.lossWt == null ? null : Number(c.in.lossWt),
       MAIN_USER: input.mainUser ?? null,
       // Desktop APR_DETL grid columns (TR_APR_ISU.cs:6180-6240, `mSG[i, c]`).
       ISU_AC_NAME: t(c.in.isuAcName, 50), // mSG[i,3]  :6180

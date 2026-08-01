@@ -105,9 +105,9 @@ model AC_MAST {
   BR_DATE      String?   @db.VarChar(255)
   L_BR_DATE    DateTime? @db.Date
   AN_DATE      String?   @db.VarChar(255)
-  AC_CR_DAYS   String?   @db.VarChar(255)
-  AC_INT_PRC   String?   @db.VarChar(255)
-  DPC_PRC      String?   @db.VarChar(255)
+  AC_CR_DAYS   Float?
+  AC_INT_PRC   Float?
+  DPC_PRC      Float?
   BANK_NAME    String?   @db.VarChar(50)
   BANK_AREA    String?   @db.VarChar(40)
   BANK_AC_NO   String?   @db.VarChar(30)
@@ -408,8 +408,8 @@ model APR_DETL {
   TAG_NO        String?   @db.VarChar(15)
   ISU_REC       String?   @db.VarChar(1)
   TBL_CODE      String?   @db.VarChar(3)
-  ADJ_GWT       String?   @db.VarChar(255)
-  ADJ_NWT       String?   @db.VarChar(255)
+  ADJ_GWT       Float?
+  ADJ_NWT       Float?
   CON_ISU_REC   String?   @db.VarChar(255)
   CO_CODE       String?   @db.VarChar(2)
   LC_CODE       String?   @db.VarChar(2)
@@ -478,8 +478,8 @@ model APR_DETL {
   ITM_COLOR     String?   @db.VarChar(15)
   ORNA_REC_DATE String?   @db.VarChar(255)
   EMP_CODE      String?   @db.VarChar(3)
-  ITM_LESS_TCH  String?   @db.VarChar(255)
-  ITM_LOSS_WT   String?   @db.VarChar(255)
+  ITM_LESS_TCH  Float?
+  ITM_LOSS_WT   Float?
   DESIGN_IMG_ID String?   @db.VarChar(50)
   ADD_USER      String?   @db.VarChar(15)
   ITM_STYLE     String?   @db.VarChar(20)
@@ -558,16 +558,16 @@ model BAL_GR {
   PURC_AC    String?  @db.VarChar(10)
   CLOSING_AC String?  @db.VarChar(255)
   OP_AC      String?  @db.VarChar(255)
-  TRAD_AMT   String?  @db.VarChar(255)
-  TRAD_WT    String?  @db.VarChar(255)
+  TRAD_AMT   Float?
+  TRAD_WT    Float?
   CLG_AC     String?  @db.VarChar(255)
-  OP_TOUCH   String?  @db.VarChar(255)
-  OP_FINE    String?  @db.VarChar(255)
-  AVG_TOUCH  String?  @db.VarChar(255)
-  AVG_FINE   String?  @db.VarChar(255)
-  AVG_NWT    String?  @db.VarChar(255)
-  AVG_AMT    String?  @db.VarChar(255)
-  AVG_RATE   String?  @db.VarChar(255)
+  OP_TOUCH   Float?
+  OP_FINE    Float?
+  AVG_TOUCH  Float?
+  AVG_FINE   Float?
+  AVG_NWT    Float?
+  AVG_AMT    Float?
+  AVG_RATE   Float?
   IT_TYPE    String?  @db.VarChar(1)
   OP_AMT     Decimal? @db.Decimal(18, 2)
   OP_WT      Decimal? @db.Decimal(14, 3)
@@ -790,8 +790,8 @@ model BAR_DETL {
   ITM_REMARK      String?
   KR_LBR_RATE     Decimal?  @db.Decimal(18, 2)
   KR_LBR_AMT      Decimal?  @db.Decimal(18, 2)
-  KR_COST         String?   @db.VarChar(255)
-  KR_OTH_AMT      String?   @db.VarChar(255)
+  KR_COST         Float?
+  KR_OTH_AMT      Float?
   CO_CODE         String?   @db.VarChar(2)
   LC_CODE         String?   @db.VarChar(2)
   CO_YEAR         String?   @db.VarChar(10)
@@ -837,12 +837,12 @@ model BAR_DETL {
   KR_NAME         String?   @db.VarChar(5)
   KR_OTH_WT       Decimal?  @db.Decimal(14, 3)
   KR_NET_WT       Decimal?  @db.Decimal(14, 3)
-  KR_GHT_PRC      String?   @db.VarChar(255)
-  KR_GHT_WT       String?   @db.VarChar(255)
+  KR_GHT_PRC      Float?
+  KR_GHT_WT       Float?
   KR_TOUCH        Decimal?  @db.Decimal(14, 3)
   KR_WEST_PRC     Decimal?  @db.Decimal(9, 4)
   KR_FINE         Decimal?  @db.Decimal(14, 3)
-  TAG_SRNO        String?   @db.VarChar(255)
+  TAG_SRNO        Int?
   VCH_SRNO        Float?
   RATE_TYPE       String?   @db.VarChar(1)
   IT_TYPE         String?   @db.VarChar(1)
@@ -873,28 +873,28 @@ model BAR_DETL {
   ITM_COLOR       String?   @db.VarChar(15)
   MAIN_MARGIN_PRC Decimal?  @db.Decimal(9, 4)
   MAIN_MRP        Decimal?  @db.Decimal(18, 2)
-  JDT_JDT_WT      String?   @db.VarChar(255)
-  JDT_GHT_WT      String?   @db.VarChar(255)
-  JDT_KUN_WT      String?   @db.VarChar(255)
-  JDT_WAX_WT      String?   @db.VarChar(255)
+  JDT_JDT_WT      Float?
+  JDT_GHT_WT      Float?
+  JDT_KUN_WT      Float?
+  JDT_WAX_WT      Float?
   KR_WAX_WT       Decimal?  @db.Decimal(14, 3)
-  JDT_KUN_TOUCH   String?   @db.VarChar(255)
-  JDT_KUN_NET     String?   @db.VarChar(255)
+  JDT_KUN_TOUCH   Float?
+  JDT_KUN_NET     Float?
   EMP_ISU         String?   @db.VarChar(1)
   LBR_CODE        String?
   DESIGN_IMG_ID   String?   @db.VarChar(50)
   SL_TYPE         String?   @db.VarChar(255)
-  KR_OTH_RATE     String?   @db.VarChar(255)
-  KR_OTH_FINE     String?   @db.VarChar(255)
-  KR_TOT_FINE     String?   @db.VarChar(255)
-  KR_GWT_TOUCH    String?   @db.VarChar(255)
+  KR_OTH_RATE     Float?
+  KR_OTH_FINE     Float?
+  KR_TOT_FINE     Float?
+  KR_GWT_TOUCH    Float?
   ITM_WEST        Decimal?  @db.Decimal(14, 3)
   ITM_STYLE       String?   @db.VarChar(255)
   ORD_LC_CODE     String?   @db.VarChar(255)
   MFG_YRCD        String?   @db.VarChar(255)
   MFG_DBCD        String?   @db.VarChar(255)
   MFG_NO          String?   @db.VarChar(255)
-  MFG_SRNO        String?   @db.VarChar(255)
+  MFG_SRNO        Float?
 
   @@index([tenantId])
   @@index([tenantId, CO_CODE, LC_CODE, TAG_NO, VCH_SRNO, IT_CODE], map: "idx_bar_detl_tag_identity")
@@ -955,8 +955,8 @@ model BAR_IDTL {
   OLD_VCH_NO   String?
   NEW_VCH_NO   String?
   KR_RATE_TYPE String?   @db.VarChar(255)
-  IT_DISC_PRC  String?   @db.VarChar(255)
-  IT_DISC_AMT  String?   @db.VarChar(255)
+  IT_DISC_PRC  Float?
+  IT_DISC_AMT  Float?
 
   @@index([tenantId])
   @@map("BAR_IDTL")
@@ -1203,7 +1203,7 @@ model CASH_DATA {
   CLR_DATE       DateTime? @db.Date
   USER_UPDATE    String?   @db.VarChar(1)
   USER_DELETE    String?   @db.VarChar(1)
-  BANK_CHARGES   String?   @db.VarChar(255)
+  BANK_CHARGES   Float?
   MOB_ENTRY_SAVE String?   @db.VarChar(255)
 
   @@index([tenantId])
@@ -1298,20 +1298,20 @@ model CONTRA_DATA {
 model CONV_MAST {
   tenantId       String   @map("tenant_id") @db.VarChar(24)
   rowId          BigInt   @id @default(autoincrement()) @map("row_id")
-  GOLD_OZ_RATE   String?  @db.VarChar(255)
+  GOLD_OZ_RATE   Float?
   GOLD_CONV      Float?
   SILVER_CONV    Float?
   CO_CODE        String?  @db.VarChar(2)
   CON_CODE       String?  @db.VarChar(255)
   CON_NAME       String?  @db.VarChar(255)
   RATE_DATE      String?  @db.VarChar(255)
-  SILVER_OZ_RATE String?  @db.VarChar(255)
+  SILVER_OZ_RATE Float?
   CURRENCY_RATE  Decimal? @db.Decimal(18, 2)
   OUNCES_CONV    Float?
-  GOLD_PR_RATE   String?  @db.VarChar(255)
-  GOLD_SL_RATE   String?  @db.VarChar(255)
-  SILVER_PR_RATE String?  @db.VarChar(255)
-  SILVER_SL_RATE String?  @db.VarChar(255)
+  GOLD_PR_RATE   Float?
+  GOLD_SL_RATE   Float?
+  SILVER_PR_RATE Float?
+  SILVER_SL_RATE Float?
   MAIN_USER      String?  @db.VarChar(15)
 
   @@index([tenantId])
@@ -1368,7 +1368,7 @@ model CO_MAST {
 model CO_SET {
   tenantId           String  @map("tenant_id") @db.VarChar(24)
   rowId              BigInt  @id @default(autoincrement()) @map("row_id")
-  THEME              String? @db.VarChar(255)
+  THEME              Int?
   TAG_RPT            String? @db.VarChar(255)
   FINE_STK_TYPE      String? @db.VarChar(255)
   RATE_MAST_OPEN     String? @db.VarChar(255)
@@ -1376,7 +1376,7 @@ model CO_SET {
   VB_IMPORT          String? @db.VarChar(255)
   SL_ROW_CHANGE      String? @db.VarChar(255)
   DHRN_INT_TYPE      String? @db.VarChar(255)
-  INT_YEAR_DAYS      String? @db.VarChar(255)
+  INT_YEAR_DAYS      Float?
   OP_DHRN            String? @db.VarChar(255)
   INT_DAY            String? @db.VarChar(1)
   HELP_SERCH         String? @db.VarChar(255)
@@ -1387,9 +1387,9 @@ model CO_SET {
   OP_LOAN            String? @db.VarChar(255)
   LOAN_INT_TYPE      String? @db.VarChar(255)
   TRAD_FINE          String? @db.VarChar(255)
-  LBR_ROF            String? @db.VarChar(255)
+  LBR_ROF            Float?
   REMINDER_OPEN      String? @db.VarChar(255)
-  ITM_RATE_ROF       String? @db.VarChar(255)
+  ITM_RATE_ROF       Float?
   ADMIN_SMS          String? @db.VarChar(255)
   CUST_SMS           String? @db.VarChar(255)
   PURC_WITH_LBR      String? @db.VarChar(255)
@@ -1397,8 +1397,8 @@ model CO_SET {
   GRID_SCROLL        String? @db.VarChar(255)
   STK_RPT_TYPE       String? @db.VarChar(255)
   TOUCH_AUTO_SAVE    String? @db.VarChar(255)
-  PAN_CARD_VAL       String? @db.VarChar(255)
-  DHRN_PRC           String? @db.VarChar(255)
+  PAN_CARD_VAL       Float?
+  DHRN_PRC           Float?
   DUP_PRINT          String? @db.VarChar(255)
   TAX_CODE           String? @db.VarChar(2)
   IP_WITH_PC         String? @db.VarChar(255)
@@ -1410,7 +1410,7 @@ model CO_SET {
   EMP_CODE_MANDATORY String? @db.VarChar(255)
   STOCK_RPT_TYPE     String? @db.VarChar(255)
   LAST_DAY_LOCK      String? @db.VarChar(255)
-  CASH_LIMIT         String? @db.VarChar(255)
+  CASH_LIMIT         Float?
   DHRN_WAPP          String? @db.VarChar(255)
   SCHM_WAPP          String? @db.VarChar(255)
   LEDR_BILL_COL      String? @db.VarChar(255)
@@ -1421,10 +1421,10 @@ model CO_SET {
   LBR_TYPE           String? @db.VarChar(1)
   AC_LC_CODE_LEN     String? @db.VarChar(255)
   LOCK_DATE          String? @db.VarChar(255)
-  TAX_ROF            String? @db.VarChar(255)
+  TAX_ROF            Int?
   RATE_PAR           String? @db.VarChar(1)
-  OZ_CON_VAL         String? @db.VarChar(255)
-  FX_RATE            String? @db.VarChar(255)
+  OZ_CON_VAL         Float?
+  FX_RATE            Float?
   FX_CODE            String? @db.VarChar(255)
   COUNTRY_ID         String? @db.VarChar(255)
   MFG_ONE_FORM       String  @default("Y") @db.VarChar(1)
@@ -2337,7 +2337,7 @@ model EMP_MAST {
   USER_NAME String?  @db.VarChar(15)
   EMP_TYPE  String?  @db.VarChar(255)
   EMP_AC    String?  @db.VarChar(255)
-  EMP_AMT   String?  @db.VarChar(255)
+  EMP_AMT   Float?
   MAIN_USER String?  @db.VarChar(15)
   TDS_PRC   Decimal? @db.Decimal(9, 4)
   TDS_AMT   Decimal? @db.Decimal(18, 2)
@@ -2657,28 +2657,28 @@ model GROUP_MAST {
   GR_NAME       String?  @db.VarChar(40)
   GR_TYPE       String?  @db.VarChar(255)
   TRAD_TYPE     String?  @db.VarChar(255)
-  GR_TOUCH      String?  @db.VarChar(255)
-  GR_PURC_TOUCH String?  @db.VarChar(255)
-  MELTING_PRC   String?  @db.VarChar(255)
+  GR_TOUCH      Float?
+  GR_PURC_TOUCH Float?
+  MELTING_PRC   Float?
   GR_RATE       Decimal? @db.Decimal(18, 2)
-  WEST_PRC      String?  @db.VarChar(255)
+  WEST_PRC      Float?
   SALE_AC       String?  @db.VarChar(10)
   PURC_AC       String?  @db.VarChar(10)
   HSN_CODE      String?  @db.VarChar(10)
   MAIN_USER     String?  @db.VarChar(15)
   TAX_PRC       Decimal? @db.Decimal(9, 4)
-  AVG_TOUCH     String?  @db.VarChar(255)
-  AVG_FINE      String?  @db.VarChar(255)
-  AVG_NWT       String?  @db.VarChar(255)
-  DAY_OP_PCS    String?  @db.VarChar(255)
-  DAY_OP_WT     String?  @db.VarChar(255)
-  DAY_CL_PCS    String?  @db.VarChar(255)
-  DAY_CL_WT     String?  @db.VarChar(255)
+  AVG_TOUCH     Float?
+  AVG_FINE      Float?
+  AVG_NWT       Float?
+  DAY_OP_PCS    Float?
+  DAY_OP_WT     Float?
+  DAY_CL_PCS    Float?
+  DAY_CL_WT     Float?
   RATE_DISPLAY  String?  @db.VarChar(255)
   DATA_TRFR     String?  @db.VarChar(1)
-  OP_TOUCH      String?  @db.VarChar(255)
-  OP_FINE       String?  @db.VarChar(255)
-  AVG_RATE      String?  @db.VarChar(255)
+  OP_TOUCH      Float?
+  OP_FINE       Float?
+  AVG_RATE      Float?
   TOT_PCS       Float?
   PCS_RATE      Decimal? @db.Decimal(18, 2)
 
@@ -3099,7 +3099,7 @@ model KR_DATA {
   CHQ_AMT      Decimal?  @db.Decimal(18, 2)
   KASAR_AMT    Decimal?  @db.Decimal(18, 2)
   BILL_OS      Float?
-  OS_ADJ_AMT   String?   @db.VarChar(255)
+  OS_ADJ_AMT   Float?
   CR_DAYS      Float?
   CARD_AC      String?
   BANK_AC      String?
@@ -3132,9 +3132,9 @@ model KR_DATA {
   TCS_CODE     String?
   TCS_PRC      Decimal?  @db.Decimal(9, 4)
   TCS_AMT      Decimal?  @db.Decimal(18, 2)
-  HM_AMT       String?   @db.VarChar(255)
-  HM_TAX_PRC   String?   @db.VarChar(255)
-  HM_TAX_AMT   String?   @db.VarChar(255)
+  HM_AMT       Float?
+  HM_TAX_PRC   Float?
+  HM_TAX_AMT   Float?
   TDS_AMT      Decimal?  @db.Decimal(18, 2)
   TDS_CODE     String?   @db.VarChar(5)
   TDS_PRC      Decimal?  @db.Decimal(9, 4)
@@ -3205,23 +3205,23 @@ model KR_DETL {
   NEW_VCH_NO    String?
   MAIN_USER     String?   @db.VarChar(15)
   ADD_USER      String?   @db.VarChar(15)
-  ITM_OTH_RATE  String?   @db.VarChar(255)
-  ITM_OTH_FINE  String?   @db.VarChar(255)
+  ITM_OTH_RATE  Float?
+  ITM_OTH_FINE  Float?
   SL_BILL_NO    String?   @db.VarChar(255)
   SL_BILL_LC    String?   @db.VarChar(255)
   SL_BILL_YRCD  String?   @db.VarChar(255)
   SL_BILL_DBCD  String?   @db.VarChar(255)
-  CONV_RATE     String?   @db.VarChar(255)
-  CONV_PRC      String?   @db.VarChar(255)
-  ITM_LESS_TCH  String?   @db.VarChar(255)
+  CONV_RATE     Float?
+  CONV_PRC      Float?
+  ITM_LESS_TCH  Float?
   IT_DESC       String?   @db.VarChar(50)
-  ITM_LOSS_WT   String?   @db.VarChar(255)
-  SILVER_FINE   String?   @db.VarChar(255)
+  ITM_LOSS_WT   Float?
+  SILVER_FINE   Float?
   CON_PRC       Decimal?  @db.Decimal(9, 4)
   CON_WT        Decimal?  @db.Decimal(14, 3)
-  AVG_RATE      String?   @db.VarChar(255)
-  AVG_AMT       String?   @db.VarChar(255)
-  CON_RATE      String?   @db.VarChar(255)
+  AVG_RATE      Float?
+  AVG_AMT       Float?
+  CON_RATE      Float?
   ITM_GHT_PRC   Decimal?  @db.Decimal(9, 4)
   CON_IT_CODE   String?   @db.VarChar(5)
   HM_ID2        String?   @db.VarChar(10)
@@ -3390,8 +3390,8 @@ model LBR_ISU_DETL {
   ITM_REMARK      String?
   KR_LBR_RATE     Decimal?  @db.Decimal(18, 2)
   KR_LBR_AMT      Decimal?  @db.Decimal(18, 2)
-  KR_COST         String?   @db.VarChar(255)
-  KR_OTH_AMT      String?   @db.VarChar(255)
+  KR_COST         Float?
+  KR_OTH_AMT      Float?
   VCH_SRNO        Float?
   TAG_NO          String?   @db.VarChar(15)
   IT_TAX_AMT      String?   @db.VarChar(255)
@@ -3400,8 +3400,8 @@ model LBR_ISU_DETL {
   EMP_CODE        String?
   ITM_RATE        Decimal?  @db.Decimal(18, 2)
   KR_OTH_WT       Decimal?  @db.Decimal(14, 3)
-  NEW_VCH_SRNO    String?   @db.VarChar(255)
-  NEW_FINE        String?   @db.VarChar(255)
+  NEW_VCH_SRNO    Float?
+  NEW_FINE        Float?
   IT_CODE         String?
   CO_CODE         String?   @db.VarChar(2)
   LC_CODE         String?   @db.VarChar(2)
@@ -3665,8 +3665,8 @@ model LEDR_AC_DATA {
   AC_CODE    String?   @db.VarChar(8)
   CR_AMT     Decimal?  @db.Decimal(18, 2)
   DR_AMT     Decimal?  @db.Decimal(18, 2)
-  CR_FINE_WT String?   @db.VarChar(255)
-  DR_FINE_WT String?   @db.VarChar(255)
+  CR_FINE_WT Float?
+  DR_FINE_WT Float?
   CR_SL_FINE Decimal?  @db.Decimal(14, 3)
   DR_SL_FINE Decimal?  @db.Decimal(14, 3)
   DATA_TYPE  String?   @db.VarChar(1)
@@ -3877,13 +3877,13 @@ model MAIN_STOCK {
   OTH_AMT     Decimal?  @db.Decimal(18, 2)
   ITM_MRP     Decimal?  @db.Decimal(18, 2)
   NET_AMT     Decimal?  @db.Decimal(18, 2)
-  KR_NWT      String?   @db.VarChar(255)
+  KR_NWT      Float?
   KR_TOUCH    Decimal?  @db.Decimal(14, 3)
-  KR_WEST     String?   @db.VarChar(255)
+  KR_WEST     Float?
   KR_FINE     Decimal?  @db.Decimal(14, 3)
   KR_LBR_AMT  Decimal?  @db.Decimal(18, 2)
-  KR_OTH_AMT  String?   @db.VarChar(255)
-  KR_COST     String?   @db.VarChar(255)
+  KR_OTH_AMT  Float?
+  KR_COST     Float?
   EMP_CODE    String?   @db.VarChar(3)
   ENTRY_TIME  DateTime? @db.Date
   MAIN_USER   String?   @db.VarChar(15)
@@ -4390,15 +4390,15 @@ model MessageAttemptLog {
 model OP_DATA {
   tenantId     String  @map("tenant_id") @db.VarChar(24)
   rowId        BigInt  @id @default(autoincrement()) @map("row_id")
-  FINE_BAL     String? @db.VarChar(255)
-  SL_FINE_BAL  String? @db.VarChar(255)
+  FINE_BAL     Float?
+  SL_FINE_BAL  Float?
   CO_CODE      String? @db.VarChar(2)
   LC_CODE      String?
   CO_YEAR      String? @db.VarChar(10)
   CO_BOOK      String? @db.VarChar(3)
   VCH_NO       String?
   AC_CODE      String? @db.VarChar(8)
-  OP_AMT       String? @db.VarChar(255)
+  OP_AMT       Float?
   OP_SIGN      String? @db.VarChar(255)
   FINE_SIGN    String? @db.VarChar(255)
   SL_FINE_SIGN String? @db.VarChar(255)
@@ -4651,7 +4651,7 @@ model PR_DATA {
   CHQ_AMT          Decimal?  @db.Decimal(18, 2)
   KASAR_AMT        Decimal?  @db.Decimal(18, 2)
   BILL_OS          Float?
-  OS_ADJ_AMT       String?   @db.VarChar(255)
+  OS_ADJ_AMT       Float?
   CR_DAYS          Float?
   CARD_AC          String?
   BANK_AC          String?
@@ -4685,9 +4685,9 @@ model PR_DATA {
   TCS_PRC          Decimal?  @db.Decimal(9, 4)
   TCS_AMT          Decimal?  @db.Decimal(18, 2)
   RATE_UNFIX       String?   @db.VarChar(255)
-  HM_AMT           String?   @db.VarChar(255)
-  HM_TAX_PRC       String?   @db.VarChar(255)
-  HM_TAX_AMT       String?   @db.VarChar(255)
+  HM_AMT           Float?
+  HM_TAX_PRC       Float?
+  HM_TAX_AMT       Float?
   TDS_AMT          Decimal?  @db.Decimal(18, 2)
   TDS_CODE         String?   @db.VarChar(5)
   TDS_PRC          Decimal?  @db.Decimal(9, 4)
@@ -4758,23 +4758,23 @@ model PR_DETL {
   NEW_VCH_NO     String?
   MAIN_USER      String?   @db.VarChar(15)
   ADD_USER       String?   @db.VarChar(15)
-  ITM_OTH_RATE   String?   @db.VarChar(255)
-  ITM_OTH_FINE   String?   @db.VarChar(255)
+  ITM_OTH_RATE   Float?
+  ITM_OTH_FINE   Float?
   SL_BILL_NO     String?   @db.VarChar(255)
   SL_BILL_LC     String?   @db.VarChar(255)
   SL_BILL_YRCD   String?   @db.VarChar(255)
   SL_BILL_DBCD   String?   @db.VarChar(255)
-  CONV_RATE      String?   @db.VarChar(255)
-  CONV_PRC       String?   @db.VarChar(255)
-  ITM_LESS_TCH   String?   @db.VarChar(255)
+  CONV_RATE      Float?
+  CONV_PRC       Float?
+  ITM_LESS_TCH   Float?
   IT_DESC        String?   @db.VarChar(50)
-  ITM_LOSS_WT    String?   @db.VarChar(255)
-  FINE_CUT_FINE  String?   @db.VarChar(255)
-  FINE_CUT_NWT   String?   @db.VarChar(255)
-  FINE_CUT_GWT   String?   @db.VarChar(255)
-  FINE_CUT_PCS   String?   @db.VarChar(255)
-  CONSI_SRNO     String?   @db.VarChar(255)
-  SILVER_FINE    String?   @db.VarChar(255)
+  ITM_LOSS_WT    Float?
+  FINE_CUT_FINE  Float?
+  FINE_CUT_NWT   Float?
+  FINE_CUT_GWT   Float?
+  FINE_CUT_PCS   Float?
+  CONSI_SRNO     Float?
+  SILVER_FINE    Float?
   VCH_SRNO       Float?
   ITM_GHT_PRC    Decimal?  @db.Decimal(9, 4)
   CONSI_NO       String?   @db.VarChar(10)
@@ -4903,32 +4903,32 @@ model RATE_CUT_DATA {
   DR_FINE        Decimal?  @db.Decimal(14, 3)
   RATE_PAR       String?   @db.VarChar(1)
   FINE_RATE      Decimal?  @db.Decimal(14, 3)
-  SL_FINE        String?   @db.VarChar(255)
-  PR_FINE        String?   @db.VarChar(255)
-  TOT_FINE_DR    String?   @db.VarChar(255)
-  TOT_FINE_CR    String?   @db.VarChar(255)
-  KSR_FINE_CR    String?   @db.VarChar(255)
-  KSR_FINE_DR    String?   @db.VarChar(255)
-  SL_NET_AMT     String?   @db.VarChar(255)
-  SL_ITM_AMT     String?   @db.VarChar(255)
-  SL_LBR_AMT     String?   @db.VarChar(255)
-  SL_OTH_AMT     String?   @db.VarChar(255)
-  SL_ADV_AMT     String?   @db.VarChar(255)
-  SL_CASH_AMT    String?   @db.VarChar(255)
-  SL_CARD_AMT    String?   @db.VarChar(255)
-  SL_CHQ_AMT     String?   @db.VarChar(255)
-  SL_KASAR_AMT   String?   @db.VarChar(255)
-  SL_BILL_OS     String?   @db.VarChar(255)
-  PR_NET_AMT     String?   @db.VarChar(255)
-  PR_ITM_AMT     String?   @db.VarChar(255)
-  PR_LBR_AMT     String?   @db.VarChar(255)
-  PR_OTH_AMT     String?   @db.VarChar(255)
-  PR_ADV_AMT     String?   @db.VarChar(255)
-  PR_CASH_AMT    String?   @db.VarChar(255)
-  PR_CARD_AMT    String?   @db.VarChar(255)
-  PR_CHQ_AMT     String?   @db.VarChar(255)
-  PR_KASAR_AMT   String?   @db.VarChar(255)
-  PR_BILL_OS     String?   @db.VarChar(255)
+  SL_FINE        Float?
+  PR_FINE        Float?
+  TOT_FINE_DR    Float?
+  TOT_FINE_CR    Float?
+  KSR_FINE_CR    Float?
+  KSR_FINE_DR    Float?
+  SL_NET_AMT     Float?
+  SL_ITM_AMT     Float?
+  SL_LBR_AMT     Float?
+  SL_OTH_AMT     Float?
+  SL_ADV_AMT     Float?
+  SL_CASH_AMT    Float?
+  SL_CARD_AMT    Float?
+  SL_CHQ_AMT     Float?
+  SL_KASAR_AMT   Float?
+  SL_BILL_OS     Float?
+  PR_NET_AMT     Float?
+  PR_ITM_AMT     Float?
+  PR_LBR_AMT     Float?
+  PR_OTH_AMT     Float?
+  PR_ADV_AMT     Float?
+  PR_CASH_AMT    Float?
+  PR_CARD_AMT    Float?
+  PR_CHQ_AMT     Float?
+  PR_KASAR_AMT   Float?
+  PR_BILL_OS     Float?
   CR_DAYS        Float?
   CARD_AC        String?
   BANK_AC        String?
@@ -4946,23 +4946,23 @@ model RATE_CUT_DATA {
   OLD_VCH_NO     String?
   NEW_VCH_NO     String?
   MAIN_USER      String?   @db.VarChar(15)
-  CONV_RATE      String?   @db.VarChar(255)
-  CONV_PRC       String?   @db.VarChar(255)
-  SILVER_FINE_DR String?   @db.VarChar(255)
-  SILVER_FINE_CR String?   @db.VarChar(255)
+  CONV_RATE      Float?
+  CONV_PRC       Float?
+  SILVER_FINE_DR Float?
+  SILVER_FINE_CR Float?
   MOB_ENTRY_SAVE String?   @db.VarChar(255)
-  VP_ADJ_AMT     String?   @db.VarChar(255)
-  PR_TAX_AMT     String?   @db.VarChar(255)
-  PR_TOT_AMT     String?   @db.VarChar(255)
-  SL_TAX_AMT     String?   @db.VarChar(255)
-  SL_TOT_AMT     String?   @db.VarChar(255)
+  VP_ADJ_AMT     Float?
+  PR_TAX_AMT     Float?
+  PR_TOT_AMT     Float?
+  SL_TAX_AMT     Float?
+  SL_TOT_AMT     Float?
   INT_DAYS       Float?
   INT_OS_FINE    String?   @db.VarChar(255)
-  INT_PRC_FINE   String?   @db.VarChar(255)
-  INT_FINE       String?   @db.VarChar(255)
-  VP_AMT         String?   @db.VarChar(255)
-  VP_INS_AMT     String?   @db.VarChar(255)
-  VP_CHARG_AMT   String?   @db.VarChar(255)
+  INT_PRC_FINE   Float?
+  INT_FINE       Float?
+  VP_AMT         Float?
+  VP_INS_AMT     Float?
+  VP_CHARG_AMT   Float?
   VP_AMT_TYPE    String?   @db.VarChar(1)
   AC_ANGDIYA     String?   @db.VarChar(8)
   TAX_CODE       String?   @db.VarChar(2)
@@ -5043,29 +5043,29 @@ model RATE_CUT_ISU {
   NEW_VCH_NO    String?
   MAIN_USER     String?   @db.VarChar(15)
   ADD_USER      String?   @db.VarChar(15)
-  LESS_TOUCH    String?   @db.VarChar(255)
-  ITM_OTH_RATE  String?   @db.VarChar(255)
-  ITM_OTH_FINE  String?   @db.VarChar(255)
-  CONV_RATE     String?   @db.VarChar(255)
-  CONV_PRC      String?   @db.VarChar(255)
-  SILVER_FINE   String?   @db.VarChar(255)
+  LESS_TOUCH    Float?
+  ITM_OTH_RATE  Float?
+  ITM_OTH_FINE  Float?
+  CONV_RATE     Float?
+  CONV_PRC      Float?
+  SILVER_FINE   Float?
   ISU_NO        String?   @db.VarChar(10)
   ISU_LC_CODE   String?   @db.VarChar(255)
   ISU_YRCD      String?
   ISU_DBCD      String?   @db.VarChar(3)
   ISU_SRNO      Float?
   LESS_WT       Decimal?  @db.Decimal(14, 3)
-  TAG_GWT       String?   @db.VarChar(255)
-  TAG_NWT       String?   @db.VarChar(255)
-  MCX_RATE      String?   @db.VarChar(255)
-  HM_FINE       String?   @db.VarChar(255)
+  TAG_GWT       Float?
+  TAG_NWT       Float?
+  MCX_RATE      Float?
+  HM_FINE       Float?
   DESIGN_IMG_ID String?   @db.VarChar(50)
   ADJ_WT        Decimal?  @db.Decimal(14, 3)
   ITM_LOT       String?   @db.VarChar(255)
-  FINE_CUT_FINE String?   @db.VarChar(255)
-  FINE_CUT_NWT  String?   @db.VarChar(255)
-  FINE_CUT_GWT  String?   @db.VarChar(255)
-  FINE_CUT_PCS  String?   @db.VarChar(255)
+  FINE_CUT_FINE Float?
+  FINE_CUT_NWT  Float?
+  FINE_CUT_GWT  Float?
+  FINE_CUT_PCS  Float?
   EMP_CODE      String?
   PRM_AMT       Decimal?  @db.Decimal(18, 2)
   HM_ID2        String?   @db.VarChar(10)
@@ -5118,10 +5118,10 @@ model RATE_CUT_ISU_REC {
   NET_AMT       Decimal?  @db.Decimal(18, 2)
   RATE_TYPE     String?   @db.VarChar(1)
   IT_TYPE       String?   @db.VarChar(1)
-  LESS_TOUCH    String?   @db.VarChar(255)
-  ITM_OTH_FINE  String?   @db.VarChar(255)
-  CONV_RATE     String?   @db.VarChar(255)
-  CONV_PRC      String?   @db.VarChar(255)
+  LESS_TOUCH    Float?
+  ITM_OTH_FINE  Float?
+  CONV_RATE     Float?
+  CONV_PRC      Float?
   LESS_WT       Decimal?  @db.Decimal(14, 3)
   VCH_DATE      DateTime? @db.Date
   EMP_CODE      String?
@@ -5143,7 +5143,7 @@ model RATE_CUT_ISU_REC {
   OTH_IT_2      String?   @db.VarChar(255)
   OTH_IT_3      String?   @db.VarChar(255)
   OTH_IT_4      String?   @db.VarChar(255)
-  SILVER_FINE   String?   @db.VarChar(255)
+  SILVER_FINE   Float?
   LOT_NO        String?   @db.VarChar(15)
   TBL_CODE      String?   @db.VarChar(3)
   ITM_SIZE      String?   @db.VarChar(15)
@@ -5226,16 +5226,16 @@ model RATE_CUT_REC {
   NEW_VCH_NO    String?
   MAIN_USER     String?   @db.VarChar(15)
   ADD_USER      String?   @db.VarChar(15)
-  LESS_TOUCH    String?   @db.VarChar(255)
-  ITM_OTH_RATE  String?   @db.VarChar(255)
-  ITM_OTH_FINE  String?   @db.VarChar(255)
+  LESS_TOUCH    Float?
+  ITM_OTH_RATE  Float?
+  ITM_OTH_FINE  Float?
   ITM_REMARK    String?   @db.VarChar(50)
-  CONV_RATE     String?   @db.VarChar(255)
-  CONV_PRC      String?   @db.VarChar(255)
-  SILVER_FINE   String?   @db.VarChar(255)
+  CONV_RATE     Float?
+  CONV_PRC      Float?
+  SILVER_FINE   Float?
   LESS_WT       Decimal?  @db.Decimal(14, 3)
   VCH_SRNO      Float?
-  OLD_VCH_SRNO  String?   @db.VarChar(255)
+  OLD_VCH_SRNO  Float?
   EMP_CODE      String?
   ISU_SRNO      Float?
   PRM_AMT       Decimal?  @db.Decimal(18, 2)
@@ -5649,9 +5649,9 @@ model SL_DATA {
   TAX_AMT          Decimal?  @db.Decimal(18, 2)
   ROF_AMT          Decimal?  @db.Decimal(18, 2)
   TOT_AMT          Decimal?  @db.Decimal(18, 2)
-  ADV_AMT          String?   @db.VarChar(255)
-  OLD_GL_AMT       String?   @db.VarChar(255)
-  OLD_SL_AMT       String?   @db.VarChar(255)
+  ADV_AMT          Float?
+  OLD_GL_AMT       Float?
+  OLD_SL_AMT       Float?
   CASH_AMT         Decimal?  @db.Decimal(18, 2)
   CARD_AMT         Decimal?  @db.Decimal(18, 2)
   CHQ_AMT          Decimal?  @db.Decimal(18, 2)
@@ -5659,7 +5659,7 @@ model SL_DATA {
   CASH_PAID        Decimal?  @db.Decimal(18, 2)
   KASAR_AMT        Decimal?  @db.Decimal(18, 2)
   BILL_OS          Float?
-  OS_ADJ_AMT       String?   @db.VarChar(255)
+  OS_ADJ_AMT       Float?
   CR_DAYS          Float?
   CARD_AC          String?
   BANK_AC          String?
@@ -5668,8 +5668,8 @@ model SL_DATA {
   EMP_CODE         String?
   VCH_DESC         String?
   ENTRY_TIME       DateTime? @db.Date
-  OLD_GL           String?   @db.VarChar(255)
-  OLD_SL           String?   @db.VarChar(255)
+  OLD_GL           Float?
+  OLD_SL           Float?
   ADD1             String?   @db.VarChar(255)
   ADD2             String?   @db.VarChar(255)
   ADD3             String?   @db.VarChar(255)
@@ -5689,19 +5689,19 @@ model SL_DATA {
   ISU_LC_CODE      String?   @db.VarChar(255)
   ISU_YRCD         String?
   ISU_DBCD         String?   @db.VarChar(3)
-  RTN_NET_AMT      String?   @db.VarChar(255)
-  RTN_TOT_AMT      String?   @db.VarChar(255)
-  RTN_CHQ_AMT      String?   @db.VarChar(255)
-  RTN_CARD_AMT     String?   @db.VarChar(255)
-  RTN_CASH_AMT     String?   @db.VarChar(255)
-  RTN_KASAR_AMT    String?   @db.VarChar(255)
-  RTN_BILL_OS      String?   @db.VarChar(255)
+  RTN_NET_AMT      Float?
+  RTN_TOT_AMT      Float?
+  RTN_CHQ_AMT      Float?
+  RTN_CARD_AMT     Float?
+  RTN_CASH_AMT     Float?
+  RTN_KASAR_AMT    Float?
+  RTN_BILL_OS      Float?
   TCS_CODE         String?
   TCS_PRC          Decimal?  @db.Decimal(9, 4)
   TCS_AMT          Decimal?  @db.Decimal(18, 2)
-  HM_AMT           String?   @db.VarChar(255)
-  HM_TAX_PRC       String?   @db.VarChar(255)
-  HM_TAX_AMT       String?   @db.VarChar(255)
+  HM_AMT           Float?
+  HM_TAX_PRC       Float?
+  HM_TAX_AMT       Float?
   HM_TAX_CODE      String?   @db.VarChar(255)
   TDS_CODE         String?
   TDS_PRC          Decimal?  @db.Decimal(9, 4)
@@ -5717,15 +5717,15 @@ model SL_DATA {
   UPI_AMT          Decimal?  @db.Decimal(18, 2)
   LBR_AMT          Decimal?  @db.Decimal(18, 2)
   OTH_AMT          Decimal?  @db.Decimal(18, 2)
-  CRNT_ADJ_AMT     String?   @db.VarChar(255)
+  CRNT_ADJ_AMT     Float?
   PARTY_FINE       Decimal?  @db.Decimal(14, 3)
   IT_TYPE          String?   @db.VarChar(1)
-  OZ_RATE          String?   @db.VarChar(255)
-  OZ_CONV          String?   @db.VarChar(255)
-  FX_RATE          String?   @db.VarChar(255)
+  OZ_RATE          Float?
+  OZ_CONV          Float?
+  FX_RATE          Float?
   FX_CODE          String?   @db.VarChar(255)
-  MTL_RATE         String?   @db.VarChar(255)
-  TOT_TAX_FREE_AMT String?   @db.VarChar(255)
+  MTL_RATE         Float?
+  TOT_TAX_FREE_AMT Float?
   ZERO_RATED_AMT   String?   @db.VarChar(255)
   RATE_UNFIX       String?   @db.VarChar(255)
 
@@ -5739,7 +5739,7 @@ model SL_DETL {
   rowId           BigInt    @id @default(autoincrement()) @map("row_id")
   VCH_SRNO        Float?
   TAG_NO          String?   @db.VarChar(15)
-  IT_TAX_AMT      String?   @db.VarChar(255)
+  IT_TAX_AMT      Float?
   VCH_NO          String?
   CO_CODE         String?   @db.VarChar(2)
   LC_CODE         String?   @db.VarChar(2)
@@ -5801,7 +5801,7 @@ model SL_DETL {
   ISU_DBCD        String?   @db.VarChar(3)
   ISU_SRNO        Float?
   ITM_GHT_PRC     Decimal?  @db.Decimal(9, 4)
-  GHT_AMT         String?   @db.VarChar(255)
+  GHT_AMT         Float?
   HM_ID           String?   @db.VarChar(10)
   HM_ID2          String?   @db.VarChar(10)
   HM_ID3          String?   @db.VarChar(10)
@@ -5810,31 +5810,31 @@ model SL_DETL {
   HM_ID2_WT       Decimal?  @db.Decimal(14, 3)
   HM_ID3_WT       Decimal?  @db.Decimal(14, 3)
   HM_ID4_WT       Decimal?  @db.Decimal(14, 3)
-  HM_AMT          String?   @db.VarChar(255)
-  IT_DISC_AMT     String?   @db.VarChar(255)
-  TAG_GWT         String?   @db.VarChar(255)
-  TAG_NWT         String?   @db.VarChar(255)
+  HM_AMT          Float?
+  IT_DISC_AMT     Float?
+  TAG_GWT         Float?
+  TAG_NWT         Float?
   FINE_RATE       Decimal?  @db.Decimal(14, 3)
   DISC_PRC        Decimal?  @db.Decimal(9, 4)
   DISC_AMT        Decimal?  @db.Decimal(18, 2)
   TAX_CODE        String?   @db.VarChar(2)
-  TAXABL_RATE     String?   @db.VarChar(255)
-  ITM_IGST_AMT    String?   @db.VarChar(255)
-  ITM_CGST_AMT    String?   @db.VarChar(255)
-  ITM_SGST_AMT    String?   @db.VarChar(255)
-  GRAND_TOTAL     String?   @db.VarChar(255)
+  TAXABL_RATE     Float?
+  ITM_IGST_AMT    Float?
+  ITM_CGST_AMT    Float?
+  ITM_SGST_AMT    Float?
+  GRAND_TOTAL     Float?
   ITM_COLOR       String?   @db.VarChar(15)
   EMP_CODE        String?
   ORD_TAG_STK_ADD String?   @db.VarChar(255)
   DESIGN_IMG_ID   String?   @db.VarChar(50)
   RATE_WITH       String?   @db.VarChar(255)
   ITM_LOT         String?   @db.VarChar(255)
-  MCX_RATE        String?   @db.VarChar(255)
+  MCX_RATE        Float?
   PRM_AMT         Decimal?  @db.Decimal(18, 2)
-  PRM_DISC        String?   @db.VarChar(255)
+  PRM_DISC        Float?
   ITM_STYLE       String?   @db.VarChar(255)
   TAX_TYPE        String?   @db.VarChar(1)
-  TAX_FREE_AMT    String?   @db.VarChar(255)
+  TAX_FREE_AMT    Float?
   TAX_RVRS        String?   @db.VarChar(255)
   ORD_NO          String?
   ORD_LC_CODE     String?   @db.VarChar(255)
@@ -6056,10 +6056,10 @@ model SL_ORD_DATA {
   TAX_PRC        Decimal?  @db.Decimal(9, 4)
   TAX_AMT        Decimal?  @db.Decimal(18, 2)
   TOT_AMT        Decimal?  @db.Decimal(18, 2)
-  ADV_AMT        String?   @db.VarChar(255)
-  ORD_ADJ_AMT    String?   @db.VarChar(255)
-  OLD_GL_AMT     String?   @db.VarChar(255)
-  OLD_SL_AMT     String?   @db.VarChar(255)
+  ADV_AMT        Float?
+  ORD_ADJ_AMT    Float?
+  OLD_GL_AMT     Float?
+  OLD_SL_AMT     Float?
   CASH_AMT       Decimal?  @db.Decimal(18, 2)
   CARD_AMT       Decimal?  @db.Decimal(18, 2)
   CHQ_AMT        Decimal?  @db.Decimal(18, 2)
@@ -6073,10 +6073,10 @@ model SL_ORD_DATA {
   VCH_DESC       String?
   ENTRY_TIME     DateTime? @db.Date
   SL_BILL_TYPE   String?   @db.VarChar(255)
-  OLD_GL         String?   @db.VarChar(255)
-  ADJ_GOLD       String?   @db.VarChar(255)
-  OLD_SL         String?   @db.VarChar(255)
-  ADJ_SILVER     String?   @db.VarChar(255)
+  OLD_GL         Float?
+  ADJ_GOLD       Float?
+  OLD_SL         Float?
+  ADJ_SILVER     Float?
   CARD_ADJ       String?   @db.VarChar(255)
   DATA_TRFR      String?   @db.VarChar(1)
   OLD_VCH_NO     String?
@@ -6091,9 +6091,9 @@ model SL_ORD_DATA {
   USER_DELETE    String?   @db.VarChar(1)
   MOB_ENTRY_SAVE String?   @db.VarChar(255)
   FUN_DATE       String?   @db.VarChar(255)
-  RCUT_RATE      String?   @db.VarChar(255)
-  RCUT_FINE      String?   @db.VarChar(255)
-  RCUT_AMT       String?   @db.VarChar(255)
+  RCUT_RATE      Float?
+  RCUT_FINE      Float?
+  RCUT_AMT       Float?
   UPI_AMT        Decimal?  @db.Decimal(18, 2)
 
   @@index([tenantId])
@@ -6172,7 +6172,7 @@ model SL_ORD_DETL {
   HM_ID3_WT     Decimal?  @db.Decimal(14, 3)
   HM_ID4_WT     Decimal?  @db.Decimal(14, 3)
   HM_ID         String?   @db.VarChar(10)
-  ORD_REC_AMT   String?   @db.VarChar(255)
+  ORD_REC_AMT   Float?
   EMP_CODE      String?
   ITM_COLOR     String?   @db.VarChar(15)
   OLD_TBL_CODE  String?   @db.VarChar(255)
@@ -6287,7 +6287,7 @@ model SL_PR_DETL {
   HM_ID3_WT     Decimal?  @db.Decimal(14, 3)
   HM_ID4_WT     Decimal?  @db.Decimal(14, 3)
   HM_ID         String?   @db.VarChar(10)
-  ITM_OTH       String?   @db.VarChar(255)
+  ITM_OTH       Float?
   CON_PRC       Decimal?  @db.Decimal(9, 4)
   CON_WT        Decimal?  @db.Decimal(14, 3)
   ITM_RATE_TYPE String?   @db.VarChar(1)
@@ -6643,7 +6643,7 @@ model TAX_DATA {
   PARTY_NAME     String?   @db.VarChar(255)
   R_CHARG        String?   @db.VarChar(255)
   ISR_NO         Float?
-  TAX_FREE_AMT   String?   @db.VarChar(255)
+  TAX_FREE_AMT   Float?
   ZERO_RATED_AMT String?   @db.VarChar(255)
   BILL_NO        String?   @db.VarChar(20)
   BILL_DATE      DateTime? @db.Date
@@ -6663,7 +6663,7 @@ model TAX_MAST {
   TAX_GROUP   String?  @db.VarChar(255)
   TAX_NAME    String?  @db.VarChar(255)
   TAX_PRC     Decimal? @db.Decimal(9, 4)
-  ADD_TAX_PRC String?  @db.VarChar(255)
+  ADD_TAX_PRC Float?
   TAX_AC      String?  @db.VarChar(255)
   MAIN_USER   String?  @db.VarChar(15)
 

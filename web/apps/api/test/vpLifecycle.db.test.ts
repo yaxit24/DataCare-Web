@@ -213,7 +213,8 @@ databaseDescribe('database-backed VP adjustment lifecycle', () => {
       temp_name: 'VP Receipt',
       hidden: '00008',
       main_user: 'vp-user',
-      source_adj: '130',
+      // VP_ADJ_AMT is double precision after the column-type correction, so this comes back as a number.
+      source_adj: 130,
       cr: 210,
       dr: 210,
       metal_leg: 1,
@@ -276,7 +277,7 @@ databaseDescribe('database-backed VP adjustment lifecycle', () => {
       rojmel: 3,
       deleted: 0,
       main_user: 'vp-user',
-      source_adj: '75',
+      source_adj: 75,
       cr: 105,
       dr: 105,
     });
@@ -361,7 +362,7 @@ databaseDescribe('database-backed VP adjustment lifecycle', () => {
       ledger: 0,
       rojmel: 0,
       temp: 0,
-      source_adj: '20',
+      source_adj: 20,
     });
   }, 30_000);
 });

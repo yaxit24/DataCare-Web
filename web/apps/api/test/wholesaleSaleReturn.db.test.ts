@@ -546,12 +546,13 @@ databaseDescribe('database-backed wholesale sale return lifecycle', () => {
       // The settlement columns stay zero: TR_WH_SALE_RTN writes them as literal zeros and derives no
       // money/metal settlement, unlike its sibling rate-cut form.
       const settle = (await owner.$queryRawUnsafe(
-        // CONV_RATE and CONV_PRC are VARCHAR on this table while DR_AMT/CR_AMT/DR_FINE/CR_FINE are numeric,
-        // so they cannot share a coalesce and are normalised as text instead.
+        // CONV_RATE and CONV_PRC were VARCHAR here while DR_AMT/CR_AMT/DR_FINE/CR_FINE were numeric, so they
+        // could not share a coalesce. All four are numeric after the column-type correction - the desktop holds
+        // every one of them as float - so the asymmetry and its workaround are both gone.
         `SELECT coalesce("DR_AMT",0)::float da, coalesce("CR_AMT",0)::float ca,
                 coalesce("DR_FINE",0)::float df, coalesce("CR_FINE",0)::float cf,
-                coalesce(NULLIF("CONV_RATE",'')::numeric,0)::float cr,
-                coalesce(NULLIF("CONV_PRC",'')::numeric,0)::float cp
+                coalesce("CONV_RATE",0)::float cr,
+                coalesce("CONV_PRC",0)::float cp
            FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2 LIMIT 1`,
         TENANT,
         created.voucherNo,

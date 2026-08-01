@@ -144,7 +144,7 @@ d('typed ledger report staging', () => {
     expect(String(row.DATA_TYPE).trim()).toBe('L');
   }, 30_000);
 
-  it('stages every LEDR_AC_DATA column, writing the text date and weight columns as text', async () => {
+  it('stages every LEDR_AC_DATA column, writing the text date as ISO and the weights as numbers', async () => {
     const written = await withTenant(runtime, TENANT, (tx: any) =>
       stageLedgerAcDataTx(tx, scope, [
         {
@@ -175,10 +175,11 @@ d('typed ledger report staging', () => {
     expect(String(row.VCH_DT).trim()).toBe('2024-04-05');
     expect(Number(row.DR_AMT)).toBeCloseTo(71091, 2);
     expect(Number(row.CR_AMT)).toBe(0);
-    // Fine-weight columns are varchar too, carrying three decimals rather than a coerced number.
-    expect(String(row.DR_FINE_WT).trim()).toBe('11.172');
-    expect(String(row.CR_FINE_WT).trim()).toBe('0.000');
-    // The silver pair is numeric, unlike the gold pair — an asymmetry in the restored schema.
+    // The gold fine-weight pair used to be varchar here and carried three decimals as text. Both are
+    // `double precision` after the column-type correction - the desktop holds them as float - so the
+    // asymmetry with the silver pair is gone and all four are compared as numbers.
+    expect(Number(row.DR_FINE_WT)).toBeCloseTo(11.172, 3);
+    expect(Number(row.CR_FINE_WT)).toBe(0);
     expect(Number(row.DR_SL_FINE)).toBeCloseTo(2.5, 3);
     expect(Number(row.CR_SL_FINE)).toBe(0);
     expect(String(row.DATA_TYPE).trim()).toBe('L');

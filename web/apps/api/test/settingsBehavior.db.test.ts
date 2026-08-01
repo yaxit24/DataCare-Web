@@ -129,10 +129,33 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       adminSms: 'ADMIN_SMS',
       customerSms: 'CUST_SMS',
     };
+    // Ten CO_SET columns are numeric after the column-type correction, so a bare string parameter fails with
+    // `42804 ... is of type double precision but expression is of type text`, and an empty string fails with
+    // `22P02 invalid input syntax`. The patch API stays string-based, matching the real settings surface; the
+    // conversion happens here at the write.
+    const NUMERIC_COLUMNS = new Set([
+      'CASH_LIMIT',
+      'PAN_CARD_VAL',
+      'INT_YEAR_DAYS',
+      'TAX_ROF',
+      'LBR_ROF',
+      'ITM_RATE_ROF',
+      'OZ_CON_VAL',
+      'FX_RATE',
+      'DHRN_PRC',
+      'THEME',
+    ]);
     for (const [key, value] of Object.entries(patch)) {
+      const column = columns[key as keyof SettingsBehavior];
+      const bound =
+        NUMERIC_COLUMNS.has(column) && value != null
+          ? String(value).trim() === ''
+            ? null
+            : Number(value)
+          : value;
       await owner.$executeRawUnsafe(
-        `UPDATE "CO_SET" SET "${columns[key as keyof SettingsBehavior]}"=$1 WHERE tenant_id=$2 AND "CO_CODE"=$3`,
-        value,
+        `UPDATE "CO_SET" SET "${column}"=$1 WHERE tenant_id=$2 AND "CO_CODE"=$3`,
+        bound,
         TENANT,
         CO,
       );

@@ -15,8 +15,16 @@ export interface SettingColumn {
   table: SettingTable;
   /** Storage shape from information_schema — drives the typed control and the write cast. */
   storage: 'text' | 'number' | 'date';
+  /**
+   * Text width, for `storage: 'text'` only.
+   *
+   * Optional because a numeric column has no character length. Ten CO_SET settings moved from 'text' to
+   * 'number' when the 226 varchar-where-the-desktop-is-numeric columns were corrected - CASH_LIMIT, TAX_ROF,
+   * LBR_ROF, ITM_RATE_ROF, OZ_CON_VAL, FX_RATE, DHRN_PRC, INT_YEAR_DAYS, PAN_CARD_VAL and THEME, the last of
+   * which is an `int` on the desktop and so a theme NUMBER rather than a name.
+   */
   /** Real character maximum for text columns; 0 when not applicable. */
-  maxLength: number;
+  maxLength?: number;
 }
 
 /** Columns that identify the row rather than configure behaviour. Never editable. */
@@ -24,7 +32,7 @@ export const SETTING_IDENTITY_COLUMNS = new Set(['CO_CODE']);
 
 export const SETTING_COLUMNS: readonly SettingColumn[] = [
   // --- CO_SET (60 columns) ---
-  { key: 'THEME', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'THEME', table: 'CO_SET', storage: 'number' },
   { key: 'TAG_RPT', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'FINE_STK_TYPE', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'RATE_MAST_OPEN', table: 'CO_SET', storage: 'text', maxLength: 255 },
@@ -32,7 +40,7 @@ export const SETTING_COLUMNS: readonly SettingColumn[] = [
   { key: 'VB_IMPORT', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'SL_ROW_CHANGE', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'DHRN_INT_TYPE', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'INT_YEAR_DAYS', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'INT_YEAR_DAYS', table: 'CO_SET', storage: 'number' },
   { key: 'OP_DHRN', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'INT_DAY', table: 'CO_SET', storage: 'text', maxLength: 1 },
   { key: 'HELP_SERCH', table: 'CO_SET', storage: 'text', maxLength: 255 },
@@ -43,9 +51,9 @@ export const SETTING_COLUMNS: readonly SettingColumn[] = [
   { key: 'OP_LOAN', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'LOAN_INT_TYPE', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'TRAD_FINE', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'LBR_ROF', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'LBR_ROF', table: 'CO_SET', storage: 'number' },
   { key: 'REMINDER_OPEN', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'ITM_RATE_ROF', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'ITM_RATE_ROF', table: 'CO_SET', storage: 'number' },
   { key: 'ADMIN_SMS', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'CUST_SMS', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'PURC_WITH_LBR', table: 'CO_SET', storage: 'text', maxLength: 255 },
@@ -53,8 +61,8 @@ export const SETTING_COLUMNS: readonly SettingColumn[] = [
   { key: 'GRID_SCROLL', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'STK_RPT_TYPE', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'TOUCH_AUTO_SAVE', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'PAN_CARD_VAL', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'DHRN_PRC', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'PAN_CARD_VAL', table: 'CO_SET', storage: 'number' },
+  { key: 'DHRN_PRC', table: 'CO_SET', storage: 'number' },
   { key: 'DUP_PRINT', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'TAX_CODE', table: 'CO_SET', storage: 'text', maxLength: 2 },
   { key: 'IP_WITH_PC', table: 'CO_SET', storage: 'text', maxLength: 255 },
@@ -66,7 +74,7 @@ export const SETTING_COLUMNS: readonly SettingColumn[] = [
   { key: 'EMP_CODE_MANDATORY', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'STOCK_RPT_TYPE', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'LAST_DAY_LOCK', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'CASH_LIMIT', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'CASH_LIMIT', table: 'CO_SET', storage: 'number' },
   { key: 'DHRN_WAPP', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'SCHM_WAPP', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'LEDR_BILL_COL', table: 'CO_SET', storage: 'text', maxLength: 255 },
@@ -77,10 +85,10 @@ export const SETTING_COLUMNS: readonly SettingColumn[] = [
   { key: 'LBR_TYPE', table: 'CO_SET', storage: 'text', maxLength: 1 },
   { key: 'AC_LC_CODE_LEN', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'LOCK_DATE', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'TAX_ROF', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'TAX_ROF', table: 'CO_SET', storage: 'number' },
   { key: 'RATE_PAR', table: 'CO_SET', storage: 'text', maxLength: 1 },
-  { key: 'OZ_CON_VAL', table: 'CO_SET', storage: 'text', maxLength: 255 },
-  { key: 'FX_RATE', table: 'CO_SET', storage: 'text', maxLength: 255 },
+  { key: 'OZ_CON_VAL', table: 'CO_SET', storage: 'number' },
+  { key: 'FX_RATE', table: 'CO_SET', storage: 'number' },
   { key: 'FX_CODE', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'COUNTRY_ID', table: 'CO_SET', storage: 'text', maxLength: 255 },
   { key: 'MFG_ONE_FORM', table: 'CO_SET', storage: 'text', maxLength: 1 },

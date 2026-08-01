@@ -64,4 +64,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20260730050000_message_log_rls',
     checksum: '298e2dd8f3b511ae27c2302e8d3d546b06baf13346b6dabbe84a261bdf3449c6',
   },
+  {
+    // Corrects 226 columns that were varchar in Postgres while the desktop holds them as float or int.
+    name: '20260801120000_column_type_parity',
+    checksum: 'd90f7313519b2cd7a158a6ce55728e1d181807bfe2d8dc41506efffe55373413',
+  },
 ];

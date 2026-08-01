@@ -637,7 +637,7 @@ async function writeTx(
         PARTY_NAME: resolved.party.name,
         R_CHARG: 'N',
         ISR_NO: 0,
-        TAX_FREE_AMT: '0',
+        TAX_FREE_AMT: 0,
         ZERO_RATED_AMT: '0',
         BILL_NO: text(input.billNo).slice(0, 20),
         BILL_DATE: billDate,
