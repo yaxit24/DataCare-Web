@@ -138,8 +138,24 @@ verification sequence and to CI.
 
 **Exit criterion:** 0 errors and the command is in the gate list.
 
-**Phase 0 exit:** all five items done, each with a control demonstrated failing. Only then is any Phase 1
-result meaningful.
+### 0.6 Build the documentation reference checker
+
+Every `path:line` citation, table name and numeric claim in the docs must resolve against the tree. The manual
+version of this check has caught something **seven** times (§10.4), which is a high enough rate to automate.
+
+**Implementation:** `scripts/check-doc-references.mjs` — extract citations and `<!-- verify: cmd -->` tagged
+claims, re-run each, fail on mismatch. **Control:** alter one cited line number and confirm it fails.
+
+### 0.7 Build the completion register
+
+`docs/COMPLETION-REGISTER.json` plus `scripts/check-completion-register.mjs` (§9.1). Without it there is no
+machine-checkable definition of done, and progress reverts to assertion.
+
+**Seed it** with all 204 forms in state `unclassified`, all 22 families, 48 report slugs, 39 settings and 7
+integrations, so the starting position is explicit rather than implied.
+
+**Phase 0 exit:** all seven items done, each with a control demonstrated failing. Only then is any Phase 1
+result meaningful — and the register plus the reference checker are what keep every later phase honest.
 
 ---
 
@@ -225,6 +241,9 @@ A family is **done** when all of these hold and are retained as artifacts:
 5. Edit and delete are covered: post → edit → assert identity preserved → delete → assert full reversal.
 6. A control is demonstrated failing for each new assertion.
 7. `LEDR_KEY` reproduced byte-for-byte, including line numbers where the type repeats.
+8. **`docs/comparisons/<family>.md` written in the same commit**, with the four-way triage and the artifact
+   path; `MODULE-VERIFICATION-CATALOGUE.md` and `STATE-OF-PARITY.md` updated; any correction added to
+   `GAP-ANALYSIS-AND-PLAN.md` **with its method error stated**, not just the corrected fact.
 
 ### 1.5 Known open items in family 1 (sale) — the template
 
@@ -679,6 +698,8 @@ Phase 0 (instruments)  ─── blocks everything
           └── Phase 3.2 (report data parity) ── shares the loader with ── Phase 5 (migration)
                  └── Phase 3.3 (Crystal) ← needs Windows
 Phase 6 (owner decisions) ── blocks closure of 1, 2, 5
+Phase 10 (docs)           ── NOT a phase: an exit criterion inside every item above
+Phase 11 (continuous run) ── the operating protocol for all of it
 Phase 7 (integrations)    ── needs hardware and credentials
 Phase 8 (hardening + UAT) ── last, and the UAT cannot be shortened
 ```
@@ -702,3 +723,161 @@ projection becomes possible. That is the first point at which a schedule means a
 The web application is well engineered and barely compared. **Phase 1 is the migration**; everything else
 supports it, and no amount of the rest substitutes for replaying real vouchers, family by family, until the
 findings dry up.
+
+---
+
+## 10. Documentation discipline — during implementation, not after
+
+**The rule.** A phase item is not complete when the code works. It is complete when the code works, the tests
+prove it, the control has been demonstrated failing, **and the affected documents are updated in the same
+commit.** Documentation written afterwards is written from memory, and memory is where the retractions in
+`GAP-ANALYSIS-AND-PLAN.md` came from.
+
+### 10.1 Which document absorbs which kind of finding
+
+| Finding                                      | Document                                      | What goes in                                                  |
+| -------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------- |
+| A schema fact, type surprise, or convention  | `TECHNICAL-REFERENCE.md`                      | the fact, its consequence, and the defect it caused           |
+| A measurement recipe, gate, control, or trap | `VERIFICATION-REFERENCE.md`                   | the command, and what happens when the step is skipped        |
+| Per-module state                             | `MODULE-VERIFICATION-CATALOGUE.md`            | tables + real counts, verified/not, next measurement          |
+| A voucher family comparison                  | `docs/comparisons/<family>.md`                | the four-way triage, with the artifact path                   |
+| A correction or retraction                   | `GAP-ANALYSIS-AND-PLAN.md`                    | what was claimed, why it was wrong, what the method error was |
+| Overall position                             | `STATE-OF-PARITY.md`                          | measured counts only, never an impression                     |
+| A new test layer or gate                     | `VALIDATION-PLAN.md`                          | what it can prove **and what it cannot**                      |
+| Phase progress                               | `MIGRATION-COMPLETION-PLAN.md` + the register | state change with its evidence path                           |
+
+`FIRST-REAL-COMPARISON.md` becomes the **template**, not a growing file. Each family gets its own comparison
+record in `docs/comparisons/`, using the same four categories: _fixed_, _deliberate divergence_, _unresolved_,
+_owner decision_.
+
+### 10.2 The per-item commit contract
+
+Every implementation commit carries all five, or it is not finished:
+
+1. the code change,
+2. the test that fails without it,
+3. evidence the control was demonstrated failing (in the commit message),
+4. the document updates,
+5. the register state change.
+
+### 10.3 Retractions are additive, never silent edits
+
+When a previous finding turns out to be wrong, **the wrong finding stays** with its correction beside it. Six
+retractions are recorded so far and the pattern in them has been more useful than any individual fix — the
+`KR_DETL` false positive survived its method's retraction for weeks precisely because a headline was corrected
+without revisiting the conclusions drawn with it.
+
+**A retraction must state the method error, not just the corrected fact.** "The rounding is not a defect" is
+half a retraction; "the harness seeded `CO_SET` but not `CO_SET_NEW`, so an absent setting looked like a missing
+feature" is the whole one.
+
+### 10.4 Verify every reference against the tree before committing
+
+This check has caught something **seven** times: five reversed rate-cut directions, a 220-line stale export
+table, the `KR_DETL` retraction, book 043's `CUR_USE`, the ledger total 5194→5094, 44→48 report slugs, and the
+test-typecheck count 112→114.
+
+```bash
+# every file path, line citation and count in a document must resolve
+node scripts/check-doc-references.mjs        # TO BUILD in Phase 0
+```
+
+**To build (Phase 0.6):** a script that extracts `path:line` citations, table names and numeric claims tagged
+with a `<!-- verify: cmd -->` comment from the docs, re-runs each, and fails on a mismatch. Until it exists,
+the check is manual and must still happen.
+
+**Working assumption, stated because the rate justifies it:** any unverified document is roughly half wrong.
+
+### 10.5 Staleness is a gate, not a habit
+
+`check-completion-register.mjs` (§9.1) fails when an artifact is older than the code it certifies. Extend the
+same idea to documents: a document claiming a module is verified, whose module has changed since, is stale and
+fails. This is what stops the doc set from drifting into fiction during a long implementation.
+
+---
+
+## 11. Continuous execution protocol
+
+Once implementation starts it runs to completion without stopping. This section defines what that means
+concretely, so "nonstop" is a procedure rather than an intention.
+
+### 11.1 The loop
+
+```
+read the register  ->  take the highest item on the critical path
+  ->  measure (never assume)
+  ->  implement
+  ->  test + demonstrate the control failing
+  ->  run the full gate sequence
+  ->  read the result, THEN commit (separate step, always)
+  ->  update docs + register in the same commit
+  ->  push
+  ->  repeat
+```
+
+**No idle turns.** If an item is blocked, switch tracks (§11.4) rather than stopping. Parallel tracks exist
+precisely so a blocker never halts the whole effort: Phase 1 families, Phase 2 classification and Phase 4
+settings are independent of each other.
+
+### 11.2 Resume from the register, never from memory
+
+Context is finite and will compact during a run of this length. **Recovery is by re-reading state, not by
+recalling it:**
+
+```bash
+git log --oneline -20                      # what actually landed
+node scripts/check-completion-register.mjs # what is claimed, and whether its evidence exists
+(cd apps/api && npx vitest run)            # the true current count
+pnpm type:parity && pnpm schema:readiness  # the true current gate state
+```
+
+Any belief about progress that these four commands do not confirm is discarded. This is the same discipline as
+"source for what exists, data for what runs", applied to the project's own state.
+
+### 11.3 Never leave work uncommitted
+
+A verified-green change is committed before the next item begins. The one time a commit was cancelled
+mid-execution, the next session had to reconstruct what was on disk versus what was pushed.
+
+Corollary: **never put `vitest run` and `git commit` in the same shell block.** Three commits landed on red
+before this became a mechanism instead of an intention.
+
+### 11.4 When blocked, switch tracks — do not stop
+
+| Blocker                                                             | Action                                                                                                    |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| A material business rule cannot be resolved from source **or** data | record it in §6, take the next item, **ask at the next natural checkpoint** — do not guess                |
+| Needs Windows / hardware / credentials                              | record the requirement, move to work that does not                                                        |
+| Two failed attempts at the same approach                            | stop tweaking. Diagnose the root cause, state what went wrong, change approach                            |
+| A test fails in a full run but passes in isolation                  | check connections, re-run once; if it moves, it is contention — if it repeats, it is real                 |
+| A gate goes red unexpectedly                                        | read the failure log **before** overwriting it; the identity of nine failing tests was lost that way once |
+
+**The only legitimate reason to stop and ask** is a business rule that neither the desktop source nor the real
+data can settle — a genuine ambiguity where guessing would embed a wrong answer. Everything else continues.
+
+### 11.5 What "the end" means
+
+Not "the plan's items are ticked". The end is:
+
+1. `check-completion-register.mjs` green — every one of the 204 forms classified, every family verified with a
+   live artifact, no staleness;
+2. `g5:parity` GREEN on captured evidence across all live families;
+3. `type:parity` baseline at 0, or every remaining entry justified in writing;
+4. 39 of 39 settings with a matrix and a control;
+5. report data parity green; Crystal layout artifacts retained for every in-scope report;
+6. a rehearsed data migration whose reconciliation report shows zero unexplained differences;
+7. every integration evidenced by a real reading, print or delivered message;
+8. the six owner decisions recorded as decisions;
+9. **UAT signed off after one full month-end of parallel running.**
+
+Item 9 cannot be shortened, and it is the only one that is not mine to complete.
+
+### 11.6 Honesty conditions that hold throughout
+
+- Never claim parity without a retained artifact.
+- Never claim an integration works without a real reading.
+- Never present presence as behaviour — `schema:readiness` at 100% coexisted with 226 wrong types, and
+  `settings:parity` at 128/128 coexists with 37 unproven behaviours.
+- Never call a routine dead for _the business_ — only unused in `Live24`.
+- Report the discovery rate alongside progress. **A phase that finds nothing is either finished or badly
+  measured, and the second is more likely.**
