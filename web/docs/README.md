@@ -10,6 +10,8 @@ Nine documents. Read in this order depending on what you need.
 | **verify, measure or test** anything    | **`VERIFICATION-REFERENCE.md`** — method, recipes, controls, gates, process rules                     |
 | know **where a specific module stands** | **`MODULE-VERIFICATION-CATALOGUE.md`** — per-module authority, tables, verified/not, next measurement |
 | know **the overall position**           | **`STATE-OF-PARITY.md`** — measured web-vs-desktop assessment                                         |
+| know **what is left before go-live**    | **`MIGRATION-COMPLETION-PLAN.md`** — nine phases with evidence, tests and exit criteria               |
+| see **the first real comparison**       | **`FIRST-REAL-COMPARISON.md`** — one voucher, triaged four ways                                       |
 
 ## Working documents
 
