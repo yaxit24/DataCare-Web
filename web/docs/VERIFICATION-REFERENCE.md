@@ -188,6 +188,7 @@ node scripts/report-baselines.mjs    # 254 layouts unchanged — never pass --wr
 node scripts/check-g5-parity.mjs     # G5_RED — correct, see §7
 pnpm type:parity            # 226 numeric->text mismatches baselined; a NEW one fails
 pnpm register:check         # 198 desktop menu items; --strict fails while any is unclassified
+pnpm docs:refs              # every cited path resolves; every pinned claim still holds
 pnpm lint                   # 502 files, 0 policy violations
 pnpm build --force          # 7/7
 (cd apps/web && node test/browser.smoke.mjs)   # AFTER build, exit 0

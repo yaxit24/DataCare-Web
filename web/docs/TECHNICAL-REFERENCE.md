@@ -22,17 +22,20 @@ web/
   docs/              this and its siblings
 ```
 
-| Measure                         | Value             | Command                                                     |
-| ------------------------------- | ----------------- | ----------------------------------------------------------- |
-| API tests                       | 1054 in 124 files | `(cd apps/api && npx vitest run)`                           |
-| DB-backed tests                 | 47                | `ls apps/api/test/*.db.test.ts \| wc -l`                    |
-| Lint surface                    | 502 source files  | `pnpm lint`                                                 |
-| Policed route strings           | 383               | pinned twice in `apps/api/test/routePolicy.test.ts`         |
-| `route()` policy entries        | 140               | `grep -c "route(" apps/api/src/modules/rbac/routePolicy.ts` |
-| Report slugs                    | 48                | `REPORT_BUILDERS` in `routes/txn.ts`                        |
-| Build targets                   | 7                 | `pnpm build`                                                |
-| Desktop menu items to reproduce | 198               | `NextMain.MENU_DATA`, 13 tabs — the authoritative surface   |
-| Classified in the register      | 0 of 198          | `pnpm register:check`                                       |
+| Measure                  | Value             | Command                                                     |
+| ------------------------ | ----------------- | ----------------------------------------------------------- |
+| API tests                | 1054 in 124 files | `(cd apps/api && npx vitest run)`                           |
+| DB-backed tests          | 47                | `ls apps/api/test/*.db.test.ts \| wc -l`                    |
+| Lint surface             | 502 source files  | `pnpm lint`                                                 |
+| Policed route strings    | 383               | pinned twice in `apps/api/test/routePolicy.test.ts`         |
+| `route()` policy entries | 140               | `grep -c "route(" apps/api/src/modules/rbac/routePolicy.ts` |
+| Report slugs             | 48                | `REPORT_BUILDERS` in `routes/txn.ts`                        |
+| Build targets            | 7                 | `pnpm build`                                                |
+
+<!-- verify: ls apps/api/test/*.test.ts | wc -l | tr -d ' ' == 129 -->
+
+| Desktop menu items to reproduce | 198 | `NextMain.MENU_DATA`, 13 tabs — the authoritative surface |
+| Classified in the register | 0 of 198 | `pnpm register:check` |
 
 **`packages/core` is built separately.** Vitest transpiles `apps/api/src` on the fly but **not** that
 package. A change there needs `pnpm --filter @datacare/core build` or tests silently run against the old

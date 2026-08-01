@@ -24,7 +24,8 @@
     "g5:parity": "node scripts/check-g5-parity.mjs",
     "fresh:provision": "node scripts/check-fresh-provision.mjs",
     "type:parity": "node scripts/check-type-parity.mjs",
-    "register:check": "node scripts/check-completion-register.mjs"
+    "register:check": "node scripts/check-completion-register.mjs",
+    "docs:refs": "node scripts/check-doc-references.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.0",

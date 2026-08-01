@@ -100,7 +100,7 @@ guessed.
 
 ## Phase 0 — Trust the instruments (blocks everything else)
 
-**Progress at 2026-08-01: 4 of 7 items done, each with a control demonstrated failing.**
+**Progress at 2026-08-01: 5 of 7 items done, each with a control demonstrated failing.**
 
 | Item                                    | State                 | Evidence                                                                   |
 | --------------------------------------- | --------------------- | -------------------------------------------------------------------------- |
@@ -109,7 +109,7 @@ guessed.
 | 0.3 replay harness seeds completely     | **done for rounding** | `PARITY_STRICT=1` throws on any unset flag; `parityStrictSettings.test.ts` |
 | 0.4 type parity closure                 | gated, 226 baselined  | `pnpm type:parity`                                                         |
 | 0.5 typecheck the tests                 | open                  | 114 errors                                                                 |
-| 0.6 doc reference checker               | open                  | —                                                                          |
+| 0.6 doc reference checker               | **done**              | `pnpm docs:refs` — 131 citations, 11 with line numbers, 3 controls         |
 | 0.7 completion register                 | **done**              | `pnpm register:check`, 198 items                                           |
 
 **0.1 and 0.7 each found something the moment they existed** — 0.1 exposed that `ROJ_MEL_DATA` had never been
@@ -458,6 +458,8 @@ For each of the 48 existing slugs:
 3. **Compare row sets** — same canonicaliser, same union-not-intersection discipline as the voucher differ.
 4. **Compare totals and groupings separately** from detail rows; a matching total with mismatched detail is a
    worse failure than an obvious one.
+
+<!-- planned: scripts/check-report-parity.mjs -->
 
 **New tooling required:** `scripts/check-report-parity.mjs` plus a `report-parity-baseline.json`. Model it on
 `check-type-parity.mjs`: SKIP (never silent pass) when the SQL Server side is unavailable, exit 1 on a new
