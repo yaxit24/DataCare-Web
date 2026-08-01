@@ -54,7 +54,18 @@ export const ROW_KEYS: Record<string, readonly string[]> = {
   // SR_NO deliberately does NOT lead: the desktop writes SR_NO 1 on BOTH rows of a two-line sale and
   // distinguishes them by TAG_NO, while the web numbers them 1 and 2. Keying on it would preserve the
   // mispairing and hide the numbering difference itself, which is a finding worth keeping visible.
-  MAIN_STOCK: ['IT_CODE', 'TAG_NO', 'VCH_SRNO', 'ITM_SIGN'],
+  // A KEY COLUMN MUST NOT BE A COLUMN UNDER TEST. TAG_NO and VCH_SRNO are exactly the columns the comparison
+  // is examining - the desktop sold a tagged instance (TAG_NO 'MAS00013', VCH_SRNO a 12-digit composite) where
+  // the web wrote 'N' and 0 - so including them in the key GUARANTEES the rows cannot pair, which then hides
+  // every other difference in that row behind a missing/extra pair or a forced one.
+  //
+  // Adding IT_CODE fixed the cross-line mispairing but left TAG_NO in place, so MAIN_STOCK was still being
+  // force-paired one row at a time. The forced-pair report is what made that visible.
+  //
+  // What remains is stable identity for a stock movement: which item, which direction. Two lines of the same
+  // item in the same direction would collide, and that case falls through to the content key rather than being
+  // mispaired.
+  MAIN_STOCK: ['IT_CODE', 'ITM_SIGN'],
   BAR_CAN_DETL: ['TAG_NO', 'VCH_SRNO'],
   // Ledger rows are identified by account and side. Several rows can share an account, so the amount pair is
   // part of the key.
@@ -87,6 +98,19 @@ export interface TableDiff {
   missingColumns: string[];
   fieldsCompared: number;
   fieldsExcluded: number;
+  /**
+   * Rows compared by FORCE rather than by key: one row left unpaired on each side, so they are compared
+   * field-by-field because that yields more information than reporting one missing plus one extra.
+   *
+   * Surfaced because it is the differ's only signal that its own PAIRING may be wrong. The shortcut is useful -
+   * it is why `SL_DATA` was compared at all while the row keys were defective - but it also means a broken key
+   * on a single-row table looks perfectly clean: the rows get compared anyway, and if their values agree there
+   * is nothing to report. A regression test for the key defect passed against broken code for exactly this
+   * reason.
+   *
+   * So a non-zero count here on a table that OUGHT to pair by key is a warning, not a detail.
+   */
+  forcedPairs: number;
   differences: FieldDifference[];
 }
 
@@ -220,6 +244,8 @@ function diffTable(
   const comparedColumns = comparable.filter((c) => wIndex.has(upper(c.name))).map((c) => c.name);
 
   const differences: FieldDifference[] = [];
+  // Counted at function scope because the return is outside the both-sides branch where forcing happens.
+  let forcedPairCount = 0;
   const missingRows: string[] = [];
   const extraRows: string[] = [];
   let fieldsCompared = 0;
@@ -290,6 +316,7 @@ function diffTable(
 
     if (unpairedD.length === 1 && unpairedW.length === 1) {
       forcedPairs.push([unpairedD[0]!, unpairedW[0]!, 'single unmatched row']);
+      forcedPairCount += 1;
     } else {
       for (const row of unpairedD)
         missingRows.push(rowKeyOf(table, row, dIndex, comparedColumns, wIndex));
@@ -329,6 +356,7 @@ function diffTable(
     presentOn,
     desktopRows: desktop?.rows.length ?? 0,
     webRows: web?.rows.length ?? 0,
+    forcedPairs: forcedPairCount,
     missingRows: missingRows.slice(0, 50),
     extraRows: extraRows.slice(0, 50),
     missingColumns,
@@ -442,6 +470,20 @@ export function formatDiff(report: BundleDiffReport): string {
     `rows missing ${t.rowsMissing}   rows extra ${t.rowsExtra}   ` +
       `tables desktop-only ${t.tablesDesktopOnly}   web-only ${t.tablesWebOnly}`,
   ];
+  // Forced pairs are the differ's only signal that its own key construction may be wrong, so they are printed
+  // even when nothing differed - a force-paired table with zero differences is precisely the case that looks
+  // clean while proving nothing about pairing.
+  // Only MULTI-row tables are warned about. A header table with one row per voucher - SL_DATA,
+  // BILL_OS_DATA - has nothing to pair BY, so forcing is the correct behaviour there; reporting it would be
+  // noise that trains the reader to ignore the line. A table with SEVERAL rows that still needed forcing has
+  // a key that does not identify its rows, which is worth acting on.
+  const forced = report.cases.flatMap((c) =>
+    c.tables
+      .filter((tb) => tb.forcedPairs > 0 && (tb.desktopRows > 1 || tb.webRows > 1))
+      .map((tb) => `${c.caseId}/${tb.table} (${tb.desktopRows}v${tb.webRows} rows)`),
+  );
+  if (forced.length)
+    lines.push(`KEY WARNING - multi-row tables compared without a key match: ${forced.join(', ')}`);
   if (report.desktopOnlyCases.length)
     lines.push(`cases never entered on the web: ${report.desktopOnlyCases.join(', ')}`);
   if (report.webOnlyCases.length)
