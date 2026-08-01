@@ -109,6 +109,64 @@ complete. Read a total first, or ask for the count separately.
 
 ---
 
+## Status after implementation
+
+**Replay** `apps/api/integration/parity-replay-cash.mjs` (book 001 voucher 00001), under `PARITY_STRICT=1`.
+163 fields compared, 47 raw differences, 26 unpopulated columns, **7 real** — of which 6 were the replay's own
+date and are now corrected.
+
+**All four ledger legs reproduce the desktop byte for byte:**
+
+```
+[01002024-202500100001         101]  ac 000926  ld 00001   Cr 60000.00
+[01002024-202500100001         102]  ac 00001   ld 000926  Dr 60000.00
+[01002024-202500100001         103]  ac 000926  ld 00057   Cr   771.00
+[01002024-202500100001         104]  ac 00057   ld 000926  Dr   771.00
+```
+
+### Fixed
+
+| #   | Defect                                                                     | Paths                        |
+| --- | -------------------------------------------------------------------------- | ---------------------------- |
+| 1   | Party leg **netted** — 3 legs where the desktop writes 4                   | `postReceipt`, `postPayment` |
+| 2   | Multi-line wrote **aggregate** cash/kasar legs — 11 legs for 9 lines vs 18 | `postPaymentLines`           |
+| 3   | No leg codes — positional fallback instead of 01–08                        | all three                    |
+| 4   | Wrong order — the desktop's first leg is the party                         | all three                    |
+| 5   | No `LD_CODE`                                                               | all three                    |
+| 6   | Placeholder `'CASH'` instead of `BOOK_DETL` slot 1                         | all three                    |
+
+Defect 6 is now at **four occurrences** across the finance paths (scheme, receipt, payment, payment-lines), so
+it is systemic rather than local.
+
+### Still open — the Rojmel
+
+`ROJ_MEL_DATA` needs a row per movement too. The desktop writes **three** rows for this voucher; the web writes
+one.
+
+```
+[01002024-20250010000101         1]  ac 00001   ld 000926  Cr 60000.00
+[01002024-20250010000102         1]  ac 000926  ld 00057   Cr   771.00
+[01002024-20250010000103         1]  ac 00057   ld 000926  Dr   771.00
+```
+
+**A FOURTH key layout.** This is `<leg>` at characters 22-23 plus a bare line right-aligned in 10 — the scheme's
+`AC_DATA` shape — and _not_ the cash ledger's 12-wide combined field, even though both belong to the same
+voucher. So one voucher uses two different key layouts across two tables.
+
+And the amounts: `ROJ_MEL_DATA.CR_AMT` is **60000.00**, the cash tendered. The web wrote 60771.00, the party's
+total including the write-off.
+
+That figure **contradicts a comment in `finance.ts`** which states the cash books "take their DEBIT/CREDIT from
+the PARTY's leg … the party's ledger figure, which includes any kasar written off, not the cash actually
+tendered." The comment was written when the party leg was a single netted 60771; splitting the legs made the
+party's _first_ leg 60000, and the desktop agrees with that. The comment needs correcting along with the code —
+it is evidence about the old shape, not the desktop.
+
+Note too that the Rojmel's type-01 row **credits** cash where the ledger **debits** it, so the Rojmel's
+direction convention is not the ledger's and must be taken from data per row type.
+
+---
+
 ## Next steps
 
 1. Pick reference vouchers: 001/00001 (4 legs — party, cash, party, kasar) and 002/00029 (18 legs, multi-line).
