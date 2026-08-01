@@ -367,17 +367,60 @@ async function postMemberEntry(
     // EXCEPT a MEMB OPENING (entType 'O') posts NO money ledger — desktop TR_MEMB_ENT.cs#L4660 only
     // writes the AD_OS carry-forward for openings, and the real 175-member opening voucher 00086 has
     // 0 AC_DATA legs, confirming it.
+    // The desktop's measured leg shape for book 074, from all 2620 real AC_DATA legs:
+    //
+    //   type 01  the scheme LIABILITY, credited   (1311 rows, one account)
+    //   type 02  the RECEIPT account, debited     (1311 rows, cash and four banks)
+    //
+    // Liability FIRST - type 01 is the credit - and each pair carries the MEMBER LINE in the key, giving 33
+    // characters. `buildTransferLedger` is not used here: it emits debit-first, sets no LD_CODE, and is shared
+    // with modules whose leg order has not been measured, so changing it would guess on their behalf.
+    // The RECEIPT account comes from BOOK_DETL slot 1 when the caller supplies no explicit bank.
+    //
+    // `settlementAc` returns the literal 'CASH' for cash mode, which is a placeholder rather than an account:
+    // the real leg-02 rows name 00001 and four banks, and 00001 is book 074's slot 1. An explicit bankAc still
+    // wins, and the literal remains the last resort so a book without the slot behaves as before rather than
+    // failing.
+    const slotRec = (await tx.$queryRawUnsafe(
+      `SELECT "AC_CODE" FROM "BOOK_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+          AND coalesce("SR_NO",0)::numeric=1
+        LIMIT 1`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coBook,
+    )) as Array<{ AC_CODE: unknown }>;
+    const recAcResolved =
+      (input.bankAc ?? '').trim() || String(slotRec[0]?.AC_CODE ?? '').trim() || recAc;
+
     const ledger: LedgerLine[] = isOpening
       ? []
-      : lines.flatMap((l) =>
-          buildTransferLedger(
-            key,
-            tags.vchType,
-            recAc,
-            (l.liabAc ?? '').trim() || liabOf.get(l.schmCode)!,
-            numv(l.amount),
-          ),
-        );
+      : lines.flatMap((l, idx) => {
+          const liabAc = (l.liabAc ?? '').trim() || liabOf.get(l.schmCode)!;
+          const amount = numv(l.amount);
+          const base = { ...key, VCH_TYPE: tags.vchType, legLine: idx + 1 };
+          return [
+            {
+              ...base,
+              legType: 1,
+              AC_CODE: liabAc,
+              LD_CODE: recAcResolved,
+              DR_AMT: 0,
+              CR_AMT: amount,
+              SIGN: 'C',
+            },
+            {
+              ...base,
+              legType: 2,
+              AC_CODE: recAcResolved,
+              LD_CODE: liabAc,
+              DR_AMT: amount,
+              CR_AMT: 0,
+              SIGN: 'D',
+            },
+          ];
+        });
     if (ledger.length) assertBalanced(ledger);
 
     const adDataRows = lines.map((l, i) => ({
@@ -394,7 +437,7 @@ async function postMemberEntry(
       TOT_AMT: 0,
       IT_DESC: `Scheme ${l.schmCode} ${isOpening ? 'opening balance' : 'installment'}`,
       ENT_TYPE: tags.entType, // desktop TR_MEMB_ENT (L4567): 'E' = monthly entry, 'O' = MEMB OPENING
-      REC_AC: recAc,
+      REC_AC: recAcResolved,
       CHQ_NO: l.chqNo ?? null,
       ENTRY_TIME: vchDate,
       VCH_TIME: vchDate,
@@ -424,14 +467,18 @@ async function postMemberEntry(
       // 000418 OLD HDFC (163), 001023 AXIS CURRENT (33), 000207 SBI (17), blank (91). Writing
       // the liability account here would break any grouping of collections by cash/bank.
       EMP_CODE: (l.empCode ?? '').trim().slice(0, 3) || null,
-      LD_CODE: recAc.trim().slice(0, 8) || null,
+      LD_CODE: recAcResolved.trim().slice(0, 8) || null,
       GOLD_WT: 0,
       ...key,
       SR_NO: i + 1,
       VCH_DATE: vchDate,
       VCH_TYPE: tags.vchType,
       INOUT_TYPE: 'I',
-      ENTRY_TYPE: 'I',
+      // Measured on all 8194 real AD_OS rows: ENTRY_TYPE is 'E' on 8070, 'O' on 90 and 'A' on 34. 'I' appears
+      // nowhere, so it was a plausible-looking invention ("instalment") rather than an observed value. It
+      // mirrors AD_DATA.ENT_TYPE - 'E' for a monthly entry, 'O' for an opening - and the adjust path already
+      // writes 'A' correctly further down.
+      ENTRY_TYPE: tags.entType,
       BOOK_NAME: tags.bookName,
       SCHM_CODE: l.schmCode,
       SCHM_DATE: vchDate,
@@ -472,12 +519,12 @@ async function postMemberEntry(
             vchType: tags.vchType,
             bookName: tags.bookName,
             partyName: '',
-            partyCode: recAc,
+            partyCode: recAcResolved,
           },
           lines.map((l, i) => ({
             lineNo: i + 1,
             controlAc: (l.liabAc ?? '').trim() || liabOf.get(l.schmCode)!,
-            receiptAc: recAc,
+            receiptAc: recAcResolved,
             amount: numv(l.amount),
             banked: mode !== 'cash',
           })),

@@ -66,6 +66,8 @@ const pad = (v: unknown, n: number): string => String(v ?? '').padStart(n, '0');
 function enrichLedgerLine(
   line: LedgerLine,
   srno: number,
+  /** Right-aligned line number, or '' for the 23-character form. */
+  lineSuffix: string,
   bookName?: string,
   voucherDate?: Date | null,
 ): LedgerLine {
@@ -88,7 +90,7 @@ function enrichLedgerLine(
       // `01002024-20250270000101` - which is the same layout already verified byte-for-byte for
       // ROJ_MEL_DATA. Padding to six produced a 24-character key with an extra zero, so every web ledger
       // key differed from the desktop's in a column that is part of the primary key.
-      `${line.CO_CODE ?? ''}${line.LC_CODE ?? ''}${line.CO_YEAR ?? ''}${line.CO_BOOK ?? ''}${pad(line.VCH_NO, 5)}${pad(srno, 2)}`,
+      `${line.CO_CODE ?? ''}${line.LC_CODE ?? ''}${line.CO_YEAR ?? ''}${line.CO_BOOK ?? ''}${pad(line.VCH_NO, 5)}${pad(srno, 2)}${lineSuffix}`,
     VCH_DATE: line.VCH_DATE ?? rowDate,
     IT_TYPE: line.IT_TYPE ?? 'A',
     DATA_TYPE: line.DATA_TYPE ?? 'A',
@@ -357,11 +359,26 @@ export async function postVoucherTx(tx: any, tenantId: string, input: PostInput)
     // 21/22, 23/24, 25/26). The band 50-98 is unused by any of them, and 99 is the web-only round-off leg.
     const declared = (line as Record<string, unknown>).legType;
     const legNo = typeof declared === 'number' ? declared : 50 + srno;
+    // `legLine` appends a LINE NUMBER, right-aligned in 10, giving a 33-character key.
+    //
+    // Measured on book 074 (member entry): all 2620 real AC_DATA legs are 33 characters and carry the MEMBER
+    // LINE, because a scheme instalment posts a Dr/Cr pair per member - 570 vouchers have 2 legs, 172 have 4
+    // and one has 22. The sale family's keys are 23 characters with no line, so this is per-family and cannot
+    // be applied globally.
+    //
+    // Same layout ROJ_MEL_DATA already uses, verified byte-exact there against a real 33-character key.
+    const declaredLine = (line as Record<string, unknown>).legLine;
     // legType is a directive to this function, not a column, so it never reaches the INSERT.
-    const { legType: _legType, ...columns } = line as Record<string, unknown>;
+    const { legType: _legType, legLine: _legLine, ...columns } = line as Record<string, unknown>;
     const row =
       input.ledger.table === 'AC_DATA'
-        ? enrichLedgerLine(columns as typeof line, legNo, input.bookName, voucherDate)
+        ? enrichLedgerLine(
+            columns as typeof line,
+            legNo,
+            typeof declaredLine === 'number' ? String(declaredLine).padStart(10, ' ') : '',
+            input.bookName,
+            voucherDate,
+          )
         : (columns as typeof line);
     await insertRowTx(tx, input.ledger.table, tenantId, row);
   }
