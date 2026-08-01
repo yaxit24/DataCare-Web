@@ -254,9 +254,15 @@ Menu → form comes from the `MDI_FORM.cs` dispatch: find a quoted label, then t
 
 ## 6. Process rules
 
-**Never put `vitest run` and `git commit` in the same shell block.** This is the rule that actually prevents
-committing on red, and it took three violations to work out: an instruction cannot enforce itself against a
-command that has already executed. Run the suite, read the result, _then_ commit separately.
+**Never put ANYTHING that can fail in the same shell block as the commit that describes it.** Run the work,
+read the result, _then_ commit as a separate step.
+
+The rule began narrowly — `vitest run` and `git commit` — after three commits landed on red. That wording was
+too narrow, and it recurred in a different form: a documentation edit failed on a prettier reflow, its
+assertion fired and printed `AssertionError`, and the `git commit` in the same block ran anyway with a message
+claiming the edit had landed. **A failing step does not stop a following command.**
+
+The commit must be a separate step whose input is a result already read.
 
 **Do not overwrite a failure log before reading it.** The identity of nine failing tests was lost that way.
 
