@@ -231,7 +231,7 @@ describe('the cash books take the PARTY’s direction, not the cash account’s'
     // Real: AC_CODE 00001 (cash) LD_CODE 000926 CR 60000.00, against a ledger that DEBITS cash.
     const rows = buildCashRojmel(
       { ...cashCtx, coBook: '001', partyCode: '000926' },
-      { cashAc: '00001', partyLegAmount: 60000, direction: 'receipt' },
+      { cashAc: '00001', cashAmount: 60000, direction: 'receipt' },
     );
     expect(rows).toHaveLength(1);
     expect(rows[0]!.AC_CODE).toBe('00001'); // names cash
@@ -245,7 +245,7 @@ describe('the cash books take the PARTY’s direction, not the cash account’s'
     // Real: AC_CODE 00001 (cash) LD_CODE 000294 DR 730.00, against a ledger that CREDITS cash.
     const rows = buildCashRojmel(cashCtx, {
       cashAc: '00001',
-      partyLegAmount: 730,
+      cashAmount: 730,
       direction: 'payment',
     });
     expect(rows[0]!.DR_AMT).toBe(730);
@@ -257,7 +257,7 @@ describe('the cash books take the PARTY’s direction, not the cash account’s'
   it('carries no metal: a cash voucher moves money only', () => {
     const rows = buildCashRojmel(cashCtx, {
       cashAc: '00001',
-      partyLegAmount: 730,
+      cashAmount: 730,
       direction: 'payment',
     });
     expect(rows[0]!.IT_TYPE).toBe('A');
@@ -265,9 +265,49 @@ describe('the cash books take the PARTY’s direction, not the cash account’s'
     expect(rows[0]!.ITM_GWT).toBe(0);
   });
 
+  it('gives the KASAR movement its own pair — types 02/03 on a receipt', () => {
+    // Measured on book 001: 56 type-01 rows (one per voucher) against 25 each of 02 and 03 - one pair per
+    // voucher that carried a write-off. The cash movement is ONE row; the kasar movement is TWO.
+    //
+    // Real voucher 001/00001 received 60000.00 with a 771.00 write-off and has THREE Rojmel rows. The web
+    // wrote one, carrying 60771.00 - the party's total rather than the cash tendered.
+    const rows = buildCashRojmel(cashCtx, {
+      cashAc: '00001',
+      cashAmount: 60000,
+      direction: 'receipt',
+      kasar: 771,
+      kasarAc: '00057',
+    });
+    expect(rows).toHaveLength(3);
+    // Type 01: the cash account, carrying the CASH figure and the party's direction.
+    expect(rows[0]!.LEDR_KEY.slice(21, 23)).toBe('01');
+    expect(rows[0]!.AC_CODE).toBe('00001');
+    expect(Number(rows[0]!.CR_AMT)).toBe(60000);
+    // Types 02/03: the party then the kasar account, self-balancing.
+    expect(rows[1]!.LEDR_KEY.slice(21, 23)).toBe('02');
+    expect(rows[1]!.AC_CODE).toBe(cashCtx.partyCode);
+    expect(Number(rows[1]!.CR_AMT)).toBe(771);
+    expect(rows[2]!.LEDR_KEY.slice(21, 23)).toBe('03');
+    expect(rows[2]!.AC_CODE).toBe('00057');
+    expect(Number(rows[2]!.DR_AMT)).toBe(771);
+  });
+
+  it('uses DIFFERENT kasar types on a payment — 05/06, not 02/03', () => {
+    // Book 002's kasar rows are types 05 and 06. A receipt and a payment share no codes in the Rojmel either.
+    const rows = buildCashRojmel(cashCtx, {
+      cashAc: '00001',
+      cashAmount: 5000,
+      direction: 'payment',
+      kasar: 160,
+      kasarAc: '00042',
+    });
+    expect(rows.map((r) => r.LEDR_KEY.slice(21, 23))).toEqual(['04', '05', '06']);
+    expect(rows[2]!.AC_CODE).toBe('00042');
+  });
+
   it('writes nothing for a zero-amount voucher', () => {
     expect(
-      buildCashRojmel(cashCtx, { cashAc: '00001', partyLegAmount: 0, direction: 'receipt' }),
+      buildCashRojmel(cashCtx, { cashAc: '00001', cashAmount: 0, direction: 'receipt' }),
     ).toEqual([]);
   });
 });

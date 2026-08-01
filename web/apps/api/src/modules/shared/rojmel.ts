@@ -119,7 +119,10 @@ export function rojmelLedrKey(
     | RojmelRateCutRowType
     | RojmelOrderRowType
     | RojmelSchemeAdjRowType
-    | RojmelFineJvRowType,
+    | RojmelFineJvRowType
+    // Sixth widening of this union. Each family's row types are measured separately and none has yet reused
+    // another's, which is why the union grows rather than a shared enum being reached for.
+    | (typeof ROJMEL_CASH_ROW_TYPE)[keyof typeof ROJMEL_CASH_ROW_TYPE],
   lineNo?: number,
 ): string {
   const head =
@@ -484,40 +487,106 @@ export function buildSaleRojmel(
  * condition is a multi-settlement voucher, which has not been derived. A voucher carrying only a cash
  * settlement produces just the one row.
  */
-export const ROJMEL_CASH_ROW_TYPE = { RECEIPT: '01', PAYMENT: '04' } as const;
+/**
+ * Cash Rojmel row types, measured across all rows of books 001 and 002.
+ *
+ *   book 001 CASH REC   01 cash 00001 Cr (56)   02 party Cr (25)   03 kasar 00057 Dr (25)
+ *   book 002 CASH PAY   04 cash 00001 Dr (175)  05 party Dr (5)    06 kasar 00042 Cr (5)
+ *
+ * ASYMMETRIC on purpose: the cash movement is ONE row naming the cash account, while the kasar movement is a
+ * PAIR naming the party and the kasar account separately. The counts prove it - 56 type-01 rows against 25 each
+ * of 02 and 03, one per voucher that carried a write-off.
+ *
+ * Direction comes from the PARTY, not the named account: a receipt CREDITS type 01 even though the ledger
+ * DEBITS cash. So the Rojmel's convention is not the ledger's and cannot be inherited from it.
+ */
+export const ROJMEL_CASH_ROW_TYPE = {
+  RECEIPT: '01',
+  RECEIPT_KASAR_PARTY: '02',
+  RECEIPT_KASAR: '03',
+  PAYMENT: '04',
+  PAYMENT_KASAR_PARTY: '05',
+  PAYMENT_KASAR: '06',
+} as const;
 
 export function buildCashRojmel(
   ctx: RojmelContext,
   p: {
     /** The cash or bank account the money moved through. */
     cashAc: string;
-    /** The amount on the PARTY's ledger leg — not necessarily the cash tendered. */
-    partyLegAmount: number;
+    /**
+     * The CASH actually tendered — NOT the party's total.
+     *
+     * Real voucher 001/00001 received 60000.00 against a 771.00 write-off, and its type-01 Rojmel row carries
+     * 60000.00. This parameter was previously `partyLegAmount` and callers passed amount + kasar, giving
+     * 60771.00. The old name and its comment described the code's own behaviour rather than the desktop's, and
+     * they only looked correct while the party's ledger leg was a single netted figure.
+     */
+    cashAmount: number;
     /** A receipt credits the party; a payment debits it. */
     direction: 'receipt' | 'payment';
+    /** Write-off on this movement, which gets its own PAIR of rows. */
+    kasar?: number;
+    /** Receipt uses 00057 KASAR JAVK, payment 00042 KASAR AVAK — the account mirrors the money's direction. */
+    kasarAc?: string;
   },
 ): RojmelRow[] {
-  if (!p.partyLegAmount) return [];
   const receipt = p.direction === 'receipt';
-  return [
-    {
+  const T = ROJMEL_CASH_ROW_TYPE;
+  const rows: RojmelRow[] = [];
+  if (p.cashAmount)
+    rows.push({
       ...blank(
         ctx,
-        rojmelLedrKey(
-          ctx.scope,
-          ctx.coBook,
-          ctx.vchNo,
-          receipt ? ROJMEL_CASH_ROW_TYPE.RECEIPT : ROJMEL_CASH_ROW_TYPE.PAYMENT,
-          1,
-        ),
+        rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, receipt ? T.RECEIPT : T.PAYMENT, 1),
       ),
       AC_CODE: p.cashAc,
       LD_CODE: ctx.partyCode,
       // The party's direction, not the cash account's — this is the whole point of the convention.
-      CR_AMT: receipt ? p.partyLegAmount : 0,
-      DR_AMT: receipt ? 0 : p.partyLegAmount,
-    },
-  ];
+      CR_AMT: receipt ? p.cashAmount : 0,
+      DR_AMT: receipt ? 0 : p.cashAmount,
+    });
+  // The kasar movement is a PAIR: the party, then the kasar account. Types 02/03 on a receipt, 05/06 on a
+  // payment - a receipt and a payment share no codes here either.
+  const kasar = Number(p.kasar ?? 0);
+  if (kasar && p.kasarAc) {
+    rows.push(
+      {
+        ...blank(
+          ctx,
+          rojmelLedrKey(
+            ctx.scope,
+            ctx.coBook,
+            ctx.vchNo,
+            receipt ? T.RECEIPT_KASAR_PARTY : T.PAYMENT_KASAR_PARTY,
+            1,
+          ),
+        ),
+        AC_CODE: ctx.partyCode,
+        LD_CODE: p.kasarAc,
+        CR_AMT: receipt ? kasar : 0,
+        DR_AMT: receipt ? 0 : kasar,
+      },
+      {
+        ...blank(
+          ctx,
+          rojmelLedrKey(
+            ctx.scope,
+            ctx.coBook,
+            ctx.vchNo,
+            receipt ? T.RECEIPT_KASAR : T.PAYMENT_KASAR,
+            1,
+          ),
+        ),
+        AC_CODE: p.kasarAc,
+        LD_CODE: ctx.partyCode,
+        // The kasar account takes the OPPOSITE direction to the party, so the pair self-balances.
+        CR_AMT: receipt ? 0 : kasar,
+        DR_AMT: receipt ? kasar : 0,
+      },
+    );
+  }
+  return rows;
 }
 
 /**

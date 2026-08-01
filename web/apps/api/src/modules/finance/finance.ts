@@ -320,10 +320,18 @@ export async function postReceipt(
       );
     }
     assertBalanced(ledger);
-    // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's
-    // leg - verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book
-    // 002 type 04, 175 rows). partyLegAmount is therefore the party's ledger figure, which includes
-    // any kasar written off, not the cash actually tendered.
+    // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's leg -
+    // verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book 002 type 04,
+    // 175 rows). That part of the convention stands.
+    //
+    // CORRECTED: this comment used to end "the party's ledger figure, which INCLUDES any kasar written off,
+    // not the cash actually tendered". That was wrong. Real voucher 001/00001 received 60000.00 against a
+    // 771.00 write-off and its type-01 Rojmel row carries 60000.00 - the CASH tendered. The old claim was true
+    // only of the code's own former shape, where the party's ledger leg was a single netted 60771; it described
+    // the implementation and read as though it described the desktop.
+    //
+    // The write-off is not folded in anywhere: it gets its OWN PAIR of Rojmel rows, types 02/03 on a receipt
+    // and 05/06 on a payment. Book 001 has 56 type-01 rows against 25 each of 02 and 03.
     const rojmelCtx = {
       scope: {
         coCode: input.scope.coCode,
@@ -341,8 +349,10 @@ export async function postReceipt(
     };
     const rojmelRows = buildCashRojmel(rojmelCtx, {
       cashAc: recAcResolved,
-      partyLegAmount: round2(input.amount + kasar),
+      cashAmount: input.amount,
       direction: 'receipt',
+      kasar,
+      kasarAc: input.kasarAc ?? 'KASAR',
     });
     const writes: VoucherWrite[] = [
       {
@@ -550,10 +560,18 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
       );
     }
     assertBalanced(ledger);
-    // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's
-    // leg - verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book
-    // 002 type 04, 175 rows). partyLegAmount is therefore the party's ledger figure, which includes
-    // any kasar written off, not the cash actually tendered.
+    // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's leg -
+    // verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book 002 type 04,
+    // 175 rows). That part of the convention stands.
+    //
+    // CORRECTED: this comment used to end "the party's ledger figure, which INCLUDES any kasar written off,
+    // not the cash actually tendered". That was wrong. Real voucher 001/00001 received 60000.00 against a
+    // 771.00 write-off and its type-01 Rojmel row carries 60000.00 - the CASH tendered. The old claim was true
+    // only of the code's own former shape, where the party's ledger leg was a single netted 60771; it described
+    // the implementation and read as though it described the desktop.
+    //
+    // The write-off is not folded in anywhere: it gets its OWN PAIR of Rojmel rows, types 02/03 on a receipt
+    // and 05/06 on a payment. Book 001 has 56 type-01 rows against 25 each of 02 and 03.
     const rojmelCtx = {
       scope: {
         coCode: input.scope.coCode,
@@ -571,8 +589,10 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
     };
     const rojmelRows = buildCashRojmel(rojmelCtx, {
       cashAc: payAc,
-      partyLegAmount: round2(input.amount + kasar),
+      cashAmount: input.amount,
       direction: 'payment',
+      kasar,
+      kasarAc: input.kasarAc ?? 'KASAR',
     });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
