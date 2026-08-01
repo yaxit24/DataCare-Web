@@ -189,7 +189,9 @@ node scripts/check-g5-parity.mjs     # G5_RED — correct, see §7
 pnpm type:parity            # 226 numeric->text mismatches baselined; a NEW one fails
 pnpm register:check         # 198 desktop menu items; --strict fails while any is unclassified
 pnpm docs:refs              # every cited path resolves; every pinned claim still holds
-pnpm typecheck:tests        # the TEST project, which was never typechecked until Phase 0.5
+pnpm typecheck:tests        # the TEST project, never typechecked until Phase 0.5.
+                            # Needs --max-old-space-size=6144: the default heap OOMs at exit 134, which
+                            # looks like a type failure and is not one.
 pnpm lint                   # 502 files, 0 policy violations
 pnpm build --force          # 7/7
 (cd apps/web && node test/browser.smoke.mjs)   # AFTER build, exit 0

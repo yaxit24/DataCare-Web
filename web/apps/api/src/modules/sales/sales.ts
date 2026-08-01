@@ -304,6 +304,52 @@ export function computeLine(
  *  Settlement: Dr cash/bank/old-gold for amounts received now, Dr customer for the balance (BILL_OS);
  *  Cr sales (taxable) + GST (tax) + round-off. With no payments, the whole total is the customer balance
  *  (credit sale) — identical to the prior behaviour. */
+/**
+ * Desktop leg type codes for a sale, measured across books 026/027/029/032.
+ *
+ * The last two characters of `LEDR_KEY` name the leg's ROLE, they are not a sequence. Settlement legs come in
+ * pairs of party-credit plus receiving-account-debit:
+ *
+ *     PARTY_BILL 01  Dr the customer for the bill
+ *     REVENUE    03  Cr the sales account          TAX 04  Cr the tax account
+ *     BANK pair  09/10   party Cr / bank Dr
+ *     CASH pair  19/20   party Cr / cash Dr
+ *     KASAR pair 25/26   party Cr / kasar Dr
+ *
+ * `02` does not appear on any sale book, which is why a 1..n sequence cannot be right: it gets leg 1 by
+ * coincidence and shifts every leg after it.
+ *
+ * Codes NOT yet measured are deliberately absent. A settlement kind with no entry here keeps the sequence
+ * rather than being given a guessed code - the same discipline that cut rate cut from 40 row types to 9.
+ */
+const SALE_LEG = {
+  partyBill: 1,
+  revenue: 3,
+  tax: 4,
+  partyBank: 9,
+  bank: 10,
+  partyCash: 19,
+  cash: 20,
+  partyKasar: 25,
+  kasar: 26,
+  /**
+   * The web's round-off leg, which the DESKTOP DOES NOT WRITE AT ALL.
+   *
+   * `SL_DATA.ROF_AMT` is 0.00 on all 190 real sale headers: the desktop rounds the bill total and posts the
+   * sub-rupee residue nowhere, which is why 89 of its sale vouchers are out of balance by under a rupee. The
+   * web balances instead, so it has a leg the desktop has no code for.
+   *
+   * 99 rather than a plausible-looking low number, deliberately. Inventing `05` would put a web-only leg in the
+   * middle of a measured scheme and make it indistinguishable from a desktop code nobody had checked yet. And
+   * it cannot be left to the sequence: legs 1-3 now take 1/3/4, so a fourth leg numbered positionally collides
+   * with the tax leg's 04.
+   *
+   * If the owner decision (docs/FIRST-REAL-COMPARISON.md 3.4) is to reproduce the desktop's imbalance, this
+   * leg and this code disappear together.
+   */
+  webRoundOff: 99,
+} as const;
+
 export function buildSaleLedger(p: {
   key: VoucherKey;
   acCode: string;
@@ -333,6 +379,7 @@ export function buildSaleLedger(p: {
     if (p.totals.total !== 0)
       lines.push({
         ...base,
+        legType: SALE_LEG.partyBill,
         AC_CODE: p.acCode,
         LD_CODE: p.controlAc ?? p.salesAc,
         DR_AMT: p.totals.total,
@@ -347,6 +394,7 @@ export function buildSaleLedger(p: {
       if (leg.amount !== 0)
         lines.push({
           ...base,
+          legType: SALE_LEG.revenue,
           AC_CODE: leg.ac,
           LD_CODE: p.acCode,
           DR_AMT: 0,
@@ -356,6 +404,7 @@ export function buildSaleLedger(p: {
     if (p.totals.tax !== 0)
       lines.push({
         ...base,
+        legType: SALE_LEG.tax,
         AC_CODE: p.taxAc,
         LD_CODE: p.acCode,
         DR_AMT: 0,
@@ -365,6 +414,7 @@ export function buildSaleLedger(p: {
     if (p.totals.roundOff > 0)
       lines.push({
         ...base,
+        legType: SALE_LEG.webRoundOff,
         AC_CODE: p.roundAc,
         LD_CODE: p.acCode,
         DR_AMT: 0,
@@ -374,6 +424,7 @@ export function buildSaleLedger(p: {
     else if (p.totals.roundOff < 0)
       lines.push({
         ...base,
+        legType: SALE_LEG.webRoundOff,
         AC_CODE: p.roundAc,
         LD_CODE: p.acCode,
         DR_AMT: Math.abs(p.totals.roundOff),
@@ -383,11 +434,18 @@ export function buildSaleLedger(p: {
   }
 
   // Desktop emits a self-balanced party/tender pair, not a netted party balance.
-  const addReceipt = (account: string, amount: number): void => {
+  // Each settlement is a PAIR with its own measured code pair: party credit, then the receiving account debit.
+  // Book 027 shows 09/10 for bank, 19/20 for cash and 25/26 for kasar, each with the party on the odd code.
+  const addReceipt = (
+    account: string,
+    amount: number,
+    legs?: { party: number; account: number },
+  ): void => {
     const value = R2(amount);
     if (value <= 0) return;
     lines.push({
       ...base,
+      ...(legs ? { legType: legs.party } : {}),
       AC_CODE: p.acCode,
       LD_CODE: account,
       DR_AMT: 0,
@@ -396,6 +454,7 @@ export function buildSaleLedger(p: {
     });
     lines.push({
       ...base,
+      ...(legs ? { legType: legs.account } : {}),
       AC_CODE: account,
       LD_CODE: p.acCode,
       DR_AMT: value,
@@ -404,8 +463,17 @@ export function buildSaleLedger(p: {
     });
   };
   const pay = p.payments ?? {};
-  addReceipt(pay.cashAc ?? 'CASH', Number(pay.cashAmt ?? 0));
-  addReceipt(pay.bankAc ?? 'BANK', Number(pay.bankAmt ?? 0));
+  addReceipt(pay.cashAc ?? 'CASH', Number(pay.cashAmt ?? 0), {
+    party: SALE_LEG.partyCash,
+    account: SALE_LEG.cash,
+  });
+  addReceipt(pay.bankAc ?? 'BANK', Number(pay.bankAmt ?? 0), {
+    party: SALE_LEG.partyBank,
+    account: SALE_LEG.bank,
+  });
+  // Old gold has NO measured code pair on any sale book, so it keeps the sequence rather than borrowing one.
+  // Borrowing 25/26 would put an old-gold settlement under the kasar codes and corrupt any report that groups
+  // by leg type. It cannot collide with 01/03/04/09/10/19/20 because those are all above the leg count.
   addReceipt(pay.oldGoldAc ?? 'OLDGOLD', Number(pay.oldGoldAmt ?? 0));
   return lines;
 }

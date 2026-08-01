@@ -65,6 +65,11 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     checksum: '298e2dd8f3b511ae27c2302e8d3d546b06baf13346b6dabbe84a261bdf3449c6',
   },
   {
+    // LEDR_KEY uniqueness the desktop enforces via PK_AC_DATA and the web lacked.
+    name: '20260801160000_ledger_key_uniqueness',
+    checksum: 'a5233b5115ef855e2bec6999e37fd4a59c58b563dacc27a69f75c0c7a6c7612b',
+  },
+  {
     // Corrects 226 columns that were varchar in Postgres while the desktop holds them as float or int.
     name: '20260801120000_column_type_parity',
     checksum: 'd90f7313519b2cd7a158a6ce55728e1d181807bfe2d8dc41506efffe55373413',

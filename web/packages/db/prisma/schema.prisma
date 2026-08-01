@@ -40,6 +40,7 @@ model AC_DATA {
   PARTY_AC_CODE String?   @db.VarChar(255)
   LDR_NAME      String?   @db.VarChar(255)
 
+  @@unique([tenantId, LEDR_KEY], map: "AC_DATA_tenant_ledr_key_key")
   @@index([tenantId])
   @@index([tenantId, CO_CODE, AC_CODE, VCH_DATE], map: "idx_ac_data_scope")
   @@map("AC_DATA")
@@ -591,6 +592,7 @@ model BANK_RECONCILE {
   LEDR_KEY String?   @db.VarChar(50)
   CLR_DATE DateTime? @db.Date
 
+  @@unique([tenantId, LEDR_KEY], map: "BANK_RECONCILE_tenant_ledr_key_key")
   @@index([tenantId])
   @@map("BANK_RECONCILE")
 }

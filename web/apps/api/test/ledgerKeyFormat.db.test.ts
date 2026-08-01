@@ -83,8 +83,12 @@ describe.runIf(RUN)('AC_DATA ledger key layout', () => {
         ledger: {
           table: 'AC_DATA',
           lines: [
+            // legType states the leg's ROLE. The desktop's codes for a sale are 01 party and 03 revenue; an
+            // untyped leg lands in the reserved 50+ band instead, which is correct behaviour but not what this
+            // test is about.
             {
               ...key,
+              legType: 1,
               AC_CODE: '000888',
               LD_CODE: '00004',
               DR_AMT: 1560,
@@ -93,6 +97,7 @@ describe.runIf(RUN)('AC_DATA ledger key layout', () => {
             },
             {
               ...key,
+              legType: 3,
               AC_CODE: '00004',
               LD_CODE: '000888',
               DR_AMT: 0,
@@ -125,5 +130,7 @@ describe.runIf(RUN)('AC_DATA ledger key layout', () => {
     }
     // Byte-for-byte against the real desktop row for book 027 voucher 00001.
     expect(rows[0]!.k).toBe('01002024-20250270000101');
+    // And the second leg carries the desktop's revenue code 03, not a positional 02.
+    expect(rows[1]!.k).toBe('01002024-20250270000103');
   });
 });
