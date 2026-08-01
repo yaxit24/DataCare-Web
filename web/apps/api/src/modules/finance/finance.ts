@@ -452,6 +452,13 @@ export interface PaymentInput {
   vchDate?: Date | string;
   kasar?: number; // discount received / round-off (Cr KASAR), clears amount+kasar on the party
   kasarAc?: string; // default 'KASAR'
+  /**
+   * The CASH_DATA line this movement belongs to; becomes the leading digits of the key's 12-character tail.
+   *
+   * Real voucher 002/00029 has nine lines and eighteen legs keyed 105/106 through 905/906, so the line is not
+   * bounded at one. A single-line caller may omit it and get 1.
+   */
+  lineNo?: number;
 }
 
 /** Payment (money OUT): Dr party, Cr cash/bank. Header → PAY_DATA. */
@@ -468,24 +475,80 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
     const kasar = round2(Number(input.kasar ?? 0));
     const lbase = { ...key, VCH_TYPE: vchType };
+    // A SELF-BALANCED PAIR PER MOVEMENT, the mirror of the receipt - and with DIFFERENT leg codes.
+    //
+    // Measured on book 002 (CASH PAY), all 360 legs: the amount pair is 05 party Dr / 06 cash Cr (175 each) and
+    // the kasar pair is 07 party Dr / 08 kasar Cr (5 each). A receipt and a payment share NO codes: the same
+    // role takes a different number depending on which way the money moves.
+    //
+    // The KASAR ACCOUNT differs too. Book 002's leg-08 rows name 00042 KASAR AVAK, where book 001's leg-04 rows
+    // name 00057 KASAR JAVK. Gujarati javak is outgoing and avak incoming, so the account mirrors the money
+    // rather than the voucher - and one account for both directions would post half the discounts to the wrong
+    // ledger. The caller supplies it; the default below is only a last resort.
+    //
+    // This previously netted the party DEBIT at amount + kasar into one leg, writing three where the desktop
+    // writes four. It balanced, so only a leg-count assertion can catch it.
+    // Slot 1 of BOOK_DETL, for the same reason as the receipt: `settlementAc` returns the literal 'CASH', and
+    // book 002's leg-06 rows all name 00001.
+    const paySlot = (await tx.$queryRawUnsafe(
+      `SELECT "AC_CODE" FROM "BOOK_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+          AND coalesce("SR_NO",0)::numeric=1
+        LIMIT 1`,
+      tenantId,
+      input.scope.coCode,
+      input.scope.lcCode,
+      input.scope.coBook,
+    )) as Array<{ AC_CODE: unknown }>;
+    const payAcResolved =
+      (input.bankAc ?? '').trim() || String(paySlot[0]?.AC_CODE ?? '').trim() || payAc;
+
+    const lineNo = Number(input.lineNo ?? 1);
+    const suffix = (leg: number): string =>
+      `${lineNo}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
     const ledger: LedgerLine[] = [
       {
         ...lbase,
+        legKeySuffix: suffix(CASH_LEG.payParty),
         AC_CODE: input.partyAc,
-        DR_AMT: round2(input.amount + kasar),
+        LD_CODE: payAcResolved,
+        DR_AMT: input.amount,
         CR_AMT: 0,
         SIGN: 'D',
       },
-    ];
-    ledger.push({ ...lbase, AC_CODE: payAc, DR_AMT: 0, CR_AMT: input.amount, SIGN: 'C' });
-    if (kasar > 0)
-      ledger.push({
+      {
         ...lbase,
-        AC_CODE: input.kasarAc ?? 'KASAR',
+        legKeySuffix: suffix(CASH_LEG.payCash),
+        AC_CODE: payAcResolved,
+        LD_CODE: input.partyAc,
         DR_AMT: 0,
-        CR_AMT: kasar,
+        CR_AMT: input.amount,
         SIGN: 'C',
-      }); // discount received
+      },
+    ];
+    if (kasar > 0) {
+      const kasarAc = input.kasarAc ?? 'KASAR';
+      ledger.push(
+        {
+          ...lbase,
+          legKeySuffix: suffix(CASH_LEG.payKasarParty),
+          AC_CODE: input.partyAc,
+          LD_CODE: kasarAc,
+          DR_AMT: kasar,
+          CR_AMT: 0,
+          SIGN: 'D',
+        },
+        {
+          ...lbase,
+          legKeySuffix: suffix(CASH_LEG.payKasar),
+          AC_CODE: kasarAc,
+          LD_CODE: input.partyAc,
+          DR_AMT: 0,
+          CR_AMT: kasar,
+          SIGN: 'C',
+        },
+      );
+    }
     assertBalanced(ledger);
     // The Rojmel. The cash books name the cash account but take their DEBIT/CREDIT from the PARTY's
     // leg - verified at 100% within each row type on the real data (book 001 type 01, 56 rows; book
@@ -687,24 +750,78 @@ export async function postPaymentLines(
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
     const lbase = { ...key, VCH_TYPE: vchType };
+    // A PAIR PER LINE, each with its own line number - not one party leg per line plus aggregate cash.
+    //
+    // Real voucher 002/00029 is NINE CASH_DATA lines and EIGHTEEN AC_DATA legs, keyed 105/106 through 905/906.
+    // Every line gets its own cash leg; there is no aggregate. This previously wrote one netted party leg per
+    // line plus a single aggregate cash leg plus a single aggregate kasar leg - eleven legs for nine lines.
+    //
+    // It balanced, which is why it survived. What it cannot do is reproduce a per-account ledger: the desktop
+    // shows nine cash movements and the aggregate form shows one.
+    const linesSlot = (await tx.$queryRawUnsafe(
+      `SELECT "AC_CODE" FROM "BOOK_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+          AND coalesce("SR_NO",0)::numeric=1
+        LIMIT 1`,
+      tenantId,
+      input.scope.coCode,
+      input.scope.lcCode,
+      input.scope.coBook,
+    )) as Array<{ AC_CODE: unknown }>;
+    const payAcLinesResolved =
+      (input.bankAc ?? '').trim() || String(linesSlot[0]?.AC_CODE ?? '').trim() || payAc;
+
+    const lineSuffix = (line: number, leg: number): string =>
+      `${line}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
     const ledger: LedgerLine[] = [];
-    for (const l of lines)
-      ledger.push({
-        ...lbase,
-        AC_CODE: l.partyAc,
-        DR_AMT: round2(Number(l.amount) + Number(l.kasar ?? 0)),
-        CR_AMT: 0,
-        SIGN: 'D',
-      });
-    ledger.push({ ...lbase, AC_CODE: payAc, DR_AMT: 0, CR_AMT: totalAmt, SIGN: 'C' });
-    if (totalKasar > 0)
-      ledger.push({
-        ...lbase,
-        AC_CODE: input.kasarAc ?? 'KASAR',
-        DR_AMT: 0,
-        CR_AMT: totalKasar,
-        SIGN: 'C',
-      });
+    lines.forEach((l, idx) => {
+      const lineNo = idx + 1;
+      const amt = round2(Number(l.amount));
+      const lineKasar = round2(Number(l.kasar ?? 0));
+      ledger.push(
+        {
+          ...lbase,
+          legKeySuffix: lineSuffix(lineNo, CASH_LEG.payParty),
+          AC_CODE: l.partyAc,
+          LD_CODE: payAcLinesResolved,
+          DR_AMT: amt,
+          CR_AMT: 0,
+          SIGN: 'D',
+        },
+        {
+          ...lbase,
+          legKeySuffix: lineSuffix(lineNo, CASH_LEG.payCash),
+          AC_CODE: payAcLinesResolved,
+          LD_CODE: l.partyAc,
+          DR_AMT: 0,
+          CR_AMT: amt,
+          SIGN: 'C',
+        },
+      );
+      if (lineKasar > 0) {
+        const kasarAc = input.kasarAc ?? 'KASAR';
+        ledger.push(
+          {
+            ...lbase,
+            legKeySuffix: lineSuffix(lineNo, CASH_LEG.payKasarParty),
+            AC_CODE: l.partyAc,
+            LD_CODE: kasarAc,
+            DR_AMT: lineKasar,
+            CR_AMT: 0,
+            SIGN: 'D',
+          },
+          {
+            ...lbase,
+            legKeySuffix: lineSuffix(lineNo, CASH_LEG.payKasar),
+            AC_CODE: kasarAc,
+            LD_CODE: l.partyAc,
+            DR_AMT: 0,
+            CR_AMT: lineKasar,
+            SIGN: 'C',
+          },
+        );
+      }
+    });
     assertBalanced(ledger);
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },

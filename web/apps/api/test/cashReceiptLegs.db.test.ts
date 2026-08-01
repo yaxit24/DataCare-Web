@@ -26,7 +26,7 @@
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { postReceipt } from '../src/modules/finance/finance.js';
+import { postPayment, postPaymentLines, postReceipt } from '../src/modules/finance/finance.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'cash-legs';
@@ -180,5 +180,95 @@ describe.runIf(RUN)('cash receipt ledger legs', () => {
     const rows = await legs();
     expect(rows).toHaveLength(2);
     expect(rows.map((r) => r.k.slice(21).trim())).toEqual(['101', '102']);
+  });
+});
+
+describe.runIf(RUN)('cash payment ledger legs', () => {
+  beforeEach(async () => {
+    await wipe();
+    await seed();
+    // A payment book, with its own kasar account. Book 002's leg-08 rows name 00042 KASAR AVAK where book
+    // 001's leg-04 rows name 00057 KASAR JAVK - the account mirrors the money's direction, not the voucher's.
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
+       VALUES ($1,$2,$3,'00042','KASAR AVAK A/C.','L')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+       VALUES ($1,$2,$3,'002','Cash Payment','CPAY','CASH PAY','O','Y','CASH_DATA')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'002',1,$4,'Cash Payment','CASH PAY','O')`,
+      TENANT,
+      CO,
+      LC,
+      CASH,
+    );
+  });
+
+  it('uses legs 05-08, which a receipt never uses, and pairs each movement', async () => {
+    // Measured on book 002, all 360 legs: 05 party Dr / 06 cash Cr (175 each), 07 party Dr / 08 kasar Cr (5).
+    // A receipt and a payment share NO codes - the same role takes a different number by direction.
+    await postPayment(runtime, {
+      scope: { ...scope, coBook: '002' },
+      partyAc: PARTY,
+      amount: 5000,
+      kasar: 160,
+      kasarAc: '00042',
+      mode: 'cash',
+      vchDate: '2024-04-01',
+    } as never);
+    const rows = await legs();
+    expect(rows).toHaveLength(4);
+    expect(rows.map((r) => r.k.slice(21).trim())).toEqual(['105', '106', '107', '108']);
+    // The party is DEBITED twice - once against cash, once against kasar - not once for the total.
+    expect(rows[0]!.ac).toBe(PARTY);
+    expect(rows[0]!.dr).toBe(5000);
+    expect(rows[2]!.ac).toBe(PARTY);
+    expect(rows[2]!.dr).toBe(160);
+    // The payment kasar account, NOT the receipt's.
+    expect(rows[3]!.ac).toBe('00042');
+    expect(rows[3]!.cr).toBe(160);
+  });
+
+  it('pairs EVERY line, so three lines give six legs keyed 105 through 306', async () => {
+    // Real voucher 002/00029 is nine CASH_DATA lines and EIGHTEEN legs - nine pairs, keyed 105/106 through
+    // 905/906. There is no aggregate cash leg.
+    //
+    // An earlier version of this test called postPayment three times and asserted the line numbers, which was
+    // the WRONG SHAPE: three single-line vouchers are not one multi-line voucher, and it failed with 23505 on
+    // the voucher-number counter rather than on anything it meant to check. The multi-line path is
+    // postPaymentLines.
+    await postPaymentLines(runtime, {
+      scope: { ...scope, coBook: '002' },
+      mode: 'cash',
+      vchDate: '2024-04-01',
+      lines: [
+        { partyAc: PARTY, amount: 5000 },
+        { partyAc: PARTY, amount: 1000 },
+        { partyAc: PARTY, amount: 750 },
+      ],
+    } as never);
+    const rows = await legs();
+    // SIX, not four. The old shape wrote three party legs plus one aggregate cash leg.
+    expect(rows).toHaveLength(6);
+    expect(rows.map((r) => r.k.slice(21).trim())).toEqual([
+      '105',
+      '106',
+      '205',
+      '206',
+      '305',
+      '306',
+    ]);
+    // Each cash leg carries its OWN line's amount, not the total.
+    const cashLegs = rows.filter((r) => r.ac === CASH);
+    expect(cashLegs.map((r) => r.cr)).toEqual([5000, 1000, 750]);
   });
 });
