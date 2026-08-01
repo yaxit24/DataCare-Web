@@ -18,7 +18,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
-import { postReceipt } from '../dist/modules/finance/finance.js';
+import { postPaymentLines, postReceipt } from '../dist/modules/finance/finance.js';
 
 const TENANT = process.env.PARITY_REPLAY_TENANT || 'parity-cash';
 const CO = '01';
@@ -117,9 +117,74 @@ async function seed() {
   );
 }
 
+/**
+ * The nine-line payment: book 002 voucher 00029, 2024-04-22.
+ *
+ * Eighteen AC_DATA legs keyed 105/106 through 905/906 - a pair per line, with NO aggregate cash leg. This is
+ * the case that proves the line prefix is not fixed at 1 and that the aggregate form is wrong; the web wrote
+ * eleven legs (nine netted party legs plus one aggregate cash leg plus one aggregate kasar leg).
+ */
+const PAY_LINES = [
+  ['000760', 5000],
+  ['00052', 1000],
+  ['00052', 750],
+  ['00052', 250],
+  ['00052', 300],
+  ['00052', 1100],
+  ['00052', 300],
+  ['000463', 1800],
+  ['00052', 160],
+];
+
+async function seedPaymentBook() {
+  for (const code of ['000760', '00052', '000463', '00042']) {
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
+       VALUES ($1,$2,$3,$4,'PAY PARTY','L')`,
+      TENANT,
+      CO,
+      LC,
+      code,
+    );
+  }
+  await exec(
+    `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
+        "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+     VALUES ($1,$2,$3,'002','Cash Payment','CPAY','CASH PAY','O','Y','CASH_DATA')`,
+    TENANT,
+    CO,
+    LC,
+  );
+  await exec(
+    `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+     VALUES ($1,$2,$3,'002',1,$4,'Cash Payment','CASH PAY','O')`,
+    TENANT,
+    CO,
+    LC,
+    CASH,
+  );
+}
+
 async function main() {
   await wipe();
   await seed();
+
+  // PARITY_REPLAY_CASE=payment replays the nine-line voucher instead of the receipt.
+  if (process.env.PARITY_REPLAY_CASE === 'payment') {
+    await seedPaymentBook();
+    const result = await postPaymentLines(runtime, {
+      scope: { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: '002' },
+      mode: 'cash',
+      vchDate: '2024-04-22',
+      mainUser: 'parity-replay',
+      lines: PAY_LINES.map(([partyAc, amount]) => ({ partyAc, amount })),
+    });
+    console.log(`REPLAY_OK tenant=${TENANT} book=002 vchNo=${result.vchNo ?? '?'}`);
+    console.log('  desktop for comparison: 18 legs, keyed 105/106 through 905/906, no aggregate');
+    await owner.$disconnect();
+    await runtime.$disconnect();
+    return;
+  }
 
   const result = await postReceipt(runtime, {
     scope: { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: BOOK },
