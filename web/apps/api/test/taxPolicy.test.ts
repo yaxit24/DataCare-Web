@@ -26,6 +26,10 @@ describe('transaction tax policy', () => {
       taxGroup: 'G',
       taxAc: 'GSTOUT',
       taxPct: 3,
+      // The code's component rows (SR_NO 1 SGST, 2 CGST, 3 IGST). Empty here because this fixture defines only
+      // the parent row. Asserted as an exact shape rather than ignored, so a future field cannot appear
+      // unnoticed - the same reason footprints use toEqual and not toContain.
+      components: new Map(),
     });
   });
 

@@ -100,6 +100,29 @@ describe.runIf(RUN)('tax resolution against a real GST tax master', () => {
     expect(policy.interState).toBe(false);
   });
 
+  it('exposes the component groups a TAX_DATA row needs', async () => {
+    // `taxGroup` is the PARENT's group - 'N' for a GST code - because selecting by code pins SR_NO 0. A
+    // TAX_DATA row must carry the COMPONENT's name, which Ac_Tax.cs reads from the master in all ~20 of its
+    // book families as `C.TAX_GROUP` joined at C.SR_NO = 1, 2 or 3.
+    //
+    // Measured: all 184 real TAX_DATA rows are two per voucher, SGST at SR_NO 1 then CGST at SR_NO 2, and
+    // TAX_TYPE never holds anything else. So 'N' - which the web used to write on both rows - is a value the
+    // desktop never produced, and a tax report grouping by TAX_TYPE could not split the halves.
+    const policy = await withTenant(prisma, TENANT, (tx) =>
+      resolveTaxPolicyTx(tx, scope, { acCode: '000888', taxPct: 3, taxCode: '10' }),
+    );
+    expect(policy.taxGroup).toBe('N');
+    expect(policy.components.get(1)?.group).toBe('SGST');
+    expect(policy.components.get(2)?.group).toBe('CGST');
+    expect(policy.components.get(3)?.group).toBe('IGST');
+    // Each half carries its own percentage, not the parent's 3.
+    expect(policy.components.get(1)?.pct).toBe(1.5);
+    expect(policy.components.get(2)?.pct).toBe(1.5);
+    expect(policy.components.get(3)?.pct).toBe(3);
+    // The parent row is NOT a component; including it would put 'N' back in play.
+    expect(policy.components.has(0)).toBe(false);
+  });
+
   it('still resolves when an explicit SR_NO names a component', async () => {
     const igst = await withTenant(prisma, TENANT, (tx) =>
       resolveTaxPolicyTx(tx, scope, { acCode: '000888', taxPct: 3, taxCode: '10', srNo: 3 }),

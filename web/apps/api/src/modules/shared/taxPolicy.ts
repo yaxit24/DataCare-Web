@@ -14,6 +14,14 @@ export interface ResolvedTaxPolicy {
   taxGroup: string;
   taxAc: string | null;
   taxPct: number;
+  /**
+   * The tax code's component rows keyed by SR_NO: 1 SGST, 2 CGST, 3 IGST for a GST code.
+   *
+   * `taxGroup` is the PARENT's group ('N' for GST) because the resolver pins SR_NO 0. A TAX_DATA row needs the
+   * component's own group, which `Ac_Tax.cs` reads from the master in all ~20 of its book families rather than
+   * hardcoding a literal.
+   */
+  components: Map<number, { group: string; ac: string | null; pct: number }>;
 }
 
 /** Desktop Ac_Tax derives geography from AC_MAST.AC_GST_TYPE='I' and tax identity/account from
@@ -114,6 +122,48 @@ export async function resolveTaxPolicyTx(
     );
   }
   const tax = taxes[0];
+  // The code's COMPONENT rows, keyed by SR_NO.
+  //
+  // `taxGroup` above is the PARENT's group - 'N' for a GST code - because selecting by code pins SR_NO 0. The
+  // components carry the names that belong on a TAX_DATA row, and `Ac_Tax.cs` takes them from the master rather
+  // than hardcoding: every one of its ~20 book families writes `C.TAX_GROUP` joined at
+  //
+  //     C.SR_NO = 1  with  AC_GST_TYPE <> 'I'   ->  SGST, TAX_AMT/2
+  //     C.SR_NO = 2  with  AC_GST_TYPE <> 'I'   ->  CGST, TAX_AMT/2
+  //     C.SR_NO = 3  with  AC_GST_TYPE  = 'I'   ->  IGST, the full TAX_AMT
+  //
+  // Confirmed by data for the intra-state case: all 184 real TAX_DATA rows are two per voucher, SGST then CGST,
+  // and TAX_TYPE never holds anything else - so 'N' was never a value the desktop wrote.
+  const code = args.taxCode?.trim() ?? '';
+  const componentRows: Array<{
+    sr_no: unknown;
+    tax_group: unknown;
+    tax_ac: unknown;
+    tax_pct: unknown;
+  }> = code
+    ? await tx.$queryRawUnsafe(
+        `SELECT coalesce("SR_NO",0) AS sr_no,"TAX_GROUP" AS tax_group,"TAX_AC" AS tax_ac,
+                  coalesce("TAX_PRC",0) AS tax_pct
+             FROM "TAX_MAST"
+            WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "TAX_CODE"::text=$3
+              AND coalesce("SR_NO",0)::numeric > 0
+            ORDER BY coalesce("SR_NO",0)`,
+        scope.tenantId,
+        scope.coCode,
+        code,
+      )
+    : [];
+  const components = new Map(
+    componentRows.map((r) => [
+      Number(r.sr_no),
+      {
+        group: String(r.tax_group ?? '').trim(),
+        ac: String(r.tax_ac ?? '').trim() || null,
+        pct: Number(r.tax_pct ?? 0),
+      },
+    ]),
+  );
+
   return {
     interState,
     accountGstType,
@@ -121,5 +171,6 @@ export async function resolveTaxPolicyTx(
     taxGroup: String(tax?.tax_group ?? ''),
     taxAc: String(tax?.tax_ac ?? '').trim() || null,
     taxPct: Number(tax?.tax_pct ?? 0),
+    components,
   };
 }
