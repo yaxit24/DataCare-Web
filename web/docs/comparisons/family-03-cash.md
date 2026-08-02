@@ -196,6 +196,65 @@ the plan's per-family measurement step exists and why the bank codes were not as
 
 ---
 
+## Twelve defects fixed
+
+| #   | Defect                                                          | Paths                                  |
+| --- | --------------------------------------------------------------- | -------------------------------------- |
+| 1   | Party leg **netted** — 3 legs where the desktop writes 4        | `postReceipt`, `postPayment`           |
+| 2   | Multi-line wrote **aggregate** cash/kasar legs                  | `postReceiptLines`, `postPaymentLines` |
+| 3   | No leg codes — positional fallback                              | all four                               |
+| 4   | Wrong order — the desktop's first leg is the party              | all four                               |
+| 5   | No `LD_CODE`                                                    | all four                               |
+| 6   | Placeholder `'CASH'` instead of `BOOK_DETL` slot 1              | **all five**, incl. the scheme         |
+| 7   | Rojmel had **no kasar pair** — 1 row where the desktop writes 3 | `buildCashRojmel`                      |
+| 8   | Rojmel carried the **party total**, not the cash tendered       | `buildCashRojmel`                      |
+| 9   | Rojmel **line hardcoded to 1**                                  | `buildCashRojmel`                      |
+| 10  | Multi-line paths wrote **no Rojmel rows at all**                | `postReceiptLines`, `postPaymentLines` |
+| 11  | Key tail needed a **third mechanism** (`legKeySuffix`)          | `postVoucherTx`                        |
+| 12  | Bank payment codes assumed to mirror cash                       | `postPayment`, `postPaymentLines`      |
+
+**Not one could have been caught by a balance assertion.** Every wrong shape balanced: netted legs, aggregate
+legs, missing Rojmel rows, wrong codes, wrong key layouts, placeholder accounts.
+
+### Two stale comments corrected
+
+Both cash paths claimed the Rojmel takes "the party's ledger figure, which **includes** any kasar written off,
+not the cash actually tendered". The desktop carries 60000.00, the cash. The comment was true only of the code's
+own former shape and read as though it described the desktop — evidence about the implementation dressed as
+evidence about the target. The parameter was renamed `partyLegAmount` → `cashAmount` for the same reason.
+
+### Inferred, and labelled
+
+`postReceiptLines`' shape. All 56 real receipt vouchers have exactly **one line**, so no multi-line receipt
+exists to measure. Applied: the measured payment _pattern_ with the measured receipt _codes_. The alternative
+was not safety — the path is route-reachable and wrote **no Rojmel rows**, so a multi-line receipt produced an
+empty day book. Definitely-wrong versus probably-right.
+
+### Recorded, not implemented
+
+**Bank charges.** `BANK REC` 05/06 and `BANK PAY` 11/12 name `00048 BANK CHARGES A/C` on five real vouchers.
+The web has no bank-charge input on these paths, so this is a missing **feature**, not a wrong value. Inventing
+an input would be worse than recording the gap.
+
+---
+
+## Exit criteria
+
+| #   | Criterion                                    | State                                                                   |
+| --- | -------------------------------------------- | ----------------------------------------------------------------------- |
+| 1   | 0 unexplained field differences              | **met** for 001/00001 (ledger + Rojmel) and 002/00029 (ledger + Rojmel) |
+| 2   | Every difference categorised                 | **met** — 12 fixed, 1 inferred, 1 feature gap                           |
+| 3   | Every real row type produced                 | **partly** — the bank-charges pair is a known feature gap               |
+| 4   | Write set asserted as an exact set           | met (pre-existing)                                                      |
+| 5   | Edit and delete covered                      | met (pre-existing)                                                      |
+| 6   | A control demonstrated failing per assertion | **met** — six proven, two redone after failing for the wrong reason     |
+| 7   | `LEDR_KEY` byte-exact incl. the tail         | **met** — 4-leg and 18-leg vouchers both                                |
+| 8   | Docs updated in the same commit              | **met** — this file                                                     |
+
+**Family 3 is complete apart from the bank-charges feature**, which is recorded as a gap rather than guessed at.
+
+---
+
 ## Next steps
 
 1. Pick reference vouchers: 001/00001 (4 legs — party, cash, party, kasar) and 002/00029 (18 legs, multi-line).

@@ -241,28 +241,44 @@ Established over four sessions; each step exists because skipping it caused a do
 proven (sale item rows are type `'02'` in source, `'01'` in data) — and the divergence is **not uniform**, so
 verify per row type.
 
-### 1.2 The family queue, ordered by real ledger rows
+### 1.2 Progress — 3 of 16 families, 31 defects fixed
+
+**What the first three families established, which the plan did not anticipate:**
+
+1. **No two families share a key layout.** Sale is 23 characters with the leg type at 22-23; scheme is 33 with a
+   bare line right-aligned in 10; cash is 33 with `<line><leg>` right-aligned in 12 — and the cash _Rojmel_ uses
+   the scheme's shape, so **one voucher can use two layouts across two of its own tables.**
+2. **Leg codes are per-`MAIN_BOOK`, not per-role or per-direction.** `BANK REC` 05/06 is a bank-charges pair
+   while `CASH PAY` 05/06 is party/cash. Three distinct schemes in family 3 alone.
+3. **A balance assertion cannot catch any of this.** All 31 defects balanced.
+4. **Shared helpers encoded one family's assumption as universal** — `buildTransferLedger`, `settlementAc`'s
+   `'CASH'` literal in five paths, `lineTotalDesktop`'s hardcoded rounding, the aggregate Rojmel row. This is
+   why the per-family records exist rather than a single shared model.
+5. **A fix routinely uncovers a sibling.** Resolving one account exposed three more sites; splitting one leg
+   pair exposed a stale comment; keying one table exposed that another had never been compared.
+
+### 1.3 The family queue, ordered by real ledger rows
 
 Ordering is by measured output, not by code size.
 
-| #   | Family             | Book(s)             | Real rows | Reference voucher               | Desktop source                |
-| --- | ------------------ | ------------------- | --------- | ------------------------------- | ----------------------------- |
-| 1   | Sale (tax invoice) | 026/027/029/030/032 | 556       | 027/00001 ✅ started            | `TR_SALE.cs` 21,586           |
-| 2   | Scheme instalment  | 074/075             | 1635      | pick highest-member voucher     | `TR_MEMB_REC.cs`              |
-| 3   | Cash pay/receive   | 001/002 + 5         | 291 + 227 | one of each direction           | `TR_CASH_*.cs`                |
-| 4   | Purchase           | 035/036             | 115       | incl. one with `PR_BILL_OS < 0` | `TR_PURC.cs` 17,255           |
-| 5   | Contra / journal   | 017                 | 74        | multi-line                      | `TR_JV.cs`                    |
-| 6   | Rate cut           | 064                 | 66        | one per live type (9)           | `TR_RATE_CUT.cs`              |
-| 7   | Sales order        | 020                 | 55        | with an adjustment              | `TR_SALE_ORD.cs` 12,022       |
-| 8   | Scheme adjust      | 076                 | 37        | maturity + bonus                | `TR_MEMB_ADJ.cs` ⚠️ uncited   |
-| 9   | Fine JV            | 078                 | 28        | both types                      | `TR_FINE_JV.cs`               |
-| 10  | Karigar receipt    | 052                 | 28        | types 11 and 01                 | `TR_MFG_KR_ISU_REC.cs` 11,974 |
-| 11  | Sales return       | 028/031             | measure   | with an admitted tag            | `TR_SALE_RTN.cs` 16,923       |
-| 12  | Tag opening        | —                   | measure   | —                               | `TR_TAG_OPBL.cs` 14,664       |
-| 13  | Tag split          | —                   | measure   | —                               | `TR_TAG_SPLIT.cs` 12,940      |
-| 14  | Hallmark sale      | —                   | measure   | —                               | `TR_SALE_HM.cs` 15,353        |
-| 15  | Labour sale        | —                   | measure   | —                               | `TR_SALE_LBR.cs` 12,299       |
-| 16  | Wholesale sale     | WH SALES            | 38        | **form does not exist**         | `TR_WH_SALE.cs` 18,007        |
+| #   | Family                  | Book(s)             | Real rows        | Reference voucher                                       | Desktop source                |
+| --- | ----------------------- | ------------------- | ---------------- | ------------------------------------------------------- | ----------------------------- |
+| 1   | Sale (tax invoice)      | 026/027/029/030/032 | 556              | **DONE** — 13 defects, `comparisons/family-01-sale.md`  | `TR_SALE.cs` 21,586           |
+| 2   | Scheme instalment       | 074/075             | 1635 (2622 legs) | **DONE** — 6 defects, `comparisons/family-02-scheme.md` | `TR_MEMB_ENT.cs`              |
+| 3   | Cash + bank pay/receive | 001/002 + 11 bank   | 522 + 228        | **DONE** — 12 defects, `comparisons/family-03-cash.md`  | `TR_CASH_*.cs`, `Ac_Tax.cs`   |
+| 4   | Purchase                | 035/036             | 115              | incl. one with `PR_BILL_OS < 0`                         | `TR_PURC.cs` 17,255           |
+| 5   | Contra / journal        | 017                 | 74               | multi-line                                              | `TR_JV.cs`                    |
+| 6   | Rate cut                | 064                 | 66               | one per live type (9)                                   | `TR_RATE_CUT.cs`              |
+| 7   | Sales order             | 020                 | 55               | with an adjustment                                      | `TR_SALE_ORD.cs` 12,022       |
+| 8   | Scheme adjust           | 076                 | 37               | maturity + bonus                                        | `TR_MEMB_ADJ.cs` ⚠️ uncited   |
+| 9   | Fine JV                 | 078                 | 28               | both types                                              | `TR_FINE_JV.cs`               |
+| 10  | Karigar receipt         | 052                 | 28               | types 11 and 01                                         | `TR_MFG_KR_ISU_REC.cs` 11,974 |
+| 11  | Sales return            | 028/031             | measure          | with an admitted tag                                    | `TR_SALE_RTN.cs` 16,923       |
+| 12  | Tag opening             | —                   | measure          | —                                                       | `TR_TAG_OPBL.cs` 14,664       |
+| 13  | Tag split               | —                   | measure          | —                                                       | `TR_TAG_SPLIT.cs` 12,940      |
+| 14  | Hallmark sale           | —                   | measure          | —                                                       | `TR_SALE_HM.cs` 15,353        |
+| 15  | Labour sale             | —                   | measure          | —                                                       | `TR_SALE_LBR.cs` 12,299       |
+| 16  | Wholesale sale          | WH SALES            | 38               | **form does not exist**                                 | `TR_WH_SALE.cs` 18,007        |
 
 Families 11–15 need their real row counts measured before ordering — several may be dead for this customer,
 which is a legitimate reason to defer but **must be recorded as a fact about `Live24`, not a general claim.**
