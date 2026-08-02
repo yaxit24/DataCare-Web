@@ -63,7 +63,7 @@ export function insertRowTx(
 const pad = (v: unknown, n: number): string => String(v ?? '').padStart(n, '0');
 /** Stamp desktop ledger-line fields. LD_CODE is never synthesized: desktop uses the workflow's
  * contra-account code, not a line ordinal, so callers must provide it when the source rule is known. */
-function enrichLedgerLine(
+export function enrichLedgerLine(
   line: LedgerLine,
   srno: number,
   /** Right-aligned line number, or '' for the 23-character form. */
@@ -114,6 +114,24 @@ function enrichLedgerLine(
     ENTRY_TIME: line.ENTRY_TIME ?? rowDate,
     CLR_DATE: line.CLR_DATE ?? rowDate,
     MAIN_USER: line.MAIN_USER ?? null,
+    // SIGN IS A MOVEMENT DIRECTION, NOT A DEBIT/CREDIT MARKER.
+    //
+    // Measured across every table in the real customer database that has a `SIGN` column - 11,548 rows:
+    //
+    //     AC_DATA        blank 4975   + 105    - 70
+    //     ROJ_MEL_DATA   blank 2711   + 160    - 308
+    //     AD_OS                       + 8160   - 34
+    //     AD_ADJ                               - 26
+    //
+    // 'C' and 'D' appear NOWHERE. The desktop leaves SIGN blank on a money leg and sets +/- only where metal
+    // moves: 174 of the 175 signed AC_DATA rows carry a non-zero FINE_WT, the single exception being in book
+    // 034 (wholesale sale, which is not built). '+' is metal in - purchase 035, karigar receipt 052 - and '-'
+    // is metal out - karigar issue 050, labour work 088.
+    //
+    // The C/D alphabet IS correct for the differently-named columns OP_DATA.OP_SIGN (D 73 / C 35) and
+    // OP_DATA.FINE_SIGN (D 97 / C 11), which are opening-balance debit/credit markers. Those are untouched;
+    // conflating the two is exactly the mistake this normalisation exists to undo, so it matches only `SIGN`.
+    SIGN: line.SIGN === 'C' || line.SIGN === 'D' ? '' : (line.SIGN ?? ''),
   };
   if (e.BOOK_NAME == null && bookName) e.BOOK_NAME = bookName;
   return e;

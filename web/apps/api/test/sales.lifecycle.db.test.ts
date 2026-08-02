@@ -921,7 +921,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
                 WHERE a.tenant_id=s.tenant_id AND a."CO_CODE"=s."CO_CODE"
                   AND a."LC_CODE"=s."LC_CODE" AND a."CO_YEAR"=s."CO_YEAR"
                   AND a."CO_BOOK"=s."CO_BOOK" AND a."VCH_NO"=s."VCH_NO"
-                  AND a."AC_CODE"='CUST' AND a."SIGN"='D' LIMIT 1) ledger_total
+                  AND a."AC_CODE"='CUST' AND coalesce(a."DR_AMT",0)<>0 LIMIT 1) ledger_total
          FROM "SL_DATA" s WHERE s.tenant_id=$1 AND s."VCH_NO"='00008'`,
       TENANT,
     )) as Array<{ total: number; ledger_total: number }>;
@@ -940,7 +940,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
                 WHERE a.tenant_id=s.tenant_id AND a."CO_CODE"=s."CO_CODE"
                   AND a."LC_CODE"=s."LC_CODE" AND a."CO_YEAR"=s."CO_YEAR"
                   AND a."CO_BOOK"=s."CO_BOOK" AND a."VCH_NO"=s."VCH_NO"
-                  AND a."AC_CODE"='CUST' AND a."SIGN"='D' LIMIT 1) ledger_total
+                  AND a."AC_CODE"='CUST' AND coalesce(a."DR_AMT",0)<>0 LIMIT 1) ledger_total
          FROM "SL_DATA" s WHERE s.tenant_id=$1 AND s."VCH_NO"='00008'`,
       TENANT,
     )) as Array<{ total: number; ledger_total: number }>;
