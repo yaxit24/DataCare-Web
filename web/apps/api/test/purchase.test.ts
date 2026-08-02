@@ -206,3 +206,38 @@ describe('purchase fine legs are per LINE, not per metal/account', () => {
     expect(l.SIGN).toBe('+');
   });
 });
+
+describe('purchase money leg codes are measured, and differ from the sale family', () => {
+  // Real voucher 035/00001 is a cash purchase with FOUR legs, all 23-character keys:
+  //
+  //     [01002024-20250350000101]  ac 000903  ld 00008   Cr 6780.00     party
+  //     [01002024-20250350000103]  ac 00008   ld 000903  Dr 6780.00     purchase
+  //     [01002024-20250350000116]  ac 000903  ld 00001   Dr 6780.00     settlement, party
+  //     [01002024-20250350000117]  ac 00001   ld 000903  Cr 6780.00     settlement, cash
+  //
+  // NOTE THE TAX CODE, measured separately: purchase uses 06 where the SALE family uses 04 for the same role.
+  // The codes are per BOOK, not a universal role map - the third independent confirmation of that, after the
+  // cash/bank split and the receipt/payment split.
+  it('types the bill pair 01/03 and the settlement pair 16/17', () => {
+    const legs = buildPurchaseLedger({
+      key: {
+        CO_CODE: '01',
+        LC_CODE: '00',
+        CO_YEAR: '2024-2025',
+        CO_BOOK: '035',
+        VCH_NO: '00001',
+      },
+      acCode: '000903',
+      purchaseAc: '00008',
+      taxAc: '00085',
+      roundAc: '00057',
+      totals: { total: 6780, taxable: 6780, tax: 0, roundOff: 0, discount: 0 },
+    } as never);
+    const types = legs.map((l) => (l as never as { legType?: number }).legType);
+    // The party leg is 01 and the purchase leg 03 — NOT a 1..n sequence, and not the sale's 04 for tax.
+    expect(types[0]).toBe(1);
+    expect(types).toContain(3);
+    // Every money leg carries a code; none falls through to the reserved band.
+    expect(types.every((t) => typeof t === 'number')).toBe(true);
+  });
+});

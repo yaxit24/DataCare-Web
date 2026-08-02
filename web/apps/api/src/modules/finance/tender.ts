@@ -11,6 +11,8 @@ import type { LedgerLine } from '../posting/posting.js';
 const R2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
 
 export interface TenderParams {
+  /** Per-book leg type codes; omitted keeps the reserved-band fallback. */
+  legs?: TenderLegCodes;
   partyAc: string;
   cashAmt?: number;
   chequeAmt?: number;
@@ -39,12 +41,32 @@ function amounts(p: TenderParams) {
 }
 
 /** Payment OUT (purchase / other-expense): Dr party / Cr cash|bank + kasar Dr party / Cr KASAR. */
+/**
+ * Leg type codes for a tender pair, supplied by the CALLER.
+ *
+ * They are per book and cannot be defaulted here. Measured examples: a purchase settlement is 16 party Dr / 17
+ * cash Cr on books 035/036, while a SALE settlement is 19/20 for cash and 09/10 for bank, and a cash-book
+ * payment is 05/06. Four different pairs for the same role, so this helper takes them rather than guessing.
+ *
+ * A caller that has not measured its codes omits this and keeps the positional fallback, which lands in the
+ * reserved 50+ band and is therefore visibly not a desktop code.
+ */
+export interface TenderLegCodes {
+  cashParty?: number;
+  cash?: number;
+  bankParty?: number;
+  bank?: number;
+  kasarParty?: number;
+  kasar?: number;
+}
+
 export function payoutLegs(base: Record<string, unknown>, p: TenderParams): TenderResult {
   const { cashAmt, bankPaid, kasar, paidNow } = amounts(p);
   const legs: LedgerLine[] = [];
   if (cashAmt > 0) {
     legs.push({
       ...base,
+      ...(p.legs?.cashParty != null ? { legType: p.legs.cashParty } : {}),
       AC_CODE: p.partyAc,
       LD_CODE: p.cashAc ?? 'CASH',
       DR_AMT: cashAmt,
@@ -53,6 +75,7 @@ export function payoutLegs(base: Record<string, unknown>, p: TenderParams): Tend
     } as LedgerLine);
     legs.push({
       ...base,
+      ...(p.legs?.cash != null ? { legType: p.legs.cash } : {}),
       AC_CODE: p.cashAc ?? 'CASH',
       LD_CODE: p.partyAc,
       DR_AMT: 0,

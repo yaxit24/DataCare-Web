@@ -282,6 +282,7 @@ export function buildPurchaseLedger(p: {
     lines.push({
       ...base,
       AC_CODE: p.acCode,
+      legType: PURC_LEG.party,
       LD_CODE: p.controlAc ?? p.purchaseAc,
       DR_AMT: 0,
       CR_AMT: p.totals.total,
@@ -295,6 +296,7 @@ export function buildPurchaseLedger(p: {
     if (leg.amount !== 0)
       lines.push({
         ...base,
+        legType: PURC_LEG.purchase,
         AC_CODE: leg.ac,
         LD_CODE: p.acCode,
         DR_AMT: leg.amount,
@@ -304,6 +306,7 @@ export function buildPurchaseLedger(p: {
   if (p.totals.tax !== 0)
     lines.push({
       ...base,
+      legType: PURC_LEG.tax,
       AC_CODE: p.taxAc,
       LD_CODE: p.acCode,
       DR_AMT: p.totals.tax,
@@ -313,6 +316,7 @@ export function buildPurchaseLedger(p: {
   if (p.totals.roundOff > 0)
     lines.push({
       ...base,
+      legType: PURC_LEG.webRoundOff,
       AC_CODE: p.roundAc,
       LD_CODE: p.acCode,
       DR_AMT: p.totals.roundOff,
@@ -322,6 +326,7 @@ export function buildPurchaseLedger(p: {
   else if (p.totals.roundOff < 0)
     lines.push({
       ...base,
+      legType: PURC_LEG.webRoundOff,
       AC_CODE: p.roundAc,
       LD_CODE: p.acCode,
       DR_AMT: 0,
@@ -425,6 +430,32 @@ export function buildPurchaseFineLedger(p: {
  * pair, 18/19 the kasar pair - and they are 23-character keys while these are 33.
  */
 const FINE_LEG = 21;
+
+/**
+ * Purchase leg type codes, measured across books 035 and 036.
+ *
+ *   01 party      Cr   (17)   the bill - the sale's shape with the directions inverted
+ *   03 purchase   Dr   (17)   00008 gold / 00009 silver
+ *   06 tax 00085  Dr    (2)
+ *   16 party Dr / 17 cash Cr   (5)   paying the supplier
+ *   18 party Dr / 19 kasar 00042 Cr  (2)   book 036 only
+ *   21 fine legs       (42)   weight only, 33-character keys - see buildPurchaseFineLedger
+ *
+ * NOTE THE TAX CODE. Purchase uses 06 where the SALE family uses 04 for the same role. So the codes are not a
+ * universal role map even for identical roles - they are per book, which is the third independent confirmation
+ * of that after the cash/bank split and the receipt/payment split.
+ */
+const PURC_LEG = {
+  party: 1,
+  purchase: 3,
+  tax: 6,
+  settleParty: 16,
+  settleCash: 17,
+  kasarParty: 18,
+  kasar: 19,
+  /** The web's round-off leg, which the desktop does not write. Same reasoning as the sale family's 99. */
+  webRoundOff: 99,
+} as const;
 
 function keyOf(s: VoucherScope, vchNo: number | string): VoucherKey {
   return {
@@ -1049,6 +1080,10 @@ async function writePurchaseTx(
       cashAc,
       bankAc: input.bankAc,
       kasarAc,
+      // Measured on books 035/036: the settlement pair is 16 party Dr / 17 cash Cr on 5 real vouchers. The
+      // bank and kasar pairs are NOT passed - book 036's kasar pair is 18/19, but no bank settlement appears
+      // in this dataset, so those stay on the reserved-band fallback until measured.
+      legs: { cashParty: PURC_LEG.settleParty, cash: PURC_LEG.settleCash },
     },
   );
   ledger.push(...tender.legs);
