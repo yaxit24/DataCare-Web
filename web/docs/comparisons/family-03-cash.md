@@ -167,6 +167,35 @@ direction convention is not the ledger's and must be taken from data per row typ
 
 ---
 
+## The BANK books — measured, and the assumption would have been wrong
+
+Measured across all 228 legs of the 11 active bank books. **Not** a mirror of cash:
+
+| `MAIN_BOOK` | Leg         | Role                            | Dir     | n   | Same as cash?                   |
+| ----------- | ----------- | ------------------------------- | ------- | --- | ------------------------------- |
+| `BANK REC`  | `01` / `02` | party / bank                    | Cr / Dr | 42  | **yes** — same as `CASH REC`    |
+| `BANK REC`  | `03` / `04` | party / kasar `00057`           | Cr / Dr | 6   | **yes**                         |
+| `BANK REC`  | `05` / `06` | bank / **bank charges `00048`** | Cr / Dr | 1   | **no — cash has no equivalent** |
+| `BANK PAY`  | `07` / `08` | party / bank                    | Dr / Cr | 61  | **NO — cash pay uses 05/06**    |
+| `BANK PAY`  | `11` / `12` | bank / **bank charges `00048`** | Cr / Dr | 4   | **no**                          |
+
+Three things follow, and only the first was predictable:
+
+1. **Bank receipt shares cash receipt's codes.** 01/02 and 03/04 carry over.
+2. **Bank payment does NOT.** It uses 07/08 where cash payment uses 05/06. Assuming the mirror would have
+   written the wrong code on all 61 legs.
+3. **Both bank directions add a bank-charges pair** — `05/06` on a receipt, `11/12` on a payment — naming
+   `00048 BANK CHARGES A/C`. The cash books have no such pair at all.
+
+**The code space is per-`MAIN_BOOK`, not per-direction.** `BANK REC`'s `05/06` is a bank-charges pair while
+`CASH PAY`'s `05/06` is a party/cash pair. The same two numbers mean different things in different books, so a
+single global map keyed on code alone would silently conflate them.
+
+That is the third distinct scheme in this family alone (cash receipt, cash payment, bank payment), which is why
+the plan's per-family measurement step exists and why the bank codes were not assumed from cash.
+
+---
+
 ## Next steps
 
 1. Pick reference vouchers: 001/00001 (4 legs — party, cash, party, kasar) and 002/00029 (18 legs, multi-line).

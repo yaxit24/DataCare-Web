@@ -356,3 +356,52 @@ describe.runIf(RUN)('multi-line cash paths write a Rojmel row per line', () => {
     expect(roj.map((r) => r.k.slice(23).trim())).toEqual(['1', '2', '3']);
   });
 });
+
+describe.runIf(RUN)('bank leg codes are not a mirror of cash', () => {
+  beforeEach(async () => {
+    await wipe();
+    await seed();
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
+       VALUES ($1,$2,$3,'000754','OLD AXIS BANK','L')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+       VALUES ($1,$2,$3,'012','Bank Payment','BPAY','BANK PAY','O','Y','CASH_DATA')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'012',1,'000754','Bank Payment','BANK PAY','O')`,
+      TENANT,
+      CO,
+      LC,
+    );
+  });
+
+  it('a BANK payment uses 07/08, where a CASH payment uses 05/06', async () => {
+    // Measured across all 228 legs of the 11 active bank books: BANK PAY is 07 party Dr / 08 bank Cr on 61 legs
+    // each. CASH PAY is 05/06. A bank RECEIPT does share the cash receipt's 01/02 and 03/04 - so the mirror
+    // holds in one direction and not the other, and assuming it would have written 05/06 on all 61.
+    await postPayment(runtime, {
+      scope: { ...scope, coBook: '012' },
+      partyAc: PARTY,
+      amount: 5000,
+      mode: 'cheque',
+      bankAc: '000754',
+      vchDate: '2024-04-01',
+    } as never);
+    const rows = await legs();
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.k.slice(21).trim())).toEqual(['107', '108']);
+    expect(rows[0]!.ac).toBe(PARTY);
+    expect(rows[0]!.dr).toBe(5000);
+    expect(rows[1]!.ac).toBe('000754');
+    expect(rows[1]!.cr).toBe(5000);
+  });
+});

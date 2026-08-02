@@ -154,6 +154,44 @@ const CASH_LEG = {
   payKasar: 8,
 } as const;
 
+/**
+ * BANK leg codes, measured across all 228 legs of the 11 active bank books. NOT a mirror of cash.
+ *
+ *   BANK REC   01 party Cr / 02 bank Dr   (42)      same as CASH REC
+ *              03 party Cr / 04 kasar Dr  (6)       same as CASH REC
+ *              05 bank  Cr / 06 charges Dr (1)      cash has NO equivalent
+ *   BANK PAY   07 party Dr / 08 bank Cr   (61)      CASH PAY uses 05/06 - DIFFERENT
+ *              11 bank  Cr / 12 charges Dr (4)      cash has NO equivalent
+ *
+ * A bank RECEIPT shares the cash receipt's codes; a bank PAYMENT does not. Assuming the mirror would have
+ * written 05/06 on all 61 bank-payment legs.
+ *
+ * And the code space is PER MAIN_BOOK, not per direction: `BANK REC` 05/06 is a bank-charges pair while
+ * `CASH PAY` 05/06 is a party/cash pair. The same numbers mean different things in different books, so these
+ * are kept as separate maps rather than one lookup keyed on the code.
+ *
+ * The bank-charges pairs are recorded but NOT yet emitted - the web has no bank-charge input on these paths,
+ * which is a gap of its own rather than a wrong value.
+ */
+const BANK_LEG = {
+  recParty: 1,
+  recBank: 2,
+  recKasarParty: 3,
+  recKasar: 4,
+  recChargesBank: 5,
+  recCharges: 6,
+  payParty: 7,
+  payBank: 8,
+  payChargesBank: 11,
+  payCharges: 12,
+} as const;
+
+/** The leg map for a mode: bank payments use 07/08 where cash payments use 05/06. */
+const legsFor = (mode: PayMode) =>
+  mode === 'cash'
+    ? { party: CASH_LEG.payParty, account: CASH_LEG.payCash }
+    : { party: BANK_LEG.payParty, account: BANK_LEG.payBank };
+
 export function buildTransferLedger(
   key: VoucherKey,
   vchType: string,
@@ -519,7 +557,7 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
     const ledger: LedgerLine[] = [
       {
         ...lbase,
-        legKeySuffix: suffix(CASH_LEG.payParty),
+        legKeySuffix: suffix(legsFor(mode).party),
         AC_CODE: input.partyAc,
         LD_CODE: payAcResolved,
         DR_AMT: input.amount,
@@ -528,7 +566,7 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
       },
       {
         ...lbase,
-        legKeySuffix: suffix(CASH_LEG.payCash),
+        legKeySuffix: suffix(legsFor(mode).account),
         AC_CODE: payAcResolved,
         LD_CODE: input.partyAc,
         DR_AMT: 0,
@@ -886,7 +924,7 @@ export async function postPaymentLines(
       ledger.push(
         {
           ...lbase,
-          legKeySuffix: lineSuffix(lineNo, CASH_LEG.payParty),
+          legKeySuffix: lineSuffix(lineNo, legsFor(mode).party),
           AC_CODE: l.partyAc,
           LD_CODE: payAcLinesResolved,
           DR_AMT: amt,
@@ -895,7 +933,7 @@ export async function postPaymentLines(
         },
         {
           ...lbase,
-          legKeySuffix: lineSuffix(lineNo, CASH_LEG.payCash),
+          legKeySuffix: lineSuffix(lineNo, legsFor(mode).account),
           AC_CODE: payAcLinesResolved,
           LD_CODE: l.partyAc,
           DR_AMT: 0,
