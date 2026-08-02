@@ -376,31 +376,55 @@ export function buildPurchaseFineLedger(p: {
   }>;
 }): LedgerLine[] {
   if (p.rateUnfix) return [];
-  const legs = new Map<string, { metal: 'G' | 'S'; ldCode: string; fine: number }>();
-  for (const line of p.lines) {
-    if (round2(line.metalAmount) !== 0) continue;
+  // ONE FINE LEG PER LINE, not one per metal/account combination.
+  //
+  // Measured on book 035: 42 real type-21 legs across 11 accounts, and voucher 00004 alone has THREE - lines 1,
+  // 2 and 3 carrying 12.712, 11.950 and 3.950, all gold and all against purchase account 00008. Aggregating by
+  // `${metal}|${ldCode}` collapsed those into a single leg of 28.612.
+  //
+  // THE KEY IS A DIFFERENT LAYOUT FROM THE SAME BOOK'S MONEY LEGS. Money legs 01/03/06/16/17 are 23 characters
+  // with the leg type at 22-23; these fine legs are 33 with `<line><leg>` right-aligned in 12 - the cash books'
+  // shape. So one table of one book uses two layouts, chosen by leg type. Real keys:
+  //
+  //     [01002024-202503500004         121]  fine 12.712
+  //     [01002024-202503500004         221]  fine 11.950
+  //     [01002024-202503500004         321]  fine  3.950
+  //
+  // `legKeySuffix` carries it per row, which is why that mechanism is per-LINE rather than per-family.
+  const suffix = (line: number): string =>
+    `${line}${String(FINE_LEG).padStart(2, '0')}`.padStart(12, ' ');
+  const out: LedgerLine[] = [];
+  p.lines.forEach((line, idx) => {
+    if (round2(line.metalAmount) !== 0) return;
     const metal = line.metal ?? 'G';
     const ldCode = metal === 'S' ? '00009' : (p.purcAcByItem?.[line.itCode.trim()] ?? p.purchaseAc);
     const fine =
       metal === 'S' ? round3(num(line.silverFineWt)) : round3(line.fine + num(line.otherFineWt));
-    if (fine === 0) continue;
-    const id = `${metal}|${ldCode}`;
-    const prior = legs.get(id);
-    legs.set(id, { metal, ldCode, fine: round3((prior?.fine ?? 0) + fine) });
-  }
-  return [...legs.values()].map((leg) => ({
-    ...p.key,
-    VCH_TYPE: p.vchType ?? 'PURC',
-    AC_CODE: p.acCode,
-    LD_CODE: leg.ldCode,
-    IT_TYPE: leg.metal,
-    SIGN: '+',
-    FINE_WT: leg.fine,
-    FINE_RATE: 0,
-    DR_AMT: 0,
-    CR_AMT: 0,
-  }));
+    if (fine === 0) return;
+    out.push({
+      ...p.key,
+      legKeySuffix: suffix(idx + 1),
+      VCH_TYPE: p.vchType ?? 'PURC',
+      AC_CODE: p.acCode,
+      LD_CODE: ldCode,
+      IT_TYPE: metal,
+      SIGN: '+',
+      FINE_WT: fine,
+      FINE_RATE: 0,
+      DR_AMT: 0,
+      CR_AMT: 0,
+    });
+  });
+  return out;
 }
+
+/**
+ * The purchase FINE leg's type code, measured on books 035 and 036: type 21, on all 42 real legs.
+ *
+ * The money legs use different codes entirely - 01 party Cr, 03 purchase Dr, 06 tax Dr, 16/17 the settlement
+ * pair, 18/19 the kasar pair - and they are 23-character keys while these are 33.
+ */
+const FINE_LEG = 21;
 
 function keyOf(s: VoucherScope, vchNo: number | string): VoucherKey {
   return {

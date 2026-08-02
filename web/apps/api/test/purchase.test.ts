@@ -145,3 +145,64 @@ it('PURC_WITH_LBR allocates labour and other either with purchase or separately'
   expect(purchaseExpenseSplit(120, 15, 5, true)).toEqual({ primary: 120, labourOther: 0 });
   expect(purchaseExpenseSplit(120, 15, 5, false)).toEqual({ primary: 100, labourOther: 20 });
 });
+
+describe('purchase fine legs are per LINE, not per metal/account', () => {
+  // Measured on book 035: 42 real type-21 legs, and voucher 00004 alone has THREE - lines 1, 2 and 3 carrying
+  // 12.712, 11.950 and 3.950, all gold and all against purchase account 00008. Aggregating by metal+account
+  // collapsed them into a single leg of 28.612.
+  //
+  // The keys are 33 characters with `<line><leg>` right-aligned in 12 - the cash books' shape - while the SAME
+  // BOOK's money legs are 23 with the leg type at 22-23. One table, two layouts, chosen by leg type:
+  //
+  //     [01002024-202503500004         121]  fine 12.712
+  //     [01002024-202503500004         221]  fine 11.950
+  //     [01002024-202503500004         321]  fine  3.950
+  const key = {
+    CO_CODE: '01',
+    LC_CODE: '00',
+    CO_YEAR: '2024-2025',
+    CO_BOOK: '035',
+    VCH_NO: '00004',
+  };
+  const line = (fine: number) => ({
+    itCode: 'GOLD',
+    metal: 'G' as const,
+    fine,
+    metalAmount: 0,
+  });
+
+  it('writes one leg per line, each with its own fine weight and line number', () => {
+    const legs = buildPurchaseFineLedger({
+      key,
+      acCode: '000258',
+      purchaseAc: '00008',
+      lines: [line(12.712), line(11.95), line(3.95)],
+    } as never);
+    // THREE legs, not one aggregate of 28.612.
+    expect(legs).toHaveLength(3);
+    expect(legs.map((l) => Number((l as never as { FINE_WT: number }).FINE_WT))).toEqual([
+      12.712, 11.95, 3.95,
+    ]);
+    // Each carries its line in the key tail, leg type 21.
+    expect(legs.map((l) => (l as never as { legKeySuffix: string }).legKeySuffix.trim())).toEqual([
+      '121',
+      '221',
+      '321',
+    ]);
+  });
+
+  it('carries no money — a fine leg is weight only', () => {
+    const legs = buildPurchaseFineLedger({
+      key,
+      acCode: '000258',
+      purchaseAc: '00008',
+      lines: [line(7.917)],
+    } as never);
+    const l = legs[0] as never as { DR_AMT: number; CR_AMT: number; IT_TYPE: string; SIGN: string };
+    expect(Number(l.DR_AMT)).toBe(0);
+    expect(Number(l.CR_AMT)).toBe(0);
+    // All 42 real legs are IT_TYPE 'G' with SIGN '+' — metal coming IN on a purchase.
+    expect(l.IT_TYPE).toBe('G');
+    expect(l.SIGN).toBe('+');
+  });
+});
