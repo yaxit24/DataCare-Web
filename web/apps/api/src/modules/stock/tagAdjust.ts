@@ -38,7 +38,10 @@ export interface TagAdjustVoucher {
   stones: Array<Record<string, unknown>>;
 }
 
-const text = (value: unknown, max = 255): string => String(value ?? '').trim().slice(0, max);
+const text = (value: unknown, max = 255): string =>
+  String(value ?? '')
+    .trim()
+    .slice(0, max);
 const nullableText = (value: unknown, max = 255): string | null => text(value, max) || null;
 const n = (value: unknown): number => Number(value ?? 0) || 0;
 
@@ -55,7 +58,10 @@ function normalizeScope(input: TagAdjustInput): VoucherScope & { coYear: string;
   return scope as VoucherScope & { coYear: string; coBook: string };
 }
 
-async function assertTagAdjustBookTx(tx: any, scope: VoucherScope & { coYear: string; coBook: string }) {
+async function assertTagAdjustBookTx(
+  tx: any,
+  scope: VoucherScope & { coYear: string; coBook: string },
+) {
   const rows = (await tx.$queryRawUnsafe(
     `SELECT "BOOK_SNAME","BOOK_INOUT","MAIN_BOOK","BOOK_NAME"
        FROM "BOOK_DATA"
@@ -373,13 +379,22 @@ async function updateSourceDataTypesTx(
 export async function saveTagAdjust(
   prisma: any,
   input: TagAdjustInput,
-): Promise<{ vchNo: number; lines: number; stones: number; barDetlUpdated: number; mainStockUpdated: number }> {
+): Promise<{
+  vchNo: number;
+  lines: number;
+  stones: number;
+  barDetlUpdated: number;
+  mainStockUpdated: number;
+}> {
   if (!input.lines?.length) throw new TagAdjustError('tagAdjust requires at least one line');
   const scope = normalizeScope(input);
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
     const meta = await assertTagAdjustBookTx(tx, scope);
-    const vchNo = input.vchNo == null ? formatVoucherNo(await nextVoucherNoTx(tx, scope)) : formatVoucherNo(input.vchNo);
+    const vchNo =
+      input.vchNo == null
+        ? formatVoucherNo(await nextVoucherNoTx(tx, scope))
+        : formatVoucherNo(input.vchNo);
     await deleteRegisterTx(tx, scope, vchNo);
     await insertRowTx(tx, 'BAR_CAN_DATA', scope.tenantId, headerRow(scope, input, vchNo, vchDate));
     let stones = 0;
@@ -401,7 +416,10 @@ export async function getTagAdjust(
   vchNoInput: string | number,
   book?: string,
 ): Promise<TagAdjustVoucher | null> {
-  const scope = normalizeScope({ scope: { ...inputScope, coBook: book ?? inputScope.coBook }, lines: [{ tagNo: 'x', dataType: 'x' }] });
+  const scope = normalizeScope({
+    scope: { ...inputScope, coBook: book ?? inputScope.coBook },
+    lines: [{ tagNo: 'x', dataType: 'x' }],
+  });
   const vchNo = formatVoucherNo(vchNoInput);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
     const headers = (await tx.$queryRawUnsafe(
@@ -451,7 +469,10 @@ export async function deleteTagAdjust(
   vchNoInput: string | number,
   book?: string,
 ): Promise<{ deleted: true }> {
-  const scope = normalizeScope({ scope: { ...inputScope, coBook: book ?? inputScope.coBook }, lines: [{ tagNo: 'x', dataType: 'x' }] });
+  const scope = normalizeScope({
+    scope: { ...inputScope, coBook: book ?? inputScope.coBook },
+    lines: [{ tagNo: 'x', dataType: 'x' }],
+  });
   const vchNo = formatVoucherNo(vchNoInput);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
     await deleteRegisterTx(tx, scope, vchNo);

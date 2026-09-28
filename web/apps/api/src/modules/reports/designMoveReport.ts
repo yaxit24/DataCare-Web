@@ -18,10 +18,16 @@ const isoDate = (v: unknown): string | null => {
   const d = v instanceof Date ? v : new Date(String(v));
   return Number.isFinite(d.getTime()) ? d.toISOString().slice(0, 10) : null;
 };
-const modeFrom = (v: unknown): DesignMoveMode => (String(v ?? '').trim() === 'item' ? 'item' : 'design');
+const modeFrom = (v: unknown): DesignMoveMode =>
+  String(v ?? '').trim() === 'item' ? 'item' : 'design';
 
 function scopeWhere(s: ReportScope, params: unknown[]): string[] {
-  const where = ['a."CO_CODE"=$1', 'a."LC_CODE"=$2', 'a."CO_YEAR"=$3', `coalesce(a."TAG_NO",'') <> 'N'`];
+  const where = [
+    'a."CO_CODE"=$1',
+    'a."LC_CODE"=$2',
+    'a."CO_YEAR"=$3',
+    `coalesce(a."TAG_NO",'') <> 'N'`,
+  ];
   const toDate = s.toDate ?? new Date().toISOString().slice(0, 10);
   params.push(toDate);
   where.push(`a."VCH_DATE" <= $${params.length}::date`);
@@ -115,7 +121,9 @@ export async function designMoveDetailReport(
     const params: unknown[] = [s.coCode, s.lcCode ?? '', s.coYear ?? ''];
     const where = scopeWhere(s, params);
     params.push(key);
-    where.push(mode === 'item' ? `c."IT_CODE"=$${params.length}` : `f."DESIGN_NO"=$${params.length}`);
+    where.push(
+      mode === 'item' ? `c."IT_CODE"=$${params.length}` : `f."DESIGN_NO"=$${params.length}`,
+    );
     params.push(size);
     where.push(`f."ITM_SIZE"=$${params.length}`);
     if (mode === 'item' && designNo) {

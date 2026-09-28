@@ -72,7 +72,16 @@ databaseDescribe('RP_SLPR_ZOOM Old Stock parity builder', () => {
 
   it('pivots positive old gold stock by item and stock month like the desktop grid', async () => {
     const report = await oldStockReport(runtime, scope);
-    expect(report.rows.map((row: any) => [row.srNo, row.itemCode, row.itemName, row['24/04'], row['24/05'], row.total])).toEqual([
+    expect(
+      report.rows.map((row: any) => [
+        row.srNo,
+        row.itemCode,
+        row.itemName,
+        row['24/04'],
+        row['24/05'],
+        row.total,
+      ]),
+    ).toEqual([
       [1, 'CHN', 'Gold Chain', 0, 1, 1],
       [2, 'RING', 'Gold Ring', 1, 0, 1],
     ]);

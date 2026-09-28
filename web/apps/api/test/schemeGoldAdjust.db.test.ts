@@ -33,7 +33,8 @@ async function wipe() {
     `SELECT table_name FROM information_schema.columns
       WHERE column_name='tenant_id' AND table_schema='public'`,
   )) as { table_name: string }[];
-  for (const r of rows) await owner.$executeRawUnsafe(`DELETE FROM "${r.table_name}" WHERE tenant_id=$1`, TENANT);
+  for (const r of rows)
+    await owner.$executeRawUnsafe(`DELETE FROM "${r.table_name}" WHERE tenant_id=$1`, TENANT);
 }
 
 async function seed() {
@@ -107,7 +108,10 @@ async function seed() {
 }
 
 async function rows(table: string) {
-  const order = table === 'AC_DATA' || table === 'ROJ_MEL_DATA' ? '"LEDR_KEY" NULLS LAST' : '"SR_NO" NULLS LAST';
+  const order =
+    table === 'AC_DATA' || table === 'ROJ_MEL_DATA'
+      ? '"LEDR_KEY" NULLS LAST'
+      : '"SR_NO" NULLS LAST';
   return (await owner.$queryRawUnsafe(
     `SELECT * FROM "${table}" WHERE tenant_id=$1 ORDER BY ${order}`,
     TENANT,
@@ -147,7 +151,13 @@ describe.runIf(RUN)('scheme gold adjustment desktop lifecycle', () => {
       ],
     });
 
-    expect(result).toEqual({ vchNo: 1, lines: 1, goldWt: 2, goldAmt: 12000, adjustedAmount: 12000 });
+    expect(result).toEqual({
+      vchNo: 1,
+      lines: 1,
+      goldWt: 2,
+      goldAmt: 12000,
+      adjustedAmount: 12000,
+    });
 
     const adj = await rows('AD_ADJ');
     expect(adj).toHaveLength(1);
@@ -172,16 +182,22 @@ describe.runIf(RUN)('scheme gold adjustment desktop lifecycle', () => {
 
     const os = await rows('AD_OS');
     expect(os.map((r) => Number(r.SR_NO))).toEqual([1, 701]);
-    expect(os[0]).toMatchObject({ ENTRY_TYPE: 'A', BOOK_NAME: 'MEMB GOLD ADJ', SIGN: '-', OS_TYPE: 'D', LD_CODE: MEMBER_AC });
+    expect(os[0]).toMatchObject({
+      ENTRY_TYPE: 'A',
+      BOOK_NAME: 'MEMB GOLD ADJ',
+      SIGN: '-',
+      OS_TYPE: 'D',
+      LD_CODE: MEMBER_AC,
+    });
     expect(Number(os[0]!.ADJ_AMT)).toBe(12500);
     expect(Number(os[1]!.ADJ_AMT)).toBe(0);
     expect(Number(os[1]!.GOLD_WT)).toBe(2);
 
-    const ledger = await owner.$queryRawUnsafe(
+    const ledger = (await owner.$queryRawUnsafe(
       `SELECT "LEDR_KEY","AC_CODE","LD_CODE","DR_AMT"::float dr,"CR_AMT"::float cr,"IT_TYPE",coalesce("SIGN",'') sign,"FINE_WT"::float fine
          FROM "AC_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
       TENANT,
-    ) as Array<Record<string, unknown>>;
+    )) as Array<Record<string, unknown>>;
     expect(ledger.map((r) => String(r.LEDR_KEY).slice(21, 23))).toEqual(['08', '09', '10', '11']);
     expect(ledger.every((r) => String(r.LEDR_KEY).length === 33)).toBe(true);
     expect(ledger.map((r) => [r.AC_CODE, r.LD_CODE, r.dr, r.cr])).toEqual([
@@ -191,11 +207,11 @@ describe.runIf(RUN)('scheme gold adjustment desktop lifecycle', () => {
       [MEMBER_AC, GOLD_CONTROL_AC, 0, 11500],
     ]);
 
-    const rojmel = await owner.$queryRawUnsafe(
+    const rojmel = (await owner.$queryRawUnsafe(
       `SELECT "LEDR_KEY","AC_CODE","LD_CODE","DR_AMT"::float dr,"CR_AMT"::float cr,"IT_TYPE",coalesce("SIGN",'') sign
          FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
       TENANT,
-    ) as Array<Record<string, unknown>>;
+    )) as Array<Record<string, unknown>>;
     expect(rojmel.map((r) => String(r.LEDR_KEY).slice(21, 23))).toEqual(['05', '06', '07', '08']);
     expect(rojmel.map((r) => [r.AC_CODE, r.LD_CODE, r.dr, r.cr, r.IT_TYPE, r.sign])).toEqual([
       [SCHEME_AC, MEMBER_AC, 0, 500, 'G', '+'],
@@ -217,10 +233,10 @@ describe.runIf(RUN)('scheme gold adjustment desktop lifecycle', () => {
       less: 500,
     });
 
-    const member = await owner.$queryRawUnsafe(
+    const member = (await owner.$queryRawUnsafe(
       `SELECT "EXP_DATE"::text AS exp FROM "AD_MEMB" WHERE tenant_id=$1`,
       TENANT,
-    ) as Array<{ exp: string }>;
+    )) as Array<{ exp: string }>;
     expect(member[0]!.exp.slice(0, 10)).toBe('2024-04-10');
 
     await deleteSchemeGoldAdjust(runtime, { scope, vchNo: 1, deleteUser: 'tester' });
@@ -230,7 +246,12 @@ describe.runIf(RUN)('scheme gold adjustment desktop lifecycle', () => {
     expect(await rows('ROJ_MEL_DATA')).toHaveLength(0);
     const deleted = await rows('DELETE_DATA');
     expect(deleted).toHaveLength(1);
-    expect(deleted[0]).toMatchObject({ CO_BOOK: BOOK, VCH_NO: '00001', VCH_TYPE: 'MGADJ', DELETE_USER: 'tester' });
+    expect(deleted[0]).toMatchObject({
+      CO_BOOK: BOOK,
+      VCH_NO: '00001',
+      VCH_TYPE: 'MGADJ',
+      DELETE_USER: 'tester',
+    });
     expect(Number(deleted[0]!.VCH_FINE_CR)).toBe(2);
   });
 });

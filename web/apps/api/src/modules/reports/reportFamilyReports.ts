@@ -28,7 +28,12 @@ function range(s: ReportScope): { fromDate: string; toDate: string } {
   return { fromDate, toDate };
 }
 
-function scopedWhere(alias: string, s: ReportScope, params: unknown[], dateColumn = 'VCH_DATE'): string[] {
+function scopedWhere(
+  alias: string,
+  s: ReportScope,
+  params: unknown[],
+  dateColumn = 'VCH_DATE',
+): string[] {
   const { fromDate, toDate } = range(s);
   params.push(s.tenantId, s.coCode, fromDate, toDate);
   const where = [
@@ -139,7 +144,10 @@ function mapLineRow(r: Record<string, unknown>): LineReportRow {
   };
 }
 
-const approvalModes: Record<ApprovalReportMode, { label: string; crystal: string; pending?: boolean }> = {
+const approvalModes: Record<
+  ApprovalReportMode,
+  { label: string; crystal: string; pending?: boolean }
+> = {
   issue: { label: 'Party Wise Approval Issue', crystal: 'AprPartyWise' },
   inout: { label: 'Approval In Out', crystal: 'AprInOut' },
   pending: { label: 'Pending Approval', crystal: 'AprPan', pending: true },
@@ -196,7 +204,10 @@ export async function approvalReport(
   });
 }
 
-const karigarModes: Record<KarigarReportMode, { label: string; crystal: string; bookName: string }> = {
+const karigarModes: Record<
+  KarigarReportMode,
+  { label: string; crystal: string; bookName: string }
+> = {
   issue: { label: 'Karigar Item Issue', crystal: 'KrIsuReport', bookName: 'KARIGAR ISSUE' },
   receive: { label: 'Karigar Item Receipt', crystal: 'KrRecReport', bookName: 'KARIGAR RECEIPT' },
 };
@@ -253,14 +264,48 @@ export async function karigarReport(
   });
 }
 
-const repairModes: Record<RepairReportMode, { label: string; crystal: string; bookName: string; pendingColumn?: 'ISU_ADJ' }> = {
-  'customer-receipt': { label: 'Customer Repair Received Item', crystal: 'CustRepRec', bookName: 'CUSTREP RECEIPT' },
-  'karigar-issue-pending': { label: 'Repairing Item Issue Pending', crystal: 'CustRepRec', bookName: 'CUSTREP RECEIPT', pendingColumn: 'ISU_ADJ' },
-  'karigar-issue': { label: 'Repairing Issue To Karigar', crystal: 'CustRepRec', bookName: 'KRREP ISSUE' },
-  'karigar-receipt-pending': { label: 'Karigar Repairing Receipt Pending', crystal: 'CustRepRec', bookName: 'KRREP ISSUE', pendingColumn: 'ISU_ADJ' },
-  'karigar-receipt': { label: 'Karigar Repairing Receipt', crystal: 'KrRepRec', bookName: 'KRREP RECEIPT' },
-  'customer-issue': { label: 'Customer Repairing Issue', crystal: 'CustRepIsu', bookName: 'CUSTREP ISSUE' },
-  'customer-issue-pending': { label: 'Customer Repairing Issue Pending', crystal: 'KrRepRec', bookName: 'KRREP RECEIPT', pendingColumn: 'ISU_ADJ' },
+const repairModes: Record<
+  RepairReportMode,
+  { label: string; crystal: string; bookName: string; pendingColumn?: 'ISU_ADJ' }
+> = {
+  'customer-receipt': {
+    label: 'Customer Repair Received Item',
+    crystal: 'CustRepRec',
+    bookName: 'CUSTREP RECEIPT',
+  },
+  'karigar-issue-pending': {
+    label: 'Repairing Item Issue Pending',
+    crystal: 'CustRepRec',
+    bookName: 'CUSTREP RECEIPT',
+    pendingColumn: 'ISU_ADJ',
+  },
+  'karigar-issue': {
+    label: 'Repairing Issue To Karigar',
+    crystal: 'CustRepRec',
+    bookName: 'KRREP ISSUE',
+  },
+  'karigar-receipt-pending': {
+    label: 'Karigar Repairing Receipt Pending',
+    crystal: 'CustRepRec',
+    bookName: 'KRREP ISSUE',
+    pendingColumn: 'ISU_ADJ',
+  },
+  'karigar-receipt': {
+    label: 'Karigar Repairing Receipt',
+    crystal: 'KrRepRec',
+    bookName: 'KRREP RECEIPT',
+  },
+  'customer-issue': {
+    label: 'Customer Repairing Issue',
+    crystal: 'CustRepIsu',
+    bookName: 'CUSTREP ISSUE',
+  },
+  'customer-issue-pending': {
+    label: 'Customer Repairing Issue Pending',
+    crystal: 'KrRepRec',
+    bookName: 'KRREP RECEIPT',
+    pendingColumn: 'ISU_ADJ',
+  },
 };
 
 function repairMode(value: unknown): RepairReportMode {
@@ -342,7 +387,10 @@ interface VpReportRow {
   mainUser: string | null;
 }
 
-const vpModes: Record<VpReportMode, { label: string; crystal: string; pending?: 'open' | 'closed' }> = {
+const vpModes: Record<
+  VpReportMode,
+  { label: string; crystal: string; pending?: 'open' | 'closed' }
+> = {
   'vp-issue': { label: 'VP Issue', crystal: 'VpIsuRpt' },
   'vp-pending': { label: 'VP Pending', crystal: 'VpIsuRpt', pending: 'open' },
   'vp-adjusted': { label: 'VP Adjusted', crystal: 'VpIsuRpt', pending: 'closed' },
@@ -369,8 +417,10 @@ export async function vpReport(
     const params: unknown[] = [];
     const where = scopedWhere('r', s, params);
     where.push(`r."CO_BOOK"::text='215'`);
-    if (spec.pending === 'open') where.push(`(coalesce(r."VP_AMT",0)-coalesce(r."VP_ADJ_AMT",0)) <> 0`);
-    if (spec.pending === 'closed') where.push(`(coalesce(r."VP_AMT",0)-coalesce(r."VP_ADJ_AMT",0)) = 0`);
+    if (spec.pending === 'open')
+      where.push(`(coalesce(r."VP_AMT",0)-coalesce(r."VP_ADJ_AMT",0)) <> 0`);
+    if (spec.pending === 'closed')
+      where.push(`(coalesce(r."VP_AMT",0)-coalesce(r."VP_ADJ_AMT",0)) = 0`);
     const filterSql = applyFilters('vp-report', s.filters, params);
     const rows = (await tx.$queryRawUnsafe(
       `SELECT row_number() OVER (ORDER BY r."VCH_DATE",r."CO_BOOK",r."VCH_NO") AS "srNo",
@@ -451,13 +501,37 @@ interface BullionReportRow {
   mainUser: string | null;
 }
 
-const bullionModes: Record<BullionReportMode, { label: string; crystal: string; inout: 'I' | 'O'; saleBook?: boolean; pending?: boolean }> = {
-  'sales-booking': { label: 'Sales Booking', crystal: 'BulCustBooking', inout: 'O', saleBook: true },
+const bullionModes: Record<
+  BullionReportMode,
+  { label: string; crystal: string; inout: 'I' | 'O'; saleBook?: boolean; pending?: boolean }
+> = {
+  'sales-booking': {
+    label: 'Sales Booking',
+    crystal: 'BulCustBooking',
+    inout: 'O',
+    saleBook: true,
+  },
   'purchase-booking': { label: 'Purchase Booking', crystal: 'BulCustBooking', inout: 'I' },
-  'sales-adjusted': { label: 'Sales Booking Adjust', crystal: 'BulCustAdjust', inout: 'O', saleBook: true },
+  'sales-adjusted': {
+    label: 'Sales Booking Adjust',
+    crystal: 'BulCustAdjust',
+    inout: 'O',
+    saleBook: true,
+  },
   'purchase-adjusted': { label: 'Purchase Booking Adjust', crystal: 'BulCustAdjust', inout: 'I' },
-  'sales-pending': { label: 'Sales Booking Pending', crystal: 'BulCustAdjust', inout: 'O', saleBook: true, pending: true },
-  'purchase-pending': { label: 'Purchase Booking Pending', crystal: 'BulCustAdjust', inout: 'I', pending: true },
+  'sales-pending': {
+    label: 'Sales Booking Pending',
+    crystal: 'BulCustAdjust',
+    inout: 'O',
+    saleBook: true,
+    pending: true,
+  },
+  'purchase-pending': {
+    label: 'Purchase Booking Pending',
+    crystal: 'BulCustAdjust',
+    inout: 'I',
+    pending: true,
+  },
 };
 
 function bullionMode(value: unknown): BullionReportMode {

@@ -41,11 +41,7 @@ export async function branchInoutReport(
 
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? ''];
-    const where = [
-      'a."CO_CODE"=$1',
-      'a."LC_CODE"=$2',
-      `a."BOOK_NAME" IN ('${bookName}')`,
-    ];
+    const where = ['a."CO_CODE"=$1', 'a."LC_CODE"=$2', `a."BOOK_NAME" IN ('${bookName}')`];
     if (s.coYear) {
       params.push(s.coYear);
       where.push(`a."CO_YEAR"=$${params.length}`);

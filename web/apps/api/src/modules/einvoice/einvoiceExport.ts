@@ -168,7 +168,8 @@ function scopedWhere(
 }
 
 const bookTypePredicate = `coalesce(e."BOOK_TYPE"::text,'')='T'`;
-const docNo = (row: Record<string, unknown>): string => `${t(row.BOOK_SR_NAME) || t(row.CO_BOOK)}-${t(row.VCH_NO)}`;
+const docNo = (row: Record<string, unknown>): string =>
+  `${t(row.BOOK_SR_NAME) || t(row.CO_BOOK)}-${t(row.VCH_NO)}`;
 const dt = (value: unknown): Date | null => {
   if (value instanceof Date) return value;
   const s = t(value);

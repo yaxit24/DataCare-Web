@@ -69,7 +69,10 @@ function range(s: ReportScope): { fromDate: string; toDate: string } {
 }
 
 const loanTypeCode = (value: unknown): string => {
-  const s = String(value ?? '').trim().slice(0, 1).toUpperCase();
+  const s = String(value ?? '')
+    .trim()
+    .slice(0, 1)
+    .toUpperCase();
   return ['A', 'G', 'S'].includes(s) ? s : 'A';
 };
 
@@ -106,23 +109,36 @@ export async function dhrnLoanReport(
       params.push(s.coYear);
       where.push(`i."CO_YEAR"::text=$${params.length}`);
     }
-    const packetNo = String(options.packetNo ?? '').trim().slice(0, 20);
+    const packetNo = String(options.packetNo ?? '')
+      .trim()
+      .slice(0, 20);
     if (packetNo) {
       params.push(packetNo);
       where.push(`i."PACKET_NO"::text=$${params.length}`);
     }
-    const refNo = String(options.refNo ?? '').trim().slice(0, 20);
+    const refNo = String(options.refNo ?? '')
+      .trim()
+      .slice(0, 20);
     if (refNo) {
       params.push(refNo);
       where.push(`i."DHRN_BILL"::text=$${params.length}`);
     }
-    const refAc = String(options.refAc ?? '').trim().slice(0, 12);
+    const refAc = String(options.refAc ?? '')
+      .trim()
+      .slice(0, 12);
     if (refAc) {
       params.push(refAc);
       where.push(`m."AC_REF_CODE"::text=$${params.length}`);
     }
-    const filterSql = applyFilters(options.entryType === 'L' ? 'loan-report' : 'dhiran-report', s.filters, params);
-    const pendingSql = mode === 'pending' ? ' AND (coalesce(i."DHRN_AMT",0)-coalesce(r."receivedAmount",i."DHRN_REC_AMT",0)) > 0' : '';
+    const filterSql = applyFilters(
+      options.entryType === 'L' ? 'loan-report' : 'dhiran-report',
+      s.filters,
+      params,
+    );
+    const pendingSql =
+      mode === 'pending'
+        ? ' AND (coalesce(i."DHRN_AMT",0)-coalesce(r."receivedAmount",i."DHRN_REC_AMT",0)) > 0'
+        : '';
 
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `WITH receipts AS (
@@ -164,7 +180,8 @@ export async function dhrnLoanReport(
     return {
       rows: rows.map((r) => ({
         srNo: Number(r.srNo ?? 0),
-        reportType: t(r.reportType) ?? (options.entryType === 'L' ? 'Loan Report' : 'Dhiran Report'),
+        reportType:
+          t(r.reportType) ?? (options.entryType === 'L' ? 'Loan Report' : 'Dhiran Report'),
         mode: t(r.mode) ?? mode,
         coYear: t(r.coYear),
         coBook: t(r.coBook),

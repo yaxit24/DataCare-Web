@@ -689,7 +689,13 @@ export async function testGspAuth(
 export async function cancelIrnForSale(
   prisma: any,
   scope: VoucherScope,
-  args: { coBook: string; vchNo: number | string; reason?: string; remark?: string; expectedMainBook?: string },
+  args: {
+    coBook: string;
+    vchNo: number | string;
+    reason?: string;
+    remark?: string;
+    expectedMainBook?: string;
+  },
 ): Promise<{ irn: string; cancelDate: string; mode: string }> {
   const coBook = args.coBook || scope.coBook || 'SAL';
   const irn = await withTenant(prisma, scope.tenantId, async (tx: any) => {
@@ -726,7 +732,12 @@ export async function cancelIrnForSale(
 export async function submitIrnForSale(
   prisma: any,
   scope: VoucherScope,
-  args: { coBook?: string; vchNo: number | string; docType?: IrnDocType; expectedMainBook?: string },
+  args: {
+    coBook?: string;
+    vchNo: number | string;
+    docType?: IrnDocType;
+    expectedMainBook?: string;
+  },
 ): Promise<IrnResult & { mode: string }> {
   const coBook = args.coBook || scope.coBook || 'SAL';
   const data = await withTenant(prisma, scope.tenantId, async (tx: any) => {
@@ -740,7 +751,11 @@ export async function submitIrnForSale(
     if (!hdr) throw new EInvoiceValidationError(`sale not found: ${coBook}/${args.vchNo}`);
     const co =
       (
-        await tx.$queryRawUnsafe(`SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`, scope.tenantId, scope.coCode)
+        await tx.$queryRawUnsafe(
+          `SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
+          scope.tenantId,
+          scope.coCode,
+        )
       )[0] ?? {};
     const party =
       (
@@ -820,7 +835,11 @@ export async function submitIrnForSale(
   };
   const payload = buildIrnPayload({ seller, buyer, sale, items });
   const { transport, mode } = irnTransportFromEnv();
-  const res = await submitIrn(prisma, { ...scope, coBook }, { vchNo: args.vchNo, payload, transport });
+  const res = await submitIrn(
+    prisma,
+    { ...scope, coBook },
+    { vchNo: args.vchNo, payload, transport },
+  );
   return { ...res, mode };
 }
 

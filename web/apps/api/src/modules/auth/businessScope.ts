@@ -130,7 +130,10 @@ interface StoredScopeInput extends SelectedScopeInput {
  * and must already bind input.tenantId through withTenant. SQL NULL year must be projected
  * to undefined by the caller; a present invalid/empty year is refused.
  */
-export async function validateStoredScopeTx(tx: Tx, input: StoredScopeInput): Promise<BusinessScope> {
+export async function validateStoredScopeTx(
+  tx: Tx,
+  input: StoredScopeInput,
+): Promise<BusinessScope> {
   if (typeof input.coCode !== 'string' || input.coCode.length === 0) {
     throw new ScopeError('company-unavailable');
   }

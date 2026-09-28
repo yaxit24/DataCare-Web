@@ -242,15 +242,19 @@ export async function schemeMonthlyReport(
       out.lMonth = key;
     }
 
-    const mapped: Array<Record<string, unknown>> = Array.from(byMember.values()).map((row, index) => ({
-      ...row,
-      srNo: index + 1,
-    }));
+    const mapped: Array<Record<string, unknown>> = Array.from(byMember.values()).map(
+      (row, index) => ({
+        ...row,
+        srNo: index + 1,
+      }),
+    );
     return {
       rows: mapped,
       totals: {
         rows: mapped.length,
-        ...Object.fromEntries(monthKeys.map((key) => [key, a2(mapped.reduce((sum, row) => sum + num(row[key]), 0))])),
+        ...Object.fromEntries(
+          monthKeys.map((key) => [key, a2(mapped.reduce((sum, row) => sum + num(row[key]), 0))]),
+        ),
         total: a2(mapped.reduce((sum, row) => sum + num(row['total']), 0)),
       },
     };

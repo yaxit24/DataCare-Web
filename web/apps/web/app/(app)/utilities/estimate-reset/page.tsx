@@ -51,20 +51,25 @@ export default function EstimateResetPage() {
     [preview],
   );
 
-  const loadPreview = useCallback(async function loadPreview() {
-    setBusy('preview');
-    setMsg(null);
-    try {
-      const next = await post<EstimateResetPreview>('/utilities/estimate-reset/preview', { asOfDate });
-      setPreview(next);
-      setConfirmation('');
-    } catch (e) {
-      setPreview(null);
-      setMsg({ kind: 'err', text: errText(e, 'Failed to load Estimate Reset preview.') });
-    } finally {
-      setBusy(null);
-    }
-  }, [asOfDate]);
+  const loadPreview = useCallback(
+    async function loadPreview() {
+      setBusy('preview');
+      setMsg(null);
+      try {
+        const next = await post<EstimateResetPreview>('/utilities/estimate-reset/preview', {
+          asOfDate,
+        });
+        setPreview(next);
+        setConfirmation('');
+      } catch (e) {
+        setPreview(null);
+        setMsg({ kind: 'err', text: errText(e, 'Failed to load Estimate Reset preview.') });
+      } finally {
+        setBusy(null);
+      }
+    },
+    [asOfDate],
+  );
 
   async function applyReset() {
     if (!preview) return;
@@ -103,8 +108,9 @@ export default function EstimateResetPage() {
     <div>
       <h1>Estimate Reset</h1>
       <p className="muted">
-        Web replacement for desktop UT_IMPORT Estimate Reset. It previews and applies the desktop reset-book
-        cleanup for estimate sales, tag-cancel vouchers, wholesale sales, and orphan approval tags.
+        Web replacement for desktop UT_IMPORT Estimate Reset. It previews and applies the desktop
+        reset-book cleanup for estimate sales, tag-cancel vouchers, wholesale sales, and orphan
+        approval tags.
       </p>
 
       <div className="panel">
@@ -118,8 +124,9 @@ export default function EstimateResetPage() {
           </button>
         </div>
         <p className="muted" style={{ margin: 0 }}>
-          Scope: company <strong>{scope.coCode}</strong>, location <strong>{scope.lcCode}</strong>, year{' '}
-          <strong>{scope.coYear}</strong>. Apply requires Delete rights on Utilities / Estimate Reset.
+          Scope: company <strong>{scope.coCode}</strong>, location <strong>{scope.lcCode}</strong>,
+          year <strong>{scope.coYear}</strong>. Apply requires Delete rights on Utilities / Estimate
+          Reset.
         </p>
       </div>
 
@@ -128,10 +135,22 @@ export default function EstimateResetPage() {
       {preview && (
         <>
           <div className="tiles">
-            <div className="tile"><span className="muted">Selected vouchers</span><div className="big">{num(preview.totals.selectedVouchers)}</div></div>
-            <div className="tile"><span className="muted">Rows to delete</span><div className="big">{num(preview.totals.delete)}</div></div>
-            <div className="tile"><span className="muted">Rows to insert</span><div className="big">{num(preview.totals.insert)}</div></div>
-            <div className="tile"><span className="muted">Stock-adjust details</span><div className="big">{num(preview.totals.stockAdjustmentDetails)}</div></div>
+            <div className="tile">
+              <span className="muted">Selected vouchers</span>
+              <div className="big">{num(preview.totals.selectedVouchers)}</div>
+            </div>
+            <div className="tile">
+              <span className="muted">Rows to delete</span>
+              <div className="big">{num(preview.totals.delete)}</div>
+            </div>
+            <div className="tile">
+              <span className="muted">Rows to insert</span>
+              <div className="big">{num(preview.totals.insert)}</div>
+            </div>
+            <div className="tile">
+              <span className="muted">Stock-adjust details</span>
+              <div className="big">{num(preview.totals.stockAdjustmentDetails)}</div>
+            </div>
           </div>
 
           <div className="panel" style={{ overflow: 'auto' }}>
@@ -174,7 +193,9 @@ export default function EstimateResetPage() {
             <strong>Voucher samples</strong>
             {preview.samples.length ? (
               <ul>
-                {preview.samples.map((sample) => <li key={sample}>{sample}</li>)}
+                {preview.samples.map((sample) => (
+                  <li key={sample}>{sample}</li>
+                ))}
               </ul>
             ) : (
               <p className="muted">No voucher samples available.</p>
@@ -184,8 +205,8 @@ export default function EstimateResetPage() {
           <div className="panel">
             <strong>Apply reset</strong>
             <p className="muted">
-              Desktop message after completion: {preview.postApplyMessage} This web action creates the same
-              stock-adjust return rows before deleting eligible reset-book vouchers.
+              Desktop message after completion: {preview.postApplyMessage} This web action creates
+              the same stock-adjust return rows before deleting eligible reset-book vouchers.
             </p>
             <label>
               Type <strong>{preview.requiresConfirmation}</strong>{' '}
@@ -195,7 +216,9 @@ export default function EstimateResetPage() {
               <button className="danger" onClick={applyReset} disabled={busy !== null || !canApply}>
                 {busy === 'apply' ? 'Applying…' : 'Apply Estimate Reset'}
               </button>
-              <a className="button ghost" href="/utilities/data-refresh">Open Data Refresh</a>
+              <a className="button ghost" href="/utilities/data-refresh">
+                Open Data Refresh
+              </a>
             </div>
           </div>
         </>

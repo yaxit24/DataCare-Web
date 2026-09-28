@@ -30,7 +30,9 @@ interface LoadedVoucher {
 const blank = (): Line => ({ tagNo: '', itCode: '', vchSrno: '', dataType: '', remark: '' });
 const today = () => new Date().toISOString().slice(0, 10);
 const msg = (e: unknown, fallback: string): string =>
-  e instanceof ApiError ? e.body?.message || e.body?.error || e.body?.detail || e.message : fallback;
+  e instanceof ApiError
+    ? e.body?.message || e.body?.error || e.body?.detail || e.message
+    : fallback;
 const dateText = (value: unknown): string => String(value ?? '').slice(0, 10);
 
 export default function TagAdjustPage() {
@@ -100,7 +102,9 @@ export default function TagAdjustPage() {
     setError('');
     setResult(null);
     try {
-      const loaded = await get<LoadedVoucher>(`/stock/tag-adjust/${encodeURIComponent(lookupNo.trim())}?book=${encodeURIComponent(coBook)}`);
+      const loaded = await get<LoadedVoucher>(
+        `/stock/tag-adjust/${encodeURIComponent(lookupNo.trim())}?book=${encodeURIComponent(coBook)}`,
+      );
       if (!loaded?.header) {
         setError('Voucher not found.');
         return;
@@ -120,7 +124,13 @@ export default function TagAdjustPage() {
             }))
           : [blank()],
       );
-      setResult({ vchNo: Number(lookupNo), lines: loaded.lines.length, stones: loaded.stones.length, barDetlUpdated: 0, mainStockUpdated: 0 });
+      setResult({
+        vchNo: Number(lookupNo),
+        lines: loaded.lines.length,
+        stones: loaded.stones.length,
+        barDetlUpdated: 0,
+        mainStockUpdated: 0,
+      });
     } catch (e) {
       setError(msg(e, 'Tag adjust load failed.'));
     } finally {
@@ -130,7 +140,9 @@ export default function TagAdjustPage() {
 
   async function deleteVoucher() {
     if (!loadedNo || !coBook) return;
-    const ok = window.confirm(`Delete Tag Adjust voucher ${loadedNo}? Desktop deletion removes the audit voucher; it does not restore the previous tag DATA_TYPE.`);
+    const ok = window.confirm(
+      `Delete Tag Adjust voucher ${loadedNo}? Desktop deletion removes the audit voucher; it does not restore the previous tag DATA_TYPE.`,
+    );
     if (!ok) return;
     setBusy(true);
     setError('');
@@ -151,8 +163,8 @@ export default function TagAdjustPage() {
     <div>
       <h1>Tag Adjust</h1>
       <p className="muted">
-        Desktop TR_TAG_CAN / TAG ADJ mode. It records a tag-adjust voucher and updates DATA_TYPE on the
-        matching BAR_DETL and MAIN_STOCK tag rows.
+        Desktop TR_TAG_CAN / TAG ADJ mode. It records a tag-adjust voucher and updates DATA_TYPE on
+        the matching BAR_DETL and MAIN_STOCK tag rows.
       </p>
 
       <form onSubmit={save}>
@@ -160,7 +172,12 @@ export default function TagAdjustPage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="TAD" mainBooks={['TAG ADJ']} />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="TAD"
+                mainBooks={['TAG ADJ']}
+              />
             </div>
             <div className="field">
               <label>Voucher Date</label>
@@ -168,7 +185,11 @@ export default function TagAdjustPage() {
             </div>
             <div className="field">
               <label>Party / AC Code</label>
-              <input value={acCode} onChange={(e) => setAcCode(e.target.value)} placeholder="optional" />
+              <input
+                value={acCode}
+                onChange={(e) => setAcCode(e.target.value)}
+                placeholder="optional"
+              />
             </div>
           </div>
           <label>
@@ -193,31 +214,86 @@ export default function TagAdjustPage() {
             <tbody>
               {lines.map((line, index) => (
                 <tr key={index}>
-                  <td><input value={line.tagNo} onChange={(e) => setLine(index, 'tagNo', e.target.value)} /></td>
-                  <td><input value={line.itCode} onChange={(e) => setLine(index, 'itCode', e.target.value)} /></td>
-                  <td><input className="num" value={line.vchSrno} onChange={(e) => setLine(index, 'vchSrno', e.target.value)} /></td>
-                  <td><input value={line.dataType} onChange={(e) => setLine(index, 'dataType', e.target.value)} maxLength={1} /></td>
-                  <td><input value={line.remark} onChange={(e) => setLine(index, 'remark', e.target.value)} /></td>
-                  <td><button type="button" className="ghost" onClick={() => removeLine(index)}>Remove</button></td>
+                  <td>
+                    <input
+                      value={line.tagNo}
+                      onChange={(e) => setLine(index, 'tagNo', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={line.itCode}
+                      onChange={(e) => setLine(index, 'itCode', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      value={line.vchSrno}
+                      onChange={(e) => setLine(index, 'vchSrno', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={line.dataType}
+                      onChange={(e) => setLine(index, 'dataType', e.target.value)}
+                      maxLength={1}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={line.remark}
+                      onChange={(e) => setLine(index, 'remark', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <button type="button" className="ghost" onClick={() => removeLine(index)}>
+                      Remove
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <button type="button" className="ghost" onClick={addLine} style={{ marginTop: 12 }}>Add Row</button>
+          <button type="button" className="ghost" onClick={addLine} style={{ marginTop: 12 }}>
+            Add Row
+          </button>
         </div>
 
         <div className="toolbar">
-          <button className="primary" disabled={busy || !coBook}>{busy ? 'Saving…' : loadedNo ? 'Update Tag Adjust' : 'Save Tag Adjust'}</button>
-          <input value={lookupNo} onChange={(e) => setLookupNo(e.target.value)} placeholder="Voucher no" />
-          <button type="button" className="ghost" onClick={loadVoucher} disabled={busy || !coBook || !lookupNo.trim()}>Load</button>
-          <button type="button" className="danger" onClick={deleteVoucher} disabled={busy || !loadedNo}>Delete</button>
+          <button className="primary" disabled={busy || !coBook}>
+            {busy ? 'Saving…' : loadedNo ? 'Update Tag Adjust' : 'Save Tag Adjust'}
+          </button>
+          <input
+            value={lookupNo}
+            onChange={(e) => setLookupNo(e.target.value)}
+            placeholder="Voucher no"
+          />
+          <button
+            type="button"
+            className="ghost"
+            onClick={loadVoucher}
+            disabled={busy || !coBook || !lookupNo.trim()}
+          >
+            Load
+          </button>
+          <button
+            type="button"
+            className="danger"
+            onClick={deleteVoucher}
+            disabled={busy || !loadedNo}
+          >
+            Delete
+          </button>
         </div>
       </form>
 
       {error && <div className="msg err">{error}</div>}
       {result && (
         <div className="msg ok">
-          Voucher {String(result.vchNo).padStart(5, '0')} saved. Lines {result.lines}, copied stone rows {result.stones}, BAR_DETL updates {result.barDetlUpdated}, MAIN_STOCK updates {result.mainStockUpdated}.
+          Voucher {String(result.vchNo).padStart(5, '0')} saved. Lines {result.lines}, copied stone
+          rows {result.stones}, BAR_DETL updates {result.barDetlUpdated}, MAIN_STOCK updates{' '}
+          {result.mainStockUpdated}.
         </div>
       )}
     </div>

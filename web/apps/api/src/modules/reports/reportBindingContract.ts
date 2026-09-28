@@ -63,34 +63,71 @@ export const REPORT_BINDING_CONTRACTS: Readonly<Record<string, ReportBindingCont
   // Full main reports recovered from direct XML children; OrdRec remains an independent
   // received-metal subreport. TR_SALE_ORD.cs:9815–9818 / TR_TOUR_ORD.cs:7980–7996 select these.
   OrderVch: {
-    header: 'SL_ORD_DATA', detail: 'SL_ORD_DATA',
-    orderDocument: { family: 'either', orderedItems: false,
-      specSha256: 'ae98795a6e5797bbf38b6bbc9100517a6bfc7cfd3a47174b604177aadc63a136' },
+    header: 'SL_ORD_DATA',
+    detail: 'SL_ORD_DATA',
+    orderDocument: {
+      family: 'either',
+      orderedItems: false,
+      specSha256: 'ae98795a6e5797bbf38b6bbc9100517a6bfc7cfd3a47174b604177aadc63a136',
+    },
   },
   OrderBill: {
-    header: 'SL_ORD_DATA', detail: 'SL_ORD_DETL', child: 'SL_ORD_IDTL', orderBy: 'SR_NO',
-    parentSections: ['Section10'], childSections: ['Section5'],
+    header: 'SL_ORD_DATA',
+    detail: 'SL_ORD_DETL',
+    child: 'SL_ORD_IDTL',
+    orderBy: 'SR_NO',
+    parentSections: ['Section10'],
+    childSections: ['Section5'],
     parentFooterSections: ['Section17', 'Section8'],
-    orderDocument: { family: 'SALES ORDER', orderedItems: true,
-      specSha256: '0273b928b4c08082b2df511184b2c7df057f00cf8876d751ba61f9557f19ed82' },
+    orderDocument: {
+      family: 'SALES ORDER',
+      orderedItems: true,
+      specSha256: '0273b928b4c08082b2df511184b2c7df057f00cf8876d751ba61f9557f19ed82',
+    },
   },
   TourOrdVch: {
-    header: 'SL_ORD_DATA', detail: 'SL_ORD_DETL', child: 'SL_ORD_IDTL', orderBy: 'SR_NO',
-    parentSections: ['Section10'], childSections: ['Section5'], parentFooterSections: ['Section8'],
-    orderDocument: { family: 'TOUR ORDER', orderedItems: true,
-      specSha256: '92d5d2eda3826f907b87c98f25be872cc0de3c14d2964c509e5fc72716fc9477' },
+    header: 'SL_ORD_DATA',
+    detail: 'SL_ORD_DETL',
+    child: 'SL_ORD_IDTL',
+    orderBy: 'SR_NO',
+    parentSections: ['Section10'],
+    childSections: ['Section5'],
+    parentFooterSections: ['Section8'],
+    orderDocument: {
+      family: 'TOUR ORDER',
+      orderedItems: true,
+      specSha256: '92d5d2eda3826f907b87c98f25be872cc0de3c14d2964c509e5fc72716fc9477',
+    },
   },
   OrdVchImg: {
-    header: 'SL_ORD_DATA', detail: 'SL_ORD_DETL', child: 'SL_ORD_IDTL', orderBy: 'SR_NO',
-    parentSections: ['Section10'], childSections: ['Section5'], parentFooterSections: ['Section17', 'Section8'],
-    orderDocument: { family: 'SALES ORDER', orderedItems: true, images: true,
-      specSha256: 'b81fce190197f67009a19630132ee3455e539bbcadcd5c9bc7008e1de700a16f' },
+    header: 'SL_ORD_DATA',
+    detail: 'SL_ORD_DETL',
+    child: 'SL_ORD_IDTL',
+    orderBy: 'SR_NO',
+    parentSections: ['Section10'],
+    childSections: ['Section5'],
+    parentFooterSections: ['Section17', 'Section8'],
+    orderDocument: {
+      family: 'SALES ORDER',
+      orderedItems: true,
+      images: true,
+      specSha256: 'b81fce190197f67009a19630132ee3455e539bbcadcd5c9bc7008e1de700a16f',
+    },
   },
   TourOrdImg: {
-    header: 'SL_ORD_DATA', detail: 'SL_ORD_DETL', child: 'SL_ORD_IDTL', orderBy: 'SR_NO',
-    parentSections: ['Section10'], childSections: ['Section5'], parentFooterSections: ['Section17', 'Section8'],
-    orderDocument: { family: 'TOUR ORDER', orderedItems: true, images: true,
-      specSha256: '25ac43d932d98c27d687a0ac3a4a75296d2fe91370a30ba7bd711bdf17dcd2f6' },
+    header: 'SL_ORD_DATA',
+    detail: 'SL_ORD_DETL',
+    child: 'SL_ORD_IDTL',
+    orderBy: 'SR_NO',
+    parentSections: ['Section10'],
+    childSections: ['Section5'],
+    parentFooterSections: ['Section17', 'Section8'],
+    orderDocument: {
+      family: 'TOUR ORDER',
+      orderedItems: true,
+      images: true,
+      specSha256: '25ac43d932d98c27d687a0ac3a4a75296d2fe91370a30ba7bd711bdf17dcd2f6',
+    },
   },
   SalesBillHz: childBill('SL'),
   SalesBillHzGst: childBill('SL'),
@@ -131,7 +168,10 @@ export function resolveReportBinding(spec: RptSpec): ReportBindingContract {
   if (contract.orderDocument) {
     // The dedicated order renderer implements these recovered formulas, suppression conditions,
     // group totals and one linked subreport. A changed template must be reviewed as a new contract.
-    if (createHash('sha256').update(JSON.stringify(spec)).digest('hex') !== contract.orderDocument.specSha256)
+    if (
+      createHash('sha256').update(JSON.stringify(spec)).digest('hex') !==
+      contract.orderDocument.specSha256
+    )
       return refuse('altered-order-report-spec');
     return contract;
   }

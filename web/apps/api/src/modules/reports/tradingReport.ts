@@ -32,7 +32,8 @@ const cleanCodes = (value: unknown): string[] =>
     .filter(Boolean)
     .map((v) => v.slice(0, 8));
 const rate = (amount: number, fine: number): number => (amount && fine ? round2(amount / fine) : 0);
-const keyOf = (row: Record<string, unknown>): string => `${txt(row.coBook) ?? ''}|${txt(row.vchNo) ?? ''}`;
+const keyOf = (row: Record<string, unknown>): string =>
+  `${txt(row.coBook) ?? ''}|${txt(row.vchNo) ?? ''}`;
 const fineKey = (row: Record<string, unknown>, sign: string): string => `${keyOf(row)}|${sign}`;
 
 function dateBounds(s: ReportScope): { fromDate: string; toDate: string } {
@@ -72,7 +73,14 @@ export async function tradingReport(
   const { fromDate, toDate } = dateBounds(s);
 
   return withTenant(prisma, s.tenantId, async (tx: any) => {
-    const stockParams: unknown[] = [s.coCode, s.lcCode ?? '', fromDate, toDate, salesAc, purchaseAc];
+    const stockParams: unknown[] = [
+      s.coCode,
+      s.lcCode ?? '',
+      fromDate,
+      toDate,
+      salesAc,
+      purchaseAc,
+    ];
     const stockBookFilter = pushBookFilter(bookCodes, stockParams, 'a');
     const stockFineRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT a."CO_BOOK" AS "coBook", a."VCH_NO" AS "vchNo", a."ITM_SIGN" AS "sign",
@@ -94,7 +102,12 @@ export async function tradingReport(
         GROUP BY a."CO_BOOK", a."VCH_NO", a."ITM_SIGN"`,
       ...stockParams,
     );
-    const stockFine = new Map(stockFineRows.map((row) => [fineKey(row, String(row.sign ?? '').trim()), round3(num(row.fine))]));
+    const stockFine = new Map(
+      stockFineRows.map((row) => [
+        fineKey(row, String(row.sign ?? '').trim()),
+        round3(num(row.fine)),
+      ]),
+    );
 
     const rateParams: unknown[] = [s.coCode, s.lcCode ?? '', fromDate, toDate];
     const rateBookFilter = pushBookFilter(bookCodes, rateParams, 'a');
@@ -112,17 +125,24 @@ export async function tradingReport(
        HAVING SUM(coalesce(a."FINE_WT",0)) <> 0`,
       ...rateParams,
     );
-    const rateCutFine = new Map(rateCutRows.map((row) => [fineKey(row, String(row.sign ?? '').trim()), round3(num(row.fine))]));
+    const rateCutFine = new Map(
+      rateCutRows.map((row) => [
+        fineKey(row, String(row.sign ?? '').trim()),
+        round3(num(row.fine)),
+      ]),
+    );
 
     const partyParams: unknown[] = [s.coCode, s.lcCode ?? '', fromDate, toDate];
     const partyBookFilter1 = pushBookFilter(bookCodes, partyParams, 'a');
     const partyOffset = partyParams.length;
     partyParams.push(s.coCode, s.lcCode ?? '', fromDate, toDate);
     const partyBookFilter2 = bookCodes.length
-      ? ` AND c."CO_BOOK" IN (${bookCodes.map((book) => {
-          partyParams.push(book);
-          return `$${partyParams.length}`;
-        }).join(',')})`
+      ? ` AND c."CO_BOOK" IN (${bookCodes
+          .map((book) => {
+            partyParams.push(book);
+            return `$${partyParams.length}`;
+          })
+          .join(',')})`
       : '';
     const partyRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT x."coBook", x."vchNo", MIN(x."party") AS "party"
@@ -156,25 +176,38 @@ export async function tradingReport(
     );
     const partyName = new Map(partyRows.map((row) => [keyOf(row), txt(row.party)]));
 
-    const mainParams: unknown[] = [s.coCode, s.lcCode ?? '', s.coYear ?? '', salesAc, purchaseAc, fromDate, toDate];
+    const mainParams: unknown[] = [
+      s.coCode,
+      s.lcCode ?? '',
+      s.coYear ?? '',
+      salesAc,
+      purchaseAc,
+      fromDate,
+      toDate,
+    ];
     const mainBookFilter = pushBookFilter(bookCodes, mainParams, 'a');
     const modeSql =
       mode === 'only-ratecut'
         ? {
-            amountSelect: 'SUM(coalesce(a."DR_AMT",0)) AS "crAmt", SUM(coalesce(a."CR_AMT",0)) AS "drAmt"',
+            amountSelect:
+              'SUM(coalesce(a."DR_AMT",0)) AS "crAmt", SUM(coalesce(a."CR_AMT",0)) AS "drAmt"',
             filter: `AND coalesce(a."FINE_RATE",0) <> 0 AND a."LD_CODE" IN ($4,$5) AND b."MAIN_BOOK" IN ('WH SALES','RATE CUT')`,
             order: 'a."VCH_DATE", a."VCH_TYPE", a."CO_BOOK", a."VCH_NO"',
           }
         : mode === 'without-ratecut'
           ? {
-              amountSelect: 'SUM(coalesce(a."CR_AMT",0)) AS "crAmt", SUM(coalesce(a."DR_AMT",0)) AS "drAmt"',
+              amountSelect:
+                'SUM(coalesce(a."CR_AMT",0)) AS "crAmt", SUM(coalesce(a."DR_AMT",0)) AS "drAmt"',
               filter: `AND coalesce(a."FINE_RATE",0) = 0 AND a."AC_CODE" IN ($4,$5)`,
-              order: 'a."VCH_DATE", SUM(coalesce(a."CR_AMT",0)), a."VCH_TYPE", a."CO_BOOK", a."VCH_NO"',
+              order:
+                'a."VCH_DATE", SUM(coalesce(a."CR_AMT",0)), a."VCH_TYPE", a."CO_BOOK", a."VCH_NO"',
             }
           : {
-              amountSelect: 'SUM(coalesce(a."CR_AMT",0)) AS "crAmt", SUM(coalesce(a."DR_AMT",0)) AS "drAmt"',
+              amountSelect:
+                'SUM(coalesce(a."CR_AMT",0)) AS "crAmt", SUM(coalesce(a."DR_AMT",0)) AS "drAmt"',
               filter: `AND coalesce(a."CR_AMT",0) + coalesce(a."DR_AMT",0) <> 0 AND a."AC_CODE" IN ($4,$5)`,
-              order: 'a."VCH_DATE", SUM(coalesce(a."DR_AMT",0)), a."VCH_TYPE", a."CO_BOOK", a."VCH_NO"',
+              order:
+                'a."VCH_DATE", SUM(coalesce(a."DR_AMT",0)), a."VCH_TYPE", a."CO_BOOK", a."VCH_NO"',
             };
     const mainRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT a."VCH_TYPE" AS "vchType", a."CO_BOOK" AS "coBook", b."MAIN_BOOK" AS "bookName",
@@ -200,8 +233,12 @@ export async function tradingReport(
       const baseKey = keyOf(row);
       const saleAmt = round2(num(row.crAmt));
       const purchaseAmt = round2(num(row.drAmt));
-      const saleFine = saleAmt ? round3(rateCutFine.get(`${baseKey}|+`) ?? stockFine.get(`${baseKey}|-`) ?? 0) : 0;
-      const purchaseFine = purchaseAmt ? round3(rateCutFine.get(`${baseKey}|-`) ?? stockFine.get(`${baseKey}|+`) ?? 0) : 0;
+      const saleFine = saleAmt
+        ? round3(rateCutFine.get(`${baseKey}|+`) ?? stockFine.get(`${baseKey}|-`) ?? 0)
+        : 0;
+      const purchaseFine = purchaseAmt
+        ? round3(rateCutFine.get(`${baseKey}|-`) ?? stockFine.get(`${baseKey}|+`) ?? 0)
+        : 0;
       const party = partyName.get(baseKey) ?? null;
       return {
         srNo: index + 1,

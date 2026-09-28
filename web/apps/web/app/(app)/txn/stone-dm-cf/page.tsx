@@ -114,7 +114,16 @@ export default function StoneDmCfPage() {
       otherAmount: sum.otherAmount + (Number(row.otherAmount) || 0),
       mrp: sum.mrp + (Number(row.mrp) || 0),
     }),
-    { pieces: 0, grossWt: 0, otherWt: 0, netWt: 0, fineWt: 0, labourAmount: 0, otherAmount: 0, mrp: 0 },
+    {
+      pieces: 0,
+      grossWt: 0,
+      otherWt: 0,
+      netWt: 0,
+      fineWt: 0,
+      labourAmount: 0,
+      otherAmount: 0,
+      mrp: 0,
+    },
   );
 
   const message = (caught: unknown, fallback: string): string =>
@@ -157,8 +166,12 @@ export default function StoneDmCfPage() {
   function addSource(row: StoneDmCfLine) {
     setLines((current) => {
       const key = `${row.tagNo}|${row.vchSrno}`;
-      if (current.some((line) => line.tagNo && `${line.tagNo}|${line.vchSrno}` === key)) return current;
-      return [...current, { ...row, color: '', purity: '', certificateNo: '', remark: row.remark || '' }];
+      if (current.some((line) => line.tagNo && `${line.tagNo}|${line.vchSrno}` === key))
+        return current;
+      return [
+        ...current,
+        { ...row, color: '', purity: '', certificateNo: '', remark: row.remark || '' },
+      ];
     });
   }
 
@@ -312,12 +325,24 @@ export default function StoneDmCfPage() {
           </div>
           <div className="field">
             <label>Counter filter</label>
-            <input value={tblCodeFilter} onChange={(event) => setTblCodeFilter(event.target.value)} />
+            <input
+              value={tblCodeFilter}
+              onChange={(event) => setTblCodeFilter(event.target.value)}
+            />
           </div>
-          <button type="button" className="primary" disabled={busy} onClick={() => void loadSources()}>
+          <button
+            type="button"
+            className="primary"
+            disabled={busy}
+            onClick={() => void loadSources()}
+          >
             Load in-stock tags
           </button>
-          <button type="button" className="ghost" onClick={() => setLines((current) => [...current, blankLine()])}>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => setLines((current) => [...current, blankLine()])}
+          >
             Add manual row
           </button>
         </div>
@@ -398,25 +423,151 @@ export default function StoneDmCfPage() {
               {lines.map((row, index) => (
                 <tr key={identity(row, index)} onClick={() => setImageRow(index)}>
                   <td>{index + 1}</td>
-                  <td><input value={row.tagNo} onChange={(e) => updateLine(index, { tagNo: e.target.value })} /></td>
-                  <td><input type="number" value={row.vchSrno || ''} onChange={(e) => updateLine(index, { vchSrno: num(e.target.value) })} style={{ width: 70 }} /></td>
-                  <td><input value={row.itCode} onChange={(e) => updateLine(index, { itCode: e.target.value })} style={{ width: 70 }} /></td>
-                  <td><input value={row.designNo} onChange={(e) => updateLine(index, { designNo: e.target.value })} /></td>
-                  <td><input value={row.color} onChange={(e) => updateLine(index, { color: e.target.value })} /></td>
-                  <td><input value={row.purity} onChange={(e) => updateLine(index, { purity: e.target.value })} /></td>
-                  <td><input value={row.size} onChange={(e) => updateLine(index, { size: e.target.value })} /></td>
-                  <td><input value={row.certificateNo} onChange={(e) => updateLine(index, { certificateNo: e.target.value })} /></td>
-                  <td><input className="num" type="number" value={row.pieces || ''} onChange={(e) => updateLine(index, { pieces: num(e.target.value) })} style={{ width: 70 }} /></td>
-                  <td><input className="num" type="number" value={row.grossWt || ''} onChange={(e) => updateLine(index, { grossWt: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input className="num" type="number" value={row.otherWt || ''} onChange={(e) => updateLine(index, { otherWt: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input className="num" type="number" value={row.netWt || ''} onChange={(e) => updateLine(index, { netWt: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input className="num" type="number" value={row.fineWt || ''} onChange={(e) => updateLine(index, { fineWt: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input className="num" type="number" value={row.labourAmount || ''} onChange={(e) => updateLine(index, { labourAmount: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input className="num" type="number" value={row.otherAmount || ''} onChange={(e) => updateLine(index, { otherAmount: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input className="num" type="number" value={row.tagCost || ''} onChange={(e) => updateLine(index, { tagCost: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input className="num" type="number" value={row.mrp || ''} onChange={(e) => updateLine(index, { mrp: num(e.target.value) })} style={{ width: 90 }} /></td>
-                  <td><input value={row.remark} onChange={(e) => updateLine(index, { remark: e.target.value })} /></td>
-                  <td><input value={row.karigarName} onChange={(e) => updateLine(index, { karigarName: e.target.value })} style={{ width: 70 }} /></td>
+                  <td>
+                    <input
+                      value={row.tagNo}
+                      onChange={(e) => updateLine(index, { tagNo: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={row.vchSrno || ''}
+                      onChange={(e) => updateLine(index, { vchSrno: num(e.target.value) })}
+                      style={{ width: 70 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.itCode}
+                      onChange={(e) => updateLine(index, { itCode: e.target.value })}
+                      style={{ width: 70 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.designNo}
+                      onChange={(e) => updateLine(index, { designNo: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.color}
+                      onChange={(e) => updateLine(index, { color: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.purity}
+                      onChange={(e) => updateLine(index, { purity: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.size}
+                      onChange={(e) => updateLine(index, { size: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.certificateNo}
+                      onChange={(e) => updateLine(index, { certificateNo: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.pieces || ''}
+                      onChange={(e) => updateLine(index, { pieces: num(e.target.value) })}
+                      style={{ width: 70 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.grossWt || ''}
+                      onChange={(e) => updateLine(index, { grossWt: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.otherWt || ''}
+                      onChange={(e) => updateLine(index, { otherWt: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.netWt || ''}
+                      onChange={(e) => updateLine(index, { netWt: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.fineWt || ''}
+                      onChange={(e) => updateLine(index, { fineWt: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.labourAmount || ''}
+                      onChange={(e) => updateLine(index, { labourAmount: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.otherAmount || ''}
+                      onChange={(e) => updateLine(index, { otherAmount: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.tagCost || ''}
+                      onChange={(e) => updateLine(index, { tagCost: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="num"
+                      type="number"
+                      value={row.mrp || ''}
+                      onChange={(e) => updateLine(index, { mrp: num(e.target.value) })}
+                      style={{ width: 90 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.remark}
+                      onChange={(e) => updateLine(index, { remark: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={row.karigarName}
+                      onChange={(e) => updateLine(index, { karigarName: e.target.value })}
+                      style={{ width: 70 }}
+                    />
+                  </td>
                   <td>
                     <button
                       type="button"
@@ -454,7 +605,8 @@ export default function StoneDmCfPage() {
       {error && <div className="msg err">{error}</div>}
       {result && (
         <div className="msg ok" data-testid="stone-dm-cf-saved">
-          Saved Stone/Dm-Cf {result.voucherNo} · header {result.hiddenVoucherNo} · {result.lines} row(s). This records the SF PRINT data used by the desktop print flow.
+          Saved Stone/Dm-Cf {result.voucherNo} · header {result.hiddenVoucherNo} · {result.lines}{' '}
+          row(s). This records the SF PRINT data used by the desktop print flow.
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash } from 'node:crypto';
 import {
   composeSaleReturnIncomingLabour,
   copySaleReturnIncomingLabour,
@@ -14,41 +14,38 @@ import {
   SALE_RETURN_INCOMING_LABOUR_COMPOSE_VERSION,
   type SaleReturnIncomingAggregateState,
   type SaleReturnIncomingLabourObservation,
-} from "@datacare/core";
-import type { Tx } from "@datacare/db";
-import { BookPolicyValidationError } from "../shared/bookPolicy.js";
+} from '@datacare/core';
+import type { Tx } from '@datacare/db';
+import { BookPolicyValidationError } from '../shared/bookPolicy.js';
 import {
   withSessionContextReadSnapshot,
   SESSION_CONTEXT_READ_SNAPSHOT_VERSION,
-} from "../auth/sessionContextReadSnapshot.js";
-import type { AuthenticatedSessionContext } from "../auth/sessionContextAccess.js";
-import {
-  SavedSaleReturnError,
-  type SavedSaleReturnScope,
-} from "./savedSaleReturn.js";
-import { SaleReturnIncomingConfigurationError } from "./saleReturnIncomingConfiguration.js";
+} from '../auth/sessionContextReadSnapshot.js';
+import type { AuthenticatedSessionContext } from '../auth/sessionContextAccess.js';
+import { SavedSaleReturnError, type SavedSaleReturnScope } from './savedSaleReturn.js';
+import { SaleReturnIncomingConfigurationError } from './saleReturnIncomingConfiguration.js';
 import {
   SaleReturnIncomingReplayError,
   type SaleReturnIncomingReplayCellSnapshot,
-} from "./saleReturnIncomingReplay.js";
+} from './saleReturnIncomingReplay.js';
 import {
   observeSaleReturnBillReplayTx,
   SaleReturnBillReplayError,
   type SaleReturnBillReplayObservation,
   type SaleReturnBillReplayState,
   type SaleReturnBillReplayPhase,
-} from "./saleReturnBillReplay.js";
+} from './saleReturnBillReplay.js';
 import {
   readSaleReturnIncomingLabourTx,
   SaleReturnIncomingLabourReadError,
-} from "./saleReturnIncomingLabour.js";
+} from './saleReturnIncomingLabour.js';
 
 export const SALE_RETURN_LABOUR_REPLAY_CONTRACT =
-  "x13-saved-incoming-labour-bill-replay-v1" as const;
+  'x13-saved-incoming-labour-bill-replay-v1' as const;
 export const SALE_RETURN_LABOUR_REPLAY_PROFILE =
-  "saved-primary-incoming-resolved-labour-bill-preview-v1" as const;
+  'saved-primary-incoming-resolved-labour-bill-preview-v1' as const;
 const semanticVersions = Object.freeze({
-  adapter: "saved-labour-bill-server-adapter-v1",
+  adapter: 'saved-labour-bill-server-adapter-v1',
   rowProjection: SALE_RETURN_INCOMING_PROJECTION_VERSION,
   billProjection: SALE_RETURN_BILL_PROJECTION_VERSION,
   aggregate: SALE_RETURN_INCOMING_AGGREGATE_VERSION,
@@ -58,12 +55,11 @@ const semanticVersions = Object.freeze({
   labourCompose: SALE_RETURN_INCOMING_LABOUR_COMPOSE_VERSION,
   sessionRead: SESSION_CONTEXT_READ_SNAPSHOT_VERSION,
 });
-export type SaleReturnLabourField =
-  "x13.primary-incoming.c13" | "x13.primary-incoming.c29";
+export type SaleReturnLabourField = 'x13.primary-incoming.c13' | 'x13.primary-incoming.c29';
 export type SaleReturnLabourReplayEvent =
-  | { kind: "moneyLeave"; fieldId: string; editorText: string }
+  | { kind: 'moneyLeave'; fieldId: string; editorText: string }
   | {
-      kind: "labourEnter";
+      kind: 'labourEnter';
       fieldId: SaleReturnLabourField;
       editorText: string;
       observationVersion: string;
@@ -101,7 +97,7 @@ export class SaleReturnLabourReplayError extends Error {
     },
   ) {
     super(message);
-    this.name = "SaleReturnLabourReplayError";
+    this.name = 'SaleReturnLabourReplayError';
     // Bound the actual route envelope, including a recovered prefix, not merely
     // its individual pieces. Never truncate a recovery into a different prefix.
     if (
@@ -111,13 +107,13 @@ export class SaleReturnLabourReplayError extends Error {
           message,
           ...(details === undefined ? {} : { details }),
         }),
-        "utf8",
+        'utf8',
       ) > 2097152
     ) {
       this.statusCode = 422;
-      this.code = "unsupported-output";
+      this.code = 'unsupported-output';
       this.message =
-        "The complete preview error exceeds the response bound. Retain the local prefix and reload.";
+        'The complete preview error exceeds the response bound. Retain the local prefix and reload.';
       this.details = undefined;
     }
   }
@@ -132,7 +128,7 @@ interface Identity {
     lcCode: string;
     coYear: string;
   };
-  scope: Omit<SavedSaleReturnScope, "tenantId">;
+  scope: Omit<SavedSaleReturnScope, 'tenantId'>;
   voucherNo: string;
   baseVersion: string;
   documentVersion: string;
@@ -143,7 +139,7 @@ interface Field {
   allowed: boolean;
   reason: string | null;
   maxLength: 2;
-  commit: "resolved-enter";
+  commit: 'resolved-enter';
 }
 const noAuthority = Object.freeze({
   canPreviewClosing: false,
@@ -184,7 +180,7 @@ export interface SaleReturnLabourReplayResult extends Identity {
   prefix: SaleReturnLabourPrefix;
   acceptedEvent: {
     event: SaleReturnLabourReplayEvent;
-    status: "applied" | "skipped";
+    status: 'applied' | 'skipped';
   };
   effects: {
     aggregateApplied: boolean;
@@ -194,20 +190,13 @@ export interface SaleReturnLabourReplayResult extends Identity {
   capabilities: typeof noAuthority;
 }
 const money = new Map<string, number>(
-  SALE_RETURN_INCOMING_MONEY_PREVIEW_COLUMNS.map(
-    (c) => [`x13.primary-incoming.c${c}`, c] as const,
-  ),
+  SALE_RETURN_INCOMING_MONEY_PREVIEW_COLUMNS.map((c) => [`x13.primary-incoming.c${c}`, c] as const),
 );
 const labourFields: readonly SaleReturnLabourField[] = [
-  "x13.primary-incoming.c13",
-  "x13.primary-incoming.c29",
+  'x13.primary-incoming.c13',
+  'x13.primary-incoming.c29',
 ];
-const prefixKeys = [
-  "baseVersion",
-  "rowIdentity",
-  "prefixVersion",
-  "events",
-] as const;
+const prefixKeys = ['baseVersion', 'rowIdentity', 'prefixVersion', 'events'] as const;
 const reject = (
   code: string,
   message: string,
@@ -216,80 +205,64 @@ const reject = (
   throw new SaleReturnLabourReplayError(status, code, message);
 };
 function own(value: unknown, keys: readonly string[]): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    return reject(
-      "invalid-replay-request",
-      "Use an exact plain replay request.",
-    );
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    return reject('invalid-replay-request', 'Use an exact plain replay request.');
   const proto = Object.getPrototypeOf(value);
   const desc = Object.getOwnPropertyDescriptors(value),
     found = Reflect.ownKeys(value);
   if (
     (proto !== Object.prototype && proto !== null) ||
     found.length !== keys.length ||
-    found.some((k) => typeof k !== "string" || !keys.includes(k)) ||
-    keys.some((k) => !desc[k]?.enumerable || !("value" in desc[k]!))
+    found.some((k) => typeof k !== 'string' || !keys.includes(k)) ||
+    keys.some((k) => !desc[k]?.enumerable || !('value' in desc[k]!))
   )
     return reject(
-      "invalid-replay-request",
-      "Unknown, missing or accessor request fields are unsupported.",
+      'invalid-replay-request',
+      'Unknown, missing or accessor request fields are unsupported.',
     );
   return Object.fromEntries(keys.map((k) => [k, desc[k]!.value]));
 }
 const hashText = (v: unknown): v is string =>
-  typeof v === "string" && v.length === 64 && !/[^a-f0-9]/.test(v);
+  typeof v === 'string' && v.length === 64 && !/[^a-f0-9]/.test(v);
 const ascii = (v: unknown, max: number): v is string =>
-  typeof v === "string" && v.length <= max && !/[^\x20-\x7e]/.test(v);
-const code = (v: unknown): v is string =>
-  ascii(v, 2) && v.length > 0 && v.trim() === v;
+  typeof v === 'string' && v.length <= max && !/[^\x20-\x7e]/.test(v);
+const code = (v: unknown): v is string => ascii(v, 2) && v.length > 0 && v.trim() === v;
 function field(v: unknown): SaleReturnLabourField {
-  if (
-    typeof v !== "string" ||
-    !labourFields.includes(v as SaleReturnLabourField)
-  )
-    return reject("invalid-replay-request", "Use a supported labour field.");
+  if (typeof v !== 'string' || !labourFields.includes(v as SaleReturnLabourField))
+    return reject('invalid-replay-request', 'Use a supported labour field.');
   return v as SaleReturnLabourField;
 }
 function event(value: unknown): SaleReturnLabourReplayEvent {
   // Inspect kind only through an own data descriptor; never invoke a getter to choose the schema.
-  if (!value || typeof value !== "object")
-    return reject("invalid-replay-request", "A committed event is required.");
-  const d = Object.getOwnPropertyDescriptor(value, "kind");
-  if (!d || !("value" in d))
-    return reject("invalid-replay-request", "A plain event kind is required.");
-  if (d.value === "moneyLeave") {
-    const r = own(value, ["kind", "fieldId", "editorText"]);
-    if (
-      typeof r.fieldId !== "string" ||
-      !money.has(r.fieldId) ||
-      !ascii(r.editorText, 10)
-    )
+  if (!value || typeof value !== 'object')
+    return reject('invalid-replay-request', 'A committed event is required.');
+  const d = Object.getOwnPropertyDescriptor(value, 'kind');
+  if (!d || !('value' in d))
+    return reject('invalid-replay-request', 'A plain event kind is required.');
+  if (d.value === 'moneyLeave') {
+    const r = own(value, ['kind', 'fieldId', 'editorText']);
+    if (typeof r.fieldId !== 'string' || !money.has(r.fieldId) || !ascii(r.editorText, 10))
       return reject(
-        "invalid-replay-request",
-        "Use one supported money field and at most ten ASCII editor characters.",
+        'invalid-replay-request',
+        'Use one supported money field and at most ten ASCII editor characters.',
       );
-    return { kind: "moneyLeave", fieldId: r.fieldId, editorText: r.editorText };
+    return { kind: 'moneyLeave', fieldId: r.fieldId, editorText: r.editorText };
   }
-  if (d.value === "labourEnter") {
-    const r = own(value, [
-      "kind",
-      "fieldId",
-      "editorText",
-      "observationVersion",
-    ]);
+  if (d.value === 'labourEnter') {
+    const r = own(value, ['kind', 'fieldId', 'editorText', 'observationVersion']);
     if (!code(r.editorText) || !hashText(r.observationVersion))
       return reject(
-        "invalid-replay-request",
-        "A qualified exact one/two-character code and observation version are required.",
+        'invalid-replay-request',
+        'A qualified exact one/two-character code and observation version are required.',
       );
     return {
-      kind: "labourEnter",
+      kind: 'labourEnter',
       fieldId: field(r.fieldId),
       editorText: r.editorText,
       observationVersion: r.observationVersion,
     };
   }
-  return reject("invalid-replay-request", "Unsupported committed event kind.");
+  return reject('invalid-replay-request', 'Unsupported committed event kind.');
 }
 function prefix(r: Record<string, unknown>): SaleReturnLabourPrefixInput {
   if (
@@ -302,24 +275,18 @@ function prefix(r: Record<string, unknown>): SaleReturnLabourPrefixInput {
     Object.keys(r.events).length !== r.events.length
   )
     return reject(
-      "invalid-replay-request",
-      "Exact versions, saved identity and a dense journal of at most100 events are required.",
+      'invalid-replay-request',
+      'Exact versions, saved identity and a dense journal of at most100 events are required.',
     );
   const events: SaleReturnLabourReplayEvent[] = [];
   for (let i = 0; i < r.events.length; i++) {
     const d = Object.getOwnPropertyDescriptor(r.events, String(i));
-    if (!d || !d.enumerable || !("value" in d))
-      return reject(
-        "invalid-replay-request",
-        "Sparse or accessor events are unsupported.",
-      );
+    if (!d || !d.enumerable || !('value' in d))
+      return reject('invalid-replay-request', 'Sparse or accessor events are unsupported.');
     events.push(event(d.value));
   }
   if (Reflect.ownKeys(r.events).length !== r.events.length + 1)
-    return reject(
-      "invalid-replay-request",
-      "Extra event-array fields are unsupported.",
-    );
+    return reject('invalid-replay-request', 'Extra event-array fields are unsupported.');
   return {
     baseVersion: r.baseVersion,
     rowIdentity: r.rowIdentity,
@@ -330,116 +297,82 @@ function prefix(r: Record<string, unknown>): SaleReturnLabourPrefixInput {
 function parsed<T>(fn: () => T): T {
   try {
     const r = fn();
-    if (Buffer.byteLength(JSON.stringify(r), "utf8") > 65536)
-      return reject(
-        "invalid-replay-request",
-        "Replay request exceeds the transport bound.",
-        413,
-      );
+    if (Buffer.byteLength(JSON.stringify(r), 'utf8') > 65536)
+      return reject('invalid-replay-request', 'Replay request exceeds the transport bound.', 413);
     return r;
   } catch (e) {
     if (e instanceof SaleReturnLabourReplayError) throw e;
-    return reject(
-      "invalid-replay-request",
-      "A plain replay request is required.",
-    );
+    return reject('invalid-replay-request', 'A plain replay request is required.');
   }
 }
-export const saleReturnLabourObserveInput = (
-  value: unknown,
-): SaleReturnLabourObserveInput =>
+export const saleReturnLabourObserveInput = (value: unknown): SaleReturnLabourObserveInput =>
   parsed(() => {
-    const r = own(value, [...prefixKeys, "fieldId", "editorText"]);
+    const r = own(value, [...prefixKeys, 'fieldId', 'editorText']);
     if (!code(r.editorText))
-      return reject(
-        "invalid-replay-request",
-        "Enter an exact one/two-character ASCII code.",
-      );
+      return reject('invalid-replay-request', 'Enter an exact one/two-character ASCII code.');
     return {
       ...prefix(r),
       fieldId: field(r.fieldId),
       editorText: r.editorText,
     };
   });
-export const saleReturnLabourAppendInput = (
-  value: unknown,
-): SaleReturnLabourAppendInput =>
+export const saleReturnLabourAppendInput = (value: unknown): SaleReturnLabourAppendInput =>
   parsed(() => {
-    const r = own(value, [...prefixKeys, "event"]);
+    const r = own(value, [...prefixKeys, 'event']);
     const p = prefix(r);
     if (p.events.length === 100)
       return reject(
-        "invalid-replay-request",
-        "Discard/reopen the preview after100 committed events.",
+        'invalid-replay-request',
+        'Discard/reopen the preview after100 committed events.',
       );
     return { ...p, event: event(r.event) };
   });
-function copyScope(
-  value: SavedSaleReturnScope,
-  voucherNo: string,
-): SavedSaleReturnScope {
+function copyScope(value: SavedSaleReturnScope, voucherNo: string): SavedSaleReturnScope {
   return parsed(() => {
-    const r = own(value, ["tenantId", "coCode", "lcCode", "coYear", "coBook"]);
+    const r = own(value, ['tenantId', 'coCode', 'lcCode', 'coYear', 'coBook']);
     for (const [key, max] of [
-      ["tenantId", 24],
-      ["coCode", 2],
-      ["lcCode", 2],
-      ["coYear", 9],
-      ["coBook", 4],
+      ['tenantId', 24],
+      ['coCode', 2],
+      ['lcCode', 2],
+      ['coYear', 9],
+      ['coBook', 4],
     ] as const)
-      if (
-        !ascii(r[key], max) ||
-        !r[key] ||
-        (r[key] as string).trim() !== r[key]
-      )
-        return reject(
-          "invalid-replay-request",
-          "A complete canonical Return scope is required.",
-        );
+      if (!ascii(r[key], max) || !r[key] || (r[key] as string).trim() !== r[key])
+        return reject('invalid-replay-request', 'A complete canonical Return scope is required.');
     if (
-      typeof voucherNo !== "string" ||
+      typeof voucherNo !== 'string' ||
       voucherNo.length !== 5 ||
       !/^[0-9]{5}$/.test(voucherNo) ||
-      voucherNo === "00000"
+      voucherNo === '00000'
     )
       return reject(
-        "invalid-replay-request",
-        "Use the exact saved positive five-digit voucher key.",
+        'invalid-replay-request',
+        'Use the exact saved positive five-digit voucher key.',
       );
     return r as unknown as SavedSaleReturnScope;
   });
 }
 function canonical(v: unknown): string {
-  if (Array.isArray(v)) return "[" + v.map(canonical).join(",") + "]";
-  if (v && typeof v === "object")
+  if (Array.isArray(v)) return '[' + v.map(canonical).join(',') + ']';
+  if (v && typeof v === 'object')
     return (
-      "{" +
+      '{' +
       Object.keys(v)
         .sort()
-        .map(
-          (k) =>
-            JSON.stringify(k) +
-            ":" +
-            canonical((v as Record<string, unknown>)[k]),
-        )
-        .join(",") +
-      "}"
+        .map((k) => JSON.stringify(k) + ':' + canonical((v as Record<string, unknown>)[k]))
+        .join(',') +
+      '}'
     );
-  return JSON.stringify(v) ?? "null";
+  return JSON.stringify(v) ?? 'null';
 }
-const digest = (v: unknown) =>
-  createHash("sha256").update(canonical(v)).digest("hex");
+const digest = (v: unknown) => createHash('sha256').update(canonical(v)).digest('hex');
 function detached<T>(v: T): T {
   const text = JSON.stringify(v);
-  if (Buffer.byteLength(text, "utf8") > 2097152)
-    return reject(
-      "unsupported-output",
-      "The preview exceeds the bounded response profile.",
-      422,
-    );
+  if (Buffer.byteLength(text, 'utf8') > 2097152)
+    return reject('unsupported-output', 'The preview exceeds the bounded response profile.', 422);
   const out: T = JSON.parse(text);
   const freeze = (x: unknown): void => {
-    if (x && typeof x === "object") {
+    if (x && typeof x === 'object') {
       Object.values(x).forEach(freeze);
       Object.freeze(x);
     }
@@ -454,8 +387,7 @@ function prefixVersion(
 ): string {
   const dependencies = new Map<string, string>();
   for (const e of events)
-    if (e.kind === "labourEnter")
-      dependencies.set(e.editorText, e.observationVersion);
+    if (e.kind === 'labourEnter') dependencies.set(e.editorText, e.observationVersion);
   return digest({
     baseVersion,
     rowIdentity,
@@ -496,18 +428,16 @@ function snapshot(
 ): SaleReturnIncomingReplayCellSnapshot {
   const row = state.rows[index]!.state,
     editor = projectSaleReturnIncomingEditorText(row);
-  if (editor.status !== "ready")
+  if (editor.status !== 'ready')
     throw new SaleReturnLabourReplayError(
       422,
-      "unsupported-editor",
-      "The result cannot be represented in the supported editors.",
+      'unsupported-editor',
+      'The result cannot be represented in the supported editors.',
       { diagnostics: editor.diagnostics },
     );
   return {
     visible: Object.fromEntries(
-      Object.entries(row.visible).filter(
-        (p): p is [string, string] => typeof p[1] === "string",
-      ),
+      Object.entries(row.visible).filter((p): p is [string, string] => typeof p[1] === 'string'),
     ),
     caches: { ...row.caches },
     editorTextByField: { ...editor.editorTextByField },
@@ -520,11 +450,7 @@ function currentPrefix(
   events: SaleReturnLabourReplayEvent[],
 ): SaleReturnLabourPrefix {
   return {
-    prefixVersion: prefixVersion(
-      dto.baseVersion,
-      state.rows[index]!.state.rowIdentity,
-      events,
-    ),
+    prefixVersion: prefixVersion(dto.baseVersion, state.rows[index]!.state.rowIdentity, events),
     events,
     preview: snapshot(state, index),
     phase: { incomingTotals: { ...state.totals.cells }, bill: state.bill },
@@ -543,7 +469,7 @@ async function observe(
   input?: SaleReturnLabourPrefixInput,
   candidate?: string,
 ): Promise<Observed> {
-  let baseVersion = "";
+  let baseVersion = '';
   const masters = new Map<string, SaleReturnIncomingLabourObservation>();
   const bill = await observeSaleReturnBillReplayTx(
     tx,
@@ -562,14 +488,12 @@ async function observe(
       });
       if (input && baseVersion !== input.baseVersion)
         return reject(
-          "version-conflict",
-          "Saved Return or calculation inputs changed. Reload before previewing.",
+          'version-conflict',
+          'Saved Return or calculation inputs changed. Reload before previewing.',
           409,
         );
       const codes = new Set(
-        input?.events
-          .filter((e) => e.kind === "labourEnter")
-          .map((e) => e.editorText) ?? [],
+        input?.events.filter((e) => e.kind === 'labourEnter').map((e) => e.editorText) ?? [],
       );
       if (candidate !== undefined) codes.add(candidate);
       for (const enteredCode of [...codes].sort())
@@ -582,46 +506,38 @@ async function observe(
         );
       for (const e of input?.events ?? [])
         if (
-          e.kind === "labourEnter" &&
+          e.kind === 'labourEnter' &&
           masters.get(e.editorText)!.observationVersion !== e.observationVersion
         )
           return reject(
-            "master-version-conflict",
-            "A previously selected labour master changed. Reload before another selection.",
+            'master-version-conflict',
+            'A previously selected labour master changed. Reload before another selection.',
             409,
           );
       if (
         input &&
-        input.prefixVersion !==
-          prefixVersion(baseVersion, input.rowIdentity, input.events)
+        input.prefixVersion !== prefixVersion(baseVersion, input.rowIdentity, input.events)
       )
-        return reject(
-          "prefix-conflict",
-          "The committed prefix does not match its version.",
-          409,
-        );
+        return reject('prefix-conflict', 'The committed prefix does not match its version.', 409);
     },
   );
-  if (!context.coYear)
-    return reject("context-stale", "The selected year is unavailable.", 409);
+  if (!context.coYear) return reject('context-stale', 'The selected year is unavailable.', 409);
   const rows = bill.dto.rowReplay.rows.map((row) => ({
     rowIdentity: row.rowIdentity,
     initialPrefixVersion: prefixVersion(baseVersion, row.rowIdentity, []),
     labourFields: labourFields.map((fieldId): Field => {
-      const col = bill.dto.rowReplay.configuration.columns.find(
-        (c) => c.id === fieldId,
-      );
+      const col = bill.dto.rowReplay.configuration.columns.find((c) => c.id === fieldId);
       const reason = !bill.dto.capabilities.canPreviewBill
-        ? "This saved Return is outside the supported whole-grid bill preview."
-        : col?.widthState !== "nonzero"
-          ? "The labour field is hidden or its configured width is unresolved."
+        ? 'This saved Return is outside the supported whole-grid bill preview.'
+        : col?.widthState !== 'nonzero'
+          ? 'The labour field is hidden or its configured width is unresolved.'
           : null;
       return {
         fieldId,
         allowed: reason === null,
         reason,
         maxLength: 2,
-        commit: "resolved-enter",
+        commit: 'resolved-enter',
       };
     }),
   }));
@@ -655,16 +571,9 @@ async function observe(
 }
 function supported(observed: Observed, input: SaleReturnLabourPrefixInput) {
   const { dto, bill } = observed;
-  const index =
-    bill.state?.rows.findIndex(
-      (r) => r.state.rowIdentity === input.rowIdentity,
-    ) ?? -1;
+  const index = bill.state?.rows.findIndex((r) => r.state.rowIdentity === input.rowIdentity) ?? -1;
   if (!dto.rows.some((r) => r.rowIdentity === input.rowIdentity))
-    return reject(
-      "identity-conflict",
-      "The saved row identity is missing.",
-      409,
-    );
+    return reject('identity-conflict', 'The saved row identity is missing.', 409);
   if (
     !bill.state ||
     !bill.context ||
@@ -673,16 +582,12 @@ function supported(observed: Observed, input: SaleReturnLabourPrefixInput) {
   )
     throw new SaleReturnLabourReplayError(
       422,
-      "unsupported-state",
-      "This saved Return is available for inspection only.",
+      'unsupported-state',
+      'This saved Return is available for inspection only.',
       { diagnostics: bill.dto.diagnostics },
     );
   if (index < 0)
-    return reject(
-      "identity-conflict",
-      "The projected saved row identity is missing.",
-      409,
-    );
+    return reject('identity-conflict', 'The projected saved row identity is missing.', 409);
   return {
     state: bill.state,
     context: bill.context,
@@ -695,9 +600,7 @@ function checkField(
   rowIdentity: string,
   e: SaleReturnLabourReplayEvent | { fieldId: SaleReturnLabourField },
 ): void {
-  const row = observed.dto.billReplay.rowReplay.rows.find(
-    (r) => r.rowIdentity === rowIdentity,
-  )!;
+  const row = observed.dto.billReplay.rowReplay.rows.find((r) => r.rowIdentity === rowIdentity)!;
   const cap = labourFields.includes(e.fieldId as SaleReturnLabourField)
     ? observed.dto.rows
         .find((r) => r.rowIdentity === rowIdentity)!
@@ -705,8 +608,8 @@ function checkField(
     : row.fieldCapabilities.find((f) => f.fieldId === e.fieldId);
   if (!cap?.allowed)
     return reject(
-      "unsupported-field",
-      cap?.reason ?? "This field has no supported preview action.",
+      'unsupported-field',
+      cap?.reason ?? 'This field has no supported preview action.',
       422,
     );
 }
@@ -720,12 +623,12 @@ function apply(
   checkField(observed, rowIdentity, e);
   const context = observed.bill.context!,
     policy = observed.bill.dto.rowReplay.configuration.policy!;
-  if (e.kind === "labourEnter") {
+  if (e.kind === 'labourEnter') {
     const observation = observed.masters.get(e.editorText)!;
     if (observation.observationVersion !== e.observationVersion)
       return reject(
-        "master-version-conflict",
-        "The checked labour code changed before commitment.",
+        'master-version-conflict',
+        'The checked labour code changed before commitment.',
         409,
       );
     const result = composeSaleReturnIncomingLabour({
@@ -735,28 +638,27 @@ function apply(
         coCode: observation.scope.coCode,
       },
       rowIdentity,
-      field: e.fieldId === "x13.primary-incoming.c13" ? 13 : 29,
+      field: e.fieldId === 'x13.primary-incoming.c13' ? 13 : 29,
       editorText: e.editorText,
       expectedObservationVersion: e.observationVersion,
       observation,
       rowPolicy: policy,
       context,
     });
-    if (result.status !== "applied")
+    if (result.status !== 'applied')
       throw new SaleReturnLabourReplayError(
         422,
-        result.status === "lookup-required"
-          ? "lookup-required"
-          : result.diagnostics.some((d) => d.origin === "calculation")
-            ? "calculation-rejected"
-            : "unsupported-master",
-        result.diagnostics[0]?.message ??
-          "The labour selection is unsupported.",
+        result.status === 'lookup-required'
+          ? 'lookup-required'
+          : result.diagnostics.some((d) => d.origin === 'calculation')
+            ? 'calculation-rejected'
+            : 'unsupported-master',
+        result.diagnostics[0]?.message ?? 'The labour selection is unsupported.',
         { diagnostics: result.diagnostics },
       );
     return {
       state: result.state,
-      status: "applied" as const,
+      status: 'applied' as const,
       effects: {
         aggregateApplied: result.aggregateApplied,
         billApplied: result.billApplied,
@@ -770,7 +672,7 @@ function apply(
   const result = reduceSaleReturnIncomingAggregate(
     state,
     {
-      kind: "leaveCell",
+      kind: 'leaveCell',
       rowIdentity,
       column: money.get(e.fieldId)!,
       text: e.editorText,
@@ -784,22 +686,18 @@ function apply(
     policy,
     context,
   );
-  if (result.status === "rejected")
-    throw new SaleReturnLabourReplayError(
-      422,
-      "calculation-rejected",
-      result.diagnostic.message,
-      { diagnostics: [result.diagnostic] },
-    );
+  if (result.status === 'rejected')
+    throw new SaleReturnLabourReplayError(422, 'calculation-rejected', result.diagnostic.message, {
+      diagnostics: [result.diagnostic],
+    });
   return {
     state: result.state,
     status: result.status,
     effects: {
-      aggregateApplied: result.status === "applied" && result.aggregateApplied,
-      billApplied: result.status === "applied" && result.billApplied,
+      aggregateApplied: result.status === 'applied' && result.aggregateApplied,
+      billApplied: result.status === 'applied' && result.billApplied,
       taxRecalculated:
-        result.status === "applied" &&
-        (result.state.journal.at(-1)?.taxRecalculated ?? false),
+        result.status === 'applied' && (result.state.journal.at(-1)?.taxRecalculated ?? false),
     },
   };
 }
@@ -812,24 +710,15 @@ function reconstruct(observed: Observed, input: SaleReturnLabourPrefixInput) {
       snapshot(next.state, initial.index);
       state = next.state;
     }
-    const recovered = detached(
-      currentPrefix(observed.dto, state, initial.index, input.events),
-    );
+    const recovered = detached(currentPrefix(observed.dto, state, initial.index, input.events));
     if (recovered.prefixVersion !== input.prefixVersion)
-      return reject(
-        "prefix-conflict",
-        "The committed prefix no longer matches.",
-        409,
-      );
+      return reject('prefix-conflict', 'The committed prefix no longer matches.', 409);
     return { state, index: initial.index, recovered };
   } catch (error) {
-    if (
-      error instanceof SaleReturnLabourReplayError &&
-      error.statusCode === 422
-    )
+    if (error instanceof SaleReturnLabourReplayError && error.statusCode === 422)
       return reject(
-        "prefix-conflict",
-        "A previously accepted operation cannot be reconstructed. Reload before previewing.",
+        'prefix-conflict',
+        'A previously accepted operation cannot be reconstructed. Reload before previewing.',
         409,
       );
     throw error;
@@ -847,7 +736,7 @@ async function boundary<T>(fn: () => Promise<T>): Promise<T> {
     )
       throw new SaleReturnLabourReplayError(e.statusCode, e.code, e.message);
     if (e instanceof BookPolicyValidationError)
-      throw new SaleReturnLabourReplayError(422, "configuration", e.message);
+      throw new SaleReturnLabourReplayError(422, 'configuration', e.message);
     if (e instanceof SaleReturnIncomingLabourReadError)
       throw new SaleReturnLabourReplayError(500, e.code, e.message);
     throw e;
@@ -864,9 +753,8 @@ export async function getSaleReturnLabourReplayState(
     withSessionContextReadSnapshot(
       prisma,
       identityValue,
-      { form: "Sales/Sales Return", scope },
-      async (tx, admitted) =>
-        detached((await observe(tx, admitted.context, scope, voucherNo)).dto),
+      { form: 'Sales/Sales Return', scope },
+      async (tx, admitted) => detached((await observe(tx, admitted.context, scope, voucherNo)).dto),
     ),
   );
 }
@@ -883,7 +771,7 @@ export async function observeSaleReturnLabourReplayCode(
     withSessionContextReadSnapshot(
       prisma,
       identityValue,
-      { form: "Sales/Sales Return", scope },
+      { form: 'Sales/Sales Return', scope },
       async (tx, admitted) => {
         const observed = await observe(
           tx,
@@ -900,18 +788,16 @@ export async function observeSaleReturnLabourReplayCode(
           scope: { tenantId: scope.tenantId, coCode: scope.coCode },
           rowIdentity: input.rowIdentity,
           state: prior.state.rows[prior.index]!.state,
-          field: input.fieldId === "x13.primary-incoming.c13" ? 13 : 29,
+          field: input.fieldId === 'x13.primary-incoming.c13' ? 13 : 29,
           editorText: input.editorText,
           expectedObservationVersion: observation.observationVersion,
           observation,
         });
-        if (copied.status !== "ready")
+        if (copied.status !== 'ready')
           throw new SaleReturnLabourReplayError(
             422,
-            copied.status === "lookup-required"
-              ? "lookup-required"
-              : "unsupported-master",
-            copied.diagnostics[0]?.message ?? "The labour code is unsupported.",
+            copied.status === 'lookup-required' ? 'lookup-required' : 'unsupported-master',
+            copied.diagnostics[0]?.message ?? 'The labour code is unsupported.',
             { diagnostics: copied.diagnostics },
           );
         const raw = observation.masters[0]!.raw;
@@ -946,7 +832,7 @@ export async function previewSaleReturnLabourReplay(
     const outcome = await withSessionContextReadSnapshot(
       prisma,
       identityValue,
-      { form: "Sales/Sales Return", scope },
+      { form: 'Sales/Sales Return', scope },
       async (tx, admitted) => {
         const observed = await observe(
           tx,
@@ -954,9 +840,7 @@ export async function previewSaleReturnLabourReplay(
           scope,
           voucherNo,
           input,
-          input.event.kind === "labourEnter"
-            ? input.event.editorText
-            : undefined,
+          input.event.kind === 'labourEnter' ? input.event.editorText : undefined,
         );
         const prior = reconstruct(observed, input);
         try {
@@ -975,26 +859,19 @@ export async function previewSaleReturnLabourReplay(
         } catch (e) {
           if (e instanceof SaleReturnLabourReplayError && e.statusCode === 422)
             return {
-              rejection: new SaleReturnLabourReplayError(
-                422,
-                e.code,
-                e.message,
-                {
-                  eventIndex: input.events.length,
-                  event: input.event,
-                  diagnostics: e.details?.diagnostics ?? [
-                    { code: e.code, message: e.message },
-                  ],
-                  recovery: prior.recovered,
-                },
-              ),
+              rejection: new SaleReturnLabourReplayError(422, e.code, e.message, {
+                eventIndex: input.events.length,
+                event: input.event,
+                diagnostics: e.details?.diagnostics ?? [{ code: e.code, message: e.message }],
+                recovery: prior.recovered,
+              }),
             };
           throw e;
         }
       },
     );
     // Recovery is published only after the read coordinator's final live/context check.
-    if ("rejection" in outcome) throw outcome.rejection;
+    if ('rejection' in outcome) throw outcome.rejection;
     return outcome;
   });
 }

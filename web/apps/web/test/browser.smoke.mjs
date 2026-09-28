@@ -105,12 +105,13 @@ const smokeLedgerContext = {
   mode: null,
   reason: 'vendor-authority-unresolved',
 };
-const authJson = (route, status, body) => route.fulfill({
-  status,
-  contentType: 'application/json',
-  headers: { 'cache-control': 'no-store' },
-  body: JSON.stringify(body),
-});
+const authJson = (route, status, body) =>
+  route.fulfill({
+    status,
+    contentType: 'application/json',
+    headers: { 'cache-control': 'no-store' },
+    body: JSON.stringify(body),
+  });
 try {
   await waitForServer();
   browser = await chromium.launch({ headless: true });
@@ -163,28 +164,45 @@ try {
     if (path === '/auth/logout') return json(route, 200, { ok: true });
     if (path === '/auth/refresh')
       return authJson(route, 200, {
-        refreshed: true, context: smokeContext, ledgerContext: smokeLedgerContext,
+        refreshed: true,
+        context: smokeContext,
+        ledgerContext: smokeLedgerContext,
       });
     if (path === '/context/select') {
       const input = request.postDataJSON();
       // The existing smoke has one deliberate same-scope Open. Require the real
       // request shape, then model only that successful transition; no retry/CAS credit.
       assert.deepEqual(Object.keys(input).sort(), [
-        'coCode', 'coYear', 'expectedContextEpoch', 'lcCode', 'selectionId',
+        'coCode',
+        'coYear',
+        'expectedContextEpoch',
+        'lcCode',
+        'selectionId',
       ]);
       assert.deepEqual(
         { coCode: input.coCode, lcCode: input.lcCode, coYear: input.coYear },
         { coCode: '01', lcCode: '01', coYear: '2024-2025' },
       );
       assert.equal(input.expectedContextEpoch, smokeContext.contextEpoch);
-      assert.match(input.selectionId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      assert.match(
+        input.selectionId,
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      );
       const headers = request.headers();
       assert.equal(headers['x-session-context-id'], smokeContext.sessionId);
       assert.equal(headers['x-session-context-epoch'], smokeContext.contextEpoch);
-      smokeContext = { ...smokeContext, contextEpoch: (BigInt(smokeContext.contextEpoch) + 1n).toString() };
+      smokeContext = {
+        ...smokeContext,
+        contextEpoch: (BigInt(smokeContext.contextEpoch) + 1n).toString(),
+      };
       return authJson(route, 200, {
-        coCode: '01', lcCode: '01', coYear: '2024-2025', scoped: true, replayed: false,
-        context: smokeContext, ledgerContext: smokeLedgerContext,
+        coCode: '01',
+        lcCode: '01',
+        coYear: '2024-2025',
+        scoped: true,
+        replayed: false,
+        context: smokeContext,
+        ledgerContext: smokeLedgerContext,
       });
     }
     if (path === '/me')

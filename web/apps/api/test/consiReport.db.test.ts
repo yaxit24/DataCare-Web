@@ -17,7 +17,15 @@ const exec = (sql: string, ...params: unknown[]) =>
   withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...params));
 
 async function clean(): Promise<void> {
-  for (const table of ['APR_DETL', 'ITEM_MAST', 'AC_MAST', 'AC_DATA', 'BOOK_DATA', 'SL_DATA', 'PR_DATA']) {
+  for (const table of [
+    'APR_DETL',
+    'ITEM_MAST',
+    'AC_MAST',
+    'AC_DATA',
+    'BOOK_DATA',
+    'SL_DATA',
+    'PR_DATA',
+  ]) {
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   }
 }
@@ -86,7 +94,18 @@ databaseDescribe('RP_CONSI_APR consignment report parity builder', () => {
 
   it('runs the consignment receipt balance summary from APR_DETL', async () => {
     const report = await consiReport(runtime, scope);
-    expect(report.rows.map((row: any) => [row.acCode, row.itemType, row.recGold, row.adjGold, row.balGold, row.recSilver, row.adjSilver, row.balSilver])).toEqual([
+    expect(
+      report.rows.map((row: any) => [
+        row.acCode,
+        row.itemType,
+        row.recGold,
+        row.adjGold,
+        row.balGold,
+        row.recSilver,
+        row.adjSilver,
+        row.balSilver,
+      ]),
+    ).toEqual([
       ['C001', 'G', 10, 4, 6, 0, 0, 0],
       ['C001', 'S', 0, 0, 0, 20, 5, 15],
     ]);
@@ -95,7 +114,16 @@ databaseDescribe('RP_CONSI_APR consignment report parity builder', () => {
 
   it('runs the desktop account-detail drilldown with opening balance and running amount balance', async () => {
     const detail = await consiDetailReport(runtime, scope, 'C001');
-    expect(detail.rows.map((row: any) => [row.bookName, row.vchNo, row.drAmt, row.crAmt, row.balAmt, row.crDr])).toEqual([
+    expect(
+      detail.rows.map((row: any) => [
+        row.bookName,
+        row.vchNo,
+        row.drAmt,
+        row.crAmt,
+        row.balAmt,
+        row.crDr,
+      ]),
+    ).toEqual([
       ['Op Balance', null, 0, 100, 100, 'Cr'],
       ['Receipt', '00001', 40, 0, 60, 'Cr'],
       ['Receipt', '00002', 0, 25, 85, 'Cr'],

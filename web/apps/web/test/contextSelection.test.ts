@@ -184,7 +184,12 @@ describe('pending company selection recovery (controlled storage/fetch; no real 
     await expect(subject.submitPendingContextSelection(pending)).resolves.toEqual(B);
     expectBodyAndHeaders(0, pendingLiteral(), A);
     expect(memory.has(key)).toBe(false);
-    expect(api.getPageContextState()).toMatchObject({ status: 'stale', context: A, observed: B, reason: 'context-changed' });
+    expect(api.getPageContextState()).toMatchObject({
+      status: 'stale',
+      context: A,
+      observed: B,
+      reason: 'context-changed',
+    });
   });
 
   it('a storage write failure prevents dispatch in the required save-then-submit sequence', async () => {
@@ -207,7 +212,9 @@ describe('pending company selection recovery (controlled storage/fetch; no real 
     api.pinPageContext(A);
     const pending = saved();
     const bytes = memory.get(key);
-    await expect(subject.submitPendingContextSelection(pending, { isCurrent: () => false })).rejects.toThrow('no longer active');
+    await expect(
+      subject.submitPendingContextSelection(pending, { isCurrent: () => false }),
+    ).rejects.toThrow('no longer active');
     expect(fetcher).not.toHaveBeenCalled();
     expect(memory.get(key)).toBe(bytes);
     expect(api.getPageContextState()).toMatchObject({ status: 'ready', context: A });
@@ -220,7 +227,12 @@ describe('pending company selection recovery (controlled storage/fetch; no real 
     fetcher.mockReturnValueOnce(held.promise);
     const ordinary = settle(api.get('/masters/components'));
     await expect(subject.submitPendingContextSelection(pending)).resolves.toEqual(B);
-    expect(api.getPageContextState()).toMatchObject({ status: 'stale', context: A, observed: B, reason: 'context-changed' });
+    expect(api.getPageContextState()).toMatchObject({
+      status: 'stale',
+      context: A,
+      observed: B,
+      reason: 'context-changed',
+    });
     held.resolve(response([{ rate: 123 }]));
     expect(await ordinary).toMatchObject({ status: 'rejected', reason: { code: 'context-stale' } });
     expect(memory.has(key)).toBe(false);
@@ -231,28 +243,48 @@ describe('pending company selection recovery (controlled storage/fetch; no real 
     const pending = saved();
     fetcher.mockResolvedValueOnce(response(validResponse(true)));
     await expect(subject.submitPendingContextSelection(pending)).resolves.toEqual(B);
-    expect(api.getPageContextState()).toMatchObject({ status: 'ready', context: B, observed: null });
+    expect(api.getPageContextState()).toMatchObject({
+      status: 'ready',
+      context: B,
+      observed: null,
+    });
     expect(memory.has(key)).toBe(false);
   });
 
-  it.each(['success', 'network-failure'] as const)('late %s after route departure guards the document but preserves the original recovery operation', async (outcome) => {
-    api.pinPageContext(A);
-    const pending = saved();
-    const bytes = memory.get(key);
-    const held = deferred<Response>();
-    let live = true;
-    fetcher.mockReturnValueOnce(outcome === 'success' ? held.promise : held.promise.then(() => { throw new TypeError('connection-lost'); }));
-    const work = settle(subject.submitPendingContextSelection(pending, { isCurrent: () => live }));
-    live = false;
-    held.resolve(response(validResponse()));
-    expect(await work).toMatchObject({ status: 'rejected' });
-    expect(memory.get(key)).toBe(bytes);
-    expect(api.getPageContextState()).toMatchObject({ status: 'stale', context: A,
-      reason: outcome === 'success' ? 'context-changed' : 'context-selection-unconfirmed',
-      observed: outcome === 'success' ? B : null });
-    await expect(api.post('/sales/orders', { draft: 'unchanged' })).rejects.toMatchObject({ code: 'context-stale' });
-    expect(fetcher).toHaveBeenCalledTimes(1);
-  });
+  it.each(['success', 'network-failure'] as const)(
+    'late %s after route departure guards the document but preserves the original recovery operation',
+    async (outcome) => {
+      api.pinPageContext(A);
+      const pending = saved();
+      const bytes = memory.get(key);
+      const held = deferred<Response>();
+      let live = true;
+      fetcher.mockReturnValueOnce(
+        outcome === 'success'
+          ? held.promise
+          : held.promise.then(() => {
+              throw new TypeError('connection-lost');
+            }),
+      );
+      const work = settle(
+        subject.submitPendingContextSelection(pending, { isCurrent: () => live }),
+      );
+      live = false;
+      held.resolve(response(validResponse()));
+      expect(await work).toMatchObject({ status: 'rejected' });
+      expect(memory.get(key)).toBe(bytes);
+      expect(api.getPageContextState()).toMatchObject({
+        status: 'stale',
+        context: A,
+        reason: outcome === 'success' ? 'context-changed' : 'context-selection-unconfirmed',
+        observed: outcome === 'success' ? B : null,
+      });
+      await expect(api.post('/sales/orders', { draft: 'unchanged' })).rejects.toMatchObject({
+        code: 'context-stale',
+      });
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it.each(['absent', 'different-body', 'different-operation'] as const)(
     'submit refuses %s persisted recovery before any dispatch',

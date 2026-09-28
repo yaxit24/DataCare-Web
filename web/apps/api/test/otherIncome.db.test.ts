@@ -56,7 +56,11 @@ async function seedBook(book = BOOK, mainBook = 'OTH INC', inout = 'I') {
 }
 
 async function seed() {
-  await exec(`INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`, TENANT, CO);
+  await exec(
+    `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
+    TENANT,
+    CO,
+  );
   await exec(
     `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
      VALUES ($1,$2,$3,'2024-04-01','2025-03-31'::timestamp)`,
@@ -179,7 +183,12 @@ databaseDescribe('database-backed TR_OTH_PURC Other Income mode', () => {
 
   it('creates, reads, edits and desktop-deletes an OTH INC PAY voucher', async () => {
     const created = await saveOtherIncome(runtime, input());
-    expect(created).toEqual({ voucherNo: '00005', hiddenVoucherNo: '00010', created: true, lines: 1 });
+    expect(created).toEqual({
+      voucherNo: '00005',
+      hiddenVoucherNo: '00010',
+      created: true,
+      lines: 1,
+    });
 
     const persisted = await query(
       `SELECT
@@ -254,7 +263,15 @@ databaseDescribe('database-backed TR_OTH_PURC Other Income mode', () => {
         vchDate: NEXT_DAY,
         mainUser: 'editor',
         description: 'Edited income voucher',
-        lines: [{ hsnCode: '9984', itemName: 'Consulting income', netAmount: 500, taxCode: 'T1', taxType: 'R' }],
+        lines: [
+          {
+            hsnCode: '9984',
+            itemName: 'Consulting income',
+            netAmount: 500,
+            taxCode: 'T1',
+            taxType: 'R',
+          },
+        ],
         chequeAmount: 0,
         cardAmount: 0,
         cashAmount: 0,
@@ -263,7 +280,12 @@ databaseDescribe('database-backed TR_OTH_PURC Other Income mode', () => {
       }),
       created.voucherNo,
     );
-    expect(edited).toEqual({ voucherNo: '00005', hiddenVoucherNo: '00010', created: false, lines: 1 });
+    expect(edited).toEqual({
+      voucherNo: '00005',
+      hiddenVoucherNo: '00010',
+      created: false,
+      lines: 1,
+    });
     const afterEdit = await query(
       `SELECT
          (SELECT min("MAIN_USER") FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"='00005') main_user,
@@ -322,9 +344,9 @@ databaseDescribe('database-backed TR_OTH_PURC Other Income mode', () => {
     await expect(
       saveOtherIncome(runtime, input({ scope: { ...scope, coBook: 'BAD' } })),
     ).rejects.toThrow(/OTH INC/);
-    await expect(saveOtherIncome(runtime, input({ cashAmount: 1, cashAccount: '' }))).rejects.toThrow(
-      /cash account is required/,
-    );
+    await expect(
+      saveOtherIncome(runtime, input({ cashAmount: 1, cashAccount: '' })),
+    ).rejects.toThrow(/cash account is required/);
     const rows = await query(
       `SELECT count(*)::int AS n FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"='00005'`,
       TENANT,

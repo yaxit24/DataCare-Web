@@ -135,7 +135,14 @@ databaseDescribe('database-backed loan received / loan issue', () => {
       LOAN_REC_BOOK,
       vchNo,
     )) as Array<Record<string, any>>;
-    expect(ledger.map((row) => ({ ac: String(row.AC_CODE).trim(), ld: String(row.LD_CODE).trim(), dr: row.dr, cr: row.cr }))).toEqual([
+    expect(
+      ledger.map((row) => ({
+        ac: String(row.AC_CODE).trim(),
+        ld: String(row.LD_CODE).trim(),
+        dr: row.dr,
+        cr: row.cr,
+      })),
+    ).toEqual([
       { ac: 'LEND', ld: 'CASH', dr: 0, cr: 25_000 },
       { ac: 'CASH', ld: 'LEND', dr: 25_000, cr: 0 },
     ]);
@@ -214,7 +221,14 @@ databaseDescribe('database-backed loan received / loan issue', () => {
       LOAN_ISU_BOOK,
       issueVchNo,
     )) as Array<Record<string, any>>;
-    expect(ledger.map((row) => ({ ac: String(row.AC_CODE).trim(), ld: String(row.LD_CODE).trim(), dr: row.dr, cr: row.cr }))).toEqual([
+    expect(
+      ledger.map((row) => ({
+        ac: String(row.AC_CODE).trim(),
+        ld: String(row.LD_CODE).trim(),
+        dr: row.dr,
+        cr: row.cr,
+      })),
+    ).toEqual([
       { ac: 'LEND', ld: 'CASH', dr: 25_000, cr: 0 },
       { ac: 'INTEXP', ld: 'CASH', dr: 1_250, cr: 0 },
       { ac: 'CASH', ld: 'LEND', dr: 0, cr: 26_250 },

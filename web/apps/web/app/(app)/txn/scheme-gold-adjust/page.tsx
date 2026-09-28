@@ -204,7 +204,9 @@ export default function SchemeGoldAdjustPage() {
     setMessage(null);
     setBusy(true);
     try {
-      await del(`/scheme/gold-adjust/${encodeURIComponent(loadNo.trim())}`, { book: coBook || undefined });
+      await del(`/scheme/gold-adjust/${encodeURIComponent(loadNo.trim())}`, {
+        book: coBook || undefined,
+      });
       setMessage({ kind: 'ok', text: `Deleted gold adjustment voucher #${loadNo.trim()}` });
       setResult(null);
       setLines([blankLine()]);
@@ -260,7 +262,11 @@ export default function SchemeGoldAdjustPage() {
           <div className="toolbar" style={{ marginBottom: 8 }}>
             <strong>Adjustment Lines</strong>
             <span className="spacer" />
-            <button type="button" className="ghost" onClick={() => setLines((rows) => [...rows, blankLine()])}>
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => setLines((rows) => [...rows, blankLine()])}
+            >
               Add Row
             </button>
           </div>
@@ -345,7 +351,9 @@ export default function SchemeGoldAdjustPage() {
                       data-grid-cell={`${index}:6`}
                       onKeyDown={handleGridKey}
                       value={line.goldAmt}
-                      placeholder={line.goldWt && line.goldRate ? String(computedGoldAmt(line)) : ''}
+                      placeholder={
+                        line.goldWt && line.goldRate ? String(computedGoldAmt(line)) : ''
+                      }
                       onChange={(e) => setLine(index, 'goldAmt', e.target.value)}
                     />
                   </td>
@@ -434,10 +442,20 @@ export default function SchemeGoldAdjustPage() {
             onChange={(e) => setLoadNo(e.target.value)}
             style={{ maxWidth: 140 }}
           />
-          <button type="button" className="ghost" disabled={busy || !loadNo.trim()} onClick={loadVoucher}>
+          <button
+            type="button"
+            className="ghost"
+            disabled={busy || !loadNo.trim()}
+            onClick={loadVoucher}
+          >
             Load
           </button>
-          <button type="button" className="ghost" disabled={busy || !loadNo.trim()} onClick={deleteVoucher}>
+          <button
+            type="button"
+            className="ghost"
+            disabled={busy || !loadNo.trim()}
+            onClick={deleteVoucher}
+          >
             Delete
           </button>
         </div>

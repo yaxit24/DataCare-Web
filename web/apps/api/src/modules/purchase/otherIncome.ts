@@ -246,7 +246,8 @@ async function lineTaxTx(
     };
   }
   const taxAccount = text(policy.taxAc);
-  if (!taxAccount) throw new OtherIncomeValidationError(`tax ${policy.taxCode} has no ledger account`);
+  if (!taxAccount)
+    throw new OtherIncomeValidationError(`tax ${policy.taxCode} has no ledger account`);
   await oneAccountTx(tx, scope, taxAccount, `tax ${policy.taxCode} ledger account`);
   return {
     code: policy.taxCode,
@@ -320,7 +321,9 @@ async function resolveInputTx(tx: any, input: OtherIncomeInput): Promise<Resolve
     const itemName = text(line?.itemName).slice(0, 50);
     const netAmount = positiveOrZero(line?.netAmount, 'line net amount');
     if (!itemName || netAmount === 0) {
-      throw new OtherIncomeValidationError('every other-income line requires a description and amount');
+      throw new OtherIncomeValidationError(
+        'every other-income line requires a description and amount',
+      );
     }
     const taxType = (text(line?.taxType).toUpperCase() || 'F') as 'F' | 'R';
     if (taxType !== 'F' && taxType !== 'R') {
@@ -646,7 +649,12 @@ async function writeTx(
           ]
         : [
             { srNo, percent: line.sgstPercent, amount: line.sgstAmount, group: line.taxGroup },
-            { srNo: 111 + srNo, percent: line.cgstPercent, amount: line.cgstAmount, group: line.taxGroup },
+            {
+              srNo: 111 + srNo,
+              percent: line.cgstPercent,
+              amount: line.cgstAmount,
+              group: line.taxGroup,
+            },
           ];
     for (const taxRow of taxRows) {
       if (!line.taxCode || !taxRow.amount) continue;
@@ -888,7 +896,9 @@ export async function saveOtherIncome(
   input: OtherIncomeInput,
   requestedVoucherNo?: string,
 ) {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) => saveTx(tx, input, requestedVoucherNo));
+  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+    saveTx(tx, input, requestedVoucherNo),
+  );
 }
 
 export async function getOtherIncome(
@@ -1025,7 +1035,8 @@ export async function deleteOtherIncome(
       scope.coBook,
       voucherNo,
     );
-    if (!rows.length) throw new OtherIncomeValidationError(`other-income voucher not found: ${voucherNo}`);
+    if (!rows.length)
+      throw new OtherIncomeValidationError(`other-income voucher not found: ${voucherNo}`);
     await insertDesktopDeleteAuditTx(tx, {
       scope,
       configuredBook: { name: book.configuredName.slice(0, 20), shortName: book.vchType },

@@ -91,8 +91,20 @@ databaseDescribe('RP_STK_LEVEL scheme monthly report parity builder', () => {
   });
 
   it('includes adjusted/closed members when With Adj Scheme is selected', async () => {
-    const report = await schemeMonthlyReport(runtime, scope, { schemeCode: 'S01', withAdjScheme: 'true' });
-    expect(report.rows.map((row: any) => [row.membCode, row['24/01'], row['24/02'], row['24/03'], row.total, row.lMonth])).toEqual([
+    const report = await schemeMonthlyReport(runtime, scope, {
+      schemeCode: 'S01',
+      withAdjScheme: 'true',
+    });
+    expect(
+      report.rows.map((row: any) => [
+        row.membCode,
+        row['24/01'],
+        row['24/02'],
+        row['24/03'],
+        row.total,
+        row.lMonth,
+      ]),
+    ).toEqual([
       ['M001', 100, 200, 0, 300, '24/02'],
       ['M002', 0, 50, 75, 125, '24/03'],
     ]);

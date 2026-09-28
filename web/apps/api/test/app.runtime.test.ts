@@ -27,8 +27,10 @@ describe('production application security options', () => {
       $executeRawUnsafe: vi.fn().mockResolvedValue(1),
       $queryRawUnsafe: vi.fn(async (sql: string) => {
         // Cookie serialization test only: lifecycle/expiry atomicity has separate real-DB tests.
-        if (sql.includes('INSERT INTO "auth_session"')) return [{ expiresAt: '2099-01-01 00:00:00+00' }];
-        if (sql.includes('FROM "auth_session"') && sql.includes(' AS active')) return [{ active: true }];
+        if (sql.includes('INSERT INTO "auth_session"'))
+          return [{ expiresAt: '2099-01-01 00:00:00+00' }];
+        if (sql.includes('FROM "auth_session"') && sql.includes(' AS active'))
+          return [{ active: true }];
         if (sql.includes('FROM "CO_MAST"'))
           return [{ CO_CODE: '01', CO_NAME: 'Test', LC_CODE: '01', allowed: true }];
         if (sql.includes('FROM "LOCT_MAST"')) return [{ LC_CODE: '01', LC_NAME: 'Main' }];

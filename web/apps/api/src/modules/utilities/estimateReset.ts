@@ -78,7 +78,8 @@ const requiredScope = (scope: EstimateResetScope): Required<EstimateResetScope> 
 };
 
 const dateOnly = (input?: unknown): string => {
-  if (input === undefined || input === null || input === '') return new Date().toISOString().slice(0, 10);
+  if (input === undefined || input === null || input === '')
+    return new Date().toISOString().slice(0, 10);
   const text = String(input).trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
     throw new EstimateResetValidationError('asOfDate must be an ISO date (YYYY-MM-DD)');
@@ -90,7 +91,10 @@ const dateOnly = (input?: unknown): string => {
   return text;
 };
 
-const params = (scope: Required<EstimateResetScope>, asOfDate: string): [string, string, string, string, string] => [
+const params = (
+  scope: Required<EstimateResetScope>,
+  asOfDate: string,
+): [string, string, string, string, string] => [
   scope.tenantId,
   scope.coCode,
   scope.lcCode,
@@ -98,7 +102,10 @@ const params = (scope: Required<EstimateResetScope>, asOfDate: string): [string,
   asOfDate,
 ];
 
-async function ensureCompanyAllowsResetTx(tx: any, scope: Required<EstimateResetScope>): Promise<string> {
+async function ensureCompanyAllowsResetTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<string> {
   const rows = (await tx.$queryRawUnsafe(
     `SELECT coalesce("CO_TYPE", '') AS co_type
        FROM "CO_MAST"
@@ -109,7 +116,9 @@ async function ensureCompanyAllowsResetTx(tx: any, scope: Required<EstimateReset
   if (!rows.length) throw new EstimateResetValidationError(`company ${scope.coCode} was not found`);
   const companyType = String(rows[0]?.co_type ?? '').trim();
   if (companyType !== '') {
-    throw new EstimateResetValidationError('Estimate Reset is available only when company type is blank, matching desktop MCo_Type="" behavior');
+    throw new EstimateResetValidationError(
+      'Estimate Reset is available only when company type is blank, matching desktop MCo_Type="" behavior',
+    );
   }
   return companyType;
 }
@@ -259,7 +268,9 @@ async function prepareCandidateTablesTx(
     scope.coCode,
     scope.lcCode,
   );
-  await tx.$executeRawUnsafe('CREATE INDEX ON estimate_reset_source_tags(co_year, co_book, vch_no, tag_no, vch_srno)');
+  await tx.$executeRawUnsafe(
+    'CREATE INDEX ON estimate_reset_source_tags(co_year, co_book, vch_no, tag_no, vch_srno)',
+  );
 
   await tx.$executeRawUnsafe(
     `CREATE TEMP TABLE estimate_reset_adjust_rows ON COMMIT DROP AS
@@ -426,7 +437,9 @@ async function prepareCandidateTablesTx(
     scope.coCode,
     scope.lcCode,
   );
-  await tx.$executeRawUnsafe('CREATE INDEX ON estimate_reset_adjust_rows(vch_date, source, line_row_id)');
+  await tx.$executeRawUnsafe(
+    'CREATE INDEX ON estimate_reset_adjust_rows(vch_date, source, line_row_id)',
+  );
 
   await tx.$executeRawUnsafe(
     `CREATE TEMP TABLE estimate_reset_apr_headers ON COMMIT DROP AS
@@ -456,7 +469,9 @@ async function prepareCandidateTablesTx(
     scope.coCode,
     scope.lcCode,
   );
-  await tx.$executeRawUnsafe('CREATE INDEX ON estimate_reset_apr_headers(co_year, co_book, vch_no)');
+  await tx.$executeRawUnsafe(
+    'CREATE INDEX ON estimate_reset_apr_headers(co_year, co_book, vch_no)',
+  );
 }
 
 async function scalarInt(tx: any, sql: string, ...p: unknown[]): Promise<number> {
@@ -469,7 +484,12 @@ async function scalarInt(tx: any, sql: string, ...p: unknown[]): Promise<number>
 function compactDiffs(diffs: EstimateResetDiff[]): EstimateResetDiff[] {
   const merged = new Map<string, EstimateResetDiff>();
   for (const diff of diffs) {
-    const current = merged.get(diff.table) ?? { table: diff.table, insert: 0, update: 0, delete: 0 };
+    const current = merged.get(diff.table) ?? {
+      table: diff.table,
+      insert: 0,
+      update: 0,
+      delete: 0,
+    };
     current.insert += Number(diff.insert || 0);
     current.update += Number(diff.update || 0);
     current.delete += Number(diff.delete || 0);
@@ -535,7 +555,10 @@ async function countSourceTagDeleteTx(
   );
 }
 
-async function countMainStockDeleteTx(tx: any, scope: Required<EstimateResetScope>): Promise<number> {
+async function countMainStockDeleteTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<number> {
   return scalarInt(
     tx,
     `SELECT count(*)::int AS n
@@ -571,7 +594,10 @@ async function countMainStockDeleteTx(tx: any, scope: Required<EstimateResetScop
   );
 }
 
-async function countAprDetlOrphansTx(tx: any, scope: Required<EstimateResetScope>): Promise<number> {
+async function countAprDetlOrphansTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<number> {
   return scalarInt(
     tx,
     `SELECT count(*)::int AS n
@@ -602,7 +628,10 @@ async function countAprDetlOrphansTx(tx: any, scope: Required<EstimateResetScope
   );
 }
 
-async function countAprHeadersAfterOrphansTx(tx: any, scope: Required<EstimateResetScope>): Promise<number> {
+async function countAprHeadersAfterOrphansTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<number> {
   return scalarInt(
     tx,
     `SELECT count(*)::int AS n
@@ -652,7 +681,10 @@ async function countAprHeadersAfterOrphansTx(tx: any, scope: Required<EstimateRe
   );
 }
 
-async function estimateDiffsTx(tx: any, scope: Required<EstimateResetScope>): Promise<EstimateResetDiff[]> {
+async function estimateDiffsTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<EstimateResetDiff[]> {
   const selectedSale = await countTemp(tx, 'estimate_reset_sale_keys');
   const selectedTag = await countTemp(tx, 'estimate_reset_tag_keys');
   const selectedWh = await countTemp(tx, 'estimate_reset_wh_keys');
@@ -705,21 +737,84 @@ async function estimateDiffsTx(tx: any, scope: Required<EstimateResetScope>): Pr
       delete: await countVoucherDeleteTx(tx, 'BAR_CAN_IDTL', 'estimate_reset_tag_keys', scope),
     },
     { table: 'TEMP_BOOK_DATA', insert: newAdjustHeaders, update: 0, delete: 0 },
-    { table: 'BAR_DETL', insert: 0, update: 0, delete: await countSourceTagDeleteTx(tx, 'BAR_DETL', scope) },
-    { table: 'BAR_IDTL', insert: 0, update: 0, delete: await countSourceTagDeleteTx(tx, 'BAR_IDTL', scope) },
+    {
+      table: 'BAR_DETL',
+      insert: 0,
+      update: 0,
+      delete: await countSourceTagDeleteTx(tx, 'BAR_DETL', scope),
+    },
+    {
+      table: 'BAR_IDTL',
+      insert: 0,
+      update: 0,
+      delete: await countSourceTagDeleteTx(tx, 'BAR_IDTL', scope),
+    },
     { table: 'MAIN_STOCK', insert: 0, update: 0, delete: await countMainStockDeleteTx(tx, scope) },
     { table: 'SL_DATA', insert: 0, update: 0, delete: selectedSale },
-    { table: 'SL_DETL', insert: 0, update: 0, delete: await countVoucherDeleteTx(tx, 'SL_DETL', 'estimate_reset_sale_keys', scope) },
-    { table: 'SL_IDTL', insert: 0, update: 0, delete: (await countVoucherDeleteTx(tx, 'SL_IDTL', 'estimate_reset_sale_keys', scope)) + (await countVoucherDeleteTx(tx, 'SL_IDTL', 'estimate_reset_wh_keys', scope)) },
-    { table: 'SL_PR_DETL', insert: 0, update: 0, delete: await countVoucherDeleteTx(tx, 'SL_PR_DETL', 'estimate_reset_sale_keys', scope) },
-    { table: 'AC_DATA', insert: 0, update: 0, delete: (await countVoucherDeleteTx(tx, 'AC_DATA', 'estimate_reset_sale_keys', scope)) + (await countVoucherDeleteTx(tx, 'AC_DATA', 'estimate_reset_wh_keys', scope)) },
-    { table: 'ROJ_MEL_DATA', insert: 0, update: 0, delete: (await countVoucherDeleteTx(tx, 'ROJ_MEL_DATA', 'estimate_reset_sale_keys', scope)) + (await countVoucherDeleteTx(tx, 'ROJ_MEL_DATA', 'estimate_reset_wh_keys', scope)) },
-    { table: 'FINE_DATA', insert: 0, update: 0, delete: (await countVoucherDeleteTx(tx, 'FINE_DATA', 'estimate_reset_sale_keys', scope)) + (await countVoucherDeleteTx(tx, 'FINE_DATA', 'estimate_reset_wh_keys', scope)) },
+    {
+      table: 'SL_DETL',
+      insert: 0,
+      update: 0,
+      delete: await countVoucherDeleteTx(tx, 'SL_DETL', 'estimate_reset_sale_keys', scope),
+    },
+    {
+      table: 'SL_IDTL',
+      insert: 0,
+      update: 0,
+      delete:
+        (await countVoucherDeleteTx(tx, 'SL_IDTL', 'estimate_reset_sale_keys', scope)) +
+        (await countVoucherDeleteTx(tx, 'SL_IDTL', 'estimate_reset_wh_keys', scope)),
+    },
+    {
+      table: 'SL_PR_DETL',
+      insert: 0,
+      update: 0,
+      delete: await countVoucherDeleteTx(tx, 'SL_PR_DETL', 'estimate_reset_sale_keys', scope),
+    },
+    {
+      table: 'AC_DATA',
+      insert: 0,
+      update: 0,
+      delete:
+        (await countVoucherDeleteTx(tx, 'AC_DATA', 'estimate_reset_sale_keys', scope)) +
+        (await countVoucherDeleteTx(tx, 'AC_DATA', 'estimate_reset_wh_keys', scope)),
+    },
+    {
+      table: 'ROJ_MEL_DATA',
+      insert: 0,
+      update: 0,
+      delete:
+        (await countVoucherDeleteTx(tx, 'ROJ_MEL_DATA', 'estimate_reset_sale_keys', scope)) +
+        (await countVoucherDeleteTx(tx, 'ROJ_MEL_DATA', 'estimate_reset_wh_keys', scope)),
+    },
+    {
+      table: 'FINE_DATA',
+      insert: 0,
+      update: 0,
+      delete:
+        (await countVoucherDeleteTx(tx, 'FINE_DATA', 'estimate_reset_sale_keys', scope)) +
+        (await countVoucherDeleteTx(tx, 'FINE_DATA', 'estimate_reset_wh_keys', scope)),
+    },
     { table: 'RATE_CUT_DATA', insert: 0, update: 0, delete: selectedWh },
-    { table: 'RATE_CUT_ISU', insert: 0, update: 0, delete: await countVoucherDeleteTx(tx, 'RATE_CUT_ISU', 'estimate_reset_wh_keys', scope) },
-    { table: 'RATE_CUT_REC', insert: 0, update: 0, delete: await countVoucherDeleteTx(tx, 'RATE_CUT_REC', 'estimate_reset_wh_keys', scope) },
+    {
+      table: 'RATE_CUT_ISU',
+      insert: 0,
+      update: 0,
+      delete: await countVoucherDeleteTx(tx, 'RATE_CUT_ISU', 'estimate_reset_wh_keys', scope),
+    },
+    {
+      table: 'RATE_CUT_REC',
+      insert: 0,
+      update: 0,
+      delete: await countVoucherDeleteTx(tx, 'RATE_CUT_REC', 'estimate_reset_wh_keys', scope),
+    },
     { table: 'APR_DETL', insert: 0, update: 0, delete: await countAprDetlOrphansTx(tx, scope) },
-    { table: 'APR_DATA', insert: 0, update: 0, delete: await countAprHeadersAfterOrphansTx(tx, scope) },
+    {
+      table: 'APR_DATA',
+      insert: 0,
+      update: 0,
+      delete: await countAprHeadersAfterOrphansTx(tx, scope),
+    },
   ];
   return compactDiffs(diffs);
 }
@@ -805,8 +900,15 @@ export async function estimateResetPreview(
 
 function assertConfirmation(input: Record<string, unknown>): void {
   if (input.confirmed === true) return;
-  if (String(input.confirmation ?? '').trim().toUpperCase() === ESTIMATE_RESET_CONFIRMATION) return;
-  throw new EstimateResetValidationError(`type ${ESTIMATE_RESET_CONFIRMATION} to apply Estimate Reset`);
+  if (
+    String(input.confirmation ?? '')
+      .trim()
+      .toUpperCase() === ESTIMATE_RESET_CONFIRMATION
+  )
+    return;
+  throw new EstimateResetValidationError(
+    `type ${ESTIMATE_RESET_CONFIRMATION} to apply Estimate Reset`,
+  );
 }
 
 function toDb(value: unknown): unknown {
@@ -892,7 +994,10 @@ async function ensureAdjustmentVoucherTx(
   return vchNo;
 }
 
-async function insertAdjustmentRowsTx(tx: any, scope: Required<EstimateResetScope>): Promise<{ headers: number; details: number }> {
+async function insertAdjustmentRowsTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<{ headers: number; details: number }> {
   const rows = (await tx.$queryRawUnsafe(
     `SELECT source, line_row_id::text AS line_row_id, vch_date, it_code, itm_remark,
             itm_pcs, bag_wt, itm_gwt, itm_oth_wt, itm_nwt, itm_ght_wt, itm_touch, itm_west_prc,
@@ -997,7 +1102,11 @@ async function deleteVoucherRowsTx(
   );
 }
 
-async function deleteSourceTagRowsTx(tx: any, table: string, scope: Required<EstimateResetScope>): Promise<number> {
+async function deleteSourceTagRowsTx(
+  tx: any,
+  table: string,
+  scope: Required<EstimateResetScope>,
+): Promise<number> {
   return Number(
     await tx.$executeRawUnsafe(
       `DELETE FROM "${table}" AS T
@@ -1017,7 +1126,10 @@ async function deleteSourceTagRowsTx(tx: any, table: string, scope: Required<Est
   );
 }
 
-async function deleteMainStockRowsTx(tx: any, scope: Required<EstimateResetScope>): Promise<number> {
+async function deleteMainStockRowsTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<number> {
   return Number(
     await tx.$executeRawUnsafe(
       `DELETE FROM "MAIN_STOCK" AS T
@@ -1053,7 +1165,10 @@ async function deleteMainStockRowsTx(tx: any, scope: Required<EstimateResetScope
   );
 }
 
-async function applyDeletesTx(tx: any, scope: Required<EstimateResetScope>): Promise<EstimateResetDiff[]> {
+async function applyDeletesTx(
+  tx: any,
+  scope: Required<EstimateResetScope>,
+): Promise<EstimateResetDiff[]> {
   const diffs: EstimateResetDiff[] = [];
   const updateBarData = Number(
     await tx.$executeRawUnsafe(
@@ -1072,9 +1187,24 @@ async function applyDeletesTx(tx: any, scope: Required<EstimateResetScope>): Pro
   diffs.push({ table: 'TEMP_BOOK_DATA', insert: inserted.headers, update: 0, delete: 0 });
   diffs.push({ table: 'BAR_CAN_DETL', insert: inserted.details, update: 0, delete: 0 });
 
-  diffs.push({ table: 'MAIN_STOCK', insert: 0, update: 0, delete: await deleteMainStockRowsTx(tx, scope) });
-  diffs.push({ table: 'BAR_IDTL', insert: 0, update: 0, delete: await deleteSourceTagRowsTx(tx, 'BAR_IDTL', scope) });
-  diffs.push({ table: 'BAR_DETL', insert: 0, update: 0, delete: await deleteSourceTagRowsTx(tx, 'BAR_DETL', scope) });
+  diffs.push({
+    table: 'MAIN_STOCK',
+    insert: 0,
+    update: 0,
+    delete: await deleteMainStockRowsTx(tx, scope),
+  });
+  diffs.push({
+    table: 'BAR_IDTL',
+    insert: 0,
+    update: 0,
+    delete: await deleteSourceTagRowsTx(tx, 'BAR_IDTL', scope),
+  });
+  diffs.push({
+    table: 'BAR_DETL',
+    insert: 0,
+    update: 0,
+    delete: await deleteSourceTagRowsTx(tx, 'BAR_DETL', scope),
+  });
 
   for (const table of ['AC_DATA', 'ROJ_MEL_DATA', 'FINE_DATA', 'SL_IDTL'] as const) {
     const saleDelete = await deleteVoucherRowsTx(tx, table, 'estimate_reset_sale_keys', scope);
@@ -1082,13 +1212,28 @@ async function applyDeletesTx(tx: any, scope: Required<EstimateResetScope>): Pro
     diffs.push({ table, insert: 0, update: 0, delete: saleDelete + whDelete });
   }
   for (const table of ['SL_PR_DETL', 'SL_DETL', 'SL_DATA'] as const) {
-    diffs.push({ table, insert: 0, update: 0, delete: await deleteVoucherRowsTx(tx, table, 'estimate_reset_sale_keys', scope) });
+    diffs.push({
+      table,
+      insert: 0,
+      update: 0,
+      delete: await deleteVoucherRowsTx(tx, table, 'estimate_reset_sale_keys', scope),
+    });
   }
   for (const table of ['BAR_CAN_IDTL', 'BAR_CAN_DETL', 'BAR_CAN_DATA'] as const) {
-    diffs.push({ table, insert: 0, update: 0, delete: await deleteVoucherRowsTx(tx, table, 'estimate_reset_tag_keys', scope) });
+    diffs.push({
+      table,
+      insert: 0,
+      update: 0,
+      delete: await deleteVoucherRowsTx(tx, table, 'estimate_reset_tag_keys', scope),
+    });
   }
   for (const table of ['RATE_CUT_ISU', 'RATE_CUT_REC', 'RATE_CUT_DATA'] as const) {
-    diffs.push({ table, insert: 0, update: 0, delete: await deleteVoucherRowsTx(tx, table, 'estimate_reset_wh_keys', scope) });
+    diffs.push({
+      table,
+      insert: 0,
+      update: 0,
+      delete: await deleteVoucherRowsTx(tx, table, 'estimate_reset_wh_keys', scope),
+    });
   }
 
   const aprDetlDelete = Number(
@@ -1153,14 +1298,25 @@ export async function applyEstimateReset(
   const asOfDate = dateOnly(options.asOfDate);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
     const companyType = await ensureCompanyAllowsResetTx(tx, scope);
-    await tx.$executeRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))', `estimate-reset:${scope.tenantId}:${scope.coCode}:${scope.lcCode}:${scope.coYear}`);
+    await tx.$executeRawUnsafe(
+      'SELECT pg_advisory_xact_lock(hashtext($1))',
+      `estimate-reset:${scope.tenantId}:${scope.coCode}:${scope.lcCode}:${scope.coYear}`,
+    );
     await prepareCandidateTablesTx(tx, scope, asOfDate);
     const samples = await samplesTx(tx);
     const selectedVouchers = await selectedVoucherTotalTx(tx);
     const stockAdjustmentDetails = await countTemp(tx, 'estimate_reset_adjust_rows');
     const diffs = await applyDeletesTx(tx, scope);
     return {
-      ...buildPreview(scope, asOfDate, companyType, diffs, samples, selectedVouchers, stockAdjustmentDetails),
+      ...buildPreview(
+        scope,
+        asOfDate,
+        companyType,
+        diffs,
+        samples,
+        selectedVouchers,
+        stockAdjustmentDetails,
+      ),
       applied: true as const,
     };
   });

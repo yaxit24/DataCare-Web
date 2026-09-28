@@ -228,10 +228,7 @@ export class SalesOrderConflictError extends Error {
   }
 }
 
-function orderRowNumbers(
-  rows: readonly Record<string, any>[],
-  key: 'srNo' | 'isrNo',
-): number[] {
+function orderRowNumbers(rows: readonly Record<string, any>[], key: 'srNo' | 'isrNo'): number[] {
   const specified = rows.filter((row) => row[key] != null).map((row) => Number(row[key]));
   if (
     specified.some((value) => !Number.isSafeInteger(value) || value <= 0) ||
@@ -316,14 +313,10 @@ async function resolveOrderBookTx(
     coBook,
   );
   if (rows.length > 1)
-    throw new SaleValidationError(
-      `${mode.mainBook} book configuration is ambiguous: ${coBook}`,
-    );
+    throw new SaleValidationError(`${mode.mainBook} book configuration is ambiguous: ${coBook}`);
   const row = rows[0];
   if (!row)
-    throw new SaleValidationError(
-      `${mode.mainBook} book configuration not found for ${coBook}`,
-    );
+    throw new SaleValidationError(`${mode.mainBook} book configuration not found for ${coBook}`);
   const actualMainBook = text(row.MAIN_BOOK).toUpperCase();
   if (actualMainBook !== mode.mainBook)
     throw new SaleValidationError(
@@ -445,8 +438,7 @@ function calculateOrderLine(
   if (action != null && !['rate', 'percentage', 'amount'].includes(action))
     throw new SaleValidationError('invalid order labour action');
   if (!action) {
-    if (line.labourAmount != null && next.labourAmount !== previous.labourAmount)
-      action = 'amount';
+    if (line.labourAmount != null && next.labourAmount !== previous.labourAmount) action = 'amount';
     else if (next.labourRate !== previous.labourRate) action = 'rate';
     else if (next.labourPct !== previous.labourPct) action = 'percentage';
   }
@@ -585,12 +577,7 @@ async function replaySalesOrderLineTx(
 ) {
   const edits = line.orderEdits;
   if (!edits) return calculateOrderLine(line, prior, policy);
-  if (
-    !Array.isArray(edits) ||
-    edits.length > 512 ||
-    line.labourEdits?.length ||
-    line.labourAction
-  )
+  if (!Array.isArray(edits) || edits.length > 512 || line.labourEdits?.length || line.labourAction)
     throw new SaleValidationError(
       'Submit one ordered Sales Order journal with at most 512 committed events.',
     );
@@ -633,16 +620,10 @@ async function replaySalesOrderLineTx(
     TOT_AMT: cached.total,
   });
   let calculationBaseline = rowOf(current);
-  const selectedTextFields = new Set<
-    'designNo' | 'itmSize' | 'karigarName' | 'designImageId'
-  >();
+  const selectedTextFields = new Set<'designNo' | 'itmSize' | 'karigarName' | 'designImageId'>();
   const trigger = (_previous: Record<string, any>) => {
     try {
-      const result = orderLabourWithCache(
-        persistedLabour(rowOf(current)),
-        triggerCache,
-        policy,
-      );
+      const result = orderLabourWithCache(persistedLabour(rowOf(current)), triggerCache, policy);
       triggerCache = result.cache;
       current = {
         ...current,
@@ -688,9 +669,7 @@ async function replaySalesOrderLineTx(
     } else if (event.kind === 'field') {
       const numeric = (REPLAY_NUMBERS as readonly string[]).includes(event.field);
       if (!numeric && !(REPLAY_TEXT as readonly string[]).includes(event.field))
-        throw new SaleValidationError(
-          `Unsupported Sales Order committed field: ${event.field}`,
-        );
+        throw new SaleValidationError(`Unsupported Sales Order committed field: ${event.field}`);
       if (
         (numeric && (typeof event.value !== 'number' || !Number.isFinite(event.value))) ||
         (!numeric && typeof event.value !== 'string')
@@ -701,22 +680,13 @@ async function replaySalesOrderLineTx(
         event.value !== 'N' &&
         event.value !== current.designImageId
       )
-        throw new SaleValidationError(
-          'Choose a saved design to change its linked image identity.',
-        );
+        throw new SaleValidationError('Choose a saved design to change its linked image identity.');
       const previous = rowOf(current);
       current = { ...current, [event.field]: event.value };
       if (
-        [
-          'pcs',
-          'grossWt',
-          'netWt',
-          'ghtWt',
-          'rate',
-          'touch',
-          'westPct',
-          'otherAmount',
-        ].includes(event.field)
+        ['pcs', 'grossWt', 'netWt', 'ghtWt', 'rate', 'touch', 'westPct', 'otherAmount'].includes(
+          event.field,
+        )
       ) {
         trigger(previous);
       } else
@@ -1532,8 +1502,7 @@ export async function getSalesOrder(
           making:
             n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0)
               ? n(r.LBR_AMT) /
-                (n(r.ITM_NWT) +
-                  (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0))
+                (n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0))
               : 0,
           remark: text(r.ITM_REMARK),
           tblCode: text(r.TBL_CODE),
@@ -1848,9 +1817,7 @@ export async function cancelSalesOrder(
   input: SalesOrderCancelInput,
 ): Promise<{ cancelled: true }> {
   const prepared = prepareSalesOrderCancel(input);
-  return withTenant(prisma, prepared.tenantId, (tx) =>
-    runSalesOrderCancelTx(tx, input, prepared),
-  );
+  return withTenant(prisma, prepared.tenantId, (tx) => runSalesOrderCancelTx(tx, input, prepared));
 }
 
 /** Existing reversal, temporary row deletion and cancellation evidence in the caller's transaction. */
@@ -1904,8 +1871,7 @@ async function runSalesOrderCancelTx(
     scope.lcCode,
     scope.coBook,
   );
-  if (books.length !== 1)
-    throw new SaleValidationError('sales order book configuration not found');
+  if (books.length !== 1) throw new SaleValidationError('sales order book configuration not found');
   await reverseVoucherTx(tx, tenantId, { tables: [...ORDER_WRITE_TABLES], key });
   await tx.$executeRawUnsafe(
     `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
@@ -2182,11 +2148,9 @@ export async function cancelSalesOrderAdjust(
     const kasar = round2(Number(input.kasarAmt || 0));
     const paidAc = input.paidAc ?? 'CASH';
     const kasarAc = input.kasarAc ?? 'KASAR';
-    const no =
-      lifecycle?.vchNo ?? (await nextVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
+    const no = lifecycle?.vchNo ?? (await nextVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
     const hdVchNo =
-      lifecycle?.hdVchNo ??
-      (await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
+      lifecycle?.hdVchNo ?? (await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
     const mainUser = lifecycle?.mainUser ?? String(input.mainUser ?? '').trim();
     const key: VoucherKey = {
       CO_CODE: input.scope.coCode,
@@ -2280,8 +2244,7 @@ const ADJUST_WRITE_TABLES = [
   'BAR_IDTL',
 ] as const;
 function adjustScope(scope: VoucherScope): CompleteOrderScope {
-  if (!scope.coYear)
-    throw new SaleValidationError('complete voucher scope (coYear) is required');
+  if (!scope.coYear) throw new SaleValidationError('complete voucher scope (coYear) is required');
   return { ...scope, coYear: scope.coYear, coBook: 'ORC' };
 }
 export async function getSalesOrderAdjustment(

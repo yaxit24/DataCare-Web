@@ -14,7 +14,9 @@ describe('cheque print rendering', () => {
     expect(html).toContain('M/S Hiral Jewellers &amp; Sons');
     expect(html).toContain('A/c Payee Only');
     expect(html).toContain('Chq: CQ-102');
-    expect(html).toContain('One Lakh Twenty Three Thousand Four Hundred Fifty Six Rupees and Seventy Eight Paise Only');
+    expect(html).toContain(
+      'One Lakh Twenty Three Thousand Four Hundred Fifty Six Rupees and Seventy Eight Paise Only',
+    );
     expect(html).toContain('10092026');
   });
 

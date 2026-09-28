@@ -141,10 +141,14 @@ databaseDescribe('RP_ALL report family parity builders', () => {
   });
 
   it('runs the Approval Rpt pending mode with party, product, and geography filters', async () => {
-    const report = await approvalReport(runtime, {
-      ...baseScope,
-      filters: { acCode: 'C001', prCode: 'P1', city: 'Surat', empCode: 'E01' },
-    }, { mode: 'pending' });
+    const report = await approvalReport(
+      runtime,
+      {
+        ...baseScope,
+        filters: { acCode: 'C001', prCode: 'P1', city: 'Surat', empCode: 'E01' },
+      },
+      { mode: 'pending' },
+    );
 
     expect(report.rows).toHaveLength(1);
     expect(report.rows[0]).toMatchObject({
@@ -160,24 +164,40 @@ databaseDescribe('RP_ALL report family parity builders', () => {
   });
 
   it('runs Kr Report issue/receipt modes from KR_DETL book names', async () => {
-    const receive = await karigarReport(runtime, { ...baseScope, filters: { grCode: 'G01' } }, { mode: 'receive' });
+    const receive = await karigarReport(
+      runtime,
+      { ...baseScope, filters: { grCode: 'G01' } },
+      { mode: 'receive' },
+    );
     expect(receive.rows.map((r) => [r.mode, r.bookName, r.vchNo])).toEqual([
       ['receive', 'KARIGAR RECEIPT', '00002'],
     ]);
   });
 
   it('runs Reparing Rpt pending branches using desktop ISU_ADJ predicates', async () => {
-    const issuePending = await repairReport(runtime, { ...baseScope }, { mode: 'karigar-issue-pending' });
+    const issuePending = await repairReport(
+      runtime,
+      { ...baseScope },
+      { mode: 'karigar-issue-pending' },
+    );
     expect(issuePending.rows.map((r) => [r.bookName, r.vchNo, r.status])).toEqual([
       ['CUSTREP RECEIPT', '00001', 'REP_ADJ=N ISU_ADJ=N'],
     ]);
 
-    const customerPending = await repairReport(runtime, { ...baseScope }, { mode: 'customer-issue-pending' });
+    const customerPending = await repairReport(
+      runtime,
+      { ...baseScope },
+      { mode: 'customer-issue-pending' },
+    );
     expect(customerPending.rows.map((r) => r.vchNo)).toEqual(['00003']);
   });
 
   it('runs VP Report pending/adjusted modes from RATE_CUT_DATA book 215', async () => {
-    const pending = await vpReport(runtime, { ...baseScope, filters: { grCode: 'ANG1' } }, { mode: 'vp-pending' });
+    const pending = await vpReport(
+      runtime,
+      { ...baseScope, filters: { grCode: 'ANG1' } },
+      { mode: 'vp-pending' },
+    );
     expect(pending.rows).toHaveLength(1);
     expect(pending.rows[0]).toMatchObject({
       reportType: 'VP Pending',
@@ -196,7 +216,11 @@ databaseDescribe('RP_ALL report family parity builders', () => {
   });
 
   it('runs Bul Report sales/purchase pending modes from BUL_DATA', async () => {
-    const pending = await bullionReport(runtime, { ...baseScope, filters: { prCode: 'P1', city: 'Surat' } }, { mode: 'sales-pending' });
+    const pending = await bullionReport(
+      runtime,
+      { ...baseScope, filters: { prCode: 'P1', city: 'Surat' } },
+      { mode: 'sales-pending' },
+    );
     expect(pending.rows).toHaveLength(1);
     expect(pending.rows[0]).toMatchObject({
       reportType: 'Sales Booking Pending',
@@ -210,7 +234,11 @@ databaseDescribe('RP_ALL report family parity builders', () => {
       totalAmount: 640000,
     });
 
-    const purchasePending = await bullionReport(runtime, { ...baseScope }, { mode: 'purchase-pending' });
+    const purchasePending = await bullionReport(
+      runtime,
+      { ...baseScope },
+      { mode: 'purchase-pending' },
+    );
     expect(purchasePending.rows).toEqual([]);
   });
 });

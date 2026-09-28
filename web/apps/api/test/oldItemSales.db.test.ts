@@ -15,9 +15,13 @@ const d = RUN ? describe : describe.skip;
 
 d('old item sales workflow over KR_DATA/KR_DETL', () => {
   const owner = new PrismaClient({
-    datasources: { db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' } },
+    datasources: {
+      db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' },
+    },
   });
-  const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL ?? '' } } });
+  const runtime = new PrismaClient({
+    datasources: { db: { url: process.env.DATABASE_URL ?? '' } },
+  });
   const tenantId = 'old-item-sales-db';
   const CO = '01';
   const LC = '00';
@@ -79,7 +83,11 @@ d('old item sales workflow over KR_DATA/KR_DETL', () => {
       CO,
       YEAR,
     );
-    await exec(`INSERT INTO "CO_SET"(tenant_id,"CO_CODE","FINE_STK_TYPE") VALUES ($1,$2,'F')`, tenantId, CO);
+    await exec(
+      `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","FINE_STK_TYPE") VALUES ($1,$2,'F')`,
+      tenantId,
+      CO,
+    );
     await exec(`INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE") VALUES ($1,$2)`, tenantId, CO);
     for (const [code, name] of [
       [PARTY, 'OLD ITEM CUSTOMER'],
@@ -310,7 +318,18 @@ d('old item sales workflow over KR_DATA/KR_DETL', () => {
       vchDate: '2024-06-11',
       mainUser: 'old-edit',
       partyFine: 8.5,
-      lines: [line({ netWt: 8, ghtWt: 0.5, touch: 90, westPct: 0, lessTouch: 1, kunFine: 0.25, amount: 50000, totalAmount: 50000 })],
+      lines: [
+        line({
+          netWt: 8,
+          ghtWt: 0.5,
+          touch: 90,
+          westPct: 0,
+          lessTouch: 1,
+          kunFine: 0.25,
+          amount: 50000,
+          totalAmount: 50000,
+        }),
+      ],
     } as any);
     const editedFine = fineFor('purchaseOldGold', {
       netWt: 8,
@@ -333,7 +352,13 @@ d('old item sales workflow over KR_DATA/KR_DETL', () => {
         OLD_BOOK,
         vchNo,
       ),
-    )) as Array<{ headers: number; lines: number; stones: number; delete_rows: number; line_fine: number }>;
+    )) as Array<{
+      headers: number;
+      lines: number;
+      stones: number;
+      delete_rows: number;
+      line_fine: number;
+    }>;
     expect(afterEdit[0]).toMatchObject({ headers: 1, lines: 1, stones: 1, delete_rows: 0 });
     expect(afterEdit[0]!.line_fine).toBeCloseTo(editedFine, 3);
 

@@ -71,7 +71,11 @@ async function wipe() {
 }
 
 async function seed() {
-  await exec(`INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`, TENANT, CO);
+  await exec(
+    `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
+    TENANT,
+    CO,
+  );
   await exec(
     `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","PR_TDS_TAX") VALUES ($1,$2,'N')`,
     TENANT,
@@ -326,7 +330,12 @@ databaseDescribe('database-backed TR_PR_SL_UAE consignment purchase mode', () =>
       /already purchased: 1/,
     );
 
-    await editPurchase(runtime, purchaseInput({ mainUser: 'editor' }), [line({ grossWt: 8, netWt: 7 })], created.vchNo);
+    await editPurchase(
+      runtime,
+      purchaseInput({ mainUser: 'editor' }),
+      [line({ grossWt: 8, netWt: 7 })],
+      created.vchNo,
+    );
     const afterEdit = await query(
       `SELECT "ADJ_GWT"::float adj_gwt,"ADJ_NWT"::float adj_nwt,"CON_ISU_REC" source_flag
          FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
@@ -336,7 +345,9 @@ databaseDescribe('database-backed TR_PR_SL_UAE consignment purchase mode', () =>
     );
     expect(afterEdit[0]).toMatchObject({ adj_gwt: 8, adj_nwt: 7, source_flag: 'Y' });
 
-    await expect(deletePurchase(runtime, { scope, vchNo: created.vchNo, deleteUser: 'deleter' })).resolves.toEqual({
+    await expect(
+      deletePurchase(runtime, { scope, vchNo: created.vchNo, deleteUser: 'deleter' }),
+    ).resolves.toEqual({
       reversed: true,
     });
     const afterDelete = await query(

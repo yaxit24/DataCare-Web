@@ -69,26 +69,34 @@ databaseDescribe('RP_OTH_DETL other item report parity builder', () => {
   });
 
   it('runs stud in/out modes from DM_DATA ENTRY_TYPE=S and DM_SIGN', async () => {
-    const studIn = await otherItemReport(runtime, { ...scope, filters: { city: 'Surat' } }, { mode: 'stud-in' });
-    expect(studIn.rows.map((row: any) => [row.vchNo, row.direction, row.itCode, row.weight, row.amount])).toEqual([
-      ['00001', 'In', 'DMG', 0.55, 550],
-    ]);
+    const studIn = await otherItemReport(
+      runtime,
+      { ...scope, filters: { city: 'Surat' } },
+      { mode: 'stud-in' },
+    );
+    expect(
+      studIn.rows.map((row: any) => [row.vchNo, row.direction, row.itCode, row.weight, row.amount]),
+    ).toEqual([['00001', 'In', 'DMG', 0.55, 550]]);
 
     const studOut = await otherItemReport(runtime, scope, { mode: 'stud-out', itemCode: 'DMS' });
-    expect(studOut.rows.map((row: any) => [row.vchNo, row.direction, row.itCode, row.pcs])).toEqual([
-      ['00002', 'Out', 'DMS', 1],
-    ]);
+    expect(studOut.rows.map((row: any) => [row.vchNo, row.direction, row.itCode, row.pcs])).toEqual(
+      [['00002', 'Out', 'DMS', 1]],
+    );
   });
 
   it('runs loose modes and enforces the exact formula filter surface', async () => {
-    const loose = await otherItemReport(runtime, { ...scope, filters: { prCode: 'P1', bookCode: 'PUR' } }, { mode: 'loose-inout' });
-    expect(loose.rows.map((row: any) => [row.entryType, row.vchNo, row.itCode, row.pcs, row.weight])).toEqual([
-      ['Loose', '00003', 'DMG', 3, 0.75],
-    ]);
+    const loose = await otherItemReport(
+      runtime,
+      { ...scope, filters: { prCode: 'P1', bookCode: 'PUR' } },
+      { mode: 'loose-inout' },
+    );
+    expect(
+      loose.rows.map((row: any) => [row.entryType, row.vchNo, row.itCode, row.pcs, row.weight]),
+    ).toEqual([['Loose', '00003', 'DMG', 3, 0.75]]);
     expect(loose.totals).toMatchObject({ rows: 1, pcs: 3, weight: 0.75, amount: 900 });
 
-    await expect(otherItemReport(runtime, { ...scope, filters: { state: 'GJ' } }, { mode: 'stud-inout' })).rejects.toThrow(
-      /cannot filter by: state/,
-    );
+    await expect(
+      otherItemReport(runtime, { ...scope, filters: { state: 'GJ' } }, { mode: 'stud-inout' }),
+    ).rejects.toThrow(/cannot filter by: state/);
   });
 });

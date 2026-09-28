@@ -291,9 +291,7 @@ export default function BullionSalePage() {
   const pickBooking = (i: number, row: LookupRow) =>
     setLines((rows) => rows.map((line, j) => (j === i ? bookingPatch(line, row) : line)));
   const pickReceivedBooking = (i: number, row: LookupRow) =>
-    setReceivedLines((rows) =>
-      rows.map((line, j) => (j === i ? bookingPatch(line, row) : line)),
-    );
+    setReceivedLines((rows) => rows.map((line, j) => (j === i ? bookingPatch(line, row) : line)));
   const addRow = () => setLines((ls) => [...ls, blankLine()]);
   const addReceivedRow = () => setReceivedLines((rows) => [...rows, blankLine()]);
   const removeRow = (i: number) =>
@@ -429,7 +427,9 @@ export default function BullionSalePage() {
         settleDrFine: settleDrFine.trim() ? n(settleDrFine) : undefined,
         settleCrFine: settleCrFine.trim() ? n(settleCrFine) : undefined,
       };
-      setResult((await post('/bullion-sales', body)) as { vchNo: number; fine: number; netAmt: number });
+      setResult(
+        (await post('/bullion-sales', body)) as { vchNo: number; fine: number; netAmt: number },
+      );
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -445,7 +445,11 @@ export default function BullionSalePage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} mainBooks={['BUL WH SALE', 'BUL SALE']} />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                mainBooks={['BUL WH SALE', 'BUL SALE']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

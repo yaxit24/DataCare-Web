@@ -22,7 +22,9 @@ const isoDate = (v: unknown): string | null => {
 const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 function statusFrom(v: unknown): TourStatus {
-  const s = String(v ?? '').trim().toLowerCase();
+  const s = String(v ?? '')
+    .trim()
+    .toLowerCase();
   if (s === 'sales' || s === 'sale' || s === 'sold') return 'sales';
   if (s === 'return' || s === 'returned' || s === 'received') return 'return';
   if (s === 'all') return 'all';
@@ -30,7 +32,9 @@ function statusFrom(v: unknown): TourStatus {
 }
 
 function modeFrom(v: unknown): TourReportMode {
-  const s = String(v ?? '').trim().toLowerCase();
+  const s = String(v ?? '')
+    .trim()
+    .toLowerCase();
   return s === 'item-wise' || s === 'item' || s === 'item-stock' ? 'item-wise' : 'voucher';
 }
 
@@ -56,8 +60,13 @@ function statusWhere(status: TourStatus): string {
   return '';
 }
 
-function totals(rows: Array<Record<string, unknown>>, cols: readonly string[]): Record<string, number> {
-  return Object.fromEntries(cols.map((col) => [col, round3(rows.reduce((sum, row) => sum + num(row[col]), 0))]));
+function totals(
+  rows: Array<Record<string, unknown>>,
+  cols: readonly string[],
+): Record<string, number> {
+  return Object.fromEntries(
+    cols.map((col) => [col, round3(rows.reduce((sum, row) => sum + num(row[col]), 0))]),
+  );
 }
 
 /**
@@ -167,7 +176,10 @@ async function tourVoucherReport(
     }));
     return {
       rows: mapped,
-      totals: { rows: mapped.length, ...totals(mapped, ['isuWt', 'isuPcs', 'salePcs', 'recPcs', 'panPcs', 'panWt']) },
+      totals: {
+        rows: mapped.length,
+        ...totals(mapped, ['isuWt', 'isuPcs', 'salePcs', 'recPcs', 'panPcs', 'panWt']),
+      },
     };
   });
 }
@@ -240,7 +252,18 @@ async function tourItemWiseReport(
       rows: mapped,
       totals: {
         rows: mapped.length,
-        ...totals(mapped, ['opPcs', 'opWt', 'isuPcs', 'isuWt', 'salePcs', 'saleWt', 'recPcs', 'recWt', 'panPcs', 'panWt']),
+        ...totals(mapped, [
+          'opPcs',
+          'opWt',
+          'isuPcs',
+          'isuWt',
+          'salePcs',
+          'saleWt',
+          'recPcs',
+          'recWt',
+          'panPcs',
+          'panWt',
+        ]),
       },
     };
   });
@@ -271,7 +294,12 @@ export async function tourTagReport(
 
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', toDate];
-    const where = ['a."CO_CODE"=$1', 'a."LC_CODE"=$2', `a."BOOK_NAME"='EMP ISU'`, 'a."VCH_DATE" <= $3::date'];
+    const where = [
+      'a."CO_CODE"=$1',
+      'a."LC_CODE"=$2',
+      `a."BOOK_NAME"='EMP ISU'`,
+      'a."VCH_DATE" <= $3::date',
+    ];
     pushText(params, where, 'a."AC_CODE"', options.employeeCode);
     if (onlyTagged) where.push(`coalesce(a."TAG_NO",'') <> 'N'`);
     const statusSql = statusWhere(status);
@@ -387,7 +415,10 @@ export async function tourTagReport(
 
     return {
       rows: mapped,
-      totals: { rows: mapped.length, ...totals(mapped, ['iPcs', 'iGrWt', 'sPcs', 'slGrWt', 'rPcs', 'rcGrWt', 'pPcs', 'pGrWt']) },
+      totals: {
+        rows: mapped.length,
+        ...totals(mapped, ['iPcs', 'iGrWt', 'sPcs', 'slGrWt', 'rPcs', 'rcGrWt', 'pPcs', 'pGrWt']),
+      },
     };
   });
 }

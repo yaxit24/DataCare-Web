@@ -105,7 +105,10 @@ export async function exerciseColumnSettings(
     assert.equal(otherLogin.status(), 200, await otherLogin.text());
     const mainMe = await page.context().request.get('/api/me');
     assert.equal(mainMe.status(), 200, await mainMe.text());
-    assert.notEqual((await otherLogin.json()).context.sessionId, (await mainMe.json()).context.sessionId);
+    assert.notEqual(
+      (await otherLogin.json()).context.sessionId,
+      (await mainMe.json()).context.sessionId,
+    );
     await page.goto(`${origin}/masters/styles`);
     await ready();
     const beforeA = (await list(familyA))[0],

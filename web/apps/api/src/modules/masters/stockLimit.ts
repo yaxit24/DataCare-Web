@@ -6,7 +6,10 @@ const n = (v: unknown): number => {
   return Number.isFinite(out) ? out : 0;
 };
 const t = (v: unknown, len: number): string | null => {
-  const out = String(v ?? '').trim().toUpperCase().slice(0, len);
+  const out = String(v ?? '')
+    .trim()
+    .toUpperCase()
+    .slice(0, len);
   return out || null;
 };
 const designKey = (v: unknown): string => t(v, 20) ?? 'N';

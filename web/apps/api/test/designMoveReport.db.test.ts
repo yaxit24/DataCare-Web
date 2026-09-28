@@ -1,7 +1,10 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
-import { designMoveDetailReport, designMoveReport } from '../src/modules/reports/designMoveReport.js';
+import {
+  designMoveDetailReport,
+  designMoveReport,
+} from '../src/modules/reports/designMoveReport.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -79,7 +82,11 @@ databaseDescribe('RP_STK_MOVE Design Move parity builder', () => {
   });
 
   it('runs Design / Size mode with positive signed tag counts and filters', async () => {
-    const report = await designMoveReport(runtime, { ...scope, filters: { grCode: 'G01' } }, { mode: 'design' });
+    const report = await designMoveReport(
+      runtime,
+      { ...scope, filters: { grCode: 'G01' } },
+      { mode: 'design' },
+    );
     expect(report.rows.map((row: any) => [row.key, row.name, row.size, row.pcs])).toEqual([
       ['D100', 'D100', '10', 1],
       ['D100', 'D100', '11', 1],
@@ -88,15 +95,31 @@ databaseDescribe('RP_STK_MOVE Design Move parity builder', () => {
   });
 
   it('runs Item / Size mode and the desktop double-click detail query', async () => {
-    const item = await designMoveReport(runtime, { ...scope, filters: { itType: 'G' } }, { mode: 'item', designNo: 'D100' });
+    const item = await designMoveReport(
+      runtime,
+      { ...scope, filters: { itType: 'G' } },
+      { mode: 'item', designNo: 'D100' },
+    );
     expect(item.rows.map((row: any) => [row.key, row.name, row.size, row.pcs])).toEqual([
       ['RING', 'Gold Ring', '10', 1],
       ['RING', 'Gold Ring', '11', 1],
     ]);
 
-    const detail = await designMoveDetailReport(runtime, { ...scope, filters: { itType: 'G' } }, { mode: 'item', key: 'RING', size: '10', designNo: 'D100' });
-    expect(detail.rows.map((row: any) => [row.book, row.vchNo, row.tagNo, row.itemName, row.designNo, row.size, row.gwt])).toEqual([
-      ['SAL', '00001', 'T1', 'Gold Ring', 'D100', '10', 5],
-    ]);
+    const detail = await designMoveDetailReport(
+      runtime,
+      { ...scope, filters: { itType: 'G' } },
+      { mode: 'item', key: 'RING', size: '10', designNo: 'D100' },
+    );
+    expect(
+      detail.rows.map((row: any) => [
+        row.book,
+        row.vchNo,
+        row.tagNo,
+        row.itemName,
+        row.designNo,
+        row.size,
+        row.gwt,
+      ]),
+    ).toEqual([['SAL', '00001', 'T1', 'Gold Ring', 'D100', '10', 5]]);
   });
 });

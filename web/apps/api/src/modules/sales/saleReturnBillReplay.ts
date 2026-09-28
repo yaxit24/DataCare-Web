@@ -504,7 +504,12 @@ export async function previewSaleReturnBillReplay(
       prisma,
       scope.tenantId,
       async (tx) => {
-        const observed = await observeSaleReturnBillReplayTx(tx, scope, voucherNo, input.replayVersion);
+        const observed = await observeSaleReturnBillReplayTx(
+          tx,
+          scope,
+          voucherNo,
+          input.replayVersion,
+        );
         const { dto, context } = observed;
         const row = dto.rowReplay.rows.find((r) => r.rowIdentity === input.rowIdentity);
         if (!row)

@@ -76,17 +76,23 @@ function projectContext(row: RefreshSessionRow): RefreshedSessionContext {
   if (epoch.status !== 'ready') throw new RefreshContextError(epoch.code);
   const ledger = parseUnknownSessionLedgerContext(row.ledgerContext);
   if (ledger.status !== 'ready') throw new RefreshContextError(ledger.code);
-  const receipt = [row.lastContextSelectionId, row.lastContextRequestSha256, row.lastContextFromEpoch];
+  const receipt = [
+    row.lastContextSelectionId,
+    row.lastContextRequestSha256,
+    row.lastContextFromEpoch,
+  ];
   let fromEpoch: ContextEpoch | null = null;
   if (!receipt.every((value) => value === null)) {
     const id = parseContextSelectionId(row.lastContextSelectionId);
     const from = parseContextEpoch(row.lastContextFromEpoch);
     if (
-      id.status !== 'ready' || from.status !== 'ready' ||
+      id.status !== 'ready' ||
+      from.status !== 'ready' ||
       typeof row.lastContextRequestSha256 !== 'string' ||
       !/^[0-9a-f]{64}$/.test(row.lastContextRequestSha256) ||
       BigInt(from.value) >= BigInt(epoch.value)
-    ) throw new RefreshContextError('invalid-context-receipt');
+    )
+      throw new RefreshContextError('invalid-context-receipt');
     fromEpoch = from.value;
   }
   return Object.freeze({
@@ -108,7 +114,10 @@ function projectContext(row: RefreshSessionRow): RefreshedSessionContext {
 
 async function sampleTimeTx(tx: Tx, expiresAt: string, clock?: () => Date) {
   const supplied = clock?.();
-  if (supplied !== undefined && (!(supplied instanceof Date) || !Number.isFinite(supplied.getTime()))) {
+  if (
+    supplied !== undefined &&
+    (!(supplied instanceof Date) || !Number.isFinite(supplied.getTime()))
+  ) {
     throw new RefreshContextError('invalid-server-clock');
   }
   const rows = await tx.$queryRawUnsafe<Array<{ now: string; expired: boolean }>>(
@@ -145,9 +154,12 @@ export async function refreshSessionContext(
   if (Object.values(identity).some((value) => typeof value !== 'string' || value.length === 0)) {
     throw new SessionRejectedError('session-invalid');
   }
-  const outcome = await withTenant(prisma, identity.tenantId, async (tx) => {
-    const rows = await tx.$queryRawUnsafe<RefreshSessionRow[]>(
-      `SELECT "tenant_id" AS "tenantId","session_id" AS "sessionId",
+  const outcome = await withTenant(
+    prisma,
+    identity.tenantId,
+    async (tx) => {
+      const rows = await tx.$queryRawUnsafe<RefreshSessionRow[]>(
+        `SELECT "tenant_id" AS "tenantId","session_id" AS "sessionId",
               "login_name" AS "loginName","login_co_code" AS "loginCoCode",
               "co_code" AS "coCode","lc_code" AS "lcCode","co_year" AS "coYear",
               "context_epoch"::text AS "contextEpoch","ledger_context" AS "ledgerContext",
@@ -157,64 +169,107 @@ export async function refreshSessionContext(
               "last_context_request_sha256" AS "lastContextRequestSha256",
               "last_context_from_epoch"::text AS "lastContextFromEpoch"
          FROM "auth_session" WHERE "tenant_id"=$1 AND "session_id"=$2 FOR UPDATE`,
-      identity.tenantId, identity.sid,
-    );
-    const row = rows[0];
-    if (!row || row.tenantId !== identity.tenantId || row.sessionId !== identity.sid || row.loginName !== identity.sub) {
-      return { status: 'rejected' as const, code: 'session-invalid' as const };
-    }
-    if (row.revokedAt !== null) return { status: 'rejected' as const, code: 'session-revoked' as const };
-    const time = await sampleTimeTx(tx, row.expiresAt, dependencies.clock);
-    const rejection: 'session-expired' | 'refresh-reused' | null =
-      time.expired ? 'session-expired' : !hashEquals(row.refreshJtiHash, identity.jti) ? 'refresh-reused' : null;
-    if (rejection) {
-      const changed = await tx.$executeRawUnsafe(
-        `UPDATE "auth_session" SET "revoked_at"=$1::timestamptz,"revoke_reason"=$2
-          WHERE "tenant_id"=$3 AND "session_id"=$4 AND "revoked_at" IS NULL`,
-        time.now, rejection === 'session-expired' ? 'expired' : 'refresh-reuse', identity.tenantId, identity.sid,
+        identity.tenantId,
+        identity.sid,
       );
-      if (changed !== 1) throw new RefreshContextError('mutation-count-failure');
-      // Throwing here would roll back the required reuse/expiry revocation.
-      return { status: 'rejected' as const, code: rejection };
-    }
-    const session = projectContext(row);
-    const currentPrincipal = await loadPrincipalTx(tx, {
-      tenantId: session.tenantId, loginName: session.loginName,
-      coCode: session.coCode, loginCoCode: session.loginCoCode,
-    });
-    const principal = Object.freeze({ ...currentPrincipal, rights: Object.freeze({ ...currentPrincipal.rights }) });
-    await validateStoredScopeTx(tx, {
-      tenantId: session.tenantId, loginName: session.loginName, isAdmin: principal.isAdmin,
-      coCode: session.coCode, lcCode: session.lcCode, coYear: session.coYear,
-    });
-    const refreshJti = dependencies.newRefreshJti?.() ?? randomBytes(32).toString('base64url');
-    if (typeof refreshJti !== 'string' || !refreshJti || hashEquals(row.refreshJtiHash, refreshJti)) {
-      throw new RefreshContextError('invalid-next-refresh-jti');
-    }
-    const tokens = await dependencies.issueTokens({ session, principal, refreshJti });
-    if (!tokens || typeof tokens.accessToken !== 'string' || !tokens.accessToken ||
-        typeof tokens.refreshToken !== 'string' || !tokens.refreshToken) {
-      throw new RefreshContextError('invalid-issued-tokens');
-    }
-    // Copy token bytes before awaiting; a server callback cannot mutate a prospective response.
-    const issued = { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-    const finalTime = await sampleTimeTx(tx, row.expiresAt, dependencies.clock);
-    if (finalTime.expired) throw new SessionRejectedError('session-expired');
-    const changed = await tx.$executeRawUnsafe(
-      `UPDATE "auth_session" SET "refresh_jti_hash"=$1,"last_used_at"=$2::timestamptz
+      const row = rows[0];
+      if (
+        !row ||
+        row.tenantId !== identity.tenantId ||
+        row.sessionId !== identity.sid ||
+        row.loginName !== identity.sub
+      ) {
+        return { status: 'rejected' as const, code: 'session-invalid' as const };
+      }
+      if (row.revokedAt !== null)
+        return { status: 'rejected' as const, code: 'session-revoked' as const };
+      const time = await sampleTimeTx(tx, row.expiresAt, dependencies.clock);
+      const rejection: 'session-expired' | 'refresh-reused' | null = time.expired
+        ? 'session-expired'
+        : !hashEquals(row.refreshJtiHash, identity.jti)
+          ? 'refresh-reused'
+          : null;
+      if (rejection) {
+        const changed = await tx.$executeRawUnsafe(
+          `UPDATE "auth_session" SET "revoked_at"=$1::timestamptz,"revoke_reason"=$2
+          WHERE "tenant_id"=$3 AND "session_id"=$4 AND "revoked_at" IS NULL`,
+          time.now,
+          rejection === 'session-expired' ? 'expired' : 'refresh-reuse',
+          identity.tenantId,
+          identity.sid,
+        );
+        if (changed !== 1) throw new RefreshContextError('mutation-count-failure');
+        // Throwing here would roll back the required reuse/expiry revocation.
+        return { status: 'rejected' as const, code: rejection };
+      }
+      const session = projectContext(row);
+      const currentPrincipal = await loadPrincipalTx(tx, {
+        tenantId: session.tenantId,
+        loginName: session.loginName,
+        coCode: session.coCode,
+        loginCoCode: session.loginCoCode,
+      });
+      const principal = Object.freeze({
+        ...currentPrincipal,
+        rights: Object.freeze({ ...currentPrincipal.rights }),
+      });
+      await validateStoredScopeTx(tx, {
+        tenantId: session.tenantId,
+        loginName: session.loginName,
+        isAdmin: principal.isAdmin,
+        coCode: session.coCode,
+        lcCode: session.lcCode,
+        coYear: session.coYear,
+      });
+      const refreshJti = dependencies.newRefreshJti?.() ?? randomBytes(32).toString('base64url');
+      if (
+        typeof refreshJti !== 'string' ||
+        !refreshJti ||
+        hashEquals(row.refreshJtiHash, refreshJti)
+      ) {
+        throw new RefreshContextError('invalid-next-refresh-jti');
+      }
+      const tokens = await dependencies.issueTokens({ session, principal, refreshJti });
+      if (
+        !tokens ||
+        typeof tokens.accessToken !== 'string' ||
+        !tokens.accessToken ||
+        typeof tokens.refreshToken !== 'string' ||
+        !tokens.refreshToken
+      ) {
+        throw new RefreshContextError('invalid-issued-tokens');
+      }
+      // Copy token bytes before awaiting; a server callback cannot mutate a prospective response.
+      const issued = { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+      const finalTime = await sampleTimeTx(tx, row.expiresAt, dependencies.clock);
+      if (finalTime.expired) throw new SessionRejectedError('session-expired');
+      const changed = await tx.$executeRawUnsafe(
+        `UPDATE "auth_session" SET "refresh_jti_hash"=$1,"last_used_at"=$2::timestamptz
         WHERE "tenant_id"=$3 AND "session_id"=$4 AND "refresh_jti_hash"=$5
           AND "revoked_at" IS NULL
           AND "expires_at">CASE WHEN $7::boolean THEN $6::timestamptz ELSE clock_timestamp() END`,
-      hashJti(refreshJti), time.now, identity.tenantId, identity.sid, row.refreshJtiHash, finalTime.now,
-      dependencies.clock !== undefined,
-    );
-    if (changed !== 1) {
-      const rejectedAt = await sampleTimeTx(tx, row.expiresAt, dependencies.clock);
-      if (rejectedAt.expired) throw new SessionRejectedError('session-expired');
-      throw new RefreshContextError('mutation-count-failure');
-    }
-    return { status: 'ready' as const, session, principal, ...issued };
-  }, { isolationLevel: 'ReadCommitted' });
+        hashJti(refreshJti),
+        time.now,
+        identity.tenantId,
+        identity.sid,
+        row.refreshJtiHash,
+        finalTime.now,
+        dependencies.clock !== undefined,
+      );
+      if (changed !== 1) {
+        const rejectedAt = await sampleTimeTx(tx, row.expiresAt, dependencies.clock);
+        if (rejectedAt.expired) throw new SessionRejectedError('session-expired');
+        throw new RefreshContextError('mutation-count-failure');
+      }
+      return { status: 'ready' as const, session, principal, ...issued };
+    },
+    { isolationLevel: 'ReadCommitted' },
+  );
   if (outcome.status === 'rejected') throw new SessionRejectedError(outcome.code);
-  return { session: outcome.session, principal: outcome.principal, accessToken: outcome.accessToken, refreshToken: outcome.refreshToken };
+  return {
+    session: outcome.session,
+    principal: outcome.principal,
+    accessToken: outcome.accessToken,
+    refreshToken: outcome.refreshToken,
+  };
 }

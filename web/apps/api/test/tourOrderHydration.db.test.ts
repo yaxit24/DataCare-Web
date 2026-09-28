@@ -233,30 +233,56 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     const before = await businessSnapshot();
     let document: any = await getTourOrder(runtime, scope(), '00001');
     expect(document.lines[0]).toMatchObject({ tagNo: 'IMPORTED-TAG-7', vchSrno: 7 });
-    await editTourOrder(runtime, { ...document, scope: scope(), expectedVersion: document.version }, '00001');
+    await editTourOrder(
+      runtime,
+      { ...document, scope: scope(), expectedVersion: document.version },
+      '00001',
+    );
     expect(await businessSnapshot()).toEqual(before);
     document = await getTourOrder(runtime, scope(), '00001');
     for (const change of [
-      { tagNo: 'DIFFERENT-TAG' }, { tagNo: 'N' }, { tagNo: '' }, { vchSrno: 8 }, { srNo: 44 },
+      { tagNo: 'DIFFERENT-TAG' },
+      { tagNo: 'N' },
+      { tagNo: '' },
+      { vchSrno: 8 },
+      { srNo: 44 },
     ]) {
       const lines = document.lines.map((line: any) => ({ ...line, ...change }));
-      await expect(editTourOrder(runtime, { ...document, lines, scope: scope(), expectedVersion: document.version }, '00001'))
-        .rejects.toMatchObject({ name: 'SaleValidationError' });
+      await expect(
+        editTourOrder(
+          runtime,
+          { ...document, lines, scope: scope(), expectedVersion: document.version },
+          '00001',
+        ),
+      ).rejects.toMatchObject({ name: 'SaleValidationError' });
       expect(await businessSnapshot()).toEqual(before);
     }
-    await expect(editTourOrder(runtime, { ...document, lines: [], scope: scope(), expectedVersion: document.version }, '00001'))
-      .rejects.toMatchObject({ name: 'SaleValidationError' });
+    await expect(
+      editTourOrder(
+        runtime,
+        { ...document, lines: [], scope: scope(), expectedVersion: document.version },
+        '00001',
+      ),
+    ).rejects.toMatchObject({ name: 'SaleValidationError' });
     expect(await businessSnapshot()).toEqual(before);
     // Older complete-component clients may omit read-only identity fields. Omission is not tag deletion.
     const lines = document.lines.map(({ tagNo, vchSrno, ...line }: any) => line);
-    await editTourOrder(runtime, { ...document, lines, scope: scope(), expectedVersion: document.version }, '00001');
+    await editTourOrder(
+      runtime,
+      { ...document, lines, scope: scope(), expectedVersion: document.version },
+      '00001',
+    );
     expect(await businessSnapshot()).toEqual(before);
   });
 
   it('does not silently accept a new tag allocation through the ordinary order editor', async () => {
     const request = input();
-    await expect(createTourOrder(runtime, { ...request, lines: request.lines.map((line) => ({ ...line, tagNo: 'NEW-TAG' })) }))
-      .rejects.toMatchObject({ name: 'SaleValidationError' });
+    await expect(
+      createTourOrder(runtime, {
+        ...request,
+        lines: request.lines.map((line) => ({ ...line, tagNo: 'NEW-TAG' })),
+      }),
+    ).rejects.toMatchObject({ name: 'SaleValidationError' });
     const rows = await query('SELECT * FROM "SL_ORD_DATA" WHERE tenant_id=$1', tenantId);
     expect(rows).toHaveLength(0);
   });

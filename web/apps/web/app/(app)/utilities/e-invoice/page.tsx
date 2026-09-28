@@ -266,7 +266,11 @@ export default function EInvoicePage() {
               style={{ width: 150 }}
             />
           </div>
-          <button className="primary" onClick={() => load(coYear, fromDate, toDate)} disabled={loading}>
+          <button
+            className="primary"
+            onClick={() => load(coYear, fromDate, toDate)}
+            disabled={loading}
+          >
             {loading ? 'Loading…' : 'Load Invoices'}
           </button>
           <a className="button ghost" href={exportUrl}>

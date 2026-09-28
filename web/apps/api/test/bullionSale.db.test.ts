@@ -246,7 +246,12 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
            (SELECT count(*)::int FROM "DELETE_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00001') AS delete_rows`,
         tenantId,
       ),
-    )) as Array<{ headers: number; issue_lines: number; receive_lines: number; delete_rows: number }>;
+    )) as Array<{
+      headers: number;
+      issue_lines: number;
+      receive_lines: number;
+      delete_rows: number;
+    }>;
     expect(countsAfterEdit[0]).toEqual({
       headers: 1,
       issue_lines: 1,
@@ -254,7 +259,11 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
       delete_rows: 0,
     });
 
-    await deleteBullionSale(prisma, { scope: saleScope, vchNo: created.vchNo, deleteUser: 'deleter' });
+    await deleteBullionSale(prisma, {
+      scope: saleScope,
+      vchNo: created.vchNo,
+      deleteUser: 'deleter',
+    });
     expect(await adjWt('00001')).toBeCloseTo(0, 3);
     expect(await adjWt('00002')).toBeCloseTo(0, 3);
     const finalCounts = (await withTenant(prisma, tenantId, (tx: any) =>
@@ -266,8 +275,18 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
            (SELECT count(*)::int FROM "DELETE_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00001') AS delete_rows`,
         tenantId,
       ),
-    )) as Array<{ headers: number; issue_lines: number; receive_lines: number; delete_rows: number }>;
-    expect(finalCounts[0]).toEqual({ headers: 0, issue_lines: 0, receive_lines: 0, delete_rows: 1 });
+    )) as Array<{
+      headers: number;
+      issue_lines: number;
+      receive_lines: number;
+      delete_rows: number;
+    }>;
+    expect(finalCounts[0]).toEqual({
+      headers: 0,
+      issue_lines: 0,
+      receive_lines: 0,
+      delete_rows: 1,
+    });
   }, 30_000);
 
   it('keeps bullion sale books out of the generic rate-cut workflow', async () => {

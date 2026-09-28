@@ -26,7 +26,15 @@ const scope = {
 };
 
 async function clean(): Promise<void> {
-  for (const table of ['MAIN_STOCK', 'BAR_DETL', 'AC_DATA', 'AC_MAST', 'ITEM_MAST', 'BOOK_DATA', 'CO_MAST']) {
+  for (const table of [
+    'MAIN_STOCK',
+    'BAR_DETL',
+    'AC_DATA',
+    'AC_MAST',
+    'ITEM_MAST',
+    'BOOK_DATA',
+    'CO_MAST',
+  ]) {
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   }
 }
@@ -128,8 +136,13 @@ databaseDescribe('RP_GRAPH report parity builder', () => {
   });
 
   it('matches Month SL, Employee SL, book type and transaction selectors', async () => {
-    const month = await graphReport(runtime, scope, { mode: 'month-sales', transactionType: 'sales' });
-    expect(month.rows).toEqual([{ mode: 'month-sales', code: 6, name: 'Jun', value: 1000, totAmt: 1000 }]);
+    const month = await graphReport(runtime, scope, {
+      mode: 'month-sales',
+      transactionType: 'sales',
+    });
+    expect(month.rows).toEqual([
+      { mode: 'month-sales', code: 6, name: 'Jun', value: 1000, totAmt: 1000 },
+    ]);
 
     const employee = await graphReport(runtime, scope, {
       mode: 'employee-sales',

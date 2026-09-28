@@ -532,7 +532,12 @@ export default function PurchaseQuotationPage() {
             </button>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="235" mainBooks={['PR QUOT']} />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="235"
+                mainBooks={['PR QUOT']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

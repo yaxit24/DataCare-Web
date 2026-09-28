@@ -14,19 +14,46 @@ const tenants = [tenantId, otherTenant];
 const scope = { tenantId, coCode: '01', lcCode: '01', coYear: '2024-2025', coBook: 'R13' };
 const voucherNo = '00001';
 const tables = [
-  'AC_DATA', 'SL_DATA', 'SL_DETL_RTN', 'SL_DETL', 'SL_IDTL', 'BAR_DATA',
-  'BAR_DETL', 'BAR_IDTL', 'MAIN_STOCK', 'TAX_DATA', 'BILL_OS_DATA', 'ROJ_MEL_DATA',
-  'DM_DATA', 'REMARK_DATA', 'TEMP_BOOK_DATA', 'SRNO_MAST', 'TAG_SET', 'CO_SET',
-  'CO_SET_NEW', 'COL_MAST', 'BOOK_DATA', 'YEAR_MAST', 'ITEM_MAST', 'EMP_MAST',
-  'TAX_MAST', 'AC_MAST', 'CONV_MAST',
+  'AC_DATA',
+  'SL_DATA',
+  'SL_DETL_RTN',
+  'SL_DETL',
+  'SL_IDTL',
+  'BAR_DATA',
+  'BAR_DETL',
+  'BAR_IDTL',
+  'MAIN_STOCK',
+  'TAX_DATA',
+  'BILL_OS_DATA',
+  'ROJ_MEL_DATA',
+  'DM_DATA',
+  'REMARK_DATA',
+  'TEMP_BOOK_DATA',
+  'SRNO_MAST',
+  'TAG_SET',
+  'CO_SET',
+  'CO_SET_NEW',
+  'COL_MAST',
+  'BOOK_DATA',
+  'YEAR_MAST',
+  'ITEM_MAST',
+  'EMP_MAST',
+  'TAX_MAST',
+  'AC_MAST',
+  'CONV_MAST',
 ] as const;
 
 run('saved Return clock projection from real PostgreSQL JSONB observations', () => {
   let owner: PrismaClient;
   let runtime: PrismaClient;
   const sql = (query: string, ...values: unknown[]) => owner.$executeRawUnsafe(query, ...values);
-  const insert = async (table: 'CO_SET' | 'BOOK_DATA' | 'SL_DATA', values: Record<string, unknown>) => {
-    const columns = Object.keys(values).map((key) => `"${key}"`).join(',');
+  const insert = async (
+    table: 'CO_SET' | 'BOOK_DATA' | 'SL_DATA',
+    values: Record<string, unknown>,
+  ) => {
+    const columns = Object.keys(values)
+      .map((key) => `"${key}"`)
+      .join(',');
     await sql(
       `INSERT INTO "${table}" (${columns}) SELECT ${columns} FROM jsonb_populate_record(NULL::"${table}",$1::jsonb)`,
       JSON.stringify(values),
@@ -38,31 +65,49 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
   };
   // One owner query observes both fixture tenants, complete raw rows and physical
   // revisions. No timestamp is decoded to a JavaScript Date in this snapshot.
-  const snapshot = () => owner.$queryRawUnsafe<Array<Record<string, unknown>>>(
-    tables.map((table) =>
-      `SELECT '${table}' AS "tableName",to_jsonb(t)::text AS raw,t.xmin::text AS revision,t.ctid::text AS locator FROM "${table}" t WHERE tenant_id=ANY($1::text[])`,
-    ).join(' UNION ALL ') + ' ORDER BY "tableName",raw,revision,locator',
-    tenants,
-  );
-  const replaceClock = (date: string | null, time: string | null) => sql(
-    `UPDATE "SL_DATA" SET "VCH_DATE"=$2::date,"VCH_TIME"=$3::timestamp WHERE tenant_id=$1 AND "CO_BOOK"='R13' AND "VCH_NO"='00001'`,
-    tenantId, date, time,
-  );
+  const snapshot = () =>
+    owner.$queryRawUnsafe<Array<Record<string, unknown>>>(
+      tables
+        .map(
+          (table) =>
+            `SELECT '${table}' AS "tableName",to_jsonb(t)::text AS raw,t.xmin::text AS revision,t.ctid::text AS locator FROM "${table}" t WHERE tenant_id=ANY($1::text[])`,
+        )
+        .join(' UNION ALL ') + ' ORDER BY "tableName",raw,revision,locator',
+      tenants,
+    );
+  const replaceClock = (date: string | null, time: string | null) =>
+    sql(
+      `UPDATE "SL_DATA" SET "VCH_DATE"=$2::date,"VCH_TIME"=$3::timestamp WHERE tenant_id=$1 AND "CO_BOOK"='R13' AND "VCH_NO"='00001'`,
+      tenantId,
+      date,
+      time,
+    );
   const load = (dateStyle = 'ISO, MDY', timeZone = 'UTC', no = voucherNo) =>
-    withTenant(runtime, tenantId, async (tx) => {
-      await tx.$executeRawUnsafe(
-        `SELECT set_config('DateStyle',$1,true),set_config('TimeZone',$2,true)`,
-        dateStyle, timeZone,
-      );
-      const settings = await tx.$queryRawUnsafe<Array<{
-        dateStyle: string; timeZone: string; dateType: string; timeType: string;
-      }>>(
-        `SELECT current_setting('DateStyle') AS "dateStyle",current_setting('TimeZone') AS "timeZone",pg_typeof("VCH_DATE")::text AS "dateType",pg_typeof("VCH_TIME")::text AS "timeType" FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='R13' AND "VCH_NO"='00001'`,
-        tenantId,
-      );
-      const saved = await readSavedSaleReturnIncomingTx(tx, scope, no);
-      return { saved, settings: settings[0]! };
-    }, { isolationLevel: 'RepeatableRead' });
+    withTenant(
+      runtime,
+      tenantId,
+      async (tx) => {
+        await tx.$executeRawUnsafe(
+          `SELECT set_config('DateStyle',$1,true),set_config('TimeZone',$2,true)`,
+          dateStyle,
+          timeZone,
+        );
+        const settings = await tx.$queryRawUnsafe<
+          Array<{
+            dateStyle: string;
+            timeZone: string;
+            dateType: string;
+            timeType: string;
+          }>
+        >(
+          `SELECT current_setting('DateStyle') AS "dateStyle",current_setting('TimeZone') AS "timeZone",pg_typeof("VCH_DATE")::text AS "dateType",pg_typeof("VCH_TIME")::text AS "timeType" FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='R13' AND "VCH_NO"='00001'`,
+          tenantId,
+        );
+        const saved = await readSavedSaleReturnIncomingTx(tx, scope, no);
+        return { saved, settings: settings[0]! };
+      },
+      { isolationLevel: 'RepeatableRead' },
+    );
   const adapterInput = (saved: Awaited<ReturnType<typeof load>>['saved']) => ({
     raw: { VCH_DATE: saved.dto.header.raw.VCH_DATE, VCH_TIME: saved.dto.header.raw.VCH_TIME },
     provenance: {
@@ -90,21 +135,39 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
     for (const tenant of tenants) {
       await insert('CO_SET', { tenant_id: tenant, CO_CODE: '01', LOCK_DATE: null });
       await insert('BOOK_DATA', {
-        tenant_id: tenant, CO_CODE: '01', LC_CODE: '01', CO_BOOK: 'R13',
-        BOOK_NAME: 'Saved clock fixture', MAIN_BOOK: 'SALES RETURNE',
-        BOOK_SNAME: 'SRTN', BOOK_INOUT: 'I', BOOK_TBL_NAME: 'SL_DATA', CUR_USE: 'Y',
+        tenant_id: tenant,
+        CO_CODE: '01',
+        LC_CODE: '01',
+        CO_BOOK: 'R13',
+        BOOK_NAME: 'Saved clock fixture',
+        MAIN_BOOK: 'SALES RETURNE',
+        BOOK_SNAME: 'SRTN',
+        BOOK_INOUT: 'I',
+        BOOK_TBL_NAME: 'SL_DATA',
+        CUR_USE: 'Y',
       });
       await insert('SL_DATA', {
-        tenant_id: tenant, CO_CODE: '01', LC_CODE: '01', CO_YEAR: '2024-2025',
-        CO_BOOK: 'R13', VCH_NO: voucherNo, AC_CODE: 'CUST', EMP_CODE: '',
-        VCH_DATE: '2024-07-10', VCH_TIME: '2024-07-09T12:34:56.123456',
+        tenant_id: tenant,
+        CO_CODE: '01',
+        LC_CODE: '01',
+        CO_YEAR: '2024-2025',
+        CO_BOOK: 'R13',
+        VCH_NO: voucherNo,
+        AC_CODE: 'CUST',
+        EMP_CODE: '',
+        VCH_DATE: '2024-07-10',
+        VCH_TIME: '2024-07-09T12:34:56.123456',
         VCH_DESC: tenant === tenantId ? null : 'Unrelated tenant clock sentinel',
-        USER_UPDATE: 'Y', USER_DELETE: 'N',
+        USER_UPDATE: 'Y',
+        USER_DELETE: 'N',
       });
     }
   });
   afterAll(async () => {
-    if (owner) { await cleanup(); await owner.$disconnect(); }
+    if (owner) {
+      await cleanup();
+      await owner.$disconnect();
+    }
     if (runtime) await runtime.$disconnect();
   });
 
@@ -112,25 +175,30 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
     { dateStyle: 'ISO, MDY', timeZone: 'UTC' },
     { dateStyle: 'SQL, DMY', timeZone: 'Asia/Kolkata' },
     { dateStyle: 'German, DMY', timeZone: 'America/New_York' },
-  ])('preserves actual JSONB date/time under $dateStyle and $timeZone', async ({ dateStyle, timeZone }) => {
-    const before = await snapshot();
-    const observed = await load(dateStyle, timeZone);
-    expect(observed.settings.dateStyle.replaceAll(' ', '').toLowerCase()).toBe(dateStyle.replaceAll(' ', '').toLowerCase());
-    expect(observed.settings.timeZone).toBe(timeZone);
-    expect(observed.settings.dateType).toBe('date');
-    expect(observed.settings.timeType).toBe('timestamp without time zone');
-    const input = adapterInput(observed.saved);
-    expect(input.raw).toEqual({ VCH_DATE: '2024-07-10', VCH_TIME: '2024-07-09T12:34:56.123456' });
-    expect(observed.saved.dto.header.raw.VCH_DESC).toBeNull();
-    const priorInput = JSON.stringify(input);
-    const clock = ready(projectSavedSaleReturnClock(input));
-    expect(clock.cutoffLocalSecond).toBe('2024-07-10 12:34:56');
-    expect(clock.raw).toEqual(input.raw);
-    expect(clock.provenance).toEqual(input.provenance);
-    expect(JSON.stringify(input)).toBe(priorInput);
-    expect(Object.isFrozen(input.raw)).toBe(false);
-    expect(await snapshot()).toEqual(before);
-  });
+  ])(
+    'preserves actual JSONB date/time under $dateStyle and $timeZone',
+    async ({ dateStyle, timeZone }) => {
+      const before = await snapshot();
+      const observed = await load(dateStyle, timeZone);
+      expect(observed.settings.dateStyle.replaceAll(' ', '').toLowerCase()).toBe(
+        dateStyle.replaceAll(' ', '').toLowerCase(),
+      );
+      expect(observed.settings.timeZone).toBe(timeZone);
+      expect(observed.settings.dateType).toBe('date');
+      expect(observed.settings.timeType).toBe('timestamp without time zone');
+      const input = adapterInput(observed.saved);
+      expect(input.raw).toEqual({ VCH_DATE: '2024-07-10', VCH_TIME: '2024-07-09T12:34:56.123456' });
+      expect(observed.saved.dto.header.raw.VCH_DESC).toBeNull();
+      const priorInput = JSON.stringify(input);
+      const clock = ready(projectSavedSaleReturnClock(input));
+      expect(clock.cutoffLocalSecond).toBe('2024-07-10 12:34:56');
+      expect(clock.raw).toEqual(input.raw);
+      expect(clock.provenance).toEqual(input.provenance);
+      expect(JSON.stringify(input)).toBe(priorInput);
+      expect(Object.isFrozen(input.raw)).toBe(false);
+      expect(await snapshot()).toEqual(before);
+    },
+  );
 
   it('uses the saved voucher day and truncates six near-midnight digits without rollover', async () => {
     await replaceClock('2024-03-01', '2024-02-29T23:59:59.999999');
@@ -144,8 +212,13 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
 
   it('qualifies zero and one-to-six actual JSONB fraction digits without inventing padded raw text', async () => {
     const cases = [
-      ['', ''], ['.1', '.1'], ['.12', '.12'], ['.123', '.123'],
-      ['.1234', '.1234'], ['.12345', '.12345'], ['.123456', '.123456'],
+      ['', ''],
+      ['.1', '.1'],
+      ['.12', '.12'],
+      ['.123', '.123'],
+      ['.1234', '.1234'],
+      ['.12345', '.12345'],
+      ['.123456', '.123456'],
       ['.120000', '.12'],
     ] as const;
     for (const [stored, expected] of cases) {
@@ -154,7 +227,9 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
       const { saved } = await load();
       const input = adapterInput(saved);
       expect(input.raw.VCH_TIME).toBe(`2024-07-09T00:00:00${expected}`);
-      expect(ready(projectSavedSaleReturnClock(input)).cutoffLocalSecond).toBe('2024-07-10 00:00:00');
+      expect(ready(projectSavedSaleReturnClock(input)).cutoffLocalSecond).toBe(
+        '2024-07-10 00:00:00',
+      );
       expect(await snapshot()).toEqual(before);
     }
   });
@@ -175,9 +250,11 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
       expect(result.status).toBe('unsupported');
       expect(result.observation?.raw).toEqual(input.raw);
       expect(result.observation?.cutoffLocalSecond).toBeNull();
-      expect(result.diagnostics).toEqual(expect.arrayContaining([
-        expect.objectContaining({ code: 'null-saved-column', sourceField: row.field }),
-      ]));
+      expect(result.diagnostics).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ code: 'null-saved-column', sourceField: row.field }),
+        ]),
+      );
       expect(await snapshot()).toEqual(before);
     }
   });
@@ -190,14 +267,19 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
     expect(observed.raw.VCH_TIME).toBe('2024-07-09T12:34:56.123456');
     // Explicit adapter-boundary omission: PostgreSQL's real table row still has
     // VCH_TIME. This tests missing-vs-NULL containment, not invented schema loss.
-    const incomplete = { raw: { VCH_DATE: observed.raw.VCH_DATE }, provenance: observed.provenance };
+    const incomplete = {
+      raw: { VCH_DATE: observed.raw.VCH_DATE },
+      provenance: observed.provenance,
+    };
     const result = projectSavedSaleReturnClock(incomplete);
     expect(result.status).toBe('unsupported');
     expect(result.observation?.raw).toEqual(incomplete.raw);
     expect(result.observation?.cutoffLocalSecond).toBeNull();
-    expect(result.diagnostics).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: 'missing-saved-column', sourceField: 'VCH_TIME' }),
-    ]));
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'missing-saved-column', sourceField: 'VCH_TIME' }),
+      ]),
+    );
     expect(saved.dto.header.raw.VCH_TIME).toBe(observed.raw.VCH_TIME);
     expect(await snapshot()).toEqual(before);
   });
@@ -205,7 +287,8 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
   it('does not invent a clock or call the adapter when the saved document itself is absent', async () => {
     const before = await snapshot();
     await expect(load('ISO, MDY', 'UTC', '99999')).rejects.toMatchObject({
-      statusCode: 404, code: 'not-found',
+      statusCode: 404,
+      code: 'not-found',
     });
     expect(await snapshot()).toEqual(before);
   });

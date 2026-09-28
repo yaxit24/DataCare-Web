@@ -2,7 +2,10 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
 import { unzipSync, strFromU8 } from 'fflate';
-import { eInvoiceExportData, eInvoiceExportSheets } from '../src/modules/einvoice/einvoiceExport.js';
+import {
+  eInvoiceExportData,
+  eInvoiceExportSheets,
+} from '../src/modules/einvoice/einvoiceExport.js';
 import { EInvoiceValidationError } from '../src/modules/einvoice/einvoice.js';
 import { renderXlsx } from '../src/modules/reports/xlsx.js';
 

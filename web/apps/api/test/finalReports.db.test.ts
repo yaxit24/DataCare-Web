@@ -20,7 +20,8 @@ async function wipe() {
   const rows = (await owner.$queryRawUnsafe(
     `SELECT table_name FROM information_schema.columns WHERE column_name='tenant_id' AND table_schema='public'`,
   )) as { table_name: string }[];
-  for (const r of rows) await owner.$executeRawUnsafe(`DELETE FROM "${r.table_name}" WHERE tenant_id=$1`, TENANT);
+  for (const r of rows)
+    await owner.$executeRawUnsafe(`DELETE FROM "${r.table_name}" WHERE tenant_id=$1`, TENANT);
 }
 
 async function seed() {
@@ -103,7 +104,11 @@ describe.runIf(RUN)('RP_BALANCE final reports', () => {
     expect(pnl.totals).toMatchObject({ income: 1000, expense: 300, netProfit: 700 });
 
     const final = await finalReports(runtime, scope, { closingDate: '2024-04-10' });
-    expect(final.rows.map((r) => r.statement)).toEqual(['Trial Balance', 'Profit and Loss', 'Balance Sheet']);
+    expect(final.rows.map((r) => r.statement)).toEqual([
+      'Trial Balance',
+      'Profit and Loss',
+      'Balance Sheet',
+    ]);
     expect(final.totals?.netProfit).toBe(700);
     expect(final.detail.profitAndLoss).toMatchObject({ totals: { netProfit: 700 } });
   });

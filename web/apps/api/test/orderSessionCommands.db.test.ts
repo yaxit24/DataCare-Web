@@ -69,9 +69,7 @@ const protectedTables = [
   'SRNO_MAST',
 ] as const;
 const tables = [...orderTables, ...protectedTables];
-const bytes = readFileSync(
-  new URL('./fixtures/orderCommand.independent.json', import.meta.url),
-);
+const bytes = readFileSync(new URL('./fixtures/orderCommand.independent.json', import.meta.url));
 const golden = JSON.parse(bytes.toString()) as {
   fixture: {
     vchDate: string;
@@ -455,12 +453,8 @@ db('remaining five order session commands on isolated PostgreSQL', () => {
       `UPDATE "SL_ORD_IDTL" SET "KR_RATE"=NULL WHERE tenant_id=$1 AND "CO_BOOK"='N14' AND "ISR_NO"=3`,
       tenantId,
     );
-    const beforeParents = (await raw('SL_ORD_DETL', 'N14')).map(
-      ({ row_id: _id, ...row }) => row,
-    );
-    const beforeChildren = (await raw('SL_ORD_IDTL', 'N14')).map(
-      ({ row_id: _id, ...row }) => row,
-    );
+    const beforeParents = (await raw('SL_ORD_DETL', 'N14')).map(({ row_id: _id, ...row }) => row);
+    const beforeChildren = (await raw('SL_ORD_IDTL', 'N14')).map(({ row_id: _id, ...row }) => row);
     const body = await tourEdit();
     // The Tour read projection now retains the exact saved input value directly.
     for (const line of body.lines ?? []) {
@@ -591,10 +585,7 @@ db('remaining five order session commands on isolated PostgreSQL', () => {
       const before = await physical();
       let injected = false;
       const client = instrument(async (statement, tx) => {
-        if (
-          statement.includes('AS "ledgerContext"') &&
-          statement.includes('clock_timestamp()')
-        ) {
+        if (statement.includes('AS "ledgerContext"') && statement.includes('clock_timestamp()')) {
           injected = true;
           await tx.$executeRawUnsafe(
             `UPDATE auth_session SET expires_at=clock_timestamp()-interval '1 microsecond' WHERE tenant_id=$1 AND session_id=$2`,
@@ -619,9 +610,9 @@ db('remaining five order session commands on isolated PostgreSQL', () => {
       const results = await Promise.all([create(family), create(family)]);
       expect(results.map((row) => row.vchNo).sort()).toEqual([1, 2]);
       await assertFinance(family, 25, 2);
-      expect(
-        (await raw('TEMP_BOOK_DATA', bookOf(family))).map((row) => row.VCH_NO).sort(),
-      ).toEqual(['00001', '00002']);
+      expect((await raw('TEMP_BOOK_DATA', bookOf(family))).map((row) => row.VCH_NO).sort()).toEqual(
+        ['00001', '00002'],
+      );
     },
   );
   it('concurrent Tour edits with one document version commit one40 replacement and one conflict', async () => {

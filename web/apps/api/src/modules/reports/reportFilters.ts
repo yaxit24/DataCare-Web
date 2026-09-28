@@ -194,7 +194,8 @@ export function filterWhere(f: ReportFilters, b: FilterBinding, params: unknown[
     if (val(f.area)) push(`${geo}."AC_AREA"`, val(f.area));
     if (val(f.city)) push(`${geo}."AC_CITY"`, val(f.city));
   }
-  if (b.party && b.partyState !== false && val(f.state)) push(`${b.party}."AC_STATE"`, val(f.state));
+  if (b.party && b.partyState !== false && val(f.state))
+    push(`${b.party}."AC_STATE"`, val(f.state));
   if (val(f.grCode)) {
     // The rate-cut family binds this control to AC_ANGDIYA on the data table instead of the item group.
     if (b.grCodeDataColumn && b.data) {
@@ -208,7 +209,8 @@ export function filterWhere(f: ReportFilters, b: FilterBinding, params: unknown[
     // `tItCode` drives PR_CODE — the product code, despite the control's name.
     if (val(f.prCode) && itemCols.has('PR_CODE')) push(`${b.item}."PR_CODE"`, val(f.prCode));
     // IT_TYPE holds a single character; the desktop stores Strings.Mid(cboItemTyp.Text, 1, 1).
-    if (val(f.itType) && itemCols.has('IT_TYPE')) push(`${b.item}."IT_TYPE"`, val(f.itType).slice(0, 1));
+    if (val(f.itType) && itemCols.has('IT_TYPE'))
+      push(`${b.item}."IT_TYPE"`, val(f.itType).slice(0, 1));
   }
   if (b.custNameAlias && val(f.custName)) {
     push(`${b.custNameAlias}."AC_NAME"`, val(f.custName));
@@ -279,13 +281,44 @@ export const REPORT_FILTER_BINDINGS: Record<string, FilterBinding> = {
   'user-report': { data: 'v', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'ac' },
   'dhiran-report': { data: 'i', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'm' },
   'loan-report': { data: 'i', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'm' },
-  'approval-report': { data: 'a', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', item: 'i' },
-  'vp-report': { data: 'r', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', grCodeDataColumn: 'AC_ANGDIYA' },
-  'bullion-report': { data: 'b', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', item: 'i' },
-  'karigar-report': { data: 'd', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'm', item: 'i' },
-  'repair-report': { data: 'd', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', item: 'i' },
+  'approval-report': {
+    data: 'a',
+    dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'],
+    party: 'm',
+    item: 'i',
+  },
+  'vp-report': {
+    data: 'r',
+    dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'],
+    party: 'm',
+    grCodeDataColumn: 'AC_ANGDIYA',
+  },
+  'bullion-report': {
+    data: 'b',
+    dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'],
+    party: 'm',
+    item: 'i',
+  },
+  'karigar-report': {
+    data: 'd',
+    dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'],
+    party: 'm',
+    item: 'i',
+  },
+  'repair-report': {
+    data: 'd',
+    dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'],
+    party: 'm',
+    item: 'i',
+  },
   'branch-inout': { item: 'b' },
-  'other-item-report': { data: 'd', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'a', partyState: false, item: 'i' },
+  'other-item-report': {
+    data: 'd',
+    dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'],
+    party: 'a',
+    partyState: false,
+    item: 'i',
+  },
   'design-move': { item: 'c' },
   'old-stock': { data: 'a', dataColumns: ['LC_CODE'], item: 'c', itemColumns: ['IT_TYPE'] },
   'tour-report': { item: 'g', itemColumns: ['GR_CODE', 'PR_CODE'] },

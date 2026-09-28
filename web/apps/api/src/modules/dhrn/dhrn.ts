@@ -93,7 +93,9 @@ type DhrnReceiptLedgerMode = 'pledge-receipt' | 'loan-issue';
 type DhrnBook = Awaited<ReturnType<typeof configuredBookTx>>;
 
 function normalized(value: unknown): string {
-  return String(value ?? '').trim().toUpperCase();
+  return String(value ?? '')
+    .trim()
+    .toUpperCase();
 }
 
 function assertDhrnBook(
@@ -257,11 +259,25 @@ export function buildDhrnReceiptLedger(
 ): LedgerLine[] {
   const base = { ...key, VCH_TYPE: 'DREC' };
   const lines: LedgerLine[] = [
-    { ...base, AC_CODE: cashAc, LD_CODE: loanAc, DR_AMT: round2(principalRepaid + interest), CR_AMT: 0, SIGN: 'D' },
+    {
+      ...base,
+      AC_CODE: cashAc,
+      LD_CODE: loanAc,
+      DR_AMT: round2(principalRepaid + interest),
+      CR_AMT: 0,
+      SIGN: 'D',
+    },
     { ...base, AC_CODE: loanAc, LD_CODE: cashAc, DR_AMT: 0, CR_AMT: principalRepaid, SIGN: 'C' },
   ];
   if (interest > 0)
-    lines.push({ ...base, AC_CODE: intIncAc, LD_CODE: cashAc, DR_AMT: 0, CR_AMT: interest, SIGN: 'C' });
+    lines.push({
+      ...base,
+      AC_CODE: intIncAc,
+      LD_CODE: cashAc,
+      DR_AMT: 0,
+      CR_AMT: interest,
+      SIGN: 'C',
+    });
   return lines;
 }
 
@@ -279,7 +295,14 @@ function buildLoanIssueLedger(
     { ...base, AC_CODE: lenderAc, LD_CODE: cashAc, DR_AMT: principalIssued, CR_AMT: 0, SIGN: 'D' },
   ];
   if (interest > 0) {
-    lines.push({ ...base, AC_CODE: intExpenseAc, LD_CODE: cashAc, DR_AMT: interest, CR_AMT: 0, SIGN: 'D' });
+    lines.push({
+      ...base,
+      AC_CODE: intExpenseAc,
+      LD_CODE: cashAc,
+      DR_AMT: interest,
+      CR_AMT: 0,
+      SIGN: 'D',
+    });
   }
   lines.push({
     ...base,
@@ -291,7 +314,6 @@ function buildLoanIssueLedger(
   });
   return lines;
 }
-
 
 function keyOf(s: VoucherScope, vchNo: number, book: string): VoucherKey {
   return {
@@ -671,7 +693,14 @@ export async function receiveDhrn(
     const key = voucherKey(input.scope, identity.voucherNo);
     const ledgerBuilder =
       input.ledgerMode === 'loan-issue'
-        ? buildLoanIssueLedger(key, input.borrowerAc, cashAc, intIncAc, input.principalRepaid, interest)
+        ? buildLoanIssueLedger(
+            key,
+            input.borrowerAc,
+            cashAc,
+            intIncAc,
+            input.principalRepaid,
+            interest,
+          )
         : buildDhrnReceiptLedger(key, loanAc, cashAc, intIncAc, input.principalRepaid, interest);
     const ledger = ledgerBuilder.map((l) => ({
       ...l,
@@ -967,12 +996,7 @@ async function outstandingTx(
   isuNo: number | string,
   options: { isuBook?: string; isuYear?: string; entryType?: DhrnEntryType } = {},
 ): Promise<number> {
-  const issueWhere = [
-    `tenant_id=$1`,
-    `"CO_CODE"=$2`,
-    `"LC_CODE"=$3`,
-    `"VCH_NO"=$4`,
-  ];
+  const issueWhere = [`tenant_id=$1`, `"CO_CODE"=$2`, `"LC_CODE"=$3`, `"VCH_NO"=$4`];
   const issueParams: unknown[] = [s.tenantId, s.coCode, s.lcCode, formatVoucherNo(isuNo)];
   if (options.isuBook) {
     issueParams.push(options.isuBook);
@@ -1012,7 +1036,6 @@ async function outstandingTx(
   );
   return round2(principal - Number(rec[0]?.r ?? 0));
 }
-
 
 /** Outstanding principal for a Dhrn issue = principal − Σ receipts (desktop OS-report parity). */
 export async function outstanding(

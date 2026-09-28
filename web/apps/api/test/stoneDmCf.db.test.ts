@@ -28,7 +28,8 @@ const scope: VoucherScope = {
 let owner: PrismaClient;
 let runtime: PrismaClient;
 
-const exec = (sql: string, ...params: unknown[]): Promise<number> => owner.$executeRawUnsafe(sql, ...params);
+const exec = (sql: string, ...params: unknown[]): Promise<number> =>
+  owner.$executeRawUnsafe(sql, ...params);
 const query = <T = Record<string, unknown>>(sql: string, ...params: unknown[]): Promise<T[]> =>
   owner.$queryRawUnsafe(sql, ...params) as Promise<T[]>;
 
@@ -104,7 +105,11 @@ async function seedTag(tagNo: string, vchSrno: number, netWt: number): Promise<v
 }
 
 async function seed(): Promise<void> {
-  await exec(`INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`, TENANT, CO);
+  await exec(
+    `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
+    TENANT,
+    CO,
+  );
   await exec(
     `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
      VALUES ($1,$2,$3,'2024-04-01','2025-03-31'::timestamp)`,
@@ -170,7 +175,12 @@ databaseDescribe('TR_PHYSTK Stone/Dm-Cf SF PRINT mode', () => {
   });
 
   it('saves, reads, edits and deletes SF PRINT certificate rows without moving stock', async () => {
-    const available = await listStoneDmCfSources(runtime, TENANT, { CO_CODE: CO, LC_CODE: LC }, { tagNo: 'TAG001' });
+    const available = await listStoneDmCfSources(
+      runtime,
+      TENANT,
+      { CO_CODE: CO, LC_CODE: LC },
+      { tagNo: 'TAG001' },
+    );
     expect(available).toMatchObject([
       { tagNo: 'TAG001', vchSrno: 1, itCode: 'GOLD', designNo: 'D1', grossWt: 10, tagCost: 1200 },
     ]);
@@ -210,7 +220,12 @@ databaseDescribe('TR_PHYSTK Stone/Dm-Cf SF PRINT mode', () => {
         },
       ],
     });
-    expect(created).toEqual({ voucherNo: '00001', hiddenVoucherNo: '00001', created: true, lines: 2 });
+    expect(created).toEqual({
+      voucherNo: '00001',
+      hiddenVoucherNo: '00001',
+      created: true,
+      lines: 2,
+    });
     expect(await state()).toMatchObject({
       headers: 1,
       details: 2,
@@ -248,8 +263,22 @@ databaseDescribe('TR_PHYSTK Stone/Dm-Cf SF PRINT mode', () => {
       hiddenVoucherNo: '00001',
       mainUser: 'sf-user',
       lines: [
-        { tagNo: 'TAG001', vchSrno: 1, color: 'WHITE', purity: 'VVS', certificateNo: 'CF-001', mrp: 2500 },
-        { tagNo: '', vchSrno: 0, itCode: 'DM', designNo: 'LOOSE-1', certificateNo: 'CF-MAN', grossWt: 2.2 },
+        {
+          tagNo: 'TAG001',
+          vchSrno: 1,
+          color: 'WHITE',
+          purity: 'VVS',
+          certificateNo: 'CF-001',
+          mrp: 2500,
+        },
+        {
+          tagNo: '',
+          vchSrno: 0,
+          itCode: 'DM',
+          designNo: 'LOOSE-1',
+          certificateNo: 'CF-MAN',
+          grossWt: 2.2,
+        },
       ],
     });
 
@@ -287,7 +316,12 @@ databaseDescribe('TR_PHYSTK Stone/Dm-Cf SF PRINT mode', () => {
       },
       created.voucherNo,
     );
-    expect(edited).toEqual({ voucherNo: '00001', hiddenVoucherNo: '00001', created: false, lines: 1 });
+    expect(edited).toEqual({
+      voucherNo: '00001',
+      hiddenVoucherNo: '00001',
+      created: false,
+      lines: 1,
+    });
     expect(await state()).toMatchObject({
       headers: 1,
       details: 1,

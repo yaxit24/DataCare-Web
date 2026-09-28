@@ -22,19 +22,19 @@ web/
   docs/              this and its siblings
 ```
 
-| Inventory measure | Value on 2026-09-12 | Evidence |
-| --- | --- | --- |
-| API top-level TypeScript test files | 266 | `apps/api/test/*.test.ts` |
-| DB test files | 151 | `apps/api/test/*.db.test.ts` |
-| Declared API routes | 556 | `apps/api/test/routePolicy.test.ts` |
-| Route policy bindings | 196 | `route()` calls in `routePolicy.ts` |
-| Prisma models | 170 | `packages/db/prisma/schema.prisma`; not a database table count |
-| Migrated tenant tables with forced RLS | 174 | Isolated DB wrapper, 29 migrations |
-| Web / core TypeScript test files | 36 / 26 | `apps/web/test/*.test.ts`, `packages/core/test/*.test.ts` |
-| Web native Node test files | 1 | `apps/web/test/*.test.mjs`;6 cases, separate from Vitest |
-| Build targets | 7 | `pnpm build` |
-| Desktop menu identities | 198 | Completion register |
-| Verified menu acceptance | 0 | All 198 remain implemented-unverified |
+| Inventory measure                      | Value on 2026-09-12 | Evidence                                                       |
+| -------------------------------------- | ------------------- | -------------------------------------------------------------- |
+| API top-level TypeScript test files    | 266                 | `apps/api/test/*.test.ts`                                      |
+| DB test files                          | 151                 | `apps/api/test/*.db.test.ts`                                   |
+| Declared API routes                    | 556                 | `apps/api/test/routePolicy.test.ts`                            |
+| Route policy bindings                  | 196                 | `route()` calls in `routePolicy.ts`                            |
+| Prisma models                          | 170                 | `packages/db/prisma/schema.prisma`; not a database table count |
+| Migrated tenant tables with forced RLS | 174                 | Isolated DB wrapper, 29 migrations                             |
+| Web / core TypeScript test files       | 36 / 26             | `apps/web/test/*.test.ts`, `packages/core/test/*.test.ts`      |
+| Web native Node test files             | 1                   | `apps/web/test/*.test.mjs`;6 cases, separate from Vitest       |
+| Build targets                          | 7                   | `pnpm build`                                                   |
+| Desktop menu identities                | 198                 | Completion register                                            |
+| Verified menu acceptance               | 0                   | All 198 remain implemented-unverified                          |
 
 <!-- verify: ls apps/api/test/*.test.ts | wc -l | tr -d ' ' == 266 -->
 

@@ -143,7 +143,10 @@ export default function OtherIncomePage() {
 
   const eligibleRows = rows.filter((row) => row.itemName.trim() || Number(row.netAmount) !== 0);
   const enteredTotal = money(
-    rows.reduce((sum, row) => sum + Math.max(0, Number(row.netAmount || 0) - Number(row.discountAmount || 0)), 0),
+    rows.reduce(
+      (sum, row) => sum + Math.max(0, Number(row.netAmount || 0) - Number(row.discountAmount || 0)),
+      0,
+    ),
   );
   const receivedTotal = money(chequeAmount + cardAmount + cashAmount + kasarAmount);
 
@@ -267,7 +270,11 @@ export default function OtherIncomePage() {
           </label>
           <label>
             Voucher date
-            <input type="date" value={vchDate} onChange={(event) => setVchDate(event.target.value)} />
+            <input
+              type="date"
+              value={vchDate}
+              onChange={(event) => setVchDate(event.target.value)}
+            />
           </label>
           <label>
             Customer
@@ -301,7 +308,11 @@ export default function OtherIncomePage() {
           </label>
           <label>
             Bill date
-            <input type="date" value={billDate} onChange={(event) => setBillDate(event.target.value)} />
+            <input
+              type="date"
+              value={billDate}
+              onChange={(event) => setBillDate(event.target.value)}
+            />
           </label>
           <label>
             Employee
@@ -367,7 +378,9 @@ export default function OtherIncomePage() {
                   <td data-grid-row={rowIndex} data-grid-column={3}>
                     <select
                       value={row.taxType}
-                      onChange={(event) => update(rowIndex, { taxType: event.target.value as 'F' | 'R' })}
+                      onChange={(event) =>
+                        update(rowIndex, { taxType: event.target.value as 'F' | 'R' })
+                      }
                     >
                       <option value="F">Forward</option>
                       <option value="R">Reverse</option>
@@ -378,7 +391,9 @@ export default function OtherIncomePage() {
                       type="number"
                       step="0.01"
                       value={row.netAmount}
-                      onChange={(event) => update(rowIndex, { netAmount: Number(event.target.value) })}
+                      onChange={(event) =>
+                        update(rowIndex, { netAmount: Number(event.target.value) })
+                      }
                     />
                   </td>
                   <td data-grid-row={rowIndex} data-grid-column={5}>
@@ -386,7 +401,12 @@ export default function OtherIncomePage() {
                       type="number"
                       step="0.01"
                       value={row.discountPercent}
-                      onChange={(event) => update(rowIndex, { discountPercent: Number(event.target.value), discountAmount: undefined })}
+                      onChange={(event) =>
+                        update(rowIndex, {
+                          discountPercent: Number(event.target.value),
+                          discountAmount: undefined,
+                        })
+                      }
                     />
                   </td>
                   <td data-grid-row={rowIndex} data-grid-column={6}>
@@ -396,7 +416,8 @@ export default function OtherIncomePage() {
                       value={row.discountAmount ?? ''}
                       onChange={(event) =>
                         update(rowIndex, {
-                          discountAmount: event.target.value === '' ? undefined : Number(event.target.value),
+                          discountAmount:
+                            event.target.value === '' ? undefined : Number(event.target.value),
                         })
                       }
                     />
@@ -406,7 +427,8 @@ export default function OtherIncomePage() {
                       type="button"
                       aria-label={`Remove row ${rowIndex + 1}`}
                       onClick={() => {
-                        if (rows.length > 1) setRows((current) => current.filter((_, i) => i !== rowIndex));
+                        if (rows.length > 1)
+                          setRows((current) => current.filter((_, i) => i !== rowIndex));
                       }}
                     >
                       Remove
@@ -427,7 +449,11 @@ export default function OtherIncomePage() {
         <div className="form-grid">
           <label>
             Cheque amount
-            <input type="number" value={chequeAmount} onChange={(event) => setChequeAmount(Number(event.target.value))} />
+            <input
+              type="number"
+              value={chequeAmount}
+              onChange={(event) => setChequeAmount(Number(event.target.value))}
+            />
           </label>
           <label>
             Cheque account
@@ -439,7 +465,11 @@ export default function OtherIncomePage() {
           </label>
           <label>
             Card amount
-            <input type="number" value={cardAmount} onChange={(event) => setCardAmount(Number(event.target.value))} />
+            <input
+              type="number"
+              value={cardAmount}
+              onChange={(event) => setCardAmount(Number(event.target.value))}
+            />
           </label>
           <label>
             Card account
@@ -447,7 +477,11 @@ export default function OtherIncomePage() {
           </label>
           <label>
             Cash amount
-            <input type="number" value={cashAmount} onChange={(event) => setCashAmount(Number(event.target.value))} />
+            <input
+              type="number"
+              value={cashAmount}
+              onChange={(event) => setCashAmount(Number(event.target.value))}
+            />
           </label>
           <label>
             Cash account
@@ -455,7 +489,11 @@ export default function OtherIncomePage() {
           </label>
           <label>
             Kasar amount
-            <input type="number" value={kasarAmount} onChange={(event) => setKasarAmount(Number(event.target.value))} />
+            <input
+              type="number"
+              value={kasarAmount}
+              onChange={(event) => setKasarAmount(Number(event.target.value))}
+            />
           </label>
           <label>
             Kasar account

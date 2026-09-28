@@ -1,5 +1,10 @@
 import { withTenant } from '@datacare/db';
-import { buildMoneyRojmel, buildSchemeAdjRojmel, type RojmelContext, type RojmelRow } from '../shared/rojmel.js';
+import {
+  buildMoneyRojmel,
+  buildSchemeAdjRojmel,
+  type RojmelContext,
+  type RojmelRow,
+} from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -47,7 +52,11 @@ export class SchemeError extends Error {
 export const MEMB_ENTRY = { book: '074', vchType: 'MBENT', bookName: 'MEMB ENTRY' } as const;
 export const MEMB_OPENING = { book: '075', vchType: 'MBOP', bookName: 'MEMB OPENING' } as const;
 export const MEMB_ADJUST = { book: '076', vchType: 'MBADJ', bookName: 'MEMB ADJUST' } as const;
-export const MEMB_GOLD_ADJUST = { book: '176', vchType: 'MGADJ', bookName: 'MEMB GOLD ADJ' } as const;
+export const MEMB_GOLD_ADJUST = {
+  book: '176',
+  vchType: 'MGADJ',
+  bookName: 'MEMB GOLD ADJ',
+} as const;
 
 /** Monthly-installment tags (desktop 074 / MBENT / 'MEMB ENTRY'). */
 const SCHEME_BOOK = MEMB_ENTRY.book;
@@ -402,7 +411,9 @@ function normalizeUpiRows(
   const total = round2(rows.reduce((sum, r) => sum + r.amount, 0));
   const expected = round2(numv(line.amount));
   if (total !== expected) {
-    throw new SchemeError(`UPI split total ${total} must equal member amount ${expected} (line ${lineNo})`);
+    throw new SchemeError(
+      `UPI split total ${total} must equal member amount ${expected} (line ${lineNo})`,
+    );
   }
   return rows;
 }
@@ -466,7 +477,14 @@ function schemeRojmelBlank(ctx: RojmelContext, ledrKey: string): RojmelRow {
 
 function buildSchemeUpiRojmel(
   ctx: RojmelContext,
-  lines: { lineNo: number; schmCode: string; membCode: string; liabAc: string; amount: number; upiRows: NormalizedSchemeUpiRow[] }[],
+  lines: {
+    lineNo: number;
+    schmCode: string;
+    membCode: string;
+    liabAc: string;
+    amount: number;
+    upiRows: NormalizedSchemeUpiRow[];
+  }[],
 ): RojmelRow[] {
   const rows: RojmelRow[] = [];
   for (const line of lines) {
@@ -1293,7 +1311,6 @@ export async function schemeMaturity(
   return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
 }
 
-
 export interface SchemeGoldAdjustLineInput {
   srNo?: number;
   schmCode: string;
@@ -1336,7 +1353,9 @@ export interface SchemeGoldAdjustResult {
   adjustedAmount: number;
 }
 
-type NormalizedGoldAdjustLine = Required<Pick<SchemeGoldAdjustLineInput, 'schmCode' | 'membCode'>> & {
+type NormalizedGoldAdjustLine = Required<
+  Pick<SchemeGoldAdjustLineInput, 'schmCode' | 'membCode'>
+> & {
   srNo: number;
   acCode: string;
   acName: string;
@@ -1385,9 +1404,11 @@ async function memberSchemeInfoTx(
   );
   if (!mem.length) throw new SchemeError(`member ${membCode} not enrolled in scheme ${schmCode}`);
   return {
-    schemeAc:
-      (sch[0]?.SCHM_AC != null ? String(sch[0].SCHM_AC).trim() : '') || DEFAULT_SCHEME_AC,
-    schemeType: String(sch[0]?.SCHM_TYPE ?? '').trim().toUpperCase() || 'A',
+    schemeAc: (sch[0]?.SCHM_AC != null ? String(sch[0].SCHM_AC).trim() : '') || DEFAULT_SCHEME_AC,
+    schemeType:
+      String(sch[0]?.SCHM_TYPE ?? '')
+        .trim()
+        .toUpperCase() || 'A',
     memberName: String(mem[0]?.MEMB_NAME ?? '').trim(),
   };
 }
@@ -1396,7 +1417,13 @@ async function goldAdjustBookTx(
   tx: any,
   scope: VoucherScope,
   book: string,
-): Promise<{ vchType: string; inout: string; mainBook: string; displayName: string; dataType: string }> {
+): Promise<{
+  vchType: string;
+  inout: string;
+  mainBook: string;
+  displayName: string;
+  dataType: string;
+}> {
   const rows: any[] = await tx.$queryRawUnsafe(
     `SELECT "BOOK_SNAME","BOOK_INOUT","MAIN_BOOK","BOOK_NAME","DATA_TYPE" FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 LIMIT 1`,
@@ -1414,7 +1441,9 @@ async function goldAdjustBookTx(
       dataType: 'A',
     };
   }
-  const mainBook = String(rows[0]?.MAIN_BOOK ?? '').trim().toUpperCase();
+  const mainBook = String(rows[0]?.MAIN_BOOK ?? '')
+    .trim()
+    .toUpperCase();
   if (mainBook !== MEMB_GOLD_ADJUST.bookName) {
     throw new SchemeError(`book ${book} is ${mainBook || 'unclassified'}, expected MEMB GOLD ADJ`);
   }
@@ -1437,7 +1466,8 @@ async function normalizeGoldAdjustLinesTx(
   for (const [idx, line] of raw.entries()) {
     const lineNo = idx + 1;
     const srNo = Number(line.srNo ?? lineNo);
-    if (!Number.isFinite(srNo) || srNo <= 0) throw new SchemeError(`line ${lineNo}: srNo must be positive`);
+    if (!Number.isFinite(srNo) || srNo <= 0)
+      throw new SchemeError(`line ${lineNo}: srNo must be positive`);
     if (seen.has(srNo)) throw new SchemeError(`duplicate scheme gold-adjust row ${srNo}`);
     seen.add(srNo);
     const schmCode = trimTo(line.schmCode, 3) ?? '';
@@ -1449,7 +1479,9 @@ async function normalizeGoldAdjustLinesTx(
     const goldWt = round3(numv(line.goldWt));
     const goldRate = round2(numv(line.goldRate));
     const explicitGoldAmt = line.goldAmt != null && String(line.goldAmt).trim() !== '';
-    const goldAmt = round2(explicitGoldAmt ? numv(line.goldAmt) : goldWt && goldRate ? goldWt * goldRate : 0);
+    const goldAmt = round2(
+      explicitGoldAmt ? numv(line.goldAmt) : goldWt && goldRate ? goldWt * goldRate : 0,
+    );
     const memberAmount = round2(numv(line.memberAmount));
     const adjustAmount = round2(numv(line.adjustAmount));
     const bonus = round2(numv(line.bonus));
@@ -1469,7 +1501,9 @@ async function normalizeGoldAdjustLinesTx(
       throw new SchemeError(`line ${lineNo}: less cannot exceed gold amount`);
     }
     if (!(goldWt || goldAmt || adjustAmount || bonus || less || memberAmount)) {
-      throw new SchemeError(`line ${lineNo}: at least one gold, amount, bonus, or less value is required`);
+      throw new SchemeError(
+        `line ${lineNo}: at least one gold, amount, bonus, or less value is required`,
+      );
     }
     const info = await memberSchemeInfoTx(tx, input.scope, schmCode, membCode);
     out.push({
@@ -1569,7 +1603,8 @@ function goldAdjustLedgerLines(
       );
     }
     if (l.goldRate !== 0) {
-      if (!bookSettlementAc) throw new SchemeError('book settlement account is required for priced gold adjustment');
+      if (!bookSettlementAc)
+        throw new SchemeError('book settlement account is required for priced gold adjustment');
       const settlementAmount = round2(l.goldAmt - l.less);
       ledger.push(
         {
@@ -1618,7 +1653,8 @@ function goldAdjustRojmelRows(
   bookSettlementAc: string | null,
 ): RojmelRow[] {
   const rows: RojmelRow[] = [];
-  const key = (rowType: string, srNo: number) => schemeRojmelKey(ctx.scope, ctx.coBook, ctx.vchNo, rowType, srNo);
+  const key = (rowType: string, srNo: number) =>
+    schemeRojmelKey(ctx.scope, ctx.coBook, ctx.vchNo, rowType, srNo);
   for (const l of lines) {
     const isGoldOrSilver = l.schemeType === 'G' || l.schemeType === 'S';
     if (!isGoldOrSilver || !l.acCode) continue;
@@ -1771,15 +1807,22 @@ export async function schemeGoldAdjust(
     const sc: VoucherScope = { ...scope, coBook: book };
     const meta = await goldAdjustBookTx(tx, scope, book);
     const lines = await normalizeGoldAdjustLinesTx(tx, input);
-    const needsBookSettlement = lines.some((l) => l.schemeType === 'G' || l.schemeType === 'S') && lines.some((l) => l.goldRate !== 0);
+    const needsBookSettlement =
+      lines.some((l) => l.schemeType === 'G' || l.schemeType === 'S') &&
+      lines.some((l) => l.goldRate !== 0);
     const bookSettlementAc = needsBookSettlement
       ? await resolveBookSlotAccountTx(tx, sc, 'bank-settlement', 1, undefined)
       : null;
     const vchNo = lifecycle?.vchNo ?? (await nextVoucherNoTx(tx, sc));
-    const hdVchNo = lifecycle?.hdVchNo ?? (await nextHiddenVoucherNoTx(tx, sc as VoucherScope & { coBook: string }));
+    const hdVchNo =
+      lifecycle?.hdVchNo ??
+      (await nextHiddenVoucherNoTx(tx, sc as VoucherScope & { coBook: string }));
     const mainUser = lifecycle?.mainUser ?? String(input.mainUser ?? '').trim();
     const key = keyOf(sc, vchNo, book);
-    const vchDate = voucherTimestamp(input.vchDate ? new Date(input.vchDate) : new Date(), lifecycle?.persistedClock);
+    const vchDate = voucherTimestamp(
+      input.vchDate ? new Date(input.vchDate) : new Date(),
+      lifecycle?.persistedClock,
+    );
 
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
       CO_CODE: scope.coCode,
@@ -1789,8 +1832,26 @@ export async function schemeGoldAdjust(
       BOOK_NAME: meta.displayName,
     });
 
-    const ledger = goldAdjustLedgerLines(key, meta.vchType, vchDate, hdVchNo, mainUser, lines, bookSettlementAc);
-    const adOsRows = goldAdjustAdOsRows(key, vchDate, meta.vchType, meta.inout, meta.mainBook, hdVchNo, mainUser, meta.dataType, lines);
+    const ledger = goldAdjustLedgerLines(
+      key,
+      meta.vchType,
+      vchDate,
+      hdVchNo,
+      mainUser,
+      lines,
+      bookSettlementAc,
+    );
+    const adOsRows = goldAdjustAdOsRows(
+      key,
+      vchDate,
+      meta.vchType,
+      meta.inout,
+      meta.mainBook,
+      hdVchNo,
+      mainUser,
+      meta.dataType,
+      lines,
+    );
     const rojmelRows = goldAdjustRojmelRows(
       {
         scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: sc.coYear! },
@@ -1940,7 +2001,12 @@ export async function deleteSchemeGoldAdjust(
   const v = formatVoucherNo(input.vchNo);
   const key = keyOf(sc, Number(v), book);
   return withTenant(prisma, sc.tenantId, async (tx: any) => {
-    const h = await persistedVoucherHeaderTx(tx, { table: 'AD_ADJ', scope: sc, voucherNo: v, extraColumns: [] });
+    const h = await persistedVoucherHeaderTx(tx, {
+      table: 'AD_ADJ',
+      scope: sc,
+      voucherNo: v,
+      extraColumns: [],
+    });
     await assertPeriodOpen(tx, sc.tenantId, {
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: sc.coCode, VCH_DATE: h.VCH_DATE }] },
     });

@@ -19,7 +19,18 @@ describe('MS_STK_LIMIT web pages', () => {
     expect(dmPage).toContain('/masters/diamond-sizes');
 
     const limitPage = read('app/(app)/masters/item-stock-limits/page.tsx');
-    for (const label of ['From Wt', 'To Wt', 'Min Pcs', 'Lbr Code', 'Ght %', 'Lbr %', 'MinLbr %', 'Lbr Type', 'Lbr Rate', 'Lbr Amt']) {
+    for (const label of [
+      'From Wt',
+      'To Wt',
+      'Min Pcs',
+      'Lbr Code',
+      'Ght %',
+      'Lbr %',
+      'MinLbr %',
+      'Lbr Type',
+      'Lbr Rate',
+      'Lbr Amt',
+    ]) {
       expect(limitPage).toContain(label);
     }
     expect(limitPage).toContain('/masters/item-stock-limits');

@@ -78,9 +78,10 @@ describe('session context values: independently frozen transport decisions', () 
         expect(result.value).not.toBe(input);
       }
     } else {
-      const code = operation === 'successor' && input === '9223372036854775807'
-        ? 'context-epoch-exhausted'
-        : invalidCodes[operation];
+      const code =
+        operation === 'successor' && input === '9223372036854775807'
+          ? 'context-epoch-exhausted'
+          : invalidCodes[operation];
       expect(result).toStrictEqual({ status: 'invalid', code });
     }
   });
@@ -144,9 +145,10 @@ describe('unknown ledger envelope and non-JSON containment', () => {
         calls += 1;
         throw new Error('Uninspectable input');
       };
-      const input = new Proxy(unknownContext(), trap === 'getPrototypeOf'
-        ? { getPrototypeOf: fail }
-        : { ownKeys: fail });
+      const input = new Proxy(
+        unknownContext(),
+        trap === 'getPrototypeOf' ? { getPrototypeOf: fail } : { ownKeys: fail },
+      );
       expectInvalidLedger(input);
       expect(calls).toBe(1);
     },
@@ -176,10 +178,17 @@ describe('unknown ledger envelope and non-JSON containment', () => {
         throw new Error('No coercion');
       },
     };
-    expect(parseContextEpoch(value)).toStrictEqual({ status: 'invalid', code: 'invalid-context-epoch' });
-    expect(nextContextEpoch(value)).toStrictEqual({ status: 'invalid', code: 'invalid-context-epoch' });
+    expect(parseContextEpoch(value)).toStrictEqual({
+      status: 'invalid',
+      code: 'invalid-context-epoch',
+    });
+    expect(nextContextEpoch(value)).toStrictEqual({
+      status: 'invalid',
+      code: 'invalid-context-epoch',
+    });
     expect(parseContextSelectionId(value)).toStrictEqual({
-      status: 'invalid', code: 'invalid-context-selection-id',
+      status: 'invalid',
+      code: 'invalid-context-selection-id',
     });
     expectInvalidLedger({ ...unknownContext(), reason: value });
     expect(calls).toBe(0);

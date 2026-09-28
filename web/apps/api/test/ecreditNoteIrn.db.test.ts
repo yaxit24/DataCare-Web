@@ -6,20 +6,34 @@ import { submitIrnForCreditNote } from '../src/modules/einvoice/einvoice.js';
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
 
-const GSP_KEYS = ['GSP_ASPID', 'GSP_PASSWORD', 'GSP_GSTIN', 'GSP_USER', 'GSP_EINV_PWD', 'GSP_SANDBOX'] as const;
-const originalEnv = Object.fromEntries(['NODE_ENV', ...GSP_KEYS].map((key) => [key, process.env[key]]));
+const GSP_KEYS = [
+  'GSP_ASPID',
+  'GSP_PASSWORD',
+  'GSP_GSTIN',
+  'GSP_USER',
+  'GSP_EINV_PWD',
+  'GSP_SANDBOX',
+] as const;
+const originalEnv = Object.fromEntries(
+  ['NODE_ENV', ...GSP_KEYS].map((key) => [key, process.env[key]]),
+);
 
 databaseDescribe('TR_SL_EBILL E CrntNote IRN parity', () => {
   const owner = new PrismaClient({
-    datasources: { db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' } },
+    datasources: {
+      db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' },
+    },
   });
-  const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL ?? '' } } });
+  const runtime = new PrismaClient({
+    datasources: { db: { url: process.env.DATABASE_URL ?? '' } },
+  });
   const tenantId = 'e-crntnote-irn-db';
   const CO = '01';
   const LC = '01';
   const YEAR = '2024-2025';
   const DAY = new Date('2024-06-10T00:00:00Z');
-  const scope = (coBook = '146') => ({ tenantId, coCode: CO, lcCode: LC, coYear: YEAR, coBook }) as any;
+  const scope = (coBook = '146') =>
+    ({ tenantId, coCode: CO, lcCode: LC, coYear: YEAR, coBook }) as any;
 
   const tables = ['E_DATA', 'SL_DETL', 'SL_DATA', 'BOOK_DATA', 'ITEM_MAST', 'AC_MAST', 'CO_MAST'];
 
@@ -133,10 +147,21 @@ databaseDescribe('TR_SL_EBILL E CrntNote IRN parity', () => {
       CO,
       LC,
       YEAR,
-    )) as Array<{ CO_BOOK: string; VCH_NO: string; IRN_NO: string | null; ACK_NO: string | null; qrLen: number }>;
+    )) as Array<{
+      CO_BOOK: string;
+      VCH_NO: string;
+      IRN_NO: string | null;
+      ACK_NO: string | null;
+      qrLen: number;
+    }>;
 
     expect(eRows).toHaveLength(1);
-    expect(eRows[0]).toMatchObject({ CO_BOOK: '146', VCH_NO: '00001', IRN_NO: result.Irn, ACK_NO: result.AckNo });
+    expect(eRows[0]).toMatchObject({
+      CO_BOOK: '146',
+      VCH_NO: '00001',
+      IRN_NO: result.Irn,
+      ACK_NO: result.AckNo,
+    });
     expect(Number(eRows[0]!.qrLen)).toBeGreaterThan(0);
   });
 

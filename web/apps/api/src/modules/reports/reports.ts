@@ -586,7 +586,6 @@ export async function balanceSheet(
   });
 }
 
-
 /**
  * Profit and Loss (RP_BALANCE → Ac_Final.AcBalInsert with RptData='P').
  * Desktop rule: P&L accounts are those whose account master has AC_MAIN_GR >= '3'; balance-sheet

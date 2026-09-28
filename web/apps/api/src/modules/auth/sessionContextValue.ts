@@ -12,9 +12,7 @@ declare const contextSelectionIdBrand: unique symbol;
 export type ContextSelectionId = string & { readonly [contextSelectionIdBrand]: true };
 
 export type UnknownLedgerReason =
-  | 'vendor-authority-unresolved'
-  | 'legacy-session-uninitialized'
-  | 'scope-incomplete';
+  'vendor-authority-unresolved' | 'legacy-session-uninitialized' | 'scope-incomplete';
 
 export interface UnknownSessionLedgerContext {
   readonly version: typeof SESSION_LEDGER_CONTEXT_VERSION;
@@ -82,10 +80,14 @@ export function parseUnknownSessionLedgerContext(
   try {
     if (value === null || typeof value !== 'object') return invalid('invalid-ledger-context');
     const prototype = Object.getPrototypeOf(value);
-    if (prototype !== Object.prototype && prototype !== null) return invalid('invalid-ledger-context');
+    if (prototype !== Object.prototype && prototype !== null)
+      return invalid('invalid-ledger-context');
     const fields = ['version', 'status', 'mode', 'reason'] as const;
     const keys = Reflect.ownKeys(value);
-    if (keys.length !== fields.length || keys.some((key) => !fields.some((field) => field === key))) {
+    if (
+      keys.length !== fields.length ||
+      keys.some((key) => !fields.some((field) => field === key))
+    ) {
       return invalid('invalid-ledger-context');
     }
     const data: Record<string, unknown> = Object.create(null);

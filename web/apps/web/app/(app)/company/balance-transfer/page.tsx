@@ -50,11 +50,27 @@ const errText = (e: unknown, fallback: string): string =>
   e instanceof ApiError ? e.body?.message || e.body?.error || e.message : fallback;
 
 const relatedActions = [
-  { label: 'Year-End Close', href: '/utilities/year-end', note: 'same AC_DATA opening transfer engine' },
-  { label: 'Year Create', href: '/masters/year-create', note: 'financial year setup and OP_DATA carry-forward' },
-  { label: 'Data Refresh', href: '/utilities/data-refresh', note: 'rebuild derived balances before/after transfer' },
+  {
+    label: 'Year-End Close',
+    href: '/utilities/year-end',
+    note: 'same AC_DATA opening transfer engine',
+  },
+  {
+    label: 'Year Create',
+    href: '/masters/year-create',
+    note: 'financial year setup and OP_DATA carry-forward',
+  },
+  {
+    label: 'Data Refresh',
+    href: '/utilities/data-refresh',
+    note: 'rebuild derived balances before/after transfer',
+  },
   { label: 'Tag Stock', href: '/txn/stock', note: 'tag opening and stock workflows' },
-  { label: 'Sales Order', href: '/txn/sales-order', note: 'open order workflow carried by order modules' },
+  {
+    label: 'Sales Order',
+    href: '/txn/sales-order',
+    note: 'open order workflow carried by order modules',
+  },
   { label: 'Pledge / Dhiran', href: '/txn/dhrn-issue', note: 'pledge issue/receipt lifecycle' },
   { label: 'Loan Issue', href: '/txn/loan-issue', note: 'loan transfer lifecycle' },
   { label: 'MFG Issue', href: '/txn/mfg-issue', note: 'manufacturing WIP movement' },
@@ -110,7 +126,10 @@ export default function BalanceTransferPage() {
     setBusy('year-close');
     setMsg(null);
     try {
-      const result = await post<YearCloseResult>('/balance-transfer/year-close', { fromYear, toYear });
+      const result = await post<YearCloseResult>('/balance-transfer/year-close', {
+        fromYear,
+        toYear,
+      });
       setYearClose(result);
       setMsg({
         kind: 'ok',
@@ -140,7 +159,10 @@ export default function BalanceTransferPage() {
     setBusy('openings');
     setMsg(null);
     try {
-      const result = await post<OpeningCarryResult>('/balance-transfer/openings', { fromYear, toYear });
+      const result = await post<OpeningCarryResult>('/balance-transfer/openings', {
+        fromYear,
+        toYear,
+      });
       setOpenings(result);
       setMsg({
         kind: 'ok',
@@ -168,11 +190,19 @@ export default function BalanceTransferPage() {
         <div className="toolbar">
           <div className="field" style={{ marginBottom: 0 }}>
             <label>From Year</label>
-            <input value={fromYear} onChange={(e) => setFromYear(e.target.value)} style={{ width: 100 }} />
+            <input
+              value={fromYear}
+              onChange={(e) => setFromYear(e.target.value)}
+              style={{ width: 100 }}
+            />
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
             <label>To Year</label>
-            <input value={toYear} onChange={(e) => setToYear(e.target.value)} style={{ width: 100 }} />
+            <input
+              value={toYear}
+              onChange={(e) => setToYear(e.target.value)}
+              style={{ width: 100 }}
+            />
           </div>
           <button className="primary" onClick={runPreview} disabled={busy !== null}>
             {busy === 'preview' ? 'Previewing…' : 'Preview Ac Balance'}
@@ -198,12 +228,26 @@ export default function BalanceTransferPage() {
           <div className="tiles" style={{ marginTop: 12 }}>
             {yearClose && (
               <>
-                <div className="tile"><span className="muted">Accounts carried</span><div className="big">{yearClose.carried}</div></div>
-                <div className="tile"><span className="muted">Prior rows replaced</span><div className="big">{yearClose.deleted}</div></div>
-                <div className="tile"><span className="muted">Closing stock fine</span><div className="big">{wt(yearClose.closingStockFine)}</div></div>
+                <div className="tile">
+                  <span className="muted">Accounts carried</span>
+                  <div className="big">{yearClose.carried}</div>
+                </div>
+                <div className="tile">
+                  <span className="muted">Prior rows replaced</span>
+                  <div className="big">{yearClose.deleted}</div>
+                </div>
+                <div className="tile">
+                  <span className="muted">Closing stock fine</span>
+                  <div className="big">{wt(yearClose.closingStockFine)}</div>
+                </div>
               </>
             )}
-            {openings && <div className="tile"><span className="muted">Party openings carried</span><div className="big">{openings.parties}</div></div>}
+            {openings && (
+              <div className="tile">
+                <span className="muted">Party openings carried</span>
+                <div className="big">{openings.parties}</div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -215,7 +259,9 @@ export default function BalanceTransferPage() {
               Ac Balance preview — {preview.fromYear} ({preview.accounts} account
               {preview.accounts === 1 ? '' : 's'})
             </strong>
-            <span className="muted">Closing stock fine: <strong>{wt(preview.closingStockFine)}</strong></span>
+            <span className="muted">
+              Closing stock fine: <strong>{wt(preview.closingStockFine)}</strong>
+            </span>
           </div>
           {rows.length === 0 ? (
             <span className="muted">No non-zero account balances for {preview.fromYear}.</span>
@@ -263,7 +309,8 @@ export default function BalanceTransferPage() {
         <strong>BtmSchm dashboard coverage</strong>
         <p className="muted">
           The desktop form also acts as a launcher for stock, order, pledge, loan, repair, lot and
-          manufacturing transfer work. Those workflows remain available from their dedicated web modules.
+          manufacturing transfer work. Those workflows remain available from their dedicated web
+          modules.
         </p>
         <div className="tiles">
           {relatedActions.map((action) => (

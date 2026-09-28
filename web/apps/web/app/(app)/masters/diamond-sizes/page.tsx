@@ -81,7 +81,10 @@ export default function DiamondSizesPage() {
       } catch (error) {
         setMsg({
           kind: 'err',
-          text: error instanceof ApiError ? error.body?.message || error.body?.error || error.message : 'failed',
+          text:
+            error instanceof ApiError
+              ? error.body?.message || error.body?.error || error.message
+              : 'failed',
         });
       } finally {
         setBusy(false);
@@ -117,7 +120,10 @@ export default function DiamondSizesPage() {
     } catch (error) {
       setMsg({
         kind: 'err',
-        text: error instanceof ApiError ? error.body?.message || error.body?.detail || error.body?.error || error.message : 'failed',
+        text:
+          error instanceof ApiError
+            ? error.body?.message || error.body?.detail || error.body?.error || error.message
+            : 'failed',
       });
     } finally {
       setBusy(false);
@@ -142,7 +148,10 @@ export default function DiamondSizesPage() {
     } catch (error) {
       setMsg({
         kind: 'err',
-        text: error instanceof ApiError ? error.body?.message || error.body?.error || error.message : 'failed',
+        text:
+          error instanceof ApiError
+            ? error.body?.message || error.body?.error || error.message
+            : 'failed',
       });
     } finally {
       setBusy(false);
@@ -200,28 +209,57 @@ export default function DiamondSizesPage() {
               <tr key={index}>
                 <td className="num muted">{index + 1}</td>
                 <td>
-                  <input value={row.dmSize} onChange={(event) => setRow(index, 'dmSize', event.target.value)} style={{ width: 120 }} />
+                  <input
+                    value={row.dmSize}
+                    onChange={(event) => setRow(index, 'dmSize', event.target.value)}
+                    style={{ width: 120 }}
+                  />
                 </td>
                 <td className="num">
-                  <input value={row.dmWt} onChange={(event) => setRow(index, 'dmWt', event.target.value)} style={{ width: 80, textAlign: 'right' }} />
+                  <input
+                    value={row.dmWt}
+                    onChange={(event) => setRow(index, 'dmWt', event.target.value)}
+                    style={{ width: 80, textAlign: 'right' }}
+                  />
                 </td>
                 <td className="num">
-                  <input value={row.pcsGht} onChange={(event) => setRow(index, 'pcsGht', event.target.value)} style={{ width: 80, textAlign: 'right' }} />
+                  <input
+                    value={row.pcsGht}
+                    onChange={(event) => setRow(index, 'pcsGht', event.target.value)}
+                    style={{ width: 80, textAlign: 'right' }}
+                  />
                 </td>
                 <td className="num">
-                  <input value={row.pcsLbr} onChange={(event) => setRow(index, 'pcsLbr', event.target.value)} style={{ width: 80, textAlign: 'right' }} />
+                  <input
+                    value={row.pcsLbr}
+                    onChange={(event) => setRow(index, 'pcsLbr', event.target.value)}
+                    style={{ width: 80, textAlign: 'right' }}
+                  />
                 </td>
                 <td>
-                  <input value={row.rateType} maxLength={1} onChange={(event) => setRow(index, 'rateType', event.target.value)} style={{ width: 70 }} />
+                  <input
+                    value={row.rateType}
+                    maxLength={1}
+                    onChange={(event) => setRow(index, 'rateType', event.target.value)}
+                    style={{ width: 70 }}
+                  />
                 </td>
                 <td className="num">
-                  <input value={row.dmRate} onChange={(event) => setRow(index, 'dmRate', event.target.value)} style={{ width: 90, textAlign: 'right' }} />
+                  <input
+                    value={row.dmRate}
+                    onChange={(event) => setRow(index, 'dmRate', event.target.value)}
+                    style={{ width: 90, textAlign: 'right' }}
+                  />
                 </td>
                 <td>
                   <button
                     type="button"
                     className="danger"
-                    onClick={() => setRows((current) => (current.length > 1 ? current.filter((_, i) => i !== index) : [blankLine()]))}
+                    onClick={() =>
+                      setRows((current) =>
+                        current.length > 1 ? current.filter((_, i) => i !== index) : [blankLine()],
+                      )
+                    }
                   >
                     ×
                   </button>
@@ -231,7 +269,11 @@ export default function DiamondSizesPage() {
           </tbody>
         </table>
         <div className="toolbar" style={{ marginTop: 10 }}>
-          <button type="button" className="ghost" onClick={() => setRows((current) => [...current, blankLine()])}>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => setRows((current) => [...current, blankLine()])}
+          >
             + Add Row
           </button>
           <span className="spacer" />

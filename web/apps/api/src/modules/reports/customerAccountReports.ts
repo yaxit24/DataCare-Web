@@ -65,7 +65,10 @@ function datePredicate(column: string, s: ReportScope, params: unknown[]): strin
  * uses the stored LAST_VISIT when present and computes the latest AC_DATA voucher as the fallback, preserving
  * the same visible columns while keeping the route read-only.
  */
-export async function lastVisitReport(prisma: any, s: ReportScope): Promise<{ rows: LastVisitRow[] }> {
+export async function lastVisitReport(
+  prisma: any,
+  s: ReportScope,
+): Promise<{ rows: LastVisitRow[] }> {
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const params: unknown[] = [s.tenantId, s.coCode];
     const scopeWhere = ['a.tenant_id=$1', 'a."CO_CODE"::text=$2'];

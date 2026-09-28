@@ -28,10 +28,14 @@ async function wipe() {
   const rows = (await owner.$queryRawUnsafe(
     `SELECT table_name FROM information_schema.columns WHERE column_name='tenant_id' AND table_schema='public'`,
   )) as { table_name: string }[];
-  for (const row of rows) await owner.$executeRawUnsafe(`DELETE FROM "${row.table_name}" WHERE tenant_id=$1`, TENANT);
+  for (const row of rows)
+    await owner.$executeRawUnsafe(`DELETE FROM "${row.table_name}" WHERE tenant_id=$1`, TENANT);
 }
 
-async function seedBook(coBook: string, values: Partial<{ bookType: string; mainBook: string; reset: string }>) {
+async function seedBook(
+  coBook: string,
+  values: Partial<{ bookType: string; mainBook: string; reset: string }>,
+) {
   await exec(
     `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","BOOK_TYPE","MAIN_BOOK","RESET_BOOK","DATA_TYPE")
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'O')`,
@@ -308,9 +312,9 @@ describe.runIf(RUN)('UT_IMPORT Estimate Reset utility', () => {
     expect(diff(preview, 'APR_DETL').delete).toBe(2);
     expect(diff(preview, 'APR_DATA').delete).toBe(2);
 
-    await expect(applyEstimateReset(runtime, scope, { asOfDate: AS_OF, confirmation: 'wrong' })).rejects.toThrow(
-      /RESET ESTIMATE/,
-    );
+    await expect(
+      applyEstimateReset(runtime, scope, { asOfDate: AS_OF, confirmation: 'wrong' }),
+    ).rejects.toThrow(/RESET ESTIMATE/);
 
     const applied = await applyEstimateReset(runtime, scope, {
       asOfDate: AS_OF,
@@ -331,7 +335,13 @@ describe.runIf(RUN)('UT_IMPORT Estimate Reset utility', () => {
     expect(await count('APR_DATA')).toBe(1);
     expect(await count('APR_DETL', `AND "TAG_NO"='STAY'`)).toBe(1);
 
-    const adjust = await query<{ headers: number; details: number; temp_rows: number; sign: string | null; transfer: string | null }>(
+    const adjust = await query<{
+      headers: number;
+      details: number;
+      temp_rows: number;
+      sign: string | null;
+      transfer: string | null;
+    }>(
       `SELECT
          (SELECT count(*)::int FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='163') AS headers,
          (SELECT count(*)::int FROM "BAR_CAN_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='163') AS details,
@@ -340,7 +350,13 @@ describe.runIf(RUN)('UT_IMPORT Estimate Reset utility', () => {
          (SELECT min("DATA_TRFR") FROM "BAR_CAN_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='163') AS transfer`,
       TENANT,
     );
-    expect(adjust[0]).toMatchObject({ headers: 3, details: 3, temp_rows: 3, sign: '-', transfer: 'N' });
+    expect(adjust[0]).toMatchObject({
+      headers: 3,
+      details: 3,
+      temp_rows: 3,
+      sign: '-',
+      transfer: 'N',
+    });
 
     const barData = await query<{ stk: string | null }>(
       `SELECT "STK_IT_CODE" AS stk FROM "BAR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='NUL'`,

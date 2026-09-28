@@ -766,7 +766,10 @@ export default function SalesQuotationPage() {
             `/sales-quotations/${encodeURIComponent(loadedVchNo)}`,
             body,
           )
-        : await post<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>('/sales-quotations', body);
+        : await post<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>(
+            '/sales-quotations',
+            body,
+          );
       setResult(saved);
       const savedNo = String(saved.vchNo).padStart(5, '0');
       setLoadedVchNo(savedNo);
@@ -832,7 +835,12 @@ export default function SalesQuotationPage() {
             </button>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="099" mainBooks={['SL QUOT']} />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="099"
+                mainBooks={['SL QUOT']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

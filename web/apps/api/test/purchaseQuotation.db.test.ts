@@ -65,7 +65,11 @@ async function wipe() {
 }
 
 async function seed() {
-  await exec(`INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`, TENANT, CO);
+  await exec(
+    `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
+    TENANT,
+    CO,
+  );
   await exec(
     `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","PR_TDS_TAX") VALUES ($1,$2,'N')`,
     TENANT,

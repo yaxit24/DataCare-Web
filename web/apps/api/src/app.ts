@@ -1,7 +1,13 @@
 import { LastDayLockConfigurationError } from './modules/shared/lastDayLock.js';
 import { loginSessionContext } from './modules/auth/sessionContextLogin.js';
-import { refreshSessionContext, type RefreshContextDependencies } from './modules/auth/sessionContextRefresh.js';
-import { selectSessionContext, ContextSelectionError } from './modules/auth/sessionContextSelection.js';
+import {
+  refreshSessionContext,
+  type RefreshContextDependencies,
+} from './modules/auth/sessionContextRefresh.js';
+import {
+  selectSessionContext,
+  ContextSelectionError,
+} from './modules/auth/sessionContextSelection.js';
 import { validateAccessSessionContext } from './modules/auth/sessionContextAccess.js';
 import type { UnknownSessionLedgerContext } from './modules/auth/sessionContextValue.js';
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
@@ -17,14 +23,8 @@ import {
   verifyRefreshToken,
   type SessionClaims,
 } from './modules/auth/jwt.js';
-import {
-  revokeSession,
-  SessionRejectedError,
-} from './modules/auth/session.js';
-import {
-  changeOwnPassword,
-  PasswordChangeError,
-} from './modules/auth/passwordAccount.js';
+import { revokeSession, SessionRejectedError } from './modules/auth/session.js';
+import { changeOwnPassword, PasswordChangeError } from './modules/auth/passwordAccount.js';
 import { PasswordPolicyError } from './modules/auth/password.js';
 import {
   enforceRequestScope,
@@ -246,21 +246,47 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   };
 
   const contextDescriptor = (session: {
-    sessionId: string; contextEpoch: string; coCode: string; lcCode: string; coYear?: string;
+    sessionId: string;
+    contextEpoch: string;
+    coCode: string;
+    lcCode: string;
+    coYear?: string;
   }) => ({
-    sessionId: session.sessionId, contextEpoch: session.contextEpoch,
-    coCode: session.coCode, lcCode: session.lcCode, coYear: session.coYear ?? null,
+    sessionId: session.sessionId,
+    contextEpoch: session.contextEpoch,
+    coCode: session.coCode,
+    lcCode: session.lcCode,
+    coYear: session.coYear ?? null,
   });
-  const issueContextTokens: RefreshContextDependencies['issueTokens'] = async ({ session, principal, refreshJti }) => {
-    const accessToken = await issueAccess({
-      sub: session.loginName, tenantId: session.tenantId, sid: session.sessionId,
-      loginCoCode: session.loginCoCode, coCode: session.coCode, lcCode: session.lcCode,
-      coYear: session.coYear, contextEpoch: session.contextEpoch,
-      rights: principal.rights, passwordResetRequired: principal.passwordResetRequired,
-    }, secret);
-    const refreshToken = await issueRefresh({
-      sub: session.loginName, tenantId: session.tenantId, sid: session.sessionId, jti: refreshJti,
-    }, secret);
+  const issueContextTokens: RefreshContextDependencies['issueTokens'] = async ({
+    session,
+    principal,
+    refreshJti,
+  }) => {
+    const accessToken = await issueAccess(
+      {
+        sub: session.loginName,
+        tenantId: session.tenantId,
+        sid: session.sessionId,
+        loginCoCode: session.loginCoCode,
+        coCode: session.coCode,
+        lcCode: session.lcCode,
+        coYear: session.coYear,
+        contextEpoch: session.contextEpoch,
+        rights: principal.rights,
+        passwordResetRequired: principal.passwordResetRequired,
+      },
+      secret,
+    );
+    const refreshToken = await issueRefresh(
+      {
+        sub: session.loginName,
+        tenantId: session.tenantId,
+        sid: session.sessionId,
+        jti: refreshJti,
+      },
+      secret,
+    );
     return { accessToken, refreshToken };
   };
 
@@ -292,8 +318,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       const stored = await validateAccessSessionContext(prisma, claims);
       const pageSession = req.headers['x-session-context-id'];
       const pageEpoch = req.headers['x-session-context-epoch'];
-      if ((pageSession !== undefined || pageEpoch !== undefined) &&
-          (pageSession !== stored.sessionId || pageEpoch !== stored.contextEpoch)) {
+      if (
+        (pageSession !== undefined || pageEpoch !== undefined) &&
+        (pageSession !== stored.sessionId || pageEpoch !== stored.contextEpoch)
+      ) {
         await reply.code(409).send({ error: 'context-stale' });
         return;
       }
@@ -459,16 +487,30 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         return reply.code(400).send({ error: 'missing-fields' });
       }
       try {
-        const created = await loginSessionContext(prisma, {
-          tenantId, coCode: b.coCode, loginName: b.loginName, password: b.password,
-          lcCode: b.lcCode, coYear: b.coYear,
-        }, { issueTokens: issueContextTokens });
-        reply.setCookie('access', created.accessToken, accessCookie)
+        const created = await loginSessionContext(
+          prisma,
+          {
+            tenantId,
+            coCode: b.coCode,
+            loginName: b.loginName,
+            password: b.password,
+            lcCode: b.lcCode,
+            coYear: b.coYear,
+          },
+          { issueTokens: issueContextTokens },
+        );
+        reply
+          .setCookie('access', created.accessToken, accessCookie)
           .setCookie('refresh', created.refreshToken, refreshCookie);
         return {
-          user: created.session.loginName, rights: created.principal.rights,
+          user: created.session.loginName,
+          rights: created.principal.rights,
           forcedReset: created.principal.passwordResetRequired,
-          scope: { coCode: created.session.coCode, lcCode: created.session.lcCode, coYear: created.session.coYear ?? null },
+          scope: {
+            coCode: created.session.coCode,
+            lcCode: created.session.lcCode,
+            coYear: created.session.coYear ?? null,
+          },
           context: contextDescriptor(created.session),
           ledgerContext: created.session.ledgerContext,
         };
@@ -498,10 +540,17 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     if (!token) return reply.code(401).send({ error: 'invalid-refresh' });
     try {
       const claims = await verifyRefreshToken(token, secret);
-      const refreshed = await refreshSessionContext(prisma, claims, { issueTokens: issueContextTokens });
-      reply.setCookie('access', refreshed.accessToken, accessCookie)
+      const refreshed = await refreshSessionContext(prisma, claims, {
+        issueTokens: issueContextTokens,
+      });
+      reply
+        .setCookie('access', refreshed.accessToken, accessCookie)
         .setCookie('refresh', refreshed.refreshToken, refreshCookie);
-      return { refreshed: true, context: contextDescriptor(refreshed.session), ledgerContext: refreshed.session.ledgerContext };
+      return {
+        refreshed: true,
+        context: contextDescriptor(refreshed.session),
+        ledgerContext: refreshed.session.ledgerContext,
+      };
     } catch {
       reply.clearCookie('access', cookieBase).clearCookie('refresh', cookieBase);
       return reply.code(401).send({ error: 'invalid-refresh' });
@@ -563,7 +612,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     );
     return {
       user: s.sub,
-      context: contextDescriptor({ sessionId: s.sid, contextEpoch: s.contextEpoch, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear }),
+      context: contextDescriptor({
+        sessionId: s.sid,
+        contextEpoch: s.contextEpoch,
+        coCode: s.coCode,
+        lcCode: s.lcCode,
+        coYear: s.coYear,
+      }),
       ledgerContext: s.ledgerContext,
       coCode: s.coCode,
       lcCode: s.lcCode,
@@ -634,28 +689,53 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       reply.header('Cache-Control', 'no-store');
       const s = sess(req);
       try {
-        const selected = await selectSessionContext(prisma, {
-          identity: { tenantId: s.tenantId, sessionId: s.sid, loginName: s.sub,
-            loginCoCode: s.loginCoCode, coCode: s.coCode, lcCode: s.lcCode,
-            coYear: s.coYear, contextEpoch: s.contextEpoch },
-          request: req.body,
-        }, { signAccess: (descriptor) => issueAccess({ ...descriptor }, secret) });
+        const selected = await selectSessionContext(
+          prisma,
+          {
+            identity: {
+              tenantId: s.tenantId,
+              sessionId: s.sid,
+              loginName: s.sub,
+              loginCoCode: s.loginCoCode,
+              coCode: s.coCode,
+              lcCode: s.lcCode,
+              coYear: s.coYear,
+              contextEpoch: s.contextEpoch,
+            },
+            request: req.body,
+          },
+          { signAccess: (descriptor) => issueAccess({ ...descriptor }, secret) },
+        );
         reply.setCookie('access', selected.accessToken, accessCookie);
-        return { coCode: selected.session.coCode, lcCode: selected.session.lcCode,
-          coYear: selected.session.coYear, scoped: true, replayed: selected.replayed,
+        return {
+          coCode: selected.session.coCode,
+          lcCode: selected.session.lcCode,
+          coYear: selected.session.coYear,
+          scoped: true,
+          replayed: selected.replayed,
           ledgerContext: selected.session.ledgerContext,
-          context: contextDescriptor(selected.session) };
+          context: contextDescriptor(selected.session),
+        };
       } catch (error) {
-        if (error instanceof ScopeError) return reply.code(error.statusCode).send({ error: error.code });
+        if (error instanceof ScopeError)
+          return reply.code(error.statusCode).send({ error: error.code });
         if (error instanceof ContextSelectionError) {
-          const status = error.code === 'invalid-context-selection-request' ? 400 :
-            ['password-reset-required','target-password-reset-required'].includes(error.code) ? 403 :
-            ['session-invalid','session-revoked','session-expired'].includes(error.code) ? 401 :
-            error.code === 'context-signing-failed' ? 500 : 409;
+          const status =
+            error.code === 'invalid-context-selection-request'
+              ? 400
+              : ['password-reset-required', 'target-password-reset-required'].includes(error.code)
+                ? 403
+                : ['session-invalid', 'session-revoked', 'session-expired'].includes(error.code)
+                  ? 401
+                  : error.code === 'context-signing-failed'
+                    ? 500
+                    : 409;
           return reply.code(status).send({ error: error.code });
         }
-        if (error instanceof PrincipalUnavailableError) return reply.code(401).send({ error: 'session-invalid' });
-        if (error instanceof LastDayLockConfigurationError) return reply.code(409).send({ error: 'last-day-lock-invalid' });
+        if (error instanceof PrincipalUnavailableError)
+          return reply.code(401).send({ error: 'session-invalid' });
+        if (error instanceof LastDayLockConfigurationError)
+          return reply.code(409).send({ error: 'last-day-lock-invalid' });
         throw error;
       }
     },

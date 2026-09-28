@@ -821,8 +821,7 @@ async function writePurchaseTx(
       const itemType = String(r.typ ?? '')
         .trim()
         .toUpperCase();
-      if (!item)
-        throw new PurchaseValidationError(`item not found or invalid: ${item || '?'}`);
+      if (!item) throw new PurchaseValidationError(`item not found or invalid: ${item || '?'}`);
       if (!isPurchaseQuotation && !account)
         throw new PurchaseValidationError(`missing GROUP_MAST.PURC_AC for item ${item || '?'}`);
       if (itemType !== 'G' && itemType !== 'S') {
@@ -1095,67 +1094,71 @@ async function writePurchaseTx(
     })),
   );
 
-  const barDetl = isPurchaseQuotation ? [] : computed.flatMap((c, idx) => {
-    if (!c.in.tagNo) return [];
-    return [
-      {
-        ...key,
-        SR_NO: idx + 1,
-        OLD_SRNO: idx + 1,
-        VCH_DATE: vchDate,
-        VCH_TIME: sharedVoucherTime,
-        VCH_TYPE: bookPolicy.vchType,
-        INOUT_TYPE: 'I',
-        ENTRY_TYPE: 'P',
-        BOOK_NAME: bookPolicy.bookName,
-        AC_CODE: input.acCode,
-        MAIN_USER: ctx.mainUser || null,
-        HD_VCH_NO: ctx.hdVchNo,
-        TAG_NO: c.in.tagNo,
-        VCH_SRNO: tagSrnos.get(idx) ?? 0,
-        IT_CODE: c.in.itCode,
-        ITM_PCS: num(c.in.pcs),
-        ITM_GWT: num(c.in.grossWt),
-        ITM_NWT: num(c.in.netWt),
-        ITM_TOUCH: num(c.in.touch),
-        ITM_WEST_PRC: num(c.in.westPct),
-        ITM_FINE: c.calc.fine,
-        ITM_RATE: num(c.in.rate),
-        ITM_AMT: c.calc.metal,
-        LBR_AMT: c.calc.labour,
-        OTH_AMT: num(c.in.otherAmount),
-        RATE_TYPE: c.in.metalAmount != null ? 'A' : 'P',
-        IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
-        HM_ID: c.in.huid ?? null,
-      },
-    ];
-  });
-  const barIdtl = isPurchaseQuotation ? [] : computed.flatMap((c, idx) => {
-    if (!c.in.tagNo) return [];
-    return [
-      {
-        ...key,
-        SR_NO: idx + 1,
-        ISR_NO: 1,
-        VCH_DATE: vchDate,
-        VCH_TYPE: bookPolicy.vchType,
-        INOUT_TYPE: 'I',
-        ENTRY_TYPE: 'P',
-        BOOK_NAME: bookPolicy.bookName,
-        AC_CODE: input.acCode,
-        TAG_NO: c.in.tagNo,
-        VCH_SRNO: tagSrnos.get(idx) ?? 0,
-        IT_CODE: c.in.itCode,
-        IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
-        IT_PCS: num(c.in.pcs),
-        IT_GWT: num(c.in.grossWt),
-        IT_RATE: num(c.in.rate),
-        IT_AMT: c.calc.metal,
-        IT_LBR_AMT: c.calc.labour,
-        IT_NET_AMT: c.calc.net,
-      },
-    ];
-  });
+  const barDetl = isPurchaseQuotation
+    ? []
+    : computed.flatMap((c, idx) => {
+        if (!c.in.tagNo) return [];
+        return [
+          {
+            ...key,
+            SR_NO: idx + 1,
+            OLD_SRNO: idx + 1,
+            VCH_DATE: vchDate,
+            VCH_TIME: sharedVoucherTime,
+            VCH_TYPE: bookPolicy.vchType,
+            INOUT_TYPE: 'I',
+            ENTRY_TYPE: 'P',
+            BOOK_NAME: bookPolicy.bookName,
+            AC_CODE: input.acCode,
+            MAIN_USER: ctx.mainUser || null,
+            HD_VCH_NO: ctx.hdVchNo,
+            TAG_NO: c.in.tagNo,
+            VCH_SRNO: tagSrnos.get(idx) ?? 0,
+            IT_CODE: c.in.itCode,
+            ITM_PCS: num(c.in.pcs),
+            ITM_GWT: num(c.in.grossWt),
+            ITM_NWT: num(c.in.netWt),
+            ITM_TOUCH: num(c.in.touch),
+            ITM_WEST_PRC: num(c.in.westPct),
+            ITM_FINE: c.calc.fine,
+            ITM_RATE: num(c.in.rate),
+            ITM_AMT: c.calc.metal,
+            LBR_AMT: c.calc.labour,
+            OTH_AMT: num(c.in.otherAmount),
+            RATE_TYPE: c.in.metalAmount != null ? 'A' : 'P',
+            IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+            HM_ID: c.in.huid ?? null,
+          },
+        ];
+      });
+  const barIdtl = isPurchaseQuotation
+    ? []
+    : computed.flatMap((c, idx) => {
+        if (!c.in.tagNo) return [];
+        return [
+          {
+            ...key,
+            SR_NO: idx + 1,
+            ISR_NO: 1,
+            VCH_DATE: vchDate,
+            VCH_TYPE: bookPolicy.vchType,
+            INOUT_TYPE: 'I',
+            ENTRY_TYPE: 'P',
+            BOOK_NAME: bookPolicy.bookName,
+            AC_CODE: input.acCode,
+            TAG_NO: c.in.tagNo,
+            VCH_SRNO: tagSrnos.get(idx) ?? 0,
+            IT_CODE: c.in.itCode,
+            IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+            IT_PCS: num(c.in.pcs),
+            IT_GWT: num(c.in.grossWt),
+            IT_RATE: num(c.in.rate),
+            IT_AMT: c.calc.metal,
+            IT_LBR_AMT: c.calc.labour,
+            IT_NET_AMT: c.calc.net,
+          },
+        ];
+      });
 
   const header = {
     ...key,
@@ -1296,7 +1299,9 @@ async function writePurchaseTx(
   const tender = isPurchaseQuotation
     ? {
         cashAmt: round2(num(input.cashAmt)),
-        paidNow: round2(num(input.cashAmt) + num(input.chequeAmt) + num(input.cardAmt) + num(input.upiAmt)),
+        paidNow: round2(
+          num(input.cashAmt) + num(input.chequeAmt) + num(input.cardAmt) + num(input.upiAmt),
+        ),
         kasar: round2(num(input.kasar)),
         legs: [] as LedgerLine[],
       }
@@ -1929,9 +1934,13 @@ function normalizeConsignmentPurchaseInput(
     consiDbcd: text(line.consiDbcd || source.coBook).slice(0, 3),
     consiSrno: num(line.consiSrno),
   }));
-  const missingLine = normalizedLines.find((line) => !line.consiNo || !line.consiYrcd || !line.consiDbcd || !line.consiSrno);
+  const missingLine = normalizedLines.find(
+    (line) => !line.consiNo || !line.consiYrcd || !line.consiDbcd || !line.consiSrno,
+  );
   if (missingLine) {
-    throw new PurchaseValidationError('each consignment purchase line requires a source line serial');
+    throw new PurchaseValidationError(
+      'each consignment purchase line requires a source line serial',
+    );
   }
   return {
     input: {
@@ -1953,7 +1962,9 @@ async function assertConsignmentPurchaseSourceOpenTx(
 ): Promise<void> {
   const normalized = normalizeConsignmentPurchaseInput(input, lines);
   const source = normalized.source;
-  const srnos = [...new Set(normalized.lines.map((line) => num(line.consiSrno)).filter((n) => n > 0))];
+  const srnos = [
+    ...new Set(normalized.lines.map((line) => num(line.consiSrno)).filter((n) => n > 0)),
+  ];
   const rows: Array<{ OLD_SRNO: unknown; CON_ISU_REC: unknown; MAIN_BOOK: unknown }> =
     await tx.$queryRawUnsafe(
       `SELECT a."OLD_SRNO",a."CON_ISU_REC",d."MAIN_BOOK"
@@ -2516,7 +2527,9 @@ export async function listOpenConsignmentPurchaseReceipts(
       coYear: sourceYear,
       coBook: actualSourceBook,
       acCode: text(first.AC_CODE),
-      acName: receipts.find((r) => r.voucherNo === sourceVchNo && r.coBook === actualSourceBook)?.acName ?? '',
+      acName:
+        receipts.find((r) => r.voucherNo === sourceVchNo && r.coBook === actualSourceBook)
+          ?.acName ?? '',
     };
     return {
       source,

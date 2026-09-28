@@ -436,7 +436,6 @@ export default function ConsiPurchaseEntryPage() {
     }
   }
 
-
   async function loadOpenReceipts() {
     if (!coBook) return;
     setBusy(true);
@@ -476,7 +475,11 @@ export default function ConsiPurchaseEntryPage() {
         lineFromApi(line, { consiNo: sourceNo, consiYrcd: sourceYear, consiDbcd: sourceBook }),
       );
       setLines(imported.length ? imported : [blank()]);
-      stones.load((view.lines ?? []).map((line: any) => (line.stones ?? []).map((stone: any) => stoneRowFromApi(stone))));
+      stones.load(
+        (view.lines ?? []).map((line: any) =>
+          (line.stones ?? []).map((stone: any) => stoneRowFromApi(stone)),
+        ),
+      );
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -669,7 +672,12 @@ export default function ConsiPurchaseEntryPage() {
             </button>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="203" mainBooks={['CON PUR']} />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="203"
+                mainBooks={['CON PUR']}
+              />
             </div>
             <div className="field">
               <label>Year</label>
@@ -681,7 +689,11 @@ export default function ConsiPurchaseEntryPage() {
             </div>
             <div className="field">
               <label>Consi No</label>
-              <input value={consiNo} onChange={(e) => setConsiNo(e.target.value)} placeholder="00001" />
+              <input
+                value={consiNo}
+                onChange={(e) => setConsiNo(e.target.value)}
+                placeholder="00001"
+              />
             </div>
             <div className="field">
               <label>Consi Year</label>
@@ -689,12 +701,26 @@ export default function ConsiPurchaseEntryPage() {
             </div>
             <div className="field">
               <label>Consi Book</label>
-              <input value={consiDbCd} onChange={(e) => setConsiDbCd(e.target.value)} placeholder="201" />
+              <input
+                value={consiDbCd}
+                onChange={(e) => setConsiDbCd(e.target.value)}
+                placeholder="201"
+              />
             </div>
-            <button type="button" className="ghost" disabled={busy || !coBook} onClick={loadOpenReceipts}>
+            <button
+              type="button"
+              className="ghost"
+              disabled={busy || !coBook}
+              onClick={loadOpenReceipts}
+            >
               Open Consignments
             </button>
-            <button type="button" className="ghost" disabled={busy || !coBook || !consiNo} onClick={() => importConsignmentReceipt()}>
+            <button
+              type="button"
+              className="ghost"
+              disabled={busy || !coBook || !consiNo}
+              onClick={() => importConsignmentReceipt()}
+            >
               Import Consi
             </button>
             <div className="field">
@@ -768,10 +794,18 @@ export default function ConsiPurchaseEntryPage() {
                     <td>{receipt.acName || receipt.acCode || ''}</td>
                     <td>{receipt.coYear}</td>
                     <td>{receipt.coBook}</td>
-                    <td className="num">{Number(receipt.balanceGrossWt ?? 0).toLocaleString('en-IN')}</td>
-                    <td className="num">{Number(receipt.balanceNetWt ?? 0).toLocaleString('en-IN')}</td>
+                    <td className="num">
+                      {Number(receipt.balanceGrossWt ?? 0).toLocaleString('en-IN')}
+                    </td>
+                    <td className="num">
+                      {Number(receipt.balanceNetWt ?? 0).toLocaleString('en-IN')}
+                    </td>
                     <td>
-                      <button type="button" className="ghost" onClick={() => importConsignmentReceipt(receipt)}>
+                      <button
+                        type="button"
+                        className="ghost"
+                        onClick={() => importConsignmentReceipt(receipt)}
+                      >
                         Import
                       </button>
                     </td>
@@ -1092,7 +1126,11 @@ export default function ConsiPurchaseEntryPage() {
               <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
             </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : loadedVchNo ? 'Update Consignment Purchase' : 'Save Consignment Purchase'}
+              {busy
+                ? 'Saving…'
+                : loadedVchNo
+                  ? 'Update Consignment Purchase'
+                  : 'Save Consignment Purchase'}
             </button>
           </div>
         </div>

@@ -14,16 +14,21 @@ const databaseDescribe = RUN ? describe : describe.skip;
 
 databaseDescribe('TR_SALE_ORD Tour Order lifecycle parity', () => {
   const owner = new PrismaClient({
-    datasources: { db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' } },
+    datasources: {
+      db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' },
+    },
   });
-  const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL ?? '' } } });
+  const runtime = new PrismaClient({
+    datasources: { db: { url: process.env.DATABASE_URL ?? '' } },
+  });
   const tenantId = 'tour-order-db';
   const CO = '01';
   const LC = '01';
   const YEAR = '2024-2025';
   const DAY = '2024-07-10';
   const EDIT_DAY = '2024-07-11';
-  const scope = (coBook = '510') => ({ tenantId, coCode: CO, lcCode: LC, coYear: YEAR, coBook }) as any;
+  const scope = (coBook = '510') =>
+    ({ tenantId, coCode: CO, lcCode: LC, coYear: YEAR, coBook }) as any;
 
   const tables = [
     'DELETE_DATA',
@@ -44,7 +49,8 @@ databaseDescribe('TR_SALE_ORD Tour Order lifecycle parity', () => {
     withTenant(owner, tenantId, (tx: any) => tx.$executeRawUnsafe(sql, ...params));
 
   async function clean() {
-    for (const table of tables) await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, tenantId);
+    for (const table of tables)
+      await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, tenantId);
   }
 
   async function seed() {
@@ -219,10 +225,21 @@ databaseDescribe('TR_SALE_ORD Tour Order lifecycle parity', () => {
 
     await editTourOrder(runtime, tourInput({ vchDate: EDIT_DAY, advanceAmount: 10 }) as any, vchNo);
     const edited = (await getTourOrder(runtime, scope(), vchNo)) as any;
-    expect(edited).toMatchObject({ vchDate: EDIT_DAY, advanceAmount: 10, hiddenVoucherNo: '00001' });
+    expect(edited).toMatchObject({
+      vchDate: EDIT_DAY,
+      advanceAmount: 10,
+      hiddenVoucherNo: '00001',
+    });
 
     await cancelTourOrder(runtime, { scope: scope(), vchNo, deleteUser: 'tour-delete' });
-    for (const table of ['SL_ORD_DATA', 'SL_ORD_DETL', 'SL_ORD_IDTL', 'AC_DATA', 'ROJ_MEL_DATA', 'TEMP_BOOK_DATA']) {
+    for (const table of [
+      'SL_ORD_DATA',
+      'SL_ORD_DETL',
+      'SL_ORD_IDTL',
+      'AC_DATA',
+      'ROJ_MEL_DATA',
+      'TEMP_BOOK_DATA',
+    ]) {
       const rows = (await owner.$queryRawUnsafe(
         `SELECT count(*)::int AS n FROM "${table}" WHERE tenant_id=$1`,
         tenantId,

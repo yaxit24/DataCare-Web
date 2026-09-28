@@ -291,9 +291,7 @@ export default function RateCutPage() {
   const pickBooking = (i: number, row: LookupRow) =>
     setLines((rows) => rows.map((line, j) => (j === i ? bookingPatch(line, row) : line)));
   const pickReceivedBooking = (i: number, row: LookupRow) =>
-    setReceivedLines((rows) =>
-      rows.map((line, j) => (j === i ? bookingPatch(line, row) : line)),
-    );
+    setReceivedLines((rows) => rows.map((line, j) => (j === i ? bookingPatch(line, row) : line)));
   const addRow = () => setLines((ls) => [...ls, blankLine()]);
   const addReceivedRow = () => setReceivedLines((rows) => [...rows, blankLine()]);
   const removeRow = (i: number) =>

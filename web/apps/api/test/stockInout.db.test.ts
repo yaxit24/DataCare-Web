@@ -17,9 +17,13 @@ const d = RUN ? describe : describe.skip;
 
 d('TR_INOUT Stock In/Stock Out lifecycle parity', () => {
   const owner = new PrismaClient({
-    datasources: { db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' } },
+    datasources: {
+      db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' },
+    },
   });
-  const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL ?? '' } } });
+  const runtime = new PrismaClient({
+    datasources: { db: { url: process.env.DATABASE_URL ?? '' } },
+  });
   const tenantId = 'stock-inout-db';
   const CO = '01';
   const LC = '01';
@@ -324,7 +328,9 @@ d('TR_INOUT Stock In/Stock Out lifecycle parity', () => {
         vchDate: '2024-06-11',
         mainUser: 'stock-edit',
         toLcCode: '02',
-        lines: [stockOutLine({ netWt: 8, grossWt: 9, ghtWt: 0, fineWt: 7.5, remark: 'edited out' })],
+        lines: [
+          stockOutLine({ netWt: 8, grossWt: 9, ghtWt: 0, fineWt: 7.5, remark: 'edited out' }),
+        ],
       } as any,
       vchNo,
     );
@@ -347,7 +353,14 @@ d('TR_INOUT Stock In/Stock Out lifecycle parity', () => {
     expect(deleteBefore[0]!.n).toBe(0);
 
     await deleteStockOut(runtime, { scope: outScope, vchNo, deleteUser: 'deleter' });
-    for (const table of ['INOUT_DATA', 'INOUT_DETL', 'MAIN_STOCK', 'AC_DATA', 'ROJ_MEL_DATA', 'TEMP_BOOK_DATA']) {
+    for (const table of [
+      'INOUT_DATA',
+      'INOUT_DETL',
+      'MAIN_STOCK',
+      'AC_DATA',
+      'ROJ_MEL_DATA',
+      'TEMP_BOOK_DATA',
+    ]) {
       const rows = (await owner.$queryRawUnsafe(
         `SELECT count(*)::int AS n FROM "${table}" WHERE tenant_id=$1`,
         tenantId,
@@ -475,7 +488,13 @@ d('TR_INOUT Stock In/Stock Out lifecycle parity', () => {
         ),
       )) as Array<Record<string, unknown>>
     )[0]!;
-    expect(ledger).toMatchObject({ BOOK_NAME: 'INWORD', AC_CODE: 'SRCAC', LD_CODE: '00008', SIGN: '+', fine: 4.5 });
+    expect(ledger).toMatchObject({
+      BOOK_NAME: 'INWORD',
+      AC_CODE: 'SRCAC',
+      LD_CODE: '00008',
+      SIGN: '+',
+      fine: 4.5,
+    });
     expect(String(ledger.LEDR_KEY)).toMatch(/         102$/);
 
     const rojmel = (
@@ -489,12 +508,22 @@ d('TR_INOUT Stock In/Stock Out lifecycle parity', () => {
         ),
       )) as Array<Record<string, unknown>>
     )[0]!;
-    expect(rojmel).toMatchObject({ BOOK_NAME: 'INWORD', AC_CODE: 'SRCAC', LD_CODE: '00008', SIGN: '+', fine: 4.5 });
+    expect(rojmel).toMatchObject({
+      BOOK_NAME: 'INWORD',
+      AC_CODE: 'SRCAC',
+      LD_CODE: '00008',
+      SIGN: '+',
+      fine: 4.5,
+    });
     expect(String(rojmel.LEDR_KEY)).toMatch(/02         1$/);
 
     const reopened = (await getStockIn(runtime, inScope, vchNo)) as any;
     expect(reopened).toMatchObject({ fromLcCode: '03', toLcCode: '01', stockTransferred: true });
-    expect(reopened.lines[0]).toMatchObject({ tagNo: 'TAG-IN-1', vchSrno: 77, hallmarkId: 'HUIDIN1' });
+    expect(reopened.lines[0]).toMatchObject({
+      tagNo: 'TAG-IN-1',
+      vchSrno: 77,
+      hallmarkId: 'HUIDIN1',
+    });
 
     await deleteStockIn(runtime, { scope: inScope, vchNo, deleteUser: 'in-delete' });
     const deleted = (await owner.$queryRawUnsafe(

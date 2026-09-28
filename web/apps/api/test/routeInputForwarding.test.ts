@@ -94,7 +94,6 @@ function helperKeys(source: string, helper: string): string[] {
   return literalKeys(source, source.indexOf('{', arrow));
 }
 
-
 describe('routes forward every documented module input', () => {
   const scheme = read('modules/membership/scheme.ts');
   const rateCut = read('modules/sales/rateCut.ts');

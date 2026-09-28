@@ -104,7 +104,8 @@ function invalidInput(): SavedSaleReturnClockResult {
     diagnostics: [
       {
         code: 'invalid-input',
-        message: 'Two owned raw date/clock fields and complete plain-data document provenance are required.',
+        message:
+          'Two owned raw date/clock fields and complete plain-data document provenance are required.',
       },
     ],
   });
@@ -195,7 +196,8 @@ export function projectSavedSaleReturnClock(input: unknown): SavedSaleReturnCloc
           diagnostics.push({
             code: 'unsupported-saved-time',
             sourceField,
-            message: 'The saved clock must be a valid local JSONB timestamp with at most six fractional digits.',
+            message:
+              'The saved clock must be a valid local JSONB timestamp with at most six fractional digits.',
           });
       }
     }

@@ -82,7 +82,8 @@ export default function ChequePrintPage() {
       </h1>
       <p className="muted">
         Enter the cheque print name exactly as it should appear on the instrument. Preview and Print
-        use the same authenticated API endpoint as voucher cheque printing: <code>/finance/cheque-print</code>.
+        use the same authenticated API endpoint as voucher cheque printing:{' '}
+        <code>/finance/cheque-print</code>.
       </p>
 
       <div className="panel">
@@ -112,7 +113,11 @@ export default function ChequePrintPage() {
           </div>
           <div className="field">
             <label>Cheque No</label>
-            <input value={chqNo} onChange={(e) => setChqNo(e.target.value)} style={{ width: 140 }} />
+            <input
+              value={chqNo}
+              onChange={(e) => setChqNo(e.target.value)}
+              style={{ width: 140 }}
+            />
           </div>
           <label className="field" style={{ alignSelf: 'end', minWidth: 150 }}>
             <span>A/c Payee Only</span>
@@ -130,10 +135,20 @@ export default function ChequePrintPage() {
           <button type="button" className="primary" onClick={preview} disabled={!canRender}>
             View Preview
           </button>
-          <button type="button" className="ghost" onClick={() => openCheque(false)} disabled={!canRender}>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => openCheque(false)}
+            disabled={!canRender}
+          >
             Open View
           </button>
-          <button type="button" className="ghost" onClick={() => openCheque(true)} disabled={!canRender}>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => openCheque(true)}
+            disabled={!canRender}
+          >
             Print
           </button>
           <button
@@ -152,7 +167,9 @@ export default function ChequePrintPage() {
             Clear
           </button>
           <span className="spacer" />
-          <span className="muted">{canRender ? 'Ready to preview or print' : 'Fill payee and amount'}</span>
+          <span className="muted">
+            {canRender ? 'Ready to preview or print' : 'Fill payee and amount'}
+          </span>
         </div>
       </div>
 

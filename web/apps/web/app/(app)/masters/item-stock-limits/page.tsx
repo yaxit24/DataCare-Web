@@ -99,7 +99,10 @@ export default function ItemStockLimitsPage() {
       } catch (error) {
         setMsg({
           kind: 'err',
-          text: error instanceof ApiError ? error.body?.message || error.body?.error || error.message : 'failed',
+          text:
+            error instanceof ApiError
+              ? error.body?.message || error.body?.error || error.message
+              : 'failed',
         });
       } finally {
         setBusy(false);
@@ -141,7 +144,10 @@ export default function ItemStockLimitsPage() {
     } catch (error) {
       setMsg({
         kind: 'err',
-        text: error instanceof ApiError ? error.body?.message || error.body?.detail || error.body?.error || error.message : 'failed',
+        text:
+          error instanceof ApiError
+            ? error.body?.message || error.body?.detail || error.body?.error || error.message
+            : 'failed',
       });
     } finally {
       setBusy(false);
@@ -167,7 +173,10 @@ export default function ItemStockLimitsPage() {
     } catch (error) {
       setMsg({
         kind: 'err',
-        text: error instanceof ApiError ? error.body?.message || error.body?.error || error.message : 'failed',
+        text:
+          error instanceof ApiError
+            ? error.body?.message || error.body?.error || error.message
+            : 'failed',
       });
     } finally {
       setBusy(false);
@@ -200,7 +209,11 @@ export default function ItemStockLimitsPage() {
           </div>
           <div className="field" style={{ width: 150 }}>
             <label>Design</label>
-            <input value={itDesign} onChange={(event) => setItDesign(event.target.value)} maxLength={20} />
+            <input
+              value={itDesign}
+              onChange={(event) => setItDesign(event.target.value)}
+              maxLength={20}
+            />
           </div>
           <div className="field" style={{ alignSelf: 'end' }}>
             <button type="button" className="ghost" onClick={() => load()} disabled={busy}>
@@ -234,7 +247,11 @@ export default function ItemStockLimitsPage() {
                 <td className="num muted">{index + 1}</td>
                 {(['fromWt', 'toWt', 'minPcs'] as const).map((key) => (
                   <td className="num" key={key}>
-                    <input value={row[key]} onChange={(event) => setRow(index, key, event.target.value)} style={{ width: 72, textAlign: 'right' }} />
+                    <input
+                      value={row[key]}
+                      onChange={(event) => setRow(index, key, event.target.value)}
+                      style={{ width: 72, textAlign: 'right' }}
+                    />
                   </td>
                 ))}
                 <td style={{ minWidth: 105 }}>
@@ -247,11 +264,19 @@ export default function ItemStockLimitsPage() {
                 </td>
                 {(['ghtPct', 'lbrPct', 'minLbrPct'] as const).map((key) => (
                   <td className="num" key={key}>
-                    <input value={row[key]} onChange={(event) => setRow(index, key, event.target.value)} style={{ width: 72, textAlign: 'right' }} />
+                    <input
+                      value={row[key]}
+                      onChange={(event) => setRow(index, key, event.target.value)}
+                      style={{ width: 72, textAlign: 'right' }}
+                    />
                   </td>
                 ))}
                 <td>
-                  <select value={row.lbrType} onChange={(event) => setRow(index, 'lbrType', event.target.value)} style={{ width: 72 }}>
+                  <select
+                    value={row.lbrType}
+                    onChange={(event) => setRow(index, 'lbrType', event.target.value)}
+                    style={{ width: 72 }}
+                  >
                     <option value=""></option>
                     <option value="G">G</option>
                     <option value="N">N</option>
@@ -262,14 +287,22 @@ export default function ItemStockLimitsPage() {
                 </td>
                 {(['lbrRate', 'lbrAmt'] as const).map((key) => (
                   <td className="num" key={key}>
-                    <input value={row[key]} onChange={(event) => setRow(index, key, event.target.value)} style={{ width: 82, textAlign: 'right' }} />
+                    <input
+                      value={row[key]}
+                      onChange={(event) => setRow(index, key, event.target.value)}
+                      style={{ width: 82, textAlign: 'right' }}
+                    />
                   </td>
                 ))}
                 <td>
                   <button
                     type="button"
                     className="danger"
-                    onClick={() => setRows((current) => (current.length > 1 ? current.filter((_, i) => i !== index) : [blankLine()]))}
+                    onClick={() =>
+                      setRows((current) =>
+                        current.length > 1 ? current.filter((_, i) => i !== index) : [blankLine()],
+                      )
+                    }
                   >
                     ×
                   </button>
@@ -279,7 +312,11 @@ export default function ItemStockLimitsPage() {
           </tbody>
         </table>
         <div className="toolbar" style={{ marginTop: 10 }}>
-          <button type="button" className="ghost" onClick={() => setRows((current) => [...current, blankLine()])}>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => setRows((current) => [...current, blankLine()])}
+          >
             + Add Row
           </button>
           <span className="spacer" />

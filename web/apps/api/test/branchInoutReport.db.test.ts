@@ -67,7 +67,11 @@ databaseDescribe('RP_LC_INOUT branch in-out report parity builder', () => {
   });
 
   it('runs the Outword branch report with desktop grouping and item filters', async () => {
-    const report = await branchInoutReport(runtime, { ...scope, filters: { prCode: 'P1' } }, { mode: 'out' });
+    const report = await branchInoutReport(
+      runtime,
+      { ...scope, filters: { prCode: 'P1' } },
+      { mode: 'out' },
+    );
     expect(report.rows).toEqual([
       {
         srNo: 1,
@@ -85,9 +89,9 @@ databaseDescribe('RP_LC_INOUT branch in-out report parity builder', () => {
 
   it('runs the Inword branch report from FROM_LC_CODE and refuses unsupported party filters', async () => {
     const report = await branchInoutReport(runtime, scope, { mode: 'in' });
-    expect(report.rows.map((row: any) => [row.direction, row.transferLocation, row.pcs, row.gwt])).toEqual([
-      ['Inword', '02', 1, 7.75],
-    ]);
+    expect(
+      report.rows.map((row: any) => [row.direction, row.transferLocation, row.pcs, row.gwt]),
+    ).toEqual([['Inword', '02', 1, 7.75]]);
     await expect(
       branchInoutReport(runtime, { ...scope, filters: { acCode: 'C001' } }, { mode: 'in' }),
     ).rejects.toThrow(/cannot filter by: acCode/);

@@ -6,7 +6,13 @@ import { NAV } from '../lib/nav';
 import { get, post } from '../lib/api';
 import type { BrowserSessionContext } from '../lib/pageContext';
 import { useOperationLease } from './useOperationLease';
-import { createPendingContextSelection, savePendingContextSelection, readPendingContextSelection, submitPendingContextSelection, type PendingContextSelection } from '../lib/contextSelection';
+import {
+  createPendingContextSelection,
+  savePendingContextSelection,
+  readPendingContextSelection,
+  submitPendingContextSelection,
+  type PendingContextSelection,
+} from '../lib/contextSelection';
 
 export interface Session {
   user: string;
@@ -57,17 +63,25 @@ export default function Shell({
   }, [pathname]);
   useEffect(() => {
     const blockCommands = (event: KeyboardEvent) => {
-      if (operationBusy.current && (event.key === 'Enter' || /^F[0-9]+$/.test(event.key) ||
-          ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's'))) {
-        event.preventDefault(); event.stopImmediatePropagation();
+      if (
+        operationBusy.current &&
+        (event.key === 'Enter' ||
+          /^F[0-9]+$/.test(event.key) ||
+          ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's'))
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
       }
     };
     document.addEventListener('keydown', blockCommands, true);
     return () => document.removeEventListener('keydown', blockCommands, true);
   }, []);
   useEffect(() => {
-    try { setPending(readPendingContextSelection(session.context)); }
-    catch { setSelectionError('Browser recovery storage is unavailable. Company changes are paused.'); }
+    try {
+      setPending(readPendingContextSelection(session.context));
+    } catch {
+      setSelectionError('Browser recovery storage is unavailable. Company changes are paused.');
+    }
   }, [session.context]);
 
   useEffect(() => {
@@ -104,15 +118,24 @@ export default function Shell({
   ) {
     if (!nextCo || operationBusy.current || pending || contextStale) return;
     if (!deriveCompanyDefaults && (!nextLc || !nextYear)) return;
-    if (!window.confirm('Changing company, branch or year closes this page. Save or copy any unsaved work first. Continue?')) return;
+    if (
+      !window.confirm(
+        'Changing company, branch or year closes this page. Save or copy any unsaved work first. Continue?',
+      )
+    )
+      return;
     const isCurrent = beginOperation();
     if (!isCurrent()) return;
     operationBusy.current = true;
     setSwitching(true);
     setSelectionError('');
     try {
-      const saved = createPendingContextSelection(session.context, deriveCompanyDefaults
-        ? { coCode: nextCo } : { coCode: nextCo, lcCode: nextLc, coYear: nextYear });
+      const saved = createPendingContextSelection(
+        session.context,
+        deriveCompanyDefaults
+          ? { coCode: nextCo }
+          : { coCode: nextCo, lcCode: nextLc, coYear: nextYear },
+      );
       savePendingContextSelection(saved);
       setPending(saved);
       await submitPendingContextSelection(saved, { isCurrent });
@@ -120,7 +143,9 @@ export default function Shell({
       window.location.reload();
     } catch (error) {
       if (!isCurrent()) return;
-      setSelectionError(error instanceof Error ? error.message : 'The company change could not be confirmed.');
+      setSelectionError(
+        error instanceof Error ? error.message : 'The company change could not be confirmed.',
+      );
       operationBusy.current = false;
       setSwitching(false);
     }
@@ -194,9 +219,19 @@ export default function Shell({
         )}
         <span className="spacer" />
         <span className="chip">👤 {session.user}</span>
-        <button disabled={switching} onClick={logout}>Logout</button>
+        <button disabled={switching} onClick={logout}>
+          Logout
+        </button>
       </header>
-      <nav className="sidebar" onClickCapture={(event) => { if (switching) { event.preventDefault(); event.stopPropagation(); } }}>
+      <nav
+        className="sidebar"
+        onClickCapture={(event) => {
+          if (switching) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }}
+      >
         {NAV.map((g) => {
           // Only explicit null (server-verified admin) means show all; [] hides every form.
           const allowed = session.allowedForms;
@@ -224,14 +259,32 @@ export default function Shell({
       <main className="content">
         {(pending || selectionError) && (
           <div className="msg err" role="alert" data-testid="pending-context-recovery">
-            {pending && <p>A company change to {pending.request.coCode} is awaiting confirmation.</p>}
+            {pending && (
+              <p>A company change to {pending.request.coCode} is awaiting confirmation.</p>
+            )}
             {selectionError && <p>{selectionError}</p>}
-            {pending && <button disabled={switching} onClick={() => {
-              if (window.confirm('Company selection will close this page. Copy any unsaved work first. Continue?')) window.location.assign('/select');
-            }}>Check company change</button>}
+            {pending && (
+              <button
+                disabled={switching}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      'Company selection will close this page. Copy any unsaved work first. Continue?',
+                    )
+                  )
+                    window.location.assign('/select');
+                }}
+              >
+                Check company change
+              </button>
+            )}
           </div>
         )}
-        <fieldset disabled={switching} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }} aria-busy={switching}>
+        <fieldset
+          disabled={switching}
+          style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+          aria-busy={switching}
+        >
           {children}
         </fieldset>
       </main>

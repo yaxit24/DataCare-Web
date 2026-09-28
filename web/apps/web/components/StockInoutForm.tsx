@@ -253,7 +253,9 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
   });
 
   const setLine = (index: number, key: keyof Line, value: string) =>
-    setLines((rows) => rows.map((row, current) => (current === index ? { ...row, [key]: value } : row)));
+    setLines((rows) =>
+      rows.map((row, current) => (current === index ? { ...row, [key]: value } : row)),
+    );
 
   const scopeQuery = `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
   const fineTotal = lines.reduce((sum, line) => sum + lineFine(line), 0);
@@ -275,7 +277,9 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
     setBusy(true);
     setMsg(null);
     try {
-      const view = await get<any>(`${endpoint}/${encodeURIComponent(voucherLookup.trim())}?${scopeQuery}`);
+      const view = await get<any>(
+        `${endpoint}/${encodeURIComponent(voucherLookup.trim())}?${scopeQuery}`,
+      );
       setLoadedVchNo(String(view.voucherNo));
       setVoucherLookup(String(view.voucherNo));
       setVchDate(String(view.vchDate || currentDate()));
@@ -285,7 +289,7 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
       const loaded = (view.lines ?? []).map((row: any): Line => ({
         ...blank(),
         itCode: String(row.itCode ?? ''),
-        tagNo: String(row.tagNo === 'N' ? '' : row.tagNo ?? ''),
+        tagNo: String(row.tagNo === 'N' ? '' : (row.tagNo ?? '')),
         vchSrno: str(row.vchSrno),
         itemLot: String(row.itemLot ?? ''),
         lotNo: String(row.lotNo ?? ''),
@@ -388,7 +392,10 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
       const no = String(saved.vchNo).padStart(5, '0');
       setLoadedVchNo(no);
       setVoucherLookup(no);
-      setMsg({ kind: 'ok', text: `${label} ${no} saved · fine ${Number(saved.fine ?? 0).toLocaleString('en-IN')}` });
+      setMsg({
+        kind: 'ok',
+        text: `${label} ${no} saved · fine ${Number(saved.fine ?? 0).toLocaleString('en-IN')}`,
+      });
     } catch (error) {
       setMsg({ kind: 'err', text: errorText(error) });
     } finally {
@@ -398,7 +405,9 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
 
   return (
     <div>
-      <h1>{label} — {mainBook}</h1>
+      <h1>
+        {label} — {mainBook}
+      </h1>
       <p className="muted">
         {isIn
           ? 'Receive stock into the current branch from another location. Posts INWORD detail, positive MAIN_STOCK, signed ledger, and Rojmel rows.'
@@ -413,7 +422,11 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
             </div>
             <div className="field">
               <label>Voucher Date</label>
-              <input type="date" value={vchDate} onChange={(event) => setVchDate(event.target.value)} />
+              <input
+                type="date"
+                value={vchDate}
+                onChange={(event) => setVchDate(event.target.value)}
+              />
             </div>
             <div className="field">
               <label>Year</label>
@@ -425,11 +438,19 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
             </div>
             <div className="field">
               <label>{isIn ? 'From Location' : 'To Location'}</label>
-              <input value={transferLcCode} onChange={(event) => setTransferLcCode(event.target.value)} required />
+              <input
+                value={transferLcCode}
+                onChange={(event) => setTransferLcCode(event.target.value)}
+                required
+              />
             </div>
             <div className="field">
               <label>Employee</label>
-              <input value={employeeCode} onChange={(event) => setEmployeeCode(event.target.value)} maxLength={3} />
+              <input
+                value={employeeCode}
+                onChange={(event) => setEmployeeCode(event.target.value)}
+                maxLength={3}
+              />
             </div>
             <div className="field" style={{ minWidth: 280 }}>
               <label>Description</label>
@@ -439,15 +460,29 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
           <div className="row" style={{ marginTop: 12 }}>
             <div className="field">
               <label>Voucher No</label>
-              <input value={voucherLookup} onChange={(event) => setVoucherLookup(event.target.value)} placeholder="00001" />
+              <input
+                value={voucherLookup}
+                onChange={(event) => setVoucherLookup(event.target.value)}
+                placeholder="00001"
+              />
             </div>
-            <button type="button" className="ghost" disabled={busy || !coBook} onClick={loadVoucher}>
+            <button
+              type="button"
+              className="ghost"
+              disabled={busy || !coBook}
+              onClick={loadVoucher}
+            >
               Load
             </button>
             <button type="button" className="ghost" disabled={busy} onClick={newVoucher}>
               New
             </button>
-            <button type="button" className="danger" disabled={busy || !loadedVchNo} onClick={removeVoucher}>
+            <button
+              type="button"
+              className="danger"
+              disabled={busy || !loadedVchNo}
+              onClick={removeVoucher}
+            >
               Delete
             </button>
           </div>
@@ -457,7 +492,12 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
           <div className="toolbar">
             <h2 style={{ margin: 0 }}>Item Lines</h2>
             <span className="spacer" />
-            <GridModeToggle full={fullGrid} setFull={setFullGrid} extendedCount={extendedLineFields.length} testId={`${direction}-stock-grid-mode`} />
+            <GridModeToggle
+              full={fullGrid}
+              setFull={setFullGrid}
+              extendedCount={extendedLineFields.length}
+              testId={`${direction}-stock-grid-mode`}
+            />
           </div>
           <table className="grid" onKeyDown={handleGridKey}>
             <thead>
@@ -478,14 +518,55 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
               {lines.map((line, index) => (
                 <tr key={index}>
                   <td>
-                    <LookupPicker entity="items" value={line.itCode} onChange={(value) => setLine(index, 'itCode', value)} style={{ width: 120 }} />
+                    <LookupPicker
+                      entity="items"
+                      value={line.itCode}
+                      onChange={(value) => setLine(index, 'itCode', value)}
+                      style={{ width: 120 }}
+                    />
                   </td>
-                  <td className="num"><input value={line.pcs} onChange={(event) => setLine(index, 'pcs', event.target.value)} style={{ width: 52, textAlign: 'right' }} /></td>
-                  <td className="num"><input value={line.grossWt} onChange={(event) => setLine(index, 'grossWt', event.target.value)} style={{ width: 72, textAlign: 'right' }} /></td>
-                  <td className="num"><input value={line.netWt} onChange={(event) => setLine(index, 'netWt', event.target.value)} style={{ width: 72, textAlign: 'right' }} /></td>
-                  <td className="num"><input value={line.touch} onChange={(event) => setLine(index, 'touch', event.target.value)} style={{ width: 64, textAlign: 'right' }} /></td>
-                  <td className="num"><input value={line.westPct} onChange={(event) => setLine(index, 'westPct', event.target.value)} style={{ width: 64, textAlign: 'right' }} /></td>
-                  <td className="num"><input value={line.rate} onChange={(event) => setLine(index, 'rate', event.target.value)} style={{ width: 80, textAlign: 'right' }} /></td>
+                  <td className="num">
+                    <input
+                      value={line.pcs}
+                      onChange={(event) => setLine(index, 'pcs', event.target.value)}
+                      style={{ width: 52, textAlign: 'right' }}
+                    />
+                  </td>
+                  <td className="num">
+                    <input
+                      value={line.grossWt}
+                      onChange={(event) => setLine(index, 'grossWt', event.target.value)}
+                      style={{ width: 72, textAlign: 'right' }}
+                    />
+                  </td>
+                  <td className="num">
+                    <input
+                      value={line.netWt}
+                      onChange={(event) => setLine(index, 'netWt', event.target.value)}
+                      style={{ width: 72, textAlign: 'right' }}
+                    />
+                  </td>
+                  <td className="num">
+                    <input
+                      value={line.touch}
+                      onChange={(event) => setLine(index, 'touch', event.target.value)}
+                      style={{ width: 64, textAlign: 'right' }}
+                    />
+                  </td>
+                  <td className="num">
+                    <input
+                      value={line.westPct}
+                      onChange={(event) => setLine(index, 'westPct', event.target.value)}
+                      style={{ width: 64, textAlign: 'right' }}
+                    />
+                  </td>
+                  <td className="num">
+                    <input
+                      value={line.rate}
+                      onChange={(event) => setLine(index, 'rate', event.target.value)}
+                      style={{ width: 80, textAlign: 'right' }}
+                    />
+                  </td>
                   <td className="num">{lineFine(line).toLocaleString('en-IN')}</td>
                   <ExtendedBodyCells
                     full={fullGrid}
@@ -496,17 +577,38 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
                     setValue={(row, key, value) => setLine(row, key, value)}
                   />
                   <td>
-                    <button type="button" className="danger" onClick={() => setLines((rows) => rows.length > 1 ? rows.filter((_, row) => row !== index) : [blank()])}>×</button>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() =>
+                        setLines((rows) =>
+                          rows.length > 1 ? rows.filter((_, row) => row !== index) : [blank()],
+                        )
+                      }
+                    >
+                      ×
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
           <div className="toolbar" style={{ marginTop: 10 }}>
-            <button type="button" className="ghost" onClick={() => setLines((rows) => [...rows, blank()])}>+ Add line</button>
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => setLines((rows) => [...rows, blank()])}
+            >
+              + Add line
+            </button>
             <span className="spacer" />
-            <span className="muted" style={{ marginRight: 16 }}>Net {netTotal.toLocaleString('en-IN')} g · <b>Fine {fineTotal.toLocaleString('en-IN')}</b></span>
-            <button ref={submitRef} className="primary" disabled={busy || !coBook}>{busy ? 'Saving…' : loadedVchNo ? `Update ${label}` : `Save ${label}`}</button>
+            <span className="muted" style={{ marginRight: 16 }}>
+              Net {netTotal.toLocaleString('en-IN')} g ·{' '}
+              <b>Fine {fineTotal.toLocaleString('en-IN')}</b>
+            </span>
+            <button ref={submitRef} className="primary" disabled={busy || !coBook}>
+              {busy ? 'Saving…' : loadedVchNo ? `Update ${label}` : `Save ${label}`}
+            </button>
           </div>
         </div>
       </form>

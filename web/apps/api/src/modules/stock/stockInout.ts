@@ -362,7 +362,10 @@ function locationForLine(
   line: StockInoutLine,
   policy: DirectionPolicy,
 ): string {
-  const raw = policy.direction === 'out' ? text(line.toLcCode) || text(input.toLcCode) : text(line.fromLcCode) || text(input.fromLcCode);
+  const raw =
+    policy.direction === 'out'
+      ? text(line.toLcCode) || text(input.toLcCode)
+      : text(line.fromLcCode) || text(input.fromLcCode);
   if (!raw) throw new StockInoutValidationError(`${policy.label} requires ${policy.transferField}`);
   return raw.slice(0, 2);
 }
@@ -382,7 +385,8 @@ async function computedLinesTx(
   scope: CompleteScope,
   policy: DirectionPolicy,
 ): Promise<ComputedLine[]> {
-  if (!input.lines?.length) throw new StockInoutValidationError(`${policy.label} requires at least one line`);
+  if (!input.lines?.length)
+    throw new StockInoutValidationError(`${policy.label} requires at least one line`);
 
   const base = [] as Array<{
     input: StockInoutLine;
@@ -412,8 +416,17 @@ async function computedLinesTx(
     } else if (policy.direction === 'in' && tagNo !== 'N') {
       vchSrno = n(line.vchSrno) || index + 1;
     }
-    if (!itCode) throw new StockInoutValidationError(`${policy.label} line ${index + 1} requires itCode`);
-    base.push({ input: line, srNo: index + 1, itCode, transferLcCode: locationForLine(input, line, policy), tagNo, vchSrno, stock });
+    if (!itCode)
+      throw new StockInoutValidationError(`${policy.label} line ${index + 1} requires itCode`);
+    base.push({
+      input: line,
+      srNo: index + 1,
+      itCode,
+      transferLcCode: locationForLine(input, line, policy),
+      tagNo,
+      vchSrno,
+      stock,
+    });
   }
 
   const types = await itemTypesTx(
@@ -434,7 +447,10 @@ async function computedLinesTx(
     const grossWt = line.grossWt != null ? n(line.grossWt) : n(stock?.ITM_GWT);
     const netWt = line.netWt != null ? n(line.netWt) : n(stock?.ITM_NWT);
     const touch = line.touch != null ? n(line.touch) : n(stock?.ITM_TOUCH);
-    const fineWt = line.fineWt != null ? round3(n(line.fineWt)) : fineFor('sale', { netWt, ghtWt: n(line.ghtWt), touch, westPct: n(line.westPct) });
+    const fineWt =
+      line.fineWt != null
+        ? round3(n(line.fineWt))
+        : fineFor('sale', { netWt, ghtWt: n(line.ghtWt), touch, westPct: n(line.westPct) });
     const amount = amountOf(line, fineWt);
     const labourAmount = n(line.labourAmount);
     const otherAmount = n(line.otherAmount);
@@ -474,8 +490,10 @@ function headerRow(
   lines: ComputedLine[],
 ) {
   const key = voucherKey(scope, ctx.voucherNo);
-  const toLcCode = policy.direction === 'out' ? lines[0]?.transferLcCode : text(input.toLcCode) || scope.lcCode;
-  const fromLcCode = policy.direction === 'in' ? lines[0]?.transferLcCode : text(input.fromLcCode) || scope.lcCode;
+  const toLcCode =
+    policy.direction === 'out' ? lines[0]?.transferLcCode : text(input.toLcCode) || scope.lcCode;
+  const fromLcCode =
+    policy.direction === 'in' ? lines[0]?.transferLcCode : text(input.fromLcCode) || scope.lcCode;
   return {
     ...key,
     VCH_DATE: date,
@@ -530,8 +548,10 @@ function detailRows(
     ENTRY_TYPE: policy.entry,
     BOOK_NAME: book.bookName,
     AC_CODE: policy.direction === 'out' ? line.transferLcCode : '',
-    TO_LC_CODE: policy.direction === 'out' ? line.transferLcCode : text(input.toLcCode) || scope.lcCode,
-    FROM_LC_CODE: policy.direction === 'in' ? line.transferLcCode : text(input.fromLcCode) || scope.lcCode,
+    TO_LC_CODE:
+      policy.direction === 'out' ? line.transferLcCode : text(input.toLcCode) || scope.lcCode,
+    FROM_LC_CODE:
+      policy.direction === 'in' ? line.transferLcCode : text(input.fromLcCode) || scope.lcCode,
     TO_CO_BOOK: nullable(input.toBook, 3),
     TO_VCH_NO: input.toVchNo != null ? formatVoucherNo(input.toVchNo) : null,
     FROM_CO_BOOK: nullable(input.fromBook, 3),
@@ -677,7 +697,12 @@ function stockRows(
   return lines.map((line) => ({
     ...key,
     SR_NO: line.srNo,
-    ISR_NO: policy.direction === 'in' && line.tagNo !== 'N' ? 2 : line.input.lotNo || line.input.itemLot ? 3 : 1,
+    ISR_NO:
+      policy.direction === 'in' && line.tagNo !== 'N'
+        ? 2
+        : line.input.lotNo || line.input.itemLot
+          ? 3
+          : 1,
     VCH_DATE: date,
     STK_DATE: date.toISOString().slice(0, 10),
     VCH_TYPE: book.vchType,
@@ -753,7 +778,13 @@ function acLedgerRows(
     }));
 }
 
-function rojmelKey(scope: CompleteScope, coBook: string, voucherNo: string, type: '01' | '02', srNo: number): string {
+function rojmelKey(
+  scope: CompleteScope,
+  coBook: string,
+  voucherNo: string,
+  type: '01' | '02',
+  srNo: number,
+): string {
   // Ac_Rojmel.Stk_InOut_Rojmel: head + '01'/'02' + STR(SR_NO).
   return `${scope.coCode.padStart(2, '0').slice(0, 2)}${scope.lcCode.padStart(2, '0').slice(0, 2)}${scope.coYear.padEnd(9).slice(0, 9)}${coBook.padStart(3, '0').slice(0, 3)}${voucherNo.padStart(5, '0').slice(0, 5)}${type}${String(srNo).padStart(10, ' ')}`;
 }
@@ -815,7 +846,8 @@ async function writeStockInoutTx(
   const lines = await computedLinesTx(tx, input, scope, policy);
   const header = headerRow(scope, policy, book, input, ctx, date, lines);
   const details = detailRows(scope, policy, book, ctx, date, lines, input);
-  const taggedIn = policy.direction === 'in' ? barRowsForStockIn(scope, book, ctx, date, lines) : [];
+  const taggedIn =
+    policy.direction === 'in' ? barRowsForStockIn(scope, book, ctx, date, lines) : [];
   const stock = stockRows(scope, policy, book, ctx, date, lines);
   const ledger = acLedgerRows(scope, policy, book, ctx, date, lines);
   const daybook = rojmelRows(scope, policy, book, ctx, date, lines);
@@ -945,7 +977,15 @@ async function editStockInout(
     // TR_INOUT save-on-edit deletes and rewrites INOUT_DATA/INOUT_DETL/INOUT_IDTL/MAIN_STOCK/AC/ROJMEL
     // without inserting DELETE_DATA. DELETE_DATA is only written by BtnDelete.
     await deleteVoucherWriteSetTx(tx, {
-      tables: ['ROJ_MEL_DATA', 'AC_DATA', 'MAIN_STOCK', 'BAR_DETL', 'INOUT_IDTL', 'INOUT_DETL', 'INOUT_DATA'],
+      tables: [
+        'ROJ_MEL_DATA',
+        'AC_DATA',
+        'MAIN_STOCK',
+        'BAR_DETL',
+        'INOUT_IDTL',
+        'INOUT_DETL',
+        'INOUT_DATA',
+      ],
       key: { scope, voucherNo },
       tempBook: { voucherNo: ctx.hiddenVoucherNo },
     });
@@ -1090,7 +1130,9 @@ async function deleteStockInout(
     const book = await resolveBookTx(tx, scope, policy);
     const persisted = await headerTx(tx, scope, voucherNo, policy);
     const persistedBusinessDate = businessDate(
-      persisted.VCH_DATE instanceof Date ? persisted.VCH_DATE : text(persisted.VCH_DATE).slice(0, 10),
+      persisted.VCH_DATE instanceof Date
+        ? persisted.VCH_DATE
+        : text(persisted.VCH_DATE).slice(0, 10),
     );
     await assertDatesOpenTx(tx, scope, persistedBusinessDate, persisted.VCH_DATE);
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
@@ -1124,20 +1166,44 @@ async function deleteStockInout(
       });
     }
     await deleteVoucherWriteSetTx(tx, {
-      tables: ['ROJ_MEL_DATA', 'AC_DATA', 'MAIN_STOCK', 'BAR_DETL', 'INOUT_IDTL', 'INOUT_DETL', 'INOUT_DATA'],
+      tables: [
+        'ROJ_MEL_DATA',
+        'AC_DATA',
+        'MAIN_STOCK',
+        'BAR_DETL',
+        'INOUT_IDTL',
+        'INOUT_DETL',
+        'INOUT_DATA',
+      ],
       key: { scope, voucherNo },
-      tempBook: { voucherNo: text(persisted.HD_VCH_NO) ? formatVoucherNo(text(persisted.HD_VCH_NO)) : voucherNo },
+      tempBook: {
+        voucherNo: text(persisted.HD_VCH_NO)
+          ? formatVoucherNo(text(persisted.HD_VCH_NO))
+          : voucherNo,
+      },
     });
     return { reversed: true };
   });
 }
 
-export const createStockOut = (prisma: any, input: StockInoutInput) => saveStockInout(prisma, input, 'out');
-export const getStockOut = (prisma: any, scope: VoucherScope, vchNo: number | string) => getStockInout(prisma, scope, 'out', vchNo);
-export const editStockOut = (prisma: any, input: StockInoutInput, vchNo: number | string) => editStockInout(prisma, input, 'out', vchNo);
-export const deleteStockOut = (prisma: any, input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string }) => deleteStockInout(prisma, input, 'out');
+export const createStockOut = (prisma: any, input: StockInoutInput) =>
+  saveStockInout(prisma, input, 'out');
+export const getStockOut = (prisma: any, scope: VoucherScope, vchNo: number | string) =>
+  getStockInout(prisma, scope, 'out', vchNo);
+export const editStockOut = (prisma: any, input: StockInoutInput, vchNo: number | string) =>
+  editStockInout(prisma, input, 'out', vchNo);
+export const deleteStockOut = (
+  prisma: any,
+  input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string },
+) => deleteStockInout(prisma, input, 'out');
 
-export const createStockIn = (prisma: any, input: StockInoutInput) => saveStockInout(prisma, input, 'in');
-export const getStockIn = (prisma: any, scope: VoucherScope, vchNo: number | string) => getStockInout(prisma, scope, 'in', vchNo);
-export const editStockIn = (prisma: any, input: StockInoutInput, vchNo: number | string) => editStockInout(prisma, input, 'in', vchNo);
-export const deleteStockIn = (prisma: any, input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string }) => deleteStockInout(prisma, input, 'in');
+export const createStockIn = (prisma: any, input: StockInoutInput) =>
+  saveStockInout(prisma, input, 'in');
+export const getStockIn = (prisma: any, scope: VoucherScope, vchNo: number | string) =>
+  getStockInout(prisma, scope, 'in', vchNo);
+export const editStockIn = (prisma: any, input: StockInoutInput, vchNo: number | string) =>
+  editStockInout(prisma, input, 'in', vchNo);
+export const deleteStockIn = (
+  prisma: any,
+  input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string },
+) => deleteStockInout(prisma, input, 'in');

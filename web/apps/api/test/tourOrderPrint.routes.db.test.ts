@@ -49,7 +49,8 @@ const TOUR_URL = '/tour-orders/confirmation';
   };
   beforeAll(async () => {
     for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433') throw new Error('Tour print route fixtures require isolated database 55433');
+      if (!url || new URL(url).port !== '55433')
+        throw new Error('Tour print route fixtures require isolated database 55433');
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await clean();
@@ -83,12 +84,14 @@ const TOUR_URL = '/tour-orders/confirmation';
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME") VALUES
-       ($1,'01','GOLD','Gold ring'),($1,'01','RUBY','Ruby component'),($1,'01','DMND','Diamond component')`, tenantId,
+       ($1,'01','GOLD','Gold ring'),($1,'01','RUBY','Ruby component'),($1,'01','DMND','Diamond component')`,
+      tenantId,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "SL_ORD_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","IT_CODE","IT_PCS","IT_GWT")
        VALUES($1,'01','01','2024-2025','Z09','00001',17,1,'RUBY',1,0.123),
-             ($1,'01','01','2024-2025','Z09','00001',17,2,'DMND',2,0.456)`, tenantId,
+             ($1,'01','01','2024-2025','Z09','00001',17,2,'DMND',2,0.456)`,
+      tenantId,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "SL_ORD_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","HD_VCH_NO","SR_NO","IT_CODE","DESIGN_NO","ITM_PCS","ITM_GWT","ITM_NWT","ITM_RATE","NET_AMT")
@@ -108,10 +111,25 @@ const TOUR_URL = '/tour-orders/confirmation';
     );
     const rolePassword = await hashPassword(PASSWORD);
     for (const [name, mainMenu, subMenu, view, edit, remove, print] of roles) {
-      await owner.$executeRawUnsafe(`INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
-        VALUES($1,'01',$2,$3,'USER','Y','Y','Y','N')`, tenantId, name, rolePassword);
-      await owner.$executeRawUnsafe(`INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-        VALUES($1,'01','01',$2,$3,$4,$5,$6,$7,$8)`, tenantId, name, mainMenu, subMenu, view, edit, remove, print);
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
+        VALUES($1,'01',$2,$3,'USER','Y','Y','Y','N')`,
+        tenantId,
+        name,
+        rolePassword,
+      );
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+        VALUES($1,'01','01',$2,$3,$4,$5,$6,$7,$8)`,
+        tenantId,
+        name,
+        mainMenu,
+        subMenu,
+        view,
+        edit,
+        remove,
+        print,
+      );
     }
     app = await buildApp({ prisma: runtime, secret: SECRET, secureCookies: false });
     const login = await app.inject({
@@ -132,11 +150,17 @@ const TOUR_URL = '/tour-orders/confirmation';
       .map((header) => header.split(';', 1)[0])
       .join('; ');
     for (const [loginName] of roles) {
-      const response = await app.inject({ method: 'POST', url: '/auth/login', headers: { 'x-tenant-id': tenantId },
-        payload: { coCode: '01', lcCode: '01', coYear: '2024-2025', loginName, password: PASSWORD } });
+      const response = await app.inject({
+        method: 'POST',
+        url: '/auth/login',
+        headers: { 'x-tenant-id': tenantId },
+        payload: { coCode: '01', lcCode: '01', coYear: '2024-2025', loginName, password: PASSWORD },
+      });
       expect(response.statusCode, response.body).toBe(200);
       const value = response.headers['set-cookie'];
-      cookies[loginName!] = (Array.isArray(value) ? value : [value ?? '']).map((part) => part.split(';', 1)[0]).join('; ');
+      cookies[loginName!] = (Array.isArray(value) ? value : [value ?? ''])
+        .map((part) => part.split(';', 1)[0])
+        .join('; ');
     }
   });
   afterAll(async () => {
@@ -169,22 +193,47 @@ const TOUR_URL = '/tour-orders/confirmation';
   });
 
   it('retains approved copy labels and prints the source-selected image template with its saved parent image', async () => {
-    const copy = await app.inject({ method: 'GET', url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html&copy=D`, headers: { cookie } });
+    const copy = await app.inject({
+      method: 'GET',
+      url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html&copy=D`,
+      headers: { cookie },
+    });
     expect(copy.statusCode, copy.body).toBe(200);
     expect(copy.body).toContain('DUPLICATE FOR SUPPLIER');
-    const invalidCopy = await app.inject({ method: 'GET', url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html&copy=OTHER`, headers: { cookie } });
+    const invalidCopy = await app.inject({
+      method: 'GET',
+      url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html&copy=OTHER`,
+      headers: { cookie },
+    });
     expect(invalidCopy.statusCode).toBe(400);
-    await owner.$executeRawUnsafe('INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","ORD_IMG_PRINT") VALUES($1,\'01\',\'Y\')', tenantId);
-    const image = await app.inject({ method: 'GET', url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html`, headers: { cookie } });
+    await owner.$executeRawUnsafe(
+      'INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","ORD_IMG_PRINT") VALUES($1,\'01\',\'Y\')',
+      tenantId,
+    );
+    const image = await app.inject({
+      method: 'GET',
+      url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html`,
+      headers: { cookie },
+    });
     expect(image.statusCode, image.body).toBe(200);
     expect(image.body).toContain('<title>TourOrdImg</title>');
     expect(image.body).toContain('order-image-absent');
     const bytes = readFileSync(new URL('./fixtures/order-design-portrait.png', import.meta.url));
     const imageKey = JSON.stringify(['2024-2025', 'Z09', 'H0001', 'TOUR-D17']);
-    await owner.$executeRawUnsafe(`INSERT INTO "ENTITY_IMAGE"(tenant_id,"CO_CODE","LC_CODE","ENTITY_TYPE","ENTITY_KEY","INSTANCE","IMAGE_TYPE","MIME_TYPE","IMAGE_SIZE","IMAGE_BYTES")
-      VALUES($1,'01','01','ORDER',$2,0,'T','image/png',$3,$4)`, tenantId, imageKey, bytes.length, bytes);
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "ENTITY_IMAGE"(tenant_id,"CO_CODE","LC_CODE","ENTITY_TYPE","ENTITY_KEY","INSTANCE","IMAGE_TYPE","MIME_TYPE","IMAGE_SIZE","IMAGE_BYTES")
+      VALUES($1,'01','01','ORDER',$2,0,'T','image/png',$3,$4)`,
+      tenantId,
+      imageKey,
+      bytes.length,
+      bytes,
+    );
     try {
-      const withImage = await app.inject({ method: 'GET', url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html`, headers: { cookie } });
+      const withImage = await app.inject({
+        method: 'GET',
+        url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html`,
+        headers: { cookie },
+      });
       expect(withImage.statusCode, withImage.body).toBe(200);
       expect(withImage.body.match(/<img /g)).toHaveLength(1);
       expect(withImage.body).toContain(`data:image/png;base64,${bytes.toString('base64')}`);
@@ -198,39 +247,93 @@ const TOUR_URL = '/tour-orders/confirmation';
   });
 
   it('requires separate Tour Order view, update and delete rights for saved images', async () => {
-    const imageUrl = '/tour-orders/00001/image?coCode=01&lcCode=01&coYear=2024-2025&coBook=Z09&srNo=17';
+    const imageUrl =
+      '/tour-orders/00001/image?coCode=01&lcCode=01&coYear=2024-2025&coBook=Z09&srNo=17';
     for (const name of ['print-only', 'sales-images']) {
       for (const method of ['GET', 'POST', 'DELETE'] as const) {
-        const denied = await app.inject({ method, url: imageUrl, headers: { cookie: cookies[name] },
-          ...(method === 'POST' ? { payload: { version: 'unused', data: 'unused', mimeType: 'image/png' } } : {}) });
+        const denied = await app.inject({
+          method,
+          url: imageUrl,
+          headers: { cookie: cookies[name] },
+          ...(method === 'POST'
+            ? { payload: { version: 'unused', data: 'unused', mimeType: 'image/png' } }
+            : {}),
+        });
         expect(denied.statusCode, `${name} ${method}: ${denied.body}`).toBe(403);
       }
     }
-    const print = await app.inject({ method: 'GET', url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html`, headers: { cookie: cookies['print-only'] } });
+    const print = await app.inject({
+      method: 'GET',
+      url: `${TOUR_URL}?coBook=Z09&vchNo=1&format=html`,
+      headers: { cookie: cookies['print-only'] },
+    });
     // authorizeForm requires view as well as print; print alone grants no form access.
     expect(print.statusCode, print.body).toBe(403);
-    const read = await app.inject({ method: 'GET', url: imageUrl, headers: { cookie: cookies['image-view'] } });
+    const read = await app.inject({
+      method: 'GET',
+      url: imageUrl,
+      headers: { cookie: cookies['image-view'] },
+    });
     expect(read.statusCode, read.body).toBe(200);
-    expect(read.json()).toMatchObject({ editable: true, canUpdate: false, canDelete: false, image: { state: 'absent' } });
+    expect(read.json()).toMatchObject({
+      editable: true,
+      canUpdate: false,
+      canDelete: false,
+      image: { state: 'absent' },
+    });
     const bytes = readFileSync(new URL('./fixtures/order-design-portrait.png', import.meta.url));
-    const payload = { version: read.json().version, data: bytes.toString('base64'), mimeType: 'image/png' };
+    const payload = {
+      version: read.json().version,
+      data: bytes.toString('base64'),
+      mimeType: 'image/png',
+    };
     for (const name of ['image-view', 'image-delete']) {
-      const denied = await app.inject({ method: 'POST', url: imageUrl, headers: { cookie: cookies[name] }, payload });
+      const denied = await app.inject({
+        method: 'POST',
+        url: imageUrl,
+        headers: { cookie: cookies[name] },
+        payload,
+      });
       expect(denied.statusCode, denied.body).toBe(403);
     }
-    const saved = await app.inject({ method: 'POST', url: imageUrl, headers: { cookie: cookies['image-edit'] }, payload });
+    const saved = await app.inject({
+      method: 'POST',
+      url: imageUrl,
+      headers: { cookie: cookies['image-edit'] },
+      payload,
+    });
     expect(saved.statusCode, saved.body).toBe(200);
-    const reread = await app.inject({ method: 'GET', url: imageUrl, headers: { cookie: cookies['image-view'] } });
+    const reread = await app.inject({
+      method: 'GET',
+      url: imageUrl,
+      headers: { cookie: cookies['image-view'] },
+    });
     expect(reread.statusCode, reread.body).toBe(200);
-    expect(reread.json().image).toMatchObject({ state: 'present', data: payload.data, mimeType: 'image/png' });
+    expect(reread.json().image).toMatchObject({
+      state: 'present',
+      data: payload.data,
+      mimeType: 'image/png',
+    });
     const removeUrl = `${imageUrl}&version=${encodeURIComponent(reread.json().version)}`;
     for (const name of ['image-view', 'image-edit']) {
-      const denied = await app.inject({ method: 'DELETE', url: removeUrl, headers: { cookie: cookies[name] } });
+      const denied = await app.inject({
+        method: 'DELETE',
+        url: removeUrl,
+        headers: { cookie: cookies[name] },
+      });
       expect(denied.statusCode, denied.body).toBe(403);
     }
-    const removed = await app.inject({ method: 'DELETE', url: removeUrl, headers: { cookie: cookies['image-delete'] } });
+    const removed = await app.inject({
+      method: 'DELETE',
+      url: removeUrl,
+      headers: { cookie: cookies['image-delete'] },
+    });
     expect(removed.statusCode, removed.body).toBe(200);
-    const empty = await app.inject({ method: 'GET', url: imageUrl, headers: { cookie: cookies['image-view'] } });
+    const empty = await app.inject({
+      method: 'GET',
+      url: imageUrl,
+      headers: { cookie: cookies['image-view'] },
+    });
     expect(empty.json().image).toEqual({ state: 'absent' });
   });
 

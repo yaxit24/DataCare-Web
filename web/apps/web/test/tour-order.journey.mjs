@@ -6,9 +6,19 @@ import { createHash } from 'node:crypto';
  * No request interception or canned API responses are used here. See fixture defaults below.
  */
 export async function exerciseTourOrder(page, options = {}) {
-  assert(options.owner && typeof options.owner.$queryRawUnsafe === 'function', 'Tour exact-value roundtrip requires the existing disposable fixture owner');
-  assert.equal(typeof options.tenantId, 'string', 'Tour exact-value roundtrip requires the runner tenant');
-  assert(options.tenantId.length > 0, 'Tour exact-value roundtrip requires a nonempty runner tenant');
+  assert(
+    options.owner && typeof options.owner.$queryRawUnsafe === 'function',
+    'Tour exact-value roundtrip requires the existing disposable fixture owner',
+  );
+  assert.equal(
+    typeof options.tenantId,
+    'string',
+    'Tour exact-value roundtrip requires the runner tenant',
+  );
+  assert(
+    options.tenantId.length > 0,
+    'Tour exact-value roundtrip requires a nonempty runner tenant',
+  );
   const fixture = {
     coCode: '01',
     lcCode: '01',
@@ -436,7 +446,10 @@ export async function exerciseTourOrder(page, options = {}) {
       false,
     );
     const exactValues = await exerciseTourOrderExactValues(page, {
-      owner: options.owner, tenantId: options.tenantId, fixture, checkpoint: options.checkpoint,
+      owner: options.owner,
+      tenantId: options.tenantId,
+      fixture,
+      checkpoint: options.checkpoint,
     });
     const relevant = requests.filter((request) => request.scope.coBook === fixture.coBook);
     for (const request of relevant) {
@@ -482,82 +495,183 @@ export async function exerciseTourOrder(page, options = {}) {
 
 /** Additional real-DB import/roundtrip case; the runner supplies its already isolated owner. */
 async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, checkpoint }) {
-  const scope = { coCode: fixture.coCode, lcCode: fixture.lcCode, coYear: fixture.coYear, coBook: 'E13' };
+  const scope = {
+    coCode: fixture.coCode,
+    lcCode: fixture.lcCode,
+    coYear: fixture.coYear,
+    coBook: 'E13',
+  };
   const query = new URLSearchParams(scope).toString();
   const fullScope = [tenantId, scope.coCode, scope.lcCode, scope.coYear, scope.coBook];
   const tableNames = ['SL_ORD_DATA', 'SL_ORD_DETL', 'SL_ORD_IDTL', 'AC_DATA', 'ROJ_MEL_DATA'];
   const rawRows = async (table, voucherNo) => {
     assert(tableNames.includes(table));
-    return (await owner.$queryRawUnsafe(
-      `SELECT (SELECT jsonb_object_agg(e.key,e.value) FROM jsonb_each_text(to_jsonb(r)-'row_id') e) AS value
+    return (
+      await owner.$queryRawUnsafe(
+        `SELECT (SELECT jsonb_object_agg(e.key,e.value) FROM jsonb_each_text(to_jsonb(r)-'row_id') e) AS value
        FROM "${table}" r WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
        ORDER BY (to_jsonb(r)-'row_id')::text`,
-      ...fullScope, voucherNo,
-    )).map((row) => row.value);
+        ...fullScope,
+        voucherNo,
+      )
+    ).map((row) => row.value);
   };
-  const snapshot = async (voucherNo) => Object.fromEntries(await Promise.all(
-    tableNames.map(async (table) => [table, await rawRows(table, voucherNo)]),
-  ));
-  const protectedRows = async () => Object.fromEntries(await Promise.all(tableNames.map(async (table) => [table,
-    await owner.$queryRawUnsafe(
-      `SELECT to_jsonb(r)::text AS raw,r.xmin::text AS xmin,r.ctid::text AS ctid FROM "${table}" r
+  const snapshot = async (voucherNo) =>
+    Object.fromEntries(
+      await Promise.all(tableNames.map(async (table) => [table, await rawRows(table, voucherNo)])),
+    );
+  const protectedRows = async () =>
+    Object.fromEntries(
+      await Promise.all(
+        tableNames.map(async (table) => [
+          table,
+          await owner.$queryRawUnsafe(
+            `SELECT to_jsonb(r)::text AS raw,r.xmin::text AS xmin,r.ctid::text AS ctid FROM "${table}" r
        WHERE tenant_id=$1 AND NOT ("CO_CODE" IS NOT DISTINCT FROM $2 AND "LC_CODE" IS NOT DISTINCT FROM $3
        AND "CO_YEAR" IS NOT DISTINCT FROM $4 AND "CO_BOOK" IS NOT DISTINCT FROM $5) ORDER BY to_jsonb(r)::text`,
-      ...fullScope,
-    ),
-  ])));
+            ...fullScope,
+          ),
+        ]),
+      ),
+    );
   const protectedBefore = await protectedRows();
   const sha = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
   const existing = await owner.$queryRawUnsafe(
     'SELECT "CO_BOOK" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4',
-    tenantId, scope.coCode, scope.lcCode, scope.coBook,
+    tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
   );
   assert.deepEqual(existing, [], 'exact-value book must be a new isolated fixture');
   await owner.$executeRawUnsafe(
     `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
      VALUES($1,$2,$3,$4,'Tour exact values','TUROD','TOUR ORDER','I','Y','SL_ORD_DATA','SL_ORD_DETL')`,
-    tenantId, scope.coCode, scope.lcCode, scope.coBook,
+    tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
   );
   // Create ordinary calculable bases through the real API. SQL below represents imported
   // exact auxiliary values; it does not replace or intercept any HTTP response.
-  const base = { pcs: 1, touch: 100, making: 0, labourRate: 0, labourPct: 0, labourAmount: 0, mrp: 0, bagWt: 0 };
-  const createdResponse = await page.request.post(`/api/tour-orders?${query}`, { data: {
-    acCode: fixture.acCode, acName: 'Exact Tour browser customer', vchDate: '2024-07-10',
-    vchTime: '09:10:11.123456', billNo: 'TOUR-EXACT/17', vchDesc: 'Exact imported values',
-    taxRatePct: 0, advanceAmount: 25, cashAc: 'CASH', netAmount: 260,
-    lines: [
-      { ...base, srNo: 7, oldSrNo: 31, itCode: fixture.itemCode, grossWt: 10, netWt: 10, rate: 20,
-        components: [
-          { isrNo: 3, itCode: fixture.componentCode, dmCode: '00012', dmName: 'Imported first', pcs: 0, grossWt: 0.125, rate: 0, amount: 11, lbrRate: 0, netAmount: 11, karigarRate: 0 },
-          { isrNo: 13, itCode: fixture.componentCode, dmCode: '00013', dmName: 'Imported second', pcs: 2, grossWt: 0.25, rate: 0, amount: 13, lbrRate: 0, netAmount: 13, karigarRate: 0 },
-        ] },
-      { ...base, srNo: 19, oldSrNo: 58, itCode: fixture.itemCode, grossWt: 2, netWt: 2, rate: 30, components: [] },
-    ],
-  } });
+  const base = {
+    pcs: 1,
+    touch: 100,
+    making: 0,
+    labourRate: 0,
+    labourPct: 0,
+    labourAmount: 0,
+    mrp: 0,
+    bagWt: 0,
+  };
+  const createdResponse = await page.request.post(`/api/tour-orders?${query}`, {
+    data: {
+      acCode: fixture.acCode,
+      acName: 'Exact Tour browser customer',
+      vchDate: '2024-07-10',
+      vchTime: '09:10:11.123456',
+      billNo: 'TOUR-EXACT/17',
+      vchDesc: 'Exact imported values',
+      taxRatePct: 0,
+      advanceAmount: 25,
+      cashAc: 'CASH',
+      netAmount: 260,
+      lines: [
+        {
+          ...base,
+          srNo: 7,
+          oldSrNo: 31,
+          itCode: fixture.itemCode,
+          grossWt: 10,
+          netWt: 10,
+          rate: 20,
+          components: [
+            {
+              isrNo: 3,
+              itCode: fixture.componentCode,
+              dmCode: '00012',
+              dmName: 'Imported first',
+              pcs: 0,
+              grossWt: 0.125,
+              rate: 0,
+              amount: 11,
+              lbrRate: 0,
+              netAmount: 11,
+              karigarRate: 0,
+            },
+            {
+              isrNo: 13,
+              itCode: fixture.componentCode,
+              dmCode: '00013',
+              dmName: 'Imported second',
+              pcs: 2,
+              grossWt: 0.25,
+              rate: 0,
+              amount: 13,
+              lbrRate: 0,
+              netAmount: 13,
+              karigarRate: 0,
+            },
+          ],
+        },
+        {
+          ...base,
+          srNo: 19,
+          oldSrNo: 58,
+          itCode: fixture.itemCode,
+          grossWt: 2,
+          netWt: 2,
+          rate: 30,
+          components: [],
+        },
+      ],
+    },
+  });
   const created = await createdResponse.json();
   assert.equal(createdResponse.status(), 201, JSON.stringify(created));
-  assert.equal(created.total, 260, 'ordinary calculation bases remain independent of imported auxiliary values');
+  assert.equal(
+    created.total,
+    260,
+    'ordinary calculation bases remain independent of imported auxiliary values',
+  );
   const voucherNo = String(created.vchNo).padStart(5, '0');
   const key = [...fullScope, voucherNo];
-  assert.equal(await owner.$executeRawUnsafe(
-    `UPDATE "SL_ORD_DATA" SET "MOBILE"=NULL,"ADD1"='',"SCHM_AMT"=0
-     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`, ...key,
-  ), 1);
-  assert.equal(await owner.$executeRawUnsafe(
-    `UPDATE "SL_ORD_DETL" SET "ITM_MRP"=999999999999999.99,"BAG_WT"=NULL,"OTH_AMT"=0
-     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"=7`, ...key,
-  ), 1);
-  assert.equal(await owner.$executeRawUnsafe(
-    `UPDATE "SL_ORD_IDTL" SET "DM_NAME"=NULL,"IT_RATE"=NULL,"IT_LBR_RATE"=0,"KR_RATE"=999999999999998.99
-     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"=7 AND "ISR_NO"=3`, ...key,
-  ), 1);
-  assert.equal(await owner.$executeRawUnsafe(
-    `UPDATE "SL_ORD_IDTL" SET "DM_NAME"='',"IT_RATE"=0,"IT_LBR_RATE"=NULL,"KR_RATE"=999999999999997.99
-     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"=7 AND "ISR_NO"=13`, ...key,
-  ), 1);
+  assert.equal(
+    await owner.$executeRawUnsafe(
+      `UPDATE "SL_ORD_DATA" SET "MOBILE"=NULL,"ADD1"='',"SCHM_AMT"=0
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      ...key,
+    ),
+    1,
+  );
+  assert.equal(
+    await owner.$executeRawUnsafe(
+      `UPDATE "SL_ORD_DETL" SET "ITM_MRP"=999999999999999.99,"BAG_WT"=NULL,"OTH_AMT"=0
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"=7`,
+      ...key,
+    ),
+    1,
+  );
+  assert.equal(
+    await owner.$executeRawUnsafe(
+      `UPDATE "SL_ORD_IDTL" SET "DM_NAME"=NULL,"IT_RATE"=NULL,"IT_LBR_RATE"=0,"KR_RATE"=999999999999998.99
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"=7 AND "ISR_NO"=3`,
+      ...key,
+    ),
+    1,
+  );
+  assert.equal(
+    await owner.$executeRawUnsafe(
+      `UPDATE "SL_ORD_IDTL" SET "DM_NAME"='',"IT_RATE"=0,"IT_LBR_RATE"=NULL,"KR_RATE"=999999999999997.99
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"=7 AND "ISR_NO"=13`,
+      ...key,
+    ),
+    1,
+  );
   const before = await snapshot(voucherNo);
   const parent = (values, srNo) => values.SL_ORD_DETL.find((row) => row.SR_NO === String(srNo));
-  const child = (values, srNo, isrNo) => values.SL_ORD_IDTL.find((row) => row.SR_NO === String(srNo) && row.ISR_NO === String(isrNo));
+  const child = (values, srNo, isrNo) =>
+    values.SL_ORD_IDTL.find((row) => row.SR_NO === String(srNo) && row.ISR_NO === String(isrNo));
   assert.equal(parent(before, 7).ITM_MRP, '999999999999999.99');
   assert.equal(parent(before, 7).BAG_WT, null);
   assert.equal(child(before, 7, 3).KR_RATE, '999999999999998.99');
@@ -572,20 +686,29 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
   await book.locator('option[value="E13"]').waitFor({ state: 'attached' });
   await book.selectOption('E13');
   const endpoint = `/api/tour-orders/${voucherNo}`;
-  const waitResponse = (method) => page.waitForResponse((response) => {
-    const url = new URL(response.url());
-    return url.pathname === endpoint && url.searchParams.get('coBook') === 'E13' && response.request().method() === method;
-  });
+  const waitResponse = (method) =>
+    page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === endpoint &&
+        url.searchParams.get('coBook') === 'E13' &&
+        response.request().method() === method
+      );
+    });
   const load = async () => {
     await page.getByLabel('Order number', { exact: true }).fill(voucherNo);
-    const [response] = await Promise.all([waitResponse('GET'), page.getByRole('button', { name: 'Load order', exact: true }).click()]);
+    const [response] = await Promise.all([
+      waitResponse('GET'),
+      page.getByRole('button', { name: 'Load order', exact: true }).click(),
+    ]);
     assert.equal(response.status(), 200);
     const document = await response.json();
     await page.getByText(`Editing order #${voucherNo}`, { exact: true }).waitFor();
     return document;
   };
   const exactDto = (document, advance) => {
-    for (const field of ['coCode', 'lcCode', 'coYear', 'coBook']) assert.equal(document[field], scope[field]);
+    for (const field of ['coCode', 'lcCode', 'coYear', 'coBook'])
+      assert.equal(document[field], scope[field]);
     assert.equal(document.voucherNo, voucherNo);
     assert.match(document.version, /^[a-f0-9]{64}$/);
     assert.equal(document.vchTime, '09:10:11.123456');
@@ -593,13 +716,22 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
     assert.equal(document.mobile, null);
     assert.equal(document.address1, '');
     assert.equal(document.schemeAmount, 0);
-    assert.deepEqual(document.lines.map((row) => [row.srNo, row.oldSrNo]), [[7, 31], [19, 58]]);
+    assert.deepEqual(
+      document.lines.map((row) => [row.srNo, row.oldSrNo]),
+      [
+        [7, 31],
+        [19, 58],
+      ],
+    );
     assert.equal(document.lines[0].mrp, '999999999999999.99');
     assert.equal(document.lines[0].bagWt, null);
     assert.equal(document.lines[1].mrp, 0);
     assert.equal(document.lines[1].bagWt, 0);
     const children = document.lines[0].components;
-    assert.deepEqual(children.map((row) => row.isrNo), [3, 13]);
+    assert.deepEqual(
+      children.map((row) => row.isrNo),
+      [3, 13],
+    );
     assert.equal(children[0].dmCode, '00012');
     assert.equal(children[0].dmName, null);
     assert.equal(children[1].dmName, '');
@@ -610,9 +742,16 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
     assert.equal(children[0].karigarRate, '999999999999998.99');
     assert.equal(children[1].karigarRate, '999999999999997.99');
   };
-  const details = (item) => page.locator('details').filter({ has: page.locator('summary', { hasText: `Item ${item} specifications and components` }) });
+  const details = (item) =>
+    page.locator('details').filter({
+      has: page.locator('summary', { hasText: `Item ${item} specifications and components` }),
+    });
   const visible = async () => {
-    for (const summary of [page.getByText('Order details', { exact: true }), details(1).locator('summary'), details(2).locator('summary')])
+    for (const summary of [
+      page.getByText('Order details', { exact: true }),
+      details(1).locator('summary'),
+      details(2).locator('summary'),
+    ])
       if (!(await summary.locator('..').evaluate((element) => element.open))) await summary.click();
     for (const [locator, expected] of [
       [page.getByLabel('Mobile', { exact: true }), ''],
@@ -627,23 +766,40 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
       [details(1).getByLabel('Rate row 2', { exact: true }), '0'],
       [details(1).getByLabel('LbrRate row 1', { exact: true }), '0'],
       [details(1).getByLabel('LbrRate row 2', { exact: true }), ''],
-    ]) assert.equal(await locator.inputValue(), expected, 'exact saved editor value');
+    ])
+      assert.equal(await locator.inputValue(), expected, 'exact saved editor value');
   };
   const update = async (document, expectedAdvance) => {
-    const [response] = await Promise.all([waitResponse('PUT'), page.getByRole('button', { name: 'Update Tour Order', exact: true }).click()]);
+    const [response] = await Promise.all([
+      waitResponse('PUT'),
+      page.getByRole('button', { name: 'Update Tour Order', exact: true }).click(),
+    ]);
     const responseBody = await response.json();
     assert.equal(response.status(), 200, JSON.stringify(responseBody));
     const submitted = response.request().postDataJSON();
-    assert.equal(submitted.expectedVersion, document.version, 'the save uses the exact loaded version');
+    assert.equal(
+      submitted.expectedVersion,
+      document.version,
+      'the save uses the exact loaded version',
+    );
     assert.equal(submitted.advanceAmount, expectedAdvance);
     assert.equal(submitted.mobile, null);
     assert.equal(submitted.address1, '');
-    assert.deepEqual(submitted.lines.map((row) => [row.srNo, row.oldSrNo]), [[7, 31], [19, 58]]);
+    assert.deepEqual(
+      submitted.lines.map((row) => [row.srNo, row.oldSrNo]),
+      [
+        [7, 31],
+        [19, 58],
+      ],
+    );
     assert.equal(submitted.lines[0].mrp, '999999999999999.99');
     assert.equal(submitted.lines[0].bagWt, null);
     assert.equal(submitted.lines[1].mrp, 0);
     assert.equal(submitted.lines[1].bagWt, 0);
-    assert.deepEqual(submitted.lines[0].components.map((row) => row.isrNo), [3, 13]);
+    assert.deepEqual(
+      submitted.lines[0].components.map((row) => row.isrNo),
+      [3, 13],
+    );
     assert.equal(submitted.lines[0].components[0].rate, null);
     assert.equal(submitted.lines[0].components[1].rate, 0);
     assert.equal(submitted.lines[0].components[0].dmCode, '00012');
@@ -663,9 +819,17 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
   await checkpoint?.('tour-order-exact-values', page);
   const unchanged = await update(loaded, 25);
   exactDto(unchanged, 25);
-  assert.notEqual(unchanged.version, loaded.version, 'physical replacement invalidates the old saved version');
+  assert.notEqual(
+    unchanged.version,
+    loaded.version,
+    'physical replacement invalidates the old saved version',
+  );
   const afterUnchanged = await snapshot(voucherNo);
-  assert.deepEqual(afterUnchanged, before, 'all raw business header/parent/child/ledger/Rojmel scalars survive unchanged browser save');
+  assert.deepEqual(
+    afterUnchanged,
+    before,
+    'all raw business header/parent/child/ledger/Rojmel scalars survive unchanged browser save',
+  );
   await visible();
   await page.getByLabel('Advance ₹', { exact: true }).fill('40');
   const advanced = await update(unchanged, '40');
@@ -674,24 +838,41 @@ async function exerciseTourOrderExactValues(page, { owner, tenantId, fixture, ch
   const afterAdvance = await snapshot(voucherNo);
   assert.deepEqual(afterAdvance.SL_ORD_DETL, before.SL_ORD_DETL);
   assert.deepEqual(afterAdvance.SL_ORD_IDTL, before.SL_ORD_IDTL);
-  const withoutAdvance = (header) => { const { ADV_AMT, ...rest } = header; return rest; };
-  assert.deepEqual(afterAdvance.SL_ORD_DATA.map(withoutAdvance), before.SL_ORD_DATA.map(withoutAdvance));
+  const withoutAdvance = (header) => {
+    const { ADV_AMT, ...rest } = header;
+    return rest;
+  };
+  assert.deepEqual(
+    afterAdvance.SL_ORD_DATA.map(withoutAdvance),
+    before.SL_ORD_DATA.map(withoutAdvance),
+  );
   assert.match(afterAdvance.SL_ORD_DATA[0].ADV_AMT, /^40(?:\.0+)?$/);
   assert.equal(afterAdvance.AC_DATA.length, 2);
   const cash = afterAdvance.AC_DATA.find((row) => row.AC_CODE === 'CASH');
   const customer = afterAdvance.AC_DATA.find((row) => row.AC_CODE === fixture.acCode);
-  assert.match(cash.DR_AMT, /^40(?:\.0+)?$/); assert.match(cash.CR_AMT, /^0(?:\.0+)?$/);
-  assert.match(customer.CR_AMT, /^40(?:\.0+)?$/); assert.match(customer.DR_AMT, /^0(?:\.0+)?$/);
+  assert.match(cash.DR_AMT, /^40(?:\.0+)?$/);
+  assert.match(cash.CR_AMT, /^0(?:\.0+)?$/);
+  assert.match(customer.CR_AMT, /^40(?:\.0+)?$/);
+  assert.match(customer.DR_AMT, /^0(?:\.0+)?$/);
   assert.equal(afterAdvance.ROJ_MEL_DATA.length, 1);
   assert.match(afterAdvance.ROJ_MEL_DATA[0].CR_AMT, /^40(?:\.0+)?$/);
   await visible();
   const protectedAfter = await protectedRows();
-  assert.deepEqual(protectedAfter, protectedBefore, 'every other order scope in the disposable tenant retains physical rows');
+  assert.deepEqual(
+    protectedAfter,
+    protectedBefore,
+    'every other order scope in the disposable tenant retains physical rows',
+  );
   return {
-    scope, voucherNo, parentSerials: [7, 19], childSerials: [3, 13],
-    protectedBeforeSha256: sha(protectedBefore), protectedAfterSha256: sha(protectedAfter),
+    scope,
+    voucherNo,
+    parentSerials: [7, 19],
+    childSerials: [3, 13],
+    protectedBeforeSha256: sha(protectedBefore),
+    protectedAfterSha256: sha(protectedAfter),
     versions: [loaded.version, unchanged.version, advanced.version],
-    beforeSha256: sha(before), afterUnchangedSha256: sha(afterUnchanged),
+    beforeSha256: sha(before),
+    afterUnchangedSha256: sha(afterUnchanged),
     beforeParentChildrenSha256: sha([before.SL_ORD_DETL, before.SL_ORD_IDTL]),
     afterAdvanceParentChildrenSha256: sha([afterAdvance.SL_ORD_DETL, afterAdvance.SL_ORD_IDTL]),
     changedAdvance: ['25', '40'],

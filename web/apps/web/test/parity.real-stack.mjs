@@ -541,7 +541,11 @@ try {
   await seedSalesReturnLabourReplay(sql);
   try {
     result.salesReturnLabourReplay = await exerciseSalesReturnLabourReplay(page, {
-      checkpoint, owner, tenantId, password, sql,
+      checkpoint,
+      owner,
+      tenantId,
+      password,
+      sql,
     });
   } finally {
     await cleanupSalesReturnLabourReplay(sql);

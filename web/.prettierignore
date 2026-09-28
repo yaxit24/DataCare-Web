@@ -2,8 +2,16 @@
 apps/api/form-specs/
 apps/api/report-specs/
 
-# Build/test outputs.
+# Frozen independent fixtures and retained execution evidence are byte-addressed inputs.
+**/test/fixtures/
+docs/parity-evidence/
+docs/COMPLETION-REGISTER.json
+output/
+
+# Generated dependency/build state.
+node_modules/
 apps/web/.next/
 **/dist/
 coverage/
 .turbo/
+pnpm-lock.yaml

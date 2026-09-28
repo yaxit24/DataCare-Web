@@ -26,7 +26,16 @@ const scope = {
 };
 
 async function clean(): Promise<void> {
-  for (const table of ['SL_ORD_DETL', 'SL_ORD_DATA', 'APR_DETL', 'BAR_DETL', 'ITEM_MAST', 'BOOK_DATA', 'AC_MAST', 'EMP_MAST']) {
+  for (const table of [
+    'SL_ORD_DETL',
+    'SL_ORD_DATA',
+    'APR_DETL',
+    'BAR_DETL',
+    'ITEM_MAST',
+    'BOOK_DATA',
+    'AC_MAST',
+    'EMP_MAST',
+  ]) {
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   }
 }
@@ -108,7 +117,10 @@ databaseDescribe('RP_ORD_TRACK order tracking report parity builder', () => {
   });
 
   it('matches the desktop sales-pending order tracking grid and joined columns', async () => {
-    const report = await orderTrackReport(runtime, scope, { status: 'sales-pending', onlyOrderTagStock: 'true' });
+    const report = await orderTrackReport(runtime, scope, {
+      status: 'sales-pending',
+      onlyOrderTagStock: 'true',
+    });
     expect(report.rows).toHaveLength(1);
     expect(report.rows[0]).toMatchObject({
       srNo: 1,
@@ -161,7 +173,11 @@ databaseDescribe('RP_ORD_TRACK order tracking report parity builder', () => {
     const employee = await orderTrackReport(runtime, scope, { status: 'all', employeeCode: 'E01' });
     expect(employee.rows.map((row: any) => row.ordNo)).toEqual(['ORD001', 'ORD003']);
 
-    const exactOrder = await orderTrackReport(runtime, scope, { status: 'all', orderNo: 'ORD002', designNo: 'D2' });
+    const exactOrder = await orderTrackReport(runtime, scope, {
+      status: 'all',
+      orderNo: 'ORD002',
+      designNo: 'D2',
+    });
     expect(exactOrder.rows.map((row: any) => row.ordNo)).toEqual(['ORD002']);
   });
 });

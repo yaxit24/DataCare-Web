@@ -72,8 +72,12 @@ describe('saved Return clock independent canonical JSONB profile', () => {
     );
     expect(fixture.cases).toHaveLength(139);
     expect(fixture.cases.filter((value) => value.expected.status === 'ready')).toHaveLength(24);
-    expect(fixture.cases.filter((value) => value.expected.status === 'unsupported')).toHaveLength(83);
-    expect(fixture.cases.filter((value) => value.expected.status === 'invalid-input')).toHaveLength(32);
+    expect(fixture.cases.filter((value) => value.expected.status === 'unsupported')).toHaveLength(
+      83,
+    );
+    expect(fixture.cases.filter((value) => value.expected.status === 'invalid-input')).toHaveLength(
+      32,
+    );
     expect(SAVED_SALE_RETURN_CLOCK_VERSION).toBe('saved-sale-return-clock-v1');
     expect(SAVED_SALE_RETURN_CLOCK_PROFILE).toBe('canonical-postgresql-jsonb-local-clock-v1');
   });
@@ -118,7 +122,8 @@ describe('saved Return clock independent canonical JSONB profile', () => {
       const input = validInput();
       let calls = 0;
       const target = location === 'wrapper' ? input : input[location];
-      const key = location === 'wrapper' ? 'raw' : location === 'raw' ? 'VCH_DATE' : 'documentVersion';
+      const key =
+        location === 'wrapper' ? 'raw' : location === 'raw' ? 'VCH_DATE' : 'documentVersion';
       Object.defineProperty(target, key, {
         enumerable: true,
         configurable: true,
@@ -155,7 +160,10 @@ describe('saved Return clock independent canonical JSONB profile', () => {
     (location) => {
       const input = validInput();
       const target = location === 'wrapper' ? input : input[location];
-      Object.defineProperty(target, Symbol('hidden-input'), { value: 'untrusted', enumerable: true });
+      Object.defineProperty(target, Symbol('hidden-input'), {
+        value: 'untrusted',
+        enumerable: true,
+      });
       expectInvalid(input);
     },
   );
@@ -170,10 +178,13 @@ describe('saved Return clock independent canonical JSONB profile', () => {
     },
   );
 
-  it.each([NaN, Infinity, -Infinity])('refuses nonfinite raw values (%s) without coercion', (value) => {
-    const input = validInput();
-    expectInvalid({ ...input, raw: { ...input.raw, VCH_TIME: value } });
-  });
+  it.each([NaN, Infinity, -Infinity])(
+    'refuses nonfinite raw values (%s) without coercion',
+    (value) => {
+      const input = validInput();
+      expectInvalid({ ...input, raw: { ...input.raw, VCH_TIME: value } });
+    },
+  );
 
   it('keeps ready output detached while caller raw and provenance change', () => {
     const input = validInput();

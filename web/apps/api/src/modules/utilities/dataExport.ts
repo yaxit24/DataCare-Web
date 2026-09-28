@@ -130,7 +130,8 @@ interface TableMeta {
 }
 
 const quoteIdentifier = (identifier: string): string => {
-  if (!identifier || identifier.includes('\0')) throw new DataExportValidationError('invalid identifier');
+  if (!identifier || identifier.includes('\0'))
+    throw new DataExportValidationError('invalid identifier');
   return `"${identifier.replaceAll('"', '""')}"`;
 };
 
@@ -164,7 +165,12 @@ async function exportMetadataTx(tx: any): Promise<TableMeta[]> {
       WHERE table_schema='public' AND table_name IN (${placeholders})
       ORDER BY table_name, ordinal_position`,
     ...DATA_EXPORT_TABLES,
-  )) as Array<{ table_name: string; column_name: string; data_type: string; ordinal_position: number }>;
+  )) as Array<{
+    table_name: string;
+    column_name: string;
+    data_type: string;
+    ordinal_position: number;
+  }>;
   const byTable = new Map<string, ColumnMeta[]>();
   for (const row of rows) {
     const name = String(row.table_name);
@@ -250,7 +256,8 @@ function encodeCell(value: unknown, column: ColumnMeta): unknown {
   if (typeof value === 'object') {
     const maybeJson = value as { toJSON?: () => unknown; toString?: () => string };
     if (typeof maybeJson.toJSON === 'function') return maybeJson.toJSON();
-    if (column.dataType === 'numeric' || column.dataType === 'decimal') return maybeJson.toString?.() ?? value;
+    if (column.dataType === 'numeric' || column.dataType === 'decimal')
+      return maybeJson.toString?.() ?? value;
   }
   return value;
 }
@@ -274,7 +281,10 @@ async function readRowsTx(
   });
 }
 
-export async function dataExportPreview(prisma: any, inputScope: DataExportScope): Promise<DataExportPreview> {
+export async function dataExportPreview(
+  prisma: any,
+  inputScope: DataExportScope,
+): Promise<DataExportPreview> {
   const scope = normalizeScope(inputScope);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
     const metadata = await exportMetadataTx(tx);

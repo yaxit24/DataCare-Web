@@ -3,12 +3,7 @@ import { applyFilters } from './reportFilters.js';
 import type { ListReport, ReportScope } from './reports.js';
 
 export type OtherItemMode =
-  | 'stud-in'
-  | 'stud-out'
-  | 'stud-inout'
-  | 'loose-in'
-  | 'loose-out'
-  | 'loose-inout';
+  'stud-in' | 'stud-out' | 'stud-inout' | 'loose-in' | 'loose-out' | 'loose-inout';
 
 const MODES = new Set<OtherItemMode>([
   'stud-in',

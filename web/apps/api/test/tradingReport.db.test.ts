@@ -19,7 +19,14 @@ const exec = (sql: string, ...params: unknown[]) =>
   withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...params));
 
 async function clean(): Promise<void> {
-  for (const table of ['AC_DATA', 'MAIN_STOCK', 'ITEM_MAST', 'GROUP_MAST', 'BOOK_DATA', 'AC_MAST']) {
+  for (const table of [
+    'AC_DATA',
+    'MAIN_STOCK',
+    'ITEM_MAST',
+    'GROUP_MAST',
+    'BOOK_DATA',
+    'AC_MAST',
+  ]) {
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   }
 }
@@ -100,19 +107,56 @@ databaseDescribe('RP_TRADING Trading Report parity builder', () => {
   });
 
   it('runs All mode with sale and purchase account rows and stock-fine fallback', async () => {
-    const report = await tradingReport(runtime, scope, { mode: 'all', salesAc: SL_AC, purchaseAc: PR_AC });
-    expect(report.rows.map((row: any) => [row.vchDate, row.slBookCode, row.slPartyName, row.slWt, row.slRate, row.slAmt, row.prBookCode, row.prPartyName, row.prWt, row.prRate, row.prAmt])).toEqual([
+    const report = await tradingReport(runtime, scope, {
+      mode: 'all',
+      salesAc: SL_AC,
+      purchaseAc: PR_AC,
+    });
+    expect(
+      report.rows.map((row: any) => [
+        row.vchDate,
+        row.slBookCode,
+        row.slPartyName,
+        row.slWt,
+        row.slRate,
+        row.slAmt,
+        row.prBookCode,
+        row.prPartyName,
+        row.prWt,
+        row.prRate,
+        row.prAmt,
+      ]),
+    ).toEqual([
       ['2024-06-10', 'SAL', 'Sale Party', 5, 100, 500, null, null, 0, 0, 0],
       ['2024-06-11', null, null, 0, 0, 0, 'PUR', 'Purchase Party', 4, 90, 360],
     ]);
-    expect(report.totals).toMatchObject({ rows: 2, slWt: 5, slAmt: 500, prWt: 4, prAmt: 360, diffFine: -1, diffAmount: -140 });
+    expect(report.totals).toMatchObject({
+      rows: 2,
+      slWt: 5,
+      slAmt: 500,
+      prWt: 4,
+      prAmt: 360,
+      diffFine: -1,
+      diffAmount: -140,
+    });
   });
 
   it('runs Only RateCut and Without RateCut modes with desktop account/book predicates', async () => {
-    const only = await tradingReport(runtime, scope, { mode: 'only-ratecut', salesAc: SL_AC, purchaseAc: PR_AC });
-    expect(only.rows.map((row: any) => [row.slBookCode, row.slWt, row.slAmt, row.prBookCode, row.prWt, row.prAmt])).toEqual([
-      ['WHS', 2, 200, 'WHS', 3, 150],
-    ]);
+    const only = await tradingReport(runtime, scope, {
+      mode: 'only-ratecut',
+      salesAc: SL_AC,
+      purchaseAc: PR_AC,
+    });
+    expect(
+      only.rows.map((row: any) => [
+        row.slBookCode,
+        row.slWt,
+        row.slAmt,
+        row.prBookCode,
+        row.prWt,
+        row.prAmt,
+      ]),
+    ).toEqual([['WHS', 2, 200, 'WHS', 3, 150]]);
 
     const without = await tradingReport(runtime, scope, {
       mode: 'without-ratecut',

@@ -497,12 +497,14 @@ export async function orderTrackReport(
 ): Promise<ListReport> {
   const fromDate = s.fromDate ?? '2010-01-01';
   const toDate = s.toDate ?? todayIso();
-  const status = String(options.status ?? 'sales-pending').trim().toLowerCase() as OrderTrackStatus;
+  const status = String(options.status ?? 'sales-pending')
+    .trim()
+    .toLowerCase() as OrderTrackStatus;
   const lcCode = txt(options.lcCode) ?? s.lcCode ?? '';
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const params: unknown[] = [s.coCode, fromDate, toDate];
     const where = [
-      'a.tenant_id=current_setting(\'app.tenant_id\', true)',
+      "a.tenant_id=current_setting('app.tenant_id', true)",
       'a."CO_CODE"=$1',
       'a."VCH_DATE">=$2::date',
       'a."VCH_DATE"<=$3::date',
@@ -513,17 +515,17 @@ export async function orderTrackReport(
     pushText(params, where, 'a."DESIGN_NO"', options.designNo);
     pushText(params, where, 'e."AC_CODE"', options.karigarCode);
     if (flagFrom(options.onlyOrderTagStock, false)) {
-      where.push("a.\"TAG_STK_LESS\"='Y'");
+      where.push('a."TAG_STK_LESS"=\'Y\'');
       where.push("coalesce(a.\"TAG_NO\",'') <> ''");
     }
     if (status === 'sales-pending') {
-      where.push("a.\"TAG_SALE\"='N'");
-      where.push("a.\"TAG_GEN\"='Y'");
+      where.push('a."TAG_SALE"=\'N\'');
+      where.push('a."TAG_GEN"=\'Y\'');
     } else if (status === 'issue-pending') {
-      where.push("a.\"DESIGN_ISU\"='N'");
+      where.push('a."DESIGN_ISU"=\'N\'');
     } else if (status === 'receive-pending') {
-      where.push("a.\"TAG_GEN\"='N'");
-      where.push("a.\"DESIGN_ISU\"='Y'");
+      where.push('a."TAG_GEN"=\'N\'');
+      where.push('a."DESIGN_ISU"=\'Y\'');
     }
 
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(

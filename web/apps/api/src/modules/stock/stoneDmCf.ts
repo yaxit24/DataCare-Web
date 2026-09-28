@@ -79,9 +79,14 @@ type PreparedLine = {
 };
 
 const n = (value: unknown): number => (value == null || value === '' ? 0 : Number(value) || 0);
-const text = (value: unknown, max = 255): string => String(value ?? '').trim().slice(0, max);
-const hasNumber = (value: unknown): boolean => value !== undefined && value !== null && String(value).trim() !== '';
-const numOr = (value: unknown, fallback: unknown): number => (hasNumber(value) ? n(value) : n(fallback));
+const text = (value: unknown, max = 255): string =>
+  String(value ?? '')
+    .trim()
+    .slice(0, max);
+const hasNumber = (value: unknown): boolean =>
+  value !== undefined && value !== null && String(value).trim() !== '';
+const numOr = (value: unknown, fallback: unknown): number =>
+  hasNumber(value) ? n(value) : n(fallback);
 const txtOr = (value: unknown, fallback: unknown, max = 255): string => {
   const actual = text(value, max);
   return actual || text(fallback, max);
@@ -187,7 +192,11 @@ function voucherKey(scope: CompleteScope, voucherNo: string): Record<string, unk
   };
 }
 
-async function headerForUpdateTx(tx: any, scope: CompleteScope, voucherNo: string): Promise<PersistedHeader> {
+async function headerForUpdateTx(
+  tx: any,
+  scope: CompleteScope,
+  voucherNo: string,
+): Promise<PersistedHeader> {
   try {
     return (await persistedVoucherHeaderTx(tx, {
       table: 'BAR_CAN_DATA',
@@ -209,11 +218,12 @@ async function headerForUpdateTx(tx: any, scope: CompleteScope, voucherNo: strin
 function lineHasContent(line: StoneDmCfLineInput): boolean {
   return Boolean(
     text(line.tagNo) ||
-      text(line.itCode) ||
-      text(line.designNo) ||
-      text(line.certificateNo) ||
-      text(line.remark) ||
-      n(line.pieces) + n(line.grossWt) + n(line.labourAmount) + n(line.otherAmount) + n(line.mrp) !== 0,
+    text(line.itCode) ||
+    text(line.designNo) ||
+    text(line.certificateNo) ||
+    text(line.remark) ||
+    n(line.pieces) + n(line.grossWt) + n(line.labourAmount) + n(line.otherAmount) + n(line.mrp) !==
+      0,
   );
 }
 
@@ -247,7 +257,9 @@ async function duplicateCheckTx(
     currentVoucherNo ?? '',
   );
   if (prior.length) {
-    throw new StoneDmCfValidationError(`tag is already present in another stone/dm-cf voucher: ${tagNo}|${vchSrno}`);
+    throw new StoneDmCfValidationError(
+      `tag is already present in another stone/dm-cf voucher: ${tagNo}|${vchSrno}`,
+    );
   }
 }
 
@@ -303,7 +315,8 @@ async function prepareLinesTx(
   currentVoucherNo?: string,
 ): Promise<PreparedLine[]> {
   const usable = lines.filter(lineHasContent);
-  if (!usable.length) throw new StoneDmCfValidationError('at least one stone/dm-cf line is required');
+  if (!usable.length)
+    throw new StoneDmCfValidationError('at least one stone/dm-cf line is required');
   const seen = new Set<string>();
   const prepared: PreparedLine[] = [];
   let manual = 0;
@@ -311,12 +324,14 @@ async function prepareLinesTx(
     const tagNo = text(line.tagNo, 15);
     if (tagNo) {
       const requestedSrno = n(line.vchSrno);
-      const retained = requestedSrno > 0 ? existingSnapshots.get(`${tagNo}|${requestedSrno}`) : undefined;
+      const retained =
+        requestedSrno > 0 ? existingSnapshots.get(`${tagNo}|${requestedSrno}`) : undefined;
       const source = retained ?? (await sourceTagTx(tx, scope, line));
       const vchSrno = n(source.VCH_SRNO || line.vchSrno);
       if (vchSrno <= 0) throw new StoneDmCfValidationError(`VCH_SRNO is required for tag ${tagNo}`);
       const identityKey = `${tagNo}|${vchSrno}`;
-      if (seen.has(identityKey)) throw new StoneDmCfValidationError(`duplicate stone/dm-cf tag: ${identityKey}`);
+      if (seen.has(identityKey))
+        throw new StoneDmCfValidationError(`duplicate stone/dm-cf tag: ${identityKey}`);
       seen.add(identityKey);
       await duplicateCheckTx(tx, scope, tagNo, vchSrno, currentVoucherNo);
       prepared.push({
@@ -329,14 +344,22 @@ async function prepareLinesTx(
       const pieces = n(line.pieces);
       const gross = n(line.grossWt);
       if (pieces + gross === 0) {
-        throw new StoneDmCfValidationError('manual stone/dm-cf rows require pieces or gross weight');
+        throw new StoneDmCfValidationError(
+          'manual stone/dm-cf rows require pieces or gross weight',
+        );
       }
       manual += 1;
       prepared.push({ input: line, source: {}, identityKey: `manual|${manual}` });
     }
   }
-  const totalPieces = prepared.reduce((sum, row) => sum + numOr(row.input.pieces, row.source.ITM_PCS), 0);
-  const totalGross = prepared.reduce((sum, row) => sum + numOr(row.input.grossWt, row.source.ITM_GWT), 0);
+  const totalPieces = prepared.reduce(
+    (sum, row) => sum + numOr(row.input.pieces, row.source.ITM_PCS),
+    0,
+  );
+  const totalGross = prepared.reduce(
+    (sum, row) => sum + numOr(row.input.grossWt, row.source.ITM_GWT),
+    0,
+  );
   if (totalPieces + totalGross === 0) {
     throw new StoneDmCfValidationError('stone/dm-cf total pieces and gross weight are zero');
   }
@@ -390,7 +413,11 @@ function detailRow(
     OTH_AMT: numOr(line.otherAmount, source.OTH_AMT),
     ITM_RATE: 0,
     ITM_AMT: 0,
-    TAG_COST: hasNumber(line.tagCost) ? n(line.tagCost) : n(source.KR_COST) !== 0 ? n(source.KR_COST) : n(source.TAG_COST),
+    TAG_COST: hasNumber(line.tagCost)
+      ? n(line.tagCost)
+      : n(source.KR_COST) !== 0
+        ? n(source.KR_COST)
+        : n(source.TAG_COST),
     ITM_MRP: numOr(line.mrp, source.ITM_MRP),
     KR_NET_WT: 0,
     KR_TOUCH: 0,
@@ -435,7 +462,12 @@ async function saveTx(
     voucherNo = formatVoucherNo(requestedVoucherNo);
     const persisted = await headerForUpdateTx(tx, input.scope, voucherNo);
     await assertPeriodOpen(tx, input.scope.tenantId, {
-      writes: [{ table: 'BAR_CAN_DATA', rows: [{ CO_CODE: input.scope.coCode, VCH_DATE: persisted.VCH_DATE }] }],
+      writes: [
+        {
+          table: 'BAR_CAN_DATA',
+          rows: [{ CO_CODE: input.scope.coCode, VCH_DATE: persisted.VCH_DATE }],
+        },
+      ],
       ledger: { table: 'AC_DATA', lines: [] },
     });
     hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
@@ -458,7 +490,9 @@ async function saveTx(
         .filter(([identity]) => Boolean(identity)),
     );
     existingSnapshots = new Map(
-      oldRows.map((row) => [identityOfLine(row), row] as const).filter(([identity]) => Boolean(identity)),
+      oldRows
+        .map((row) => [identityOfLine(row), row] as const)
+        .filter(([identity]) => Boolean(identity)),
     );
   } else {
     voucherNo = formatVoucherNo(await nextVoucherNoTx(tx, input.scope));
@@ -512,7 +546,18 @@ async function saveTx(
       tx,
       'BAR_CAN_DETL',
       input.scope.tenantId,
-      detailRow(input.scope, policy, { ...input, mainUser }, voucherNo, hiddenVoucherNo, date, now, preparedLine, index + 1, oldSrNo),
+      detailRow(
+        input.scope,
+        policy,
+        { ...input, mainUser },
+        voucherNo,
+        hiddenVoucherNo,
+        date,
+        now,
+        preparedLine,
+        index + 1,
+        oldSrNo,
+      ),
     );
   }
 
@@ -537,7 +582,9 @@ export async function saveStoneDmCf(
   input: StoneDmCfInput,
   requestedVoucherNo?: string,
 ): Promise<{ voucherNo: string; hiddenVoucherNo: string; created: boolean; lines: number }> {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) => saveTx(tx, input, requestedVoucherNo));
+  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+    saveTx(tx, input, requestedVoucherNo),
+  );
 }
 
 export async function getStoneDmCf(
@@ -637,7 +684,9 @@ export async function deleteStoneDmCf(
     await resolveBookTx(tx, scope);
     const persisted = await headerForUpdateTx(tx, scope, voucherNo);
     await assertPeriodOpen(tx, scope.tenantId, {
-      writes: [{ table: 'BAR_CAN_DATA', rows: [{ CO_CODE: scope.coCode, VCH_DATE: persisted.VCH_DATE }] }],
+      writes: [
+        { table: 'BAR_CAN_DATA', rows: [{ CO_CODE: scope.coCode, VCH_DATE: persisted.VCH_DATE }] },
+      ],
       ledger: { table: 'AC_DATA', lines: [] },
     });
     const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
@@ -654,7 +703,14 @@ export async function listStoneDmCfSources(
   prisma: any,
   tenantId: string,
   scope: { CO_CODE: string; LC_CODE: string },
-  filters?: { tblCode?: string; itCode?: string; tagNo?: string; vchSrno?: number; limit?: number; offset?: number },
+  filters?: {
+    tblCode?: string;
+    itCode?: string;
+    tagNo?: string;
+    vchSrno?: number;
+    limit?: number;
+    offset?: number;
+  },
 ): Promise<
   Array<{
     tagNo: string;

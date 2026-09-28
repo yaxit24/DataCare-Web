@@ -32,8 +32,13 @@ function pushText(params: unknown[], where: string[], expr: string, value: unkno
   where.push(`${expr}=$${params.length}`);
 }
 
-function sumCols(rows: Array<Record<string, unknown>>, cols: readonly string[]): Record<string, number> {
-  return Object.fromEntries(cols.map((col) => [col, round3(rows.reduce((sum, row) => sum + num(row[col]), 0))]));
+function sumCols(
+  rows: Array<Record<string, unknown>>,
+  cols: readonly string[],
+): Record<string, number> {
+  return Object.fromEntries(
+    cols.map((col) => [col, round3(rows.reduce((sum, row) => sum + num(row[col]), 0))]),
+  );
 }
 
 const mfgMovementWeight =
@@ -110,7 +115,20 @@ export async function mfgInoutReport(
     }));
     return {
       rows: mapped,
-      totals: { rows: mapped.length, ...sumCols(mapped, ['grWt', 'othWt', 'netWt', 'minoWt', 'dmPcs', 'dmWt', 'ghtWt', 'ghis', 'chol']) },
+      totals: {
+        rows: mapped.length,
+        ...sumCols(mapped, [
+          'grWt',
+          'othWt',
+          'netWt',
+          'minoWt',
+          'dmPcs',
+          'dmWt',
+          'ghtWt',
+          'ghis',
+          'chol',
+        ]),
+      },
     };
   });
 }
@@ -126,7 +144,12 @@ export async function mfgInoutReport(
 export async function mfgLotIsuRecReport(
   prisma: any,
   s: ReportScope,
-  options: { partyCode?: unknown; karigarCode?: unknown; lotNo?: unknown; useItemLot?: unknown } = {},
+  options: {
+    partyCode?: unknown;
+    karigarCode?: unknown;
+    lotNo?: unknown;
+    useItemLot?: unknown;
+  } = {},
 ): Promise<ListReport> {
   const useItemLot = flagFrom(options.useItemLot, false);
   const lotExpr = useItemLot ? 'a."ITM_LOT"' : 'a."LOT_NO"';
@@ -272,7 +295,7 @@ export async function mfgLedgerReport(
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const params: unknown[] = [s.coCode, toDate];
     const where = [
-      'a.tenant_id=current_setting(\'app.tenant_id\', true)',
+      "a.tenant_id=current_setting('app.tenant_id', true)",
       'a."CO_CODE"=$1',
       "coalesce(a.\"KR_AC_CODE\",'') <> ''",
       'a."VCH_DATE"<=$2::date',
@@ -370,7 +393,7 @@ export async function mfgLedgerDetailReport(
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const params: unknown[] = [s.coCode, lcCode, acCode];
     const baseWhere = [
-      'a.tenant_id=current_setting(\'app.tenant_id\', true)',
+      "a.tenant_id=current_setting('app.tenant_id', true)",
       'a."CO_CODE"=$1',
       'a."LC_CODE"=$2',
       'a."KR_AC_CODE"=$3',
@@ -435,7 +458,10 @@ export async function mfgLedgerDetailReport(
     let drSilverTotal = 0;
     let crSilverTotal = 0;
     const rows: Array<Record<string, unknown>> = [];
-    const appendBalanceRow = (row: Record<string, unknown>, base: Record<string, unknown>): void => {
+    const appendBalanceRow = (
+      row: Record<string, unknown>,
+      base: Record<string, unknown>,
+    ): void => {
       const amountBal = num(row.amountBal);
       const goldBal = num(row.goldBal);
       const silverBal = num(row.silverBal);
@@ -473,7 +499,11 @@ export async function mfgLedgerDetailReport(
     };
 
     const opening = openingRows[0] ?? {};
-    if (num(opening.amountBal) !== 0 || num(opening.goldBal) !== 0 || num(opening.silverBal) !== 0) {
+    if (
+      num(opening.amountBal) !== 0 ||
+      num(opening.goldBal) !== 0 ||
+      num(opening.silverBal) !== 0
+    ) {
       appendBalanceRow(opening, {
         bookName: 'Op Balance',
         vchNo: null,

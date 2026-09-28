@@ -98,14 +98,18 @@ databaseDescribe('RP_USER Entry Check parity', () => {
   });
 
   it('returns the desktop double-click field-change detail rows', async () => {
-    const detail = await entryCheckDetailReport(runtime, {
-      tenantId: TENANT,
-      coCode: CO,
-      lcCode: LC,
-      coYear: YEAR,
-      fromDate: '2024-06-01',
-      toDate: '2024-06-30',
-    }, { coBook: 'SAL', vchNo: '00001' });
+    const detail = await entryCheckDetailReport(
+      runtime,
+      {
+        tenantId: TENANT,
+        coCode: CO,
+        lcCode: LC,
+        coYear: YEAR,
+        fromDate: '2024-06-01',
+        toDate: '2024-06-30',
+      },
+      { coBook: 'SAL', vchNo: '00001' },
+    );
 
     expect(detail.rows.map((r) => r.field)).toEqual(['TAX_AMT', 'NET_AMT']);
     expect(detail.rows[0]).toMatchObject({
@@ -126,12 +130,16 @@ databaseDescribe('RP_USER Entry Check parity', () => {
     });
     expect(before.rows.map((r) => r.vchNo)).toEqual(['00001']);
 
-    const result = await markEntryChecked(runtime, {
-      tenantId: TENANT,
-      coCode: CO,
-      lcCode: LC,
-      coYear: YEAR,
-    }, [{ coBook: 'SAL', vchNo: '00001', editDate: '2024-06-10' }]);
+    const result = await markEntryChecked(
+      runtime,
+      {
+        tenantId: TENANT,
+        coCode: CO,
+        lcCode: LC,
+        coYear: YEAR,
+      },
+      [{ coBook: 'SAL', vchNo: '00001', editDate: '2024-06-10' }],
+    );
 
     expect(result.updated).toBe(2);
     const after = await entryCheckReport(runtime, {
@@ -144,14 +152,18 @@ databaseDescribe('RP_USER Entry Check parity', () => {
     });
     expect(after.rows).toEqual([]);
 
-    const all = await entryCheckReport(runtime, {
-      tenantId: TENANT,
-      coCode: CO,
-      lcCode: LC,
-      coYear: YEAR,
-      fromDate: '2024-06-01',
-      toDate: '2024-06-30',
-    }, { pendingOnly: false });
+    const all = await entryCheckReport(
+      runtime,
+      {
+        tenantId: TENANT,
+        coCode: CO,
+        lcCode: LC,
+        coYear: YEAR,
+        fromDate: '2024-06-01',
+        toDate: '2024-06-30',
+      },
+      { pendingOnly: false },
+    );
     expect(all.rows.map((r) => [r.vchNo, r.entryCheck])).toEqual([
       ['00001', 'Y'],
       ['00002', 'Y'],

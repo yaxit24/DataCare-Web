@@ -60,7 +60,11 @@ async function seedTagAdjustBook(book = BOOK, mainBook = 'TAG ADJ'): Promise<voi
 }
 
 async function seed(): Promise<void> {
-  await exec(`INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`, TENANT, CO);
+  await exec(
+    `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
+    TENANT,
+    CO,
+  );
   await exec(
     `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
      VALUES ($1,$2,$3,'2024-04-01','2025-03-31'::timestamp)`,
@@ -196,7 +200,13 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
       lines: [{ tagNo: TAG, itCode: 'ORN', vchSrno: VCH_SRNO, dataType: 'N', remark: 'new type' }],
     });
 
-    expect(created).toEqual({ vchNo: 1, lines: 1, stones: 1, barDetlUpdated: 1, mainStockUpdated: 1 });
+    expect(created).toEqual({
+      vchNo: 1,
+      lines: 1,
+      stones: 1,
+      barDetlUpdated: 1,
+      mainStockUpdated: 1,
+    });
     expect(await currentState()).toMatchObject({
       headers: 1,
       details: 1,
@@ -211,7 +221,12 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
     const loaded = await getTagAdjust(runtime, scope, 1);
     expect(loaded?.header).toMatchObject({ CO_BOOK: BOOK, VCH_NO: '00001', AC_CODE: 'AC001' });
     expect(loaded?.lines).toHaveLength(1);
-    expect(loaded?.lines[0]).toMatchObject({ TAG_NO: TAG, VCH_SRNO, IT_CODE: 'ORN', DATA_TYPE: 'N' });
+    expect(loaded?.lines[0]).toMatchObject({
+      TAG_NO: TAG,
+      VCH_SRNO,
+      IT_CODE: 'ORN',
+      DATA_TYPE: 'N',
+    });
     expect(loaded?.stones).toHaveLength(1);
     expect(loaded?.stones[0]).toMatchObject({ TAG_NO: TAG, VCH_SRNO, DM_CODE: 'DMD001' });
 
@@ -224,7 +239,13 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
       mainUser: 'web-user',
       lines: [{ tagNo: TAG, itCode: 'ORN', vchSrno: VCH_SRNO, dataType: 'R', remark: 'retagged' }],
     });
-    expect(edited).toEqual({ vchNo: 1, lines: 1, stones: 1, barDetlUpdated: 1, mainStockUpdated: 1 });
+    expect(edited).toEqual({
+      vchNo: 1,
+      lines: 1,
+      stones: 1,
+      barDetlUpdated: 1,
+      mainStockUpdated: 1,
+    });
     expect(await currentState()).toMatchObject({
       headers: 1,
       details: 1,

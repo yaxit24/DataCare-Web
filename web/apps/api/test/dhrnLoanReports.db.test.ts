@@ -77,7 +77,14 @@ databaseDescribe('RP_DHRN_LOAN report family', () => {
         toDate: '2024-06-30',
         filters: { acCode: 'C001', city: 'Surat', area: 'Ring Road' },
       },
-      { entryType: 'D', loanType: 'A', mode: 'register', packetNo: 'PKT1', refNo: 'DB001', refAc: 'R001' },
+      {
+        entryType: 'D',
+        loanType: 'A',
+        mode: 'register',
+        packetNo: 'PKT1',
+        refNo: 'DB001',
+        refAc: 'R001',
+      },
     );
 
     expect(report.rows).toHaveLength(1);
@@ -104,14 +111,28 @@ databaseDescribe('RP_DHRN_LOAN report family', () => {
   it('filters pending mode to only rows with remaining principal', async () => {
     const loans = await dhrnLoanReport(
       runtime,
-      { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, fromDate: '2024-06-01', toDate: '2024-06-30' },
+      {
+        tenantId: TENANT,
+        coCode: CO,
+        lcCode: LC,
+        coYear: YEAR,
+        fromDate: '2024-06-01',
+        toDate: '2024-06-30',
+      },
       { entryType: 'L', loanType: 'A', mode: 'pending' },
     );
     expect(loans.rows).toEqual([]);
 
     const dhrn = await dhrnLoanReport(
       runtime,
-      { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, fromDate: '2024-06-01', toDate: '2024-06-30' },
+      {
+        tenantId: TENANT,
+        coCode: CO,
+        lcCode: LC,
+        coYear: YEAR,
+        fromDate: '2024-06-01',
+        toDate: '2024-06-30',
+      },
       { entryType: 'D', loanType: 'A', mode: 'pending' },
     );
     expect(dhrn.rows.map((r) => r.vchNo)).toEqual(['00001']);

@@ -237,7 +237,13 @@ const normalizeMainBook = (value: unknown): string =>
     .toUpperCase();
 
 const OLD_ITEM_SALES_MAIN_BOOK = 'OLD ITEM SALES';
-const KARIGAR_MAIN_BOOKS = new Set(['KARIGAR', 'KARIGAR ISSUE', 'KARIGAR RECEIPT', 'JOBWORK ISSUE', 'JOBWORK RECEIPT']);
+const KARIGAR_MAIN_BOOKS = new Set([
+  'KARIGAR',
+  'KARIGAR ISSUE',
+  'KARIGAR RECEIPT',
+  'JOBWORK ISSUE',
+  'JOBWORK RECEIPT',
+]);
 
 type KarigarBookGuard = 'karigar' | 'old-item-sale';
 
@@ -251,7 +257,12 @@ async function karigarBookPolicyTx(
   tx: any,
   scope: CompleteKarigarScope,
 ): Promise<KarigarBookPolicy> {
-  const rows: Array<{ BOOK_NAME: unknown; BOOK_SNAME: unknown; MAIN_BOOK: unknown; BOOK_INOUT: unknown }> = await tx.$queryRawUnsafe(
+  const rows: Array<{
+    BOOK_NAME: unknown;
+    BOOK_SNAME: unknown;
+    MAIN_BOOK: unknown;
+    BOOK_INOUT: unknown;
+  }> = await tx.$queryRawUnsafe(
     `SELECT "BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2
       AND "LC_CODE"=$3 AND "CO_BOOK"=$4 ORDER BY row_id LIMIT 2`,
     scope.tenantId,
@@ -270,10 +281,16 @@ async function karigarBookPolicyTx(
   return { bookName, vchType, mainBook, inout };
 }
 
-function assertKarigarBookGuard(scope: CompleteKarigarScope, policy: KarigarBookPolicy, guard: KarigarBookGuard) {
+function assertKarigarBookGuard(
+  scope: CompleteKarigarScope,
+  policy: KarigarBookPolicy,
+  guard: KarigarBookGuard,
+) {
   if (guard === 'old-item-sale') {
     if (policy.mainBook !== OLD_ITEM_SALES_MAIN_BOOK) {
-      throw new KarigarValidationError(`book ${scope.coBook} is ${policy.mainBook || 'not configured'}; expected OLD ITEM SALES`);
+      throw new KarigarValidationError(
+        `book ${scope.coBook} is ${policy.mainBook || 'not configured'}; expected OLD ITEM SALES`,
+      );
     }
     return;
   }
@@ -281,7 +298,9 @@ function assertKarigarBookGuard(scope: CompleteKarigarScope, policy: KarigarBook
     throw new KarigarValidationError('use the old item sales workflow for OLD ITEM SALES books');
   }
   if (!KARIGAR_MAIN_BOOKS.has(policy.mainBook)) {
-    throw new KarigarValidationError(`book ${scope.coBook} is ${policy.mainBook}; expected a karigar book`);
+    throw new KarigarValidationError(
+      `book ${scope.coBook} is ${policy.mainBook}; expected a karigar book`,
+    );
   }
 }
 
@@ -339,7 +358,6 @@ const lineLabour = (line: KarigarLine): number =>
         lbrRate: line.lbrRate,
       });
 
-
 type KarigarReceiveWorkflow = {
   guard: KarigarBookGuard;
   fineOf: (line: KarigarLine) => number;
@@ -369,16 +387,18 @@ const OLD_ITEM_SALE_WORKFLOW: KarigarReceiveWorkflow = {
 };
 
 function oldItemSaleValue(input: ReceiveInput, fineTotal: number): number {
-  return round2(
-    (input.lines ?? []).reduce(
-      (sum, line) =>
-        sum +
-        (line.totalAmount != null
-          ? num(line.totalAmount)
-          : num(line.amount) + lineLabour(line) + num(line.othAmt)),
-      0,
-    ),
-  ) + Math.abs(fineTotal);
+  return (
+    round2(
+      (input.lines ?? []).reduce(
+        (sum, line) =>
+          sum +
+          (line.totalAmount != null
+            ? num(line.totalAmount)
+            : num(line.amount) + lineLabour(line) + num(line.othAmt)),
+        0,
+      ),
+    ) + Math.abs(fineTotal)
+  );
 }
 
 function keyOf(s: VoucherScope, vchNo: number, book: string): VoucherKey {
@@ -966,9 +986,19 @@ export async function receiveKarigar(
 export async function createOldItemSale(
   prisma: any,
   input: ReceiveInput,
-): Promise<{ vchNo: number; fineReceived: number; labourAmt: number; labourGst: number; tagNos: string[] }> {
-  const lineFineTotal = round3(input.lines?.reduce((sum, line) => sum + oldItemSaleFine(line), 0) ?? 0);
-  if (oldItemSaleValue(input, input.partyFine != null ? num(input.partyFine) : lineFineTotal) <= 0) {
+): Promise<{
+  vchNo: number;
+  fineReceived: number;
+  labourAmt: number;
+  labourGst: number;
+  tagNos: string[];
+}> {
+  const lineFineTotal = round3(
+    input.lines?.reduce((sum, line) => sum + oldItemSaleFine(line), 0) ?? 0,
+  );
+  if (
+    oldItemSaleValue(input, input.partyFine != null ? num(input.partyFine) : lineFineTotal) <= 0
+  ) {
     throw new KarigarValidationError('old item sales requires party fine or item amount');
   }
   return receiveKarigar(prisma, input, OLD_ITEM_SALE_WORKFLOW);
@@ -1580,13 +1610,17 @@ export async function editKarigar(
     await assertFiscalDateTx(tx, scope, isoDate(requestedDate));
     const policy = await karigarBookPolicyTx(tx, scope);
     const receive = input.mode === 'receive';
-    const activeWorkflow = workflow ?? (receive ? KARIGAR_RECEIVE_WORKFLOW : {
-      ...KARIGAR_RECEIVE_WORKFLOW,
-      fineOf: issueFine,
-      includeLabourSettlement: false,
-      includeBarcodes: false,
-      inoutType: () => INOUT_ISSUE,
-    });
+    const activeWorkflow =
+      workflow ??
+      (receive
+        ? KARIGAR_RECEIVE_WORKFLOW
+        : {
+            ...KARIGAR_RECEIVE_WORKFLOW,
+            fineOf: issueFine,
+            includeLabourSettlement: false,
+            includeBarcodes: false,
+            inoutType: () => INOUT_ISSUE,
+          });
     assertKarigarBookGuard(scope, policy, activeWorkflow.guard);
     const inoutType = activeWorkflow.inoutType(policy) || (receive ? INOUT_RECEIPT : INOUT_ISSUE);
     const stockOut = inoutType === INOUT_ISSUE;
@@ -1615,9 +1649,10 @@ export async function editKarigar(
     const fineOf = activeWorkflow.fineOf;
     const lineFineTotal = round3(input.lines.reduce((sum, line) => sum + fineOf(line), 0));
     const fineTotal = activeWorkflow.partyFineOf?.(input, lineFineTotal) ?? lineFineTotal;
-    const labourAmt = receive && activeWorkflow.includeLabourSettlement
-      ? round2(input.labourAmt ?? input.lines.reduce((s, line) => s + lineLabour(line), 0))
-      : 0;
+    const labourAmt =
+      receive && activeWorkflow.includeLabourSettlement
+        ? round2(input.labourAmt ?? input.lines.reduce((s, line) => s + lineLabour(line), 0))
+        : 0;
     const gstPct = receive && activeWorkflow.includeLabourSettlement ? num(input.labourGstPct) : 0;
     const gst = round2((labourAmt * gstPct) / 100);
     const ledger: LedgerLine[] = [];
@@ -1686,18 +1721,20 @@ export async function editKarigar(
      * (WP-08c). Ordering matters: `resolveKarigarTagIdentitiesTx` also fills in `line.tagNo` for lines that were
      * tagged without a number, and `stockRows` reads that.
      */
-    const persistedTagSrnos = !stockOut && activeWorkflow.includeBarcodes
-      ? await persistedKarigarTagSrnosTx(tx, scope, vchNo)
-      : new Map<string, number>();
-    const tagIdentities = !stockOut && activeWorkflow.includeBarcodes
-      ? await resolveKarigarTagIdentitiesTx(tx, scope, input.lines, {
-          persisted: persistedTagSrnos,
-        })
-      : stockOut && activeWorkflow.guard === 'karigar'
-        ? // An EDIT of a karigar issue resolves the same way a create does. Otherwise the two paths would disagree
-          // about what a tagged issue line means: create refuses an unavailable tag and records its identity.
-          await resolveIssuedKarigarTagIdentitiesTx(tx, scope, input.lines)
-        : new Map<number, number>();
+    const persistedTagSrnos =
+      !stockOut && activeWorkflow.includeBarcodes
+        ? await persistedKarigarTagSrnosTx(tx, scope, vchNo)
+        : new Map<string, number>();
+    const tagIdentities =
+      !stockOut && activeWorkflow.includeBarcodes
+        ? await resolveKarigarTagIdentitiesTx(tx, scope, input.lines, {
+            persisted: persistedTagSrnos,
+          })
+        : stockOut && activeWorkflow.guard === 'karigar'
+          ? // An EDIT of a karigar issue resolves the same way a create does. Otherwise the two paths would disagree
+            // about what a tagged issue line means: create refuses an unavailable tag and records its identity.
+            await resolveIssuedKarigarTagIdentitiesTx(tx, scope, input.lines)
+          : new Map<number, number>();
     const writes = [
       { table: 'KR_DATA', rows: [hdr] },
       {
@@ -1796,8 +1833,12 @@ export async function editOldItemSale(
   prisma: any,
   input: Omit<KarigarLifecycleInput, 'mode'> & { mode?: 'receive' },
 ) {
-  const lineFineTotal = round3(input.lines?.reduce((sum, line) => sum + oldItemSaleFine(line), 0) ?? 0);
-  if (oldItemSaleValue(input, input.partyFine != null ? num(input.partyFine) : lineFineTotal) <= 0) {
+  const lineFineTotal = round3(
+    input.lines?.reduce((sum, line) => sum + oldItemSaleFine(line), 0) ?? 0,
+  );
+  if (
+    oldItemSaleValue(input, input.partyFine != null ? num(input.partyFine) : lineFineTotal) <= 0
+  ) {
     throw new KarigarValidationError('old item sales requires party fine or item amount');
   }
   return editKarigar(

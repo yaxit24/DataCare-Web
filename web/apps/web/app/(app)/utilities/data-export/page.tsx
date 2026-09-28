@@ -29,7 +29,8 @@ interface FlagResult {
 
 const errText = (e: unknown, fallback: string): string =>
   e instanceof ApiError ? e.body?.message || e.body?.error || e.message : fallback;
-const numberFmt = (n: number | null): string => (n == null ? '—' : (Number(n) || 0).toLocaleString('en-IN'));
+const numberFmt = (n: number | null): string =>
+  n == null ? '—' : (Number(n) || 0).toLocaleString('en-IN');
 
 export default function DataExportPage() {
   const scope = useBusinessScope();
@@ -62,8 +63,13 @@ export default function DataExportPage() {
     setBusy('mark');
     setMsg(null);
     try {
-      const result = await post<FlagResult>('/utilities/data-export/mark-exported', { pendingOnly: true });
-      setMsg({ kind: 'ok', text: `Marked ${result.total.toLocaleString('en-IN')} row${result.total === 1 ? '' : 's'} as exported.` });
+      const result = await post<FlagResult>('/utilities/data-export/mark-exported', {
+        pendingOnly: true,
+      });
+      setMsg({
+        kind: 'ok',
+        text: `Marked ${result.total.toLocaleString('en-IN')} row${result.total === 1 ? '' : 's'} as exported.`,
+      });
       await loadPreview();
     } catch (e) {
       setMsg({ kind: 'err', text: errText(e, 'Failed to mark rows exported.') });
@@ -81,7 +87,10 @@ export default function DataExportPage() {
     setMsg(null);
     try {
       const result = await post<FlagResult>('/utilities/data-export/reset-flags', {});
-      setMsg({ kind: 'ok', text: `Reset ${result.total.toLocaleString('en-IN')} row${result.total === 1 ? '' : 's'} to pending transfer.` });
+      setMsg({
+        kind: 'ok',
+        text: `Reset ${result.total.toLocaleString('en-IN')} row${result.total === 1 ? '' : 's'} to pending transfer.`,
+      });
       await loadPreview();
     } catch (e) {
       setMsg({ kind: 'err', text: errText(e, 'Failed to reset transfer flags.') });
@@ -111,8 +120,12 @@ export default function DataExportPage() {
           <button className="primary" onClick={loadPreview} disabled={busy !== null}>
             {busy === 'preview' ? 'Loading…' : 'Refresh Preview'}
           </button>
-          <a className="button ghost" href={pendingUrl}>Download Pending Rows</a>
-          <a className="button ghost" href={allUrl}>Download All Scoped Rows</a>
+          <a className="button ghost" href={pendingUrl}>
+            Download Pending Rows
+          </a>
+          <a className="button ghost" href={allUrl}>
+            Download All Scoped Rows
+          </a>
           <button className="ghost" onClick={markExported} disabled={busy !== null || !preview}>
             {busy === 'mark' ? 'Marking…' : 'Mark Pending Exported'}
           </button>
@@ -121,9 +134,9 @@ export default function DataExportPage() {
           </button>
         </div>
         <p className="muted" style={{ margin: 0 }}>
-          Scope: company <strong>{scope.coCode}</strong>, location <strong>{scope.lcCode}</strong>, year{' '}
-          <strong>{scope.coYear}</strong>. Preview and download are read-only; the flag buttons update
-          only rows in this scoped table family.
+          Scope: company <strong>{scope.coCode}</strong>, location <strong>{scope.lcCode}</strong>,
+          year <strong>{scope.coYear}</strong>. Preview and download are read-only; the flag buttons
+          update only rows in this scoped table family.
         </p>
       </div>
 
@@ -131,10 +144,22 @@ export default function DataExportPage() {
 
       {preview && (
         <div className="tiles">
-          <div className="tile"><span className="muted">Export tables</span><div className="big">{preview.totals.tables}</div></div>
-          <div className="tile"><span className="muted">Scoped rows</span><div className="big">{numberFmt(preview.totals.rows)}</div></div>
-          <div className="tile"><span className="muted">Pending rows</span><div className="big">{numberFmt(preview.totals.pendingRows)}</div></div>
-          <div className="tile"><span className="muted">Flagged tables</span><div className="big">{preview.totals.flaggedTables}</div></div>
+          <div className="tile">
+            <span className="muted">Export tables</span>
+            <div className="big">{preview.totals.tables}</div>
+          </div>
+          <div className="tile">
+            <span className="muted">Scoped rows</span>
+            <div className="big">{numberFmt(preview.totals.rows)}</div>
+          </div>
+          <div className="tile">
+            <span className="muted">Pending rows</span>
+            <div className="big">{numberFmt(preview.totals.pendingRows)}</div>
+          </div>
+          <div className="tile">
+            <span className="muted">Flagged tables</span>
+            <div className="big">{preview.totals.flaggedTables}</div>
+          </div>
         </div>
       )}
 

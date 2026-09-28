@@ -1,5 +1,10 @@
 import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
-import { getSaleReturnLabourReplayState, observeSaleReturnLabourReplayCode, previewSaleReturnLabourReplay, SaleReturnLabourReplayError } from '../modules/sales/saleReturnLabourReplay.js';
+import {
+  getSaleReturnLabourReplayState,
+  observeSaleReturnLabourReplayCode,
+  previewSaleReturnLabourReplay,
+  SaleReturnLabourReplayError,
+} from '../modules/sales/saleReturnLabourReplay.js';
 import { SessionCommandError } from '../modules/auth/sessionContextCommand.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { withTenant } from '@datacare/db';
@@ -685,15 +690,22 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     } catch (e: any) {
       const n: string = e?.name ?? '';
       if (e instanceof SessionCommandError || e instanceof SessionReadSnapshotError)
-        return reply.code(e.statusCode).send({ error: e.code, message: e.message,
-          ...(e.form === undefined ? {} : { form: e.form, action: e.action }) });
+        return reply.code(e.statusCode).send({
+          error: e.code,
+          message: e.message,
+          ...(e.form === undefined ? {} : { form: e.form, action: e.action }),
+        });
       if (e instanceof SavedSaleReturnError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SaleReturnSourceError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SaleReturnIncomingConfigurationError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
-      if (e instanceof SaleReturnIncomingReplayError || e instanceof SaleReturnBillReplayError || e instanceof SaleReturnLabourReplayError)
+      if (
+        e instanceof SaleReturnIncomingReplayError ||
+        e instanceof SaleReturnBillReplayError ||
+        e instanceof SaleReturnLabourReplayError
+      )
         return reply.code(e.statusCode).send({
           error: e.code,
           message: e.message,
@@ -1293,29 +1305,84 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   // New profile requires an explicitly retained page pair, even though old bootstrap reads allow omission.
-  const labourReplayAuth = {...auth, onRequest: async (_req: FastifyRequest, reply: FastifyReply) => { reply.header('cache-control', 'no-store'); }};
+  const labourReplayAuth = {
+    ...auth,
+    onRequest: async (_req: FastifyRequest, reply: FastifyReply) => {
+      reply.header('cache-control', 'no-store');
+    },
+  };
   const labourReplayIdentity = (req: FastifyRequest) => {
     const s = sess(req);
-    if (req.headers['x-session-context-id'] !== s.sid || req.headers['x-session-context-epoch'] !== s.contextEpoch)
-      throw new SaleReturnLabourReplayError(409, 'context-stale', 'Reload the page context before previewing labour selections.');
-    return {tenantId:s.tenantId,sessionId:s.sid,loginName:s.sub,loginCoCode:s.loginCoCode,
-      coCode:s.coCode,lcCode:s.lcCode,coYear:s.coYear,contextEpoch:s.contextEpoch};
+    if (
+      req.headers['x-session-context-id'] !== s.sid ||
+      req.headers['x-session-context-epoch'] !== s.contextEpoch
+    )
+      throw new SaleReturnLabourReplayError(
+        409,
+        'context-stale',
+        'Reload the page context before previewing labour selections.',
+      );
+    return {
+      tenantId: s.tenantId,
+      sessionId: s.sid,
+      loginName: s.sub,
+      loginCoCode: s.loginCoCode,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear,
+      contextEpoch: s.contextEpoch,
+    };
   };
-  app.get('/sales-returns/:vchNo/incoming-labour-replay-state', labourReplayAuth, async (req, reply) => {
-    reply.header('cache-control', 'no-store');
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getSaleReturnLabourReplayState(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo));
-  });
-  app.post('/sales-returns/:vchNo/incoming-labour-observation', {...labourReplayAuth,bodyLimit:65536}, async (req, reply) => {
-    reply.header('cache-control', 'no-store');
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => observeSaleReturnLabourReplayCode(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo, req.body));
-  });
-  app.post('/sales-returns/:vchNo/incoming-labour-replay', {...labourReplayAuth,bodyLimit:65536}, async (req, reply) => {
-    reply.header('cache-control', 'no-store');
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => previewSaleReturnLabourReplay(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo, req.body));
-  });
+  app.get(
+    '/sales-returns/:vchNo/incoming-labour-replay-state',
+    labourReplayAuth,
+    async (req, reply) => {
+      reply.header('cache-control', 'no-store');
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () =>
+        getSaleReturnLabourReplayState(
+          prisma,
+          labourReplayIdentity(req),
+          incomingReplayScope(req),
+          (req.params as { vchNo: string }).vchNo,
+        ),
+      );
+    },
+  );
+  app.post(
+    '/sales-returns/:vchNo/incoming-labour-observation',
+    { ...labourReplayAuth, bodyLimit: 65536 },
+    async (req, reply) => {
+      reply.header('cache-control', 'no-store');
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () =>
+        observeSaleReturnLabourReplayCode(
+          prisma,
+          labourReplayIdentity(req),
+          incomingReplayScope(req),
+          (req.params as { vchNo: string }).vchNo,
+          req.body,
+        ),
+      );
+    },
+  );
+  app.post(
+    '/sales-returns/:vchNo/incoming-labour-replay',
+    { ...labourReplayAuth, bodyLimit: 65536 },
+    async (req, reply) => {
+      reply.header('cache-control', 'no-store');
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () =>
+        previewSaleReturnLabourReplay(
+          prisma,
+          labourReplayIdentity(req),
+          incomingReplayScope(req),
+          (req.params as { vchNo: string }).vchNo,
+          req.body,
+        ),
+      );
+    },
+  );
   app.put('/sales-returns/:vchNo/incoming-metadata', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     reply.header('cache-control', 'no-store');
@@ -1462,9 +1529,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   );
   app.post('/sales-orders', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    return run(reply, 201, () => createSalesOrderInSession(prisma, {
-      identity: orderCommandIdentity(req), input: completeSalesOrderInput(req),
-    }));
+    return run(reply, 201, () =>
+      createSalesOrderInSession(prisma, {
+        identity: orderCommandIdentity(req),
+        input: completeSalesOrderInput(req),
+      }),
+    );
   });
   app.get('/sales-orders', auth, async (req, reply) =>
     run(reply, 200, () => listSalesOrders(prisma, readScope(req) as any)),
@@ -1474,9 +1544,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 200, () =>
       editSalesOrderInSession(prisma, {
         identity: {
-          tenantId: sess(req).tenantId, sessionId: sess(req).sid, loginName: sess(req).sub,
-          loginCoCode: sess(req).loginCoCode, coCode: sess(req).coCode, lcCode: sess(req).lcCode,
-          coYear: sess(req).coYear, contextEpoch: sess(req).contextEpoch,
+          tenantId: sess(req).tenantId,
+          sessionId: sess(req).sid,
+          loginName: sess(req).sub,
+          loginCoCode: sess(req).loginCoCode,
+          coCode: sess(req).coCode,
+          lcCode: sess(req).lcCode,
+          coYear: sess(req).coYear,
+          contextEpoch: sess(req).contextEpoch,
         },
         input: {
           ...completeSalesOrderInput(req),
@@ -1522,9 +1597,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.post('/tour-orders', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    return run(reply, 201, () => createTourOrderInSession(prisma, {
-      identity: orderCommandIdentity(req), input: salesOrderInput(req),
-    }));
+    return run(reply, 201, () =>
+      createTourOrderInSession(prisma, {
+        identity: orderCommandIdentity(req),
+        input: salesOrderInput(req),
+      }),
+    );
   });
   app.get('/tour-orders', auth, async (req, reply) =>
     run(reply, 200, () => listTourOrders(prisma, readScope(req) as any)),
@@ -1538,7 +1616,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 200, () =>
       editTourOrderInSession(prisma, {
         identity: orderCommandIdentity(req),
-        input: { ...salesOrderInput(req), expectedVersion: requireOrderVersion(body(req).expectedVersion) },
+        input: {
+          ...salesOrderInput(req),
+          expectedVersion: requireOrderVersion(body(req).expectedVersion),
+        },
         voucherNo: (req.params as any).vchNo,
       }),
     );

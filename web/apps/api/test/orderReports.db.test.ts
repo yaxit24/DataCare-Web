@@ -1,7 +1,11 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
-import { deleteDataReport, pointReport, pointReportDetail } from '../src/modules/reports/orderTagReports.js';
+import {
+  deleteDataReport,
+  pointReport,
+  pointReportDetail,
+} from '../src/modules/reports/orderTagReports.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -18,7 +22,14 @@ const exec = (sql: string, ...params: unknown[]) =>
   withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...params));
 
 async function clean(): Promise<void> {
-  for (const table of ['DELETE_DATA', 'POINT_DATA', 'POINT_MEMB', 'POINT_MAST', 'BOOK_DATA', 'AC_MAST']) {
+  for (const table of [
+    'DELETE_DATA',
+    'POINT_DATA',
+    'POINT_MEMB',
+    'POINT_MAST',
+    'BOOK_DATA',
+    'AC_MAST',
+  ]) {
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   }
 }
@@ -116,13 +127,30 @@ databaseDescribe('RP_ORDER report parity builders', () => {
     );
 
     const summary = await pointReport(runtime, scope);
-    expect(summary.rows.map((row: any) => [row.memberCode, row.totalPoint, row.adjustedPoint, row.balancePoint])).toEqual([
+    expect(
+      summary.rows.map((row: any) => [
+        row.memberCode,
+        row.totalPoint,
+        row.adjustedPoint,
+        row.balancePoint,
+      ]),
+    ).toEqual([
       ['M001', 10, 3, 7],
       ['M002', 4, 0, 4],
     ]);
 
     const detail = await pointReportDetail(runtime, scope, 'M001');
-    expect(detail.rows.map((row: any) => [row.book, row.vchNo, row.totalPoint, row.adjustedPoint, row.balancePoint, row.onePointValue, row.pointValue])).toEqual([
+    expect(
+      detail.rows.map((row: any) => [
+        row.book,
+        row.vchNo,
+        row.totalPoint,
+        row.adjustedPoint,
+        row.balancePoint,
+        row.onePointValue,
+        row.pointValue,
+      ]),
+    ).toEqual([
       ['SAL', '00001', 10, 0, 10, 2, 20],
       ['SAL', '00002', 0, 3, -3, 2, -6],
     ]);

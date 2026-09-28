@@ -20,7 +20,11 @@ export function useOperationLease(scopeKey?: unknown): { beginOperation: () => (
     const admitted = mounted.current;
     const operation = ++generation.current;
     const admittedScope = scope.current;
-    return () => admitted && mounted.current && generation.current === operation && Object.is(scope.current, admittedScope);
+    return () =>
+      admitted &&
+      mounted.current &&
+      generation.current === operation &&
+      Object.is(scope.current, admittedScope);
   }, []);
   return { beginOperation };
 }

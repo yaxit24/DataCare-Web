@@ -4,8 +4,14 @@ import { stageTagStockPrintRowsTx } from '../stock/tagPrint.js';
 import { resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { OrderImageError, resolveOrderImageTx } from '../images/orderImage.js';
 import type { OrderReportImages } from './orderReportImages.js';
-import { completeOrderFields, orderFormulaValues, orderParentFormulaValues, sumReportValues,
-  type BoundSubreport, type OrderReportCopy } from './orderReportValues.js';
+import {
+  completeOrderFields,
+  orderFormulaValues,
+  orderParentFormulaValues,
+  sumReportValues,
+  type BoundSubreport,
+  type OrderReportCopy,
+} from './orderReportValues.js';
 import type { RptSpec } from './reportEngine.js';
 import {
   resolveReportBinding,
@@ -67,9 +73,16 @@ export async function bindReport(
         throw new UnsupportedReportBindingError(spec.report, reason);
       };
       if (contract.orderDocument) {
-        if (!s.orderFamily || (contract.orderDocument.family !== 'either' && s.orderFamily !== contract.orderDocument.family))
+        if (
+          !s.orderFamily ||
+          (contract.orderDocument.family !== 'either' &&
+            s.orderFamily !== contract.orderDocument.family)
+        )
           return refuse('wrong-order-document-family');
-        await resolveBookPolicyTx(tx, s, s.orderFamily, { requireExplicitMainBook: true, expectedTable: 'SL_ORD_DATA' });
+        await resolveBookPolicyTx(tx, s, s.orderFamily, {
+          requireExplicitMainBook: true,
+          expectedTable: 'SL_ORD_DATA',
+        });
       }
       if (headerTable === 'TAG_STOCK_PRINT') {
         // RP_PHY_STOCK.cs:1830-1838 stages BAR_DETL before reading this print table.
@@ -92,7 +105,10 @@ export async function bindReport(
       // Prisma Date values retain only milliseconds; the ledger stores six fractional digits.
       // Keep the exact database timestamp in this same snapshot for the balance cutoff.
       const timestampColumn = contract.orderDocument ? ', "VCH_TIME"::text AS "__voucherTime"' : '';
-      const headers = await q(`SELECT *${timestampColumn} FROM "${headerTable}" WHERE ${scope()}${orderBy}`, ...key);
+      const headers = await q(
+        `SELECT *${timestampColumn} FROM "${headerTable}" WHERE ${scope()}${orderBy}`,
+        ...key,
+      );
       const h = headers[0];
       if (!h) return null;
       if ((headerTable !== contract.detail || contract.orderDocument) && headers.length !== 1)
@@ -108,18 +124,35 @@ export async function bindReport(
       const det =
         headerTable === contract.detail ? headers : await itemRows(contract.detail, false);
       const children = contract.child ? await itemRows(contract.child, true) : [];
-      const orderParents = contract.orderDocument && !contract.orderDocument.orderedItems
-        ? await itemRows('SL_ORD_DETL', false) : det;
-      if (contract.orderDocument && contract.orderDocument.orderedItems !== (orderParents.length > 0))
+      const orderParents =
+        contract.orderDocument && !contract.orderDocument.orderedItems
+          ? await itemRows('SL_ORD_DETL', false)
+          : det;
+      if (contract.orderDocument && contract.orderDocument.orderedItems !== orderParents.length > 0)
         return refuse('wrong-order-document-shape');
       if (contract.orderDocument?.orderedItems) {
-        const settings = await q('SELECT "ORD_IMG_PRINT" FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$2', s.tenantId, s.coCode);
-        const flags = new Set(settings.map((row) => String(row.ORD_IMG_PRINT ?? '').trim().toUpperCase() || 'N'));
+        const settings = await q(
+          'SELECT "ORD_IMG_PRINT" FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$2',
+          s.tenantId,
+          s.coCode,
+        );
+        const flags = new Set(
+          settings.map(
+            (row) =>
+              String(row.ORD_IMG_PRINT ?? '')
+                .trim()
+                .toUpperCase() || 'N',
+          ),
+        );
         if (flags.size > 1) return refuse('ambiguous-order-image-setting');
         if (flags.has('Y') !== Boolean(contract.orderDocument.images)) {
           const selected = flags.has('Y')
-            ? s.orderFamily === 'TOUR ORDER' ? 'TourOrdImg' : 'OrdVchImg'
-            : s.orderFamily === 'TOUR ORDER' ? 'TourOrdVch' : 'OrderBill';
+            ? s.orderFamily === 'TOUR ORDER'
+              ? 'TourOrdImg'
+              : 'OrdVchImg'
+            : s.orderFamily === 'TOUR ORDER'
+              ? 'TourOrdVch'
+              : 'OrderBill';
           throw new UnsupportedReportBindingError(selected, 'order-image-template-mismatch');
         }
       }
@@ -168,10 +201,14 @@ export async function bindReport(
         ...flat('LOCT_MAST', locationRows[0]),
         ...partyBindings,
       };
-      const detailRows = det.map((d) => ({
-        ...flat(contract.detail, d),
-        ...itemBinding('ITEM_MAST', d.__item),
-      })).map((row) => contract.orderDocument?.orderedItems ? orderParentFormulaValues(spec, row) : row);
+      const detailRows = det
+        .map((d) => ({
+          ...flat(contract.detail, d),
+          ...itemBinding('ITEM_MAST', d.__item),
+        }))
+        .map((row) =>
+          contract.orderDocument?.orderedItems ? orderParentFormulaValues(spec, row) : row,
+        );
       const childRows = children.map((d) => ({
         ...flat(contract.child!, d),
         ...itemBinding('ITEM_MAST_IDTL', d.__item),
@@ -179,29 +216,58 @@ export async function bindReport(
       const datasets = { [headerTable]: [flat(headerTable, h)], [contract.detail]: detailRows };
       let subreports: Record<string, BoundSubreport> | undefined;
       if (contract.orderDocument) {
-        const received = await q(`SELECT * FROM "SL_PR_DETL" WHERE ${scope()} ORDER BY "SR_NO",row_id`, ...key);
-        if (new Set(received.map((row) => fmt(row.SR_NO))).size !== received.length || received.some((row) => row.SR_NO == null))
+        const received = await q(
+          `SELECT * FROM "SL_PR_DETL" WHERE ${scope()} ORDER BY "SR_NO",row_id`,
+          ...key,
+        );
+        if (
+          new Set(received.map((row) => fmt(row.SR_NO))).size !== received.length ||
+          received.some((row) => row.SR_NO == null)
+        )
           return refuse('ambiguous-received-metal-serial');
         const receivedRows = received.map((row) => flat('SL_PR_DETL', row));
         const timestamp = h.__voucherTime;
-        if (typeof timestamp !== 'string' || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{1,6})?$/.test(timestamp))
+        if (
+          typeof timestamp !== 'string' ||
+          !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{1,6})?$/.test(timestamp)
+        )
           return refuse('missing-order-voucher-timestamp');
         const dataType = s.orderDataType ?? 'C';
         if (!/^[A-Z]$/.test(dataType)) return refuse('invalid-order-data-type');
         // DC_Main.MsAcBal: opening is before the voucher's timestamp, closing includes it.
         // Preserve same-day entries. Historical Date-only rows need source reimport; no clock is invented.
-        const balances = await q(`SELECT
+        const balances = await q(
+          `SELECT
           COALESCE(SUM(CASE WHEN "ENTRY_TIME" < $6::timestamp THEN "CR_AMT"-"DR_AMT" END),0) AS opening,
           COALESCE(SUM(CASE WHEN "ENTRY_TIME" <= $6::timestamp THEN "CR_AMT"-"DR_AMT" END),0) AS closing
           FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
           AND "AC_CODE"=$5 AND ($7='C' OR "DATA_TYPE"=$7)`,
-          s.tenantId, s.coCode, s.lcCode, s.coYear, h.AC_CODE ?? '', timestamp, dataType);
-        header = orderFormulaValues(spec, completeOrderFields(spec, header), detailRows, receivedRows,
-          { opening: fmt(balances[0]?.opening) || '0', closing: fmt(balances[0]?.closing) || '0' }, s.copy);
-        subreports = { OrdRec: { detailRows: receivedRows,
-          header: { ...completeOrderFields(spec.subreports!.OrdRec!, {}),
-            'Sum ({SL_PR_DETL.ITM_PCS})': sumReportValues(receivedRows, 'SL_PR_DETL.ITM_PCS'),
-            'Sum ({SL_PR_DETL.ITM_NWT})': sumReportValues(receivedRows, 'SL_PR_DETL.ITM_NWT') } } };
+          s.tenantId,
+          s.coCode,
+          s.lcCode,
+          s.coYear,
+          h.AC_CODE ?? '',
+          timestamp,
+          dataType,
+        );
+        header = orderFormulaValues(
+          spec,
+          completeOrderFields(spec, header),
+          detailRows,
+          receivedRows,
+          { opening: fmt(balances[0]?.opening) || '0', closing: fmt(balances[0]?.closing) || '0' },
+          s.copy,
+        );
+        subreports = {
+          OrdRec: {
+            detailRows: receivedRows,
+            header: {
+              ...completeOrderFields(spec.subreports!.OrdRec!, {}),
+              'Sum ({SL_PR_DETL.ITM_PCS})': sumReportValues(receivedRows, 'SL_PR_DETL.ITM_PCS'),
+              'Sum ({SL_PR_DETL.ITM_NWT})': sumReportValues(receivedRows, 'SL_PR_DETL.ITM_NWT'),
+            },
+          },
+        };
         datasets.SL_PR_DETL = receivedRows;
       }
       let parentChild: ParentChildBands | undefined;
@@ -237,14 +303,28 @@ export async function bindReport(
         orderImages = {};
         for (const parent of det) {
           try {
-            orderImages[fmt(parent.SR_NO)] = await resolveOrderImageTx(tx, s, s.orderFamily!, h, parent);
+            orderImages[fmt(parent.SR_NO)] = await resolveOrderImageTx(
+              tx,
+              s,
+              s.orderFamily!,
+              h,
+              parent,
+            );
           } catch (error) {
             if (error instanceof OrderImageError) return refuse(`order-image:${error.code}`);
             throw error;
           }
         }
       }
-      return { header, detailRows, datasets, parentChild, subreports, orderImages, company: fmt(co.CO_NAME) || 'Company' };
+      return {
+        header,
+        detailRows,
+        datasets,
+        parentChild,
+        subreports,
+        orderImages,
+        company: fmt(co.CO_NAME) || 'Company',
+      };
     },
     { isolationLevel: 'RepeatableRead' },
   );

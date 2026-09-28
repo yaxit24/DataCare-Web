@@ -118,7 +118,9 @@ function assertRateCutBookGuard(
     return;
   }
   if (isBullionSaleBook) {
-    throw new RateCutValidationError(`book ${coBook} is ${classification.bookName}; use the bullion sale workflow`);
+    throw new RateCutValidationError(
+      `book ${coBook} is ${classification.bookName}; use the bullion sale workflow`,
+    );
   }
 }
 
@@ -1334,7 +1336,8 @@ async function writeRateCut(
       crFine: input.settleCrFine,
       ratePar: behavior.rateBasis,
     });
-    const no = options.vchNo == null ? await nextVoucherNoTx(tx, input.scope) : Number(options.vchNo);
+    const no =
+      options.vchNo == null ? await nextVoucherNoTx(tx, input.scope) : Number(options.vchNo);
     if (!Number.isSafeInteger(no) || no < 1) {
       throw new RateCutValidationError(`invalid voucher number: ${String(options.vchNo ?? '')}`);
     }

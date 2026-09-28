@@ -130,14 +130,39 @@ databaseDescribe('RP_MFG_ZOOM manufacturing report parity builders', () => {
 
   it('matches DGV_MFG_INOUT process totals with date and karigar filters', async () => {
     const report = await mfgInoutReport(runtime, scope, { karigarCode: 'K001' });
-    expect(report.rows.map((row: any) => [row.name, row.grWt, row.othWt, row.netWt, row.minoWt, row.dmPcs, row.dmWt, row.ghtWt, row.ghis, row.chol])).toEqual([
-      ['Ghat', 140, 7, 133, 1.5, 3, 0.7, 4, 6, 8],
-    ]);
-    expect(report.totals).toMatchObject({ rows: 1, grWt: 140, othWt: 7, netWt: 133, dmPcs: 3, dmWt: 0.7, ghtWt: 4, ghis: 6, chol: 8 });
+    expect(
+      report.rows.map((row: any) => [
+        row.name,
+        row.grWt,
+        row.othWt,
+        row.netWt,
+        row.minoWt,
+        row.dmPcs,
+        row.dmWt,
+        row.ghtWt,
+        row.ghis,
+        row.chol,
+      ]),
+    ).toEqual([['Ghat', 140, 7, 133, 1.5, 3, 0.7, 4, 6, 8]]);
+    expect(report.totals).toMatchObject({
+      rows: 1,
+      grWt: 140,
+      othWt: 7,
+      netWt: 133,
+      dmPcs: 3,
+      dmWt: 0.7,
+      ghtWt: 4,
+      ghis: 6,
+      chol: 8,
+    });
   });
 
   it('matches DGV_DESIGN_FILL lot/process pivot and signed diff balances', async () => {
-    const report = await mfgLotIsuRecReport(runtime, scope, { partyCode: 'C001', karigarCode: '', lotNo: 'LOT1' });
+    const report = await mfgLotIsuRecReport(runtime, scope, {
+      partyCode: 'C001',
+      karigarCode: '',
+      lotNo: 'LOT1',
+    });
     expect(report.rows).toHaveLength(1);
     expect(report.rows[0]).toMatchObject({
       srNo: 1,
@@ -149,14 +174,25 @@ databaseDescribe('RP_MFG_ZOOM manufacturing report parity builders', () => {
       diffWt: 28,
       isPan: 5,
     });
-    expect(report.totals).toMatchObject({ rows: 1, GHT: 110, POL: 82, LOS: 5, diffWt: 28, isPan: 5 });
+    expect(report.totals).toMatchObject({
+      rows: 1,
+      GHT: 110,
+      POL: 82,
+      LOS: 5,
+      diffWt: 28,
+      isPan: 5,
+    });
   });
 
   it('supports the desktop lot-mode variant that keys the report on ITM_LOT', async () => {
-    const report = await mfgLotIsuRecReport(runtime, scope, { useItemLot: 'true', lotNo: 'ILOT1', karigarCode: 'K001' });
-    expect(report.rows.map((row: any) => [row.lotNo, row.GHT, row.POL, row.diffWt, row.isPan])).toEqual([
-      ['ILOT1', 110, 82, 17, 0],
-    ]);
+    const report = await mfgLotIsuRecReport(runtime, scope, {
+      useItemLot: 'true',
+      lotNo: 'ILOT1',
+      karigarCode: 'K001',
+    });
+    expect(
+      report.rows.map((row: any) => [row.lotNo, row.GHT, row.POL, row.diffWt, row.isPan]),
+    ).toEqual([['ILOT1', 110, 82, 17, 0]]);
   });
 
   it('matches RP_MFG_LEDR account summary balances and filters zero rows by default', async () => {
@@ -184,14 +220,24 @@ databaseDescribe('RP_MFG_ZOOM manufacturing report parity builders', () => {
         acKhataNo: 'KH3',
       },
     ]);
-    expect(report.totals).toMatchObject({ rows: 1, drAmt: 0, crAmt: 90, drGold: 0, crGold: 15, drSilver: 3, crSilver: 0 });
+    expect(report.totals).toMatchObject({
+      rows: 1,
+      drAmt: 0,
+      crAmt: 90,
+      drGold: 0,
+      crGold: 15,
+      drSilver: 3,
+      crSilver: 0,
+    });
 
     const withZero = await mfgLedgerReport(
       runtime,
       { ...scope, toDate: '2024-06-30' },
       { lcCode: LC, acGroup: 'MFGGR', includeZero: 'true' },
     );
-    expect(withZero.rows.map((row: any) => [row.acCode, row.crAmt, row.crGold, row.drSilver])).toEqual([
+    expect(
+      withZero.rows.map((row: any) => [row.acCode, row.crAmt, row.crGold, row.drSilver]),
+    ).toEqual([
       ['K003', 90, 15, 3],
       ['K004', 0, 0, 0],
     ]);
@@ -204,7 +250,24 @@ databaseDescribe('RP_MFG_ZOOM manufacturing report parity builders', () => {
       { ...scope, fromDate: '2024-06-01', toDate: '2024-06-30' },
       { acCode: 'K003', lcCode: LC },
     );
-    expect(report.rows.map((row: any) => [row.bookName, row.vchNo, row.drAmt, row.crAmt, row.balAmt, row.amtCrDr, row.drGold, row.crGold, row.balGold, row.goldCrDr, row.drSilver, row.crSilver, row.balSilver, row.silverCrDr])).toEqual([
+    expect(
+      report.rows.map((row: any) => [
+        row.bookName,
+        row.vchNo,
+        row.drAmt,
+        row.crAmt,
+        row.balAmt,
+        row.amtCrDr,
+        row.drGold,
+        row.crGold,
+        row.balGold,
+        row.goldCrDr,
+        row.drSilver,
+        row.crSilver,
+        row.balSilver,
+        row.silverCrDr,
+      ]),
+    ).toEqual([
       ['Op Balance', null, 0, 80, 80, 'Cr', 0, 20, 20, 'Cr', 0, 0, 0, ''],
       ['Polish Receive', 'L101', 30, 0, 50, 'Cr', 5, 0, 15, 'Cr', 0, 0, 0, ''],
       ['Ghat Issue', 'L102', 0, 0, 50, 'Cr', 0, 0, 15, 'Cr', 8, 0, -8, 'Dr'],

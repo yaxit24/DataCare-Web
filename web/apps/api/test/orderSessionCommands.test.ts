@@ -213,8 +213,7 @@ describe('five remaining order command entries: transaction-double checks only',
       const transaction = vi.fn(async (work: (value: Tx) => Promise<unknown>) => work(tx));
       const client = { $transaction: transaction } as unknown as PrismaClient;
       if (kind === 'create') await expect(createSalesOrder(client, input())).rejects.toBe(stop);
-      else
-        await expect(cancelSalesOrder(client, { scope: scope(), vchNo: 1 })).rejects.toBe(stop);
+      else await expect(cancelSalesOrder(client, { scope: scope(), vchNo: 1 })).rejects.toBe(stop);
       expect(transaction).toHaveBeenCalledTimes(1);
       expect(execute).toHaveBeenNthCalledWith(
         1,
@@ -224,8 +223,7 @@ describe('five remaining order command entries: transaction-double checks only',
       const first = query.mock.calls[0];
       query.mockClear();
       if (kind === 'create') await expect(createSalesOrderTx(tx, input())).rejects.toBe(stop);
-      else
-        await expect(cancelSalesOrderTx(tx, { scope: scope(), vchNo: 1 })).rejects.toBe(stop);
+      else await expect(cancelSalesOrderTx(tx, { scope: scope(), vchNo: 1 })).rejects.toBe(stop);
       expect(transaction).toHaveBeenCalledTimes(1);
       expect(query.mock.calls[0]).toEqual(first);
       expect(admission.call).not.toHaveBeenCalled();
@@ -247,8 +245,7 @@ describe('five remaining order command entries: transaction-double checks only',
       const body = source.slice(start, stop < 0 ? undefined : stop);
       expect(body).toContain(entry + '(prisma');
       expect(body).toContain('identity: orderCommandIdentity(req)');
-      if (needsVersion)
-        expect(body).toContain('requireOrderVersion(body(req).expectedVersion)');
+      if (needsVersion) expect(body).toContain('requireOrderVersion(body(req).expectedVersion)');
       if (path === '/tour-orders') expect(body).toContain('salesOrderInput(req)');
       if (path === '/sales-orders') expect(body).toContain('completeSalesOrderInput(req)');
     }

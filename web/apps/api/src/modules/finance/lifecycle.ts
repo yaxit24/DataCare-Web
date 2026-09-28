@@ -49,17 +49,21 @@ export function voucherKey(scope: VoucherScope, voucherNo: string) {
 
 export async function configuredBookTx(tx: any, scope: VoucherScope) {
   const complete = completeFinanceScope(scope);
-  const rows: Array<{ BOOK_NAME: unknown; BOOK_SNAME: unknown; MAIN_BOOK: unknown; BOOK_INOUT: unknown }> =
-    await tx.$queryRawUnsafe(
-      `SELECT "BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT" FROM "BOOK_DATA"
+  const rows: Array<{
+    BOOK_NAME: unknown;
+    BOOK_SNAME: unknown;
+    MAIN_BOOK: unknown;
+    BOOK_INOUT: unknown;
+  }> = await tx.$queryRawUnsafe(
+    `SELECT "BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT" FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
         AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
       ORDER BY row_id`,
-      complete.tenantId,
-      complete.coCode,
-      complete.lcCode,
-      complete.coBook,
-    );
+    complete.tenantId,
+    complete.coCode,
+    complete.lcCode,
+    complete.coBook,
+  );
   if (rows.length !== 1) {
     throw new FinanceLifecycleValidationError(
       `voucher book configuration is ambiguous: ${complete.coBook}`,

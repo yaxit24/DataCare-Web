@@ -17,7 +17,14 @@ const exec = (sql: string, ...params: unknown[]) =>
   withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...params));
 
 async function clean(): Promise<void> {
-  for (const table of ['APR_DETL', 'RATE_CUT_ISU', 'ITEM_MAST', 'EMP_MAST', 'AC_MAST', 'BOOK_DATA']) {
+  for (const table of [
+    'APR_DETL',
+    'RATE_CUT_ISU',
+    'ITEM_MAST',
+    'EMP_MAST',
+    'AC_MAST',
+    'BOOK_DATA',
+  ]) {
     await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   }
 }
@@ -103,40 +110,125 @@ databaseDescribe('RP_TOUR_ZOOM Tour Report and Tour Tag parity builders', () => 
   });
 
   it('matches DGV_TOUR_FILL voucher-wise issue/sale/return/pending totals and filters', async () => {
-    const report = await tourReport(runtime, { ...scope, filters: { prCode: 'P1', grCode: 'G01' } }, { employeeCode: 'E01' });
-    expect(report.rows.map((row: any) => [row.vchNo, row.empCode, row.isuPcs, row.isuWt, row.salePcs, row.recPcs, row.panPcs, row.panWt])).toEqual([
-      ['I001', 'E01', 10, 100, 3, 2, 5, 50],
-    ]);
-    expect(report.totals).toMatchObject({ rows: 1, isuPcs: 10, isuWt: 100, salePcs: 3, recPcs: 2, panPcs: 5, panWt: 50 });
+    const report = await tourReport(
+      runtime,
+      { ...scope, filters: { prCode: 'P1', grCode: 'G01' } },
+      { employeeCode: 'E01' },
+    );
+    expect(
+      report.rows.map((row: any) => [
+        row.vchNo,
+        row.empCode,
+        row.isuPcs,
+        row.isuWt,
+        row.salePcs,
+        row.recPcs,
+        row.panPcs,
+        row.panWt,
+      ]),
+    ).toEqual([['I001', 'E01', 10, 100, 3, 2, 5, 50]]);
+    expect(report.totals).toMatchObject({
+      rows: 1,
+      isuPcs: 10,
+      isuWt: 100,
+      salePcs: 3,
+      recPcs: 2,
+      panPcs: 5,
+      panWt: 50,
+    });
 
     const sales = await tourReport(runtime, scope, { status: 'sales' });
     expect(sales.rows.map((row: any) => [row.vchNo, row.salePcs, row.panPcs])).toEqual([
       ['I002', 4, 0],
     ]);
 
-    const all = await tourReport(runtime, { ...scope, filters: { prCode: 'P2' } }, { status: 'all' });
-    expect(all.rows.map((row: any) => [row.vchNo, row.empCode])).toEqual([
-      ['I004', 'E02'],
-    ]);
+    const all = await tourReport(
+      runtime,
+      { ...scope, filters: { prCode: 'P2' } },
+      { status: 'all' },
+    );
+    expect(all.rows.map((row: any) => [row.vchNo, row.empCode])).toEqual([['I004', 'E02']]);
   });
 
   it('matches Item_Wise_Tour_Stk employee non-tag opening, movement and pending stock', async () => {
     const report = await tourReport(runtime, scope, { mode: 'item-wise', employeeCode: 'E01' });
-    expect(report.rows.map((row: any) => [row.code, row.name, row.opPcs, row.opWt, row.isuPcs, row.isuWt, row.salePcs, row.saleWt, row.recPcs, row.recWt, row.panPcs, row.panWt])).toEqual([
-      ['E01', 'Employee One', 7, 70, 5, 50, 3, 30, 2, 20, 7, 70],
-    ]);
-    expect(report.totals).toMatchObject({ rows: 1, opPcs: 7, opWt: 70, isuPcs: 5, salePcs: 3, recPcs: 2, panPcs: 7, panWt: 70 });
+    expect(
+      report.rows.map((row: any) => [
+        row.code,
+        row.name,
+        row.opPcs,
+        row.opWt,
+        row.isuPcs,
+        row.isuWt,
+        row.salePcs,
+        row.saleWt,
+        row.recPcs,
+        row.recWt,
+        row.panPcs,
+        row.panWt,
+      ]),
+    ).toEqual([['E01', 'Employee One', 7, 70, 5, 50, 3, 30, 2, 20, 7, 70]]);
+    expect(report.totals).toMatchObject({
+      rows: 1,
+      opPcs: 7,
+      opWt: 70,
+      isuPcs: 5,
+      salePcs: 3,
+      recPcs: 2,
+      panPcs: 7,
+      panWt: 70,
+    });
   });
 
   it('matches Tour_Tag_Detl sale and return mapping with pending columns', async () => {
     const sale = await tourTagReport(runtime, scope, { status: 'all', tagNo: 'T001' });
-    expect(sale.rows.map((row: any) => [row.tagNo, row.isuNo, row.empName, row.iPcs, row.sPcs, row.rPcs, row.pPcs, row.slParty, row.slType, row.slVch, row.rcVch])).toEqual([
-      ['T001', 'I001', 'Employee One', 10, 3, 0, 7, 'Retail Customer', 'Tour Sale Book', 'S001', null],
+    expect(
+      sale.rows.map((row: any) => [
+        row.tagNo,
+        row.isuNo,
+        row.empName,
+        row.iPcs,
+        row.sPcs,
+        row.rPcs,
+        row.pPcs,
+        row.slParty,
+        row.slType,
+        row.slVch,
+        row.rcVch,
+      ]),
+    ).toEqual([
+      [
+        'T001',
+        'I001',
+        'Employee One',
+        10,
+        3,
+        0,
+        7,
+        'Retail Customer',
+        'Tour Sale Book',
+        'S001',
+        null,
+      ],
     ]);
 
-    const receipt = await tourTagReport(runtime, scope, { status: 'return', issueYear: YEAR, issueBook: 'ISU', issueNo: 'I003' });
-    expect(receipt.rows.map((row: any) => [row.tagNo, row.isuNo, row.iPcs, row.sPcs, row.rPcs, row.pPcs, row.rcVch, row.slVch])).toEqual([
-      ['T003', 'I003', 3, 0, 1, 2, 'R003', null],
-    ]);
+    const receipt = await tourTagReport(runtime, scope, {
+      status: 'return',
+      issueYear: YEAR,
+      issueBook: 'ISU',
+      issueNo: 'I003',
+    });
+    expect(
+      receipt.rows.map((row: any) => [
+        row.tagNo,
+        row.isuNo,
+        row.iPcs,
+        row.sPcs,
+        row.rPcs,
+        row.pPcs,
+        row.rcVch,
+        row.slVch,
+      ]),
+    ).toEqual([['T003', 'I003', 3, 0, 1, 2, 'R003', null]]);
   });
 });

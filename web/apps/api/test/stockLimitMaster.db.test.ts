@@ -68,14 +68,40 @@ databaseDescribe('MS_STK_LIMIT master parity writers', () => {
     await saveDiamondSizes(runtime, scope, 'SILV', [{ dmSize: 'S1', dmWt: 0.1 }]);
 
     await expect(getDiamondSizes(runtime, scope, 'GOLD')).resolves.toMatchObject([
-      { srNo: 1, itCode: 'GOLD', itName: 'Gold Ring', dmSize: '1.00', dmWt: 0.25, pcsGht: 1.5, pcsLbr: 2.5, rateType: 'P', dmRate: 100 },
-      { srNo: 2, itCode: 'GOLD', itName: 'Gold Ring', dmSize: '1.50', dmWt: 0.35, pcsGht: 1.6, pcsLbr: 2.6, rateType: 'W', dmRate: 150 },
+      {
+        srNo: 1,
+        itCode: 'GOLD',
+        itName: 'Gold Ring',
+        dmSize: '1.00',
+        dmWt: 0.25,
+        pcsGht: 1.5,
+        pcsLbr: 2.5,
+        rateType: 'P',
+        dmRate: 100,
+      },
+      {
+        srNo: 2,
+        itCode: 'GOLD',
+        itName: 'Gold Ring',
+        dmSize: '1.50',
+        dmWt: 0.35,
+        pcsGht: 1.6,
+        pcsLbr: 2.6,
+        rateType: 'W',
+        dmRate: 150,
+      },
     ]);
 
     await saveDiamondSizes(runtime, scope, 'GOLD', [{ dmSize: '2.00', dmWt: 0.45 }]);
-    expect((await getDiamondSizes(runtime, scope, 'GOLD')).map((row) => row.dmSize)).toEqual(['2.00']);
-    expect((await getDiamondSizes(runtime, scope, 'SILV')).map((row) => row.dmSize)).toEqual(['S1']);
-    expect((await listDiamondSizeSummary(runtime, scope)).map((row) => [row.itCode, row.dmSize])).toEqual([
+    expect((await getDiamondSizes(runtime, scope, 'GOLD')).map((row) => row.dmSize)).toEqual([
+      '2.00',
+    ]);
+    expect((await getDiamondSizes(runtime, scope, 'SILV')).map((row) => row.dmSize)).toEqual([
+      'S1',
+    ]);
+    expect(
+      (await listDiamondSizeSummary(runtime, scope)).map((row) => [row.itCode, row.dmSize]),
+    ).toEqual([
       ['GOLD', '2.00'],
       ['SILV', 'S1'],
     ]);
@@ -124,29 +150,53 @@ databaseDescribe('MS_STK_LIMIT master parity writers', () => {
   });
 
   it('deletes and rewrites ItStk Limit by item/design without removing another design', async () => {
-    await saveItemStockLimits(runtime, scope, 'GOLD', 'N', [{ fromWt: 0.001, toWt: 1, lbrCode: 'L1' }]);
-    await saveItemStockLimits(runtime, scope, 'GOLD', 'D1', [{ fromWt: 1.001, toWt: 2, lbrCode: 'L2' }]);
-    await saveItemStockLimits(runtime, scope, 'GOLD', 'N', [{ fromWt: 2.001, toWt: 3, lbrCode: 'L1', lbrRate: 300 }]);
+    await saveItemStockLimits(runtime, scope, 'GOLD', 'N', [
+      { fromWt: 0.001, toWt: 1, lbrCode: 'L1' },
+    ]);
+    await saveItemStockLimits(runtime, scope, 'GOLD', 'D1', [
+      { fromWt: 1.001, toWt: 2, lbrCode: 'L2' },
+    ]);
+    await saveItemStockLimits(runtime, scope, 'GOLD', 'N', [
+      { fromWt: 2.001, toWt: 3, lbrCode: 'L1', lbrRate: 300 },
+    ]);
 
-    expect((await getItemStockLimits(runtime, scope, 'GOLD', 'N')).map((row) => [row.itDesign, row.fromWt, row.lbrRate])).toEqual([
-      ['N', 2.001, 300],
-    ]);
-    expect((await getItemStockLimits(runtime, scope, 'GOLD', 'D1')).map((row) => [row.itDesign, row.fromWt, row.lbrCode])).toEqual([
-      ['D1', 1.001, 'L2'],
-    ]);
-    expect((await listItemStockLimitSummary(runtime, scope)).map((row) => [row.itCode, row.itDesign, row.rowCount])).toEqual([
+    expect(
+      (await getItemStockLimits(runtime, scope, 'GOLD', 'N')).map((row) => [
+        row.itDesign,
+        row.fromWt,
+        row.lbrRate,
+      ]),
+    ).toEqual([['N', 2.001, 300]]);
+    expect(
+      (await getItemStockLimits(runtime, scope, 'GOLD', 'D1')).map((row) => [
+        row.itDesign,
+        row.fromWt,
+        row.lbrCode,
+      ]),
+    ).toEqual([['D1', 1.001, 'L2']]);
+    expect(
+      (await listItemStockLimitSummary(runtime, scope)).map((row) => [
+        row.itCode,
+        row.itDesign,
+        row.rowCount,
+      ]),
+    ).toEqual([
       ['GOLD', 'D1', 1],
       ['GOLD', 'N', 1],
     ]);
 
-    await expect(deleteItemStockLimits(runtime, scope, 'GOLD', 'D1')).resolves.toEqual({ deleted: 1 });
+    await expect(deleteItemStockLimits(runtime, scope, 'GOLD', 'D1')).resolves.toEqual({
+      deleted: 1,
+    });
     expect(await getItemStockLimits(runtime, scope, 'GOLD', 'D1')).toEqual([]);
     expect(await getItemStockLimits(runtime, scope, 'GOLD', 'N')).toHaveLength(1);
   });
 
   it('rejects invalid labour type using the desktop validation message', async () => {
     await expect(
-      saveItemStockLimits(runtime, scope, 'GOLD', 'N', [{ fromWt: 0.001, toWt: 1, lbrCode: 'L1', lbrType: 'X' }]),
+      saveItemStockLimits(runtime, scope, 'GOLD', 'N', [
+        { fromWt: 0.001, toWt: 1, lbrCode: 'L1', lbrType: 'X' },
+      ]),
     ).rejects.toThrow(/Please Insert Lbr Type = G Gross/);
   });
 });

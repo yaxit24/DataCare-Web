@@ -11,7 +11,8 @@ const txt = (v: unknown): string | null => {
   return s ? s : null;
 };
 const round3 = (n: number): number => Math.round(n * 1000) / 1000;
-const monthLabel = (year: number, month: number): string => `${String(year).slice(-2)}/${String(month).padStart(2, '0')}`;
+const monthLabel = (year: number, month: number): string =>
+  `${String(year).slice(-2)}/${String(month).padStart(2, '0')}`;
 
 function varcharDateExpr(alias: string, column: string): string {
   const value = `NULLIF(trim(${alias}."${column}"::text),'')`;
@@ -37,13 +38,21 @@ export async function oldStockReport(
 ): Promise<ListReport> {
   const karigarCode = String(options.karigarCode ?? '').trim();
   const toDate = s.toDate ?? new Date().toISOString().slice(0, 10);
-  const filters = { ...(s.filters ?? {}), itType: String(s.filters?.itType ?? 'G').slice(0, 1) || 'G' };
+  const filters = {
+    ...(s.filters ?? {}),
+    itType: String(s.filters?.itType ?? 'G').slice(0, 1) || 'G',
+  };
   const barStockDate = varcharDateExpr('b', 'STK_DATE');
   const mainStockDate = varcharDateExpr('a', 'STK_DATE');
 
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const params: unknown[] = [s.coCode];
-    const where = [`a."CO_CODE"=$1`, `coalesce(a."TAG_NO",'') <> 'N'`, `${barStockDate} IS NOT NULL`, `${mainStockDate} <= $2::date`];
+    const where = [
+      `a."CO_CODE"=$1`,
+      `coalesce(a."TAG_NO",'') <> 'N'`,
+      `${barStockDate} IS NOT NULL`,
+      `${mainStockDate} <= $2::date`,
+    ];
     params.push(toDate);
     if (s.lcCode) {
       params.push(s.lcCode);
@@ -78,12 +87,13 @@ export async function oldStockReport(
     );
 
     const labels = Array.from(
-      new Set(
-        rows.map((row) => monthLabel(num(row.yrCode), num(row.mnCode))),
-      ),
+      new Set(rows.map((row) => monthLabel(num(row.yrCode), num(row.mnCode)))),
     ).sort();
     const byItem = new Map<string, Record<string, unknown> & { total: number }>();
-    const monthTotals = Object.fromEntries(labels.map((label) => [label, 0])) as Record<string, number>;
+    const monthTotals = Object.fromEntries(labels.map((label) => [label, 0])) as Record<
+      string,
+      number
+    >;
 
     for (const row of rows) {
       const itemCode = txt(row.itCode) ?? '';
@@ -105,7 +115,10 @@ export async function oldStockReport(
       monthTotals[label] = round3((monthTotals[label] ?? 0) + pcs);
     }
 
-    const pivotRows = Array.from(byItem.values()).map((row, index) => ({ ...row, srNo: index + 1 }));
+    const pivotRows = Array.from(byItem.values()).map((row, index) => ({
+      ...row,
+      srNo: index + 1,
+    }));
     const totals = {
       rows: pivotRows.length,
       items: pivotRows.length,
