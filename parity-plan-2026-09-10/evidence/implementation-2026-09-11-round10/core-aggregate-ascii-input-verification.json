@@ -1,0 +1,7 @@
+{
+  "snapshotSha256": "07db45145c4071855a176eea6729b3e8d781ca363c2bfad58b1fe06fb1a75428",
+  "checked": 10,
+  "mismatches": [],
+  "result": "passed",
+  "scope": "After62 focused tests and strict noUnchecked compiler; direct scoped imports, not a complete workspace proof."
+}

@@ -1,0 +1,13 @@
+{
+  "authoredAtUtc": "2026-09-12T02:25:50.839192+00:00",
+  "implementationExists": false,
+  "caseCount": 30,
+  "fullSuccessfulPhaseMaps": 10,
+  "sourceEntriesPerPhase": 221,
+  "fixtureSha256": "635e1e251837c0c5acc6acd39f2b7e2932ad19850b976d3a1f2d59cf5229a09b",
+  "notes": [
+    "No root or peer new implementation inspected or executed to derive expectations.",
+    "F03 independently distinguishes row fractional amounts from rounded header effects.",
+    "Opaque raw extension preservation follows explicit parent boundary; selected canonical context remains a caller precondition."
+  ]
+}

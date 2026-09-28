@@ -1,0 +1,39 @@
+{
+ "form": "MS_LOGIN",
+ "tables": [
+  "AC_MAST_SRNO",
+  "CO_MAST",
+  "LOGIN_MAST",
+  "TILE_DATA"
+ ],
+ "writes": {
+  "INSERT": {
+   "AC_MAST_SRNO": [
+    "AC_CODE",
+    "AC_GR",
+    "AC_NAME",
+    "CO_CODE",
+    "LC_CODE",
+    "MAIN_USER"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "AC_MAST_SRNO",
+   "CO_MAST"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST_SRNO",
+  "CO_MAST",
+  "LOGIN_MAST",
+  "TILE_DATA"
+ ],
+ "fKeys": [],
+ "messageBoxes": 4,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 653
+}

@@ -1,0 +1,334 @@
+{
+ "report": "TempPhone",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 413,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 120,
+       "top": 90,
+       "width": 11280,
+       "height": 216,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 10875,
+       "top": 90,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 380,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 510,
+       "top": 75,
+       "width": 1440,
+       "height": 200,
+       "text": "Party Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 5505,
+       "top": 75,
+       "width": 1755,
+       "height": 200,
+       "text": "Mobile"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 7260,
+       "top": 75,
+       "width": 1440,
+       "height": 200,
+       "text": "Phone"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 8955,
+       "top": 75,
+       "width": 1440,
+       "height": 200,
+       "text": "Email"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 10890,
+       "top": 75,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 240,
+       "top": 330,
+       "width": 11160,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "GroupHeader",
+     "height": 320,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 510,
+       "top": 30,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "{TEMP_ADD.AC_AREA}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 240,
+       "top": 285,
+       "width": 11160,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area10",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupHeader",
+     "height": 226,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 0,
+       "top": 0,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "GroupName ({TEMP_ADD.AC_NAME})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 232,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 510,
+       "top": 0,
+       "width": 810,
+       "height": 164,
+       "dataSource": "{TEMP_ADD.AC_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 1440,
+       "top": 0,
+       "width": 4065,
+       "height": 232,
+       "dataSource": "{@PartyName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 5505,
+       "top": 0,
+       "width": 1695,
+       "height": 200,
+       "dataSource": "{@AcMobile}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 7260,
+       "top": 0,
+       "width": 1650,
+       "height": 225,
+       "dataSource": "{@AcPhone}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 8955,
+       "top": 0,
+       "width": 2445,
+       "height": 232,
+       "dataSource": "{@Mail}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 255,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 510,
+       "top": 225,
+       "width": 11010,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area11",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section10",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "PageFooter",
+     "height": 100,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "IF {TEMP_ADD.AC_MOBILE} <> '' THEN {TEMP_ADD.AC_MOBILE}"
+  },
+  {
+   "name": "AcPhone",
+   "ref": "{@AcPhone}",
+   "type": "StringField",
+   "text": "IF{TEMP_ADD.AC_PHONE} <> '' THEN {TEMP_ADD.AC_PHONE}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "Mail",
+   "ref": "{@Mail}",
+   "type": "StringField",
+   "text": "IF {TEMP_ADD.AC_EMAIL} <> '' THEN 'E. ' + {TEMP_ADD.AC_EMAIL}"
+  },
+  {
+   "name": "PartyName",
+   "ref": "{@PartyName}",
+   "type": "StringField",
+   "text": "{TEMP_ADD.AC_NAME}"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'PHONE BOOK'"
+  }
+ ],
+ "sectionCount": 11,
+ "objectCount": 17,
+ "formulaCount": 6
+}

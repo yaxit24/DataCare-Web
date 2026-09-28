@@ -1,0 +1,2313 @@
+{
+  "version": "saved-return-effect-context-independent-v1",
+  "authorship": "All expected literals authored from cited source/schema and named conservative profile before implementation; no qualifier/calculator execution. Raw inputs fully expanded. Unsupported values intentionally exceed first-profile support rather than emulate general SQL STR.",
+  "cases": [
+    {
+      "id": "C01",
+      "note": "Finite source SR1: SQL STR defaults to length10, so nine literal spaces precede1; role01/02 source concatenation has no segment padding.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "values": {
+          "acEntryTime": "2026-09-12T13:04:05",
+          "stockEntryDate": "2026-09-12",
+          "stockDateText": "2026-09-12",
+          "customerLedgerKey": "01012026-2027R150000101         1",
+          "saleLedgerKey": "01012026-2027R150000102         1",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        }
+      }
+    },
+    {
+      "id": "C02",
+      "note": "All-zero fractional aliases denote the same saved-open whole second; original raw strings stay untouched.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05.000000"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05.0"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "values": {
+          "acEntryTime": "2026-09-12T13:04:05",
+          "stockEntryDate": "2026-09-12",
+          "stockDateText": "2026-09-12",
+          "customerLedgerKey": "01012026-2027R150000101         1",
+          "saleLedgerKey": "01012026-2027R150000102         1",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        }
+      }
+    },
+    {
+      "id": "C03",
+      "note": "Leap-century midnight local clock; no timezone conversion.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2000-02-29",
+          "VCH_TIME": "2000-02-29T00:00:00"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2000-02-29",
+          "VCH_TIME": "2000-02-29T00:00:00"
+        },
+        "storageText": {
+          "stockDateText": "2000-02-29",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "values": {
+          "acEntryTime": "2000-02-29T00:00:00",
+          "stockEntryDate": "2000-02-29",
+          "stockDateText": "2000-02-29",
+          "customerLedgerKey": "01012026-2027R150000101         1",
+          "saleLedgerKey": "01012026-2027R150000102         1",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        }
+      }
+    },
+    {
+      "id": "C04",
+      "note": "DST-looking local clock is not resolved to a timezone/instant.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-11-01",
+          "VCH_TIME": "2026-11-01T01:30:00"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-11-01",
+          "VCH_TIME": "2026-11-01T01:30:00"
+        },
+        "storageText": {
+          "stockDateText": "2026-11-01",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "values": {
+          "acEntryTime": "2026-11-01T01:30:00",
+          "stockEntryDate": "2026-11-01",
+          "stockDateText": "2026-11-01",
+          "customerLedgerKey": "01012026-2027R150000101         1",
+          "saleLedgerKey": "01012026-2027R150000102         1",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        }
+      }
+    },
+    {
+      "id": "C05",
+      "note": "Last whole second; no next-day rounding.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T23:59:59"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T23:59:59"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "values": {
+          "acEntryTime": "2026-09-12T23:59:59",
+          "stockEntryDate": "2026-09-12",
+          "stockDateText": "2026-09-12",
+          "customerLedgerKey": "01012026-2027R150000101         1",
+          "saleLedgerKey": "01012026-2027R150000102         1",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        }
+      }
+    },
+    {
+      "id": "C06",
+      "note": "Single-character company/location/book are not padded or truncated; year10 fits current schema. This is an observation profile, not auth-year acceptance.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "A",
+          "LC_CODE": "B",
+          "CO_YEAR": "1234567890",
+          "CO_BOOK": "R",
+          "VCH_NO": "99999",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "values": {
+          "acEntryTime": "2026-09-12T13:04:05",
+          "stockEntryDate": "2026-09-12",
+          "stockDateText": "2026-09-12",
+          "customerLedgerKey": "AB1234567890R9999901         1",
+          "saleLedgerKey": "AB1234567890R9999902         1",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        }
+      }
+    },
+    {
+      "id": "S01",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "0",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S02",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "2",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S03",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "01",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S04",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1.0",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S05",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "+1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S06",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "-1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S07",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1e0",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S08",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1 ",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S09",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": " 1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S10",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "9999999999",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S11",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "10000000000",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S12",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "9007199254740993",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S13",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "NaN",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S14",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1\n",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-serial",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S15",
+      "note": "Finite SR1 profile refuses without Number, rounding, trimming or SQL STR overflow emulation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": null,
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "null-observation",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "S16",
+      "note": "Absent serial remains absent; no default.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "missing-observation",
+          "field": "incoming.SR_NO"
+        }
+      }
+    },
+    {
+      "id": "D01",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": null,
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "null-observation",
+          "field": "header.VCH_DATE"
+        }
+      }
+    },
+    {
+      "id": "D02",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": null,
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "null-observation",
+          "field": "incoming.VCH_DATE"
+        }
+      }
+    },
+    {
+      "id": "D03",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "1900-02-29",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_DATE"
+        }
+      }
+    },
+    {
+      "id": "D04",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-02-30T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "incoming.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D05",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05.000001"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "fractional-clock",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D06",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05.999999"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "fractional-clock",
+          "field": "incoming.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D07",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-11T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "incoherent-clock",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D08",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-11",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "incoherent-clock",
+          "field": "incoming.VCH_DATE"
+        }
+      }
+    },
+    {
+      "id": "D09",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:06"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "incoherent-clock",
+          "field": "incoming.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D10",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12 13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D11",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05Z"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D12",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T24:00:00"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D13",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05\n"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D14",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05.0000000"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D15",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "0000-01-01",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_DATE"
+        }
+      }
+    },
+    {
+      "id": "D16",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-9-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-clock",
+          "field": "header.VCH_DATE"
+        }
+      }
+    },
+    {
+      "id": "D17",
+      "note": "Exact canonical PG clock and source saved-open coherence boundary.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": null
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "null-observation",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "D18",
+      "note": "Missing clock is not NULL or default midnight.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "missing-observation",
+          "field": "header.VCH_TIME"
+        }
+      }
+    },
+    {
+      "id": "K01",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "AAA",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_CODE"
+        }
+      }
+    },
+    {
+      "id": "K02",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "AAA",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.LC_CODE"
+        }
+      }
+    },
+    {
+      "id": "K03",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "12345678901",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_YEAR"
+        }
+      }
+    },
+    {
+      "id": "K04",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "AAAA",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_BOOK"
+        }
+      }
+    },
+    {
+      "id": "K05",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "000001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.VCH_NO"
+        }
+      }
+    },
+    {
+      "id": "K06",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "r15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_BOOK"
+        }
+      }
+    },
+    {
+      "id": "K07",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "0 ",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_CODE"
+        }
+      }
+    },
+    {
+      "id": "K08",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R\n",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_BOOK"
+        }
+      }
+    },
+    {
+      "id": "K09",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026/2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_YEAR"
+        }
+      }
+    },
+    {
+      "id": "K10",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_CODE"
+        }
+      }
+    },
+    {
+      "id": "K11",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "1",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.VCH_NO"
+        }
+      }
+    },
+    {
+      "id": "K12",
+      "note": "No lossy concatenation normalization; strict bounded observed identity profile.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "\uff10\uff11",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-identity",
+          "field": "incoming.CO_CODE"
+        }
+      }
+    },
+    {
+      "id": "T01",
+      "note": "Supplied exact current-storage witness qualification; no coercion or Windows-format inference.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "09/12/2026",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-storage-text",
+          "field": "storageText.stockDateText"
+        }
+      }
+    },
+    {
+      "id": "T02",
+      "note": "Supplied exact current-storage witness qualification; no coercion or Windows-format inference.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-11",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-storage-text",
+          "field": "storageText.stockDateText"
+        }
+      }
+    },
+    {
+      "id": "T03",
+      "note": "Supplied exact current-storage witness qualification; no coercion or Windows-format inference.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0.00",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-storage-text",
+          "field": "storageText.stockDiscountText"
+        }
+      }
+    },
+    {
+      "id": "T04",
+      "note": "Supplied exact current-storage witness qualification; no coercion or Windows-format inference.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0.0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-storage-text",
+          "field": "storageText.taxZeroRatedText"
+        }
+      }
+    },
+    {
+      "id": "T05",
+      "note": "Supplied exact current-storage witness qualification; no coercion or Windows-format inference.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": null,
+          "stockDiscountText": "0",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "null-observation",
+          "field": "storageText.stockDateText"
+        }
+      }
+    },
+    {
+      "id": "T06",
+      "note": "Supplied exact current-storage witness qualification; no coercion or Windows-format inference.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0",
+          "taxZeroRatedText": ""
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-storage-text",
+          "field": "storageText.taxZeroRatedText"
+        }
+      }
+    },
+    {
+      "id": "T07",
+      "note": "Supplied exact current-storage witness qualification; no coercion or Windows-format inference.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0\n",
+          "taxZeroRatedText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-storage-text",
+          "field": "storageText.stockDiscountText"
+        }
+      }
+    },
+    {
+      "id": "T08",
+      "note": "No fabricated zero for missing target observation.",
+      "input": {
+        "header": {
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "incoming": {
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2026-2027",
+          "CO_BOOK": "R15",
+          "VCH_NO": "00001",
+          "SR_NO": "1",
+          "VCH_DATE": "2026-09-12",
+          "VCH_TIME": "2026-09-12T13:04:05"
+        },
+        "storageText": {
+          "stockDateText": "2026-09-12",
+          "stockDiscountText": "0"
+        },
+        "provenance": {
+          "documentIdentity": "document-1",
+          "documentVersion": "document-version-1",
+          "rowIdentity": "incoming-1",
+          "observationIdentity": "observed-effects-1"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "missing-observation",
+          "field": "storageText.taxZeroRatedText"
+        }
+      }
+    }
+  ]
+}

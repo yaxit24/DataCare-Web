@@ -1,0 +1,72 @@
+{
+  "kind": "session-context-migration-independent-static-review-v1",
+  "status": "reviewed-with-qualified-baseline-limits; execution-pending",
+  "fixtureCases": 28,
+  "expectedSuccesses": 4,
+  "expectedRefusals": 24,
+  "execution": {
+    "database": false,
+    "harness": false,
+    "compiler": false,
+    "mainRepositoryWrites": false
+  },
+  "correctedSourceFindings": [
+    "Require the existing exact validated expiry CHECK.",
+    "Refuse inheritance/partition links, noninternal triggers and rewrite rules before backfill."
+  ],
+  "harnessReview": {
+    "status": "owner final pin pending; not an executable verification result",
+    "requiredCorrections": [
+      "Exact textual numeric snapshots plus SQL-NULL ledger discriminator.",
+      "Success preservation of each preexisting non-NULL new-column value."
+    ],
+    "owner": "tour_order_ui"
+  },
+  "limitations": [
+    "Custom extra constraint/policy/index behavior is not exhaustively qualified.",
+    "No session middleware, epoch CAS, refresh, receipt recovery or known mode/closing authority is implemented by this migration.",
+    "Native storage validation cannot reconstruct discarded input spelling or duplicate JSON keys."
+  ],
+  "references": [
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/migration.sql",
+      "sha256": "6f495c3b4948eba2c4f05449e48afac761ea5af0ce6520b9fde53812a93f6aa8",
+      "bytes": 13006
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/AuthSession.proposed.prisma",
+      "sha256": "55eb9402bd5b86596a649bcaed277fad8e6606a6ec59bcf6ff5e0187f6799bc5",
+      "bytes": 1606
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/auth-session-schema.patch",
+      "sha256": "04a12adf62c587d71f6a07bae03b8d5f928f3bff29e2944d2c7aa8641743cc85",
+      "bytes": 963
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/schema-baseline.json",
+      "sha256": "b167ebc0c7357730de944f9a04235a2f9ee6d7ca1bb9c5eb273785eae968d0f4",
+      "bytes": 359
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/baseline.sql",
+      "sha256": "af35bc5be9c42a92685389473e73f616006ff204df180f3b566a8462f1f081c6",
+      "bytes": 2610
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/migration-independent-cases.json",
+      "sha256": "1d0e891b2e8d56a4b37bd8b08d5d3495b378a3f0f0a779bf7c0527865a622bef",
+      "bytes": 16798
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/authorship.json",
+      "sha256": "37f67e30a73a60dac4363f8af1f7ad22b1eddb83aa0556054f991c24185a0855",
+      "bytes": 842
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/review.md",
+      "sha256": "6ea6f4361f09b796a5dbca60552db1423c578ad5600eaf15f6573fe3db9f8085",
+      "bytes": 3488
+    }
+  ]
+}

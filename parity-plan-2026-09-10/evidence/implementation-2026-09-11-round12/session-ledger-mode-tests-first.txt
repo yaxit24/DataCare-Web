@@ -1,0 +1,66 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+
+ ❯ packages/core/test/sessionLedgerMode.test.ts (103 tests | 3 failed) 75ms
+   × independent desktop session ledger-mode semantics > unknown prior mode cannot be invented by a missing general alias 10ms
+     → expected 'invalid-input' to be 'unsupported' // Object.is equality
+   × independent desktop session ledger-mode semantics > completed bootstrap with unknown initial mode permits an independently resolved command 1ms
+     → expected 'invalid-input' to be 'applied' // Object.is equality
+   × independent desktop session ledger-mode semantics > failed company-open observation cannot be repaired by a semantic mode command 1ms
+     → expected 'invalid-input' to be 'unsupported' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/core/test/sessionLedgerMode.test.ts > independent desktop session ledger-mode semantics > unknown prior mode cannot be invented by a missing general alias
+AssertionError: expected 'invalid-input' to be 'unsupported' // Object.is equality
+
+Expected: "unsupported"
+Received: "invalid-input"
+
+ ❯ packages/core/test/sessionLedgerMode.test.ts:287:27
+    285|     };
+    286|     const result = transitionSessionLedgerMode(input);
+    287|     expect(result.status).toBe('unsupported');
+       |                           ^
+    288|     expect(result.state).toEqual(input.previous);
+    289|     assertDiagnostics(result);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  packages/core/test/sessionLedgerMode.test.ts > independent desktop session ledger-mode semantics > completed bootstrap with unknown initial mode permits an independently resolved command
+AssertionError: expected 'invalid-input' to be 'applied' // Object.is equality
+
+Expected: "applied"
+Received: "invalid-input"
+
+ ❯ packages/core/test/sessionLedgerMode.test.ts:295:27
+    293|     const input = { ...commandInput(), previous: unresolvedPrevious() …
+    294|     const result = transitionSessionLedgerMode(input);
+    295|     expect(result.status).toBe('applied');
+       |                           ^
+    296|     expect(result.state?.mode).toBe('C');
+    297|     expect(result.state?.bootstrap).toEqual(input.previous.bootstrap);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  packages/core/test/sessionLedgerMode.test.ts > independent desktop session ledger-mode semantics > failed company-open observation cannot be repaired by a semantic mode command
+AssertionError: expected 'invalid-input' to be 'unsupported' // Object.is equality
+
+Expected: "unsupported"
+Received: "invalid-input"
+
+ ❯ packages/core/test/sessionLedgerMode.test.ts:306:27
+    304|     const input = { ...commandInput(), previous: state };
+    305|     const result = transitionSessionLedgerMode(input);
+    306|     expect(result.status).toBe('unsupported');
+       |                           ^
+    307|     expect(result.state).toEqual(state);
+    308|     assertDiagnostics(result);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 100 passed (103)
+   Start at  21:46:29
+   Duration  1.31s (transform 188ms, setup 0ms, collect 180ms, tests 75ms, environment 0ms, prepare 234ms)
+

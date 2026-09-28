@@ -1,0 +1,20 @@
+{
+  "extends": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/tsconfig.test.json",
+  "compilerOptions": {
+    "typeRoots": [
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/@types"
+    ],
+    "rootDir": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api"
+  },
+  "include": [
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextSelection.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextSelection.db.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextLogin.db.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextRefresh.db.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/storedScope.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextValue.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContext.extraction.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/migrationManifest.test.ts"
+  ],
+  "exclude": []
+}

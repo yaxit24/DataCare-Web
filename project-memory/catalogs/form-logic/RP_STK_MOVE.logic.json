@@ -1,0 +1,33 @@
+{
+ "form": "RP_STK_MOVE",
+ "tables": [
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "USER_SET",
+  "WEIGHT_MAST"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "MAIN_STOCK"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "USER_SET",
+  "WEIGHT_MAST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 2,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4259
+}

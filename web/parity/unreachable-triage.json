@@ -1,0 +1,760 @@
+{
+  "kind": "unreachable-field-triage",
+  "note": "Classifies the fields gap_manifest.py reports as unreachable from any screen. `operator` is the only class that represents work; the other two are fields a request should not carry, and their unreachability is correct. The P3 ceiling is therefore serverDerived + internal, not zero.",
+  "totals": {
+    "unreachable": 90,
+    "operator": 8,
+    "serverDerived": 53,
+    "internal": 29,
+    "correctlyUnreachable": 82
+  },
+  "operatorBacklog": [
+    {
+      "interface": "DesignBookLine",
+      "module": "masters",
+      "fields": ["pageNo", "dieNo", "ghatWt"]
+    },
+    {
+      "interface": "ChequeInput",
+      "module": "finance",
+      "fields": ["payee", "acPayee"]
+    },
+    {
+      "interface": "RateCutLine",
+      "module": "sales",
+      "fields": ["isuRef"]
+    },
+    {
+      "interface": "SchemeInstallmentInput",
+      "module": "membership",
+      "fields": ["withUpi"]
+    },
+    {
+      "interface": "SchemeInstallmentLine",
+      "module": "membership",
+      "fields": ["withUpi"]
+    }
+  ],
+  "fields": [
+    {
+      "interface": "AuthInput",
+      "file": "web/apps/api/src/modules/auth/auth.service.ts",
+      "module": "auth",
+      "field": "tenantId",
+      "class": "serverDerived",
+      "reason": "resolved from the authenticated session; a request may never assert it"
+    },
+    {
+      "interface": "BullionBookingInput",
+      "file": "web/apps/api/src/modules/bullion/bullion.ts",
+      "module": "bullion",
+      "field": "payableAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "ChequeInput",
+      "file": "web/apps/api/src/modules/finance/chequePrint.ts",
+      "module": "finance",
+      "field": "payee",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "ChequeInput",
+      "file": "web/apps/api/src/modules/finance/chequePrint.ts",
+      "module": "finance",
+      "field": "acPayee",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "ComputedLine",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "field": "itmAmt",
+      "class": "internal",
+      "reason": "a COMPUTED line, by name; its fields are outputs of the calculator"
+    },
+    {
+      "interface": "DeleteAcOpeningInput",
+      "file": "web/apps/api/src/modules/finance/acOpening.ts",
+      "module": "finance",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteBatchReceiptInput",
+      "file": "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "module": "finance",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteBillSettlementInput",
+      "file": "web/apps/api/src/modules/finance/billToBill.ts",
+      "module": "finance",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteBullionBookingInput",
+      "file": "web/apps/api/src/modules/bullion/bullion.ts",
+      "module": "bullion",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteDhrnInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "field": "headerTable",
+      "class": "serverDerived",
+      "reason": "chosen by the module from the voucher's book classification"
+    },
+    {
+      "interface": "DeleteDhrnInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteFinanceInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "field": "headerTable",
+      "class": "serverDerived",
+      "reason": "chosen by the module from the voucher's book classification"
+    },
+    {
+      "interface": "DeleteFinanceInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteKarigarInput",
+      "file": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "module": "manufacturing",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteMfgInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeletePurchaseInput",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeletePurchaseReturnInput",
+      "file": "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+      "module": "purchase",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteRateCutInput",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteSaleInput",
+      "file": "web/apps/api/src/modules/sales/sales.ts",
+      "module": "sales",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteSaleReturnInput",
+      "file": "web/apps/api/src/modules/sales/salesReturn.ts",
+      "module": "sales",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteSchemeInstallmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteSchemeMaturityInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DeleteTourInput",
+      "file": "web/apps/api/src/modules/tour/tour.ts",
+      "module": "tour",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "DesignBookInput",
+      "file": "web/apps/api/src/modules/masters/designBook.ts",
+      "module": "masters",
+      "field": "bookName",
+      "class": "serverDerived",
+      "reason": "MAIN_BOOK of the configured book"
+    },
+    {
+      "interface": "DesignBookLine",
+      "file": "web/apps/api/src/modules/masters/designBook.ts",
+      "module": "masters",
+      "field": "pageNo",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "DesignBookLine",
+      "file": "web/apps/api/src/modules/masters/designBook.ts",
+      "module": "masters",
+      "field": "dieNo",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "DesignBookLine",
+      "file": "web/apps/api/src/modules/masters/designBook.ts",
+      "module": "masters",
+      "field": "ghatWt",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "EmployeeJvInput",
+      "file": "web/apps/api/src/modules/finance/employeeJv.ts",
+      "module": "finance",
+      "field": "tdsAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "EmployeeJvInput",
+      "file": "web/apps/api/src/modules/finance/employeeJv.ts",
+      "module": "finance",
+      "field": "pfAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "FieldAuditInput",
+      "file": "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "module": "vouchers",
+      "field": "bookName",
+      "class": "internal",
+      "reason": "edit-audit metadata derived from the session and the persisted row"
+    },
+    {
+      "interface": "FieldAuditInput",
+      "file": "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "module": "vouchers",
+      "field": "originalUser",
+      "class": "internal",
+      "reason": "edit-audit metadata derived from the session and the persisted row"
+    },
+    {
+      "interface": "FieldAuditInput",
+      "file": "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "module": "vouchers",
+      "field": "editingUser",
+      "class": "internal",
+      "reason": "edit-audit metadata derived from the session and the persisted row"
+    },
+    {
+      "interface": "FieldAuditInput",
+      "file": "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "module": "vouchers",
+      "field": "ignore",
+      "class": "internal",
+      "reason": "edit-audit metadata derived from the session and the persisted row"
+    },
+    {
+      "interface": "FineJvRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "lineNo",
+      "class": "internal",
+      "reason": "day-book projection row built by the fine-JV writer from the voucher"
+    },
+    {
+      "interface": "FineJvRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "ldCode",
+      "class": "internal",
+      "reason": "day-book projection row built by the fine-JV writer from the voucher"
+    },
+    {
+      "interface": "FineJvRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "creditFine",
+      "class": "internal",
+      "reason": "day-book projection row built by the fine-JV writer from the voucher"
+    },
+    {
+      "interface": "FineJvRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "debitFine",
+      "class": "internal",
+      "reason": "day-book projection row built by the fine-JV writer from the voucher"
+    },
+    {
+      "interface": "FineSalePurchaseInput",
+      "file": "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "module": "bullion",
+      "field": "fineSalesAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "FineSalePurchaseInput",
+      "file": "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "module": "bullion",
+      "field": "finePurchaseAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "IrnItemInput",
+      "file": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "module": "einvoice",
+      "field": "qty",
+      "class": "serverDerived",
+      "reason": "e-invoice item lines are derived from the sale's own lines"
+    },
+    {
+      "interface": "IrnItemInput",
+      "file": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "module": "einvoice",
+      "field": "unit",
+      "class": "serverDerived",
+      "reason": "e-invoice item lines are derived from the sale's own lines"
+    },
+    {
+      "interface": "IrnItemInput",
+      "file": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "module": "einvoice",
+      "field": "unitPrice",
+      "class": "serverDerived",
+      "reason": "e-invoice item lines are derived from the sale's own lines"
+    },
+    {
+      "interface": "IrnItemInput",
+      "file": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "module": "einvoice",
+      "field": "assAmt",
+      "class": "serverDerived",
+      "reason": "e-invoice item lines are derived from the sale's own lines"
+    },
+    {
+      "interface": "IrnItemInput",
+      "file": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "module": "einvoice",
+      "field": "gstRt",
+      "class": "serverDerived",
+      "reason": "e-invoice item lines are derived from the sale's own lines"
+    },
+    {
+      "interface": "IssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "module": "manufacturing",
+      "field": "accountGstType",
+      "class": "serverDerived",
+      "reason": "read from persisted AC_MAST; never authoritative from a request (WP-02)"
+    },
+    {
+      "interface": "KarigarRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "lineNo",
+      "class": "internal",
+      "reason": "day-book projection row built by karigar.ts from the voucher"
+    },
+    {
+      "interface": "KarigarRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "contraAc",
+      "class": "internal",
+      "reason": "day-book projection row built by karigar.ts from the voucher"
+    },
+    {
+      "interface": "LabourInvoiceInput",
+      "file": "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "module": "sales",
+      "field": "labourAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "MeltingProInput",
+      "file": "web/apps/api/src/modules/manufacturing/meltingPro.ts",
+      "module": "manufacturing",
+      "field": "deleteUser",
+      "class": "serverDerived",
+      "reason": "taken from the session so a delete cannot be attributed to someone else"
+    },
+    {
+      "interface": "MfgIssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "field": "irType",
+      "class": "serverDerived",
+      "reason": "resolved from MFG_MAST or the stage default"
+    },
+    {
+      "interface": "MfgIssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "field": "bookName",
+      "class": "serverDerived",
+      "reason": "MAIN_BOOK of the configured book"
+    },
+    {
+      "interface": "MfgIssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "field": "postStock",
+      "class": "serverDerived",
+      "reason": "derived from the stage's STK_ISU flag"
+    },
+    {
+      "interface": "OrderOldMetalLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "lineNo",
+      "class": "serverDerived",
+      "reason": "assigned by the writer in row order"
+    },
+    {
+      "interface": "PaymentInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "field": "lineNo",
+      "class": "serverDerived",
+      "reason": "assigned by the writer in row order"
+    },
+    {
+      "interface": "PostInput",
+      "file": "web/apps/api/src/modules/posting/posting.ts",
+      "module": "posting",
+      "field": "bookName",
+      "class": "serverDerived",
+      "reason": "MAIN_BOOK of the configured book"
+    },
+    {
+      "interface": "ProfitLineInput",
+      "file": "web/apps/api/src/modules/sales/billProfit.ts",
+      "module": "sales",
+      "field": "itmMrp",
+      "class": "serverDerived",
+      "reason": "profit report rows are computed from the persisted bill"
+    },
+    {
+      "interface": "ProfitLineInput",
+      "file": "web/apps/api/src/modules/sales/billProfit.ts",
+      "module": "sales",
+      "field": "krFine",
+      "class": "serverDerived",
+      "reason": "profit report rows are computed from the persisted bill"
+    },
+    {
+      "interface": "ProfitLineInput",
+      "file": "web/apps/api/src/modules/sales/billProfit.ts",
+      "module": "sales",
+      "field": "avgTouch",
+      "class": "serverDerived",
+      "reason": "profit report rows are computed from the persisted bill"
+    },
+    {
+      "interface": "RateCutInput",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "field": "hdVchNo",
+      "class": "serverDerived",
+      "reason": "hidden voucher number, allocated by nextHiddenVoucherNoTx"
+    },
+    {
+      "interface": "RateCutLine",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "field": "isuRef",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "ReceiptInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "field": "lineNo",
+      "class": "serverDerived",
+      "reason": "assigned by the writer in row order"
+    },
+    {
+      "interface": "RepairApplyInput",
+      "file": "web/apps/api/src/modules/utilities/dataRepair.ts",
+      "module": "utilities",
+      "field": "loginCoCode",
+      "class": "serverDerived",
+      "reason": "the session's company; a request asserting it could act on another company"
+    },
+    {
+      "interface": "RequestLogInput",
+      "file": "web/apps/api/src/modules/ops/requestContext.ts",
+      "module": "ops",
+      "field": "correlationId",
+      "class": "internal",
+      "reason": "request-scoped logging metadata written by the server"
+    },
+    {
+      "interface": "RequestLogInput",
+      "file": "web/apps/api/src/modules/ops/requestContext.ts",
+      "module": "ops",
+      "field": "durationMs",
+      "class": "internal",
+      "reason": "request-scoped logging metadata written by the server"
+    },
+    {
+      "interface": "RequestLogInput",
+      "file": "web/apps/api/src/modules/ops/requestContext.ts",
+      "module": "ops",
+      "field": "tenantId",
+      "class": "internal",
+      "reason": "request-scoped logging metadata written by the server"
+    },
+    {
+      "interface": "RequestLogInput",
+      "file": "web/apps/api/src/modules/ops/requestContext.ts",
+      "module": "ops",
+      "field": "companyCode",
+      "class": "internal",
+      "reason": "request-scoped logging metadata written by the server"
+    },
+    {
+      "interface": "RequestLogInput",
+      "file": "web/apps/api/src/modules/ops/requestContext.ts",
+      "module": "ops",
+      "field": "locationCode",
+      "class": "internal",
+      "reason": "request-scoped logging metadata written by the server"
+    },
+    {
+      "interface": "ReverseInput",
+      "file": "web/apps/api/src/modules/posting/posting.ts",
+      "module": "posting",
+      "field": "deleteLog",
+      "class": "serverDerived",
+      "reason": "the reversal audit row is built by the posting engine, not supplied"
+    },
+    {
+      "interface": "RojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "lineNo",
+      "class": "internal",
+      "reason": "day-book projection row built by the posting module from the voucher"
+    },
+    {
+      "interface": "RojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "revenueAc",
+      "class": "internal",
+      "reason": "day-book projection row built by the posting module from the voucher"
+    },
+    {
+      "interface": "ScaleReadingInput",
+      "file": "web/apps/api/src/modules/integrations/deviceBridge.ts",
+      "module": "integrations",
+      "field": "unit",
+      "class": "internal",
+      "reason": "supplied by the weighing device over WebSerial, not typed"
+    },
+    {
+      "interface": "ScaleReadingInput",
+      "file": "web/apps/api/src/modules/integrations/deviceBridge.ts",
+      "module": "integrations",
+      "field": "timestamp",
+      "class": "internal",
+      "reason": "supplied by the weighing device over WebSerial, not typed"
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "lineNo",
+      "class": "internal",
+      "reason": "day-book projection row built by the scheme writer from the voucher"
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "bonusAc",
+      "class": "internal",
+      "reason": "day-book projection row built by the scheme writer from the voucher"
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "settlementAc",
+      "class": "internal",
+      "reason": "day-book projection row built by the scheme writer from the voucher"
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "adjustedAmount",
+      "class": "internal",
+      "reason": "day-book projection row built by the scheme writer from the voucher"
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "settledAgainstBillAmount",
+      "class": "internal",
+      "reason": "day-book projection row built by the scheme writer from the voucher"
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "field": "memberName",
+      "class": "internal",
+      "reason": "day-book projection row built by the scheme writer from the voucher"
+    },
+    {
+      "interface": "SchemeInstallmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "field": "liabAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "SchemeInstallmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "field": "withUpi",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "SchemeInstallmentLine",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "field": "liabAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "SchemeInstallmentLine",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "field": "withUpi",
+      "class": "operator",
+      "reason": ""
+    },
+    {
+      "interface": "SchemeMaturityInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "field": "liabAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "SettlementInput",
+      "file": "web/apps/api/src/modules/sales/settlement.ts",
+      "module": "sales",
+      "field": "drFine",
+      "class": "internal",
+      "reason": "input to the pure money/metal settlement calculator, derived by the caller"
+    },
+    {
+      "interface": "SettlementInput",
+      "file": "web/apps/api/src/modules/sales/settlement.ts",
+      "module": "sales",
+      "field": "crFine",
+      "class": "internal",
+      "reason": "input to the pure money/metal settlement calculator, derived by the caller"
+    },
+    {
+      "interface": "SettlementInput",
+      "file": "web/apps/api/src/modules/sales/settlement.ts",
+      "module": "sales",
+      "field": "ratePar",
+      "class": "internal",
+      "reason": "input to the pure money/metal settlement calculator, derived by the caller"
+    },
+    {
+      "interface": "TagWeightDiffInput",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "field": "stockAdjAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "TagWeightDiffInput",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "field": "diffAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "TagWeightDiffInput",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "field": "labourAc",
+      "class": "serverDerived",
+      "reason": "posting-account slot; resolved fail-closed from configured BOOK_DETL (WP-02D) so a request cannot name its own ledger"
+    },
+    {
+      "interface": "WindowTileInput",
+      "file": "web/apps/api/src/modules/utilities/windowTiles.ts",
+      "module": "utilities",
+      "field": "mainName",
+      "class": "serverDerived",
+      "reason": "window/tile chrome label, not voucher data"
+    }
+  ]
+}

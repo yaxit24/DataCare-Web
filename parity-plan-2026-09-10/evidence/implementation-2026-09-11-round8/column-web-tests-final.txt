@@ -1,0 +1,14 @@
+
+> @datacare/web@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> vitest run --passWithNoTests "test/columnSettings.test.ts"
+
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/columnSettings.test.ts (27 tests) 13ms
+
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+   Start at  15:30:07
+   Duration  544ms (transform 98ms, setup 0ms, collect 95ms, tests 13ms, environment 0ms, prepare 99ms)
+

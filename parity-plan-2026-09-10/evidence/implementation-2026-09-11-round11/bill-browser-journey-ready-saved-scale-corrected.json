@@ -1,0 +1,53 @@
+{
+  "kind": "x13-bill-browser-saved-scale-corrected-ready-v1",
+  "status": "syntax-checked-awaiting-browser-rerun",
+  "priorReady": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-journey-ready-total-label-corrected.json",
+    "sha256": "4f8755ee81d2b8539ffcf33c6a7e9493d65f1f7dbdbfedaf6cbeda975d91670d"
+  },
+  "historicalBrowser": "old15 passed; new journey failed on unscaled raw Decimal expectation",
+  "requiredChecksUnchanged": true,
+  "databaseOrBrowserRunByAgent": false,
+  "inputs": [
+    {
+      "path": "web/apps/web/test/sales-return-bill-replay.journey.mjs",
+      "sha256": "f60ee9fe584c483f134615255cfaac876c5816e31efde0e61b1a761d2cbb7b3c"
+    },
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "170de78b8cd988596622f7c009bc3973c828a99fe3afc6fb10386ef188043d31"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/saleReturnBillReplay.independent.json",
+      "sha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json",
+      "sha256": "2aac326a8124c6baec42f2cad8969337d8c497fb1a836d0edb914e8e38ea997e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-saved-scale-correction.md",
+      "sha256": "ac29bf262975e909151176277b965457b0687e2a32c349f138c200ace848204d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/browser-real.txt",
+      "sha256": "fc9ceeef97ed05adf233276795a17b432876a656742e3f45e8a0ca4cef5f03a8"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round11/result.json",
+      "sha256": "c2443ad84cc679f3e3235fe307a4e15947377da3ccb95ca7766a0b1f3857eb81"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round11/failure.png",
+      "sha256": "c5081f3d3d9035ee3832d690d523a1a69d0cdf56ef75f4393a751b60f249a814"
+    }
+  ]
+}

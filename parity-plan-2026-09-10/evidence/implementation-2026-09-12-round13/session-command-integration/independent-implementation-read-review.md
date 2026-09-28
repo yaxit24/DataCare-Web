@@ -1,0 +1,27 @@
+# Session command admission: independent staged source review
+
+Observed 2026-09-11T21:36:45.382781+00:00. Source read only; no compiler, tests, database, browser or main-repository writes. This note pins the staged bytes below, before owner formatting/final integration. Later revisions require an explicit comparison.
+
+No additional confirmed blocker was found after two concrete review corrections. The original final query checked only revocation/expiry; it now re-reads subject, immutable login company, scope, canonical epoch, unknown-ledger envelope and fresh database clock, and compares against the admitted identity after the callback. This also refuses an inadmissible same-transaction context alteration rather than relying solely on locks excluding other transactions. The original policy spread invoked getters and admitted unknown authority fields; the new own-data descriptor boundary rejects accessors, unknown keys and nonboolean adminOnly before the transaction. These were bounded helper-contract defects, not evidence of an exercised HTTP bypass. They were reported before these corrections; the earlier proposal note is preserved.
+
+The participating Sales Order PUT constructs required identity from retained authenticated session values and hardcodes the Sales Order update policy. Missing identity does not fall back. Its new entry requires exact lowercase 64-hex saved version, refuses Tour mode, detaches the request including Date values before waiting, and shares the same detached scope with admission and business work. The old edit wrapper remains explicitly compatible and unadopted. The extracted body retains configured-book validation, document locking/version checks, unsupported-child containment, date/period/consumption checks, deletion and lifecycle-supplied replacement Tx in the original order. Passing undefined as the unused top-level Prisma argument remains safe only because the supplied lifecycle Tx selects the existing transaction branch.
+
+The helper uses one READ COMMITTED withTenant transaction. Tenant/isolation binding is checked before the first application row lock; the exact auth_session row is locked FOR SHARE before authority/business reads. A separate subsequent statement samples clock_timestamp after lock wait. Principal/scope/form reads are fresh plain reads; avoiding LOGIN_MAST row locks preserves the reviewed password-reset LOGIN→session ordering. The full callback completes before the final separate identity/expiry check; only a successfully committed result escapes. Recognized serialization/deadlock errors are surfaced without retry; unknown connection/commit outcomes retain their original error classification.
+
+The authorizeFormTx extraction preserves administrator short circuits, alias/first-row precedence, View-only create behavior and Edit/Delete/Print decisions. Its public wrapper still avoids opening a transaction for the historical administrator bypass/adminOnly refusal. A further fresh-principal or scope read is not moved outside admission.
+
+Limits remain explicit: only this one financial PUT participates; create/delete, Tour/internal compatibility and other writers do not gain this guarantee. READ COMMITTED authority observations do not freeze independently edited rights/configuration. The final SQL time check precedes the actual COMMIT instant. Exact context authority does not prove that a legacy request without context headers came from an unchanged browser draft. No callback external I/O, independent transaction, session mutation or lock upgrade is authorized by this API.
+
+The staged unit file pins all 26 independent schedule bytes but does not execute PostgreSQL schedules. Its scripted SQL assertions cover transaction/callback ordering, final refusal and authority validation; they must not be credited as real SHARE blocking, financial rollback or a completed unknown-COMMIT experiment. Owner/peer real database and HTTP tests remain the execution authority. No tests were run in this review.
+
+## Pinned observations
+
+- `/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/modules/auth/sessionContextCommand.ts` — `ec085524bd57e7d2e0ea87ff365589d47a4f386c05b8d06f18cd2dedf73ac247`
+- `/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/modules/rbac/authorization.ts` — `d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe`
+- `/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/modules/sales/salesOrder.ts` — `f309a2e2c5c58e080c91ba5b634dbc1c9d940b46361ea06a25d97497572ecd84`
+- `/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/routes/txn.ts` — `a4169b9a5bfd4b8d86b7f2e70ba3a60e03a1292488d6752c88f3d312be54d91d`
+- `/tmp/datacare-session-context-next/admission-staged/web/apps/api/test/sessionContextCommand.test.ts` — `f10ddc27028305b694e7dae498728c878b9c7d4b60f4e58ac407c73d6437da53`
+- `/tmp/datacare-session-context-next/admission-staged/web/apps/api/test/fixtures/sessionCommand.independent.json` — `ed87f81e039273c6bd25c9a19184b7c964c7b48cbfd7a3bb39eb0c58032f4aa4`
+- `/tmp/datacare-session-context-next/admission-review/implementation-contract.md` — `ef2e6acba21dca9b6696c3dbe6bac983db42587c56e70ec0a2169b7e8eaacbbe`
+- `/tmp/datacare-session-context-next/admission-review/inputs.json` — `43c297255c2cdf5ddfc9e8b0fb9e295c82f6286a725a548f0eb91c5f57fe71d2`
+- `/tmp/datacare-session-context-next/admission-review/independent-proposal-review.md` — `633544967db5f89e3a35d95d6153dc2d391d99eb7dd1f7781273a2a7f692b421`

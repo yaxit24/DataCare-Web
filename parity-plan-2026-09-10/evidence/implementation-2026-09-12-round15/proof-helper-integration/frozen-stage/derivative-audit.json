@@ -1,0 +1,76 @@
+{
+  "functions": [
+    {
+      "baseline": "capture_implementation_checkpoint_round14.py",
+      "derivative": "capture_implementation_checkpoint_round15.py",
+      "sameFunctionControlStructureIgnoringStringLiterals": true,
+      "count": 3,
+      "qualification": "Capture adds one explicit pending-core-count publication refusal; exact string changes are separately shown in patch. Global proof literals/strict file list intentionally change."
+    },
+    {
+      "baseline": "checkpoint_recipe_round14.py",
+      "derivative": "checkpoint_recipe_round15.py",
+      "sameFunctionControlStructureIgnoringStringLiterals": true,
+      "count": 9,
+      "qualification": "Capture adds one explicit pending-core-count publication refusal; exact string changes are separately shown in patch. Global proof literals/strict file list intentionally change."
+    },
+    {
+      "baseline": "test_checkpoint_recipe_round14.py",
+      "derivative": "test_checkpoint_recipe_round15.py",
+      "sameFunctionControlStructureIgnoringStringLiterals": true,
+      "count": 2,
+      "qualification": "Capture adds one explicit pending-core-count publication refusal; exact string changes are separately shown in patch. Global proof literals/strict file list intentionally change."
+    },
+    {
+      "baseline": "validate_current_review.py",
+      "derivative": "validate_current_review.py",
+      "sameFunctionControlStructureIgnoringStringLiterals": true,
+      "count": 8,
+      "qualification": "Capture adds one explicit pending-core-count publication refusal; exact string changes are separately shown in patch. Global proof literals/strict file list intentionally change."
+    }
+  ],
+  "exact18LabelOrderPreserved": [
+    "api-qualified",
+    "api-final-test-types",
+    "core-final",
+    "core-final-test-types",
+    "workspace-final-build",
+    "workspace-final-lint",
+    "web-final",
+    "browser-context-bound",
+    "browser-bound",
+    "browser-labour-bound",
+    "kernel-final",
+    "dead-cells-final",
+    "depth-final",
+    "scanner-final",
+    "completion-final",
+    "docs-refs-qualified",
+    "checkpoint-chain-recorded",
+    "recipe-controls-recorded"
+  ],
+  "unchangedProofs": [
+    "api-final-test-types",
+    "api-qualified",
+    "checkpoint-chain-recorded",
+    "completion-final",
+    "dead-cells-final",
+    "depth-final",
+    "docs-refs-qualified",
+    "kernel-final",
+    "scanner-final",
+    "web-final",
+    "workspace-final-build",
+    "workspace-final-lint"
+  ],
+  "intentionalChangedProofs": [
+    "browser-bound",
+    "browser-context-bound",
+    "browser-labour-bound",
+    "core-final",
+    "core-final-test-types",
+    "recipe-controls-recorded"
+  ],
+  "allMinimumPrefixMembershipPreservedExceptRound15RecipeFilenames": true,
+  "runtimeHelperByteIdentical": true
+}

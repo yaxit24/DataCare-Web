@@ -1,0 +1,65 @@
+{
+ "form": "RP_CASH_BANK",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "AD_MAST",
+  "AD_MEMB",
+  "AD_OS",
+  "BOOK_DATA",
+  "EMP_MAST",
+  "PR_DATA",
+  "SL_DATA",
+  "TEMP_AD_DATA",
+  "UPI_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "TEMP_AD_DATA": [
+    "BAL_AMT",
+    "CHQ_NO",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "GOLD_BAL",
+    "ITM_GWT",
+    "ITM_RATE",
+    "LC_CODE",
+    "MEMB_CODE",
+    "REC_AC",
+    "REC_AMT",
+    "SCHM_CODE",
+    "SCHM_DATE",
+    "SR_NO",
+    "VCH_DATE",
+    "VCH_NO"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "TEMP_AD_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "AD_MAST",
+  "AD_MEMB",
+  "AD_OS",
+  "BOOK_DATA",
+  "EMP_MAST",
+  "PR_DATA",
+  "SL_DATA",
+  "TEMP_AD_DATA",
+  "UPI_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4814
+}

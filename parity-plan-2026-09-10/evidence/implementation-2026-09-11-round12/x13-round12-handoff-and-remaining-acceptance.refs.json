@@ -1,0 +1,112 @@
+{
+  "kind": "round12-handoff-source-references/1",
+  "capturedAtUtc": "2026-09-11T16:39:55.542658+00:00",
+  "status": "frozen-scoped-handoff",
+  "scope": "Pure mode and internal balance prerequisites implemented; prospective live session/clock/balance integration and all original acceptance remain open. No mutable plan edits or full-suite acceptance claim.",
+  "references": [
+    {
+      "path": "web/packages/core/src/sessionLedgerMode.ts",
+      "sha256": "651c63fcc715b995d924d79ddb756d8fca504fcee4ae8cf9c64b4ad883844493"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "sha256": "375629060abeb7454079996c19f61dcc3f8dbdff095616358257e1fa9ce4a2bd"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/session.ts",
+      "sha256": "17765f43964137139d582695cc0d10e3713227b8e118070e6f3e4a07fdb63bf0"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/jwt.ts",
+      "sha256": "4bd2d709bcd6ec64d3734822972932aed4bcd1797422815caf4a8eaa90de3169"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e"
+    },
+    {
+      "path": "web/apps/api/src/app.ts",
+      "sha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "web/apps/web/components/BusinessScope.tsx",
+      "sha256": "ffe8f4922dd0c65e7dc9bbb91ae8cdd10b67edd8b1349ef57388ee64d2119213"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "b78bbed89d97a401227fa1399448b3b56081c07676986621b89e697ef968d953"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+      "sha256": "cb91085c50d07a07ae5c5a8e6982ef6f9a2c533e2b55d61fc8c35f093f5dfbbc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-session-ledger-mode-next-contract.md",
+      "sha256": "180b315ae44c23c663a7d4a95ca1d5ddc98b4f460bb932db7735216f78ac93b0"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-round12-handoff-and-remaining-acceptance.md",
+      "sha256": "165b9ecedc421727a6f94014bae4b5bc5b6d00d29df2a1c3b82843f6ebb99e5e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-independent-tests.md",
+      "sha256": "e0764ef845e70d8c32165f53be6d9f5a61b1093df3ba70d1ce72f04a45efb63c"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-independent-tests.run.json",
+      "sha256": "3514ebde5cce9063a070b4eec1a0dd54139cbfdf0865393771d341403f071cde"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-implementation.md",
+      "sha256": "04d64ca96be61fb6b5899f67678d7224d9b293ffc6005241eea7e302171d1133"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-implementation.run.json",
+      "sha256": "7deb2d078f770e1ff56d68ca660a53ae0aa1f64a2a3abcd94729c7b903d5afdf"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-next-adapter-seam.md",
+      "sha256": "5eafc9da9d63a538b3ddb84dff3efd542f47539244c8d8840ef2a21e665640a4"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-next-adapter-seam.refs.json",
+      "sha256": "bd1beabd0eef4331cf8341247dfa2a36c8bfd9d92d3df2548490da817cd30532"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-observation-contract.md",
+      "sha256": "faa7e216765256d0d67cced66cdabb2dac1cedd72accb85370586f3f0d0c3c21"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-db-verification.md",
+      "sha256": "4fdebf2d75a0440d15f3842e83718db6480ceb5ff6ef1c100706abfcb23b0e9c"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-db-verification.run.json",
+      "sha256": "443ba926097eeac70bfc6d4178b1cf741433c4bce36d8ab2c3729f49aa5693ff"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-vector-independent-review.json",
+      "sha256": "a1583443aa01b7f22b91da8bed6add5979fe910c745e16b6e026905235959acd"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/browser-smoke-wait-independent-review.json",
+      "sha256": "4eee8e6cfa4a320e09d883435c999cc4204721a90eb65305248bd507c82efc57"
+    }
+  ]
+}

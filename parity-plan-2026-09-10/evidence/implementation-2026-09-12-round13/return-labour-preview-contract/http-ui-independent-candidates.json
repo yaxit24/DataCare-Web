@@ -1,0 +1,747 @@
+{
+  "kind": "prospective-independent-http-ui-candidates",
+  "status": "not-executed; no service/browser acceptance",
+  "authorship": "Literal strings and source/profile decisions only; no new implementation or calculator executed. Existing frozen composition outcomes were read, not regenerated. Full reachable SQL seeds and complete HTTP expected matrices must be frozen separately before implementation tests.",
+  "baselineRecipe": {
+    "scope": {
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "RLP"
+    },
+    "voucherNo": "00001",
+    "savedIdentity": {
+      "srNo": "17",
+      "oldSrNo": "31"
+    },
+    "requiredFixtureQualification": "Recipe, not an executable SQL seed. Seed every actual required saved projection field and source-shaped header/book/configuration/rights row. Do not inject synthetic core state into HTTP. NULL only where the existing projection permits it.",
+    "rowRawScalars": {
+      "CO_CODE": "01",
+      "SR_NO": "17",
+      "OLD_SRNO": "31",
+      "ENTRY_TYPE": "P",
+      "INOUT_TYPE": "I",
+      "TAG_NO": "N",
+      "APR_ISU": "",
+      "EMP_ISU": "",
+      "ITM_PCS": "1",
+      "ITM_GWT": "10",
+      "ITM_OTH_WT": "0",
+      "ITM_NWT": "10",
+      "ITM_GHT_PRC": "0",
+      "ITM_GHT_WT": "0",
+      "ITM_TOUCH": "100",
+      "ITM_WEST_PRC": "0",
+      "ITM_FINE": "10",
+      "ITM_RATE": "10",
+      "ITM_AMT": "100",
+      "LBR_CODE": "AA",
+      "LBR_TYPE": "N",
+      "LBR_PRC": "0",
+      "LBR_RATE": "1",
+      "LBR_AMT": "10",
+      "DISC_PRC": "0",
+      "DISC_AMT": "0",
+      "OTH_AMT": "0",
+      "ITM_MRP": "0",
+      "TAG_LBR_CODE": "TA",
+      "TAG_LBR_PRC": "0",
+      "TAG_LBR_RATE": "0",
+      "TAG_LBR_AMT": "0",
+      "TAG_OTH_AMT": "0",
+      "TAG_COST": "0",
+      "TAG_MRP": "0",
+      "TOT_AMT": "110",
+      "TAX_PRC": "0",
+      "NET_AMT": "110",
+      "TAG_SRNO": "0",
+      "HM_ID_WT": "0",
+      "HM_ID2_WT": "0",
+      "HM_ID3_WT": "0",
+      "HM_ID4_WT": "0"
+    },
+    "headerRawScalars": {
+      "NET_AMT": "0",
+      "TOT_AMT": "0",
+      "CHQ_AMT": "0",
+      "CARD_AMT": "0",
+      "CASH_AMT": "0",
+      "KASAR_AMT": null,
+      "BILL_OS": null,
+      "RTN_NET_AMT": "110",
+      "TAX_PRC": "10",
+      "TAX_AMT": "7",
+      "RTN_TOT_AMT": "117",
+      "RTN_CHQ_AMT": "0",
+      "RTN_CARD_AMT": "0",
+      "RTN_CASH_AMT": "0",
+      "RTN_KASAR_AMT": null,
+      "RTN_BILL_OS": null,
+      "TAX_CODE": "10",
+      "BANK_AC": "",
+      "CHQ_NO": "",
+      "CARD_AC": ""
+    },
+    "trustedPolicy": {
+      "saleAmountType": "N",
+      "labourRoundingDecimals": 2,
+      "labourIncludesGhat": false,
+      "generateLabourRate": false,
+      "fineColumnWidth": 100
+    },
+    "trustedContext": {
+      "taxRoundingDecimals": 2,
+      "editOpen": false,
+      "upDown": false,
+      "openingBalance": {
+        "status": "unavailable",
+        "reason": "Customer balance requires a resolved ledger mode."
+      }
+    },
+    "masters": [
+      {
+        "CO_CODE": "01",
+        "LBR_CODE": "AA",
+        "LBR_CATG": "01",
+        "LBR_VAL": "1"
+      },
+      {
+        "CO_CODE": "01",
+        "LBR_CODE": "BB",
+        "LBR_CATG": "01",
+        "LBR_VAL": "2"
+      },
+      {
+        "CO_CODE": "01",
+        "LBR_CODE": "TA",
+        "LBR_CATG": "04",
+        "LBR_VAL": "99"
+      },
+      {
+        "CO_CODE": "01",
+        "LBR_CODE": "C3",
+        "LBR_CATG": "03",
+        "LBR_VAL": "5"
+      }
+    ],
+    "additionalAdmission": "One exact matching ITEM_MAST with saved/master RATE_TYPE and IT_TYPE equal; configured MAIN_BOOK SALES RETURNE/I/SL_DATA; all relevant widths nonzero; period open; full scope/current View principal; no outgoing/component/BAR/DM rows; separate foreign tenant/book sentinels. Actual raw Float/NUMERIC scales are asserted from schema/storage, not guessed as 0 versus 0.00.",
+    "independentOpenedScalars": {
+      "row23": "1.00",
+      "row24": "10.00",
+      "row38": "110.00",
+      "billPaymentNet": "110.00",
+      "billTax": "7.00",
+      "billPaymentTotal": "117.00",
+      "billPaymentOs": "117.00",
+      "oldNetAmt": "110",
+      "oldTaxPrc": "10",
+      "closingAmount": null,
+      "closingLabel": null
+    },
+    "syntheticPureDifferences": "Unlike original composition fixture, HTTP hydrate leaves c41/c42 blank and row/aggregate journals empty, and initializes canonical formatted bill caches. Do not assert synthetic cache text 110.0000/10.0 or color red as saved HTTP projection output."
+  },
+  "sourceFixturePins": [
+    {
+      "path": "/tmp/datacare-return-next-admission/labour-code-independent-candidates.json",
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa",
+      "cases": 24
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/labour-compose-independent.v1.json",
+      "sha256": "fd55edb9173dbc40475d7dd04a63877226600d36c983f20b1421ab013ee73dd6",
+      "cases": 23
+    }
+  ],
+  "http": [
+    {
+      "id": "H01",
+      "title": "GET and lookup do not commit a code",
+      "setup": "Open baseline, lookup BB for c13 against initial prefix.",
+      "expected": {
+        "getStatus": 200,
+        "lookupStatus": 200,
+        "selectionCode": "BB",
+        "selectionValue": "2",
+        "eventsAdded": 0,
+        "prefixUnchanged": true,
+        "savedHeaderAndRowsUnchanged": true,
+        "canSaveNumeric": false,
+        "canPreviewClosing": false
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "H02",
+      "title": "Resolved rate then reversal retains bill history",
+      "setup": "Append observed c13 BB; observe AA against that accepted prefix; append observed c13 AA.",
+      "expected": {
+        "prefix1": {
+          "c13": "BB",
+          "c23": "2.00",
+          "c24": "20.00",
+          "c38": "120.00",
+          "tax": "12.00",
+          "payment": "132.00",
+          "oldNetAmt": "120",
+          "oldTaxPrc": "10",
+          "events": 1
+        },
+        "prefix2": {
+          "c13": "AA",
+          "c23": "1.00",
+          "c24": "10.00",
+          "c38": "110.00",
+          "tax": "11.00",
+          "payment": "121.00",
+          "oldNetAmt": "110",
+          "oldTaxPrc": "10",
+          "events": 2
+        },
+        "rawUnchanged": true
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "H03",
+      "title": "Same-code selection still invokes callbacks",
+      "setup": "From baseline explicitly observe and append c13 AA twice, preserving both events.",
+      "expected": {
+        "c38": "110.00",
+        "tax": "7.00",
+        "payment": "117.00",
+        "events": 2,
+        "eachStatus": "applied",
+        "eachBillApplied": true,
+        "oldNetAmt": "110",
+        "oldTaxPrc": "10"
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "H04",
+      "title": "Tag04 has no value destination but commits",
+      "setup": "From baseline observe and append same c29 TA/category04/value99.",
+      "expected": {
+        "events": 1,
+        "status": "applied",
+        "billApplied": true,
+        "c29": "TA",
+        "c38": "110.00",
+        "tax": "7.00",
+        "payment": "117.00",
+        "rawUnchanged": true
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "H05",
+      "title": "Copied fixed amount can be overwritten by retained cache",
+      "setup": "Baseline saved labour rate1 seeds cache58=1.00; append c13 C3/category03/value5.",
+      "expected": {
+        "c13": "C3",
+        "c23": "",
+        "c24": "0.00",
+        "c38": "100.00",
+        "tax": "10.00",
+        "payment": "110.00",
+        "rawLbrRate": "1",
+        "rawLbrAmt": "10"
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "H06",
+      "title": "Money and code events interleave bill callbacks",
+      "setup": "Append c13 BB; append money c27=1; append c13 AA.",
+      "expected": {
+        "prefixScalars": [
+          {
+            "incoming": "120.00",
+            "tax": "12.00",
+            "payment": "132.00"
+          },
+          {
+            "incoming": "121.00",
+            "tax": "12.10",
+            "payment": "133.00"
+          },
+          {
+            "incoming": "111.00",
+            "tax": "11.10",
+            "payment": "122.00"
+          }
+        ],
+        "events": 3,
+        "noJournalCollapse": true
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "H07",
+      "title": "Literal zero and empty-tag fallback are separate facts",
+      "setup": "Separate fixture raw TAG_LBR_CODE blank projects fallback AA; another pure-only fixture has truly blank visible c29. Observe zero-valued category01.",
+      "expected": {
+        "zeroCopied": "0.00",
+        "loadedTagFallback": "AA",
+        "noInventedBlankLoadedTag": true,
+        "sourceCopyFallbackCoveredByOriginal24": true
+      },
+      "source": [
+        "TR_SALE_RTN.cs:10400-10403",
+        "TR_SALE_RTN.cs:4288-4292",
+        "frozen24 copy fixture"
+      ]
+    },
+    {
+      "id": "H08",
+      "title": "Candidate missing, aliases and malformed values",
+      "setup": "Lookup missing ZZ; exact BB plus bb; separate one-character code A plus A-space, and separate canonical company Q plus Q-space/q aliases (all within varchar2); category unknown/null; value NULL/nonfinite.",
+      "expected": {
+        "missing": {
+          "status": 422,
+          "error": "lookup-required"
+        },
+        "otherCases": {
+          "status": 422,
+          "error": "unsupported-master"
+        },
+        "eventsAdded": 0,
+        "noMasterFallback": true
+      },
+      "source": [
+        "saleReturnIncomingLabour.ts current reader/copy profile"
+      ]
+    },
+    {
+      "id": "H09",
+      "title": "Observation changes between lookup and append",
+      "setup": "Observe BB then update its value before append with old observationVersion.",
+      "expected": {
+        "status": 409,
+        "error": "master-version-conflict",
+        "noRecoveryReplacement": true,
+        "oldPrefixRetainedLocally": true,
+        "serverNoCopy": true
+      },
+      "source": [
+        "new contract dependency protocol"
+      ]
+    },
+    {
+      "id": "H10",
+      "title": "Historical master change blocks a different new lookup",
+      "setup": "Accept BB; change BB physically; attempt lookup AA with the prior BB journal.",
+      "expected": {
+        "status": 409,
+        "error": "master-version-conflict",
+        "noNewSelectionResponse": true,
+        "noSilentRebase": true
+      },
+      "source": [
+        "new contract dependency protocol"
+      ]
+    },
+    {
+      "id": "H11",
+      "title": "Master physical ABA and recreation",
+      "setup": "After accepted BB, update BB 2\u21923\u21922, or delete/reinsert BB with identical raw values.",
+      "expected": {
+        "nextRequestStatus": 409,
+        "error": "master-version-conflict",
+        "rawEqualityAloneInsufficient": true
+      },
+      "source": [
+        "reader xmin/ctid observation profile"
+      ]
+    },
+    {
+      "id": "H12",
+      "title": "Unrelated and absence history limits",
+      "setup": "Change another tenant/company or unrelated code. Separately observe absent code before and after absent\u2192insert\u2192delete.",
+      "expected": {
+        "unrelatedPrefixStillValid": true,
+        "restoredEmptyObservationVersionMayEqual": true,
+        "noDurableAbsenceHistoryClaim": true
+      },
+      "source": [
+        "reader observation scope and absence qualification"
+      ]
+    },
+    {
+      "id": "H13",
+      "title": "All non-labour dependencies remain bound",
+      "setup": "Change header/row physical revision, relevant item master/alias, tax setting/label, configured width or Return book/year.",
+      "expected": {
+        "status": 409,
+        "error": "version-conflict",
+        "compareBeforeProjection": true
+      },
+      "source": [
+        "saleReturnIncomingReplay.ts observer",
+        "saleReturnBillReplay.ts additional observation"
+      ]
+    },
+    {
+      "id": "H14",
+      "title": "Exact input and prefix correspondence",
+      "setup": "Extra raw/category/value/policy/ordinal fields; unsupported kind; money field presented as labour; short/uppercase hash; forged prefix events or missing old event.",
+      "expected": {
+        "malformedStatus": 400,
+        "wellFormedPrefixMismatch": 409,
+        "prefixError": "prefix-conflict",
+        "noAuthoritativeClientState": true
+      },
+      "source": [
+        "new contract transport profile"
+      ]
+    },
+    {
+      "id": "H15",
+      "title": "Actual opaque identity and SQL order",
+      "setup": "Seed rows SR17 and42 and a separate scientific-range representable SR case; choose the matching server rowIdentity.",
+      "expected": {
+        "selectedByIdentityNotIndex": true,
+        "currentRowEqualsActualOrdinal": true,
+        "otherRowsUnchanged": true,
+        "foreignOrMissingIdentityStatus": 409
+      },
+      "source": [
+        "saleReturnIncomingReplay.ts numeric ORDER BY and JSONB serial map"
+      ]
+    },
+    {
+      "id": "H16",
+      "title": "Candidate downstream rollback equals previous accepted prefix",
+      "setup": "Use a separately frozen reachable saved fixture/admitted category/value that fails after copy in row/fold/bill or editor/output validation. Preserve earlier successful prefix.",
+      "expected": {
+        "status": 422,
+        "error": "calculation-rejected or qualified editor/output error",
+        "recoveryEventsEqualPrior": true,
+        "recoveryFullStateEqualsSeparatePriorSuccess": true,
+        "noCopiedCellOrJournalEscapes": true,
+        "noBusinessWrites": true
+      },
+      "source": [
+        "frozen composition R03-R07/R10",
+        "new contract: do not inject unreachable synthetic state into HTTP"
+      ]
+    },
+    {
+      "id": "H17",
+      "title": "Empty, outgoing and hidden state containment",
+      "setup": "Read valid empty header; add outgoing/component/issue/tag state; hide c13 or make its width unresolved.",
+      "expected": {
+        "emptyGet": {
+          "status": 200,
+          "rows": 0,
+          "canPreview": false
+        },
+        "unsupportedAppendStatus": 422,
+        "hiddenFieldStatus": 422,
+        "rawInspectionRetained": true
+      },
+      "source": [
+        "existing saved/bill profile",
+        "new field capability restriction"
+      ]
+    },
+    {
+      "id": "H18",
+      "title": "View rights are fresh inside snapshot",
+      "setup": "View-only/Update-denied principal succeeds; remove View after prehandler before RR admission; require reset on target principal.",
+      "expected": {
+        "viewOnlyPreviewStatus": 200,
+        "freshViewDenied": 403,
+        "forcedResetDenied": 403,
+        "noNumericWriterPermission": true
+      },
+      "source": [
+        "new read authority coordinator",
+        "current loadPrincipalTx/authorizeFormTx"
+      ]
+    },
+    {
+      "id": "H19",
+      "title": "Context epoch and pair are required",
+      "setup": "Old JWT after A\u2192B\u2192A; new bearer with old same-scope page pair; missing or partial pair; forged sid/epoch in body.",
+      "expected": {
+        "oldJwt": 401,
+        "mismatchedPair": 409,
+        "missingPair": 409,
+        "partialPair": 409,
+        "bodyAuthority": 400,
+        "noScopeDefault": true
+      },
+      "source": [
+        "current requireAuth/pageContext",
+        "new route stricter pair profile"
+      ]
+    },
+    {
+      "id": "H20",
+      "title": "RR lock schedules and default clock",
+      "setup": "Test preview SHARE-first versus selection/refresh/revoke UPDATE-first; lock-wait expiry and final expiry. Observe actual PG waits and settle both tasks.",
+      "expected": {
+        "shareFirstOtherWaits": true,
+        "updateFirstMayReturn409SnapshotConflict": true,
+        "expiryReturns401": true,
+        "noAuthWritesOrShareUpgrade": true,
+        "noLatestAtResponsePromise": true
+      },
+      "source": [
+        "new session read-snapshot contract"
+      ]
+    },
+    {
+      "id": "H21",
+      "title": "One RR master/config/header observation",
+      "setup": "Hold one real query, change master/config/header from a second committed connection, resume all reads.",
+      "expected": {
+        "oneConsistentAsOfSnapshot": true,
+        "noCrossTransactionMix": true,
+        "nextFreshRequestDetectsBoundChange": true
+      },
+      "source": [
+        "existing withTenant RR and internal Tx readers"
+      ]
+    },
+    {
+      "id": "H22",
+      "title": "Replay request repeat has one journal append",
+      "setup": "Drop delivery after completed append; retry identical old prefix and candidate while dependencies unchanged.",
+      "expected": {
+        "sameResult": true,
+        "acceptedJournalLength": "old+1, not old+2",
+        "auditRows": "one per authenticated POST completion",
+        "noFinancialOperationReceipt": true
+      },
+      "source": [
+        "new stateless append contract",
+        "app.ts onResponse audit"
+      ]
+    },
+    {
+      "id": "H23",
+      "title": "Output growth and event bounds preserve recovery",
+      "setup": "100 old events then append; oversized body; a candidate output exceeding the new explicit result bound.",
+      "expected": {
+        "tooManyEventsStatus": 400,
+        "oversizedBodyStatus": 413,
+        "outputStatus": 422,
+        "noTruncation": true,
+        "candidateNotPublished": true
+      },
+      "source": [
+        "new transport limits, not desktop constraints"
+      ]
+    },
+    {
+      "id": "H24",
+      "title": "Existing four routes and no-write footprint",
+      "setup": "Run previous v1 row/bill fixtures and new real GET/lookup/append success/refusal with whole-state SQL text/xmin/ctid snapshots.",
+      "expected": {
+        "oldDtoAndHashEqual": true,
+        "old12AllowlistUnchanged": true,
+        "ReturnBusinessSessionConfigMastersUnchanged": true,
+        "postAuditAssertedSeparately": true,
+        "getNoPostAudit": true
+      },
+      "source": [
+        "current old routes/contracts",
+        "app.ts:176-217"
+      ]
+    }
+  ],
+  "ui": [
+    {
+      "id": "U01",
+      "title": "Exclusive owner is synchronous",
+      "setup": "Open old row/bill preview or make metadata dirty; attempt labour start.",
+      "expected": {
+        "noLookupOrStateRequest": true,
+        "existingDraftRetained": true
+      },
+      "source": [
+        "SavedReturnPreviewOwnership",
+        "SaleReturnSavedPanel previewActivity"
+      ]
+    },
+    {
+      "id": "U02",
+      "title": "Lookup remains separate from commit",
+      "setup": "Type BB and check code; blur/Tab/change focus; explicitly commit once.",
+      "expected": {
+        "beforeCommitEvents": 0,
+        "afterCommitEvents": 1,
+        "noLocalCopyOrTotals": true
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "U03",
+      "title": "Same-code Enter is not deduplicated",
+      "setup": "Enter an already selected qualified AA twice as two intentional operations.",
+      "expected": {
+        "events": 2,
+        "billCallbacks": 2,
+        "noDoubleDispatchPerKeypress": true
+      },
+      "source": [
+        "TR_SALE_RTN.cs:4248-4380",
+        "TR_SALE_RTN.cs:4866-5158",
+        "TR_SALE_RTN.cs:16381-16458"
+      ]
+    },
+    {
+      "id": "U04",
+      "title": "Late lookup cannot replace edited draft",
+      "setup": "Start BB lookup, change draft to AA before response; release BB response.",
+      "expected": {
+        "draft": "AA",
+        "noBBSelectionAdopted": true,
+        "eventsUnchanged": true
+      },
+      "source": [
+        "new lookup lease contract"
+      ]
+    },
+    {
+      "id": "U05",
+      "title": "Lookup is pinned to accepted prefix",
+      "setup": "Start code lookup then accept another operation or explicitly discard/reopen before response.",
+      "expected": {
+        "oldCandidateIgnored": true,
+        "newPrefixUnchanged": true
+      },
+      "source": [
+        "new prefix/operation generation contract"
+      ]
+    },
+    {
+      "id": "U06",
+      "title": "Late requests cannot update new document or page",
+      "setup": "Hold real response then close, unmount, switch saved document, switch scope or pause selection.",
+      "expected": {
+        "lateResultIgnored": true,
+        "noLateFocusOrNavigation": true,
+        "noDraftLoss": true,
+        "newContextNotAdopted": true
+      },
+      "source": [
+        "api.ts/pageContext.ts",
+        "useOperationLease"
+      ]
+    },
+    {
+      "id": "U07",
+      "title": "Stale dependency preserves work",
+      "setup": "Historical master/base changes before lookup or append.",
+      "expected": {
+        "draftRetained": true,
+        "lastAcceptedDisplayRetainedMarkedStale": true,
+        "requiresExplicitReload": true,
+        "noAutomaticRebase": true
+      },
+      "source": [
+        "new version error contract"
+      ]
+    },
+    {
+      "id": "U08",
+      "title": "Full candidate rollback remains visible",
+      "setup": "Receive validated422 recovery equal to the old prefix after downstream rejection.",
+      "expected": {
+        "attemptedCodeRetained": true,
+        "oldBillAndRowRetained": true,
+        "candidateNotInJournal": true,
+        "correctionPossible": true
+      },
+      "source": [
+        "new candidate recovery contract"
+      ]
+    },
+    {
+      "id": "U09",
+      "title": "Response schema is checked before adoption",
+      "setup": "200 with wrong context/row/base/prefix/events/semantic version or canSaveNumeric=true/canPreviewClosing=true.",
+      "expected": {
+        "responseRejected": true,
+        "priorResultRetained": true,
+        "noWriterDispatch": true
+      },
+      "source": [
+        "new strict web DTO contract"
+      ]
+    },
+    {
+      "id": "U10",
+      "title": "Bounded code input preserves full loaded text",
+      "setup": "Loaded code longer than2 stays fully visible; echo commit refuses; explicit AA replacement succeeds if qualified.",
+      "expected": {
+        "noTruncation": true,
+        "correctionAllowed": true,
+        "noNumberFormatter": true
+      },
+      "source": [
+        "current code2 profile versus desktop editorMaxLength4"
+      ]
+    },
+    {
+      "id": "U11",
+      "title": "Unknown/hidden code support is explained",
+      "setup": "Missing ZZ lookup, hidden c13, unresolved width or empty grid.",
+      "expected": {
+        "labelledReason": true,
+        "noSilentFallbackOrHelpSimulation": true,
+        "noSubmitWhileIneligible": true
+      },
+      "source": [
+        "source help-return boundary",
+        "configuration capability"
+      ]
+    },
+    {
+      "id": "U12",
+      "title": "Uncertain read response retries exact history",
+      "setup": "Lose successful append response; explicit retry exact pending old prefix+event; reject new-session response.",
+      "expected": {
+        "oneLocalAppend": true,
+        "sameBodyOnRetry": true,
+        "noRawRefreshOrCookieLogic": true,
+        "unavailableClosingStillShown": true
+      },
+      "source": [
+        "new stateless protocol",
+        "current api page guard"
+      ]
+    }
+  ]
+}

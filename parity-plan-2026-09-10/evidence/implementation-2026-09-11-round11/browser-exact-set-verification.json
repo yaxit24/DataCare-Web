@@ -1,0 +1,67 @@
+{
+  "verifiedAtUtc": "2026-09-11T15:22:24.558908+00:00",
+  "status": "passed",
+  "journeys": [
+    "designBook",
+    "designCalculations",
+    "designRepeat",
+    "genericImageConflict",
+    "repairImageConflict",
+    "salesReturnSaved",
+    "tourOrder",
+    "creditNote",
+    "salesOrderDesign",
+    "salesOrder",
+    "orderImages",
+    "imageConflict",
+    "mfgLot",
+    "columnSettings",
+    "salesReturnReplay",
+    "salesReturnBillReplay"
+  ],
+  "journeyCount": 16,
+  "mockedRequests": 0,
+  "oldRowPreviewRequiredChecksPreserved": true,
+  "newBillPreviewChecks": 15,
+  "newBillPreviewRequests": 19,
+  "newPhysicalSnapshots": [
+    {
+      "label": "initial, ordered, repeated, invalid and blank previews preserve27 business tables",
+      "tables": 27,
+      "unchanged": true
+    },
+    {
+      "label": "same-value tax-setting conflict, reload and explicit fresh preview preserve business rows",
+      "tables": 27,
+      "unchanged": true
+    },
+    {
+      "label": "delayed, duplicate-book, unsupported, empty and View-only previews preserve27 business tables",
+      "tables": 27,
+      "unchanged": true
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "web/test-results/parity-real-stack-round11-final/result.json",
+      "sha256": "1e162f6d103e8001378d35f5c85a7e1660388442c77441c145884a0118db3882"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/browser-required-checks.json",
+      "sha256": "f48f8062ea01b0bb94dea90fcb6156c5e41e787ea99d2bf7e22462ab09ba08ef"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json",
+      "sha256": "2aac326a8124c6baec42f2cad8969337d8c497fb1a836d0edb914e8e38ea997e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/browser-real-final.run.json",
+      "sha256": "a07cef7d5753019da06785c170460d6e2596271558181a6bb67b2ec32539b31d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/browser-real-final.txt",
+      "sha256": "453012b387bdb3b320ae4e1e2e79674898c505c490661d04c17f1ca276ebbe14"
+    }
+  ],
+  "limits": "Synthetic fixture engineering regression; no whole-form or independent desktop acceptance."
+}

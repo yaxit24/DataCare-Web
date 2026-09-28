@@ -1,0 +1,50 @@
+{
+  "scope": "Round8 generic COL_MAST identity; owned bounded paths prior to root browser integration result",
+  "files": [
+    {
+      "path": "apps/api/src/modules/masters/configs.ts",
+      "bytes": 18063,
+      "sha256": "e3b03858a98a629385e1c0dc3c1071e354a15a590656814f743533445b845a17"
+    },
+    {
+      "path": "apps/api/src/modules/masters/columnSettings.ts",
+      "bytes": 11720,
+      "sha256": "1750f378429fef09e22e1b85386811e9f6b6e9213de7403479d14b541a5be0a1"
+    },
+    {
+      "path": "apps/api/src/modules/masters/master.service.ts",
+      "bytes": 25988,
+      "sha256": "dc81d25fa3b53a17c6998007f8a14d96da57d238cac70a11023525341953156c"
+    },
+    {
+      "path": "apps/api/src/app.ts",
+      "bytes": 33817,
+      "sha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a"
+    },
+    {
+      "path": "apps/web/app/(app)/masters/styles/page.tsx",
+      "bytes": 17216,
+      "sha256": "aeef839016dba838c16013249dceccc4a5460962d83970c73f98380e24a36dcc"
+    },
+    {
+      "path": "apps/web/lib/columnSettings.ts",
+      "bytes": 8165,
+      "sha256": "6b6d28365762a1819885f3e3516932810eba61a25c23cb8541042b61bc751771"
+    },
+    {
+      "path": "apps/api/test/columnSettings.test.ts",
+      "bytes": 4111,
+      "sha256": "2c334782d3c3b7d814b3c72329a63e7e09cf84d14a38f3ec183c6cbe3074807b"
+    },
+    {
+      "path": "apps/web/test/columnSettings.test.ts",
+      "bytes": 6044,
+      "sha256": "9d5c7a9b528ba94a71abe8eb9f0def03fab4c5085ec20577363c87a2f356114a"
+    },
+    {
+      "path": "apps/web/test/column-settings.journey.mjs",
+      "bytes": 13773,
+      "sha256": "42c96bdce361b27d2695a1830e02f44bf898f5929ddc0ff8d6c13f317144bcd2"
+    }
+  ]
+}

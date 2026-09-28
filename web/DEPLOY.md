@@ -76,9 +76,10 @@ docker compose exec -T postgres env PGPASSWORD="$APP_DB_PASSWORD" \
   < packages/db/test/verify_runtime.sql
 ```
 
-> Alternative without `migrate` history (e.g. throwaway envs): replace 4b with `prisma db push`
-> (`... api ./node_modules/.bin/prisma db push --schema prisma/schema.prisma`). Prefer
-> `migrate deploy` for real environments so the committed migration history is the source of truth.
+> **`prisma migrate deploy` is mandatory, including for throwaway environments.** Do not replace step 4b
+> with `prisma db push`: `db push` creates Prisma tables but does not execute committed raw-SQL migration
+> assets such as `datacare_advance_owned_sequence`, so step 4c would fail closed and logical-restore
+> sequence safety would be absent. Use a disposable database with the normal migration chain instead.
 
 > If you ran `docker compose up -d` (all services) before bootstrapping, the `api` container
 > will crash-loop until `app_user` exists — that is expected; it recovers automatically once
@@ -203,8 +204,10 @@ docker compose build && docker compose up -d
   `web-postgres-1`). Internal service-to-service traffic uses container port `5432`.
 - The API listens on **4000** and the web on **4001**, matching `next.config.mjs`'s default
   API origin and the `@datacare/web` `start` script (`next start -p 4001`).
-- Healthcheck targets **`/health`** (the only wired probe). A `readiness()` DB-ping helper
-  exists in code but is not currently exposed as a `/ready` route.
+- **`/health` is liveness-only.** The Compose healthcheck and deployment readiness gate use
+  **`/ready`**, which is wired by the API and must return HTTP 200 before the web tier starts. It verifies
+  database connectivity, a non-superuser/non-`BYPASSRLS` runtime role, complete ENABLE+FORCE RLS coverage,
+  and renderer availability; do not replace it with the weaker `/health` probe.
 - Images are built from the full workspace and **do not prune dev dependencies**, which keeps
   pnpm's symlinked `node_modules` (and the generated Prisma client) intact — a deliberate
   simplicity/correctness trade-off for a right-sized deploy.

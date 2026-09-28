@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /** One open-bill row in the grid: the server-listed figures plus the user-entered receive / kasar. */
 interface BillRow {
@@ -45,6 +46,22 @@ export default function BillToBillPage() {
   ]);
   const setTn = (i: number, k: 'mode' | 'bankAc' | 'amount', v: string) =>
     setTenders((ts) => ts.map((t, j) => (j === i ? { ...t, [k]: v } : t)));
+  // P1-5. The tender split is the operator-authored grid on this page; the bill list above it is a
+  // selection of fetched rows, so the keyboard contract applies here only. There is no blank-row
+  // factory, so the literal below matches the "Add tender" button (see the onClick further down).
+  const handleTenderGridKey = useGridKeyboard({
+    rowCount: tenders.length,
+    onAppendRow: () => setTenders((ts) => [...ts, { mode: 'cash', bankAc: '', amount: '' }]),
+    onRemoveRow: (row) => {
+      setTenders((ts) =>
+        ts.length === 1
+          ? [{ mode: 'cash', bankAc: '', amount: '' }]
+          : ts.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const tenderSum =
     Math.round(tenders.reduce((s, t) => s + (Number(t.amount) || 0), 0) * 100) / 100;
 
@@ -268,7 +285,7 @@ export default function BillToBillPage() {
                 — split the receipt across cash / bank (Σ must equal Receiving)
               </span>
             </h3>
-            <table className="grid" style={{ maxWidth: 520 }}>
+            <table className="grid" style={{ maxWidth: 520 }} onKeyDown={handleTenderGridKey}>
               <thead>
                 <tr>
                   <th>Mode</th>

@@ -1,0 +1,12 @@
+{
+  "frozenAtUtc": "2026-09-12T02:37:35.867232+00:00",
+  "newPlannerHasExecuted": false,
+  "integrationTestExists": false,
+  "baseThirtyCasesUnchanged": true,
+  "files": [
+    {
+      "path": "/tmp/datacare-round15-financial-effects/web/packages/core/test/fixtures/saleReturnFinancialEffects.joint.independent.json",
+      "sha256": "d1d96417de35b406d8b50d47b8547dc0e788f323f953e3d26d71a9b77323390f"
+    }
+  ]
+}

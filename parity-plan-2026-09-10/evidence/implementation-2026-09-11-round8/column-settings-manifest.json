@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "scope": "Round8 generic COL_MAST company/family/original-column identity and operator lifecycle",
+  "status": "scoped-implementation-verified",
+  "frozenAtUtc": "2026-09-11T10:56:07.169021+00:00",
+  "overallDesktopParity": false,
+  "productionFiles": [
+    "apps/api/src/modules/masters/configs.ts",
+    "apps/api/src/modules/masters/columnSettings.ts",
+    "apps/api/src/modules/masters/master.service.ts",
+    "apps/api/src/app.ts",
+    "apps/web/app/(app)/masters/styles/page.tsx",
+    "apps/web/lib/columnSettings.ts"
+  ],
+  "ownedInputs": [
+    {
+      "path": "apps/api/src/modules/masters/configs.ts",
+      "bytes": 18063,
+      "sha256": "e3b03858a98a629385e1c0dc3c1071e354a15a590656814f743533445b845a17"
+    },
+    {
+      "path": "apps/api/src/modules/masters/columnSettings.ts",
+      "bytes": 11720,
+      "sha256": "1750f378429fef09e22e1b85386811e9f6b6e9213de7403479d14b541a5be0a1"
+    },
+    {
+      "path": "apps/api/src/modules/masters/master.service.ts",
+      "bytes": 25988,
+      "sha256": "dc81d25fa3b53a17c6998007f8a14d96da57d238cac70a11023525341953156c"
+    },
+    {
+      "path": "apps/api/src/app.ts",
+      "bytes": 33817,
+      "sha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a"
+    },
+    {
+      "path": "apps/web/app/(app)/masters/styles/page.tsx",
+      "bytes": 17216,
+      "sha256": "aeef839016dba838c16013249dceccc4a5460962d83970c73f98380e24a36dcc"
+    },
+    {
+      "path": "apps/web/lib/columnSettings.ts",
+      "bytes": 8165,
+      "sha256": "6b6d28365762a1819885f3e3516932810eba61a25c23cb8541042b61bc751771"
+    },
+    {
+      "path": "apps/api/test/columnSettings.test.ts",
+      "bytes": 4111,
+      "sha256": "2c334782d3c3b7d814b3c72329a63e7e09cf84d14a38f3ec183c6cbe3074807b"
+    },
+    {
+      "path": "apps/web/test/columnSettings.test.ts",
+      "bytes": 6044,
+      "sha256": "9d5c7a9b528ba94a71abe8eb9f0def03fab4c5085ec20577363c87a2f356114a"
+    },
+    {
+      "path": "apps/web/test/column-settings.journey.mjs",
+      "bytes": 17382,
+      "sha256": "27ed4223771c9806d9da1e921eaecdc6c1330f6035dbca19cdd4d3002eaf1e04"
+    }
+  ],
+  "ownedInputsUnchangedFromCompleteSnapshot": true,
+  "relatedOwnerInputs": [
+    {
+      "path": "apps/api/test/columnSettings.db.test.ts",
+      "bytes": 29920,
+      "sha256": "e4deee526856b8f211f4744092ddfdac3056648104f621403f416525bd6a988b"
+    },
+    {
+      "path": "apps/web/test/parity.real-stack.mjs",
+      "bytes": 21078,
+      "sha256": "902b97991b7dff5019f0ec64dde1068f7a04c9874f9fe8dd136e097f485fb3d4"
+    },
+    {
+      "path": "apps/web/test/browser.smoke.mjs",
+      "bytes": 55266,
+      "sha256": "54cb6bd795c0ced4931d35b5d2d3d8d89023a7452937017be69ed5ce47adebae"
+    }
+  ],
+  "sourceProof": [
+    {
+      "path": "../unified/src/csharp/DataCareNext/UT_SETTING.cs",
+      "bytes": 219461,
+      "sha256": "a47be9b0e2b7754511e8d0aeab135c8352c58f9f417101e550b23ccbc78c30ad"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/DC_Main.cs",
+      "bytes": 85154,
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "bytes": 579807,
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "bytes": 261920,
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    }
+  ],
+  "verification": {
+    "focusedColumnApi": {
+      "files": 2,
+      "tests": 58,
+      "skipped": 0,
+      "includes": {
+        "databaseAndHttp": 21,
+        "pure": 37
+      }
+    },
+    "combinedFocusedApi": {
+      "files": 7,
+      "tests": 253
+    },
+    "web": {
+      "files": 25,
+      "tests": 195,
+      "columnHelperTests": 27
+    },
+    "buildTasks": 7,
+    "workspaceLintAndTypeTasks": 10,
+    "strictApiTestTypes": {
+      "status": "passed",
+      "invocation": "test-types-invocation.json",
+      "sameFullProjectAndOptions": true,
+      "fallbackCompilerUsed": false
+    },
+    "browser": {
+      "status": "passed",
+      "namedJourneys": 14,
+      "columnChecks": 15,
+      "mockedRequests": 0,
+      "resultPath": "test-results/parity-real-stack-round8-complete-verified/result.json",
+      "checks": [
+        "same original heading in two forms has separate exact identities and observed versions",
+        "50 plus 10 settings are reachable without duplicate or missing rows",
+        "exact family filter resets pagination and original identity is immutable with no unrelated image editor",
+        "visibility-only update preserves untouched NULLs and the identically named other form",
+        "second client change produces 409 with draft retained and no automatic replay",
+        "deliberate draft-discard reload observes the new value before explicit retry",
+        "duplicate and malformed imported identities stay readable with mutations disabled",
+        "actual year A to B to A transition clears pending drafts and observations without writing",
+        "fresh owning Styles rights disable edit/delete while retaining inherited view-create behavior",
+        "independent subsequent edit targets the other form without changing the first",
+        "new setting saves its explicit family and original name and receives a fresh observation",
+        "explicit confirmed delete carries the complete observed identity and preserves its sibling",
+        "real BOM CSV import reports per-row create and duplicate refusal without overwriting a saved form",
+        "all observed list and mutation requests carry explicit selected company location and year",
+        "no browser runtime errors"
+      ]
+    },
+    "fullApiRegression": "Owned and recorded separately by the root checkpoint; no prospective pass credited here."
+  },
+  "visualReview": {
+    "finalScreenshotsViewed": 3,
+    "blockingIssueFound": false,
+    "limits": [
+      "Captured visible regions only; no universal responsive or executable-desktop acceptance.",
+      "Primary button retains inherited blue styling inside a functionally disabled fieldset."
+    ]
+  },
+  "retainedStages": [
+    {
+      "artifact": "column-api-unit-first.txt",
+      "status": "unwrapped shared DB setup failed before any test execution; no test credit"
+    },
+    {
+      "artifact": "column-lint-final.txt",
+      "status": "numeric epoch ref heuristic corrected; API paths ignored by ESLint config and not counted as checked lint coverage"
+    },
+    {
+      "artifact": "column-format-first.txt",
+      "status": "test-only journey formatting iteration corrected"
+    },
+    {
+      "artifact": "test-types-resource-interrupted.txt",
+      "status": "6144 MiB full-project invocation terminated for memory pressure; final same-project 4096 MiB invocation passed"
+    },
+    {
+      "artifact": "browser-first.txt",
+      "status": "passed 14 journeys with historical 12-check column module; not final 15-check evidence"
+    },
+    {
+      "artifact": "browser-complete.txt",
+      "status": "aborted on malformed positive Design-image PNG before column journey; no column failure or final credit"
+    }
+  ],
+  "remaining": [
+    "Complete desktop column settings batch/keyboard workflows and runtime acceptance.",
+    "Imported malformed/duplicate key reconciliation without destructive automatic normalization.",
+    "Company clone/restore/admin-SQL writers outside generic advisory-lock protocol.",
+    "Durable absent-row history and pagination cursor beyond current offset bound.",
+    "Lossless CSV SQL-NULL representation; current export is loaded rows only.",
+    "Incoming Return numeric save, source admission, stock/ledger effects and full end-to-end parity."
+  ],
+  "artifacts": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-settings-identity-contract.md",
+      "bytes": 16303,
+      "sha256": "1410a22d35497e581ff8c43f1247b77f7e275a8425b5413bdcb45a08a3745907"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-settings-independent-read-review.md",
+      "bytes": 8376,
+      "sha256": "54754ad6b66a3f5209e4c4f7e57abb11e25f7ca4524a86eadc6a304d5f27f55e"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-owned-source-snapshot.json",
+      "bytes": 1685,
+      "sha256": "7c07e6004cc27b885f450606d0ca49f1bfa05b775f2f44a32434676fde087a49"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-owned-source-snapshot-complete.json",
+      "bytes": 1687,
+      "sha256": "2be9577ab0efd7e1f46e11d1d9a4e235a96ce63805e1c6c2b5a57e99f933f944"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-first-browser-visual-review.json",
+      "bytes": 1697,
+      "sha256": "74f88c10dcf33208ced9eb9260f7e4760cc5ac005ececb5fee60901b5db2fd62"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-api-types-first.txt",
+      "bytes": 128,
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-api-types-pagination.txt",
+      "bytes": 128,
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-web-types-final.txt",
+      "bytes": 111,
+      "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-web-tests-first.txt",
+      "bytes": 459,
+      "sha256": "ed5824e582bd59d494ea6d4893d53c194d17f65c594aa5ac3b44b4d46fb4c9ed"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-web-tests-pagination.txt",
+      "bytes": 463,
+      "sha256": "c20990b78237f0f582cb877b9ea62e45ebfe52b1b2bd6377050103c92f03fc73"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-web-tests-final.txt",
+      "bytes": 460,
+      "sha256": "6d9d9ede24a19c19f0b395dce8dcdf02d45f869f1f9a08b3c1c63109709a8d97"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-api-unit-first.txt",
+      "bytes": 2533,
+      "sha256": "39f743a5b7e8a749d5890b3f2023ea1848bc45aa1c76bbad54a19eddd5abbe0b"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-lint-final.txt",
+      "bytes": 1105,
+      "sha256": "f810857c44ba1b54f3b57937f3c8d0d68b7af7768da14368e982e48732d2825f"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-web-lint-verified.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-format-first.txt",
+      "bytes": 156,
+      "sha256": "6868f7986b4c52834dc72791cabc09228a72c5252fd9bf82bf44ac372e9e8597"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-format-verified.txt",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-journey-syntax.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-journey-syntax-complete.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-settings-db-first.txt",
+      "bytes": 1359,
+      "sha256": "640cb0b9a3aa73e7b87bd145a063aceff8a4abda2fbc641bc5e3e4fe58967223"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/focused-complete.txt",
+      "bytes": 3417,
+      "sha256": "098b62e2c8a9d856c7cf01cee26486d6e5394c2d235354127eff71c8b69be04f"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/web-tests.txt",
+      "bytes": 1638,
+      "sha256": "912e085ed14fa388a3e808828f49d15e8103a88bb18eb146fbcb065e76149afc"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/build.txt",
+      "bytes": 15108,
+      "sha256": "d228d41e27ba5cac453c0124deaa59e987f3f6e356c9846a3f65453c765d5a1b"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/lint.txt",
+      "bytes": 3505,
+      "sha256": "078b70211661b0d23bb9205eec600b93dbff1e27fe838f95470c14549c93e493"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/test-types.txt",
+      "bytes": 164,
+      "sha256": "3f5caadd4ee071bd50e218d36d66361cc2d80b74d95886760d5bc7089a51a0a8"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/test-types-invocation.json",
+      "bytes": 697,
+      "sha256": "7278e72cd254915e4a71f4c7d334409823a19e13c23965b2fa80bf40dd7ab5d8"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/test-types-resource-interrupted.txt",
+      "bytes": 356,
+      "sha256": "3f4c0822ec9eb4590c8bc12b63b9176a749751dfcadfa8a6cbcb44587cafc707"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/browser-first.txt",
+      "bytes": 1248,
+      "sha256": "90f759d81fc85609e129036725fd183ec79ee1438692b14d1ce9bb3484505cae"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/browser-complete.txt",
+      "bytes": 1578,
+      "sha256": "1b5491558f87bbbbc34629e0bfe5870667039a6026c73a5037cae96fbaece1ee"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/browser-complete-verified.txt",
+      "bytes": 1248,
+      "sha256": "90f759d81fc85609e129036725fd183ec79ee1438692b14d1ce9bb3484505cae"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/browser-png-fixture-verification.json",
+      "bytes": 1620,
+      "sha256": "2c1dca8471d82aa8bdae01a5296afb0f9d37c441a7efb6bd5d018ac35b949d47"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-first/result.json",
+      "bytes": 34708,
+      "sha256": "3dd6879b0ddb4d385e0f6922527918ef2682853e9f38148f409e5331466efde3"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-complete/result.json",
+      "bytes": 2144,
+      "sha256": "5fb32f6d27bea116b5f65c7a7212d8f6d897e10b5bcb8ace4dd33300e13440b9"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-complete-verified/result.json",
+      "bytes": 35013,
+      "sha256": "d0e499753d60a52de7657a8e43052a4fd72d2af9de9388b0567d4ae1416a8311"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-complete-verified/column-settings-conflict.png",
+      "bytes": 124957,
+      "sha256": "1c75844f6b2e085fd53d1427ccde568ebcf1bace869a9f67124d0a0d50e99038"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-complete-verified/column-settings-family-qualified.png",
+      "bytes": 104469,
+      "sha256": "3b94545ac9e9a59e9f92f5e36d1ab462e4346091cdc70947fa1a34cd8a16e25b"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-complete-verified/column-settings-read-only.png",
+      "bytes": 112500,
+      "sha256": "9f6ccf19ab94ea6aa5acd6f33a68114a5f68110704b10e52dbf90e847bdd49bd"
+    }
+  ]
+}

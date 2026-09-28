@@ -1,0 +1,40 @@
+# TR_DHRN_INTREC
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_DHRN_INTREC.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** DELETE_DATA
+- **UPDATE:** —
+
+## Tables deleted / reversed
+- **DELETE:** AC_DATA, DHRN_DATA, DHRN_REC_DATA, DHRN_REC_DETL, MAIN_STOCK, REMARK_DATA, ROJ_MEL_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- DHRN_REC_DATA, AC_MAST, TEMP_BOOK_DATA, DHRN_DATA, EMP_MAST, AC_DATA, ROJ_MEL_DATA, MAIN_STOCK, DHRN_REC_DETL, USER_SET, REMARK_DATA, DHRN_ISU_DATA
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L4706: DELETE DHRN_REC_DATA
+- L4707: DELETE DHRN_REC_DETL
+- L4710: DELETE TEMP_BOOK_DATA
+- L4797: DELETE AC_DATA
+- L4800: DELETE ROJ_MEL_DATA
+- L4803: DELETE DHRN_DATA
+- L4806: DELETE MAIN_STOCK
+- L4812: DELETE AC_DATA
+- L4815: DELETE ROJ_MEL_DATA
+- L4818: DELETE DHRN_DATA
+- L4821: DELETE MAIN_STOCK
+- L4874: INSERT DELETE_DATA
+- L4876: DELETE REMARK_DATA
+- L4877: DELETE TEMP_BOOK_DATA
+- L4878: DELETE DHRN_DATA
+- L4879: DELETE AC_DATA
+- L4880: DELETE ROJ_MEL_DATA
+- L4881: DELETE MAIN_STOCK
+- L4882: DELETE DHRN_REC_DATA
+- L4883: DELETE DHRN_REC_DETL
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

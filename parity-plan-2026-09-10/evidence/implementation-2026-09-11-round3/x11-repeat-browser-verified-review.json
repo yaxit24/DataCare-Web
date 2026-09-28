@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "startedAt": "2026-09-11T04:09:46.509Z",
+  "finishedAt": "2026-09-11T04:09:57.421Z",
+  "mockedRequests": 0,
+  "designRepeatChecks": [
+    "configured parent and component repeat without calculation",
+    "hidden repeated cost and independent parent image identity",
+    "Gross Enter focuses the active parent last component",
+    "Net Amount Enter appends with stable noncontiguous IDs",
+    "Ctrl+D confirm/cancel and no deleted ID reuse",
+    "invalid Enter retains focus/draft and blocks child allocation",
+    "blank Item Enter returns to the invoking parent and discards only an untouched placeholder",
+    "parent focus updates component context without mutating saved data",
+    "complete unchanged save after focus preserves the saved snapshot",
+    "item Enter waits for scoped defaults before moving focus",
+    "Weight Enter uses prior zero weight and current scoped fixed amount",
+    "cleared rate persists as source Conversion.Val zero",
+    "real save/reopen/delete and no unhandled page errors",
+    "parent and component context/actions remain visible when their grids scroll"
+  ],
+  "designRepeatCount": 14,
+  "designLifecycleCount": 8,
+  "designCalculationCount": 14,
+  "result": {
+    "path": "test-results/parity-real-stack-round3-verified/result.json",
+    "sha256": "e05791a3ee60cc45223fbb6175585b7eaf9e5e048ad528ec8bdf28aba7b37e93"
+  },
+  "log": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-verified.txt",
+    "sha256": "3b0ae394757b19f263230e447a3cf8272b9564eb6115130d5f628ad889fd3d0e"
+  },
+  "screenshots": [
+    {
+      "path": "test-results/parity-real-stack-round3-verified/design-repeat-identities-round3.png",
+      "sha256": "e53df4015a8808ab080b7b3017cb77947256a7525d4ffe31f2cd9877c3c3578d"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-verified/design-weight-enter-round3.png",
+      "sha256": "c91e4d89bb32bc3a890ec00a8e53efd7336c241448a84d2d1c6ae65ab1b50277"
+    }
+  ],
+  "visualReview": {
+    "passed": true,
+    "reviewedAtUtc": "2026-09-11T04:13:51.216637+00:00",
+    "finding": "Parent/component context and action controls remain visible within their panels; only tables scroll, including at far-right Net Amount focus.",
+    "productChangesRequired": false
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "command": [
+    "python3",
+    "../parity-plan-2026-09-10/test_checkpoint_recipe_round14.py"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:41:39.495201+00:00",
+  "finishedAtUtc": "2026-09-12T01:41:40.121676+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/recipe-controls-final.txt",
+  "logSha256": "f96a8a3e66645abf030bd06da732c2353da9a7b31245ca62018cbc243c0024c2",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/recipe-controls-final.inputs.json",
+  "inputManifestSha256": "ce1b22171a677071245ddec1cfbadb1b49e72b141e88d2238f784ed1d6f4969f",
+  "inputCount": 1909,
+  "changedInputs": [],
+  "changedPrivateInputs": [],
+  "changedRuntimeInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

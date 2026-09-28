@@ -1,0 +1,9 @@
+{
+  "authoredAt": "2026-09-11T14:21:40.916918+00:00",
+  "implementationExisted": false,
+  "fixtureSha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c",
+  "paths": [
+    "packages/core/test/fixtures/sale-return-bill-projection.v1.json",
+    "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-bill-projection-independent-vectors.json"
+  ]
+}

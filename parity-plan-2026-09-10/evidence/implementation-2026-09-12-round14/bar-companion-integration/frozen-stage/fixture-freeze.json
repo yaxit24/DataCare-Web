@@ -1,0 +1,25 @@
+{
+  "implementationExisted": false,
+  "files": [
+    {
+      "path": "implementation-contract.md",
+      "sha256": "f9dc482ce19d295b856f763b1a77006f437f448d6b987273dffd62054e3f4de1"
+    },
+    {
+      "path": "author-fixture.py",
+      "sha256": "c3e352a93b128a904c8b35e05a0ab345df5dbb8ccd0bfc06faf04a0c85dc8e3b"
+    },
+    {
+      "path": "fixture-authorship.json",
+      "sha256": "ea3904dfed84a294c5b53d4cf41f00f22cf1a2f3e59c8ca6d7c245f9b4754e14"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "9c37777c58519f8518c48093f9f5ee080dd439bf51b2bc7cb17a83024e11c6a4"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnNBarCompanions.independent.json",
+      "sha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a"
+    }
+  ]
+}

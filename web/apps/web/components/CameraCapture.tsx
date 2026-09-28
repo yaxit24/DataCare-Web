@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { CameraRequestGuard } from '../lib/cameraRequestGuard';
 
 /**
  * Webcam capture — the web equivalent of the desktop's `UT_WEB_CAM` / `PicImage` flow.
@@ -31,7 +32,9 @@ export function useCameraCapture(options: CameraCaptureOptions = {}) {
   const [status, setStatus] = useState<CameraStatus>('idle');
   const [message, setMessage] = useState('');
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const guardRef = useRef<CameraRequestGuard | null>(null);
+  if (!guardRef.current) guardRef.current = new CameraRequestGuard();
+  const guard = guardRef.current;
 
   useEffect(() => {
     if (
@@ -44,28 +47,33 @@ export function useCameraCapture(options: CameraCaptureOptions = {}) {
   }, []);
 
   const stop = useCallback(() => {
-    const stream = streamRef.current;
-    streamRef.current = null;
-    if (stream) for (const track of stream.getTracks()) track.stop();
+    guard.stop();
     if (videoRef.current) videoRef.current.srcObject = null;
     setStatus((current) => (current === 'unsupported' ? current : 'idle'));
-  }, []);
+  }, [guard]);
 
-  useEffect(() => stop, [stop]);
+  useEffect(
+    () => () => {
+      guard.stop();
+    },
+    [guard],
+  );
 
   const start = useCallback(async () => {
     if (typeof navigator.mediaDevices?.getUserMedia !== 'function') return;
+    const request = guard.begin();
     setStatus('requesting');
     setMessage('');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      streamRef.current = stream;
+      if (!guard.accept(request, stream)) return;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play().catch(() => undefined);
       }
-      setStatus('live');
+      if (guard.isLive(request)) setStatus('live');
     } catch (error) {
+      if (!guard.isCurrent(request)) return;
       const name = (error as { name?: string } | null)?.name ?? '';
       if (name === 'NotAllowedError' || name === 'SecurityError') {
         setStatus('denied');
@@ -75,12 +83,13 @@ export function useCameraCapture(options: CameraCaptureOptions = {}) {
         setMessage('No camera could be opened.');
       }
     }
-  }, []);
+  }, [guard]);
 
   /** Capture the current frame as a JPEG File, or null when there is nothing live to capture. */
   const capture = useCallback(async (): Promise<File | null> => {
     const video = videoRef.current;
-    if (!video || status !== 'live') return null;
+    const request = guard.token();
+    if (!video || status !== 'live' || !guard.isLive(request)) return null;
     const width = video.videoWidth;
     const height = video.videoHeight;
     if (!width || !height) return null;
@@ -96,9 +105,9 @@ export function useCameraCapture(options: CameraCaptureOptions = {}) {
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob((result) => resolve(result), 'image/jpeg', quality),
     );
-    if (!blob) return null;
+    if (!blob || !guard.isLive(request)) return null;
     return new File([blob], fileName, { type: 'image/jpeg' });
-  }, [fileName, maxEdge, quality, status]);
+  }, [fileName, guard, maxEdge, quality, status]);
 
   return { status, message, videoRef, start, stop, capture };
 }

@@ -1,0 +1,6 @@
+{
+  "coreFiles": 26,
+  "expectedCoreTests": 1612,
+  "derivation": "1059prior+44replay+89context+291financial+123guards+6composition; requiredactualfinalrunstillpending",
+  "stagedZeroPlaceholderPreserved": true
+}

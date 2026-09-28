@@ -1,0 +1,7 @@
+{
+  "web/packages/core/src/saleReturnNBarCompanions.ts": "0d63cb36e8b225055efd9c50cbdd005504ad802f589a14b1503f009f2e131d39",
+  "web/packages/core/test/saleReturnNBarCompanions.test.ts": "9f40da10bc5455d4d3ea612af6cddac3e3b9cd313f68310086abcaa473535eaf",
+  "web/packages/core/test/fixtures/saleReturnNBarCompanions.independent.json": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a",
+  "web/packages/core/vitest.config.ts": "a84b0a026850dc8c56864295e79b5499e5eb2935c04cb749e6b8554e157924d3",
+  "web/packages/core/package.json": "75310bff016b194c22167683f733bcd0991ba7d1d2a288c77763698eafecf4e8"
+}

@@ -1,0 +1,139 @@
+{
+  "contract": "sale-return-bill-projection-independent-v1",
+  "authorship": "Literal expectations transcribed from primary saved-header assignments before implementation; no application calculator used.",
+  "profile": "Exact decimal mathematical Format intent, half-up F2; not original Double/Format runtime or locale acceptance.",
+  "source": {
+    "TR_SALE_RTN.cs": {
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "savedHeader": "10112–10169",
+      "clearedLabels": "15917–15929"
+    },
+    "DC_Main.cs": {
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+      "Fnv": "2088–2104"
+    }
+  },
+  "input": {
+    "raw": {
+      "CO_CODE": "01",
+      "CO_BOOK": "R11",
+      "VCH_NO": "00017",
+      "VCH_TIME": "2024-07-02 12:34:56.123456",
+      "NET_AMT": "10.234",
+      "TOT_AMT": "81.234",
+      "CHQ_AMT": "11.111",
+      "CARD_AMT": "12.222",
+      "CASH_AMT": "13.333",
+      "KASAR_AMT": null,
+      "BILL_OS": "",
+      "RTN_NET_AMT": "200.605",
+      "TAX_CODE": "0010",
+      "TAX_PRC": "10.125",
+      "TAX_AMT": "7.374",
+      "RTN_TOT_AMT": "777.777",
+      "RTN_CHQ_AMT": "21.111",
+      "RTN_CARD_AMT": "22.222",
+      "RTN_CASH_AMT": "23.333",
+      "RTN_KASAR_AMT": "   ",
+      "RTN_BILL_OS": "-4.444",
+      "BANK_AC": "0007",
+      "CHQ_NO": "000123",
+      "CARD_AC": "0008",
+      "UNUSED_HIDDEN": null,
+      "FLOAT_OBSERVATION": "0.30000000000000004",
+      "ORIGINAL_DESCRIPTION": ""
+    },
+    "labels": {
+      "taxName": "Saved tax label",
+      "bankAccountName": "બેંક — Bank",
+      "cardAccountName": "Card account"
+    }
+  },
+  "expectedState": {
+    "matrix": [
+      [
+        "",
+        "",
+        "",
+        "Payment    ",
+        "Received    ",
+        ""
+      ],
+      [
+        "Net Amt : ",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Sale Tax : ",
+        "Saved tax label",
+        "10.13",
+        "7.37",
+        "",
+        "0010"
+      ],
+      [
+        "Total Amt : ",
+        "",
+        "",
+        "777.78",
+        "81.23",
+        ""
+      ],
+      [
+        "Cheque Amt : ",
+        "બેંક — Bank",
+        "000123",
+        "21.11",
+        "11.11",
+        "0007"
+      ],
+      [
+        "Card Amt : ",
+        "Card account",
+        "",
+        "22.22",
+        "12.22",
+        "0008"
+      ],
+      [
+        "Cash Amt : ",
+        "",
+        "",
+        "23.33",
+        "13.33",
+        ""
+      ],
+      [
+        "Kasar Amt : ",
+        "",
+        "",
+        "0.00",
+        "0.00",
+        ""
+      ],
+      [
+        "Os Amt : ",
+        "",
+        "",
+        "-4.44",
+        "0.00",
+        ""
+      ]
+    ],
+    "oldNetAmt": "200.61",
+    "oldTaxPrc": "10.13",
+    "outgoingRounded": "10.23",
+    "incomingRounded": "200.61",
+    "closing": {
+      "status": "unavailable",
+      "amount": null,
+      "label": null,
+      "color": "unknown",
+      "reason": "Customer balance requires a resolved ledger mode."
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+ "form": "RP_TAG_ESTMATE",
+ "tables": [
+  "BAR_DETL",
+  "BAR_IDTL",
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "TAG_IMAGE_DATA",
+  "TAG_STOCK_PRINT",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "TAG_STOCK_PRINT": [
+    "BOOK_NAME",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "DATA_TYPE",
+    "DESIGN_NO",
+    "INOUT_TYPE",
+    "ITM_FINE",
+    "ITM_GWT",
+    "ITM_NWT",
+    "ITM_PCS",
+    "ITM_QTY",
+    "ITM_SIGN",
+    "ITM_SIZE",
+    "IT_CODE",
+    "LC_CODE",
+    "SR_NO",
+    "TAG_NO",
+    "TBL_CODE",
+    "VCH_DATE",
+    "VCH_NO",
+    "VCH_SRNO",
+    "VCH_TYPE"
+   ]
+  },
+  "UPDATE": [
+   "TAG_IMAGE_DATA"
+  ],
+  "DELETE": [
+   "TAG_IMAGE_DATA",
+   "TAG_STOCK_PRINT"
+  ]
+ },
+ "selectTables": [
+  "BAR_DETL",
+  "BAR_IDTL",
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "TAG_IMAGE_DATA",
+  "TAG_STOCK_PRINT",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 15,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 7033
+}

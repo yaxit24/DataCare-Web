@@ -1,0 +1,12 @@
+{
+  "command": [
+    "pnpm",
+    "test:parity:api"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T16:43:07.383232+00:00",
+  "finishedAtUtc": "2026-09-11T16:45:57.579005+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/api-full-qualified.txt"
+}

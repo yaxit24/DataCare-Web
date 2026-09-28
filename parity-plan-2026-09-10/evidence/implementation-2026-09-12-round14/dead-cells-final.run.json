@@ -1,0 +1,21 @@
+{
+  "command": [
+    "node",
+    "scripts/check-dead-cells.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:24:25.466734+00:00",
+  "finishedAtUtc": "2026-09-12T01:24:30.792627+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/dead-cells-final.txt",
+  "logSha256": "40f4e4aea0c9c217dd80a645a2190bb2c9414db8d6fbe3af6524c8a199eb668f",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/dead-cells-final.inputs.json",
+  "inputManifestSha256": "d6fd6f2df2eb28c8f86bce62423cbce4a080541425abc2e36c29151ef98678dd",
+  "inputCount": 1907,
+  "changedInputs": [],
+  "changedPrivateInputs": [],
+  "changedRuntimeInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

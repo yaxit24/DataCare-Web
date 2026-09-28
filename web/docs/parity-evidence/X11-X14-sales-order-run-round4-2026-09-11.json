@@ -1,0 +1,538 @@
+{
+  "cards": [
+    "X11",
+    "X14"
+  ],
+  "round": 4,
+  "slice": "ordinary-sales-order-lifecycle-resolved-design-replay-and-exact-saved-state",
+  "implementationState": "partial",
+  "engineeringState": "bounded-api-core-web-build-lint-types-browser-passed; global-parity-gates-remain-failed",
+  "desktopAcceptance": null,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "capturedAtUtc": "2026-09-11T06:17:40.098237+00:00",
+  "sourceState": "shared-dirty-development-tree; hashes identify the current bounded slice, not a clean release candidate",
+  "pathBase": "web workspace root",
+  "inputFiles": [
+    {
+      "path": "apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "556d87d9eb73974f4a06eec64a0f6a6fe0096b90e59b14522176021ea10fc8d9",
+      "bytes": 84550
+    },
+    {
+      "path": "apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+      "sha256": "a226087e96f0bbb3c4de2d75b3634b0a0b8d39f33f8d5630b98e775de1f05251",
+      "bytes": 10439
+    },
+    {
+      "path": "apps/api/src/modules/sales/orderDesignSelection.ts",
+      "sha256": "c4d7ee655c8ebd26193dac07411bde9ee95ebd0cbc40bc160a2223f2450caa82",
+      "bytes": 9508
+    },
+    {
+      "path": "apps/api/src/modules/sales/orderDoc.ts",
+      "sha256": "e51c3a69f278f6e664f6a9076dacbdf49669d30a2955c27ef3f1e91710d3e07a",
+      "bytes": 7916
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "1e69517cf28d4af88e45f2b7bc8d271eb6e515cc2d8c4906bea0dbf8d4c050ae",
+      "bytes": 272043
+    },
+    {
+      "path": "apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "f4a35267e45582f84cd6c7f2d260778b2de5e6813f8260eb2cbfee5403916f44",
+      "bytes": 34252
+    },
+    {
+      "path": "apps/api/test/salesOrderRound4.db.test.ts",
+      "sha256": "500f26578dbcb36434fd84415e11815008cc5de159285f2d46c0a7ee4138e0e6",
+      "bytes": 17935
+    },
+    {
+      "path": "apps/api/test/salesOrderLifecycle.routes.db.test.ts",
+      "sha256": "3031006e1e6e54c69848b50d25564b2cfbff97cfab65592a1d4e57e719a54e63",
+      "bytes": 15565
+    },
+    {
+      "path": "apps/api/test/salesFamilyLifecycle.db.test.ts",
+      "sha256": "cf5df304bc87625f9e538ff7d6298341ac97d157f859e0a9f98f665020ae9592",
+      "bytes": 72005
+    },
+    {
+      "path": "apps/api/test/tourOrderHydration.db.test.ts",
+      "sha256": "1a1ab2dc5162cdd65aa7e60db79d1dc86808a9a5728ba56c2cb1b5985895e485",
+      "bytes": 29653
+    },
+    {
+      "path": "apps/api/test/routePolicy.test.ts",
+      "sha256": "26a36818f10c6c3f6b069ca14953a29bc6c944908d0ec1dfef64a104bbe3df99",
+      "bytes": 31475
+    },
+    {
+      "path": "packages/core/src/salesOrderDesign.ts",
+      "sha256": "e6b5b1a4e79a9d93d6fab540565d0159ccde9475714d4f56276c64ce101173af",
+      "bytes": 2999
+    },
+    {
+      "path": "packages/core/src/orderLabourWithCache.ts",
+      "sha256": "dd9f429992b33918e97b382d5ead1852219aece381ec7c9bb6a1cc21719f3e4f",
+      "bytes": 2357
+    },
+    {
+      "path": "packages/core/src/orderLabour.ts",
+      "sha256": "5981b6198035c845b447caf0d92fe84e3c25d1412e6b61b0eee0483f0224230d",
+      "bytes": 4966
+    },
+    {
+      "path": "packages/core/test/salesOrderDesign.test.ts",
+      "sha256": "738c30cd6635858baa4d0f23e6a68b53921455be3c4b8a481eedc9daa878f61b",
+      "bytes": 4810
+    },
+    {
+      "path": "packages/core/test/orderLabourWithCache.test.ts",
+      "sha256": "85dab66d15d2b29ea53c82902bd2b0a451fb0ccb1f5f72bd9f3224276bdd6a66",
+      "bytes": 4096
+    },
+    {
+      "path": "apps/web/app/(app)/txn/sales-order/page.tsx",
+      "sha256": "a2544854db3892240646758b9a4151b0fbfc1364f4e286dd4b32a9efd3595d38",
+      "bytes": 39316
+    },
+    {
+      "path": "apps/web/lib/salesOrderForm.ts",
+      "sha256": "fad6b74bfe41be5de895922f2f20ae17547dc31f816b16973632723c05319be7",
+      "bytes": 15085
+    },
+    {
+      "path": "apps/web/components/SalesOrderDesignPicker.tsx",
+      "sha256": "51993834d3348e640c827bce850c4ebcbac04355b25c043473005b92cf76b07d",
+      "bytes": 13416
+    },
+    {
+      "path": "apps/web/test/salesOrderForm.test.ts",
+      "sha256": "dafbed5295c06adf3377da51e53c923535c923e02d052a0548405853a2872db1",
+      "bytes": 14150
+    },
+    {
+      "path": "apps/web/test/sales-order.journey.mjs",
+      "sha256": "f9a68ff31b45d07b1d23daca725ca05a7da36f89d079455f32d33180bdc605c9",
+      "bytes": 14223
+    },
+    {
+      "path": "apps/web/test/sales-design.journey.mjs",
+      "sha256": "f228073f8a201013b3756ba13d43be224eec0659adf170ce4a1f6bc0cc8750f9",
+      "bytes": 18771
+    },
+    {
+      "path": "apps/web/app/(app)/txn/sales/page.tsx",
+      "sha256": "2de9bce08cc269ead7baffa4ede383130d5f7091cc8ccf3007479fb829675c44",
+      "bytes": 57222
+    },
+    {
+      "path": "apps/web/app/(app)/txn/sales-quotation/page.tsx",
+      "sha256": "4e5f7a5801449fa4842b1e65f7185d9077f7adbddc6b93d7a271cf22dcbe0dbc",
+      "bytes": 57362
+    },
+    {
+      "path": "scripts/check-dead-cells.mjs",
+      "sha256": "2bcf618ac20fbdf2af293b3726d3d39d7ba7ba79f455442b71a088e8512ec0c5",
+      "bytes": 8165
+    },
+    {
+      "path": "scripts/lib/request-field-trace.mjs",
+      "sha256": "a602d4dd51d9ceddc2f9076c105078b235d24b0e655179afb4324fa0c6bfce55",
+      "bytes": 17654
+    },
+    {
+      "path": "scripts/test/request-field-trace.test.mjs",
+      "sha256": "6a1a163c8468dd0258037ef1c31ee83c48a476250ba4c5f9c6a4ad62032a4e6a",
+      "bytes": 10102
+    },
+    {
+      "path": "scripts/test/ui-descriptors.test.mjs",
+      "sha256": "9ad7e202f39164b7d7b7d2244e23352d7ed2a0b9000b6b4daf50e97c12783a06",
+      "bytes": 10214
+    },
+    {
+      "path": "docs/TECHNICAL-REFERENCE.md",
+      "sha256": "b1c9366dd80b31e775f94028babe1ea8286bd5f9c2957c6f037a47e556c5a484",
+      "bytes": 18941
+    },
+    {
+      "path": "docs/HANDOFF.md",
+      "sha256": "d205531f1b0ed13a9b7f45e57c439f18ee82950668ce303ad5bbd560f0493224",
+      "bytes": 35521
+    },
+    {
+      "path": "docs/STATE-OF-PARITY.md",
+      "sha256": "cf55b11a5a1a382067c369ef26dcfff6d18d7df77904f942ad80e7ac7aef5f8b",
+      "bytes": 12236
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3",
+      "bytes": 466095
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE.cs",
+      "sha256": "b122837a890d99c370ec60e309b59a5207b65556493ce29f62ca6584e428d690",
+      "bytes": 902963
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/MS_HELP.cs",
+      "sha256": "350899da0ffc4d237602f22ed23ef5054374d2f2073558c5fb060a0e583022cf",
+      "bytes": 64914
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN_UAE.cs",
+      "sha256": "fdaf41bc46469f4a64e95bbd371a315a87135ad81a2d432ae5d7ea13ee3d6e0d",
+      "bytes": 445368
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "sha256": "da810d40fecbe8c5ef631fc66e458d3bcfeb641c67521a6f29f6c6732b2248d2",
+      "bytes": 261865
+    },
+    {
+      "path": "apps/api/src/modules/sales/salesReturn.ts",
+      "sha256": "612ddcd8f3b0cb8f0368435495125c8b50ed2f8cd03adad11f1cef12cf1d2a70",
+      "bytes": 30772
+    },
+    {
+      "path": "apps/api/src/modules/sales/sales.ts",
+      "sha256": "f9edc60fb957d5efc708bc321b1fd905ff186f1d87519728b874a8af79b62f12",
+      "bytes": 106469
+    },
+    {
+      "path": "apps/web/app/(app)/txn/sale-return/page.tsx",
+      "sha256": "4ef52449c4da2ab5f5b8bf2d12740aef605e086ff24f11b210272f089a963680",
+      "bytes": 19980
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-order-api-contract.md",
+      "sha256": "5574cb203718150c7eae3fe7f6c6023fb5a6aec12993d57c18d0a906d279f8ce",
+      "bytes": 18190
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-static-gate-diagnosis.md",
+      "sha256": "eb48d866cccbc85d17344524a93e25647e59c3db5db01b330f4ca4cf59767132",
+      "bytes": 7058
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-service-first.txt",
+      "sha256": "f87f1aa3da9736601f1bdff54b21342e5a21c477c3b52de76aeda545e7d7bbe8",
+      "bytes": 2338
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-service-legacy-verified.txt",
+      "sha256": "b03c9ac9b6ee28891ddde3b89f4b9faadfb45fca80cb284c66a68c5c205eeebb",
+      "bytes": 2951
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-service-types.txt",
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889",
+      "bytes": 128
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-source-blank-first.txt",
+      "sha256": "1e2d4ea669335df301d2ea90e03d8ead868d1b542aa5951f7f418427d91baea7",
+      "bytes": 4670
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-source-blank-verified.txt",
+      "sha256": "c1cc00401c57ade9f560e472289d25bb205533ec01ccfb1ceedc6c893da734f8",
+      "bytes": 7262
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-source-blank-types.txt",
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889",
+      "bytes": 128
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-derived-descriptor-tests.txt",
+      "sha256": "91afdd94648e3de372cfca901771f23c19afaf5c48d5c2b2bb740a9119cb481c",
+      "bytes": 1504
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/dead-cells-before.json",
+      "sha256": "732fd27335f94d771cb3fbc4c97394989c04d52517501ace07fedbaf7bc646e4",
+      "bytes": 76072
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/dead-cells-corrected.txt",
+      "sha256": "df1ac9bb59337f5037d82cc7e47786e45ea9480998fe8c695fe104db95a82805",
+      "bytes": 948
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-scanner-import-regressions.txt",
+      "sha256": "b0007fefa347dd79ce10c6aee87a89e9a31ca1eac10d5da645fc09979504a898",
+      "bytes": 3264
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/dead-cells-strict-first.txt",
+      "sha256": "40f4e4aea0c9c217dd80a645a2190bb2c9414db8d6fbe3af6524c8a199eb668f",
+      "bytes": 1550
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-full.txt",
+      "sha256": "7ca8e9f9dd28b09f5bbfa6be7245eeed923b39503cfdb38c2f7e321fde663dc0",
+      "bytes": 19191
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-snapshot.json",
+      "sha256": "7925fc0d4a738c2baa286990e6223378ba6e791daea3b868adfeba237f0fe0c3",
+      "bytes": 159518
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-full-complete.txt",
+      "sha256": "4e3032426927e215927c199307d6a39ac8b787716185d9a1371cd70ad2c39719",
+      "bytes": 35319
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-snapshot-complete.json",
+      "sha256": "16e1a9723fd48031f8c52fb2df2cefee76d7d5ac2afed0c7f777d783b8d5e3c3",
+      "bytes": 160011
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-verification-complete.json",
+      "sha256": "e94f263930c2bcdfbbab56481f0d28e7a04538986c5c1b3324ff19dae29eeebe",
+      "bytes": 484
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/core-tests-ready.txt",
+      "sha256": "b47ca20a3fda1ccfe455c217c1d954448b502f86904824d42f861d593298a362",
+      "bytes": 745
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/web-tests-blank-source.txt",
+      "sha256": "4709268190ddc276a8f2ee91c6d8386edb9082a1f1405556231a6ac72ad06d75",
+      "bytes": 1430
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/build-blank-source.txt",
+      "sha256": "c18379856a3521cedc03ce93c7b5be47bf05d6842771a1b3900199ddd8900b4e",
+      "bytes": 15020
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/lint-blank-source.txt",
+      "sha256": "34142d48f19878739a1dfd0fdf6b3d9c065dc5c73fd98f1a4e63d6878c3d6ae9",
+      "bytes": 3507
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/test-types-serial.txt",
+      "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9",
+      "bytes": 188
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-blank-source.txt",
+      "sha256": "d4deac70a9fc58f530a00e55f7cb8c622a8ca70e70ea0995842e11a35ca956db",
+      "bytes": 1162
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-smoke-complete.txt",
+      "sha256": "ffba51d0f9678cd63378c0d3f780157e7a06c31ca46f8098682b8be403b2b9b6",
+      "bytes": 520
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/scanner-tests-final.txt",
+      "sha256": "2384a062dd05b549330b7e04b2f6f328fce3ac3a0b92be713d97a4065c9da149",
+      "bytes": 3262
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/dead-cells-strict.json",
+      "sha256": "d11af34a90abecc59dee4925967be051440319f980cf5033189007d3ce5f86b2",
+      "bytes": 17756
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/dead-cells-strict.txt",
+      "sha256": "40f4e4aea0c9c217dd80a645a2190bb2c9414db8d6fbe3af6524c8a199eb668f",
+      "bytes": 1550
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/kernel-gate.txt",
+      "sha256": "93e4f6bffd808fd36d6e0935b13112240be955d0a5add76854b7bb0b95dc8853",
+      "bytes": 902
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/depth-gate-complete.txt",
+      "sha256": "13620c2ba3e2838a2fca6822843e5db6593c709bc7d9ee317d6848bffc748d23",
+      "bytes": 1183
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/desktop-ui-observation-attempt.json",
+      "sha256": "7b15d3c6ba43e62521c40f0ad556d72cb5f9d8adb204cf457d4db51337ea09ea",
+      "bytes": 561
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x13-sale-return-33-next-contract.md",
+      "sha256": "a7a0ffb02944327fe1c9f64d8bc3ff48b92df76f332c35728d312e8deb06e34b",
+      "bytes": 22984
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x13-sale-return-33-next-contract.json",
+      "sha256": "baab9cd109a8e7245b0c80d1b3c4b00aafd91661cb8a74d3311c681d13c18b7e",
+      "bytes": 27904
+    },
+    {
+      "path": "test-results/parity-real-stack-round4-blank-source/result.json",
+      "sha256": "39445f5f6d6aeaa00c479f624f5100a38f8cdc615a4f74da2d299c8b0355f467",
+      "bytes": 18115
+    },
+    {
+      "path": "test-results/parity-real-stack-round4-blank-source/sales-design-blank-existing-round4.png",
+      "sha256": "696e888fa552be0d6fa7a85ec18f9a6cb564c8d816a4a70acda6c50bf96df051",
+      "bytes": 134070
+    },
+    {
+      "path": "test-results/parity-real-stack-round4-blank-source/sales-order-loaded-components.png",
+      "sha256": "33b3cc8dc495835bd42d6cc989a94ff51dca5f1d04eb970b7911d621d008600b",
+      "bytes": 176743
+    }
+  ],
+  "focusedRuns": [
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-service-first.txt",
+      "filesPassed": 3,
+      "testsPassed": 72,
+      "skipped": 0,
+      "stage": "earlier6-caseSales-plusTour14-plusRoutes52"
+    },
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-service-legacy-verified.txt",
+      "filesPassed": 2,
+      "testsPassed": 37,
+      "skipped": 0,
+      "stage": "earlier8-caseSales-plusLegacy29"
+    },
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-source-blank-first.txt",
+      "filesPassed": 2,
+      "filesFailed": 1,
+      "testsPassed": 35,
+      "testsFailed": 2,
+      "skipped": 0,
+      "stage": "newfixturesmissingpositivepricedbasis; productguardcorrect"
+    },
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-source-blank-verified.txt",
+      "filesPassed": 3,
+      "testsPassed": 37,
+      "skipped": 0,
+      "stage": "sourceBlankCorrectedSales10-plusTour14-plusSalesHTTP13"
+    },
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-scanner-import-regressions.txt",
+      "testsPassed": 31,
+      "skipped": 0,
+      "stage": "strictimportcallee-plusdescriptors"
+    }
+  ],
+  "finalCoordinatedVerification": {
+    "state": "completed; functional-checks-passed; parity-acceptance-open",
+    "priorApiRun": {
+      "filesPassed": 219,
+      "testsPassed": 1711,
+      "skipped": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-full.txt",
+      "limitation": "before authoritative blank-source correction; retained unchanged"
+    },
+    "currentApiInputSnapshotEntries": 997,
+    "api": {
+      "filesPassed": 219,
+      "testsPassed": 1713,
+      "skipped": 0,
+      "durationSeconds": 431.78,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-full-complete.txt",
+      "inputSnapshot": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-snapshot-complete.json",
+      "inputVerification": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-verification-complete.json",
+      "inputCount": 997,
+      "inputsUnchanged": true
+    },
+    "core": {
+      "filesPassed": 8,
+      "testsPassed": 106,
+      "skipped": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/core-tests-ready.txt"
+    },
+    "web": {
+      "filesPassed": 21,
+      "testsPassed": 114,
+      "skipped": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/web-tests-blank-source.txt"
+    },
+    "build": {
+      "tasksPassed": 7,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/build-blank-source.txt"
+    },
+    "lintAndTypes": {
+      "tasksPassed": 10,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/lint-blank-source.txt"
+    },
+    "strictApiTestTypes": {
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/test-types-serial.txt",
+      "completionEvidence": "Parent root confirmed final tool session65615 exit0; tsc success is silent, not inferred from log content alone."
+    },
+    "browser": {
+      "status": "passed",
+      "journeys": 10,
+      "mockedRequests": 0,
+      "result": "test-results/parity-real-stack-round4-blank-source/result.json",
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-blank-source.txt",
+      "salesLifecycleChecks": 12,
+      "salesDesignChecks": 11
+    },
+    "legacyMockedBrowserSmoke": {
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-smoke-complete.txt",
+      "limitation": "Separate legacy mocked smoke; not counted as a real API browser journey."
+    },
+    "scannerRegression": {
+      "testsPassed": 31,
+      "skipped": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/scanner-tests-final.txt"
+    }
+  },
+  "staticDispositions": {
+    "deadCells": {
+      "unconfirmed": 33,
+      "checked": 708,
+      "state": "failed; stricter named-import callee evidence supersedes intermediate708/0"
+    },
+    "unreachable": {
+      "measured": 102,
+      "ceiling": 96,
+      "state": "failed; newrequireDesignSelection is server-owned, not a requested UI field"
+    },
+    "kernelRoundHelpers": {
+      "measured": 127,
+      "ceiling": 108,
+      "state": "failed; unchanged debt"
+    }
+  },
+  "limitations": [
+    "No executable desktop observations or business acceptance credited.",
+    "Prior-year confirmation/fiscal-lock bypass remains explicit422.",
+    "Later MRP/tax/manual-override branches, tenders, old metal, allocations, delivery/conversion/cancellation/refund and stock/tag transitions remain descendants.",
+    "Untouched exact saved decimals are preserved; unsafe new numeric Design defaults are explicitly rejected by the current calculation boundary.",
+    "Web picker cancellation preserves the selection intentionally; desktop Escape/empty-selection difference requires acceptance.",
+    "Trusted direct legacy service/import callers still have earlier shape/source-policy compatibility paths.",
+    "33 Sale Return fields have no confirmed current write paths under the stricter bounded scanner; each needs source-backed disposition and verification.",
+    "No functionality percentage or full menu acceptance follows from these test or inventory counts."
+  ],
+  "nextContract": {
+    "card": "X13",
+    "state": "unimplemented; all33fieldsremainopen",
+    "document": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x13-sale-return-33-next-contract.md",
+    "fieldMap": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x13-sale-return-33-next-contract.json",
+    "limitation": "Evidence-only source mapping; no additional functionality accepted."
+  }
+}

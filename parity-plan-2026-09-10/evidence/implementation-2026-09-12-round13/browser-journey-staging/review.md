@@ -1,0 +1,11 @@
+# Bounded lifecycle review
+
+The pre-correction helper checked the local component lease before validating/observing a successful selection response. Thus a completed selection could become invisible to the persistent document after client-side route departure. Root's corrected helper validates first, calls pinPageContext before the local lease check, retains the pending request for an obsolete origin, and only permits current-origin clearing/navigation. Dispatched failure calls pausePageContextForSelection only while the original page-state object remains current; it does not poison a later explicitly reset page. These changes match the two added browser schedules.
+
+A second concrete local-state issue was reported during review: an obsolete Shell catch returned with switching/operationBusy still true, even though Shell remained mounted across pathname changes. The integrated pathname effect releases that local busy state while retaining pending recovery. The new browser cases require the destination input and Check company change action to become usable before the late response is released; this checks the actual persistent-layout integration rather than merely testing the lease helper.
+
+The active useOperationLease stores current scope synchronously and includes it in the admitted predicate, then invalidates generation on effect cleanup. This covers pathname departure and A→B→A local generations without treating the lease as cancellation or authentication authority. The complete shared API response guard still controls explicitly reset/new document observations.
+
+No additional confirmed issue was found against the frozen twelve-check base flow. Normal selection may briefly mark the old document stale before its deliberate full navigation. Uncertain Shell failure retains the draft, recovery record and Check company change; `/select` requires a fresh read before retry/acknowledgment. No changes to the base assertions are proposed.
+
+No runtime test or browser credit is claimed. Additive source and referenced active inputs are pinned separately; frozen original files remain unchanged. Broader auth/session guarantees and server transaction races remain covered by their separate API contracts/tests, not inferred from these browser schedules.

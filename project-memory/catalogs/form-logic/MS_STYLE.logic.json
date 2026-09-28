@@ -1,0 +1,49 @@
+{
+ "form": "MS_STYLE",
+ "tables": [
+  "DESIGN_MAST",
+  "ITM_CITY",
+  "MODEL_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DESIGN_MAST": [
+    "CO_CODE",
+    "DESIGN_NO",
+    "MAIN_USER"
+   ],
+   "MODEL_MAST": [
+    "CO_CODE",
+    "MAIN_USER",
+    "MODEL_NAME"
+   ],
+   "ITM_CITY": [
+    "CO_CODE",
+    "ITM_CITY",
+    "MAIN_USER"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "DESIGN_MAST",
+   "ITM_CITY",
+   "MODEL_MAST"
+  ]
+ },
+ "selectTables": [
+  "DESIGN_MAST",
+  "ITM_CITY",
+  "MODEL_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 20,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 1369
+}

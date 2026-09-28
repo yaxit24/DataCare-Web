@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-round15-effect-context/web/packages/core
+
+ ✓ test/saleReturnEffectContext.test.ts (89 tests) 16ms
+
+ Test Files  1 passed (1)
+      Tests  89 passed (89)
+   Start at  08:02:02
+   Duration  200ms (transform 30ms, setup 0ms, collect 29ms, tests 16ms, environment 0ms, prepare 37ms)
+

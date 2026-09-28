@@ -1,0 +1,7 @@
+{
+  "integratedAtUtc": "2026-09-11T23:46:49.868899+00:00",
+  "beforeSha256": "978424a28461111d666aa51fb685384590c66c8e52790626e074a5cbd97dbf4d",
+  "afterSha256": "d902006a7ebee58a5143a9382c39c84c0dfafa32144350b19314804a8b1df04a",
+  "actualWireCaptureSha256": "db718afe6248e75a0dc81eb5dfbb872042fadeb50c95d21d9ed49d45038120cb",
+  "qualification": "Restores harness from temporary diagnostic capture to final independently strengthened12checksource. ActualUI admissionstillblockeduntilfour-field saved-scope projection correction."
+}

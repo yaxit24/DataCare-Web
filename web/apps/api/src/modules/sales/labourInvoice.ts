@@ -8,9 +8,15 @@ import {
   insertRowTx,
   type LedgerLine,
 } from '../posting/posting.js';
-import { billTotals } from '@datacare/core';
+import { billTotals, fineFor } from '@datacare/core';
 import { receiptLegs } from '../finance/tender.js';
 import { SaleValidationError } from './sales.js';
+
+/** Numeric coercion for a persisted column: a blank or absent cell is 0, never NaN. */
+const num = (v: unknown): number => {
+  const parsed = Number(String(v ?? '').trim());
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 import {
   deleteVoucherWriteSetTx,
   nextHiddenVoucherNoTx,
@@ -24,14 +30,116 @@ import {
  * at labourTaxPct (5%) — two TAX_DATA rows. The customer's order-gold reduces the chargeable metal and
  * is recorded as a Cr-Gold fine leg. Writes LBR_DATA (+ LBR_ISU_DETL) + TAX_DATA + BILL_OS. Book 'LBR'.
  */
+/**
+ * A labour-invoice line.
+ *
+ * P7: extended from 6 fields to the desktop's `TR_SALE_LBR` MSG grid, which has 30 named columns
+ * (Sr, TagNo, ItCode, ItName, Design, HuId, Pcs, GrWt, OthWt, NetWt, Ght%, GhtWt, Touch, West%,
+ * Fine, Lbr%, LType, LbrRate, LbrAmt, OthAmt, NetAmt, Counter, KrCode, Mrp, KrOthWt, KrNwt,
+ * KrTouch, KrWst%, KrFine, TagCost). Every field below maps to a real `LBR_ISU_DETL` column — that
+ * table carries 113 columns and the writer previously populated ten, so the operator could record a
+ * labour bill but none of the weight, touch, karigar or tag detail that the desktop captures.
+ */
 export interface LabourLine {
   itCode: string;
+  /** ITM_REMARK. Kept as `desc` for the existing callers. */
   desc?: string;
   pcs?: number;
   netWt?: number;
   metalAmount?: number;
   labourAmount?: number;
+  // --- identity and description ---
+  tagNo?: string; // TAG_NO
+  designNo?: string; // DESIGN_NO
+  hallmarkId?: string; // HM_ID — alphanumeric HUID, so a string
+  tblCode?: string; // TBL_CODE (desktop "Counter")
+  itmSize?: string; // ITM_SIZE
+  itemLot?: string; // ITM_LOT
+  lotNo?: string; // LOT_NO
+  itmColor?: string; // ITM_COLOR
+  // --- weights ---
+  grossWt?: number; // ITM_GWT
+  otherWt?: number; // ITM_OTH_WT
+  bagWt?: number; // BAG_WT
+  ghtPct?: number; // ITM_GHT_PRC
+  ghtWt?: number; // ITM_GHT_WT
+  touch?: number; // ITM_TOUCH
+  westPct?: number; // ITM_WEST_PRC
+  /** ITM_FINE. Derived from the sale fine policy when absent. */
+  fineWt?: number;
+  // --- money ---
+  rate?: number; // ITM_RATE
+  labourPct?: number; // LBR_PRC
+  labourType?: string; // LBR_TYPE
+  labourRate?: number; // LBR_RATE
+  otherAmount?: number; // OTH_AMT
+  mrp?: number; // ITM_MRP
+  tagCost?: number; // TAG_COST
+  rateType?: string; // RATE_TYPE
+  // --- karigar block ---
+  karigarName?: string; // KR_NAME
+  karigarOtherWt?: number; // KR_OTH_WT
+  karigarNetWt?: number; // KR_NET_WT
+  karigarTouch?: number; // KR_TOUCH
+  karigarWestPct?: number; // KR_WEST_PRC
+  karigarFine?: number; // KR_FINE
+  karigarLbrRate?: number; // KR_LBR_RATE
+  karigarLbrAmt?: number; // KR_LBR_AMT
+  // --- provenance ---
+  employeeCode?: string; // EMP_CODE
+  prCode?: string; // PR_CODE
+  lbrCode?: string; // LBR_CODE
 }
+/**
+ * A labour-invoice RECEIVE line — the metal the customer hands over against the labour bill.
+ *
+ * P8: the desktop's `TR_SALE_LBR` has TWO item grids. `mSG` is the labour being billed (written to
+ * `LBR_ISU_DETL`) and `mSG_PR` is the metal RECEIVED, written to `LBR_REC_DETL` — a 95-column table
+ * the web never wrote at all. `mSG_PR` is referenced 268 times in the desktop form and has 32 named
+ * columns (Sr, ItCode, ItName, Pcs, GrWt, NetWt, Touch, LTouch, Fine, GhtWt, Counter, Design, BagWt,
+ * PsWt, OthWt, West%, HmFine, SlvFine, Sign, Rate, ItAmt, Lbr%, Ltype, LRate, LAmt, OthAmt, ORate,
+ * OFine, Mrp, NetAmt, TotAmt, TaxPrc).
+ *
+ * Without it, a labour bill settled with metal had nowhere to record what came in: the whole receive
+ * half of the workflow was missing, not merely shallow.
+ */
+export interface LabourReceiptLine {
+  itCode: string;
+  /** ITM_SIGN. '+' takes metal in, '-' gives it back; the desktop grid's "Sign" column. */
+  sign?: '+' | '-';
+  pcs?: number; // ITM_PCS
+  grossWt?: number; // ITM_GWT
+  netWt?: number; // ITM_NWT
+  otherWt?: number; // ITM_OTH_WT   "OthWt"
+  bagWt?: number; // BAG_WT
+  ghtWt?: number; // ITM_GHT_WT
+  touch?: number; // ITM_TOUCH
+  westPct?: number; // ITM_WEST_PRC
+  lessTouch?: number; // LESS_TOUCH   "LTouch"
+  /** ITM_FINE. Derived from the shared purchase-old-gold policy when absent. */
+  fineWt?: number;
+  rate?: number; // ITM_RATE
+  amount?: number; // ITM_AMT
+  labourPct?: number; // LBR_PRC
+  labourType?: string; // LBR_TYPE
+  labourRate?: number; // LBR_RATE
+  labourAmount?: number; // LBR_AMT
+  otherAmount?: number; // OTH_AMT
+  otherRate?: number; // ITM_OTH_RATE "ORate"
+  otherFine?: number; // ITM_OTH_FINE "OFine"
+  mrp?: number; // ITM_MRP
+  netAmount?: number; // NET_AMT
+  totalAmount?: number; // TOT_AMT
+  taxPct?: number; // TAX_PRC
+  tblCode?: string; // TBL_CODE     "Counter"
+  designNo?: string; // DESIGN_NO
+  remark?: string; // ITM_REMARK
+  // DELIBERATELY ABSENT: the desktop mSG_PR grid also shows PsWt, HmFine and SlvFine, but
+  // LBR_REC_DETL has no ITM_PCS_WT, HM_FINE or SLV_FINE column — verified against information_schema.
+  // Declaring them here would create cells that silently discard what the operator types, which is
+  // worse than not showing the column. They are display-only on the desktop, or derived elsewhere.
+}
+
 export interface LabourInvoiceInput {
   scope: VoucherScope;
   acCode: string;
@@ -47,6 +155,11 @@ export interface LabourInvoiceInput {
   roundAc?: string;
   orderGoldFine?: number; // fine (g) supplied via order — Cr Gold
   lines: LabourLine[];
+  /**
+   * P8: the desktop's mSG_PR grid — metal RECEIVED against this labour bill, written to
+   * LBR_REC_DETL. Optional, because a labour bill settled in cash has no receive side.
+   */
+  receiveLines?: LabourReceiptLine[];
   // tender (money in now)
   cashAmt?: number;
   chequeAmt?: number;
@@ -215,7 +328,113 @@ export async function createLabourInvoice(
       VCH_TIME: vchDate,
       HD_VCH_NO: hdVchNo,
       MAIN_USER: mainUser,
+      // P7: the desktop TR_SALE_LBR MSG grid, persisted. Text columns default to null rather than ''
+      // so an untouched cell is absent, and numerics go through num() so a blank is 0 rather than NaN.
+      TAG_NO: text(l.tagNo) || 'N',
+      DESIGN_NO: text(l.designNo) || null,
+      // HM_ID is the alphanumeric HUID; coercing it to a number would destroy any id with a letter.
+      HM_ID: text(l.hallmarkId).slice(0, 15) || null,
+      TBL_CODE: text(l.tblCode).slice(0, 3) || null,
+      ITM_SIZE: text(l.itmSize).slice(0, 20) || null,
+      ITM_LOT: text(l.itemLot) || null,
+      LOT_NO: text(l.lotNo) || null,
+      ITM_COLOR: text(l.itmColor) || null,
+      ITM_GWT: num(l.grossWt),
+      ITM_OTH_WT: num(l.otherWt),
+      BAG_WT: num(l.bagWt),
+      ITM_GHT_PRC: num(l.ghtPct),
+      ITM_GHT_WT: num(l.ghtWt),
+      ITM_TOUCH: num(l.touch),
+      ITM_WEST_PRC: num(l.westPct),
+      // Fine follows the shared desktop policy rather than a local formula, so a labour bill agrees
+      // with every other voucher family: (net + ghat) x (touch + wastage) / 100.
+      ITM_FINE:
+        l.fineWt != null
+          ? num(l.fineWt)
+          : fineFor('sale', {
+              netWt: num(l.netWt),
+              ghtWt: num(l.ghtWt),
+              touch: num(l.touch),
+              westPct: num(l.westPct),
+            }),
+      ITM_RATE: num(l.rate),
+      LBR_PRC: num(l.labourPct),
+      LBR_TYPE: text(l.labourType) || null,
+      LBR_RATE: num(l.labourRate),
+      OTH_AMT: num(l.otherAmount),
+      ITM_MRP: num(l.mrp),
+      TAG_COST: num(l.tagCost),
+      RATE_TYPE: text(l.rateType) || null,
+      KR_NAME: text(l.karigarName) || null,
+      KR_OTH_WT: num(l.karigarOtherWt),
+      KR_NET_WT: num(l.karigarNetWt),
+      KR_TOUCH: num(l.karigarTouch),
+      KR_WEST_PRC: num(l.karigarWestPct),
+      KR_FINE: num(l.karigarFine),
+      KR_LBR_RATE: num(l.karigarLbrRate),
+      KR_LBR_AMT: num(l.karigarLbrAmt),
+      EMP_CODE: text(l.employeeCode) || null,
+      PR_CODE: text(l.prCode) || null,
+      LBR_CODE: text(l.lbrCode) || null,
     }));
+    // P8: the receive side. Rows are written only when the operator supplied them, so an unchanged
+    // cash-settled bill keeps its existing footprint and the write-set assertions stay meaningful.
+    const recDetl = (input.receiveLines ?? [])
+      .filter((l) => text(l.itCode))
+      .map((l, i) => ({
+        ...key,
+        SR_NO: i + 1,
+        VCH_DATE: vchDate,
+        VCH_TYPE: 'LBRI',
+        BOOK_NAME: 'LABOUR',
+        AC_CODE: input.acCode,
+        IT_CODE: text(l.itCode),
+        // '+' takes metal in. Defaulting to '+' matches the grid: a receive line exists because
+        // something came in, and a return is the explicit exception.
+        ITM_SIGN: l.sign === '-' ? '-' : '+',
+        ITM_PCS: num(l.pcs),
+        ITM_GWT: num(l.grossWt),
+        ITM_NWT: num(l.netWt),
+        ITM_OTH_WT: num(l.otherWt),
+        BAG_WT: num(l.bagWt),
+        ITM_GHT_WT: num(l.ghtWt),
+        ITM_TOUCH: num(l.touch),
+        ITM_WEST_PRC: num(l.westPct),
+        LESS_TOUCH: num(l.lessTouch),
+        // Old metal coming in follows the desktop's OLD-GOLD fine policy, which subtracts less-touch
+        // from (touch + wastage) — TR_PURC.cs:7310-7317, shared via fineFor so this agrees with the
+        // purchase screen instead of inventing a second formula.
+        ITM_FINE:
+          l.fineWt != null
+            ? num(l.fineWt)
+            : fineFor('purchaseOldGold', {
+                netWt: num(l.netWt),
+                ghtWt: num(l.ghtWt),
+                touch: num(l.touch),
+                westPct: num(l.westPct),
+                lesTouch: num(l.lessTouch),
+              }),
+        ITM_RATE: num(l.rate),
+        ITM_AMT: num(l.amount),
+        ITM_OTH_RATE: num(l.otherRate),
+        ITM_OTH_FINE: num(l.otherFine),
+        LBR_PRC: num(l.labourPct),
+        LBR_TYPE: text(l.labourType).slice(0, 1) || null,
+        LBR_RATE: num(l.labourRate),
+        LBR_AMT: num(l.labourAmount),
+        OTH_AMT: num(l.otherAmount),
+        ITM_MRP: num(l.mrp),
+        NET_AMT: num(l.netAmount),
+        TOT_AMT: num(l.totalAmount),
+        TAX_PRC: num(l.taxPct),
+        TBL_CODE: text(l.tblCode).slice(0, 3) || null,
+        DESIGN_NO: text(l.designNo) || null,
+        ITM_REMARK: text(l.remark) || null,
+        VCH_TIME: vchDate,
+        HD_VCH_NO: hdVchNo,
+        MAIN_USER: mainUser,
+      }));
+
     // TAX_DATA: two rows — metal GST (SALES) + labour GST (LABOUR).
     const taxBase = {
       ...key,
@@ -290,6 +509,7 @@ export async function createLabourInvoice(
       writes: [
         { table: 'LBR_DATA', rows: [header] },
         { table: 'LBR_ISU_DETL', rows: detl },
+        ...(recDetl.length ? [{ table: 'LBR_REC_DETL', rows: recDetl }] : []),
         ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
         { table: 'BILL_OS_DATA', rows: [osRow] },
       ],

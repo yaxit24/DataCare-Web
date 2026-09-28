@@ -1,0 +1,169 @@
+{
+ "form": "UT_SETTING",
+ "loc": 5149,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cColName": 1,
+  "cNewColName": 2,
+  "cColRpt": 3,
+  "cColShow": 4,
+  "cBookName": 5
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT BOOK_NAME FROM COL_MAST WHERE CO_CODE = ' ? ' GROUP BY BOOK_NAME ORDER BY BOOK_NAME",
+  "SELECT * From CO_SET WHERE CO_CODE = ' ? '",
+  "SELECT * From CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT * FROM COL_MAST WHERE CO_CODE = ' ? ' AND BOOK_NAME = ' ? ' AND COL_NAME NOT IN ('DmCode','DmName','DmColor','DmSize','DmOrigin','DmRemark')",
+  "SELECT * FROM COL_MAST WHERE CO_CODE = ' ? ' AND BOOK_NAME = ' ? '",
+  "UPDATE COL_MAST SET COL_NEW_NAME = ' ? ', COL_RPT = ' ? ', YES_NO = ' ? ' WHERE CO_CODE = ' ? ' AND BOOK_NAME = ' ? ' AND COL_NAME = ' ? '",
+  "UPDATE CO_SET SET LBR_TYPE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET RATE_PAR = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET TAX_ROF = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET SL_ROW_CHANGE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET LBR_RATE_GEN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET RATE_MAST_OPEN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET OP_DHRN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET DHRN_INT_TYPE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET HELP_SERCH = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET LDR_SUMM = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET REMINDER_OPEN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET LBR_ROF = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET ITM_RATE_ROF = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET PURC_WITH_LBR = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET STK_RPT_TYPE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET TOUCH_AUTO_SAVE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET PAN_CARD_VAL = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET DHRN_PRC = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET DUP_PRINT = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET CASH_PURC_AC = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET OP_LOAN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET FX_RATE = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET OZ_CON_VAL = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET FX_CODE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET PRINT_ZOOM = ? WHERE CO_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Right": 1,
+  "Left": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Please insert N OR Y And Try...",
+   "when": "(Operators.CompareString(TEXT_ENTRY.Text, \"N\", false) != 0) & (Operators.CompareString(TEXT_ENTRY.Text, \"Y\", false) != 0)"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "Operators.CompareString(UserEdit, \"Y\", false) != 0"
+  },
+  {
+   "message": "Column is Set",
+   "when": ""
+  },
+  {
+   "message": "Labour Type Is Set....",
+   "when": ""
+  },
+  {
+   "message": "WhSales Rate Cut Item Rate Type Is Set....",
+   "when": ""
+  },
+  {
+   "message": "Gst Tax Roundof Set....",
+   "when": ""
+  },
+  {
+   "message": "Sale Tag Row Change....",
+   "when": ""
+  },
+  {
+   "message": "Sale Labour Rate Genrate....",
+   "when": ""
+  },
+  {
+   "message": "Daily Rate Open Set....",
+   "when": ""
+  },
+  {
+   "message": "Opening Dhiran Is Set....",
+   "when": ""
+  },
+  {
+   "message": "Dhiran Intrest Type Is Set....",
+   "when": ""
+  },
+  {
+   "message": "Help Search Type is Set....",
+   "when": ""
+  },
+  {
+   "message": "Ledger Wise Summery Set....",
+   "when": ""
+  },
+  {
+   "message": "Reminder Open Set....",
+   "when": ""
+  },
+  {
+   "message": "Sales Labour Roundof Set....",
+   "when": ""
+  },
+  {
+   "message": "Sales Item Rate Roundof Set....",
+   "when": ""
+  },
+  {
+   "message": "Purchase account with labour set....",
+   "when": ""
+  },
+  {
+   "message": "Stock Report Default Open Gorss or Net Wise Set....",
+   "when": ""
+  },
+  {
+   "message": "Wh Sales Touch and West Auto Save set....",
+   "when": ""
+  },
+  {
+   "message": "Sales With Pancard Value set....",
+   "when": ""
+  },
+  {
+   "message": "Dhiran intrest Prc Default Set....",
+   "when": ""
+  },
+  {
+   "message": "Sales Bill Duplicate Print Set....",
+   "when": ""
+  },
+  {
+   "message": "Purchase Form Default Cash Purchase Ac Set....",
+   "when": ""
+  },
+  {
+   "message": "Opning Loane Ledr Posting Set....",
+   "when": ""
+  },
+  {
+   "message": "Forex Rate is Set....",
+   "when": ""
+  },
+  {
+   "message": "Oz Convert Value Set....",
+   "when": ""
+  },
+  {
+   "message": "Forex Code Is Set....",
+   "when": ""
+  },
+  {
+   "message": "Print View Zooming Set....",
+   "when": ""
+  }
+ ]
+}

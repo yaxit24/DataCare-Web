@@ -1,0 +1,93 @@
+{
+ "form": "MS_STK_LIMIT",
+ "loc": 2173,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cDmSrNo": 0,
+  "cFromWt": 1,
+  "cDmSize": 1,
+  "cToWt": 2,
+  "cDmWt": 2,
+  "cMinPcs": 3,
+  "cDmPcsGht": 3,
+  "cLbrCode": 4,
+  "cDmPcsLbr": 4,
+  "cGhtPrc": 5,
+  "cDmRateType": 5,
+  "cLbrPrc": 6,
+  "cDmRate": 6,
+  "cMinLbrPrc": 7,
+  "cLbrType": 8,
+  "cLbrRate": 9,
+  "cLbrAmt": 10
+ },
+ "inlineSql": [
+  "Select * From LBR_MAST WHERE CO_CODE = ' ? ' AND LBR_CODE = ' ? '",
+  "SELECT LBR_CODE As LbrCodeL,LBR_CATG as CategoryL,LBR_VAL As LbrValueR FROM LBR_MAST WHERE CO_CODE = ' ? ' ORDER BY LBR_CATG,LBR_CODE",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT A.IT_CODE,A.DM_SIZE As IT_NAME, '' As DesignL FROM DM_SIZE AS A WHERE A.CO_CODE = ' ? ' GROUP BY A.IT_CODE,A.DM_SIZE ORDER BY A.IT_CODE,A.DM_SIZE",
+  "SELECT A.IT_CODE,B.IT_NAME,A.IT_DESIGN FROM ITM_WT_MAST AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' GROUP BY A.IT_CODE,B.IT_NAME,A.IT_DESIGN ORDER BY A.IT_CODE,A.IT_DESIGN",
+  "SELECT A.IT_CODE,A.DM_SIZE FROM DM_SIZE AS A WHERE A.CO_CODE = ' ? ' GROUP BY A.IT_CODE,A.DM_SIZE ORDER BY A.IT_CODE,A.DM_SIZE",
+  "SELECT A.IT_CODE,B.IT_NAME FROM ITM_WT_MAST AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' GROUP BY A.IT_CODE,B.IT_NAME ORDER BY A.IT_CODE",
+  "SELECT A.*,B.IT_NAME FROM DM_SIZE AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.IT_CODE = ' ? ' ORDER BY DM_SIZE",
+  "SELECT A.*,B.IT_NAME FROM ITM_WT_MAST AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.IT_CODE = ' ? ' AND A.IT_DESIGN = 'N' ORDER BY A.SR_NO",
+  "DELETE FROM DM_SIZE WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT * FROM DM_SIZE WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "DELETE FROM ITM_WT_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? ' AND IT_DESIGN = ' ? '",
+  "SELECT * FROM ITM_WT_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? ' AND IT_DESIGN = ' ? '",
+  "Please Select Product For Delete.",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItNameL,A.IT_CODE As ItCodeL FROM ITEM_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_TYPE,A.IT_CODE"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 1,
+  "Enter": 4,
+  "Backspace": 1,
+  "Right": 1,
+  "Left": 1,
+  "Up": 1,
+  "Down": 1
+ },
+ "calc": [
+  "mSG[mSG.Row, 3] = Strings.Format((object)Conversion.Val(mSG[mSG.Row - 1, 3]), \"0.000\");",
+  "mSG[mSG.Row, 1] = Strings.Format((object)(Conversion.Val(mSG[mSG.Row - 1, 2]) + 0.001), \"0.000\");",
+  "mSG[mSG.Row, 5] = Strings.Format((object)Conversion.Val(mSG[mSG.Row - 1, 5]), \"0.00\");",
+  "mSG[mSG.Row, 6] = Strings.Format((object)Conversion.Val(mSG[mSG.Row - 1, 6]), \"0.00\");",
+  "mSG[mSG.Row, 9] = Strings.Format((object)Conversion.Val(mSG[mSG.Row - 1, 9]), \"0.00\");"
+ ],
+ "validations": [
+  {
+   "message": "Please Insert Lbr Type = G Gross OR N Net OR P Pcs Wise OR F fix OR K Kg Wise Then Try...",
+   "when": "Operators.CompareString(TEXT_ENTRY.Text, \"\", false) != 0 && ((Operators.CompareString(TEXT_ENTRY.Text, \"G\", false) != 0) & (Operators.CompareString(TEXT_ENTRY.T"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Error Found : Please Enter Item code First...",
+   "when": "Operators.CompareString(tItCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Product For Delete.",
+   "when": "Operators.CompareString(tItCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Record now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "Operators.CompareString(CurMast, \"Dm Size\", false) == 0"
+  }
+ ]
+}

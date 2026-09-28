@@ -1,0 +1,534 @@
+{
+ "report": "SalesRtnSumm",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1118,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 105,
+       "top": 0,
+       "width": 11535,
+       "height": 366,
+       "dataSource": "{@Company}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 105,
+       "top": 480,
+       "width": 11535,
+       "height": 240,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 30,
+       "top": 765,
+       "width": 11610,
+       "height": 315,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 105,
+       "top": 1080,
+       "width": 11535,
+       "height": 0
+      }
+     ]
+    },
+    {
+     "name": "Section4",
+     "kind": "PageHeader",
+     "height": 417,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 140,
+       "top": 75,
+       "width": 460,
+       "height": 240,
+       "text": "BK"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 650,
+       "top": 75,
+       "width": 1185,
+       "height": 232,
+       "text": "BIL_NO"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 1340,
+       "top": 75,
+       "width": 960,
+       "height": 240,
+       "text": "BIL_DATE"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 2370,
+       "top": 75,
+       "width": 3030,
+       "height": 232,
+       "text": "AC NAME"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 5220,
+       "top": 75,
+       "width": 1200,
+       "height": 226,
+       "text": "TOT_AMT"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 6510,
+       "top": 75,
+       "width": 900,
+       "height": 232,
+       "text": "CASH"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 7494,
+       "top": 75,
+       "width": 831,
+       "height": 232,
+       "text": "CARD"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 8445,
+       "top": 75,
+       "width": 945,
+       "height": 232,
+       "text": "Bank"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text16",
+       "left": 9540,
+       "top": 75,
+       "width": 795,
+       "height": 232,
+       "text": "Kasar"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text17",
+       "left": 10413,
+       "top": 75,
+       "width": 1032,
+       "height": 232,
+       "text": "Os Amt"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 38,
+       "top": 390,
+       "width": 11602,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 290,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "Detail",
+     "height": 270,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 140,
+       "top": 12,
+       "width": 460,
+       "height": 226,
+       "dataSource": "{SL_DATA.CO_BOOK}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 650,
+       "top": 12,
+       "width": 640,
+       "height": 192,
+       "dataSource": "{SL_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 1340,
+       "top": 12,
+       "width": 960,
+       "height": 204,
+       "dataSource": "{SL_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 2370,
+       "top": 12,
+       "width": 3030,
+       "height": 230,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 5420,
+       "top": 12,
+       "width": 1000,
+       "height": 204,
+       "dataSource": "{SL_DATA.RTN_TOT_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 6510,
+       "top": 12,
+       "width": 900,
+       "height": 204,
+       "dataSource": "{@CSH_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 7494,
+       "top": 12,
+       "width": 831,
+       "height": 204,
+       "dataSource": "{@Card_amt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 8445,
+       "top": 12,
+       "width": 945,
+       "height": 204,
+       "dataSource": "{@Crd_amt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 9465,
+       "top": 12,
+       "width": 870,
+       "height": 204,
+       "dataSource": "{SL_DATA.RTN_KASAR_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 10440,
+       "top": 12,
+       "width": 1005,
+       "height": 204,
+       "dataSource": "{SL_DATA.RTN_BILL_OS}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 456,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 105,
+       "top": 15,
+       "width": 11535,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 120,
+       "top": 15,
+       "width": 11520,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text11",
+       "left": 1740,
+       "top": 137,
+       "width": 3420,
+       "height": 240,
+       "text": "DATE TOTAL :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 6510,
+       "top": 137,
+       "width": 900,
+       "height": 204,
+       "dataSource": "Sum ({@CSH_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 7494,
+       "top": 137,
+       "width": 831,
+       "height": 204,
+       "dataSource": "Sum ({@Card_amt}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 8445,
+       "top": 137,
+       "width": 945,
+       "height": 204,
+       "dataSource": "Sum ({@Crd_amt}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 5420,
+       "top": 139,
+       "width": 1000,
+       "height": 204,
+       "dataSource": "Sum ({SL_DATA.RTN_TOT_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 9465,
+       "top": 139,
+       "width": 870,
+       "height": 204,
+       "dataSource": "Sum ({SL_DATA.RTN_KASAR_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 10501,
+       "top": 139,
+       "width": 944,
+       "height": 204,
+       "dataSource": "Sum ({SL_DATA.RTN_BILL_OS}, {SL_DATA.VCH_DATE}, \"daily\")"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "ReportFooter",
+     "height": 463,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 48,
+       "top": 12,
+       "width": 11592,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text12",
+       "left": 1740,
+       "top": 132,
+       "width": 3420,
+       "height": 240,
+       "text": "GRAND TOTAL :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 5420,
+       "top": 132,
+       "width": 1000,
+       "height": 216,
+       "dataSource": "Sum ({SL_DATA.RTN_TOT_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 6510,
+       "top": 132,
+       "width": 900,
+       "height": 216,
+       "dataSource": "Sum ({@CSH_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 7494,
+       "top": 132,
+       "width": 831,
+       "height": 216,
+       "dataSource": "Sum ({@Card_amt})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 8445,
+       "top": 132,
+       "width": 945,
+       "height": 216,
+       "dataSource": "Sum ({@Crd_amt})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 9465,
+       "top": 132,
+       "width": 890,
+       "height": 216,
+       "dataSource": "Sum ({SL_DATA.RTN_KASAR_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 10417,
+       "top": 132,
+       "width": 1028,
+       "height": 216,
+       "dataSource": "Sum ({SL_DATA.RTN_BILL_OS})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 48,
+       "top": 443,
+       "width": 11592,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "PageFooter",
+     "height": 270,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "Advance",
+   "ref": "{@Advance}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "Card_amt",
+   "ref": "{@Card_amt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.RTN_CARD_AMT}"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "Crd_amt",
+   "ref": "{@Crd_amt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.RTN_CHQ_AMT}"
+  },
+  {
+   "name": "CSH_AMT",
+   "ref": "{@CSH_AMT}",
+   "type": "NumberField",
+   "text": "{SL_DATA.RTN_CASH_AMT}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'SALES REPORT'"
+  }
+ ],
+ "sectionCount": 8,
+ "objectCount": 43,
+ "formulaCount": 8
+}

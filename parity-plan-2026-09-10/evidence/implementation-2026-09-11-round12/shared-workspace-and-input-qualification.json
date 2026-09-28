@@ -1,0 +1,83 @@
+{
+  "capturedAtUtc": "2026-09-11T16:48:32.019624+00:00",
+  "authorship": "Changes were present in the shared workspace beyond this team's ledger/mode edits; preserved and tested, not attributed as this team's implementation.",
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/ops/releaseCertification.ts",
+      "sha256": "b2485ced58e5a763d2e6238254ee3fbd2fe17a9a35b668d40d201f804e72d8c3"
+    },
+    {
+      "path": "web/apps/api/test/releaseCertification.test.ts",
+      "sha256": "810bea188b7565906632d7a04fddc2654cfad75d1f480712fffaf840470e927d"
+    },
+    {
+      "path": "web/apps/api/test/releaseCandidateIdentity.test.mjs",
+      "sha256": "85d7b054b51aced79b5f4d5ea4d9b2b1ef8b625a451836124067652567a442f7"
+    },
+    {
+      "path": "web/scripts/release-certify.mjs",
+      "sha256": "222135af656cacdc9c03d22785601b9d7d5e98eeb4e6eaca77ca671b638f9d75"
+    },
+    {
+      "path": "web/scripts/lib/release-candidate-identity.mjs",
+      "sha256": "5d645284f0b6409a3a561c2e152b07ef42a867eba12382ad14db75fac2b9757e"
+    }
+  ],
+  "testCountExplanation": {
+    "prior": {
+      "files": 237,
+      "tests": 2159
+    },
+    "newLedgerTests": 54,
+    "additionalSharedCertificationCases": 8,
+    "newSharedCandidateIdentityCases": 6,
+    "current": {
+      "files": 239,
+      "tests": 2227
+    }
+  },
+  "firstCompleteRun": {
+    "run": {
+      "command": [
+        "pnpm",
+        "test:parity:api"
+      ],
+      "cwd": "web",
+      "startedAtUtc": "2026-09-11T16:35:27.321422+00:00",
+      "finishedAtUtc": "2026-09-11T16:40:56.977575+00:00",
+      "exitCode": 0,
+      "status": "passed",
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/api-full-final.txt"
+    },
+    "actualFiles": 239,
+    "actualTests": 2227,
+    "skipped": 0,
+    "capturedFiles": 1323,
+    "capturedFilesUnchangedAtVerification": true,
+    "limits": "Full test run passed, but its capture omitted the new script helper and external certification reads. Its capture-helper code was subsequently expanded. Not the final complete dependency proof."
+  },
+  "intermediateRun": {
+    "run": {
+      "command": [
+        "pnpm",
+        "test:parity:api"
+      ],
+      "cwd": "web",
+      "startedAtUtc": "2026-09-11T16:43:07.383232+00:00",
+      "finishedAtUtc": "2026-09-11T16:45:57.579005+00:00",
+      "exitCode": 0,
+      "status": "passed",
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/api-full-qualified.txt"
+    },
+    "disposition": "Stopped with SIGINT during test collection after external inputs were identified. Vitest returned zero without a complete Test Files/Tests summary. No regression pass or assertions credited despite raw exit-based metadata status.",
+    "capturedFiles": 1361
+  },
+  "finalRequiredRun": {
+    "label": "api-full-audited",
+    "snapshot": "api-input-snapshot-audited.json",
+    "capturedFiles": 1368,
+    "externalObservations": 8,
+    "requirement": "Full exact239/2227 successful summary, no skips, unchanged captured files and external present/absent observations."
+  },
+  "limits": "Unit decision tests and injected Git observations do not certify an actual clean release candidate or report/desktop/business parity."
+}

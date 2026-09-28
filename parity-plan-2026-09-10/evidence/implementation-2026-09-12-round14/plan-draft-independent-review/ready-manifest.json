@@ -1,0 +1,46 @@
+{
+  "status": "draft-semantic-review-complete",
+  "originalDraftSha256": "aef9bf2897c53ef317f2ec37c61c24c9e8457601cdbcfbbf7400716bc319c236",
+  "proposedCorrections": 7,
+  "activeEdits": false,
+  "reviewerRuns": 0,
+  "deliberatePlaceholdersPreserved": [
+    "BAR_STATUS_PLACEHOLDER",
+    "VERIFICATION_PLACEHOLDER"
+  ],
+  "files": [
+    {
+      "path": "effect-count-qualification.json",
+      "sha256": "729f9996394e6b2abaf84371a704cafbf9235369ac2968419f0e0acee16e00ed"
+    },
+    {
+      "path": "final-api-recipe-requirements.json",
+      "sha256": "8eabbe42a3edabe10f5c13e9b3eb2acee94fbdd204cabbe70441c342ac0ef2ea"
+    },
+    {
+      "path": "proposed-draft.md",
+      "sha256": "1a696e7b3c8b443e4304e08e91e904850cdf6e99011cf76c29f767c835df883c"
+    },
+    {
+      "path": "review-inputs.json",
+      "sha256": "d7f141467c2a2e951ad83e0a6d6c6e5e2f82982a56fd104d0d2b6656a768866f"
+    },
+    {
+      "path": "review.md",
+      "sha256": "c4300f8f97aa067424d825ecb86de449404ed1ddc063341c4b35a1579a3657b2"
+    },
+    {
+      "path": "reviewed-draft.md",
+      "sha256": "aef9bf2897c53ef317f2ec37c61c24c9e8457601cdbcfbbf7400716bc319c236"
+    },
+    {
+      "path": "semantic-corrections.patch",
+      "sha256": "e33e4d51322870a158fe7ceadda281f3d1b756ea20dc175cde0f8f883088dc69"
+    },
+    {
+      "path": "semantic-replacements.json",
+      "sha256": "fc8b127fb2179447e66b91b466b1719b51593779c7f915fea09c400740743a04"
+    }
+  ],
+  "inputCount": 18
+}

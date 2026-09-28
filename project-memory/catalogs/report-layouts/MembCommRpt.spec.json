@@ -1,0 +1,445 @@
+{
+ "report": "MembCommRpt",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 945,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 45,
+       "top": 0,
+       "width": 11205,
+       "height": 324,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 45,
+       "top": 360,
+       "width": 11205,
+       "height": 240,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 45,
+       "top": 645,
+       "width": 11205,
+       "height": 230,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 10740,
+       "top": 645,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section4",
+     "kind": "PageHeader",
+     "height": 435,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 45,
+       "top": 60,
+       "width": 11355,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 225,
+       "top": 135,
+       "width": 1155,
+       "height": 255,
+       "text": "Book Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 1485,
+       "top": 135,
+       "width": 600,
+       "height": 255,
+       "text": "Date"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 2490,
+       "top": 135,
+       "width": 855,
+       "height": 230,
+       "text": "Vch No"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 3285,
+       "top": 135,
+       "width": 1950,
+       "height": 230,
+       "text": "Cust Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 5565,
+       "top": 135,
+       "width": 1950,
+       "height": 230,
+       "text": "Itm Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 7622,
+       "top": 135,
+       "width": 733,
+       "height": 216,
+       "text": "Net Wt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text12",
+       "left": 8445,
+       "top": 135,
+       "width": 750,
+       "height": 216,
+       "text": "WestWt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 9195,
+       "top": 135,
+       "width": 825,
+       "height": 216,
+       "text": "ItTouch"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 10155,
+       "top": 135,
+       "width": 900,
+       "height": 216,
+       "text": "Com Fine"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 45,
+       "top": 415,
+       "width": 11355,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupHeader",
+     "height": 346,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 225,
+       "top": 0,
+       "width": 3615,
+       "height": 226,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line11",
+       "left": 210,
+       "top": 285,
+       "width": 11220,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "Detail",
+     "height": 260,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 270,
+       "top": 30,
+       "width": 1215,
+       "height": 230,
+       "dataSource": "{BOOK_DATA.BOOK_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 1485,
+       "top": 30,
+       "width": 923,
+       "height": 204,
+       "dataSource": "{COMM_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 2490,
+       "top": 30,
+       "width": 735,
+       "height": 226,
+       "dataSource": "{COMM_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 3285,
+       "top": 30,
+       "width": 2115,
+       "height": 226,
+       "dataSource": "{AC_MAST_1.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 5565,
+       "top": 30,
+       "width": 1995,
+       "height": 211,
+       "dataSource": "{ITEM_MAST.IT_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 7622,
+       "top": 30,
+       "width": 733,
+       "height": 204,
+       "dataSource": "{COMM_DATA.COM_WT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 8430,
+       "top": 30,
+       "width": 765,
+       "height": 204,
+       "dataSource": "{COMM_DATA.COM_GHT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 9315,
+       "top": 30,
+       "width": 705,
+       "height": 204,
+       "dataSource": "{COMM_DATA.ITM_TOUCH}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 10062,
+       "top": 30,
+       "width": 997,
+       "height": 204,
+       "dataSource": "{COMM_DATA.COM_FINE}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 225,
+       "top": 240,
+       "width": 11175,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section10",
+     "kind": "GroupFooter",
+     "height": 400,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line7",
+       "left": 45,
+       "top": 0,
+       "width": 11355,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text20",
+       "left": 8040,
+       "top": 60,
+       "width": 1680,
+       "height": 255,
+       "text": "Party Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 10051,
+       "top": 60,
+       "width": 1018,
+       "height": 216,
+       "dataSource": "Sum ({COMM_DATA.COM_FINE}, {COMM_DATA.MEMB_AC_CODE})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "ReportFooter",
+     "height": 300,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 7995,
+       "top": 0,
+       "width": 3450,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 8040,
+       "top": 45,
+       "width": 1680,
+       "height": 255,
+       "text": "Grand Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 10051,
+       "top": 45,
+       "width": 1018,
+       "height": 216,
+       "dataSource": "Sum ({COMM_DATA.COM_FINE})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section13",
+     "kind": "PageFooter",
+     "height": 705,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+' '+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "Group",
+   "ref": "{@Group}",
+   "type": "StringField",
+   "text": "{COMM_DATA.CO_YEAR}+{COMM_DATA.CO_BOOK}+{COMM_DATA.VCH_NO}"
+  },
+  {
+   "name": "PurcTax",
+   "ref": "{@PurcTax}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "ReportType",
+   "ref": "{@ReportType}",
+   "type": "StringField",
+   "text": "'R'"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'SALES REPORT'"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  }
+ ],
+ "sectionCount": 8,
+ "objectCount": 33,
+ "formulaCount": 8
+}

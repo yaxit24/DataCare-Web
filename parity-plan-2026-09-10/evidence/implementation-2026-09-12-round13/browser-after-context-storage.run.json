@@ -1,0 +1,37 @@
+{
+  "command": [
+    "env",
+    "PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round13-context-storage",
+    "pnpm",
+    "test:parity:browser"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T19:40:54.523246+00:00",
+  "finishedAtUtc": "2026-09-11T19:41:28.360886+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-after-context-storage.txt",
+  "logSha256": "6b94ad7d1e61f53134a70413506b624c3db1045306f5dbd12a375b50a8c076a8",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-after-context-storage.inputs.json",
+  "inputManifestSha256": "71ef5e83a4e2ef61f150edf3a35f1b9502c99a8970db7c1b807a7b65a6bee421",
+  "inputCount": 1756,
+  "changedInputs": [
+    {
+      "path": "web/apps/api/src/modules/ops/releaseCertification.ts",
+      "beforeSha256": "56770cfd39fe64a33bc68c052eeaa60305816a2ac8e05bad3a83563bf4213bbe",
+      "afterSha256": "bcea8db1c9203d35f2f50e4937bbacbb7f50d140b404fbe445eeb1fc22953478"
+    },
+    {
+      "path": "web/apps/api/test/releaseCertificationRecord.test.mjs",
+      "beforeSha256": "1f390f9044a127a4983e99dc0835ec43753525981cce6e70b4540ba7a9c52193",
+      "afterSha256": "cfb78269a7c6431a77b34d7582a97eb443c96ec408a6790a33f45390072b93d4"
+    },
+    {
+      "path": "web/apps/api/test/typeParityInput.test.mjs",
+      "beforeSha256": "a069b1d22e7d018dbb91be810cefb90c98fd2519914e20439cf62ea3653b8f17",
+      "afterSha256": "c91a524a00a9b278c3b4fa51d986ff8cefdf1efa96c2de2a026137b8ce2b7fe2"
+    }
+  ],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

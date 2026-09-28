@@ -8,6 +8,11 @@ import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 /** Item Lot Intake (TR_ITM_LOT) — load loose/lot stock as identifiable lots → ITM_LOT_DETL +
  *  MAIN_STOCK (VCH_TYPE 'ITLOT' / TR_TYPE 'I' / '+'). No money ledger. */
@@ -23,7 +28,31 @@ interface Row {
   westPct: string;
   rate: string;
   making: string;
+  prCode: string;
+  ghtWt: string;
+  fineWt: string;
+  otherAmount: string;
+  remark: string;
 }
+/**
+ * P7 extended grid columns: desktop columns this form has and the web did not.
+ *
+ * Every entry was verified against the WRITER, not the API interface — a field present on the
+ * interface is not necessarily persisted (purchase hard-codes ITM_SIZE to blank, and five
+ * SaleLineInput fields have no SL_DETL column at all), and such a cell would silently discard
+ * what the operator types.
+ */
+const extendedLineFields: Array<[keyof Row, string]> = [
+  ['prCode', 'PrCost'],
+  ['ghtWt', 'GhtWt'],
+  ['fineWt', 'Fine'],
+  ['otherAmount', 'OthAmt'],
+  ['remark', 'Remark'],
+];
+
+/** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
+const NUMERIC_EXTENDED = new Set<string>(['ghtWt', 'fineWt', 'otherAmount']);
+
 const blank = (): Row => ({
   itCode: '',
   lotNo: '',
@@ -36,6 +65,11 @@ const blank = (): Row => ({
   westPct: '',
   rate: '',
   making: '',
+  prCode: '',
+  ghtWt: '',
+  fineWt: '',
+  otherAmount: '',
+  remark: '',
 });
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
@@ -52,6 +86,7 @@ export default function ItemLotPage() {
   const { coYear, lcCode } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [rows, setRows] = useState<Row[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
   // The desktop's image buttons act on the current grid row.
   const [imageRow, setImageRow] = useState(0);
   const [vchDate, setVchDate] = useState(currentDate);
@@ -107,6 +142,9 @@ export default function ItemLotPage() {
       setVchDate(String(view.vchDate));
       setAcCode(String(view.acCode ?? ''));
       const loaded = (view.lines ?? []).map((line: any): Row => ({
+        // Spread blank() so a loaded row carries every field the grid renders, including the
+        // extended columns; otherwise the object is missing properties Row now declares.
+        ...blank(),
         itCode: String(line.itCode ?? ''),
         lotNo: String(line.lotNo ?? ''),
         designNo: String(line.designNo ?? ''),
@@ -149,6 +187,17 @@ export default function ItemLotPage() {
     const lines = rows
       .filter((row) => row.itCode.trim())
       .map((row) => ({
+        // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+        // explicit zero is an override at the writer and defeats the server's derivation.
+        ...Object.fromEntries(
+          extendedLineFields
+            .map(([key]) => [
+              key,
+              String((row as unknown as Record<string, unknown>)[key] ?? '').trim(),
+            ])
+            .filter(([, v]) => v !== '')
+            .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+        ),
         itCode: row.itCode.trim(),
         lotNo: row.lotNo.trim() || undefined,
         designNo: row.designNo.trim() || undefined,
@@ -259,6 +308,12 @@ export default function ItemLotPage() {
           </div>
         </div>
         <div className="panel" style={{ overflow: 'auto' }}>
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="item-lot-grid-mode"
+          />
           <table className="grid">
             <thead>
               <tr>
@@ -274,6 +329,7 @@ export default function ItemLotPage() {
                 <th className="num">Fine</th>
                 <th className="num">Rate</th>
                 <th className="num">Making/g</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -331,6 +387,14 @@ export default function ItemLotPage() {
                       />
                     </td>
                   ))}
+                  <ExtendedBodyCells
+                    full={fullGrid}
+                    fields={extendedLineFields}
+                    line={row}
+                    row={i}
+                    baseColumns={11}
+                    setValue={(row, key, value) => set(row, key, value)}
+                  />
                   <td>
                     <button
                       type="button"

@@ -1,0 +1,81 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/saleReturnIncomingConfiguration.test.ts" "test/saleReturnIncomingConfiguration.db.test.ts" "test/saleReturnIncomingConfiguration.review.test.ts" "test/saleReturnIncomingConfiguration.routes.db.test.ts" "test/routePolicy.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 26ms
+ ✓ test/saleReturnIncomingConfiguration.review.test.ts (69 tests) 61ms
+ ✓ test/saleReturnIncomingConfiguration.db.test.ts (26 tests) 1165ms
+   ✓ incoming Return configuration from exact scoped database observations > returns configured source policy and stable fields without changing raw saved data or provisioning columns 329ms
+ ❯ test/saleReturnIncomingConfiguration.routes.db.test.ts (9 tests | 1 failed) 1209ms
+   × incoming Return calculation configuration HTTP boundary > rejects missing, wrong-family, inactive, duplicate, wrong-direction and wrong-table books 19ms
+     → R80: {"error":"book-unavailable"}: expected 409 to be 422 // Object.is equality
+ ✓ test/saleReturnIncomingConfiguration.test.ts (36 tests) 33ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnIncomingConfiguration.routes.db.test.ts > incoming Return calculation configuration HTTP boundary > rejects missing, wrong-family, inactive, duplicate, wrong-direction and wrong-table books
+AssertionError: R80: {"error":"book-unavailable"}: expected 409 to be 422 // Object.is equality
+
+- Expected
++ Received
+
+- 422
++ 409
+
+ ❯ test/saleReturnIncomingConfiguration.routes.db.test.ts:278:68
+    276|       for (const coBook of ['R80', 'S81', 'R83', 'R84', 'R85', 'R86'])…
+    277|         const response = await call(endpoint({ ...selected, coBook }));
+    278|         expect(response.statusCode, `${coBook}: ${response.body}`).toB…
+       |                                                                    ^
+    279|       }
+    280|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 193 passed (194)
+   Start at  09:44:05
+   Duration  8.27s (transform 2.13s, setup 0ms, collect 3.87s, tests 2.50s, environment 1ms, prepare 377ms)
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 test: `vitest run "test/saleReturnIncomingConfiguration.test.ts" "test/saleReturnIncomingConfiguration.db.test.ts" "test/saleReturnIncomingConfiguration.review.test.ts" "test/saleReturnIncomingConfiguration.routes.db.test.ts" "test/routePolicy.test.ts"`
+Exit status 1
+PARITY_TEST_FAILED pnpm exited 1

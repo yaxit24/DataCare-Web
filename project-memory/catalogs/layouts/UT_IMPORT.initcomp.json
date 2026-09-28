@@ -1,0 +1,482 @@
+{
+ "form": "UT_IMPORT",
+ "controlCount": 46,
+ "byKind": {
+  "button": 41,
+  "masked": 1,
+  "panel": 1,
+  "label": 2,
+  "other": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "SimpleButton4",
+   "btnJPTag",
+   "btnBillWise",
+   "btnRtlJdt",
+   "btnAbAcOpbl",
+   "btnAcShort",
+   "btnPlusBarIdtl",
+   "btnRtlAreaImport",
+   "btnPlusReparing",
+   "btnPlusTagDataType",
+   "btnNexHuid",
+   "btnPlusAcOp",
+   "btnPlusAcRef",
+   "btnPlusLoan",
+   "btnPlusSchm",
+   "btnPlustagcost",
+   "btnCudhiSql",
+   "SimpleButton3",
+   "SimpleButton2",
+   "SimpleButton1",
+   "btnHuId",
+   "btnPlusMast",
+   "btnLastSrNo",
+   "btnAcMastReImport",
+   "btnWhSql",
+   "btnWhApr",
+   "BtnLite",
+   "BtnRef",
+   "btnBarIdtl",
+   "btnLoan",
+   "btnDhrnAcUPdate",
+   "btnSchm",
+   "btnRtlDhrn",
+   "btnReSet",
+   "LblReset",
+   "mClDate",
+   "btnRtLImoirt",
+   "btnWhImport",
+   "ProgressBar1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "mClDate",
+   "type": "MaskedTextBox",
+   "location": "539,152",
+   "size": "89,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "btnReSet",
+   "type": "SimpleButton",
+   "location": "521,190",
+   "size": "127,32",
+   "tabIndex": "1",
+   "text": "Estimate Reset",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "btnWhImport",
+   "type": "SimpleButton",
+   "location": "407,146",
+   "size": "106,32",
+   "tabIndex": "2",
+   "text": "&Wh Soft",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "btnRtLImoirt",
+   "type": "SimpleButton",
+   "location": "654,146",
+   "size": "106,32",
+   "tabIndex": "3",
+   "text": "&Retail Soft",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Old Software Import",
+   "kind": "label"
+  },
+  {
+   "name": "ProgressBar1",
+   "type": "ProgressBar",
+   "location": "0,383",
+   "size": "1309,23",
+   "tabIndex": "1152",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "LblReset",
+   "type": "Label",
+   "location": "498,114",
+   "size": "160,20",
+   "tabIndex": "1156",
+   "text": "Estimate Reset As On",
+   "kind": "label"
+  },
+  {
+   "name": "btnRtlDhrn",
+   "type": "SimpleButton",
+   "location": "654,190",
+   "size": "106,32",
+   "tabIndex": "1157",
+   "text": "&Retail Dhrn",
+   "kind": "button"
+  },
+  {
+   "name": "btnSchm",
+   "type": "SimpleButton",
+   "location": "654,235",
+   "size": "106,32",
+   "tabIndex": "1158",
+   "text": "&Retail Schm",
+   "kind": "button"
+  },
+  {
+   "name": "btnDhrnAcUPdate",
+   "type": "SimpleButton",
+   "location": "248,321",
+   "size": "143,32",
+   "tabIndex": "1159",
+   "text": "&Dhrn Ac Update",
+   "kind": "button"
+  },
+  {
+   "name": "btnLoan",
+   "type": "SimpleButton",
+   "location": "654,278",
+   "size": "106,32",
+   "tabIndex": "1160",
+   "text": "&Retail Loan",
+   "kind": "button"
+  },
+  {
+   "name": "btnBarIdtl",
+   "type": "SimpleButton",
+   "location": "248,278",
+   "size": "143,32",
+   "tabIndex": "1161",
+   "text": "&Bar Idtl Update",
+   "kind": "button"
+  },
+  {
+   "name": "BtnRef",
+   "type": "SimpleButton",
+   "location": "248,146",
+   "size": "143,32",
+   "tabIndex": "1162",
+   "text": "Ac to Add Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "BtnLite",
+   "type": "SimpleButton",
+   "location": "533,235",
+   "size": "106,32",
+   "tabIndex": "1163",
+   "text": "&Lite Soft",
+   "kind": "button"
+  },
+  {
+   "name": "btnWhApr",
+   "type": "SimpleButton",
+   "location": "407,190",
+   "size": "106,32",
+   "tabIndex": "1164",
+   "text": "&Wh Apr",
+   "kind": "button"
+  },
+  {
+   "name": "btnWhSql",
+   "type": "SimpleButton",
+   "location": "407,235",
+   "size": "106,32",
+   "tabIndex": "1165",
+   "text": "&Wh Sql",
+   "kind": "button"
+  },
+  {
+   "name": "btnAcMastReImport",
+   "type": "SimpleButton",
+   "location": "248,190",
+   "size": "143,32",
+   "tabIndex": "1166",
+   "text": "&Ac Mast Re Import",
+   "kind": "button"
+  },
+  {
+   "name": "btnLastSrNo",
+   "type": "SimpleButton",
+   "location": "248,235",
+   "size": "143,32",
+   "tabIndex": "1167",
+   "text": "&Rtl - Wh - Tg SrNo",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusMast",
+   "type": "SimpleButton",
+   "location": "775,102",
+   "size": "106,32",
+   "tabIndex": "1168",
+   "text": "&Plus Soft",
+   "kind": "button"
+  },
+  {
+   "name": "btnHuId",
+   "type": "SimpleButton",
+   "location": "248,102",
+   "size": "143,32",
+   "tabIndex": "1169",
+   "text": "&Rtl - Wh - HuId",
+   "kind": "button"
+  },
+  {
+   "name": "SimpleButton1",
+   "type": "SimpleButton",
+   "location": "775,190",
+   "size": "106,32",
+   "tabIndex": "1170",
+   "text": "&Plus Dhrn",
+   "kind": "button"
+  },
+  {
+   "name": "SimpleButton2",
+   "type": "SimpleButton",
+   "location": "775,235",
+   "size": "106,32",
+   "tabIndex": "1171",
+   "text": "&Plus Approval",
+   "kind": "button"
+  },
+  {
+   "name": "SimpleButton3",
+   "type": "SimpleButton",
+   "location": "654,321",
+   "size": "106,32",
+   "tabIndex": "1172",
+   "text": "&Rtl Approval",
+   "kind": "button"
+  },
+  {
+   "name": "btnCudhiSql",
+   "type": "SimpleButton",
+   "location": "407,278",
+   "size": "106,32",
+   "tabIndex": "1173",
+   "text": "&Chudi Sql",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlustagcost",
+   "type": "SimpleButton",
+   "location": "887,146",
+   "size": "163,32",
+   "tabIndex": "1174",
+   "text": "Plus Stk Date",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusSchm",
+   "type": "SimpleButton",
+   "location": "887,190",
+   "size": "163,32",
+   "tabIndex": "1175",
+   "text": "&Plus Schm",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusLoan",
+   "type": "SimpleButton",
+   "location": "775,278",
+   "size": "106,32",
+   "tabIndex": "1176",
+   "text": "&Plus Loan",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusAcRef",
+   "type": "SimpleButton",
+   "location": "887,235",
+   "size": "163,32",
+   "tabIndex": "1177",
+   "text": "&PlusAcRef - ConPrc",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusAcOp",
+   "type": "SimpleButton",
+   "location": "887,278",
+   "size": "163,32",
+   "tabIndex": "1178",
+   "text": "&Plus Ac Opning",
+   "kind": "button"
+  },
+  {
+   "name": "btnNexHuid",
+   "type": "SimpleButton",
+   "location": "511,432",
+   "size": "147,32",
+   "tabIndex": "1179",
+   "text": "Next Huid Import",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusTagDataType",
+   "type": "SimpleButton",
+   "location": "887,321",
+   "size": "163,32",
+   "tabIndex": "1180",
+   "text": "Plus Poind Mast",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusReparing",
+   "type": "SimpleButton",
+   "location": "775,321",
+   "size": "106,32",
+   "tabIndex": "1181",
+   "text": "&Plus Reparing",
+   "kind": "button"
+  },
+  {
+   "name": "btnRtlAreaImport",
+   "type": "SimpleButton",
+   "location": "78,102",
+   "size": "164,32",
+   "tabIndex": "1182",
+   "text": "&Rtl Schm Area Impot",
+   "kind": "button"
+  },
+  {
+   "name": "btnPlusBarIdtl",
+   "type": "SimpleButton",
+   "location": "887,102",
+   "size": "163,32",
+   "tabIndex": "1183",
+   "text": "Plus Br Idtl  Update",
+   "kind": "button"
+  },
+  {
+   "name": "btnAcShort",
+   "type": "SimpleButton",
+   "location": "78,146",
+   "size": "164,32",
+   "tabIndex": "1184",
+   "text": "Rtl Ac Short Name",
+   "kind": "button"
+  },
+  {
+   "name": "btnAbAcOpbl",
+   "type": "SimpleButton",
+   "location": "78,190",
+   "size": "163,32",
+   "tabIndex": "1185",
+   "text": "&Ab Ac Opbl",
+   "kind": "button"
+  },
+  {
+   "name": "btnRtlJdt",
+   "type": "SimpleButton",
+   "location": "78,235",
+   "size": "163,32",
+   "tabIndex": "1186",
+   "text": "&Retail Jadtar",
+   "kind": "button"
+  },
+  {
+   "name": "btnBillWise",
+   "type": "SimpleButton",
+   "location": "775,146",
+   "size": "106,32",
+   "tabIndex": "1187",
+   "text": "Plus Bill Os",
+   "kind": "button"
+  },
+  {
+   "name": "btnJPTag",
+   "type": "SimpleButton",
+   "location": "678,432",
+   "size": "156,32",
+   "tabIndex": "1188",
+   "text": "&Rtl Jp Tag",
+   "kind": "button"
+  },
+  {
+   "name": "SimpleButton4",
+   "type": "SimpleButton",
+   "location": "337,432",
+   "size": "142,32",
+   "tabIndex": "1189",
+   "text": "&Wh Ac Re Import",
+   "kind": "button"
+  }
+ ]
+}

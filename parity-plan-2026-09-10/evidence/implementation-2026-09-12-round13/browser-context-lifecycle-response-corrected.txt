@@ -1,0 +1,36 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+SESSION_CONTEXT_REAL_STACK_FAILED: Could not acquire the actual response from /api/context/select at its response event: response.body: Protocol error (Network.getResponseBody): No resource with given identifier found
+PARITY_TEST_FAILED node exited 1

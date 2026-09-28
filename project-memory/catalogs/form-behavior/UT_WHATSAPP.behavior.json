@@ -1,0 +1,132 @@
+{
+ "form": "UT_WHATSAPP",
+ "loc": 6774,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM LOGIN_MAST WHERE CO_CODE = ' ? ' ORDER BY LOGIN_NAME",
+  "SELECT WAPP_DELAY From CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT AC_AREA FROM AC_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_AREA ORDER BY AC_AREA",
+  "SELECT AC_CITY FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CITY <> '' GROUP BY AC_CITY ORDER BY AC_CITY",
+  "SELECT * FROM MSG_MAST WHERE MSG_TYPE IN ('B','A') ORDER BY MSG_TYPE",
+  "SELECT A.AC_GR As GrCode,B.AC_GR_NAME as GrName FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' GROUP BY A.AC_GR,B.AC_GR_NAME ORDER BY A.AC_GR",
+  "SELECT A.AC_GR As GrCode FROM ADD_MAST AS A WHERE A.CO_CODE = ' ? ' GROUP BY A.AC_GR ORDER BY A.AC_GR",
+  "SELECT A.SCHM_CODE As GrCode,A.SCHM_NAME as GrName FROM AD_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.SCHM_CODE",
+  "SELECT A.AC_CODE,A.AC_NAME,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE,A.AC_MOBILE2 FROM ADD_MAST AS A WHERE A.CO_CODE = ' ? ' ? AND AC_MOBILE <> '' ? ",
+  "SELECT A.* FROM AD_MEMB AS A WHERE A.CO_CODE = ' ? ' ? AND A.AC_MOBILE <> '' ? ",
+  "SELECT A.AC_CODE,A.AC_NAME,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE,A.AC_MOBILE2 FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' ? AND AC_MOBILE <> '' ? AND A.AC_CODE > '00100'",
+  "DELETE FROM MSG_MAST WHERE MSG_TYPE = ' ? '",
+  "INSERT INTO MSG_MAST(CO_CODE,MSG_TYPE,MSG_TYPING,MSG_DETL) VALUES(' ? ',' ? ','E',' ? ')",
+  "INSERT INTO MSG_MAST(CO_CODE,MSG_TYPE,MSG_TYPING,MSG_DETL) VALUES(' ? ','N','E',' ? ')",
+  "DELETE FROM MSG_MAST WHERE MSG_DETL = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL,A.AC_ADD1 As AddressL,A.AC_MOBILE As MobileL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT MEMB_NAME As AcNameL,MEMB_CODE as AcCodeL, SCHM_CODE AS SchmCode,AC_ADD1 AS AddressL,AC_CITY AS CityL,AC_MOBILE FROM AD_MEMB WHERE CO_CODE = ' ? ' ORDER BY MEMB_NAME",
+  "SELECT * FROM [{RuntimeHelpers.GetObjectValue(objectValue)}]",
+  "SELECT MSG_DETL As SmsDescL,MSG_TYPE As TypeM FROM MSG_MAST WHERE MSG_DETL <> '' ORDER BY MSG_DETL",
+  "SELECT AC_NAME,AC_ADD1,AC_CITY,AC_PHONE,AC_MOBILE,AC_MOBILE2,BR_DATE,AN_DATE,'P' As AcType FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND DAY(BR_DATE) = ? AND MONTH(BR_DATE) = ? or DAY(L_BR_DATE) = ? AND MONTH(L_BR_DATE) = ? AND (A.AC_MOBILE <> '' OR A.AC_PHONE <> '' OR A.AC_MOBILE2 <> '') ? UNION ALL SELECT AC_NAME,AC_ADD1,AC_CITY,AC_PHONE,AC_MOBILE,AC_MOBILE2,BR_DATE,AN_DATE,'A' As AcType FROM ADD_MAST AS A WHERE A.CO_CODE = ' ? ' AND DAY(BR_DATE) = ? AND MONTH(BR_DATE) = ? or DAY(L_BR_DATE) = ? AND MONTH(L_BR_DATE) = ? AND (A.AC_MOBILE <> '' OR A.AC_PHONE <> '' OR A.AC_MOBILE2 <> '') ? UNION ALL SELECT MEMB_NAME,AC_ADD1,AC_CITY,AC_PHONE,AC_MOBILE,AC_MOBILE2,BIRTH_DATE,ANV_DATE,'S' As AcType FROM AD_MEMB AS A WHERE A.CO_CODE = ' ? ' AND DAY(BIRTH_DATE) = ? AND MONTH(BIRTH_DATE) = ? or DAY(L_BR_DATE) = ? AND MONTH(L_BR_DATE) = ? AND (A.AC_MOBILE <> '' OR A.AC_PHONE <> '' OR A.AC_MOBILE2 <> '') ? ",
+  "SELECT AC_NAME,AC_ADD1,AC_CITY,AC_PHONE,AC_MOBILE,AC_MOBILE2,BR_DATE,AN_DATE,L_BR_DATE,'P' As AcType FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND (DAY(BR_DATE) = ? AND MONTH(BR_DATE) = ? or DAY(AN_DATE) = ? AND MONTH(AN_DATE) = ? or DAY(L_BR_DATE) = ? AND MONTH(L_BR_DATE) = ? ) ? AND (A.AC_MOBILE <> '' OR A.AC_PHONE <> '' OR A.AC_MOBILE2 <> '') ? UNION ALL SELECT AC_NAME,AC_ADD1,AC_CITY,AC_PHONE,AC_MOBILE,AC_MOBILE2,BR_DATE,AN_DATE,L_BR_DATE,'A' As AcType FROM ADD_MAST AS A WHERE A.CO_CODE = ' ? ' AND (DAY(BR_DATE) = ? AND MONTH(BR_DATE) = ? or DAY(AN_DATE) = ? AND MONTH(AN_DATE) = ? or DAY(L_BR_DATE) = ? AND MONTH(L_BR_DATE) = ? ) ? AND (A.AC_MOBILE <> '' OR A.AC_PHONE <> '' OR A.AC_MOBILE2 <> '') ? UNION ALL SELECT MEMB_NAME,AC_ADD1,AC_CITY,AC_PHONE,AC_MOBILE,AC_MOBILE2,BIRTH_DATE,ANV_DATE,L_BR_DATE,'S' As AcType FROM AD_MEMB AS A WHERE A.CO_CODE = ' ? ' AND (DAY(BIRTH_DATE) = ? AND MONTH(BIRTH_DATE) = ? or DAY(ANV_DATE) = ? AND MONTH(ANV_DATE) = ? or DAY(L_BR_DATE) = ? AND MONTH(L_BR_DATE) = ? ) ? AND (A.AC_MOBILE <> '' OR A.AC_PHONE <> '' OR A.AC_MOBILE2 <> '') ? ",
+  "SELECT A.CO_CODE,A.LC_CODE,A.SCHM_CODE,A.MEMB_CODE,A.MEMB_AMT AS MembAmt,A.MEMB_NAME,A.JOIN_DATE,A.AC_MOBILE, (SELECT TOP 1 C.SCHM_DATE FROM AD_DATA AS C WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND C.SCHM_CODE = A.SCHM_CODE AND C.MEMB_CODE = A.MEMB_CODE ORDER BY C.SCHM_DATE DESC) As LastRecDt FROM AD_MEMB AS A WHERE a.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND DAY(A.JOIN_DATE) >= ' ? dd ? ' AND DAY(A.JOIN_DATE) <= ' ? dd ? ' AND A.EXP_DATE >= ' ? MM/dd/yyyy ? ' GROUP BY A.CO_CODE,A.LC_CODE,A.SCHM_CODE,A.MEMB_CODE,A.MEMB_AMT,A.MEMB_NAME,A.JOIN_DATE,A.AC_MOBILE ORDER BY A.SCHM_CODE,A.MEMB_CODE",
+  "SELECT A.MEMB_AMT,B.JOIN_DATE,A.SCHM_DATE,B.EXP_DATE FROM AD_DATA AS A LEFT JOIN AD_MEMB AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.SCHM_CODE = B.SCHM_CODE AND A.MEMB_CODE = B.MEMB_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.SCHM_CODE = ' ? SCHM_CODE ? ' AND A.MEMB_CODE = ' ? MEMB_CODE ? ' AND MONTH(SCHM_DATE) = ' ? JOIN_DATE ? MM ? ' AND B.EXP_DATE >= ' ? MM/dd/yyyy ? ' ORDER BY A.SCHM_DATE DESC",
+  "SELECT * FROM MSG_MAST WHERE MSG_TYPE IN ('O') ORDER BY MSG_TYPE",
+  "DELETE FROM LEDR_AC_DATA",
+  "Select A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE,B.AC_REF_NAME As AC_REFBY,B.AC_CITY,B.AC_KHATA_NO, Case When SUM(A.CR_AMT-A.DR_AMT) < 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As DrAmt, Case WHEN SUM(A.CR_AMT-A.DR_AMT) > 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As CrAmt, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrGold, Case When SUM(Case When A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrGold, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrSilver, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrSilver FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE And A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' and A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? HM425NEKU ? AND B.AC_GR IN ('20','19') ? HM269NEHP ? VK029NEVK ? HM404NSHM ? AND B.AC_GR = '20' ? AND B.AC_CITY = ' ? ' ? AND B.AC_AREA = ' ? ' ? U ? AND B.AC_GR NOT IN ( ? ) ? GROUP BY A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE,B.AC_REF_NAME,B.AC_CITY,B.AC_KHATA_NO ? HAVING (round(Case When SUM(A.CR_AMT-A.DR_AMT) < 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End,2)) + ? (round(Case WHEN SUM(A.CR_AMT-A.DR_AMT) > 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End,2)) + ? (format(Case WHEN SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end,'0.000')) + ? (format(Case When SUM(Case When A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end,'0.000')) + ? (format(Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end,'0.00'))+ ? (format(Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end,'0.00')) <> 0 ? ORDER BY B.AC_NAME",
+  "INSERT INTO LEDR_AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_DT,AC_CODE,CR_AMT,DR_AMT,CR_FINE_WT,DR_FINE_WT,CR_SL_FINE,DR_SL_FINE,DATA_TYPE) VALUES(' ? ',' ? ',' ? ','000',' ? MM/dd/yyyy ? ',' ? AC_CODE ? ',0, ? ,0, ? ,0, ? ,' ? ')",
+  "SELECT A.DR_AMT,A.DR_FINE_WT,A.DR_SL_FINE,B.AC_NAME,B.AC_ADD1,B.AC_CITY,B.AC_MOBILE,B.AC_MOBILE2 FROM LEDR_AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? '",
+  "select * from RATE_MAST where CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "SELECT * FROM MSG_MAST WHERE MSG_TYPE = 'G'",
+  "SELECT A.* FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.AC_MOBILE <> '' AND A.AC_GR = '20'",
+  "SELECT * FROM MSG_MAST WHERE MSG_TYPE = ' ? '",
+  "UPDATE CO_SET_NEW SET WAPP_DELAY = ? WHERE CO_CODE = ' ? '",
+  "SELECT CO_CODE FROM POINT_MAST WHERE CO_CODE = 'XX'",
+  "UPDATE POINT_MAST SET POINT_CODE = ' ? ',POINT_NAME = ' ? ',SR_NO = ? ,POINT_TYPE = ? 'Y' ? 'N' ? ,MAIN_USER = ' ? ' WHERE CO_CODE = 'XX'",
+  "INSERT INTO POINT_MAST(CO_CODE,SR_NO,POINT_CODE,POINT_NAME,POINT_TYPE,MAIN_USER) VALUES('XX', ? ,' ? ',' ? ', ? 'Y' ? 'N' ? ,' ? ')",
+  "DELETE FROM POINT_MAST WHERE CO_CODE = 'XX'"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 5,
+  "F1": 1
+ },
+ "calc": [
+  "double a = Conversion.Val(nFromRow.Text) - 1.0;",
+  "double a2 = Conversion.Val(nToRow.Text) - 1.0;"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Subscription... Plsease Subscribe...",
+   "when": "DC_Main.MsWappEndDay <= 0"
+  },
+  {
+   "message": "Internet Connection Failed",
+   "when": ""
+  },
+  {
+   "message": "Your Subscription is Over... Plsease Subscribe...",
+   "when": ""
+  },
+  {
+   "message": "Message sent successfully!",
+   "when": "tuple.Item1"
+  },
+  {
+   "message": "Failed to send message:",
+   "when": ""
+  },
+  {
+   "message": "WhatsApp not ready. Current state:",
+   "when": ""
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Please First Type Massage and Try...",
+   "when": "Operators.CompareString(tMsg.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Is Save Ok...",
+   "when": ""
+  },
+  {
+   "message": "Record will delete permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"Record will delete permantley ?\", (MsgBoxStyle)20, (object)null) == 6"
+  },
+  {
+   "message": "Sms Recotd Delete Sussesfuli...",
+   "when": "(int)Interaction.MsgBox((object)\"Record will delete permantley ?\", (MsgBoxStyle)20, (object)null) == 6"
+  },
+  {
+   "message": "You Cant Set From Row > To row Please change it...",
+   "when": "Conversion.Val(nToRow.Text) < Conversion.Val(nFromRow.Text)"
+  },
+  {
+   "message": "Import Excel Data....?",
+   "when": "(int)Interaction.MsgBox((object)\"Import Excel Data....?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "No Record Found....",
+   "when": "DC_Main.Tbl.Rows.Count == 0"
+  },
+  {
+   "message": "If Message Character Grater Tehn 1000 then 2 Message Balance Deduct",
+   "when": "(Strings.Len(TxtUniCode.Text) > 1000) & !MsgLess"
+  },
+  {
+   "message": "Please Insert Daily Rate in Rate Master......",
+   "when": ""
+  },
+  {
+   "message": "File does not exists",
+   "when": ""
+  },
+  {
+   "message": "Whatsapp Delay Time is Set....",
+   "when": ""
+  }
+ ]
+}

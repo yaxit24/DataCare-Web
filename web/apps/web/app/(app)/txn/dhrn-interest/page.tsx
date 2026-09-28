@@ -54,7 +54,14 @@ export default function DhrnInterestPage() {
         isuNo,
         borrowerAc,
         borrowerName: borrowerName || undefined,
-        interest: Number(interest || 0),
+        // P1-1: same suppression as dhrn-receipt, with a worse symptom here.
+        //
+        // `dhrn.ts:756-760` computes the accrued interest when the field is absent, then
+        // `:761-762` refuses a non-positive result. Sending an explicit 0 therefore did not
+        // merely charge nothing — it made a blank field FAIL with "interest must be positive"
+        // instead of computing what was owed, so the interest-only receipt was unusable
+        // without hand-calculating the figure the server already knows.
+        interest: interest.trim() === '' ? undefined : Number(interest),
       };
       const out = await post('/dhrn/interest', body);
       setRes(out);
@@ -111,7 +118,20 @@ export default function DhrnInterestPage() {
           <div className="row">
             <div className="field">
               <label>Interest</label>
-              <input value={interest} onChange={(e) => setInterest(e.target.value)} required />
+              {/* `required` was part of the same defect: it forced the operator to type a figure,
+                  so the configured monthly/daily/compound calculation could never run even after
+                  the payload was fixed. Desktop TR_DHRN_INTREC.cs:4265-4368 defaults the compound
+                  flag and offers a month selector rather than demanding a hand-computed amount. */}
+              <input
+                value={interest}
+                onChange={(e) => setInterest(e.target.value)}
+                placeholder="blank = compute the accrued interest"
+                aria-describedby="dhrn-interest-help"
+              />
+              <small id="dhrn-interest-help" className="hint">
+                Leave blank to receive the interest accrued to this date; type a value only to
+                override it.
+              </small>
             </div>
             <div className="field">
               <label>&nbsp;</label>

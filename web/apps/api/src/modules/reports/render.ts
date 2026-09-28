@@ -187,6 +187,8 @@ export class FakePdfRenderer implements PdfRenderer {
  * PdfRendererUnavailableError (the Chromium binary download is heavy and may be blocked in CI/sandbox).
  */
 export class PlaywrightPdfRenderer implements PdfRenderer {
+  constructor(private readonly options: { preferCSSPageSize?: boolean } = {}) {}
+
   async render(html: string): Promise<Buffer> {
     const playwright = await loadPlaywright();
     let browser: any;
@@ -198,7 +200,7 @@ export class PlaywrightPdfRenderer implements PdfRenderer {
     try {
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'load' });
-      const buffer = await page.pdf({ format: 'A4', printBackground: true });
+      const buffer = await page.pdf({ format: 'A4', printBackground: true, ...this.options });
       return Buffer.from(buffer);
     } finally {
       await browser.close();

@@ -1,0 +1,497 @@
+{
+ "report": "DhrnOsLetter",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 400,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "PageHeader",
+     "height": 1610,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 285,
+       "top": 0,
+       "width": 10845,
+       "height": 568,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 285,
+       "top": 540,
+       "width": 10845,
+       "height": 226,
+       "dataSource": "{CO_MAST.CO_ADD1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field45",
+       "left": 285,
+       "top": 930,
+       "width": 10845,
+       "height": 230,
+       "dataSource": "{@CoAdd2}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field46",
+       "left": 285,
+       "top": 1260,
+       "width": 10830,
+       "height": 230,
+       "dataSource": "{@CoCity}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 105,
+       "top": 1605,
+       "width": 11010,
+       "height": 0
+      }
+     ]
+    },
+    {
+     "name": "Section7",
+     "kind": "PageHeader",
+     "height": 912,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 285,
+       "top": 105,
+       "width": 1035,
+       "height": 300,
+       "text": "Subject :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 1560,
+       "top": 105,
+       "width": 8804,
+       "height": 283,
+       "dataSource": "{@RptTitle}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 525,
+       "top": 555,
+       "width": 795,
+       "height": 300,
+       "text": "Date :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 1560,
+       "top": 555,
+       "width": 1406,
+       "height": 283,
+       "dataSource": "{DHRN_REC_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 8415,
+       "top": 555,
+       "width": 2175,
+       "height": 282,
+       "dataSource": "{@InVoiceTipe}"
+      }
+     ]
+    },
+    {
+     "name": "Section10",
+     "kind": "PageHeader",
+     "height": 1516,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 675,
+       "top": 225,
+       "width": 645,
+       "height": 300,
+       "text": "To :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 1560,
+       "top": 225,
+       "width": 9570,
+       "height": 226,
+       "dataSource": "{DHRN_REC_DATA.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 1560,
+       "top": 645,
+       "width": 9570,
+       "height": 226,
+       "dataSource": "{AC_MAST.AC_ADD1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 1545,
+       "top": 960,
+       "width": 9570,
+       "height": 226,
+       "dataSource": "{AC_MAST.AC_ADD2}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 1575,
+       "top": 1290,
+       "width": 9555,
+       "height": 226,
+       "dataSource": "{AC_MAST.AC_ADD3}"
+      }
+     ]
+    },
+    {
+     "name": "Section6",
+     "kind": "PageHeader",
+     "height": 360,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 285,
+       "top": 60,
+       "width": 1635,
+       "height": 300,
+       "text": "Loan Ac No"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 2287,
+       "top": 60,
+       "width": 1635,
+       "height": 300,
+       "text": "Data Isue"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 4485,
+       "top": 60,
+       "width": 1635,
+       "height": 300,
+       "text": "Loan Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 6780,
+       "top": 60,
+       "width": 1635,
+       "height": 300,
+       "text": "Os As on Date"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 8790,
+       "top": 60,
+       "width": 2075,
+       "height": 300,
+       "text": "Due Date Of Loan"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "Detail",
+     "height": 505,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 285,
+       "top": 120,
+       "width": 1440,
+       "height": 226,
+       "dataSource": "{DHRN_REC_DATA.AC_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 2280,
+       "top": 120,
+       "width": 1994,
+       "height": 238,
+       "dataSource": "{DHRN_REC_DATA.DHRN_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 4773,
+       "top": 120,
+       "width": 1347,
+       "height": 238,
+       "dataSource": "{DHRN_REC_DATA.DHRN_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 6764,
+       "top": 120,
+       "width": 1651,
+       "height": 238,
+       "dataSource": "{@DhrnOs}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 8803,
+       "top": 120,
+       "width": 2134,
+       "height": 238,
+       "dataSource": "{@DueDate}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "ReportFooter",
+     "height": 540,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 897,
+       "top": 75,
+       "width": 9468,
+       "height": 276,
+       "text": "We are sorry for any inconvenience caused"
+      }
+     ]
+    },
+    {
+     "name": "Section8",
+     "kind": "ReportFooter",
+     "height": 615,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 930,
+       "top": 105,
+       "width": 9435,
+       "height": 276,
+       "dataSource": "{DHRN_REC_DATA.VCH_DESC}"
+      }
+     ]
+    },
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 1921,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field38",
+       "left": 5160,
+       "top": 120,
+       "width": 5883,
+       "height": 316,
+       "dataSource": "{@for}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text15",
+       "left": 1118,
+       "top": 1170,
+       "width": 3044,
+       "height": 270,
+       "text": "Party signature."
+      },
+      {
+       "type": "TextObject",
+       "name": "Text23",
+       "left": 6840,
+       "top": 1170,
+       "width": 3044,
+       "height": 270,
+       "text": "signature."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageFooter",
+     "height": 240,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "UnknownField",
+   "text": "'Gst No : ' + {AC_MAST.AC_LSTNO}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_MOBILE} <> '' then 'Mo : ' + {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then 'Ph : ' + {AC_MAST.AC_MOBILE} else 'Mo : ' + {AC_MAST.AC_MOBILE2}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE} + ' Ph : ' + {CO_MAST.CO_PHONE}"
+  },
+  {
+   "name": "CrDrType",
+   "ref": "{@CrDrType}",
+   "type": "StringField",
+   "text": "if {@PartyBal} < 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DhrnOs",
+   "ref": "{@DhrnOs}",
+   "type": "NumberField",
+   "text": "{DHRN_REC_DATA.DHRN_OS_AMT}+{DHRN_REC_DATA.INT_AMT}"
+  },
+  {
+   "name": "DueDate",
+   "ref": "{@DueDate}",
+   "type": "DateField",
+   "text": "{DHRN_REC_DATA.DHRN_DATE}+({DHRN_REC_DATA.DHRN_MONTH}*30)"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "InVoiceTipe",
+   "ref": "{@InVoiceTipe}",
+   "type": "StringField",
+   "text": "'ORIGINAL'"
+  },
+  {
+   "name": "OpAmt",
+   "ref": "{@OpAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpAmtCrDr",
+   "ref": "{@OpAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@OpAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "PartyBal",
+   "ref": "{@PartyBal}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "Tax",
+   "ref": "{@Tax}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{DHRN_REC_DATA.CO_YEAR}+{DHRN_REC_DATA.CO_BOOK}+{DHRN_REC_DATA.VCH_NO}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "UnknownField",
+   "text": "if {DHRN_REC_DATA.OS_AMOUNT} <> 0 then 'Ruppes : ' & ucase(ToWords ({DHRN_REC_DATA.OS_AMOUNT},0 ))"
+  }
+ ],
+ "sectionCount": 10,
+ "objectCount": 30,
+ "formulaCount": 20
+}

@@ -1,0 +1,38 @@
+{
+ "form": "MS_LBR_TYPE",
+ "tables": [
+  "BAR_DETL",
+  "GROUP_MAST",
+  "LBR_MAST",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "BAR_DETL"
+  ],
+  "DELETE": [
+   "LBR_MAST"
+  ]
+ },
+ "selectTables": [
+  "BAR_DETL",
+  "GROUP_MAST",
+  "LBR_MAST",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 13,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [
+  "LBR_CODE = '\" + tlbrCode.Text + \"'\"",
+  "LBR_CODE = '\" + tlbrCode.Text + \"'\")"
+ ],
+ "loc": 1723
+}

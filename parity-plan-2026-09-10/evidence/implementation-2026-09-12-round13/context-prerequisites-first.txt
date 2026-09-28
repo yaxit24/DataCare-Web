@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+
+ Test Files  no tests
+      Tests  no tests
+   Start at  00:39:57
+   Duration  180ms (transform 27ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 0ms)
+
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: DATABASE_URL is set but the database is unreachable: Invalid `prisma.$queryRawUnsafe()` invocation:
+
+Left alone, the 53 database-backed test files would skip and the suite would still exit 0.
+Start the database, or run with ALLOW_SKIP_DB_TESTS=1 to accept an incomplete run.
+ ❯ Object.setup test/globalSetup.ts:46:11
+     44|     await client.$queryRawUnsafe('SELECT 1');
+     45|     return { ok: true, detail: 'connected' };
+     46|   } catch (e) {
+       |           ^
+     47|     // Prisma's message often starts with a blank line, which produced…
+     48|     // first non-empty line and fall back to the error name so the fai…
+ ❯ WorkspaceProject.initializeGlobalSetup ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:9926:24
+ ❯ Vitest.initializeGlobalSetup ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10794:7
+ ❯ ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10816:7
+ ❯ Vitest.runFiles ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10840:12
+ ❯ Vitest.start ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10682:7
+ ❯ startVitest ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:11848:7
+ ❯ start ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cac.CB_9Zo9Q.js:1506:17
+ ❯ CAC.run ../../node_modules/.pnpm/vitest@2.1.9_@types+node@22.20.0/node_modules/vitest/dist/chunks/cac.CB_9Zo9Q.js:1486:3
+
+
+
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/sessionContext.extraction.test.ts test/sessionContextValue.test.ts test/auth.session.test.ts test/rbac.authorization.test.ts

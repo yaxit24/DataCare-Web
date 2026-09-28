@@ -1,0 +1,469 @@
+{
+  "status": "passed",
+  "measuredAt": "2026-07-27T20:58:37.852Z",
+  "database": {
+    "host": "127.0.0.1",
+    "port": 55433,
+    "name": "datacare"
+  },
+  "source": {
+    "tenantId": "restore-drill-source",
+    "companyCode": "01"
+  },
+  "target": {
+    "tenantId": "restore-drill-scratch",
+    "companyCode": "01"
+  },
+  "backup": {
+    "generatedAt": "2026-07-27T20:58:36.996Z",
+    "rows": 5,
+    "durationMs": 280.823
+  },
+  "restore": {
+    "restored": 5,
+    "tables": 5,
+    "cleared": 53,
+    "durationMs": 373.368
+  },
+  "verification": {
+    "verified": true,
+    "source": {
+      "tenantId": "restore-drill-source",
+      "companyCode": "01"
+    },
+    "target": {
+      "tenantId": "restore-drill-scratch",
+      "companyCode": "01"
+    },
+    "sourceRows": 5,
+    "restoredRows": 5,
+    "tablesChecked": 52,
+    "mismatches": [],
+    "tables": [
+      {
+        "table": "AC_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "AC_GROUP",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "AC_MAST",
+        "sourceRows": 1,
+        "restoredRows": 1,
+        "sourceChecksum": "422743a14881e0f19644867edba43065",
+        "restoredChecksum": "422743a14881e0f19644867edba43065",
+        "matches": true
+      },
+      {
+        "table": "APR_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "APR_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "BAR_CAN_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "BAR_CAN_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "BAR_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "BAR_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "BAR_IDTL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "BILL_OS_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "BOOK_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "CASH_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "CONTRA_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "CO_MAST",
+        "sourceRows": 1,
+        "restoredRows": 1,
+        "sourceChecksum": "65cf881a1ad66405871f8b93bb9d5148",
+        "restoredChecksum": "65cf881a1ad66405871f8b93bb9d5148",
+        "matches": true
+      },
+      {
+        "table": "CO_SET",
+        "sourceRows": 1,
+        "restoredRows": 1,
+        "sourceChecksum": "e5d2f45270163a18e1d8a6cf4c2677b8",
+        "restoredChecksum": "e5d2f45270163a18e1d8a6cf4c2677b8",
+        "matches": true
+      },
+      {
+        "table": "DESIGN_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "EMP_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "GROUP_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "ITEM_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "ITM_OPBL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "KR_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "KR_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "LBR_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "LBR_ISU_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "LOCT_MAST",
+        "sourceRows": 1,
+        "restoredRows": 1,
+        "sourceChecksum": "fb6915adf583c6ba80ee32d10fe2bdac",
+        "restoredChecksum": "fb6915adf583c6ba80ee32d10fe2bdac",
+        "matches": true
+      },
+      {
+        "table": "LOGIN_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "MAIN_STOCK",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "OP_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "PAY_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "PAY_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "POINT_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "POINT_MEMB",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "PRODUCT_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "PR_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "PR_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "RATE_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_DETL_RTN",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_IDTL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_ORD_ADJ",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_ORD_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_ORD_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SL_PR_DETL",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "SRNO_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "TABLE_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "TAG_STOCK",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "TAX_DATA",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "TAX_MAST",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "USER_SET",
+        "sourceRows": 0,
+        "restoredRows": 0,
+        "sourceChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "restoredChecksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "matches": true
+      },
+      {
+        "table": "YEAR_MAST",
+        "sourceRows": 1,
+        "restoredRows": 1,
+        "sourceChecksum": "fa555067aaf8c0385e804ee16af8f371",
+        "restoredChecksum": "fa555067aaf8c0385e804ee16af8f371",
+        "matches": true
+      }
+    ]
+  },
+  "measured": {
+    "rpo": {
+      "snapshotDataLossRows": 0,
+      "recoveryPointAgeMs": 856
+    },
+    "rtoMs": 1292.916,
+    "verifyMs": 477.574
+  }
+}

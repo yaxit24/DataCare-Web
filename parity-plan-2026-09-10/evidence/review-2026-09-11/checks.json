@@ -1,0 +1,91 @@
+[
+  {
+    "name": "register-strict",
+    "command": [
+      "node",
+      "scripts/check-completion-register.mjs",
+      "--strict"
+    ],
+    "cwd": "web",
+    "startedAt": "2026-09-10T20:34:20.441903+00:00",
+    "exitCode": 0,
+    "log": "register-strict.txt",
+    "scope": "local static audit or retained evidence; no fresh desktop/browser/DB run"
+  },
+  {
+    "name": "register-release",
+    "command": [
+      "node",
+      "scripts/check-completion-register.mjs",
+      "--strict",
+      "--release"
+    ],
+    "cwd": "web",
+    "startedAt": "2026-09-10T20:34:20.595235+00:00",
+    "exitCode": 1,
+    "log": "register-release.txt",
+    "scope": "local static audit or retained evidence; no fresh desktop/browser/DB run"
+  },
+  {
+    "name": "contracts",
+    "command": [
+      "node",
+      "scripts/check-contracts.mjs"
+    ],
+    "cwd": "web",
+    "startedAt": "2026-09-10T20:34:20.649794+00:00",
+    "exitCode": 0,
+    "log": "contracts.txt",
+    "scope": "local static audit or retained evidence; no fresh desktop/browser/DB run"
+  },
+  {
+    "name": "depth-audit",
+    "command": [
+      "node",
+      "scripts/check-depth.mjs",
+      "--audit"
+    ],
+    "cwd": "web",
+    "startedAt": "2026-09-10T20:34:20.918834+00:00",
+    "exitCode": 0,
+    "log": "depth-audit.txt",
+    "scope": "local static audit or retained evidence; no fresh desktop/browser/DB run"
+  },
+  {
+    "name": "dead-cells",
+    "command": [
+      "node",
+      "scripts/check-dead-cells.mjs"
+    ],
+    "cwd": "web",
+    "startedAt": "2026-09-10T20:34:40.128691+00:00",
+    "exitCode": 1,
+    "log": "dead-cells.txt",
+    "scope": "local static audit or retained evidence; no fresh desktop/browser/DB run"
+  },
+  {
+    "name": "g5-gate",
+    "command": [
+      "node",
+      "scripts/check-g5-parity.mjs"
+    ],
+    "cwd": "web",
+    "startedAt": "2026-09-10T20:34:40.341594+00:00",
+    "exitCode": 1,
+    "log": "g5-gate.txt",
+    "scope": "local static audit or retained evidence; no fresh desktop/browser/DB run"
+  },
+  {
+    "name": "parity-retained",
+    "command": [
+      "node",
+      "scripts/parity-measure.mjs",
+      "--reuse"
+    ],
+    "cwd": "web",
+    "startedAt": "2026-09-10T20:34:40.616944+00:00",
+    "exitCode": 0,
+    "log": "parity-retained.txt",
+    "scope": "local static audit or retained evidence; no fresh desktop/browser/DB run"
+  }
+]

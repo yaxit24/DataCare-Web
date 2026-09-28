@@ -1,0 +1,16 @@
+{
+  "integratedAtUtc": "2026-09-11T22:42:11.151925+00:00",
+  "manifestSha256": "ff6a85bd77857e56ef91627a4273cb93c2db39ce4e149a8445b1c62031ee1bf3",
+  "before": {
+    "apps/web/test/tour-order.journey.mjs": "67587a68b5139c039bcccebe0499140093496e04b5b2813350cc27e129cbc904",
+    "apps/web/test/parity.real-stack.mjs": "67e3e7a36fbf6fe1487168b3ad2f10f18eb8da1d40e4e2916940ca6dc7cd3264"
+  },
+  "after": {
+    "apps/web/test/tour-order.journey.mjs": "8f18fd57cedee25dc63cb21591a0a17dd351dc40164ba4ffa6fd4d48a9cd8d3d",
+    "apps/web/test/parity.real-stack.mjs": "243bb2595ee503037d34a0bd0d0fd2097c075f4d0b92931b3a52b1abdb8263fb"
+  },
+  "status": "integrated-awaiting-real-browser",
+  "expectedJourneys": 16,
+  "requiredNewTourCheck": "exact saved Tour scalars survive API JSON, browser unchanged/advance-only saves and SQL readback",
+  "runtimeReviewQualification": "Peer review pins an earlier staged3-file runtime revision; final runtime integration will compare formatting/semantic differences separately."
+}

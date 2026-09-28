@@ -1,0 +1,27 @@
+{
+  "kind": "round11-document-inventory-addendum/1",
+  "capturedAt": "2026-09-11T15:18:14.167091+00:00",
+  "authorization": "Root extended original pointer-only ownership to correct measured technical inventory after docs:refs found a stale API test count.",
+  "priorPlanVerification": "plan-round11-update-verification.json",
+  "priorPlanVerificationSha256": "b803a9498155d42b387340a188f4ab93f4f7370afe90d59c6d1633b3835af380",
+  "file": "web/docs/TECHNICAL-REFERENCE.md",
+  "beforeSha256": "6552a36430389e7814754774f757a38316d67c8adea126c8ad474c7fc33dcbeb",
+  "afterSha256": "bf7de09ea99afcfc6e75bb9e25fa6db686d8835c36350b32d7f387e8524794d8",
+  "measurements": {
+    "apiSourceTypeScriptFiles": 237,
+    "apiTestFiles": 237,
+    "apiDatabaseTestFiles": 134,
+    "declaredRoutes": 553,
+    "uniqueDeclaredMethodPaths": 553,
+    "webTestFiles": 27,
+    "coreTestFiles": 14
+  },
+  "unchangedMeasurements": {
+    "apiModuleDirectories": 31,
+    "webPages": 126,
+    "literalRoutePolicyBindings": 196,
+    "prismaModels": 170
+  },
+  "measurementMethod": "Filesystem glob counts; the exact literal app/server route expression from routePolicy.test.ts applied to app.ts and txn.ts. No DB or application tests run.",
+  "limits": "Inventory only; no functionality acceptance. The prior10-file plan manifest remains an immutable earlier stage; this addendum supersedes only its technical-reference file hash."
+}

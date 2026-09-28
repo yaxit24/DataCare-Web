@@ -1,5 +1,6 @@
 import { withTenant } from '@datacare/db';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
+import { nextHiddenVoucherNoTx } from '../vouchers/lifecycle.js';
 import { issueTagTx, restoreTagTx } from '../stock/stock.js';
 import {
   postVoucherTx,
@@ -42,6 +43,14 @@ export interface PurchaseReturnInput {
   cashAc?: string;
   bankAc?: string;
   kasarAc?: string;
+  /**
+   * The operator saving the voucher.
+   *
+   * A purchase return previously recorded NO acting user at all, unlike a purchase — so a reversal of
+   * stock and money had no attribution. Optional to keep existing callers compiling, but the column is
+   * written whenever it is supplied.
+   */
+  mainUser?: string;
 }
 
 type VoucherKey = {
@@ -52,6 +61,8 @@ type VoucherKey = {
   VCH_NO: string;
 };
 const num = (v: unknown): number => (v == null ? 0 : Number(v));
+/** Trimmed text for a persisted column; callers turn '' into null so a blank cell stays absent. */
+const text = (v: unknown): string => String(v ?? '').trim();
 const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
 
 function keyOf(s: VoucherScope, vchNo: number): VoucherKey {
@@ -213,8 +224,15 @@ export async function createPurchaseReturn(
 
   return withTenant(prisma, tenantId, async (tx: any) => {
     const vchNo = await nextVoucherNoTx(tx, input.scope);
+    // HD_VCH_NO is the hidden voucher identity that TEMP_BOOK_DATA and the day book join on. Purchase
+    // allocates one (purchase.ts:1648); the return did not, so its rows could not be joined back.
     const key = keyOf(input.scope, vchNo);
     const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'PURCHASE RETURN');
+    // Allocated after the book is resolved, because the hidden series is per book.
+    const hdVchNo = await nextHiddenVoucherNoTx(tx, {
+      ...input.scope,
+      coBook: String(key.CO_BOOK),
+    } as never);
     const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
     const taxPolicy = await resolveTaxPolicyTx(tx, input.scope, {
       acCode: input.acCode,
@@ -327,6 +345,51 @@ export async function createPurchaseReturn(
       NET_AMT: line.calc.net,
       TAX_PRC: input.taxRatePct,
       HM_ID: line.in.huid ?? null,
+      MAIN_USER: input.mainUser ?? null,
+      HD_VCH_NO: hdVchNo,
+      VCH_TIME: vchDate,
+      // P8: the rest of the desktop purchase-return line. `purchase.ts` writes 80 columns of PR_DETL
+      // and this writer wrote 25, so a return recorded far less than the purchase it reverses even
+      // though both accept the same `PurchaseLineInput`. Every field below was already on the contract
+      // and already on the screen — it simply had nowhere to go, which made those grid cells silently
+      // discard what the operator typed.
+      //
+      // SEPARATE FINDING, deliberately NOT patched here: this writer sets no MAIN_USER, HD_VCH_NO or
+      // VCH_TIME on either header or detail, and PurchaseReturnInput has no `mainUser` at all — so a
+      // purchase return carries no user attribution and no hidden-voucher link, unlike a purchase.
+      // Fixing it needs a contract change plus hidden-voucher allocation, so it is recorded rather
+      // than half-done.
+      OLD_SRNO: index + 1,
+      IT_DESC: text(line.in.itDesc).slice(0, 50) || null,
+      IT_TYPE: text(line.in.metal).slice(0, 1) || null,
+      TBL_CODE: text(line.in.tblCode).slice(0, 3) || null,
+      DESIGN_NO: text(line.in.designNo) || null,
+      LOT_NO: text(line.in.lotNo) || null,
+      ITM_LOT: text(line.in.itmLot) || null,
+      WITH_STOCK: text(line.in.withStock).slice(0, 1) || null,
+      BAG_WT: num(line.in.bagWt),
+      ITM_OTH_WT: num(line.in.lessWt),
+      ITM_LOSS_WT: num(line.in.lossWt),
+      ITM_GHT_PRC: num(line.in.ghtPct),
+      ITM_GHT_WT: num(line.in.ghtWt),
+      ITM_LESS_TCH: num(line.in.lessTouch ?? line.in.lesTouch),
+      ITM_MRP: num(line.in.mrp),
+      ITM_OTH_RATE: num(line.in.otherRate),
+      LBR_PRC: num(line.in.labourPct),
+      LBR_TYPE: text(line.in.labourType).slice(0, 1) || null,
+      LBR_RATE: num(line.in.labourRate),
+      CONV_RATE: num(line.in.convRate),
+      CONV_PRC: num(line.in.convPct),
+      COMM_PRC: num(line.in.commissionPct),
+      COMM_AMT: num(line.in.commissionAmount),
+      FINE_CUT_PCS: num(line.in.fineCutPcs),
+      FINE_CUT_GWT: num(line.in.fineCutGrossWt),
+      FINE_CUT_NWT: num(line.in.fineCutNetWt),
+      FINE_CUT_FINE: num(line.in.fineCutFine),
+      RATE_TYPE: text(line.in.rateType).slice(0, 1) || null,
+      URD_RATE_TYPE: text(line.in.urdRateType).slice(0, 1) || null,
+      PR_CODE: text(line.in.prCode).slice(0, 2) || null,
+      TOT_AMT: line.calc.net,
     }));
     const header = {
       ...key,
@@ -349,6 +412,9 @@ export async function createPurchaseReturn(
       IGST_TAX: totals.igst,
       ROF_AMT: totals.roundOff,
       TOT_AMT: totals.total,
+      MAIN_USER: input.mainUser ?? null,
+      HD_VCH_NO: hdVchNo,
+      VCH_TIME: vchDate,
     };
     const ledger = buildPurchaseReturnLedger({
       key,
@@ -438,7 +504,7 @@ export async function createPurchaseReturn(
       VCH_SRNO: issued.get(index)?.VCH_SRNO ?? 0,
       TR_TYPE: 'O',
       ITM_SIGN: '-',
-      ITM_QTY: num(line.in.netWt) || num(line.in.pcs) || 1,
+      ITM_QTY: 1,
       ITM_PCS: num(line.in.pcs) || 1,
       ITM_GWT: num(line.in.grossWt),
       ITM_NWT: num(line.in.netWt),
@@ -510,7 +576,9 @@ export async function deletePurchaseReturn(
           LC_CODE: key.LC_CODE,
           TAG_NO: String(tag.TAG_NO),
           VCH_SRNO: Number(tag.VCH_SRNO ?? 0),
-          IT_CODE: tag.IT_CODE,
+          // NO IT_CODE: TAG_STOCK has IT_TYPE instead, and insertTagTx THROWS on an undeclared column
+          // rather than ignoring it — so this aborted the whole reversal for any tag that lived only in
+          // TAG_STOCK, which is exactly the imported/legacy stock this restore path exists for.
           ITM_PCS: tag.ITM_PCS,
           ITM_GWT: tag.ITM_GWT,
           ITM_NWT: tag.ITM_NWT,

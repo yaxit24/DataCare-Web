@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/salesOrderSessionCommand.db.test.ts",
+    "test/sessionContextCommand.db.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:54:18.825610+00:00",
+  "finishedAtUtc": "2026-09-11T21:54:26.393312+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/session-command-financial-first.txt",
+  "logSha256": "5cf9a1b8fe45cba2e2944d97b0cc0f4ff8c1000020f702b7d35f28f3afa8c8a7",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/session-command-financial-first.inputs.json",
+  "inputManifestSha256": "862f4cd596959ac1ef7da53964f2ea98cc665d75e757ea4f485b7ff09218f2f7",
+  "inputCount": 1801,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

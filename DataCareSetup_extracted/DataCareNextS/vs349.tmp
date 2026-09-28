@@ -1,0 +1,186 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+DataCareNext
+</name>
+</assembly>
+<members>
+<member name="T:DataCareNext.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources._new">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.actions_trash">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.alignmentbottomcenter">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.ArrowRight">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.bo_contract">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.bo_dashboard">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.bo_department">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.bo_kpi_definition">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.bo_task">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.bo_user">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.bouser_32x32">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.cube_32x32">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.grandtotalsoffrowscolumnspivottable">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.grouptooltips">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.home_32x32">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.itemtypestandard">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.layoutdirection">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.longset">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.lookup_reference">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.palette">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.re_layout">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.recurrence">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.security_fingerprint">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.selectall">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.setdetaildatamember">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.shopping_sales">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.showlegendinsidehorizontalbottomcenter">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.showlegendinsidehorizontalbottomright">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.tiletooltips">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.unlink">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.weather_degreefahrenheit">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+<member name="P:DataCareNext.My.Resources.Resources.zoom">
+<summary>
+  Looks up a localized resource of type DevExpress.Utils.Svg.SvgImage.
+</summary>
+</member>
+</members>
+</doc>

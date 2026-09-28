@@ -1,0 +1,57 @@
+{
+  "pages": {
+    "sales": {
+      "status": "ok",
+      "fields": 124,
+      "uncapturable": []
+    },
+    "purchase": {
+      "status": "ok",
+      "fields": 85,
+      "uncapturable": []
+    },
+    "sales-order": {
+      "status": "ok",
+      "fields": 102,
+      "uncapturable": []
+    },
+    "sales-return": {
+      "status": "no-page",
+      "fields": 0,
+      "uncapturable": []
+    },
+    "tag-opening": {
+      "status": "ok",
+      "fields": 65,
+      "uncapturable": []
+    },
+    "karigar-issue": {
+      "status": "ok",
+      "fields": 35,
+      "uncapturable": []
+    },
+    "tour-issue": {
+      "status": "no-page",
+      "fields": 0,
+      "uncapturable": []
+    },
+    "dhrn-issue": {
+      "status": "ok",
+      "fields": 18,
+      "uncapturable": []
+    },
+    "dhrn-receipt": {
+      "status": "ok",
+      "fields": 34,
+      "uncapturable": []
+    },
+    "vp-parcel": {
+      "status": "ok",
+      "fields": 33,
+      "uncapturable": []
+    }
+  },
+  "totalFields": 496,
+  "capturable": 496,
+  "coveragePct": 100.0
+}

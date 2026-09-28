@@ -1,0 +1,38 @@
+{
+ "form": "RP_STOCK_FINE",
+ "tables": [
+  "BAL_GR",
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "BAL_GR",
+   "GROUP_MAST",
+   "ITEM_MAST"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [
+  "OP_TOUCH = 0,OP_FINE = 0 WHERE CO_CODE = '\" + DC_Main.MCo_code + \"'\")"
+ ],
+ "loc": 4040
+}

@@ -1,0 +1,145 @@
+{
+  "status": "independent-read-review-complete",
+  "productEdits": false,
+  "reviewerProductExecution": false,
+  "literalCasesReviewed": 22,
+  "phasesCompared": 44,
+  "sourceOrderedParentAssignments": 74,
+  "sourceFinalParentFields": 70,
+  "sourceHeaderFields": 12,
+  "ownerTestsPassed": 61,
+  "ownerStrictTypes": "passed",
+  "noCommitAuthority": true,
+  "files": [
+    {
+      "path": "/tmp/datacare-return-bar-companion-review/compare-source-literals.py",
+      "sha256": "ae79771317ea9d22bee16a89b6751bd938dea3421d360804f5a14560201e1a0d"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-review/fixture-source-review.md",
+      "sha256": "949551996e8ea4312d18f73cee3bf3afb5d8e356f1bf99194ea9a337ebf70b5b"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-review/implementation-read-review.md",
+      "sha256": "8ef1fbfd75d0e9f653fd6f3c734c94f5e677513f5baa29f315f2ecbcb48dcb68"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-review/independent-literal-comparison.json",
+      "sha256": "697575512ae1efd595a95bb57e9d0efb20ce2e1a3fc1aca3481f4d98c8487fa6"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-review/owner-reference-verification.json",
+      "sha256": "c10db89dc3990ff1442df8c6e86bffcf0159ce64eb83b02315f9128e03434093"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-review/source-assignment-comparison.json",
+      "sha256": "e7de876e5c5ade6ed6ddd3b298a66d901a49936dfc0f54730cec21a6548e1c64"
+    }
+  ],
+  "references": [
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/README.md",
+      "sha256": "d0fb5f82eb8ae2c7719e9f9a4690790ea3efa743f262dcd168ac2d5310f08d13"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/implementation-contract.md",
+      "sha256": "f9dc482ce19d295b856f763b1a77006f437f448d6b987273dffd62054e3f4de1"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/author-fixture.py",
+      "sha256": "c3e352a93b128a904c8b35e05a0ab345df5dbb8ccd0bfc06faf04a0c85dc8e3b"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/fixture-authorship.json",
+      "sha256": "ea3904dfed84a294c5b53d4cf41f00f22cf1a2f3e59c8ca6d7c245f9b4754e14"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/fixture-freeze.json",
+      "sha256": "0765fe232a935fe744cde786ba01ebf8742da8d186f2ec31570dd70a17cb3ac4"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/source-inputs.json",
+      "sha256": "9c37777c58519f8518c48093f9f5ee080dd439bf51b2bc7cb17a83024e11c6a4"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/web/packages/core/src/saleReturnNBarCompanions.ts",
+      "sha256": "0d63cb36e8b225055efd9c50cbdd005504ad802f589a14b1503f009f2e131d39"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/web/packages/core/test/saleReturnNBarCompanions.test.ts",
+      "sha256": "9f40da10bc5455d4d3ea612af6cddac3e3b9cd313f68310086abcaa473535eaf"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/web/packages/core/test/fixtures/saleReturnNBarCompanions.independent.json",
+      "sha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/web/packages/core/package.json",
+      "sha256": "75310bff016b194c22167683f733bcd0991ba7d1d2a288c77763698eafecf4e8"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/web/packages/core/vitest.config.ts",
+      "sha256": "a84b0a026850dc8c56864295e79b5499e5eb2935c04cb749e6b8554e157924d3"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/focused-first.txt",
+      "sha256": "7c2f2ba71acc93898d34232345872f2c38180f5b7a10374a85f19624d4655293"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/types-first.txt",
+      "sha256": "3f4ae3b7a76d810fb53660be9fe55af99a97d1114a1a67878ae57370e890bff4"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/focused-first.inputs.json",
+      "sha256": "beb437b67626a34f35036f92d342eb2ac961113fde358d3471811499b6cb053f"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/focused-first.run.json",
+      "sha256": "518fc8be56a64bacbe218f67efd3608681bb35d95b88aa51a0ddccc1f29467e8"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/focused-final.txt",
+      "sha256": "7053f7377633055a029f4eb8044bdeaf7c703b128e23569ed8f337bf42afa8bc"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/focused-final.inputs.json",
+      "sha256": "a8b058043094d293dfbab0c843881fd9ad1ce026ed66e8d81b6f573287b626fb"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/focused-final.run.json",
+      "sha256": "d0eef7378275e3939e15ada2cf22a9569677a945880e6b07f17f8550992904b1"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/effects-contract.md",
+      "sha256": "00c0d6551a0b08445835869c93bb19cafa42e879b841c315596581ec4f7b28c2"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/source-effect-index.json",
+      "sha256": "886f5a32611e412128e9c5b749a9da188c8fbbde5e9f266f09c7d20bc800c1fd"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/expected-before-after.inventory.json",
+      "sha256": "461cd378334806592661c141e72ecc4b5597cebad6609145e9878890a7e14cbc"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/ready-manifest.json",
+      "sha256": "93dfd6b82a9ce811db6ec9665c126d337f0537b101d3ecc92da433aafcf6ba84"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "/tmp/datacare-return-bar-companion-staged/ready-manifest.json",
+      "sha256": "5d4938df90240195ca8693b94409335de350177eb733f6fb423f5a290ce387c1"
+    }
+  ]
+}

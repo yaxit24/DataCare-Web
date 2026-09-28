@@ -1,0 +1,48 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/salesOrderSessionCommand.db.test.ts (15 tests) 1924ms
+   ✓ Sales Order financial edit joins the admitted HTTP session transaction > the real session entry changes only advance100→125 and preserves children, raw precision, clock and accounting ownership 302ms
+ ✓ test/orderSessionCommands.db.test.ts (34 tests) 2978ms
+ ✓ test/orderSessionCommands.test.ts (24 tests) 7ms
+
+ Test Files  3 passed (3)
+      Tests  73 passed (73)
+   Start at  22:18:12
+   Duration  6.88s (transform 833ms, setup 0ms, collect 1.45s, tests 4.91s, environment 0ms, prepare 79ms)
+

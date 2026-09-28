@@ -1,0 +1,214 @@
+{
+  "appliesTo": {
+    "path": "/tmp/datacare-return-next-write-contract/implementation-contract.md",
+    "sha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+    "section": "6, MAIN_STOCK bullet"
+  },
+  "incorrectPhrase": "SR_REC_ISU2",
+  "replacement": "MAIN_STOCK.SR_NO = 2 and MAIN_STOCK.ISR_NO = SL_DETL_RTN.SR_NO; TR_TYPE = I, ITM_SIGN = +, ITM_QTY = 1.",
+  "source": {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+    "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+    "line": 247
+  },
+  "exactSourceColumnExpressions": [
+    {
+      "column": "CO_CODE",
+      "expression": "A.CO_CODE"
+    },
+    {
+      "column": "LC_CODE",
+      "expression": "A.LC_CODE"
+    },
+    {
+      "column": "CO_YEAR",
+      "expression": "A.CO_YEAR"
+    },
+    {
+      "column": "CO_BOOK",
+      "expression": "A.CO_BOOK"
+    },
+    {
+      "column": "VCH_NO",
+      "expression": "A.VCH_NO"
+    },
+    {
+      "column": "SR_NO",
+      "expression": "2"
+    },
+    {
+      "column": "ISR_NO",
+      "expression": "A.SR_NO"
+    },
+    {
+      "column": "VCH_DATE",
+      "expression": "A.VCH_DATE"
+    },
+    {
+      "column": "STK_DATE",
+      "expression": "A.VCH_DATE"
+    },
+    {
+      "column": "VCH_TYPE",
+      "expression": "B.BOOK_SNAME"
+    },
+    {
+      "column": "BOOK_NAME",
+      "expression": "B.MAIN_BOOK"
+    },
+    {
+      "column": "AC_CODE",
+      "expression": "A.AC_CODE"
+    },
+    {
+      "column": "IT_CODE",
+      "expression": "A.IT_CODE"
+    },
+    {
+      "column": "TAG_NO",
+      "expression": "A.TAG_NO"
+    },
+    {
+      "column": "VCH_SRNO",
+      "expression": "A.VCH_SRNO"
+    },
+    {
+      "column": "TBL_CODE",
+      "expression": "A.TBL_CODE"
+    },
+    {
+      "column": "TR_TYPE",
+      "expression": "'I'"
+    },
+    {
+      "column": "ITM_SIGN",
+      "expression": "'+'"
+    },
+    {
+      "column": "ITM_QTY",
+      "expression": "1"
+    },
+    {
+      "column": "ITM_PCS",
+      "expression": "A.ITM_PCS"
+    },
+    {
+      "column": "ITM_GWT",
+      "expression": "A.ITM_GWT"
+    },
+    {
+      "column": "ITM_NWT",
+      "expression": "A.ITM_NWT"
+    },
+    {
+      "column": "ITM_TOUCH",
+      "expression": "A.ITM_TOUCH"
+    },
+    {
+      "column": "ITM_WEST",
+      "expression": "A.ITM_WEST_PRC"
+    },
+    {
+      "column": "ITM_FINE",
+      "expression": "A.ITM_FINE"
+    },
+    {
+      "column": "ITM_RATE",
+      "expression": "A.ITM_RATE"
+    },
+    {
+      "column": "ITM_AMT",
+      "expression": "A.ITM_AMT"
+    },
+    {
+      "column": "LBR_RATE",
+      "expression": "A.LBR_RATE"
+    },
+    {
+      "column": "LBR_AMT",
+      "expression": "A.LBR_AMT"
+    },
+    {
+      "column": "OTH_AMT",
+      "expression": "A.OTH_AMT"
+    },
+    {
+      "column": "ITM_MRP",
+      "expression": "0"
+    },
+    {
+      "column": "NET_AMT",
+      "expression": "A.NET_AMT"
+    },
+    {
+      "column": "KR_NWT",
+      "expression": "A.ITM_NWT"
+    },
+    {
+      "column": "KR_TOUCH",
+      "expression": "A.ITM_TOUCH"
+    },
+    {
+      "column": "KR_WEST",
+      "expression": "A.ITM_WEST_PRC"
+    },
+    {
+      "column": "KR_FINE",
+      "expression": "A.ITM_FINE"
+    },
+    {
+      "column": "KR_LBR_AMT",
+      "expression": "0"
+    },
+    {
+      "column": "KR_OTH_AMT",
+      "expression": "0"
+    },
+    {
+      "column": "KR_COST",
+      "expression": "A.TAG_COST"
+    },
+    {
+      "column": "EMP_CODE",
+      "expression": "A.EMP_CODE"
+    },
+    {
+      "column": "ENTRY_TIME",
+      "expression": "A.VCH_TIME"
+    },
+    {
+      "column": "MAIN_USER",
+      "expression": "A.MAIN_USER"
+    },
+    {
+      "column": "DATA_TYPE",
+      "expression": "A.DATA_TYPE"
+    },
+    {
+      "column": "DESIGN_NO",
+      "expression": "A.DESIGN_NO"
+    },
+    {
+      "column": "ITM_SIZE",
+      "expression": "A.ITM_SIZE"
+    },
+    {
+      "column": "ITM_DESC",
+      "expression": "''"
+    },
+    {
+      "column": "GHT_PRC",
+      "expression": "A.ITM_GHT_PRC"
+    },
+    {
+      "column": "ITM_LOT",
+      "expression": "''"
+    },
+    {
+      "column": "ITM_DISC",
+      "expression": "0"
+    }
+  ],
+  "schemaQualification": "Current MAIN_STOCK schema has SR_NO and ISR_NO; no SR_REC_ISU. DATA_TYPE comes from incoming A.DATA_TYPE here, while account postings use B.DATA_TYPE. ENTRY_TIME is currently PostgreSQL date even though desktop SELECT supplies A.VCH_TIME; preserve existing raw value and explicitly qualify any future insertion/storage conversion.",
+  "status": "mandatory-source-erratum; no source/product/candidate file changed"
+}

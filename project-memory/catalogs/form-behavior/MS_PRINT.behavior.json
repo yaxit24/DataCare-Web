@@ -1,0 +1,11 @@
+{
+ "form": "MS_PRINT",
+ "loc": 570,
+ "gridColumns": {},
+ "inlineSql": [],
+ "keyboard": {
+  "Enter": 2
+ },
+ "calc": [],
+ "validations": []
+}

@@ -1,0 +1,9 @@
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/obj/Debug/net8.0-windows/Stubs.GeneratedMSBuildEditorConfig.editorconfig
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/obj/Debug/net8.0-windows/Stubs.csproj.CoreCompileInputs.cache
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/libs/DevExpressStubs.deps.json
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/libs/DevExpressStubs.dll
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/libs/DevExpressStubs.pdb
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/obj/Debug/net8.0-windows/DevExpressStubs.dll
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/obj/Debug/net8.0-windows/refint/DevExpressStubs.dll
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/obj/Debug/net8.0-windows/DevExpressStubs.pdb
+/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/obj/Debug/net8.0-windows/ref/DevExpressStubs.dll

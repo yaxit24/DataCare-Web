@@ -1,0 +1,36 @@
+{
+ "form": "MS_TAX",
+ "tables": [
+  "AC_MAST",
+  "TAX_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "AC_MAST"
+  ],
+  "DELETE": [
+   "TAX_MAST"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "TAX_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 13,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [
+  "TAX_CODE = '\" + tTaxCode.Text + \"' AND A.SR_NO <> 0 ORDER BY A.SR_NO \"",
+  "TAX_CODE = '\" + tTaxCode.Text + \"'\"",
+  "TAX_CODE = '\" + tTaxCode.Text + \"'\")",
+  "TAX_NAME = '\" + tTaxName.Text + \"'\""
+ ],
+ "loc": 2115
+}

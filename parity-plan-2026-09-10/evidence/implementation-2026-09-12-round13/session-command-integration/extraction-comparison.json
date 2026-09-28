@@ -1,0 +1,17 @@
+{
+  "modules/rbac/authorization.ts": {
+    "existingTemplateLiterals": 6,
+    "allTemplateBytesAndOrderEqual": true,
+    "templateSequenceSha256": "3b1429bdd9b261bf6edac3beb3243d1930201e71a117f32b7987b651f5294ea9"
+  },
+  "modules/sales/salesOrder.ts": {
+    "existingTemplateLiterals": 48,
+    "allTemplateBytesAndOrderEqual": true,
+    "templateSequenceSha256": "866c6b63263e875b3e2f12de42024ebe357a70fc96d812faec04db04f9c306a3"
+  },
+  "callback": {
+    "sameStatementsIgnoringIndentation": true,
+    "onlyExpressionChange": "createSalesOrder receives undefined instead of prisma; its required lifecycle.tx branch uses no PrismaClient wrapper",
+    "normalizedAfterSha256": "359ebb5b5cbcbfda74d7b9ace64e566c7a212c40267f8662c2068ef8e917888f"
+  }
+}

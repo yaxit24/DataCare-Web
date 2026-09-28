@@ -1,0 +1,41 @@
+{
+  "kind": "datacare.round12-depth-summary-correction/1.0",
+  "correctedAtUtc": "2026-09-11T18:58:31.844609+00:00",
+  "helperPath": "parity-plan-2026-09-10/capture_implementation_checkpoint_round12_isolated.py",
+  "beforeSha256": "63628fe33281aeba8a6205a1fd6206f129119974459e523d15824a7f4107ae50",
+  "afterDepthCorrectionSha256": "e9b8073d37e0c77f5cdb81f3f3a04425a01745133d879d7272b05742b104dcfd",
+  "depthObserved": 104,
+  "ceilingUnchanged": 96,
+  "priorRound11Observed": 102,
+  "execution": "Not executed or sealed.",
+  "currentHelperSha256": "df513d5538f6ca0594b9c6f352fa7008ac7985dcebb0be8f89b482aa51b1207a",
+  "priorStagedProgressSha256": "0559902969fae1f6921ab39a3cd6e0c713fe5dc074515df38df96fa8c2a94317",
+  "correctedStagedProgressSha256": "52d55969f8165b6087b6f3bcf71a7504c700c5290292086b200e01c1584e4ea0",
+  "references": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/depth-gate.txt",
+      "sha256": "d30748be21132666c5a4d8c053df1c52d46b1c30be77ccf7e7d1e635c3b8d6ef"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/combined-depth.txt",
+      "sha256": "d30748be21132666c5a4d8c053df1c52d46b1c30be77ccf7e7d1e635c3b8d6ef"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/depth-gate.run.json",
+      "sha256": "ea4c0ee3b7d8e2b30d9f3bfb15b2fda869283498a10225ca9a6374d4aece1748"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/combined-depth.run.json",
+      "sha256": "a460f0ab1ac0020ff5714f0088523f0029602caa7c40c0dafcc28f559d69b7e1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/depth-gate.txt",
+      "sha256": "d0ece8eae53a55252e1292dec49be93cfd5545d6bb7094ab0ae3ed794bd54aaf"
+    },
+    {
+      "path": "parity-plan-2026-09-10/capture_implementation_checkpoint_round12_isolated.py",
+      "sha256": "df513d5538f6ca0594b9c6f352fa7008ac7985dcebb0be8f89b482aa51b1207a"
+    }
+  ],
+  "limits": "Read existing logs only; no scanner, test, helper execution or checkpoint seal. No field-level delta identity inferred. Prior artifacts unchanged."
+}

@@ -1,0 +1,161 @@
+{
+  "version": "session-command-schedules-independent-v1",
+  "status": "prospective-literal-expectations-not-executed",
+  "authorship": "Chosen from inspected session/order lock boundaries before any proposed command helper implementation; not generated from a reducer, database run, or new helper.",
+  "profile": "one-session-share-lock-read-committed-financial-command-v1",
+  "base": {
+    "tenantId": "context-command-fixture",
+    "sessionId": "11111111-1111-4111-8111-111111111111",
+    "otherSessionId": "22222222-2222-4222-8222-222222222222",
+    "loginName": "COMMAND_USER",
+    "loginCoCode": "01",
+    "contextA": {"coCode": "01", "lcCode": "01", "coYear": "2024-2025", "contextEpoch": "7"},
+    "contextB": {"coCode": "02", "lcCode": "01", "coYear": "2024-2025", "contextEpoch": "8"},
+    "contextAAfterABA": {"coCode": "01", "lcCode": "01", "coYear": "2024-2025", "contextEpoch": "9"},
+    "ledgerContext": {"version": "server-session-ledger-context-v1", "status": "unknown", "mode": null, "reason": "vendor-authority-unresolved"},
+    "rights": {"form": "Sales/Sales Order", "action": "update", "FRM_VIEW": "Y", "FRM_EDIT": "Y", "admin": false, "passwordResetRequired": false},
+    "savedOrder": {"coBook": "C13", "voucherNo": "00017", "version": "read-current-exact-version-from-server", "advance": "100.00", "requestedAdvance": "125.00"},
+    "time": {"authority": "database clock_timestamp after row-lock acquisition and after business callback", "normalExpiry": "strictly after every scheduled operation", "boundary": "equality is expired; preserve PostgreSQL microseconds"}
+  },
+  "resultVocabulary": {
+    "edited-once": "one committed current-scope order replacement with balanced advance125.00; unrelated business and session values unchanged except explicitly named independent actor",
+    "unchanged": "all financial business/config/counter snapshots equal before/after; independent actor deltas listed separately",
+    "callbackCalls": "number of entries into the financial callback, not number of attempted SQL statements",
+    "confirmed-abort": "database rollback established independently; excludes an unacknowledged COMMIT"
+  },
+  "schedules": [
+    {
+      "id": "T01", "name": "prehandler alone is not financial cancellation", "classification": "current-boundary-negative-control",
+      "steps": ["old request passes prehandler at A7", "selection A7→B8 commits", "existing unguarded old-scope edit transaction executes valid saved-version edit"],
+      "expected": {"business": "old-scope write remains possible", "claim": "prehandler-only guard does not cancel already admitted writes", "acceptanceOfNewHelper": false}
+    },
+    {
+      "id": "T02", "name": "command wins before selection",
+      "steps": ["command locks session SHARE at A7", "selection attempts session UPDATE and is observed blocked", "command edits125 and passes final live check", "command commits", "selection completes new contextB8"],
+      "expected": {"command": "success", "callbackCalls": 1, "business": "edited-once", "selectionBlockedUntilCommandEnds": true, "finalContext": "B8", "sessionActor": "selection-only", "selectionMayRetroactivelyCancelEdit": false}
+    },
+    {
+      "id": "T03", "name": "selection commits before delayed command admission",
+      "steps": ["request retains A7", "selection locks session UPDATE", "command attempts SHARE and is observed blocked", "selection commitsB8", "command obtains row and checks retained identity"],
+      "expected": {"command": "context-stale", "callbackCalls": 0, "business": "unchanged", "finalContext": "B8", "sessionActor": "selection-only"}
+    },
+    {
+      "id": "T04", "name": "A→B→A preserves stale generation refusal",
+      "steps": ["request retains A7", "selection B8 commits", "selection A9 commits", "command admits retained A7"],
+      "expected": {"command": "context-stale", "callbackCalls": 0, "business": "unchanged", "finalContext": "A9", "tupleEqualityMayBypassEpoch": false}
+    },
+    {
+      "id": "T05", "name": "same-scope new open invalidates old command",
+      "steps": ["request retains A7", "new selection operation reopensA and commits epoch8", "command admits retained A7"],
+      "expected": {"command": "context-stale", "callbackCalls": 0, "business": "unchanged", "finalContext": "A8"}
+    },
+    {
+      "id": "T06", "name": "exact current selection receipt does not invalidate current command",
+      "setup": {"currentContext": "A8", "receiptFromEpoch": "7", "commandExpectedEpoch": "8"},
+      "steps": ["exact selection receipt recovery locks session and returns currentA8", "recovery commits without epoch/settings writes", "currentA8 command admits and edits125"],
+      "expected": {"command": "success", "callbackCalls": 1, "business": "edited-once", "finalContext": "A8", "receiptRecoveryWrites": 0}
+    },
+    {
+      "id": "T07", "name": "successful refresh wins without changing command context",
+      "steps": ["request retains A7 access identity", "refresh obtains UPDATE and rotates current JTI", "refresh commits sameA7", "command admits A7 and edits125"],
+      "expected": {"command": "success", "callbackCalls": 1, "business": "edited-once", "finalContext": "A7", "sessionActor": "refresh-only", "commandComparesRefreshJti": false}
+    },
+    {
+      "id": "T08", "name": "refresh waits for command and preserves command result",
+      "steps": ["command locks session SHARE at A7", "refresh UPDATE is observed blocked", "command edits125 and commits", "refresh rotates and commits sameA7"],
+      "expected": {"command": "success", "callbackCalls": 1, "business": "edited-once", "refreshBlockedUntilCommandEnds": true, "finalContext": "A7", "sessionActor": "refresh-only"}
+    },
+    {
+      "id": "T09", "name": "strict refresh reuse revocation wins before command",
+      "steps": ["prior refresh rotated", "old-JTI refresh locks session and commits refresh-reuse revocation before returning error", "retained command attempts admission"],
+      "expected": {"command": "session-revoked", "callbackCalls": 0, "business": "unchanged", "refreshError": "refresh-reused", "revocationPersisted": "refresh-reuse"}
+    },
+    {
+      "id": "T10", "name": "logout before command admission",
+      "steps": ["request retains A7", "logout session UPDATE commits revocation", "command obtains SHARE and inspects state"],
+      "expected": {"command": "session-revoked", "callbackCalls": 0, "business": "unchanged", "sessionActor": "logout-only"}
+    },
+    {
+      "id": "T11", "name": "command precedes queued logout",
+      "steps": ["command locks session SHARE", "logout UPDATE is observed blocked", "command edits125 and commits", "logout commits revocation"],
+      "expected": {"command": "success", "callbackCalls": 1, "business": "edited-once", "logoutBlockedUntilCommandEnds": true, "finalSessionRevoked": true, "noRetroactiveRollback": true}
+    },
+    {
+      "id": "T12", "name": "password reset before command admission",
+      "steps": ["reset changes credential under LOGIN_MAST lock", "reset revokes matching sessions and commits", "command attempts admission"],
+      "expected": {"command": "session-revoked", "callbackCalls": 0, "business": "unchanged", "credentialAndRevocationActor": "password-reset-only"}
+    },
+    {
+      "id": "T13", "name": "command first while reset holds credentials and waits for session",
+      "steps": ["command locks session SHARE", "reset locks and updates LOGIN_MAST", "reset attempts session UPDATE and is observed blocked", "command plain principal read observes prior committed credential", "command edits125 and commits", "reset revokes matching sessions and commits"],
+      "expected": {"command": "success", "callbackCalls": 1, "business": "edited-once", "resetBlockedUntilCommandEnds": true, "commandTakesLoginRowLock": false, "finalSessionRevoked": true, "directInverseLockCycle": false}
+    },
+    {
+      "id": "T14", "name": "self password change retains its existing active-session exception",
+      "steps": ["command holds current sessionS SHARE", "self password change updates LOGIN_MAST and revokes other-session sentinel but excludesS", "self change commits", "command final live check succeeds and commits"],
+      "expected": {"command": "success", "callbackCalls": 1, "business": "edited-once", "currentSessionRevoked": false, "otherSessionRevoked": true, "exceptionPreserved": true}
+    },
+    {
+      "id": "T15", "name": "expiry while waiting is sampled after lock",
+      "steps": ["owner holds exact session row UPDATE while it is live", "command requests SHARE and waits", "database time reaches exact expiry", "owner releases without changing expiry", "command obtains lock then samples database clock"],
+      "expected": {"command": "session-expired", "callbackCalls": 0, "business": "unchanged", "commandRevocationWrites": 0, "transactionStartClockMayAdmit": false}
+    },
+    {
+      "id": "T16", "name": "expiry during callback rolls back completed business statements",
+      "steps": ["command obtains SHARE and after-lock clock is one microsecond before expiry", "callback issues valid financial replacement", "final database clock is equal to expiry", "wrapper throws before committing"],
+      "expected": {"command": "session-expired", "callbackCalls": 1, "business": "unchanged", "transactionOutcome": "confirmed-abort", "authSessionRawAndXminCtidUnchanged": true, "commandRevocationWrites": 0}
+    },
+    {
+      "id": "T17", "name": "domain failure releases session and rolls back replacement",
+      "steps": ["command obtains SHARE", "selection UPDATE waits", "callback fails after a business statement", "command transaction aborts", "selection proceeds and commitsB8"],
+      "expected": {"command": "original-domain-error", "callbackCalls": 1, "business": "unchanged", "transactionOutcome": "confirmed-abort", "finalContext": "B8"}
+    },
+    {
+      "id": "T18", "name": "two same-session commands retain document version serialization",
+      "steps": ["two requests retain same A7 and document versionV", "both obtain compatible session SHARE locks", "command1 wins existing order advisory lock and commits versionV2", "command2 acquires order advisory lock and sees versionV2"],
+      "expected": {"command1": "success", "command2": "SalesOrderConflictError", "business": "edited-once", "finalContext": "A7", "sessionWrites": 0, "sessionShareLocksMayCoexist": true}
+    },
+    {
+      "id": "T19", "name": "fresh committed form revocation defeats cached prehandler permission",
+      "steps": ["request prehandler saw ViewY/EditY", "USER_SET EditN commits", "command obtains session SHARE and performs fresh form query"],
+      "expected": {"command": "forbidden", "callbackCalls": 0, "business": "unchanged", "rightsActor": "external-USER_SET-update-only", "httpStatus": 403}
+    },
+    {
+      "id": "T20", "name": "forced reset or missing principal before admission",
+      "variants": ["selected effective principal PASSWORD_RESET_REQUIRED becomesY", "effective principal row is removed"],
+      "steps": ["credential change commits before command principal read without using a stale cached principal", "command obtains SHARE and reads fresh principal"],
+      "expected": {"variantErrors": ["password-reset-required", "session-invalid"], "callbackCalls": 0, "business": "unchanged"}
+    },
+    {
+      "id": "T21", "name": "exact context and tenant isolation",
+      "variants": ["wrong tenant binding", "wrong immutable loginCoCode", "different location", "different year", "absent financial year", "numeric epoch", "overflow epoch"],
+      "steps": ["construct internal request identity or command scope differing only by named field", "invoke admission before business callback"],
+      "expected": {"callbackCalls": 0, "business": "unchanged", "foreignTenantUntouched": true, "noDefaultingOrNumberCoercion": true, "classification": "internal-misuse/session/context/scope errors distinguished by adapter; none is success"}
+    },
+    {
+      "id": "T22", "name": "lost successful edit response is not financial retry authority",
+      "steps": ["command edits125 and database commits", "HTTP result is lost", "caller retains original document versionV", "explicit same-body retry uses current sessionA7 but old document versionV"],
+      "expected": {"firstBusiness": "edited-once", "retry": "SalesOrderConflictError", "additionalBusinessWrites": 0, "automaticRetry": false, "selectionReceiptIsFinancialIdempotency": false}
+    },
+    {
+      "id": "T23", "name": "ambiguous COMMIT acknowledgment stays ambiguous",
+      "steps": ["financial work and final live check complete", "COMMIT acknowledgment is lost with unknown database outcome"],
+      "expected": {"business": "commit-or-abort-unknown-until-readback", "automaticRetry": false, "claimConfirmedRollback": false, "response": "original-transport-failure-no-success"}
+    },
+    {
+      "id": "T24", "name": "other-session configuration and rights change remain outside session lock guarantee", "classification": "explicit-limit",
+      "steps": ["commandS1 holds sessionS1 SHARE and observes current period/config/form", "independent writerS2 changes CO_SET or USER_SET without lockingS1", "commandS1 continues under its existing business rules"],
+      "expected": {"sessionHelperAloneGuaranteesRejection": false, "sessionHelperIntroducesCompanyWideConfigLock": false, "claimAtomicConfigOrRightsStability": false}
+    },
+    {
+      "id": "T25", "name": "no-session-update invariant avoids SHARE upgrade deadlock",
+      "steps": ["two commands hold compatible SHARE locks onS", "both complete distinct documents", "final guard reads session only; neither touches last_used/JTI/epoch"],
+      "expected": {"sessionUpdateStatements": 0, "sessionRawAndXminCtidUnchanged": true, "shareToUpdateUpgrade": false, "claimNoOtherDatabaseDeadlocks": false}
+    },
+    {
+      "id": "T26", "name": "unknown mode remains unknown after successful financial admission",
+      "steps": ["admit configured complete scope with valid explicit unknown ledger envelope", "edit saved Sales Order advance using existing service rules", "return after commit"],
+      "expected": {"command": "success", "business": "edited-once", "ledgerContextExactlyPreserved": true, "knownClosingEnabled": false, "incomingNumericReturnSaveEnabled": false, "newVendorAuthority": false}
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+ "form": "UT_WAPP_WITH_API",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MAST",
+  "AD_MEMB",
+  "APP_CHATMESSAGES",
+  "LEDR_AC_DATA",
+  "LOGIN_MAST",
+  "MSG_MAST",
+  "POINT_MAST",
+  "RATE_MAST",
+  "USER_SET",
+  "WEBHOOKINBOX"
+ ],
+ "writes": {
+  "INSERT": {
+   "WEBHOOKINBOX": [
+    "JsonData"
+   ],
+   "APP_CHATMESSAGES": [
+    "AccountID",
+    "CampaignID",
+    "Content",
+    "CustomerName",
+    "Direction",
+    "ErrorMessage",
+    "MediaID",
+    "MessageID",
+    "Status",
+    "ThreadID",
+    "Timestamp",
+    "Type"
+   ],
+   "LEDR_AC_DATA": [
+    "AC_CODE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "CR_FINE_WT",
+    "CR_SL_FINE",
+    "DATA_TYPE",
+    "DR_AMT",
+    "DR_FINE_WT",
+    "DR_SL_FINE",
+    "LC_CODE",
+    "VCH_DT"
+   ],
+   "POINT_MAST": [
+    "CO_CODE",
+    "MAIN_USER",
+    "POINT_CODE",
+    "POINT_NAME",
+    "POINT_TYPE",
+    "SR_NO"
+   ]
+  },
+  "UPDATE": [
+   "POINT_MAST"
+  ],
+  "DELETE": [
+   "LEDR_AC_DATA",
+   "MSG_MAST",
+   "POINT_MAST"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MAST",
+  "AD_MEMB",
+  "APP_CHATMESSAGES",
+  "LEDR_AC_DATA",
+  "LOGIN_MAST",
+  "MSG_MAST",
+  "POINT_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 26,
+ "timers": 2,
+ "serialPort": false,
+ "handlers": 1,
+ "calcSample": [],
+ "loc": 5423
+}

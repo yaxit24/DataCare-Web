@@ -1,0 +1,1694 @@
+{
+  "forms": {
+    "UT_SETTING": {
+      "controlOptions": {
+        "cboColSet": [
+          ""
+        ],
+        "cboLbrType": [
+          "Gorss Wise",
+          "Net Wise",
+          "Kg Wise",
+          "Pcs Wise"
+        ],
+        "cboRateType": [
+          "G Gram Wise",
+          "T 10gm Wise",
+          "K Kg Wise"
+        ],
+        "cboTaxRof": [
+          "0",
+          "1",
+          "2"
+        ],
+        "cboTagRowChange": [
+          "No",
+          "Yes"
+        ],
+        "cbolbrRateGen": [
+          "No",
+          "Yes"
+        ],
+        "cboRateOpen": [
+          "No",
+          "Yes"
+        ],
+        "cboOpDhrn": [
+          "No",
+          "Yes"
+        ],
+        "cboDhrnType": [
+          "Month Wise",
+          "Day Wise"
+        ],
+        "cboHelpSearch": [
+          "Selected Col",
+          "Mobile Mathod",
+          "Whout Row Short",
+          "All Column"
+        ],
+        "cboLdrSumm": [
+          "No",
+          "Yes"
+        ],
+        "cboReminder": [
+          "No",
+          "Yes"
+        ],
+        "cbolbrrof": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "cboSlRateRof": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "cboPurcLbr": [
+          "No",
+          "Yes"
+        ],
+        "cboStkRptType": [
+          "Gross Wise",
+          "Net Wise"
+        ],
+        "cboWhTch": [
+          "No",
+          "Yes"
+        ],
+        "cboDupPrint": [
+          "No",
+          "Yes"
+        ],
+        "cboPurcAc": [
+          "No",
+          "Yes"
+        ],
+        "cboOpLoan": [
+          "No",
+          "Yes"
+        ],
+        "cboPanCardVal": [
+          "100000",
+          "200000"
+        ],
+        "cboPrintZoom": [
+          "110",
+          "120",
+          "130",
+          "140",
+          "150"
+        ],
+        "cboDhrnIntPrc": [
+          "1.00",
+          "1.25",
+          "1.50",
+          "1.75",
+          "2.00",
+          "2.25",
+          "2.50",
+          "3.00"
+        ]
+      },
+      "persistedColumns": {
+        "BOOK_NAME": {
+          "control": "cboColSet",
+          "rule": "full-text"
+        },
+        "LBR_TYPE": {
+          "control": "cboLbrType",
+          "rule": "first-char"
+        },
+        "RATE_PAR": {
+          "control": "cboRateType",
+          "rule": "first-char"
+        },
+        "TAX_ROF": {
+          "control": "cboTaxRof",
+          "rule": "numeric"
+        },
+        "SL_ROW_CHANGE": {
+          "control": "cboTagRowChange",
+          "rule": "first-char"
+        },
+        "LBR_RATE_GEN": {
+          "control": "cbolbrRateGen",
+          "rule": "first-char"
+        },
+        "RATE_MAST_OPEN": {
+          "control": "cboRateOpen",
+          "rule": "first-char"
+        },
+        "OP_DHRN": {
+          "control": "cboOpDhrn",
+          "rule": "first-char"
+        },
+        "DHRN_INT_TYPE": {
+          "control": "cboDhrnType",
+          "rule": "first-char"
+        },
+        "HELP_SERCH": {
+          "control": "cboHelpSearch",
+          "rule": "first-char"
+        },
+        "LDR_SUMM": {
+          "control": "cboLdrSumm",
+          "rule": "first-char"
+        },
+        "REMINDER_OPEN": {
+          "control": "cboReminder",
+          "rule": "first-char"
+        },
+        "LBR_ROF": {
+          "control": "cbolbrrof",
+          "rule": "numeric"
+        },
+        "ITM_RATE_ROF": {
+          "control": "cboSlRateRof",
+          "rule": "numeric"
+        },
+        "PURC_WITH_LBR": {
+          "control": "cboPurcLbr",
+          "rule": "first-char"
+        },
+        "STK_RPT_TYPE": {
+          "control": "cboStkRptType",
+          "rule": "first-char"
+        },
+        "TOUCH_AUTO_SAVE": {
+          "control": "cboWhTch",
+          "rule": "first-char"
+        },
+        "PAN_CARD_VAL": {
+          "control": "cboPanCardVal",
+          "rule": "numeric"
+        },
+        "DHRN_PRC": {
+          "control": "cboDhrnIntPrc",
+          "rule": "numeric"
+        },
+        "DUP_PRINT": {
+          "control": "cboDupPrint",
+          "rule": "first-char"
+        },
+        "CASH_PURC_AC": {
+          "control": "cboPurcAc",
+          "rule": "first-char"
+        },
+        "OP_LOAN": {
+          "control": "cboOpLoan",
+          "rule": "first-char"
+        },
+        "FX_RATE": {
+          "control": "cboFxRate",
+          "rule": "numeric"
+        },
+        "OZ_CON_VAL": {
+          "control": "cboOzCon",
+          "rule": "numeric"
+        },
+        "FX_CODE": {
+          "control": "cboOzCon",
+          "rule": "full-text"
+        },
+        "PRINT_ZOOM": {
+          "control": "cboPrintZoom",
+          "rule": "numeric"
+        }
+      }
+    },
+    "UT_SETTING_MAIN": {
+      "controlOptions": {
+        "cboQrCode": [
+          "No",
+          "Yes"
+        ],
+        "cboCustOsSms": [
+          "No",
+          "Yes"
+        ],
+        "cboLoanIntType": [
+          "Month Wise",
+          "Day Wise"
+        ],
+        "cboSalesImagPrint": [
+          "No",
+          "Yes"
+        ],
+        "cboTotFineStkType": [
+          "Item Wise",
+          "Group Wise",
+          "Trading Wise"
+        ],
+        "cboPrRateRof": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "cboAdminSms": [
+          "No",
+          "Yes"
+        ],
+        "cboCustSms": [
+          "No",
+          "Yes"
+        ],
+        "cboWappSlPrint": [
+          "No",
+          "Yes"
+        ],
+        "cboDesignGen": [
+          "No",
+          "Yes"
+        ],
+        "cboOrdImage": [
+          "No",
+          "Yes"
+        ],
+        "cboOrnaIsu": [
+          "Yes",
+          "No"
+        ],
+        "cboMobileSearch": [
+          "Yes",
+          "No"
+        ],
+        "cboEmpMandatory": [
+          "No",
+          "Yes"
+        ],
+        "cboFontChange": [
+          "No",
+          "Yes"
+        ],
+        "cboPreviousLock": [
+          "No",
+          "Yes"
+        ],
+        "cboFontSize": [
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15"
+        ],
+        "cboFontStyle": [
+          "0 - Regular",
+          "1 - Bold"
+        ],
+        "cboPrintFormSet": [
+          "Exit",
+          "Print",
+          "View"
+        ],
+        "cboGridRowHeight": [
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "33",
+          "35",
+          "37",
+          "40"
+        ],
+        "cboBilTotRof": [
+          "0",
+          "1",
+          "2"
+        ],
+        "cboScorlbar": [
+          "Yes",
+          "No"
+        ],
+        "cboStkRptType": [
+          "OLD",
+          "NEW"
+        ],
+        "cboTagSaleWtDiff": [
+          "No",
+          "Yes"
+        ],
+        "cboEstmateWithTax": [
+          "No",
+          "Yes"
+        ],
+        "cboTagRowSave": [
+          "No",
+          "Yes"
+        ],
+        "cboTagRowPrint": [
+          "No",
+          "Yes"
+        ],
+        "cboDhrnWapp": [
+          "No",
+          "Yes"
+        ],
+        "cboSchmWapp": [
+          "No",
+          "Yes"
+        ],
+        "cboRptTotShow": [
+          "No",
+          "Yes"
+        ],
+        "cboReminderType": [
+          "Reminder",
+          "Birthday",
+          "Order",
+          "Sales",
+          "Wh Sales",
+          "Dhiran",
+          "Member"
+        ],
+        "cboHelpLent": [
+          "10",
+          "15",
+          "25",
+          "50"
+        ],
+        "cboOrdTagStkLess": [
+          "No",
+          "Yes"
+        ],
+        "cboAllBrancAcShow": [
+          "No",
+          "Yes"
+        ],
+        "cboEmpAsUser": [
+          "No",
+          "Yes"
+        ],
+        "cboImgWithWt": [
+          "Yes",
+          "No"
+        ],
+        "cboDhrnImgPrint": [
+          "Yes",
+          "No"
+        ],
+        "cboLbrWitGht": [
+          "Yes",
+          "No"
+        ],
+        "cboAprlImg": [
+          "Yes",
+          "No"
+        ],
+        "cboOthItmWtRemove": [
+          "No",
+          "Yes"
+        ],
+        "cboSilverLedr3digit": [
+          "No",
+          "Yes"
+        ],
+        "cboWhSaleImg": [
+          "No",
+          "Yes"
+        ],
+        "cboitmWithLotStk": [
+          "No",
+          "Yes"
+        ],
+        "cboBalSheetType": [
+          "Fine Wise",
+          "Amount Wise"
+        ],
+        "cboFineStkType": [
+          "Average Wise",
+          "Gr Touch Wise",
+          "Net Wt Wise"
+        ],
+        "cboStkRefresh": [
+          "No",
+          "Yes",
+          "No",
+          "Yes"
+        ],
+        "cboMainFontChange": [
+          "No",
+          "Yes"
+        ],
+        "cboSlRateWith": [
+          "Net Wise",
+          "Gorss Wise",
+          "Fine Wise",
+          "Pcs Wise"
+        ],
+        "cboPurRateWith": [
+          "Net Wise",
+          "Gorss Wise",
+          "Fine Wise",
+          "Pcs Wise"
+        ],
+        "cboCrystalViewType": [
+          "Old",
+          "New"
+        ]
+      },
+      "persistedColumns": {
+        "LEDR_BILL_COL": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "ALL_ROF_REMOVE": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "KR_DESIGN_IMG_PRINT": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "SALES_WITH_HMTAX": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "PURC_WITH_HMTAX": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "SL_TDS_TAX": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "PR_TDS_TAX": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "DESIGN_HELP": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "ITM_FINE_LOCK": {
+          "control": "(checkbox grid)",
+          "rule": "yn-flag"
+        },
+        "QR_CODE_GEN": {
+          "control": "cboQrCode",
+          "rule": "first-char"
+        },
+        "OS_BILL_SMS": {
+          "control": "cboCustOsSms",
+          "rule": "first-char"
+        },
+        "LOAN_INT_TYPE": {
+          "control": "cboLoanIntType",
+          "rule": "first-char"
+        },
+        "SL_BILL_IMG": {
+          "control": "cboSalesImagPrint",
+          "rule": "first-char"
+        },
+        "TOT_FINE_STK_TYPE": {
+          "control": "cboTotFineStkType",
+          "rule": "first-char"
+        },
+        "PR_RATE_ROF": {
+          "control": "cboPrRateRof",
+          "rule": "numeric"
+        },
+        "ADMIN_SMS": {
+          "control": "cboAdminSms",
+          "rule": "first-char"
+        },
+        "CUST_SMS": {
+          "control": "cboCustSms",
+          "rule": "first-char"
+        },
+        "COUNTRY_ID": {
+          "control": "cboCountryid",
+          "rule": "full-text"
+        },
+        "WAPP_SL_PRINT": {
+          "control": "cboWappSlPrint",
+          "rule": "first-char"
+        },
+        "TAG_ENTRY_DESIGN_GEN": {
+          "control": "cboDesignGen",
+          "rule": "first-char"
+        },
+        "ORD_IMG_PRINT": {
+          "control": "cboOrdImage",
+          "rule": "first-char"
+        },
+        "OS_BILL_ORNA_ISU": {
+          "control": "cboOrnaIsu",
+          "rule": "first-char"
+        },
+        "MOBILE_HELP": {
+          "control": "cboMobileSearch",
+          "rule": "first-char"
+        },
+        "PRINT_FORM_BTN": {
+          "control": "cboPrintFormSet",
+          "rule": "first-char"
+        },
+        "EMP_CODE_MANDATORY": {
+          "control": "cboEmpMandatory",
+          "rule": "first-char"
+        },
+        "FONT_CHANGE": {
+          "control": "cboFontChange",
+          "rule": "first-char"
+        },
+        "FONT_SIZE": {
+          "control": "cboFontSize",
+          "rule": "numeric"
+        },
+        "FONT_STYLE_TYPE": {
+          "control": "cboFontStyle",
+          "rule": "first-char"
+        },
+        "GRID_ROW_HIGHT": {
+          "control": "cboGridRowHeight",
+          "rule": "numeric"
+        },
+        "LAST_DAY_LOCK": {
+          "control": "cboPreviousLock",
+          "rule": "first-char"
+        },
+        "CASH_LIMIT": {
+          "control": "cboCashLimit",
+          "rule": "numeric"
+        },
+        "TOT_AMT_ROF": {
+          "control": "cboBilTotRof",
+          "rule": "first-char"
+        },
+        "ITM_RATE_ROF": {
+          "control": "cboBilTotRof",
+          "rule": "first-char"
+        },
+        "GRID_SCROLL": {
+          "control": "cboScorlbar",
+          "rule": "first-char"
+        },
+        "STOCK_RPT_TYPE": {
+          "control": "cboStkRptType",
+          "rule": "full-text"
+        },
+        "SL_TAG_WT_DIFF": {
+          "control": "cboTagSaleWtDiff",
+          "rule": "first-char"
+        },
+        "ESTMATE_TAX": {
+          "control": "cboEstmateWithTax",
+          "rule": "first-char"
+        },
+        "TAG_VCH_AUTO_SAVE": {
+          "control": "cboTagRowSave",
+          "rule": "first-char"
+        },
+        "TAG_AUTO_PRINT": {
+          "control": "cboTagRowPrint",
+          "rule": "first-char"
+        },
+        "DHRN_WAPP": {
+          "control": "cboDhrnWapp",
+          "rule": "first-char"
+        },
+        "SCHM_WAPP": {
+          "control": "cboSchmWapp",
+          "rule": "first-char"
+        },
+        "RPT_TOT_SHOW": {
+          "control": "cboRptTotShow",
+          "rule": "first-char"
+        },
+        "DEFAULT_REMINDER": {
+          "control": "cboReminderType",
+          "rule": "first-char"
+        },
+        "VCH_DESC_HELP_LENT": {
+          "control": "cboHelpLent",
+          "rule": "numeric"
+        },
+        "ORD_TAG_STK_LESS": {
+          "control": "cboOrdTagStkLess",
+          "rule": "first-char"
+        },
+        "BRANCH_ALL_AC_SHOW": {
+          "control": "cboAllBrancAcShow",
+          "rule": "first-char"
+        },
+        "EMP_AS_USER": {
+          "control": "cboEmpAsUser",
+          "rule": "first-char"
+        },
+        "WAPP_IMG_GWT": {
+          "control": "cboImgWithWt",
+          "rule": "first-char"
+        },
+        "DHRN_IMG_PRINT": {
+          "control": "cboDhrnImgPrint",
+          "rule": "first-char"
+        },
+        "LBR_WITH_GHT": {
+          "control": "cboLbrWitGht",
+          "rule": "first-char"
+        },
+        "APR_IMG_PRINT": {
+          "control": "cboAprlImg",
+          "rule": "first-char"
+        },
+        "OTH_ITM_WT_REMOVE": {
+          "control": "cboOthItmWtRemove",
+          "rule": "first-char"
+        },
+        "SILVER_THREE_DIGIT": {
+          "control": "cboSilverLedr3digit",
+          "rule": "first-char"
+        },
+        "WH_BILL_IMG": {
+          "control": "cboWhSaleImg",
+          "rule": "first-char"
+        },
+        "ITM_WITH_LOT_STK": {
+          "control": "cboitmWithLotStk",
+          "rule": "first-char"
+        },
+        "PROFIT_RPT_TYPE": {
+          "control": "cboBalSheetType",
+          "rule": "first-char"
+        },
+        "FINE_STK_TYPE": {
+          "control": "cboFineStkType",
+          "rule": "first-char"
+        },
+        "CUR_DAY_POSTING": {
+          "control": "cboStkRefresh",
+          "rule": "first-char"
+        },
+        "MAIN_FONT_CHANGE": {
+          "control": "cboMainFontChange",
+          "rule": "first-char"
+        },
+        "SL_AMT_TYPE": {
+          "control": "cboSlRateWith",
+          "rule": "first-char"
+        },
+        "PR_AMT_TYPE": {
+          "control": "cboPurRateWith",
+          "rule": "first-char"
+        },
+        "CRYSTAL_RPT": {
+          "control": "cboCrystalViewType",
+          "rule": "first-char"
+        }
+      }
+    },
+    "UT_SET_ADMIN": {
+      "controlOptions": {
+        "cboCounterStk": [
+          "No",
+          "Yes"
+        ],
+        "cboEstmatBank": [
+          "No",
+          "Yes"
+        ],
+        "cboOldPurcTch": [
+          "No",
+          "Yes"
+        ],
+        "cboNegativeStk": [
+          "No",
+          "Yes"
+        ],
+        "cboSlNwtLock": [
+          "No",
+          "Yes"
+        ],
+        "cbobillprofit": [
+          "No",
+          "Yes"
+        ],
+        "cboPurcLot": [
+          "No",
+          "Yes"
+        ],
+        "cboKrTouchHide": [
+          "No",
+          "Yes"
+        ],
+        "cboStklimitWithDesign": [
+          "No",
+          "Yes"
+        ]
+      },
+      "persistedColumns": {
+        "COUNTER_STK": {
+          "control": "cboCounterStk",
+          "rule": "first-char"
+        },
+        "ESTMATE_BANK_LOCK": {
+          "control": "cboEstmatBank",
+          "rule": "first-char"
+        },
+        "OLD_PURC_TOUCH": {
+          "control": "cboOldPurcTch",
+          "rule": "first-char"
+        },
+        "NEGATIVE_STK_SALE": {
+          "control": "cboNegativeStk",
+          "rule": "first-char"
+        },
+        "SL_NWT_LOCK": {
+          "control": "cboSlNwtLock",
+          "rule": "first-char"
+        },
+        "BILL_PROFIT": {
+          "control": "cbobillprofit",
+          "rule": "first-char"
+        },
+        "PURC_LOT": {
+          "control": "cboPurcLot",
+          "rule": "first-char"
+        },
+        "YEAR_GOLD_SL": {
+          "control": "cboGlYearSale",
+          "rule": "numeric"
+        },
+        "YEAR_SILVER_SL": {
+          "control": "cboSlYearSale",
+          "rule": "numeric"
+        },
+        "USER_KR_TOUCH_HIDE": {
+          "control": "cboKrTouchHide",
+          "rule": "first-char"
+        },
+        "STK_LMIT_WITH_DESIGN": {
+          "control": "cboStklimitWithDesign",
+          "rule": "first-char"
+        }
+      }
+    }
+  },
+  "columns": {
+    "BOOK_NAME": {
+      "form": "UT_SETTING",
+      "control": "cboColSet",
+      "rule": "full-text",
+      "options": [
+        ""
+      ]
+    },
+    "LBR_TYPE": {
+      "form": "UT_SETTING",
+      "control": "cboLbrType",
+      "rule": "first-char",
+      "options": [
+        "Gorss Wise",
+        "Net Wise",
+        "Kg Wise",
+        "Pcs Wise"
+      ]
+    },
+    "RATE_PAR": {
+      "form": "UT_SETTING",
+      "control": "cboRateType",
+      "rule": "first-char",
+      "options": [
+        "G Gram Wise",
+        "T 10gm Wise",
+        "K Kg Wise"
+      ]
+    },
+    "TAX_ROF": {
+      "form": "UT_SETTING",
+      "control": "cboTaxRof",
+      "rule": "numeric",
+      "options": [
+        "0",
+        "1",
+        "2"
+      ]
+    },
+    "SL_ROW_CHANGE": {
+      "form": "UT_SETTING",
+      "control": "cboTagRowChange",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "LBR_RATE_GEN": {
+      "form": "UT_SETTING",
+      "control": "cbolbrRateGen",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "RATE_MAST_OPEN": {
+      "form": "UT_SETTING",
+      "control": "cboRateOpen",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "OP_DHRN": {
+      "form": "UT_SETTING",
+      "control": "cboOpDhrn",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "DHRN_INT_TYPE": {
+      "form": "UT_SETTING",
+      "control": "cboDhrnType",
+      "rule": "first-char",
+      "options": [
+        "Month Wise",
+        "Day Wise"
+      ]
+    },
+    "HELP_SERCH": {
+      "form": "UT_SETTING",
+      "control": "cboHelpSearch",
+      "rule": "first-char",
+      "options": [
+        "Selected Col",
+        "Mobile Mathod",
+        "Whout Row Short",
+        "All Column"
+      ]
+    },
+    "LDR_SUMM": {
+      "form": "UT_SETTING",
+      "control": "cboLdrSumm",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "REMINDER_OPEN": {
+      "form": "UT_SETTING",
+      "control": "cboReminder",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "LBR_ROF": {
+      "form": "UT_SETTING",
+      "control": "cbolbrrof",
+      "rule": "numeric",
+      "options": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    "ITM_RATE_ROF": {
+      "form": "UT_SETTING",
+      "control": "cboSlRateRof",
+      "rule": "numeric",
+      "options": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    "PURC_WITH_LBR": {
+      "form": "UT_SETTING",
+      "control": "cboPurcLbr",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "STK_RPT_TYPE": {
+      "form": "UT_SETTING",
+      "control": "cboStkRptType",
+      "rule": "first-char",
+      "options": [
+        "Gross Wise",
+        "Net Wise"
+      ]
+    },
+    "TOUCH_AUTO_SAVE": {
+      "form": "UT_SETTING",
+      "control": "cboWhTch",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "PAN_CARD_VAL": {
+      "form": "UT_SETTING",
+      "control": "cboPanCardVal",
+      "rule": "numeric",
+      "options": [
+        "100000",
+        "200000"
+      ]
+    },
+    "DHRN_PRC": {
+      "form": "UT_SETTING",
+      "control": "cboDhrnIntPrc",
+      "rule": "numeric",
+      "options": [
+        "1.00",
+        "1.25",
+        "1.50",
+        "1.75",
+        "2.00",
+        "2.25",
+        "2.50",
+        "3.00"
+      ]
+    },
+    "DUP_PRINT": {
+      "form": "UT_SETTING",
+      "control": "cboDupPrint",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "CASH_PURC_AC": {
+      "form": "UT_SETTING",
+      "control": "cboPurcAc",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "OP_LOAN": {
+      "form": "UT_SETTING",
+      "control": "cboOpLoan",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "FX_RATE": {
+      "form": "UT_SETTING",
+      "control": "cboFxRate",
+      "rule": "numeric",
+      "options": null
+    },
+    "OZ_CON_VAL": {
+      "form": "UT_SETTING",
+      "control": "cboOzCon",
+      "rule": "numeric",
+      "options": null
+    },
+    "FX_CODE": {
+      "form": "UT_SETTING",
+      "control": "cboOzCon",
+      "rule": "full-text",
+      "options": null
+    },
+    "PRINT_ZOOM": {
+      "form": "UT_SETTING",
+      "control": "cboPrintZoom",
+      "rule": "numeric",
+      "options": [
+        "110",
+        "120",
+        "130",
+        "140",
+        "150"
+      ]
+    },
+    "LEDR_BILL_COL": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "ALL_ROF_REMOVE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "KR_DESIGN_IMG_PRINT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "SALES_WITH_HMTAX": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "PURC_WITH_HMTAX": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "SL_TDS_TAX": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "PR_TDS_TAX": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "DESIGN_HELP": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "ITM_FINE_LOCK": {
+      "form": "UT_SETTING_MAIN",
+      "control": "(checkbox grid)",
+      "rule": "yn-flag",
+      "options": null
+    },
+    "QR_CODE_GEN": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboQrCode",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "OS_BILL_SMS": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboCustOsSms",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "LOAN_INT_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboLoanIntType",
+      "rule": "first-char",
+      "options": [
+        "Month Wise",
+        "Day Wise"
+      ]
+    },
+    "SL_BILL_IMG": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboSalesImagPrint",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "TOT_FINE_STK_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboTotFineStkType",
+      "rule": "first-char",
+      "options": [
+        "Item Wise",
+        "Group Wise",
+        "Trading Wise"
+      ]
+    },
+    "PR_RATE_ROF": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboPrRateRof",
+      "rule": "numeric",
+      "options": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    "ADMIN_SMS": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboAdminSms",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "CUST_SMS": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboCustSms",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "COUNTRY_ID": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboCountryid",
+      "rule": "full-text",
+      "options": null
+    },
+    "WAPP_SL_PRINT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboWappSlPrint",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "TAG_ENTRY_DESIGN_GEN": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboDesignGen",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "ORD_IMG_PRINT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboOrdImage",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "OS_BILL_ORNA_ISU": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboOrnaIsu",
+      "rule": "first-char",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    "MOBILE_HELP": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboMobileSearch",
+      "rule": "first-char",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    "PRINT_FORM_BTN": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboPrintFormSet",
+      "rule": "first-char",
+      "options": [
+        "Exit",
+        "Print",
+        "View"
+      ]
+    },
+    "EMP_CODE_MANDATORY": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboEmpMandatory",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "FONT_CHANGE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboFontChange",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "FONT_SIZE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboFontSize",
+      "rule": "numeric",
+      "options": [
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ]
+    },
+    "FONT_STYLE_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboFontStyle",
+      "rule": "first-char",
+      "options": [
+        "0 - Regular",
+        "1 - Bold"
+      ]
+    },
+    "GRID_ROW_HIGHT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboGridRowHeight",
+      "rule": "numeric",
+      "options": [
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "33",
+        "35",
+        "37",
+        "40"
+      ]
+    },
+    "LAST_DAY_LOCK": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboPreviousLock",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "CASH_LIMIT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboCashLimit",
+      "rule": "numeric",
+      "options": null
+    },
+    "TOT_AMT_ROF": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboBilTotRof",
+      "rule": "first-char",
+      "options": [
+        "0",
+        "1",
+        "2"
+      ]
+    },
+    "GRID_SCROLL": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboScorlbar",
+      "rule": "first-char",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    "STOCK_RPT_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboStkRptType",
+      "rule": "full-text",
+      "options": [
+        "OLD",
+        "NEW"
+      ]
+    },
+    "SL_TAG_WT_DIFF": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboTagSaleWtDiff",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "ESTMATE_TAX": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboEstmateWithTax",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "TAG_VCH_AUTO_SAVE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboTagRowSave",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "TAG_AUTO_PRINT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboTagRowPrint",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "DHRN_WAPP": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboDhrnWapp",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "SCHM_WAPP": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboSchmWapp",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "RPT_TOT_SHOW": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboRptTotShow",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "DEFAULT_REMINDER": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboReminderType",
+      "rule": "first-char",
+      "options": [
+        "Reminder",
+        "Birthday",
+        "Order",
+        "Sales",
+        "Wh Sales",
+        "Dhiran",
+        "Member"
+      ]
+    },
+    "VCH_DESC_HELP_LENT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboHelpLent",
+      "rule": "numeric",
+      "options": [
+        "10",
+        "15",
+        "25",
+        "50"
+      ]
+    },
+    "ORD_TAG_STK_LESS": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboOrdTagStkLess",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "BRANCH_ALL_AC_SHOW": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboAllBrancAcShow",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "EMP_AS_USER": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboEmpAsUser",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "WAPP_IMG_GWT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboImgWithWt",
+      "rule": "first-char",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    "DHRN_IMG_PRINT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboDhrnImgPrint",
+      "rule": "first-char",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    "LBR_WITH_GHT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboLbrWitGht",
+      "rule": "first-char",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    "APR_IMG_PRINT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboAprlImg",
+      "rule": "first-char",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    "OTH_ITM_WT_REMOVE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboOthItmWtRemove",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "SILVER_THREE_DIGIT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboSilverLedr3digit",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "WH_BILL_IMG": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboWhSaleImg",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "ITM_WITH_LOT_STK": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboitmWithLotStk",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "PROFIT_RPT_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboBalSheetType",
+      "rule": "first-char",
+      "options": [
+        "Fine Wise",
+        "Amount Wise"
+      ]
+    },
+    "FINE_STK_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboFineStkType",
+      "rule": "first-char",
+      "options": [
+        "Average Wise",
+        "Gr Touch Wise",
+        "Net Wt Wise"
+      ]
+    },
+    "CUR_DAY_POSTING": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboStkRefresh",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes",
+        "No",
+        "Yes"
+      ]
+    },
+    "MAIN_FONT_CHANGE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboMainFontChange",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "SL_AMT_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboSlRateWith",
+      "rule": "first-char",
+      "options": [
+        "Net Wise",
+        "Gorss Wise",
+        "Fine Wise",
+        "Pcs Wise"
+      ]
+    },
+    "PR_AMT_TYPE": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboPurRateWith",
+      "rule": "first-char",
+      "options": [
+        "Net Wise",
+        "Gorss Wise",
+        "Fine Wise",
+        "Pcs Wise"
+      ]
+    },
+    "CRYSTAL_RPT": {
+      "form": "UT_SETTING_MAIN",
+      "control": "cboCrystalViewType",
+      "rule": "first-char",
+      "options": [
+        "Old",
+        "New"
+      ]
+    },
+    "COUNTER_STK": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboCounterStk",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "ESTMATE_BANK_LOCK": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboEstmatBank",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "OLD_PURC_TOUCH": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboOldPurcTch",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "NEGATIVE_STK_SALE": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboNegativeStk",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "SL_NWT_LOCK": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboSlNwtLock",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "BILL_PROFIT": {
+      "form": "UT_SET_ADMIN",
+      "control": "cbobillprofit",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "PURC_LOT": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboPurcLot",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "YEAR_GOLD_SL": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboGlYearSale",
+      "rule": "numeric",
+      "options": null
+    },
+    "YEAR_SILVER_SL": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboSlYearSale",
+      "rule": "numeric",
+      "options": null
+    },
+    "USER_KR_TOUCH_HIDE": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboKrTouchHide",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    },
+    "STK_LMIT_WITH_DESIGN": {
+      "form": "UT_SET_ADMIN",
+      "control": "cboStklimitWithDesign",
+      "rule": "first-char",
+      "options": [
+        "No",
+        "Yes"
+      ]
+    }
+  }
+}

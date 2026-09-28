@@ -1,0 +1,35 @@
+{
+  "status": "frozen-before-new-evaluator-code",
+  "caseCount": 64,
+  "fixture": {
+    "path": "web/packages/core/test/fixtures/saleReturnSaveGuards.independent.json",
+    "sha256": "6af7121c2952c9be055f1e83671d0e1bd0139c80a1d81bc9482c1edb90fd8e78"
+  },
+  "contractSha256": "de7f4a6e51035d95f9340bc1152eeb7f5977eff1b6eeae821e2eda1146d42358",
+  "sourceFiles": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/save-guards-independent-review/review.md",
+      "sha256": "4828b68eb99d3bb019e41b0f361f147f01e820cda21322e44d6ece8a29db4e39"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/41-implementation-checkpoint-round14.json",
+      "sha256": "643bf89ad0ac50729c7feff06c28dfa6bf8cca7d6318e498397cd5c57bf9ebea"
+    }
+  ]
+}

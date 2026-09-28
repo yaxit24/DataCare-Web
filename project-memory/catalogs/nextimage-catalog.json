@@ -1,0 +1,33 @@
+{
+ "source": "NextImage.mdf (attached to Docker SQL, upgraded v782->921)",
+ "table": "TAG_IMAGE_DATA",
+ "rows": 3,
+ "columns": [
+  "CO_CODE",
+  "LC_CODE",
+  "TAG_NO",
+  "VCH_SRNO",
+  "IMAGE_TYPE",
+  "MOB_IMAGE (nvarchar(max) base64 JPEG)",
+  "IMG_IMPORT",
+  "CONV_IMAGE"
+ ],
+ "note": "Template DB \u2014 3 sample tag images only (BLG00001/MSG00003/ORG00001); production populates one row per tagged item.",
+ "extracted": [
+  {
+   "tag": "BLG00001",
+   "file": "extraction_output/nextimage/BLG00001.jpg",
+   "bytes": 524288
+  },
+  {
+   "tag": "MSG00003",
+   "file": "extraction_output/nextimage/MSG00003.jpg",
+   "bytes": 772653
+  },
+  {
+   "tag": "ORG00001",
+   "file": "extraction_output/nextimage/ORG00001.jpg",
+   "bytes": 317929
+  }
+ ]
+}

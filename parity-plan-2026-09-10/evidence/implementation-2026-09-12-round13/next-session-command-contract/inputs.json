@@ -1,0 +1,93 @@
+{
+  "status": "prospective source contract and 26 literal schedules; no implementation or execution at freeze",
+  "sourceInputs": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextAccess.ts",
+      "sha256": "4caa701a9c7fb82a43ddaf1c5da01ce04be6a7f1028add2049ef64231ab6ea28"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextSelection.ts",
+      "sha256": "9440e509fa5f0938edf9b0031c2bff9f5a4e2091cbe8770be2c0c8d403a53aa5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextRefresh.ts",
+      "sha256": "4d43d2639c5345913a11283b8f626e7106662d4c451db3c54c4354c50fe696d9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextLogin.ts",
+      "sha256": "6d32b25270c7a09bedcd6d876c95490368391936238de74f52c675b5c143c5d5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/session.ts",
+      "sha256": "17765f43964137139d582695cc0d10e3713227b8e118070e6f3e4a07fdb63bf0"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/passwordAccount.ts",
+      "sha256": "f566af63d2048bd64f69c7e04aaede8102a5a789a11750a8450d7016cda5ce56"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/jwt.ts",
+      "sha256": "baa2e644bcd9faeb8aebed0cfdea6afcce936752991fd73886921ee798d7fa75"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "ee079f09d0076f2339dd1307a3912c249624786566d216b1f17466af134b3acd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/shared/lastDayLock.ts",
+      "sha256": "639e4e531ac7b0856b7c139b9e359f2805df699fc9baeb4ce1d6cbdb56c17add"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/vouchers/lifecycle.ts",
+      "sha256": "346f7d64fb293666a6b430414844c5fba5ca635a71946244df46b383136a0c8b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/vouchers/numbering.ts",
+      "sha256": "ccf924ae90087c682e8ea915dcaa018cc59e250e9c1825b68600dc20fb2f09db"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "556d87d9eb73974f4a06eec64a0f6a6fe0096b90e59b14522176021ea10fc8d9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/routes/txn.ts",
+      "sha256": "5935fe23532df5248db5b03a7d6ab920375f1c30f9b19c23bf3aaf7016b3cc9c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/implementation-contract.md",
+      "sha256": "ef2e6acba21dca9b6696c3dbe6bac983db42587c56e70ec0a2169b7e8eaacbbe"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/session-command-independent.v1.json",
+      "sha256": "ed87f81e039273c6bd25c9a19184b7c964c7b48cbfd7a3bb39eb0c58032f4aa4"
+    }
+  ]
+}

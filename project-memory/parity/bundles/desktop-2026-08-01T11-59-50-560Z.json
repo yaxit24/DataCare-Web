@@ -1,0 +1,989 @@
+{
+ "kind": "datacare.parity-bundle/1.0",
+ "side": "desktop",
+ "capturedAt": "2026-08-01T11:59:50.560Z",
+ "source": {
+  "engine": "sqlserver",
+  "database": "Live24",
+  "host": "127.0.0.1",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU26) (KB5093420) - 16.0.4265.3 (X64) "
+ },
+ "scope": {
+  "coCode": "01"
+ },
+ "cases": [
+  {
+   "caseId": "scheme-074-00001",
+   "description": "",
+   "voucher": {
+    "book": "074",
+    "vchNo": "00001"
+   },
+   "tables": {
+    "AC_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BILL_DATE",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "FINE_WT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CLR_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "FINE_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "PARTY_AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LDR_NAME",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "MBENT",
+       "00001",
+       "2024-04-01T00:00:00.000Z",
+       "01002024-20250740000101         1",
+       "MEMB ENTRY",
+       "",
+       null,
+       "",
+       "000858",
+       "00001",
+       2000,
+       0,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-01T19:26:51.000Z",
+       "00001",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "000858",
+       "03 - ALAUDIN MAKASUDBHAI KADARI"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "MBENT",
+       "00001",
+       "2024-04-01T00:00:00.000Z",
+       "01002024-20250740000102         1",
+       "MEMB ENTRY",
+       "",
+       null,
+       "",
+       "00001",
+       "000858",
+       0,
+       2000,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-01T19:26:51.000Z",
+       "00001",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       "03 - ALAUDIN MAKASUDBHAI KADARI"
+      ]
+     ]
+    },
+    "AD_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SCHM_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MEMB_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "TOT_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MONTH_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REC_AC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "BANK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_TIME",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "USER_UPDATE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "USER_DELETE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "WITH_UPI",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       1,
+       "2024-04-01T00:00:00.000Z",
+       "03",
+       "2024-04-01T00:00:00.000Z",
+       "0029",
+       2000,
+       0,
+       "APR",
+       null,
+       "002",
+       "E",
+       "00001",
+       0,
+       0,
+       "",
+       "",
+       null,
+       "00001",
+       "ABC",
+       "N",
+       "2024-04-01T19:26:51.000Z",
+       "MBENT",
+       "I",
+       "MEMB ENTRY",
+       "N",
+       "N",
+       "N"
+      ]
+     ]
+    },
+    "AD_OS": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SCHM_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MEMB_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ADJ_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "OS_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "GOLD_WT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "float",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       1,
+       "2024-04-01T00:00:00.000Z",
+       "MBENT",
+       "I",
+       "E",
+       "MEMB ENTRY",
+       "03",
+       "2024-04-01T00:00:00.000Z",
+       "0029",
+       0,
+       2000,
+       "+",
+       "A",
+       "00001",
+       "002",
+       0,
+       null,
+       null,
+       null,
+       "A",
+       0
+      ]
+     ]
+    },
+    "OP_LDR": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "CR_GL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_GL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "CR_SL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_SL_FINE",
+       "type": "float",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       "A",
+       "2023-04-03T00:00:00.000Z",
+       "MBENT",
+       "I",
+       "I",
+       "MEMB ENTRY",
+       "000858",
+       4000,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       "A",
+       "2023-04-03T00:00:00.000Z",
+       "MBENT",
+       "I",
+       "I",
+       "MEMB ENTRY",
+       "00001",
+       0,
+       4000,
+       0,
+       0,
+       0,
+       0
+      ]
+     ]
+    },
+    "ROJ_MEL_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ITM_PCS",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_NWT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_TOUCH",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_WEST",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "LBR_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "NET_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "IT_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REF_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       "01002024-20250740000101         1",
+       "2024-04-01T00:00:00.000Z",
+       "MBENT",
+       "MEMB ENTRY",
+       "000858",
+       "ALAUDIN MAKASUDBHAI KADARI",
+       "00001",
+       2000,
+       0,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "APR",
+       "",
+       "0029",
+       "03",
+       "",
+       "A"
+      ]
+     ]
+    },
+    "TEMP_BOOK_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "074",
+       "00001",
+       "Member Monthly Entry"
+      ]
+     ]
+    }
+   }
+  }
+ ]
+}

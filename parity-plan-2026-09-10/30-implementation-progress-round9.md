@@ -1,0 +1,66 @@
+# Implementation continuation — 11 September 2026, round 9
+
+This continues the verified [round8 implementation](28-implementation-progress-round8.md) after immutable [checkpoint29](29-implementation-checkpoint-round8.json), SHA256 `12c69feee320f35e691667d31b37f7ef5e438d56a255e242eaa365e427fc3249`. That checkpoint records 231 API files/2023 tests, 211 core tests, 195 web tests, 14 real browser journeys and strict compiler/build/lint checks. These results belong to those captured inputs; they are not pass credit for the changes below.
+
+## Implemented slice
+
+This slice implements a saved Incoming Return calculation preview under the [server projection/replay contract](evidence/implementation-2026-09-11-round9/x13-next-server-replay-contract.md) and [UI contract](evidence/implementation-2026-09-11-round9/x13-replay-ui-contract.md). The first profile supports twelve amount, labour, discount and tax committed-cell events on one eligible saved incoming row. It preserves raw values separately from source-formatted visible values and eight comparison caches. The server observes document, settings and projection masters together and reconstructs the baseline before applying the ordered journal. Existing metadata edits and the legacy numerical writer remain separate.
+
+This preview has no stock, financial, source-admission or numeric persistence authority. Header totals, the outgoing exchange leg, tender/refund, ledger/report effects, tag/component admission and reversal remain required subsequent work. The bounded decimal display profile is not a claim of exact unmeasured VB Double/DBNull/culture execution. Unsupported imported numeric NULLs, ambiguous identities/masters and unproved source modes remain readable with explicit diagnostics.
+
+## Working behavior and boundaries
+
+The saved Return card now offers a separate **Calculation preview**. A user loads an existing voucher, opens the preview, selects its actual saved row and commits a field change with the preview button or Enter. Tab and blur do not append events. The server supplies field captions, visibility and edit eligibility. Closing discards transient values and returns focus to the opener. Metadata editing remains separate and frozen while the preview is open.
+
+The first supported fields are source columns 19,20,21,23,24,25,26,27,28,36,37,38. Requests carry only the observed replay version, complete row token and ordered original editor strings. Repeated same-valued commits remain in the journal. Every request reloads the saved baseline and replays the entire sequence. A partial calculation failure reports its index, rejected text and last valid prefix; it cannot turn that prefix into a saved transaction.
+
+The dedicated GET `/sales-returns/:vchNo/incoming-replay-state` and read-only POST `/sales-returns/:vchNo/incoming-replay` require fresh owning Sales Return View permission and exact company/location/year/book query scope. The route universe now contains 551 declared routes. Tokens bind scope, voucher, document, configuration, projection/profile versions and raw physical item-master observations. The server reads those dependencies in one RepeatableRead snapshot and checks the token before projection/replay. This does not reserve the row after the response or create a durable tombstone for an absent→insert→delete cycle.
+
+Projection preserves the original raw row and identities separately from 63 visible source cells and 8 comparison caches. SQL numeric SR order supplies display ordinals without replacing SR_NO/OLD_SRNO. Master aliases, duplicates, missing values, type disagreement and unsupported numeric projection are diagnosed. Valid projected history may remain visible while its profile disallows calculation. Empty saved headers render an explicit no-incoming-items state.
+
+Original editor text is limited to 10 characters per committed event, with ordinary blank/space handling and no control characters. A loaded amount longer than 10 characters remains exact and visible: unchanged submission is refused with the text retained, while an explicit shorter replacement is allowed. This declared preview behavior is not desktop execution evidence for programmatic MaxLength, culture or VB Double formatting.
+
+## Verification status
+
+The final full API regression passed **2,115 tests in 235 files**, with 0 skips, in 209.85 seconds. All **1,289 captured inputs** were unchanged before/after the run; input snapshot SHA256 `e10854be3a17aeee7de61a6d87f15e809645fc2d6e348ce2d6ad6163f31a08f4`. The refreshed complete strict API test compiler also passed with unchanged captured inputs. The new immutable [checkpoint31](31-implementation-checkpoint-round9.json) records this bounded implementation and its verification; it grants no execution-card acceptance or whole-product parity percentage.
+
+| Verification | Current result | Scope |
+| --- | --- | --- |
+| Complete isolated API regression |235 files /2115 tests,0 skipped | Real disposable PostgreSQL55433, migrated schema, non-owner role and forced RLS |
+| Core |11 files /264 tests; build and strict projection-test types passed | Dedicated projection plus all prior core cases; mathematical profile, not original Windows execution |
+| Web unit regression |26 files /227 tests passed | Final runtime UI including the corrected saved-book behavior |
+| Production build |7/7 passed | Final source after empty-header correction |
+| Workspace lint/application types |10/10 tasks passed | Registered lint surfaces and application compiler projects |
+| Complete strict API test compiler | Passed with unchanged captured inputs | Entire tsconfig.test.json; no exclusions or relaxed strict options; earlier pre-correction pass retained separately |
+| Actual browser |15 journeys passed;0 mocks | All14 earlier journeys plus15 required preview checks; four 23-table no-write snapshots |
+| Legacy mocked browser |Passed | Compatibility regression only |
+
+Focused192-test and 96-test stages overlap the full API suite and are not added to its count. Earlier stage outcomes remain distinct from final checks in [round9 evidence](evidence/implementation-2026-09-11-round9).
+
+The unchanged outstanding release gates remain explicit: rounding helper adoption, unreachable fields and 33 unresolved Return dead cells; no threshold may be raised to close them. All 34 execution cards, 83 original packages and 198 full menu acceptances remain open until their complete acceptance requirements pass.
+
+## Failures retained and corrected before final verification
+
+The first focused API stage passed 149/192 tests; all 43 new service cases failed shared setup because a HUID fixture exceeded VARCHAR10. The fixture was shortened without a product change. The next43-case run passed 40: its DM_DATA companion fixture omitted required MAIN_SRNO and ISR_NO; one read exceeded the existing five-second transaction timeout during a concurrent production build; a later fixture cleanup could not reach PostgreSQL. These are three distinct observations. The corrected serial run passed all 192 focused tests; the later final 2115-test regression includes the corrected cases. No timeout was widened and no failed result was discarded.
+
+The independent review strengthened the numeric-order test to mix a scientific-notation serial with a conventional serial so a mismatched SQL text representation cannot pass through fallback order. It also requires exact source-derived editor values alongside complete visible/cache maps. The browser fixture now compares the saved header amount with its exact fetched raw value because the source header column is Float, while the incoming row amount has its own decimal storage. This is a test correction, not amount normalization in the product.
+
+The first combined browser run found a real regression in the existing saved-return journey before reaching the new preview: the new integration disabled configured-book switching during an ordinary delayed read. The selector now distinguishes a pending read from a metadata save, retaining the existing ability to switch books and invalidate an obsolete read. The prior fourteen journey assertions remain unchanged. The corrected rebuild and all 227 web tests passed, followed by workspace lint/application types. The second real-browser run passed all fourteen earlier journeys, including the unchanged held-read assertion. Its new preview journey then failed an incorrect expected item amount, described below; that combined run remains failed overall.
+
+The second browser run entered 1200 into source c20 but expected 1200 to remain the calculated amount. Primary `CommPassTotal_Pr` at lines 4941–4956 recalculates c20 from its nonzero rate and weight even for that explicit edit; rate 100 × net10 correctly produces1000. The test now asserts the original submitted/returned1200 event, the source-derived1000 result and exact unchanged oversized saved baseline. The product calculation was not changed to satisfy the incorrect test expectation. The final browser pass includes this corrected, source-derived assertion.
+
+The first documentation-reference check also caught the stale executable API test-count annotation,231 instead of234. The current table and annotation now agree with the measured inventory; the final reference check passed with the final235-file inventory.
+
+The third combined browser run passed the amount expectation but found an actual empty-header contract gap: the saved Return reader rejected a valid header with no incoming rows before the UI could show its empty state. The correction permits inspection with all metadata/calculation capabilities disabled and retains the original metadata mutation refusal. The correction passed 96 tests in 5 files, including6 new service/authenticated HTTP cases. A separate [correction record](evidence/implementation-2026-09-11-round9/x13-empty-header-read-correction.md) and [independent addendum](evidence/implementation-2026-09-11-round9/x13-replay-empty-header-independent-addendum.md) preserve the earlier frozen service/review stage. The final full API regression and browser journey include this correction; the refreshed complete strict compiler passed against the corrected source.
+
+A fourth attempt ended with an unhandled response-wait timeout before reaching the empty-header case and did not produce result.json. The test’s independently pending response and click waits were joined immediately with Promise.all so failures can reach normal recording and cleanup; book switching now waits for render/effect settlement and asserts the selected book and cleared voucher. No timeout or expected business result was relaxed. The precise cause of the pre-correction wait was not captured and is not asserted. See the [wait correction record](evidence/implementation-2026-09-11-round9/x13-replay-browser-wait-correction.md).
+
+The final actual browser result is `web/test-results/parity-real-stack-round9-final/result.json`:15 journeys passed,0 mocks, exact15 required new checks and 15 column-setting checks. The preview made four full before/after comparisons over 23 business/dependency tables; DB service tests separately cover24 tables. Actual screenshot review found readable values/journal and no material overflow; its scrolled capture does not establish physical-device or desktop acceptance. Legacy mocked browser compatibility also passed and remains a separate, weaker regression layer.
+
+## Next work required for X13 and the full plan
+
+1. Preserve the saved metadata, configuration, projection and replay contracts and their immutable evidence. Retain checkpoint31 and the recorded full API, browser, build and compiler evidence; do not re-credit earlier scoped manifests for later source changes.
+2. Follow the [aggregate requirements](evidence/implementation-2026-09-11-round9/x13-next-aggregate-requirements.md), [independent phase review](evidence/implementation-2026-09-11-round9/x13-next-aggregate-independent-review.md) and [runtime probe sequence](evidence/implementation-2026-09-11-round9/x13-runtime-probe-next-steps.md). These are prospective requirements, not executed parity evidence. Implement the source incoming-row aggregate callback and dependent RTN_* header pipeline with source-derived expected intermediate values, configured rounding, exact event order, empty/multirow cases and explicit unchanged saved values during preview.
+3. Implement original-sale source selection/copy, complete master/code resolution, gross/weight/component and keyboard events with OLD_SRNO ownership and exact source identities. Preview success cannot admit stock or consume a source.
+4. Implement the complete incoming admission/consumption/reversal and outgoing exchange lifecycle, full settlement/refund/tax/ledger/report effects, with one authoritative atomic writer and conflict/retry contracts across all writers/importers. Replace the incomplete legacy numeric writer only after its full contract is proven.
+5. Complete all other execution-card requirements, outstanding rounding/depth/dead-cell gates, desktop/schema/history comparisons, supported variants, devices, restoration, business acceptance and release certification. A successful row preview does not accept a whole form, menu, package or module.

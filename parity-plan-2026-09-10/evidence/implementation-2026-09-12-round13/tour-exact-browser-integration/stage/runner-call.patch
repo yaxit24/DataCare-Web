@@ -1,0 +1,11 @@
+--- a/web/apps/web/test/parity.real-stack.mjs
++++ b/web/apps/web/test/parity.real-stack.mjs
+@@ -487,7 +487,7 @@
+   } finally {
+     await cleanupSalesReturnSaved(sql);
+   }
+-  result.tourOrder = await exerciseTourOrder(page, { checkpoint });
++  result.tourOrder = await exerciseTourOrder(page, { checkpoint, owner, tenantId });
+   result.creditNote = await exerciseCreditNote(page, { checkpoint });
+   await seedSalesOrder(sql);
+   await seedSalesOrderDesign(sql);

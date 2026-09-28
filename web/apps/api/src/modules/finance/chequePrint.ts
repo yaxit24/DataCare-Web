@@ -65,6 +65,7 @@ export interface ChequeInput {
   date?: string;
   chqNo?: string;
   acPayee?: boolean;
+  autoPrint?: boolean;
 }
 export function renderCheque(input: ChequeInput): string {
   const d = input.date ? new Date(input.date) : new Date();
@@ -88,5 +89,6 @@ export function renderCheque(input: ChequeInput): string {
       <div class="words">Rupees <span class="line" style="display:inline-block;min-width:520px">${esc(amountInWords(amt))}</span></div>
       <div class="amtbox">₹ ${amt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
       ${input.chqNo ? `<div style="position:absolute;bottom:14px;left:18px;font-family:monospace">Chq: ${esc(input.chqNo)}</div>` : ''}
-    </div></body></html>`;
+    </div>
+      ${input.autoPrint ? '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},50);});</script>' : ''}</body></html>`;
 }

@@ -1,0 +1,36 @@
+{
+  "authoredAtUtc": "2026-09-11T17:45:45.862542+00:00",
+  "scope": "Temporary prospective Round13 artifact only; no workspace source/test/plan edits and no execution checks.",
+  "author": "/root/report_children",
+  "implementationInspected": false,
+  "implementationStateAtFreeze": "Source owner explicitly reported no implementation yet and agreed to hold source implementation until fixture SHA signal.",
+  "fixture": {
+    "path": "/tmp/datacare-return-clock-round13-vectors/saved-sale-return-clock.v1.json",
+    "sha256": "d360162bc731cb383e33146c29265586358413821fca0cf5d94c4bdf753cdd78",
+    "cases": 139,
+    "ready": 24,
+    "unsupported": 83,
+    "invalidInput": 32,
+    "prospectiveNonJsonRuntimeCases": 10
+  },
+  "sources": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-round12-handoff-and-remaining-acceptance.md",
+      "sha256": "165b9ecedc421727a6f94014bae4b5bc5b6d00d29df2a1c3b82843f6ebb99e5e"
+    }
+  ],
+  "commandsRunForValidation": [],
+  "nonAcceptance": "No tests/compiler/database/browser/Windows runtime or auth/session integration credit."
+}

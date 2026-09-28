@@ -1,0 +1,273 @@
+{
+ "report": "AcLastVisit",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 413,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 120,
+       "top": 90,
+       "width": 11280,
+       "height": 216,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 10875,
+       "top": 90,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 380,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 510,
+       "top": 75,
+       "width": 1440,
+       "height": 200,
+       "text": "Party Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 5265,
+       "top": 75,
+       "width": 1695,
+       "height": 200,
+       "text": "Mobile"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 7155,
+       "top": 75,
+       "width": 1245,
+       "height": 200,
+       "text": "Last Visit"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 8580,
+       "top": 75,
+       "width": 1800,
+       "height": 200,
+       "text": "Transection type"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 10890,
+       "top": 75,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 240,
+       "top": 330,
+       "width": 11160,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area10",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupHeader",
+     "height": 358,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 510,
+       "top": 75,
+       "width": 2117,
+       "height": 238,
+       "dataSource": "{AC_MAST.LAST_VISIT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 262,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 510,
+       "top": 30,
+       "width": 810,
+       "height": 164,
+       "dataSource": "{AC_MAST.AC_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 1440,
+       "top": 30,
+       "width": 3840,
+       "height": 232,
+       "dataSource": "{@PartyName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 5280,
+       "top": 30,
+       "width": 1695,
+       "height": 200,
+       "dataSource": "{@AcMobile}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 7155,
+       "top": 30,
+       "width": 1243,
+       "height": 185,
+       "dataSource": "{AC_MAST.LAST_VISIT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 8760,
+       "top": 30,
+       "width": 2640,
+       "height": 226,
+       "dataSource": "{@TranName}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 510,
+       "top": 225,
+       "width": 11010,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area11",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "PageFooter",
+     "height": 100,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "IF {AC_MAST.AC_MOBILE} <> '' THEN {AC_MAST.AC_MOBILE}"
+  },
+  {
+   "name": "AcPhone",
+   "ref": "{@AcPhone}",
+   "type": "StringField",
+   "text": "IF{AC_MAST.AC_PHONE} <> '' THEN {AC_MAST.AC_PHONE}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "Mail",
+   "ref": "{@Mail}",
+   "type": "StringField",
+   "text": "IF {AC_MAST.AC_EMAIL} <> '' THEN 'E. ' + {AC_MAST.AC_EMAIL}"
+  },
+  {
+   "name": "PartyName",
+   "ref": "{@PartyName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'PHONE BOOK'"
+  },
+  {
+   "name": "TranName",
+   "ref": "{@TranName}",
+   "type": "StringField",
+   "text": "if {AC_MAST.VISIT_TRAN} = '' then 'Party Master' else {BOOK_DATA.BOOK_NAME}"
+  }
+ ],
+ "sectionCount": 7,
+ "objectCount": 15,
+ "formulaCount": 7
+}

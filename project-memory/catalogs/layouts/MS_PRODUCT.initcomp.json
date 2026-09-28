@@ -1,0 +1,87 @@
+{
+ "form": "MS_PRODUCT",
+ "controlCount": 2,
+ "byKind": {
+  "textbox": 2
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "btnStkUpdate",
+   "btnResetSchm"
+  ],
+  "PanelAdd": [
+   "btnIp",
+   "Label13",
+   "tPwd",
+   "Label9",
+   "tDataBaseName",
+   "tServerIp",
+   "Label6"
+  ],
+  "this": [
+   "tBankName",
+   "tBankAc",
+   "lblbankAc",
+   "lblImgType",
+   "cboImgType",
+   "PanelAdd",
+   "PicZoom",
+   "BtnImgD",
+   "BtnImgS",
+   "PicImage",
+   "nBonusMonth",
+   "lblBonusMonth",
+   "cboforapp",
+   "Label3",
+   "tHeading",
+   "lblheading",
+   "lblRemark",
+   "tRemark",
+   "cboSchmType",
+   "lblSchmeType",
+   "nSchmMonth",
+   "lblMonth",
+   "nSchmAmt",
+   "LblAmt",
+   "tAcCode",
+   "tAcName",
+   "LblAc",
+   "PnlBotam",
+   "DGV",
+   "Text1",
+   "Label1",
+   "Label2",
+   "tPrCode",
+   "tPrName",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "001",
+   "kind": "textbox"
+  },
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  }
+ ]
+}

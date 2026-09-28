@@ -1,0 +1,35 @@
+{
+  "kind": "round14-final-independent-review-ready/v1",
+  "status": "frozen-read-review-no-confirmed-remaining-issue",
+  "createdAtUtc": "2026-09-12T02:04:56.332062+00:00",
+  "files": [
+    {
+      "path": "/tmp/datacare-round14-final-review/review.md",
+      "sha256": "7ff090682ff9dad162fc969f6e4c0f7de3e70be1231a41aec16bbb3aba13ad79"
+    },
+    {
+      "path": "/tmp/datacare-round14-final-review/read-proof.json",
+      "sha256": "a252ac978c0e2bfd4eaaac2a3003755a7b29c226ee621f5a72f9c4ceef91a88e"
+    },
+    {
+      "path": "/tmp/datacare-round14-final-review/inputs.json",
+      "sha256": "3dd1727b8e332d48d7c15d4d58cf6c48b04166b7f0cd99756df3f182c14813cc"
+    },
+    {
+      "path": "/tmp/datacare-round14-final-review/40-reviewed-copy.md",
+      "sha256": "255bd5e3629d143affd498e013e19aa41daee6a3240e603864b6e2e32d76ce97"
+    },
+    {
+      "path": "/tmp/datacare-round14-final-review/recipe-reviewed-copy.json",
+      "sha256": "6f87602568de42bae085ec3775ed315a1bc8d8c4023f3beb9934996dffa2d0c8"
+    },
+    {
+      "path": "/tmp/datacare-round14-final-review/pre-supplement/read-observation.json",
+      "sha256": "a69e9f1947b9b8e6794b82d7a90bb05d33278f94bf34e4b86ecae50e8075d2a7"
+    },
+    {
+      "path": "/tmp/datacare-round14-final-review/pre-supplement/40-implementation-progress-round14.md",
+      "sha256": "b71ce3e0fe820cda1e1882f63134c52ea84b28d5d09c3f3a7194fa106bf6d240"
+    }
+  ]
+}

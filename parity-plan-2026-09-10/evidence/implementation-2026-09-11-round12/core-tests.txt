@@ -1,0 +1,29 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/designCalc.test.ts (36 tests) 52ms
+ ✓ test/saleReturnBillProjection.test.ts (84 tests) 122ms
+ ✓ test/saleReturnIncoming.review.test.ts (33 tests) 104ms
+ ✓ test/saleReturnIncoming.test.ts (72 tests) 109ms
+ ✓ test/saleReturnIncomingProjection.test.ts (53 tests) 77ms
+ ✓ test/saleReturnIncomingAggregate.test.ts (62 tests) 118ms
+ ✓ test/designRepeat.test.ts (11 tests) 12ms
+ ✓ test/orderLabour.test.ts (23 tests) 13ms
+ ✓ test/orderLabourWithCache.test.ts (11 tests) 17ms
+ ✓ test/containment.test.ts (4 tests) 10ms
+ ✓ test/salesOrderDesign.test.ts (8 tests) 9ms
+ ✓ test/saleReturnBillTaxPolicy.test.ts (89 tests) 282ms
+ ✓ test/calc.test.ts (10 tests) 71ms
+ ✓ test/money.test.ts (3 tests) 6ms
+ ✓ test/sessionLedgerMode.test.ts (104 tests) 3364ms
+   ✓ ledger-mode plain-data envelope containment > refuses an accepted-input boundary whose appended proof would exceed reread limits 3135ms
+
+ Test Files  15 passed (15)
+      Tests  603 passed (603)
+   Start at  22:02:40
+   Duration  6.11s (transform 3.25s, setup 0ms, collect 5.99s, tests 4.37s, environment 14ms, prepare 5.71s)
+

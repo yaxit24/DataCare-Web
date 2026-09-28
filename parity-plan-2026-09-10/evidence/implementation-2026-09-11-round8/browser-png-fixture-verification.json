@@ -1,0 +1,55 @@
+{
+  "verifiedAtUtc": "2026-09-11T10:52:42.073651+00:00",
+  "old": {
+    "bytes": 68,
+    "sha256": "b5c6416771b5d463d1a2e3b00cecdb93f7d475e3741004cfd16d58f05ec000b6",
+    "chunks": [
+      {
+        "type": "IHDR",
+        "crcValid": true
+      },
+      {
+        "type": "IDAT",
+        "crcValid": false,
+        "inflateError": "Error -3 while decompressing data: incorrect data check"
+      },
+      {
+        "type": "IEND",
+        "crcValid": true
+      }
+    ]
+  },
+  "replacement": {
+    "bytes": 68,
+    "sha256": "6019c3c9e47dc991f8d9937deafbb0740c2e61e321324798cb508773b0814824",
+    "chunks": [
+      {
+        "type": "IHDR",
+        "crcValid": true
+      },
+      {
+        "type": "IDAT",
+        "crcValid": true,
+        "inflatedScanlineHex": "00ffff"
+      },
+      {
+        "type": "IEND",
+        "crcValid": true
+      }
+    ]
+  },
+  "changedTestFiles": [
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "beforeSha256": "489cced77db2845e130f8517292e0d0fd85c0dc928dc4a80faddb965739af549",
+      "afterSha256": "902b97991b7dff5019f0ec64dde1068f7a04c9874f9fe8dd136e097f485fb3d4"
+    },
+    {
+      "path": "web/apps/web/test/browser.smoke.mjs",
+      "beforeSha256": "89c93fa297c87306f768f28c0084e5c73c3c8cc312dac88b7d751d997e39345b",
+      "afterSha256": "54cb6bd795c0ced4931d35b5d2d3d8d89023a7452937017be69ed5ce47adebae"
+    }
+  ],
+  "productFilesChanged": false,
+  "limits": "Proves the positive test fixture is corrupt; standalone Sharp sometimes decodes the old fixture. No product decoder change or universal cause for every historical unavailable state is asserted."
+}

@@ -1,0 +1,902 @@
+{
+ "kind": "datacare.parity-bundle/1.0",
+ "side": "web",
+ "capturedAt": "2026-08-01T12:01:23.820Z",
+ "source": {
+  "engine": "postgres",
+  "database": "datacare"
+ },
+ "scope": {
+  "coCode": "01",
+  "lcCode": "00"
+ },
+ "cases": [
+  {
+   "caseId": "scheme-074-00001",
+   "description": "",
+   "voucher": {
+    "book": "074",
+    "vchNo": "00001"
+   },
+   "tables": {
+    "AC_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "DR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "FINE_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "IT_DESC",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CLR_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "FINE_RATE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "PARTY_AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LDR_NAME",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-scheme",
+       "181795",
+       "00001",
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "MBENT",
+       "2024-04-01T00:00:00.000Z",
+       "01002024-20250740000151",
+       "MEMB ENTRY",
+       "",
+       null,
+       "",
+       "CASH",
+       null,
+       "0",
+       "2000",
+       "A",
+       "D",
+       null,
+       null,
+       "2024-04-01T00:00:00.000Z",
+       "00000",
+       "2024-04-01T00:00:00.000Z",
+       "A",
+       "N",
+       null,
+       "0",
+       "CASH",
+       ""
+      ],
+      [
+       "parity-scheme",
+       "181796",
+       "00001",
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "MBENT",
+       "2024-04-01T00:00:00.000Z",
+       "01002024-20250740000152",
+       "MEMB ENTRY",
+       "",
+       null,
+       "",
+       "000858",
+       null,
+       "2000",
+       "0",
+       "A",
+       "C",
+       null,
+       null,
+       "2024-04-01T00:00:00.000Z",
+       "00000",
+       "2024-04-01T00:00:00.000Z",
+       "A",
+       "N",
+       null,
+       "0",
+       "000858",
+       ""
+      ]
+     ]
+    },
+    "AD_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SCHM_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MEMB_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TOT_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "IT_DESC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MONTH_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ENT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "REC_AC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "BANK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_TIME",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "USER_UPDATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "USER_DELETE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "WITH_UPI",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "UPI_NAME",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-scheme",
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       1,
+       "2024-04-01T00:00:00.000Z",
+       "03",
+       "2024-04-01T00:00:00.000Z",
+       "0029",
+       "2000",
+       "0",
+       "Scheme 03 installment",
+       null,
+       null,
+       "E",
+       "CASH",
+       null,
+       null,
+       null,
+       null,
+       "2024-04-01T00:00:00.000Z",
+       "00001",
+       "parity-replay",
+       "N",
+       "2024-04-01T00:00:00.000Z",
+       "MBENT",
+       "I",
+       "MEMB ENTRY",
+       "N",
+       "N",
+       "N",
+       null
+      ]
+     ]
+    },
+    "AD_OS": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SCHM_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MEMB_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ADJ_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "SIGN",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OS_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "GOLD_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "numeric",
+       "scale": 2
+      }
+     ],
+     "rows": [
+      [
+       "parity-scheme",
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       1,
+       "2024-04-01T00:00:00.000Z",
+       "MBENT",
+       "I",
+       "I",
+       "MEMB ENTRY",
+       "03",
+       "2024-04-01T00:00:00.000Z",
+       "0029",
+       "0",
+       "2000",
+       "+",
+       "A",
+       "CASH",
+       null,
+       "0",
+       "00001",
+       "parity-replay",
+       "N",
+       "A",
+       null
+      ]
+     ]
+    },
+    "ROJ_MEL_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "DR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_PCS",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_NWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_TOUCH",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_WEST",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_FINE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "NET_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "IT_DESC",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "IT_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "REF_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-scheme",
+       "01",
+       "00",
+       "2024-2025",
+       "074",
+       "00001",
+       "01002024-20250740000101         1",
+       "2024-04-01T00:00:00.000Z",
+       "MBENT",
+       "MEMB ENTRY",
+       "000858",
+       "",
+       "CASH",
+       "2000",
+       "0",
+       "A",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "",
+       "",
+       null,
+       null,
+       null,
+       "A"
+      ]
+     ]
+    },
+    "TEMP_BOOK_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "text",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-scheme",
+       "130678",
+       "01",
+       "00",
+       "074",
+       "00001",
+       "MEMB ENTRY"
+      ]
+     ]
+    }
+   }
+  }
+ ]
+}

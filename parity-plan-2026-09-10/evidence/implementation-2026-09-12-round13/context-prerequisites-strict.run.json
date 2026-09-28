@@ -1,0 +1,25 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "tsc",
+    "-p",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-prerequisites-tsconfig.json",
+    "--noEmit"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T19:11:45.178202+00:00",
+  "finishedAtUtc": "2026-09-11T19:11:47.335112+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-prerequisites-strict.txt",
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-prerequisites-strict.inputs.json",
+  "inputManifestSha256": "ea27442d3148817ae048e29b75310100bb9035fdd2362c076e4b9548e70ec3cb",
+  "inputCount": 1753,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

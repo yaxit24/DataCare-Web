@@ -18,19 +18,10 @@ import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
+import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
+import { recalcLine } from '../../../../lib/lineRecalc';
 
 interface Line {
-  oldSrNo: string;
-  itType: string;
-  dataTransfer: string;
-  margin: string;
-  tagSrNo: string;
-  tagType: string;
-  tagLabourPct: string;
-  tagLabourRate: string;
-  tagLabourAmount: string;
-  tagOtherAmount: string;
-
   itCode: string;
   tagNo: string;
   vchSrno?: number;
@@ -64,7 +55,6 @@ interface Line {
   itemLot: string;
   remark: string;
   discountPct: string;
-  lineDiscountAmount: string;
   ghatAmount: string;
   rateWith: string;
   rateType: string;
@@ -130,17 +120,6 @@ interface Totals {
 }
 const blank = (): Line => ({
   otherWt: '',
-  oldSrNo: '',
-  itType: '',
-  dataTransfer: '',
-  margin: '',
-  tagSrNo: '',
-  tagType: '',
-  tagLabourPct: '',
-  tagLabourRate: '',
-  tagLabourAmount: '',
-  tagOtherAmount: '',
-
   itCode: 'GOLD',
   tagNo: '',
   pcs: '1',
@@ -173,7 +152,6 @@ const blank = (): Line => ({
   itemLot: '',
   remark: '',
   discountPct: '',
-  lineDiscountAmount: '',
   ghatAmount: '',
   rateWith: '',
   rateType: '',
@@ -212,18 +190,25 @@ const ogBlank = (): OgRow => ({
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
+/**
+ * P7 dead cells removed, found by scripts/check-dead-cells.mjs.
+ *
+ * Nine columns were rendered here that the sales writer never reads, so every value an operator typed
+ * into them was silently discarded — and the depth metric counted all nine as parity. Five have NO
+ * SL_DETL COLUMN AT ALL despite the interface carrying a column comment (ITM_MARGIN, TAG_LBR_PRC,
+ * TAG_LBR_RATE, TAG_LBR_AMT, TAG_OTH_AMT), verified against information_schema. `tagSrNo` and
+ * `tagType` are server-assigned, `margin` is deliberately server-derived (sales.ts:1866 notes a
+ * client-supplied cost would let the margin be manipulated), and `dataTransfer` and
+ * `lineDiscountAmount` are read by nothing.
+ *
+ * The same nine were removed from hallmark-sale earlier; this page was never re-checked, which is why
+ * the audit is now a script rather than a habit.
+ */
+/** TR_SALE:8976/8978 hides the saved ordinal and item-type cells.
+ * OLD_SRNO and IT_TYPE remain server-owned; expose neither as a discarded operator edit.
+ * The supported metal input below still undergoes the server's ITEM_MAST validation. */
 const extendedLineFields: Array<[keyof Line, string]> = [
-  ['oldSrNo', 'Old Sr No'],
   ['otherWt', 'Other Wt'],
-  ['itType', 'Item Type'],
-  ['dataTransfer', 'Data Transfer'],
-  ['margin', 'Margin'],
-  ['tagSrNo', 'Tag Sr No'],
-  ['tagType', 'Tag Type'],
-  ['tagLabourPct', 'Tag Lbr %'],
-  ['tagLabourRate', 'Tag Lbr Rate'],
-  ['tagLabourAmount', 'Tag Lbr Amt'],
-  ['tagOtherAmount', 'Tag Oth Amt'],
 
   ['bagWt', 'Bag Wt'],
   ['tagGrossWt', 'Tag Gross Wt'],
@@ -233,7 +218,6 @@ const extendedLineFields: Array<[keyof Line, string]> = [
   ['itemLot', 'Item Lot'],
   ['remark', 'Remark'],
   ['discountPct', 'Line Disc %'],
-  ['lineDiscountAmount', 'Line Disc Amt'],
   ['ghatAmount', 'Ghat Amt'],
   ['rateWith', 'Rate With'],
   ['rateType', 'Rate Type'],
@@ -338,6 +322,14 @@ export default function SalesEntryPage() {
   // Old-gold / old-silver EXCHANGE grid (metal taken in against the sale) — backend createSale.oldGold[]
   const [ogRows, setOgRows] = useState<OgRow[]>([]);
   const [lines, setLines] = useState<Line[]>([blank()]);
+  /**
+   * P4: `SL_NWT_LOCK` — the desktop makes the sale's net-weight cell read-only when set, so the
+   * operator cannot retype a figure the tag or the gross/less computation produced
+   * (the same idiom as TR_PURC.cs:7145-7148 `TEXT_PR.ReadOnly = true` for the fine cell).
+   * Blank default is 'N' per MS_OPNCOMP.cs, i.e. unlocked.
+   */
+  const companySettings = useCompanySettings();
+  const netWeightLocked = companyFlag(companySettings, 'SL_NWT_LOCK', 'N');
   // `billProfit` is present only when CO_SET_NEW.BILL_PROFIT is on, so its absence means "the shop does not
   // show margins" rather than "the margin is zero".
   const [result, setResult] = useState<{
@@ -373,11 +365,23 @@ export default function SalesEntryPage() {
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
 
   // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
+  /**
+   * P5: the line preview now delegates to the shared recalculation kernel.
+   *
+   * The local arithmetic this replaces disagreed with the server in four ways, so the figures on
+   * screen were not the figures that posted:
+   *   - fine was rounded to 2dp; the server's fine precision is 3dp (`PRECISION.fine`)
+   *   - `westPct` was ignored entirely, while the server's fine base is (touch + wastage)
+   *   - making was `netWt x rate` with no ghat term, the same LBR_WITH_GHT understatement already
+   *     fixed on the server (blank default 'Y', so ghat counts unless switched off)
+   *   - it rounded locally instead of through the money kernel
+   * Delegating means there is one implementation, so the preview cannot drift from the posting again.
+   */
   const calc = (l: Line) => {
-    const fine = r2((n(l.netWt) * n(l.touch)) / 100);
-    const metal = r2(fine * n(l.rate));
-    const mk = r2(n(l.netWt) * n(l.making));
-    return { fine, metal, mk, net: r2(metal + mk) };
+    const r = recalcLine({ ...l, labourRate: l.making, labourType: 'G' }, 'sale', {
+      labourIncludesGhat: companyFlag(companySettings, 'LBR_WITH_GHT', 'Y'),
+    });
+    return { fine: r.fineWt, metal: r.metalAmount, mk: r.netLabourAmount, net: r.totalAmount };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   const taxable = r2(lineNet - n(discountAmount));
@@ -706,7 +710,7 @@ export default function SalesEntryPage() {
             itemLot: l.itemLot || undefined,
             remark: l.remark || undefined,
             discountPct: n(l.discountPct) || undefined,
-            discountAmount: n(l.lineDiscountAmount) || undefined,
+            discountAmount: n(l.discountAmount) || undefined,
             ghatAmount: n(l.ghatAmount) || undefined,
             rateWith: l.rateWith || undefined,
             rateType: l.rateType || undefined,
@@ -727,18 +731,8 @@ export default function SalesEntryPage() {
             hallmarkId2Wt: n(l.hallmarkId2Wt) || undefined,
             hallmarkId3Wt: n(l.hallmarkId3Wt) || undefined,
             hallmarkId4Wt: n(l.hallmarkId4Wt) || undefined,
-            // Return-line costing basis -> SL_DETL_RTN (TR_SALE_RTN.cs).
-            itType: l.itType || undefined,
-            dataTransfer: l.dataTransfer || undefined,
-            tagType: l.tagType || undefined,
-            oldSrNo: n(l.oldSrNo) || undefined,
+            // Ordinary sale other weight; return-only identifiers are not this writer's inputs.
             otherWt: n(l.otherWt) || undefined,
-            margin: n(l.margin) || undefined,
-            tagSrNo: n(l.tagSrNo) || undefined,
-            tagLabourPct: n(l.tagLabourPct) || undefined,
-            tagLabourRate: n(l.tagLabourRate) || undefined,
-            tagLabourAmount: n(l.tagLabourAmount) || undefined,
-            tagOtherAmount: n(l.tagOtherAmount) || undefined,
             ordNo: l.ordNo,
             ordYrcd: l.ordYrcd,
             ordDbcd: l.ordDbcd,
@@ -1198,6 +1192,10 @@ export default function SalesEntryPage() {
                 <th className="num">Lbr%</th>
                 <th className="num">Oth Amt</th>
                 <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
+                {/* P5: derived roll-ups the desktop recomputes on every cell exit
+                    (TR_SALE.cs:9400-9522). Read-only by nature: they are results, not entry cells. */}
+                <th className="num">Fine</th>
+                <th className="num">Total</th>
                 <th className="num">Fine</th>
                 <th className="num">Amount</th>
                 <th></th>
@@ -1260,6 +1258,13 @@ export default function SalesEntryPage() {
                         style={{ width: 64, textAlign: 'right' }}
                         value={l.netWt}
                         onChange={(e) => setLine(i, 'netWt', e.target.value)}
+                        readOnly={netWeightLocked}
+                        aria-readonly={netWeightLocked}
+                        title={
+                          netWeightLocked
+                            ? 'Net weight is locked by company setting SL_NWT_LOCK'
+                            : undefined
+                        }
                       />
                     </td>
                     <td className="num" {...gridCell(i, 5)}>

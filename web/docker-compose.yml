@@ -53,7 +53,7 @@ services:
       GSP_GSTIN: ${GSP_GSTIN:-}
       GSP_USER: ${GSP_USER:-}
       GSP_EINV_PWD: ${GSP_EINV_PWD:-}
-      GSP_SANDBOX: ${GSP_SANDBOX:-1}
+      GSP_SANDBOX: ${GSP_SANDBOX:-}
       WA_PHONE_ID: ${WA_PHONE_ID:-}
       WA_TOKEN: ${WA_TOKEN:-}
       WA_API_VERSION: ${WA_API_VERSION:-}

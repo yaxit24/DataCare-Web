@@ -327,7 +327,8 @@ databaseDescribe('database-backed VP parcel lifecycle', () => {
                OR to_char(r."VCH_TIME",'HH24:MI:SS.MS') IS DISTINCT FROM h.clock)) issue_identity_errors,
         (SELECT count(*)::int FROM "AC_DATA" r,h WHERE r.tenant_id=$1 AND r."CO_BOOK"=$2 AND r."VCH_NO"='00005'
           AND (r."HD_VCH_NO" IS DISTINCT FROM h.hidden OR r."MAIN_USER" IS DISTINCT FROM h.main_user
-               OR r."ENTRY_TIME"::text IS DISTINCT FROM h.vch_day)) ledger_identity_errors,
+               OR r."ENTRY_TIME"::date::text IS DISTINCT FROM h.vch_day
+               OR to_char(r."ENTRY_TIME",'HH24:MI:SS.MS') IS DISTINCT FROM h.clock)) ledger_identity_errors,
         (SELECT count(*)::int FROM "MAIN_STOCK" r,h WHERE r.tenant_id=$1 AND r."CO_BOOK"=$2 AND r."VCH_NO"='00005'
           AND (r."MAIN_USER" IS DISTINCT FROM h.main_user
                OR r."ENTRY_TIME"::text IS DISTINCT FROM h.vch_day)) stock_identity_errors,

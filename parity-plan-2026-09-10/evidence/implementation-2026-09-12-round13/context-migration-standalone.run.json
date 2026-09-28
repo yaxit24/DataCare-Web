@@ -1,0 +1,22 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "node",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/migration-attempt1/verify-disposable.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T19:17:39.855433+00:00",
+  "finishedAtUtc": "2026-09-11T19:18:36.354221+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-migration-standalone.txt",
+  "logSha256": "9cc42d3ac38bddce5c927f87c3d87049a87c144702daa713cbf1478254c336b1",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-migration-standalone.inputs.json",
+  "inputManifestSha256": "8abb62b2c280943ad6f6a7cbe832d341c2a18567a92a28315776b7562db7706e",
+  "inputCount": 1753,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

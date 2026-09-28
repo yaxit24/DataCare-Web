@@ -1,0 +1,4852 @@
+{
+ "kind": "settings-effect",
+ "note": "desktopReaderCount is the number of desktop FORMS that read the global the setting loads into, excluding the loader forms. 0 with a resolved global means the desktop ignores it too; unresolved means the loader assignment could not be located and the row is inconclusive rather than clean.",
+ "summary": {
+  "webInventory": 130,
+  "webInert": 82,
+  "inertButDesktopHonours": 73,
+  "inertAndDesktopIgnoresToo": 9,
+  "inertUnresolvedMapping": 6
+ },
+ "realGaps": [
+  {
+   "key": "THEME",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCoTheme"
+   ],
+   "desktopReaderForms": [
+    "BtmSchm",
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_AUTO_ITEM",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GOLD_MAST",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_MFG_MAST",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_RATE",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_TRADE",
+    "MS_UPDATE",
+    "MS_USER",
+    "MS_WINDOW_SET",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_LOAN",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_GRAPH",
+    "RP_GST",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TAX",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_FN_INOUT",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_ITM_OPBL",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_UPI_REC",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_AI_TRFR",
+    "UT_BANK",
+    "UT_BKP",
+    "UT_CUST_ENTRY",
+    "UT_EXPORT",
+    "UT_E_INVOICE",
+    "UT_IMPORT",
+    "UT_REMINDER",
+    "UT_SETTING",
+    "UT_SETTING_MAIN",
+    "UT_SET_ADMIN",
+    "UT_SMS",
+    "UT_TAG_PRINT",
+    "UT_USER_REQUEST",
+    "UT_VCH_RE_NUMBR",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 152
+  },
+  {
+   "key": "MAIN_FONT_CHANGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsMainFontChange"
+   ],
+   "desktopReaderForms": [
+    "BtmSchm",
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_AUTO_ITEM",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GOLD_MAST",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_MFG_MAST",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_RATE",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_TRADE",
+    "MS_UPDATE",
+    "MS_USER",
+    "MS_WINDOW_SET",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_DAY_WORK",
+    "RP_DHRN_LOAN",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_GRAPH",
+    "RP_GST",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_ITM_OPBL",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_AI_TRFR",
+    "UT_BANK",
+    "UT_BKP",
+    "UT_REMINDER",
+    "UT_SETTING",
+    "UT_SETTING_MAIN",
+    "UT_SET_ADMIN",
+    "UT_TAG_PRINT"
+   ],
+   "desktopReaderCount": 125
+  },
+  {
+   "key": "FONT_CHANGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontChange"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_GST",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 71
+  },
+  {
+   "key": "FONT_NAME",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontName"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 69
+  },
+  {
+   "key": "FONT_SIZE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontSize"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 69
+  },
+  {
+   "key": "FONT_STYLE_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontStyle"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 69
+  },
+  {
+   "key": "BRANCH_ALL_AC_SHOW",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsAllBranchAcShow"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AUTO_ITEM",
+    "MS_LOCT",
+    "MS_PRODUCT",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BILL_PROFIT",
+    "RP_DAY_WORK",
+    "RP_DHRN_LOAN",
+    "RP_DHRN_OS",
+    "RP_GST",
+    "RP_INOUT",
+    "RP_LEDR",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_REMINDER",
+    "RP_SLPR_ZOOM",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_GOLD_BOOK",
+    "TR_ITM_LOT",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_UPI_REC",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 68
+  },
+  {
+   "key": "GRID_ROW_HIGHT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsGridRowHeight"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 68
+  },
+  {
+   "key": "GRID_SCROLL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsGridScroll"
+   ],
+   "desktopReaderForms": [
+    "MS_DESIGN_BOOK",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_FN_INOUT",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_ITM_OPBL",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_CUST_ENTRY",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 60
+  },
+  {
+   "key": "EMP_AS_USER",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsEmpAsUser"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_FN_INOUT",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR_ORD",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 57
+  },
+  {
+   "key": "VCH_DESC_HELP_LENT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsVchDescHelpLenth"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_FN_INOUT",
+    "TR_INOUT",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_OTH_PURC",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 41
+  },
+  {
+   "key": "COUNTRY_ID",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCountryId"
+   ],
+   "desktopReaderForms": [
+    "Module_Save",
+    "RP_TAG_IMAGE",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_ISU",
+    "TR_FINE_SL_PR",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MLT_PRO",
+    "TR_OTH_PURC",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 35
+  },
+  {
+   "key": "COUNTRY_ID",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCountryId"
+   ],
+   "desktopReaderForms": [
+    "Module_Save",
+    "RP_TAG_IMAGE",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_ISU",
+    "TR_FINE_SL_PR",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MLT_PRO",
+    "TR_OTH_PURC",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 35
+  },
+  {
+   "key": "DUP_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlDupPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_FINE_SL_PR",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_PURC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 23
+  },
+  {
+   "key": "ESTMATE_BANK_LOCK",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsEstmateBankLock"
+   ],
+   "desktopReaderForms": [
+    "TR_FN_INOUT",
+    "TR_JDT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_SPLIT",
+    "TR_TOUR_ORD",
+    "TR_VP",
+    "TR_WH_SALE_RTN",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 23
+  },
+  {
+   "key": "VB_IMPORT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsVbImport"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr",
+    "MS_ACCT",
+    "MS_ADD_MAST",
+    "MS_COMPANY",
+    "MS_UPDATE",
+    "Module_Schm",
+    "RP_ADDRESS",
+    "RP_OS",
+    "TR_APR_ISU",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_RTN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_WH_SALE_RTN",
+    "UT_IMPORT",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 22
+  },
+  {
+   "key": "CO_STK_MERGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCoStockMerge"
+   ],
+   "desktopReaderForms": [
+    "BtmSchm",
+    "MS_DESIGN_BOOK",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_PHY_STOCK",
+    "RP_ROJMEL",
+    "RP_STOCK",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TOUR_ZOOM",
+    "TR_APR_ISU",
+    "TR_FN_INOUT",
+    "TR_PHYSTK",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_OPBL",
+    "TR_TOUR"
+   ],
+   "desktopReaderCount": 22
+  },
+  {
+   "key": "DESIGN_HELP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDesignHelp"
+   ],
+   "desktopReaderForms": [
+    "RP_TAG",
+    "RP_TAG_IMAGE",
+    "TR_APR_ISU",
+    "TR_PR_SL_UAE",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_RTN",
+    "TR_TAG_CAN",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_TAG_PRINT"
+   ],
+   "desktopReaderCount": 13
+  },
+  {
+   "key": "SILVER_THREE_DIGIT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSilverWt3Digit"
+   ],
+   "desktopReaderForms": [
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "TR_BUL_SALE",
+    "TR_FINE_SL_PR",
+    "TR_KR_ISU",
+    "TR_MFG_GHAT_REC",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE_LBR",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 11
+  },
+  {
+   "key": "LBR_RATE_GEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsLbrGen"
+   ],
+   "desktopReaderForms": [
+    "TR_KR_ISU",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "SL_ROW_CHANGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlRowChange"
+   ],
+   "desktopReaderForms": [
+    "Mfg_Module",
+    "TR_KR_ISU",
+    "TR_PR_SL_UAE",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_WH_SALE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "ITM_WITH_LOT_STK",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsItmWitLotStk"
+   ],
+   "desktopReaderForms": [
+    "Ac_Tax",
+    "MS_ITEM",
+    "RP_STOCK",
+    "TR_INOUT",
+    "TR_MFG_KR_ISU_REC",
+    "TR_PURC",
+    "TR_SALE",
+    "TR_TAG_CAN",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "TAG_RPT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTagRpt"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE_RTN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_WH_SALE_RTN"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "OS_BILL_SMS",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOsBillSms"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "QR_CODE_GEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsQrCodeGen"
+   ],
+   "desktopReaderForms": [
+    "TR_ITM_LOT",
+    "TR_PHYSTK",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "UT_SETTING_MAIN",
+    "UT_TAG_PRINT"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "PURC_LOT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsPurcLot"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 6
+  },
+  {
+   "key": "OLD_PURC_TOUCH",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOldPurcTchGen"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_WH_SALE_RTN",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "STK_LMIT_WITH_DESIGN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsStkLimitWithDesign"
+   ],
+   "desktopReaderForms": [
+    "MS_STK_LIMIT",
+    "TR_PURC",
+    "TR_SALE_ORD",
+    "TR_TAG_OPBL",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "TOUCH_AUTO_SAVE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTchAutoSave"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "MOBILE_HELP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsMobileHelp"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_ORD",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "TAG_VCH_AUTO_SAVE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTagVchAutoSave"
+   ],
+   "desktopReaderForms": [
+    "MS_DESIGN_BOOK",
+    "TR_PURC",
+    "TR_TAG_OPBL",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "WH_BILL_IMG",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsWhBillImg"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "LDR_SUMM",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsLdrSumm"
+   ],
+   "desktopReaderForms": [
+    "RP_BAL_ZOOM",
+    "RP_LEDR",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "STOCK_RPT_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsStockRptView"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock",
+    "MS_UPDATE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "CUR_DAY_POSTING",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCurDayPosting"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock",
+    "MS_UPDATE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "ESTMATE_TAX",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTaxWithEstmate"
+   ],
+   "desktopReaderForms": [
+    "TR_FINE_SL_PR",
+    "TR_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "F_DISC_DATE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFDiscDt"
+   ],
+   "desktopReaderForms": [
+    "MS_AUTO_ITEM",
+    "TR_SALE",
+    "TR_WH_SALE"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "KR_DESIGN_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsKrDesignImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_MFG_ORD_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "ORD_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOrdImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE_ORD",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "ORD_TAG_STK_LESS",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOrdTagLessInStk"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE_ORD",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "OTH_ITM_WT_REMOVE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOthItmWtRemove"
+   ],
+   "desktopReaderForms": [
+    "MS_ITEM",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "RPT_TOT_SHOW",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsRptTotShow"
+   ],
+   "desktopReaderForms": [
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "SL_BILL_IMG",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlBillImg"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_HM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "TAG_ENTRY_DESIGN_GEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDesignMastHelp"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "TR_TAG_OPBL",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "T_DISC_DATE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTDiscDt"
+   ],
+   "desktopReaderForms": [
+    "MS_AUTO_ITEM",
+    "TR_SALE",
+    "TR_WH_SALE"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "USER_KR_TOUCH_HIDE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsUserKrTouchHide"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "TR_TAG_OPBL",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "WAPP_SL_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsWappSlPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_HM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "FINE_STK_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFineStkType"
+   ],
+   "desktopReaderForms": [
+    "RP_STOCK_FINE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "OP_DHRN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOpDhiran"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "HELP_SERCH",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsHelpSearch"
+   ],
+   "desktopReaderForms": [
+    "MS_HELP",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "OP_LOAN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOpLoan"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "CASH_PURC_AC",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCashPurcAc"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "DHRN_WAPP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDhrnWapp"
+   ],
+   "desktopReaderForms": [
+    "TR_DHRN_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "SCHM_WAPP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSchmWapp"
+   ],
+   "desktopReaderForms": [
+    "TR_MEMB_ENT",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "LEDR_BILL_COL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsLedrBillColShow"
+   ],
+   "desktopReaderForms": [
+    "RP_LEDR",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "APR_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsAprImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "DEFAULT_REMINDER",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDefaultReminder"
+   ],
+   "desktopReaderForms": [
+    "RP_REMINDER",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "DHRN_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDhrnImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_DHRN_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "OPBL_TRFR_BTN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOpblTrfrBtn"
+   ],
+   "desktopReaderForms": [
+    "MS_COMPANY",
+    "UT_EXPORT"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "PRINT_FORM_BTN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsPrintFormBtn"
+   ],
+   "desktopReaderForms": [
+    "MS_PRINT",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "SL_MRP_TAX_REVERC",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsMrpTaxReverc"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_SALE"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "SL_TAG_WT_DIFF",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlAndTagWtDiff"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "TAG_AUTO_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTagRowAutoPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_TAG_OPBL",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "TILE_MENU",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTileMenuShow"
+   ],
+   "desktopReaderForms": [
+    "MS_WINDOW_SET",
+    "UT_WINDOW"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "TOT_FINE_STK_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTotFineStkType"
+   ],
+   "desktopReaderForms": [
+    "RP_BAL_ZOOM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "WAPP_IMG_GWT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsWappImgGwt"
+   ],
+   "desktopReaderForms": [
+    "RP_TAG_IMAGE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "RATE_MAST_OPEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsRateMastOpen"
+   ],
+   "desktopReaderForms": [
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "REMINDER_OPEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsReminderOpen"
+   ],
+   "desktopReaderForms": [
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "IP_WITH_PC",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsIpWith"
+   ],
+   "desktopReaderForms": [
+    "UT_EXPORT"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "OLD_GOLD_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOldGoldType"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "OS_FINE_INT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFineInt"
+   ],
+   "desktopReaderForms": [
+    "TR_WH_SALE"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "YEAR_GOLD_SL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsYearGoldSl"
+   ],
+   "desktopReaderForms": [
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "YEAR_SILVER_SL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsYearSilverSl"
+   ],
+   "desktopReaderForms": [
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 1
+  }
+ ],
+ "deadOnBothSides": [
+  "SMS_LINK",
+  "STK_RPT_VIEW",
+  "BTN_NAME",
+  "COUNTRY_CODE",
+  "LEN_IMG_PATH",
+  "WAPP_DELAY",
+  "WAP_DELAY",
+  "WEB_IMAGE",
+  "WEB_PATH"
+ ],
+ "rows": [
+  {
+   "key": "THEME",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCoTheme"
+   ],
+   "desktopReaderForms": [
+    "BtmSchm",
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_AUTO_ITEM",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GOLD_MAST",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_MFG_MAST",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_RATE",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_TRADE",
+    "MS_UPDATE",
+    "MS_USER",
+    "MS_WINDOW_SET",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_LOAN",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_GRAPH",
+    "RP_GST",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TAX",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_FN_INOUT",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_ITM_OPBL",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_UPI_REC",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_AI_TRFR",
+    "UT_BANK",
+    "UT_BKP",
+    "UT_CUST_ENTRY",
+    "UT_EXPORT",
+    "UT_E_INVOICE",
+    "UT_IMPORT",
+    "UT_REMINDER",
+    "UT_SETTING",
+    "UT_SETTING_MAIN",
+    "UT_SET_ADMIN",
+    "UT_SMS",
+    "UT_TAG_PRINT",
+    "UT_USER_REQUEST",
+    "UT_VCH_RE_NUMBR",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 152
+  },
+  {
+   "key": "TAG_RPT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTagRpt"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE_RTN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_WH_SALE_RTN"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "FINE_STK_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFineStkType"
+   ],
+   "desktopReaderForms": [
+    "RP_STOCK_FINE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "RATE_MAST_OPEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsRateMastOpen"
+   ],
+   "desktopReaderForms": [
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "LBR_RATE_GEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsLbrGen"
+   ],
+   "desktopReaderForms": [
+    "TR_KR_ISU",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "VB_IMPORT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsVbImport"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr",
+    "MS_ACCT",
+    "MS_ADD_MAST",
+    "MS_COMPANY",
+    "MS_UPDATE",
+    "Module_Schm",
+    "RP_ADDRESS",
+    "RP_OS",
+    "TR_APR_ISU",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_RTN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_WH_SALE_RTN",
+    "UT_IMPORT",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 22
+  },
+  {
+   "key": "SL_ROW_CHANGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlRowChange"
+   ],
+   "desktopReaderForms": [
+    "Mfg_Module",
+    "TR_KR_ISU",
+    "TR_PR_SL_UAE",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_WH_SALE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "DHRN_INT_TYPE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsDhrnIntType"
+   ],
+   "desktopReaderForms": [
+    "RP_DHRN_OS",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "INT_YEAR_DAYS",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsIntYearDays"
+   ],
+   "desktopReaderForms": [
+    "RP_DHRN_OS",
+    "RP_INOUT",
+    "RP_OS",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_WH_SALE"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "OP_DHRN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOpDhiran"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "INT_DAY",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsIntDayCalc"
+   ],
+   "desktopReaderForms": [
+    "TR_DHRN_INTREC",
+    "TR_DHRN_REC"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "HELP_SERCH",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsHelpSearch"
+   ],
+   "desktopReaderForms": [
+    "MS_HELP",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "WEIGHT_PORT",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsWeightPort"
+   ],
+   "desktopReaderForms": [
+    "MS_DESIGN_BOOK",
+    "TR_TAG_OPBL"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "LDR_SUMM",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsLdrSumm"
+   ],
+   "desktopReaderForms": [
+    "RP_BAL_ZOOM",
+    "RP_LEDR",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "SL_AMT_TYPE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsSlAmtType"
+   ],
+   "desktopReaderForms": [
+    "RP_TAG_ESTMATE",
+    "TR_PR_SL_UAE",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 9
+  },
+  {
+   "key": "SMS_LINK",
+   "webStatus": "inert",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "OP_LOAN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOpLoan"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "LOAN_INT_TYPE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsLoanIntType"
+   ],
+   "desktopReaderForms": [
+    "RP_DHRN_OS",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_REC",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "TRAD_FINE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsTradFine"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "LBR_ROF",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsLbrRof"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_JDT_REC",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_VP",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 26
+  },
+  {
+   "key": "REMINDER_OPEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsReminderOpen"
+   ],
+   "desktopReaderForms": [
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "ITM_RATE_ROF",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsItmRateRof"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_DHRN_ISU",
+    "TR_KR_ISU",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 11
+  },
+  {
+   "key": "ADMIN_SMS",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsAdminSms"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "CUST_SMS",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsCustSms"
+   ],
+   "desktopReaderForms": [
+    "TR_BILL_TO",
+    "TR_CASH",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "PURC_WITH_LBR",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsPurcWithLbr"
+   ],
+   "desktopReaderForms": [
+    "Ac_Ledr",
+    "Ac_Rojmel",
+    "Mfg_Module",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "DHIRN_COMPOUND",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsDhrnCompound"
+   ],
+   "desktopReaderForms": [
+    "RP_DHRN_OS",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_REC"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "GRID_SCROLL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsGridScroll"
+   ],
+   "desktopReaderForms": [
+    "MS_DESIGN_BOOK",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_FN_INOUT",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_ITM_OPBL",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_CUST_ENTRY",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 60
+  },
+  {
+   "key": "STK_RPT_TYPE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsStkRptType"
+   ],
+   "desktopReaderForms": [
+    "RP_STOCK",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "TOUCH_AUTO_SAVE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTchAutoSave"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "PAN_CARD_VAL",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsPanCardVal"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_HM",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "DHRN_PRC",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsDhrnPrc"
+   ],
+   "desktopReaderForms": [
+    "TR_DHRN_ISU",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "DUP_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlDupPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_FINE_SL_PR",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_PURC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 23
+  },
+  {
+   "key": "TAX_CODE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsTaxCode"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_FINE_SL_PR",
+    "TR_PR_SL_UAE",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN_UAE",
+    "TR_TOUR_ORD"
+   ],
+   "desktopReaderCount": 9
+  },
+  {
+   "key": "IP_WITH_PC",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsIpWith"
+   ],
+   "desktopReaderForms": [
+    "UT_EXPORT"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "CO_STK_MERGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCoStockMerge"
+   ],
+   "desktopReaderForms": [
+    "BtmSchm",
+    "MS_DESIGN_BOOK",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_PHY_STOCK",
+    "RP_ROJMEL",
+    "RP_STOCK",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TOUR_ZOOM",
+    "TR_APR_ISU",
+    "TR_FN_INOUT",
+    "TR_PHYSTK",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_OPBL",
+    "TR_TOUR"
+   ],
+   "desktopReaderCount": 22
+  },
+  {
+   "key": "STK_RPT_VIEW",
+   "webStatus": "inert",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "PR_AMT_TYPE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsPrAmtType"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "CARD_COM_ADJ",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsCardComAdj"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SL_PR_ITEM",
+    "TR_TOUR_ORD"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "CASH_PURC_AC",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCashPurcAc"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "EMP_CODE_MANDATORY",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsEmpCodeMendetry"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_FINE_SL_PR",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MLT_PRO",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PURC",
+    "TR_SALE",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 33
+  },
+  {
+   "key": "STOCK_RPT_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsStockRptView"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock",
+    "MS_UPDATE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "LAST_DAY_LOCK",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsLastDayLock"
+   ],
+   "desktopReaderForms": [
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "CASH_LIMIT",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsCashLimit"
+   ],
+   "desktopReaderForms": [
+    "TR_BILL_TO",
+    "TR_CASH",
+    "TR_SALE",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "DHRN_WAPP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDhrnWapp"
+   ],
+   "desktopReaderForms": [
+    "TR_DHRN_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "SCHM_WAPP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSchmWapp"
+   ],
+   "desktopReaderForms": [
+    "TR_MEMB_ENT",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "LEDR_BILL_COL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsLedrBillColShow"
+   ],
+   "desktopReaderForms": [
+    "RP_LEDR",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "ALL_ROF_REMOVE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsAllRofRemove"
+   ],
+   "desktopReaderForms": [
+    "TR_FINE_SL_PR",
+    "TR_OTH_PURC",
+    "TR_PR_SL_UAE",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "CO_CODE",
+   "webStatus": "honoured",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "BTN_NAME",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsMainBtn"
+   ],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "COUNTRY_CODE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCountryCode"
+   ],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "LBR_TYPE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsLbrType"
+   ],
+   "desktopReaderForms": [
+    "MS_DESIGN_BOOK",
+    "TR_APR_ISU",
+    "TR_BUL_SALE",
+    "TR_FN_INOUT",
+    "TR_INOUT",
+    "TR_JDT_REC",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING",
+    "UT_TAG_PRINT"
+   ],
+   "desktopReaderCount": 34
+  },
+  {
+   "key": "AC_LC_CODE_LEN",
+   "webStatus": "honoured",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "LOCK_DATE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsLockDt"
+   ],
+   "desktopReaderForms": [
+    "MS_COMPANY",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_FN_INOUT",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_BANK",
+    "UT_CUST_ENTRY",
+    "UT_REMINDER",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 63
+  },
+  {
+   "key": "TAX_ROF",
+   "webStatus": "honoured",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "RATE_PAR",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsRatePar"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_FINE_SL_PR",
+    "TR_PR_SL_HEDG",
+    "TR_SALE_LBR",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 9
+  },
+  {
+   "key": "OZ_CON_VAL",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsSlPrOzConv"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "FX_RATE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsFxRate"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "FX_CODE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsFxCode"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "UT_SETTING"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "COUNTRY_ID",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCountryId"
+   ],
+   "desktopReaderForms": [
+    "Module_Save",
+    "RP_TAG_IMAGE",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_ISU",
+    "TR_FINE_SL_PR",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MLT_PRO",
+    "TR_OTH_PURC",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 35
+  },
+  {
+   "key": "MFG_ONE_FORM",
+   "webStatus": "honoured",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "CO_CODE",
+   "webStatus": "honoured",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "COUNTER_STK",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsCntrStk"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "TR_SALE_RTN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "APR_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsAprImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "BILL_PROFIT",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsBillProfit"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_LBR",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "BRANCH_ALL_AC_SHOW",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsAllBranchAcShow"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AUTO_ITEM",
+    "MS_LOCT",
+    "MS_PRODUCT",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BILL_PROFIT",
+    "RP_DAY_WORK",
+    "RP_DHRN_LOAN",
+    "RP_DHRN_OS",
+    "RP_GST",
+    "RP_INOUT",
+    "RP_LEDR",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_REMINDER",
+    "RP_SLPR_ZOOM",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_GOLD_BOOK",
+    "TR_ITM_LOT",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_UPI_REC",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 68
+  },
+  {
+   "key": "COUNTRY_ID",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCountryId"
+   ],
+   "desktopReaderForms": [
+    "Module_Save",
+    "RP_TAG_IMAGE",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_SALE",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_ISU",
+    "TR_FINE_SL_PR",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MLT_PRO",
+    "TR_OTH_PURC",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 35
+  },
+  {
+   "key": "CUR_DAY_POSTING",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsCurDayPosting"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock",
+    "MS_UPDATE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "DEFAULT_REMINDER",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDefaultReminder"
+   ],
+   "desktopReaderForms": [
+    "RP_REMINDER",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "DESIGN_HELP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDesignHelp"
+   ],
+   "desktopReaderForms": [
+    "RP_TAG",
+    "RP_TAG_IMAGE",
+    "TR_APR_ISU",
+    "TR_PR_SL_UAE",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_RTN",
+    "TR_TAG_CAN",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN",
+    "UT_TAG_PRINT"
+   ],
+   "desktopReaderCount": 13
+  },
+  {
+   "key": "DHRN_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDhrnImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_DHRN_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "EMP_AS_USER",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsEmpAsUser"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_FN_INOUT",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_MLT_PRO",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR_ORD",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 57
+  },
+  {
+   "key": "ESTMATE_BANK_LOCK",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsEstmateBankLock"
+   ],
+   "desktopReaderForms": [
+    "TR_FN_INOUT",
+    "TR_JDT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_SPLIT",
+    "TR_TOUR_ORD",
+    "TR_VP",
+    "TR_WH_SALE_RTN",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 23
+  },
+  {
+   "key": "ESTMATE_TAX",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTaxWithEstmate"
+   ],
+   "desktopReaderForms": [
+    "TR_FINE_SL_PR",
+    "TR_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "FONT_CHANGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontChange"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_GST",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 71
+  },
+  {
+   "key": "FONT_NAME",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontName"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 69
+  },
+  {
+   "key": "FONT_SIZE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontSize"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 69
+  },
+  {
+   "key": "FONT_STYLE_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFontStyle"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 69
+  },
+  {
+   "key": "F_DISC_DATE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFDiscDt"
+   ],
+   "desktopReaderForms": [
+    "MS_AUTO_ITEM",
+    "TR_SALE",
+    "TR_WH_SALE"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "GRID_ROW_HIGHT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsGridRowHeight"
+   ],
+   "desktopReaderForms": [
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_USER",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST_CRM",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "RP_MFG_ZOOM",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_PHY_STOCK",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TOUR_ZOOM",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_MEMB_ENT",
+    "TR_MFG_ISU_REC",
+    "UT_AI_TRFR",
+    "UT_E_INVOICE",
+    "UT_SETTING_MAIN",
+    "UT_SMS",
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
+   "desktopReaderCount": 68
+  },
+  {
+   "key": "ITM_FINE_LOCK",
+   "webStatus": "unknown",
+   "desktopGlobals": [
+    "MsItmFineLock"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "ITM_WITH_LOT_STK",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsItmWitLotStk"
+   ],
+   "desktopReaderForms": [
+    "Ac_Tax",
+    "MS_ITEM",
+    "RP_STOCK",
+    "TR_INOUT",
+    "TR_MFG_KR_ISU_REC",
+    "TR_PURC",
+    "TR_SALE",
+    "TR_TAG_CAN",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 10
+  },
+  {
+   "key": "KR_DESIGN_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsKrDesignImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_MFG_ORD_ISU",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "LBR_WITH_GHT",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsLbrWithGht"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BUL_SALE",
+    "TR_ITM_LOT",
+    "TR_MFG_ORD_ISU",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_VP",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 23
+  },
+  {
+   "key": "LEN_IMG_PATH",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsLenImgPath"
+   ],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "MAIN_FONT_CHANGE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsMainFontChange"
+   ],
+   "desktopReaderForms": [
+    "BtmSchm",
+    "MS_ACCT",
+    "MS_AC_GROUP",
+    "MS_ADD_MAST",
+    "MS_AUTO_ITEM",
+    "MS_BOOK",
+    "MS_BOOKLIST",
+    "MS_COMPANY",
+    "MS_DESIGN_BOOK",
+    "MS_DM",
+    "MS_EMP",
+    "MS_GOLD_MAST",
+    "MS_GROUP",
+    "MS_HELP",
+    "MS_ITEM",
+    "MS_LBR_TYPE",
+    "MS_LOCT",
+    "MS_MEMB",
+    "MS_MFG_MAST",
+    "MS_POINT",
+    "MS_PRODUCT",
+    "MS_RATE",
+    "MS_STK_LIMIT",
+    "MS_STYLE",
+    "MS_TAX",
+    "MS_TRADE",
+    "MS_UPDATE",
+    "MS_USER",
+    "MS_WINDOW_SET",
+    "RP_ADDRESS",
+    "RP_ALL",
+    "RP_BALANCE",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_CONSI_APR",
+    "RP_CUST",
+    "RP_DAY_WORK",
+    "RP_DHRN_LOAN",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_GRAPH",
+    "RP_GST",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_ORD_TRACK",
+    "RP_OS",
+    "RP_OTH_DETL",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_LEVEL",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TAG_IMAGE",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_AC_OPBL",
+    "TR_APR_ISU",
+    "TR_BILL_TO",
+    "TR_BUL_BOOKING",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_CONTRA",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_EMP_JV",
+    "TR_FINE_SL_PR",
+    "TR_GOLD_BOOK",
+    "TR_INOUT",
+    "TR_ITM_LOT",
+    "TR_ITM_OPBL",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MEMB_ADJ",
+    "TR_MEMB_ENT",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_OTH_COMM",
+    "TR_OTH_PURC",
+    "TR_PHYSTK",
+    "TR_PR_SL_HEDG",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_ORD_ADJ",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_TOUR_SALE",
+    "TR_VP",
+    "TR_VP_ADJ",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_AI_TRFR",
+    "UT_BANK",
+    "UT_BKP",
+    "UT_REMINDER",
+    "UT_SETTING",
+    "UT_SETTING_MAIN",
+    "UT_SET_ADMIN",
+    "UT_TAG_PRINT"
+   ],
+   "desktopReaderCount": 125
+  },
+  {
+   "key": "MOBILE_HELP",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsMobileHelp"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_ORD",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "NEGATIVE_STK_SALE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsNegativeStkSale"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_KR_ISU",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "OLD_GOLD_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOldGoldType"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "OLD_PURC_TOUCH",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOldPurcTchGen"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_WH_SALE_RTN",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "OPBL_TRFR_BTN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOpblTrfrBtn"
+   ],
+   "desktopReaderForms": [
+    "MS_COMPANY",
+    "UT_EXPORT"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "ORD_IMG_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOrdImgPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE_ORD",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "ORD_TAG_STK_LESS",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOrdTagLessInStk"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE_ORD",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "OS_BILL_ORNA_ISU",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsOsBillOrnaIsu"
+   ],
+   "desktopReaderForms": [
+    "BtmSchm",
+    "TR_BILL_TO",
+    "TR_MLT_PRO",
+    "TR_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "OS_BILL_SMS",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOsBillSms"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_PR_ITEM",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "OS_FINE_INT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsFineInt"
+   ],
+   "desktopReaderForms": [
+    "TR_WH_SALE"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "OTH_ITM_WT_REMOVE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsOthItmWtRemove"
+   ],
+   "desktopReaderForms": [
+    "MS_ITEM",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "PRINT_FORM_BTN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsPrintFormBtn"
+   ],
+   "desktopReaderForms": [
+    "MS_PRINT",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "PROFIT_RPT_TYPE",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsBalanceSheetType"
+   ],
+   "desktopReaderForms": [
+    "Ac_Final",
+    "RP_BALANCE",
+    "RP_BAL_ZOOM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "PR_RATE_ROF",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsPrRateRof"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "PR_TDS_TAX",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsPrTdsTax"
+   ],
+   "desktopReaderForms": [
+    "TR_FN_INOUT",
+    "TR_PURC",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "PURC_LOT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsPurcLot"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 6
+  },
+  {
+   "key": "PURC_WITH_HMTAX",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsPurcWithHmTax"
+   ],
+   "desktopReaderForms": [
+    "MS_COMPANY",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TRADING",
+    "RP_USER",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_ORD",
+    "TR_TOUR_ORD",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 31
+  },
+  {
+   "key": "QR_CODE_GEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsQrCodeGen"
+   ],
+   "desktopReaderForms": [
+    "TR_ITM_LOT",
+    "TR_PHYSTK",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "UT_SETTING_MAIN",
+    "UT_TAG_PRINT"
+   ],
+   "desktopReaderCount": 7
+  },
+  {
+   "key": "RPT_TOT_SHOW",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsRptTotShow"
+   ],
+   "desktopReaderForms": [
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "SALES_WITH_HMTAX",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsSalesWithHmTax"
+   ],
+   "desktopReaderForms": [
+    "MS_COMPANY",
+    "RP_BAL_ZOOM",
+    "RP_BILL_PROFIT",
+    "RP_CASH_BANK",
+    "RP_DAY_WORK",
+    "RP_DHRN_OS",
+    "RP_EMP",
+    "RP_HUID",
+    "RP_INOUT",
+    "RP_JDTR_ZOOM",
+    "RP_LC_INOUT",
+    "RP_LC_SALE",
+    "RP_LEDR",
+    "RP_MOVEMENT",
+    "RP_ORDER",
+    "RP_REMINDER",
+    "RP_ROJMEL",
+    "RP_SLPR_ZOOM",
+    "RP_STK_MOVE",
+    "RP_STOCK",
+    "RP_STOCK_FINE",
+    "RP_STOCK_VALUE",
+    "RP_TAG",
+    "RP_TAG_ESTMATE",
+    "RP_TRADING",
+    "RP_USER",
+    "UT_SETTING_MAIN",
+    "UT_WINDOW"
+   ],
+   "desktopReaderCount": 28
+  },
+  {
+   "key": "SILVER_THREE_DIGIT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSilverWt3Digit"
+   ],
+   "desktopReaderForms": [
+    "RP_LEDR",
+    "RP_MFG_LEDR",
+    "TR_BUL_SALE",
+    "TR_FINE_SL_PR",
+    "TR_KR_ISU",
+    "TR_MFG_GHAT_REC",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE_LBR",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 11
+  },
+  {
+   "key": "SL_BILL_IMG",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlBillImg"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_HM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "SL_MRP_TAX_REVERC",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsMrpTaxReverc"
+   ],
+   "desktopReaderForms": [
+    "TR_PR_SL_UAE",
+    "TR_SALE"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "SL_NWT_LOCK",
+   "webStatus": "unknown",
+   "desktopGlobals": [
+    "MsSlNwtLock"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_FN_INOUT",
+    "TR_PR_SL_UAE",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "TR_WH_SALE_RTN",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 11
+  },
+  {
+   "key": "SL_TAG_WT_DIFF",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsSlAndTagWtDiff"
+   ],
+   "desktopReaderForms": [
+    "Ac_Stock",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "SL_TDS_TAX",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsSlTdsTax"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "STK_LMIT_WITH_DESIGN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsStkLimitWithDesign"
+   ],
+   "desktopReaderForms": [
+    "MS_STK_LIMIT",
+    "TR_PURC",
+    "TR_SALE_ORD",
+    "TR_TAG_OPBL",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 5
+  },
+  {
+   "key": "TAG_AUTO_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTagRowAutoPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_TAG_OPBL",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "TAG_ENTRY_DESIGN_GEN",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsDesignMastHelp"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "TR_TAG_OPBL",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "TAG_VCH_AUTO_SAVE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTagVchAutoSave"
+   ],
+   "desktopReaderForms": [
+    "MS_DESIGN_BOOK",
+    "TR_PURC",
+    "TR_TAG_OPBL",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "TILE_MENU",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTileMenuShow"
+   ],
+   "desktopReaderForms": [
+    "MS_WINDOW_SET",
+    "UT_WINDOW"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "TOT_AMT_ROF",
+   "webStatus": "honoured",
+   "desktopGlobals": [
+    "MsTotAmtRof"
+   ],
+   "desktopReaderForms": [
+    "TR_FN_INOUT",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_RTN_UAE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 8
+  },
+  {
+   "key": "TOT_FINE_STK_TYPE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTotFineStkType"
+   ],
+   "desktopReaderForms": [
+    "RP_BAL_ZOOM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "T_DISC_DATE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsTDiscDt"
+   ],
+   "desktopReaderForms": [
+    "MS_AUTO_ITEM",
+    "TR_SALE",
+    "TR_WH_SALE"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "USER_KR_TOUCH_HIDE",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsUserKrTouchHide"
+   ],
+   "desktopReaderForms": [
+    "TR_PURC",
+    "TR_TAG_OPBL",
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "VCH_DESC_HELP_LENT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsVchDescHelpLenth"
+   ],
+   "desktopReaderForms": [
+    "TR_APR_ISU",
+    "TR_BUL_SALE",
+    "TR_CARD_REC",
+    "TR_CASH",
+    "TR_DHRN_INTREC",
+    "TR_DHRN_ISU",
+    "TR_DHRN_REC",
+    "TR_FN_INOUT",
+    "TR_INOUT",
+    "TR_JDT_REC",
+    "TR_KR_ISU",
+    "TR_LEDR_ADJ",
+    "TR_LOCT_AMT",
+    "TR_MFG_GHAT_REC",
+    "TR_MFG_ISU_REC",
+    "TR_MFG_ITEM",
+    "TR_MFG_KR_ISU_REC",
+    "TR_MFG_ORD_ISU",
+    "TR_MFG_ORD_REC",
+    "TR_MFG_WITH_LOT",
+    "TR_OTH_PURC",
+    "TR_PR_SL_UAE",
+    "TR_PURC",
+    "TR_PURC_HM",
+    "TR_REP_REC",
+    "TR_SALE",
+    "TR_SALE_HM",
+    "TR_SALE_LBR",
+    "TR_SALE_ORD",
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE",
+    "TR_SL_EBILL",
+    "TR_SL_PR_ITEM",
+    "TR_TAG_CAN",
+    "TR_TAG_OPBL",
+    "TR_TAG_SPLIT",
+    "TR_TAG_WT_DIFF",
+    "TR_TOUR",
+    "TR_TOUR_ORD",
+    "TR_WH_SALE_RTN",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 41
+  },
+  {
+   "key": "WAPP_DELAY",
+   "webStatus": "inert",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "WAPP_IMG_GWT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsWappImgGwt"
+   ],
+   "desktopReaderForms": [
+    "RP_TAG_IMAGE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 2
+  },
+  {
+   "key": "WAPP_SL_PRINT",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsWappSlPrint"
+   ],
+   "desktopReaderForms": [
+    "TR_SALE",
+    "TR_SALE_HM",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 3
+  },
+  {
+   "key": "WAP_DELAY",
+   "webStatus": "inert",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "WEB_IMAGE",
+   "webStatus": "inert",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "WEB_PATH",
+   "webStatus": "inert",
+   "desktopGlobals": [],
+   "desktopReaderForms": [],
+   "desktopReaderCount": 0
+  },
+  {
+   "key": "WH_BILL_IMG",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsWhBillImg"
+   ],
+   "desktopReaderForms": [
+    "TR_BUL_SALE",
+    "TR_TOUR_SALE",
+    "TR_WH_SALE",
+    "UT_SETTING_MAIN"
+   ],
+   "desktopReaderCount": 4
+  },
+  {
+   "key": "YEAR_GOLD_SL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsYearGoldSl"
+   ],
+   "desktopReaderForms": [
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 1
+  },
+  {
+   "key": "YEAR_SILVER_SL",
+   "webStatus": "inert",
+   "desktopGlobals": [
+    "MsYearSilverSl"
+   ],
+   "desktopReaderForms": [
+    "UT_SET_ADMIN"
+   ],
+   "desktopReaderCount": 1
+  }
+ ]
+}

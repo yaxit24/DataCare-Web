@@ -1,0 +1,30 @@
+[
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnBillReplay.ts",
+    "sha256": "9c7621a1ddce3e81fee8f15991398e5210035a5cd04b404124b0e69b14b8933b"
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnReplay.ts",
+    "sha256": "60093c4f2a0ded2a675c68496c958b5c62dfd24b526dc346c4183e3d9dc6a1ef"
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/pageContext.ts",
+    "sha256": "1f157fc8f55cee17e914bebbf77d5b709f42640f902f10228e41b4478dc20426"
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/api.ts",
+    "sha256": "752786074a6de23482dc33560ed677751c59fc8d686c2d25d893ad82598cc015"
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnSavedPanel.tsx",
+    "sha256": "79b0af1731dfc0e15b1ecc57070413750c639d8964807f331f09fa10b75ae65b"
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnBillReplayPanel.tsx",
+    "sha256": "11478a6b1bb4f59009491606bfcd1ff3ccadd709b08ffce49e021925aee0e54b"
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/salesReturnBillReplay.test.ts",
+    "sha256": "9e7a5ee1dc3b2f0f552c00d09d05eebcdf0100a1d9472adc49661a5fe654e113"
+  }
+]

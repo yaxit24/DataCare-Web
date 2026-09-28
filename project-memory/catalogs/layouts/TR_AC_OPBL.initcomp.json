@@ -1,0 +1,327 @@
+{
+ "form": "TR_AC_OPBL",
+ "controlCount": 30,
+ "byKind": {
+  "textbox": 7,
+  "grid": 3,
+  "combo": 4,
+  "button": 8,
+  "panel": 2,
+  "label": 6
+ },
+ "grids": [
+  "MSG",
+  "MSG_TOT",
+  "MSG_AC"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "FlowLayoutPanel1",
+   "BtnLast",
+   "BtnFirst"
+  ],
+  "this": [
+   "btnAbTypeMerg",
+   "tDataType",
+   "PnlBotam",
+   "cboSilver",
+   "nOpSilverFine",
+   "Label5",
+   "cboGold",
+   "nOpGoldFine",
+   "Label4",
+   "cboAmt",
+   "nOpAmt",
+   "Label3",
+   "Label1",
+   "cboBalType",
+   "MSG_AC",
+   "tAcCode",
+   "tAcName",
+   "MSG_TOT",
+   "TEXT_ENTRY",
+   "MSG",
+   "Label2",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "112,41",
+   "size": "78,22",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "535,148",
+   "size": "100,18",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "12,72",
+   "size": "1160,210",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "nOpAmt",
+   "type": "TextBox",
+   "location": "975,338",
+   "size": "133,26",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboAmt",
+   "type": "ComboBox",
+   "location": "1114,337",
+   "size": "60,26",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "nOpGoldFine",
+   "type": "TextBox",
+   "location": "975,370",
+   "size": "133,26",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboGold",
+   "type": "ComboBox",
+   "location": "1114,369",
+   "size": "60,26",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "nOpSilverFine",
+   "type": "TextBox",
+   "location": "975,402",
+   "size": "133,26",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboSilver",
+   "type": "ComboBox",
+   "location": "1114,401",
+   "size": "60,26",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "8",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "9",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "10",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "11",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "FlowLayoutPanel1",
+   "type": "FlowLayoutPanel",
+   "location": "246,3",
+   "size": "575,40",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnFirst",
+   "type": "SimpleButton",
+   "location": "152,3",
+   "size": "41,37",
+   "tabIndex": "28",
+   "text": "<",
+   "kind": "button"
+  },
+  {
+   "name": "BtnLast",
+   "type": "SimpleButton",
+   "location": "199,3",
+   "size": "41,37",
+   "tabIndex": "29",
+   "text": ">",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "101",
+   "text": "Party Opening",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "15,41",
+   "size": "87,20",
+   "tabIndex": "104",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "MSG_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "14,286",
+   "size": "1153,16",
+   "tabIndex": "1123",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "194,41",
+   "size": "350,22",
+   "tabIndex": "1127",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG_AC",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "14,343",
+   "size": "718,206",
+   "tabIndex": "1129",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "cboBalType",
+   "type": "ComboBox",
+   "location": "126,311",
+   "size": "156,24",
+   "tabIndex": "1130",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "18,311",
+   "size": "97,20",
+   "tabIndex": "1131",
+   "text": "Balance Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "826,339",
+   "size": "142,20",
+   "tabIndex": "1132",
+   "text": "Opening Amount",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "826,369",
+   "size": "142,20",
+   "tabIndex": "1135",
+   "text": "Opening Gold Fine",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "826,404",
+   "size": "142,20",
+   "tabIndex": "1138",
+   "text": "Opening Silver Fine",
+   "kind": "label"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "1139",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tDataType",
+   "type": "TextBox",
+   "location": "550,42",
+   "size": "27,22",
+   "tabIndex": "1140",
+   "text": "B",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnAbTypeMerg",
+   "type": "SimpleButton",
+   "location": "1204,502",
+   "size": "99,37",
+   "tabIndex": "1141",
+   "text": "&A/B Merge",
+   "kind": "button"
+  }
+ ]
+}

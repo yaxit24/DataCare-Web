@@ -1,0 +1,21 @@
+{
+  "command": [
+    "pnpm",
+    "docs:refs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:46:06.442985+00:00",
+  "finishedAtUtc": "2026-09-12T01:46:07.043417+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/docs-refs-final.txt",
+  "logSha256": "e0dcc4c4b413918860b6215336375add123069a3a41694df66598f2bc4d94444",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/docs-refs-final.inputs.json",
+  "inputManifestSha256": "59b315def2aefc2190f3658867ce8b54ee157c86289132e8266beb388178e876",
+  "inputCount": 1909,
+  "changedInputs": [],
+  "changedPrivateInputs": [],
+  "changedRuntimeInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

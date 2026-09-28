@@ -1,0 +1,71 @@
+{
+ "distinctResx": 165,
+ "richControlTrees": 16,
+ "stringOnly": 149,
+ "rich": [
+  [
+   "DataCareNext.MS_ACCT.resx",
+   1529
+  ],
+  [
+   "DataCareNext.MS_MEMB.resx",
+   945
+  ],
+  [
+   "DataCareNext.MS_ADD_MAST.resx",
+   781
+  ],
+  [
+   "DataCareNext.MS_ITEM.resx",
+   731
+  ],
+  [
+   "DataCareNext.MS_PRODUCT.resx",
+   527
+  ],
+  [
+   "DataCareNext.MS_GROUP.resx",
+   369
+  ],
+  [
+   "DataCareNext.MS_GOLD_MAST.resx",
+   292
+  ],
+  [
+   "DataCareNext.MS_AC_GROUP.resx",
+   280
+  ],
+  [
+   "DataCareNext.MS_DM.resx",
+   268
+  ],
+  [
+   "DataCareNext.MS_TAX.resx",
+   257
+  ],
+  [
+   "DataCareNext.MS_LBR_TYPE.resx",
+   233
+  ],
+  [
+   "DataCareNext.MS_EMP.resx",
+   227
+  ],
+  [
+   "DataCareNext.MS_STYLE.resx",
+   117
+  ],
+  [
+   "DataCareNext.MS_TRADE.resx",
+   92
+  ],
+  [
+   "DataCareNext.UT_REPORT.resx",
+   51
+  ],
+  [
+   "DataCareNext.Resources.resx",
+   32
+  ]
+ ]
+}

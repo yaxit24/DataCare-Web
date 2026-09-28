@@ -1,0 +1,9 @@
+{
+  "implementationExisted": false,
+  "executedRuntime": false,
+  "cases": 22,
+  "headerTargets": 12,
+  "parentTargets": 70,
+  "orderedParentAssignments": 74,
+  "fixtureSha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a"
+}

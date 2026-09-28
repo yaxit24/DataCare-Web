@@ -1,0 +1,123 @@
+{
+ "form": "Ac_Image",
+ "tables": [
+  "COL_MAST",
+  "CO_SET",
+  "CO_SET_NEW",
+  "GROUP_MAST",
+  "INOUT_DETL",
+  "ITEM_MAST",
+  "ITM_WT_MAST",
+  "LOCT_MAST",
+  "MENU_DATA",
+  "PRODUCT_MAST"
+ ],
+ "writes": {
+  "INSERT": {
+   "PRODUCT_MAST": [
+    "CO_CODE",
+    "DATA_TRFR",
+    "MAIN_USER",
+    "PR_CODE",
+    "PR_NAME"
+   ],
+   "GROUP_MAST": [
+    "AVG_FINE",
+    "AVG_NWT",
+    "AVG_TOUCH",
+    "CO_CODE",
+    "DAY_CL_PCS",
+    "DAY_CL_WT",
+    "DAY_OP_PCS",
+    "DAY_OP_WT",
+    "GR_CODE",
+    "GR_NAME",
+    "GR_PURC_TOUCH",
+    "GR_RATE",
+    "GR_TOUCH",
+    "GR_TYPE",
+    "HSN_CODE",
+    "MAIN_USER",
+    "MELTING_PRC",
+    "PURC_AC",
+    "RATE_DISPLAY",
+    "SALE_AC",
+    "TAX_PRC",
+    "TRAD_TYPE",
+    "WEST_PRC"
+   ],
+   "ITEM_MAST": [
+    "AC_ITEM",
+    "AVG_FINE",
+    "AVG_NWT",
+    "AVG_RATE",
+    "AVG_TOUCH",
+    "CON_PRC",
+    "CO_CODE",
+    "DISC_PRC",
+    "GR_CODE",
+    "HSN_CODE",
+    "ITEM_RATE",
+    "IT_CODE",
+    "IT_NAME",
+    "IT_TOUCH",
+    "IT_TYPE",
+    "IT_WEST",
+    "LBR_PRC",
+    "MAIN_USER",
+    "MIN_STK",
+    "OTHER_RATE",
+    "OTH_RATE",
+    "PR_CODE",
+    "RATE_TYPE",
+    "SAFE_NAME",
+    "STK_DISPLAY",
+    "TAG_TYPE",
+    "TRAD_TYPE",
+    "UNIT_NAME"
+   ],
+   "CO_SET_NEW": [
+    "COUNTER_STK",
+    "CO_CODE"
+   ],
+   "COL_MAST": [
+    "BOOK_NAME",
+    "COL_NAME",
+    "COL_NEW_NAME",
+    "COL_RPT",
+    "CO_CODE",
+    "YES_NO"
+   ]
+  },
+  "UPDATE": [
+   "CO_SET",
+   "CO_SET_NEW",
+   "GROUP_MAST",
+   "INOUT_DETL",
+   "ITEM_MAST",
+   "ITM_WT_MAST",
+   "LOCT_MAST",
+   "MENU_DATA",
+   "PRODUCT_MAST"
+  ],
+  "DELETE": [
+   "GROUP_MAST",
+   "ITEM_MAST",
+   "PRODUCT_MAST"
+  ]
+ },
+ "selectTables": [
+  "CO_SET_NEW",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "LOCT_MAST",
+  "PRODUCT_MAST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 8643
+}

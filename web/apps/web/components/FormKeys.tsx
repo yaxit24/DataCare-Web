@@ -2,7 +2,18 @@
 
 import { useEffect, useRef } from 'react';
 
-export const FORM_KEYS = ['F2', 'F3', 'F4', 'F5', 'F7', 'F8', 'F9', 'F11', 'F12'] as const;
+/**
+ * Plain F-keys the desktop MDI shell binds, by virtual-key code (`MDI_FORM.cs:12462-12525`):
+ * VK 113-120 = F2..F9 and VK 122-123 = F11..F12.
+ *
+ * F6 (VK 117) is included because the desktop DOES bind it, to `ShoF6WhSales_Click` ->
+ * `TR_WH_SALE` (`MDI_FORM.cs:12486-12489`). It was missing here.
+ *
+ * F10 stays out on purpose. The menu carries an "F10 Reminder" caption
+ * (`MDI_FORM.cs:5571-5601`) but VK 121 has no branch in the handler, so the desktop key is inert.
+ * Binding it would add behaviour the desktop lacks.
+ */
+export const FORM_KEYS = ['F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F11', 'F12'] as const;
 export type PlainFormKey = (typeof FORM_KEYS)[number];
 
 /**
@@ -39,6 +50,7 @@ export type FormKeyActionId =
   | 'sales-order'
   | 'sales-bill'
   | 'purchase-bill'
+  | 'wholesale-sales'
   | 'cash-received'
   | 'cash-payment'
   | 'rojmel'
@@ -153,6 +165,23 @@ export function desktopGlobalFormKeyActions(navigate: (href: string) => void): F
     },
     F4: { id: 'sales-order', label: 'Sales order', run: () => navigate('/txn/sales-order') },
     F5: { id: 'sales-bill', label: 'Sales bill', run: () => navigate('/txn/sales') },
+    /**
+     * P1-4. The desktop binds VK 117 at MDI_FORM.cs:12486-12489 to `ShoF6WhSales_Click`, which
+     * opens `TR_WH_SALE` after checking the "Wh Sales" user right. The web page for that form is
+     * /txn/wholesale-sale, the same destination as Ctrl+F6 below — on the desktop both keys open
+     * TR_WH_SALE, one captioned "Wh Sales" and one "Rate cut".
+     *
+     * DELIBERATELY NOT ADDED: F10. The menu caption "F10 Reminder" exists
+     * (MDI_FORM.cs:5571-5601), but the key handler binds only VK 113-120 and 122-123 — VK 121 is
+     * absent, so pressing F10 on the desktop does nothing. Adding it here would invent behaviour
+     * the desktop does not have, which is a parity claim in the wrong direction. The Reminder
+     * screen stays reachable from navigation.
+     */
+    F6: {
+      id: 'wholesale-sales',
+      label: 'Wholesale sales',
+      run: () => navigate('/txn/wholesale-sale'),
+    },
     F7: { id: 'purchase-bill', label: 'Purchase bill', run: () => navigate('/txn/purchase') },
     F8: { id: 'cash-received', label: 'Cash received', run: () => navigate('/txn/receipt') },
     F9: { id: 'cash-payment', label: 'Cash payment', run: () => navigate('/txn/payment') },

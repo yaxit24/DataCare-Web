@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-09-11T07:12:32.603491+00:00",
+  "status": "passed",
+  "beforeRunSnapshotSha256": "d543879f8549ea10627d6c7b8bb927dd0ad9383d382d7824ca64a087fd2832af",
+  "matchedInputs": 1001,
+  "fullRegression": {
+    "files": 221,
+    "tests": 1740,
+    "skipped": 0
+  },
+  "limits": "After strict test tuple types were corrected; final full regression captured before and unchanged after. Engineering evidence, not full desktop parity."
+}

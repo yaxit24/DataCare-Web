@@ -1,0 +1,19 @@
+{
+  "command": [
+    "node",
+    "scripts/check-depth.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:36:29.699036+00:00",
+  "finishedAtUtc": "2026-09-11T23:36:51.958741+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-labour-current.txt",
+  "logSha256": "2db3f6c011072faefbfaa70445c7ac5de50821abef869cae927ec4cfaa97ff5d",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-labour-current.inputs.json",
+  "inputManifestSha256": "08c5b9f8110912edc9afb4d8514194d11c94618ab7ab2bcbb600e539d4378189",
+  "inputCount": 1829,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

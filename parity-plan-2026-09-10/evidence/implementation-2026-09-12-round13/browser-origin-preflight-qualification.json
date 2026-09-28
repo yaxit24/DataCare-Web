@@ -1,0 +1,9 @@
+{
+  "failedRuns": [
+    "browser-existing-journeys-session-command",
+    "browser-existing-journeys-session-command-isolated"
+  ],
+  "cause": "The successful general build used default API origin. Both browser attempts stopped at the runner origin assertion before business journeys/fixture mutation. First command also used an unrecognized artifact-directory env name.",
+  "correction": "Rebuilt with explicit API_ORIGIN=http://127.0.0.1:4410 and used supported PARITY_ARTIFACT_DIR; origin-corrected run passed16existing journeys.",
+  "existingDefaultArtifacts": "Default result still retained its historical2026-09-10 startedAt. Existing directory copied after failed process exit; no claim that the copy captured a running browser or restored prior bytes."
+}

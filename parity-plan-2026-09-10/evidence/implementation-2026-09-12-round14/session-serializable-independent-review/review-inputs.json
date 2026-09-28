@@ -1,0 +1,155 @@
+{
+  "kind": "source-only-independent-review-inputs",
+  "declaredTests": {
+    "unit": 78,
+    "database": 17
+  },
+  "reviewerExecution": {
+    "tests": 0,
+    "database": false,
+    "compiler": false,
+    "browser": false
+  },
+  "files": [
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/ready-manifest.json",
+      "sha256": "764efde84b1b87192aed7c9b852a28291d160167e45408c2c0936cbadb44eeab"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/implementation-contract.md",
+      "sha256": "57fe4a02454b81264200fce82ef66a4637e41d69f3f9c71a81806ba5070097ec"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/scope-profile-addendum.md",
+      "sha256": "3d344250e04aec4b47c23cc69d149347c7bf6b37526f01a7f6c3c9969278fabc"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/peer-review-qualifications.md",
+      "sha256": "73e88ebea56f55c77bf95ff58f20a2b278f798023442c45bf23fd5136e4a1104"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/fixture-freeze.json",
+      "sha256": "ff07b5383f28cb7635578cb8ae34d9bd624e22d3fafa4614f5ea0b97af730157"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/freeze-contract.py",
+      "sha256": "6c3661ba20464b09aaa511bd1d2b039fcbb11323bb0ea6398c13721db86c54c2"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/preservation.json",
+      "sha256": "3abc3eaabff295592d60325da5b038917bfeb423832200f90fbc34de38fedf94"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/README.md",
+      "sha256": "8d38466e6ee28fe8896aa8c5df00cc447de5c3edfcbbc4609c59e3072f14f356"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/web/apps/api/src/modules/auth/sessionContextSerializableCommand.ts",
+      "sha256": "300447e6d3a8f11306620e12e6a5d13f0802dfc42544f73951231c13ba52bb37"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/web/apps/api/test/sessionContextSerializableCommand.test.ts",
+      "sha256": "16e9a2ea859edb27a89c5a8a2728d24cdeac9892e2bd2982c2f19f035f10864a"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/web/apps/api/test/sessionContextSerializableCommand.db.test.ts",
+      "sha256": "68d8c6094d4183e9711017ad1fb4e44bde30dcd8a166274842b20bdc5bd85129"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/web/apps/api/test/fixtures/sessionSerializableCommand.independent.json",
+      "sha256": "719f298df0a0f1e18b0c10f7fabc57933b682f0916f6140cd26ac0724ff68486"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/web/apps/api/test/fixtures/sessionSerializableCommand.qualifications.json",
+      "sha256": "1a84a5c10a5d7029af031b28a6f3707531305403b3fe76b6e721f5185d550795"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/historical-initial/ready-manifest.json",
+      "sha256": "444691f18ef9e98e50a272987b252cb384e5378712ea955c63aba434b88bbb75"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/historical-initial/sessionContextSerializableCommand.test.ts",
+      "sha256": "4d263e8d0016345beb1e303b8463328a0ea95ec0db7e96ddc932c49ed3bd9b07"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextAccess.ts",
+      "sha256": "4caa701a9c7fb82a43ddaf1c5da01ce04be6a7f1028add2049ef64231ab6ea28"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextCommand.test.ts",
+      "sha256": "7293d6bf7d960fc6821714c693942067e88119d83cb8ce9bb15da25ac250913e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextCommand.db.test.ts",
+      "sha256": "c64e604c7995d4ca299c94ac2767472be78f89eb7a784cca6cf18341ef2ce0d2"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextReadSnapshot.test.ts",
+      "sha256": "717ce22141eff365fea9f5fbb0fbd923b3c167b1133bc1c60dca00d923b854fe"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextReadSnapshot.db.test.ts",
+      "sha256": "fb6192e427ab5a85878f6df4261225603b94ffd7075ce6c4a25945ef17244614"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/implementation-contract.md",
+      "sha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/review.md",
+      "sha256": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/mandatory-stock-identity-erratum.json",
+      "sha256": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextSelection.ts",
+      "sha256": "9440e509fa5f0938edf9b0031c2bff9f5a4e2091cbe8770be2c0c8d403a53aa5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextRefresh.ts",
+      "sha256": "4d43d2639c5345913a11283b8f626e7106662d4c451db3c54c4354c50fe696d9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/session.ts",
+      "sha256": "17765f43964137139d582695cc0d10e3713227b8e118070e6f3e4a07fdb63bf0"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/passwordAccount.ts",
+      "sha256": "f566af63d2048bd64f69c7e04aaede8102a5a789a11750a8450d7016cda5ce56"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/formCatalog.ts",
+      "sha256": "6bacd8a39c670795528c694c961fc5a583abe0334148f8864a1ccf2d0afc8712"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/auth.service.ts",
+      "sha256": "cb6269a6b3793d9dc7163bbd1f144336f12da461cdec7177e620b5f5f74f026e"
+    }
+  ]
+}

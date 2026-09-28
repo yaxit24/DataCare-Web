@@ -1,0 +1,1010 @@
+{
+ "source": "MDI_FORM.cs",
+ "captionCount": 136,
+ "itemCount": 106,
+ "menuGroups": 2,
+ "items": [
+  {
+   "handler": "BtnComp",
+   "name": "BtnComp",
+   "caption": "Company",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnMast",
+   "name": "BtnMast",
+   "caption": "Master",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnTran",
+   "name": "BtnTran",
+   "caption": "Tran 1",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnTran2",
+   "name": "BtnTran2",
+   "caption": "Tran 2",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnOth",
+   "name": "BtnOth",
+   "caption": "Other",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnKrgr",
+   "name": "BtnKrgr",
+   "caption": "Karigar",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnRpt",
+   "name": "BtnRpt",
+   "caption": "Reports",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnSchm",
+   "name": "BtnSchm",
+   "caption": "Scheme",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnDhrn",
+   "name": "BtnDhrn",
+   "caption": "Dhiran",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnMfg",
+   "name": "BtnMfg",
+   "caption": "M&fg",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "BtnExit",
+   "name": "BtnExit",
+   "caption": "&Exit",
+   "rightName": "Data Backup",
+   "form": "UT_BKP"
+  },
+  {
+   "handler": "SLMain",
+   "name": "SLMain",
+   "caption": "Lite",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL0",
+   "name": "SL0",
+   "caption": "0",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL1",
+   "name": "SL1",
+   "caption": "1",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL2",
+   "name": "SL2",
+   "caption": "2",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL3",
+   "name": "SL3",
+   "caption": "3",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL4",
+   "name": "SL4",
+   "caption": "4",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL5",
+   "name": "SL5",
+   "caption": "5",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL6",
+   "name": "SL6",
+   "caption": "6",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL7",
+   "name": "SL7",
+   "caption": "7",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL8",
+   "name": "SL8",
+   "caption": "8",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL9",
+   "name": "SL9",
+   "caption": "9",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL10",
+   "name": "SL10",
+   "caption": "10",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL11",
+   "name": "SL11",
+   "caption": "11",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL12",
+   "name": "SL12",
+   "caption": "12",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL13",
+   "name": "SL13",
+   "caption": "13",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL14",
+   "name": "SL14",
+   "caption": "14",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL15",
+   "name": "SL15",
+   "caption": "15",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL16",
+   "name": "SL16",
+   "caption": "16",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL17",
+   "name": "SL17",
+   "caption": "17",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL18",
+   "name": "SL18",
+   "caption": "18",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL19",
+   "name": "SL19",
+   "caption": "19",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL20",
+   "name": "SL20",
+   "caption": "20",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL21",
+   "name": "SL21",
+   "caption": "21",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL22",
+   "name": "SL22",
+   "caption": "22",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL23",
+   "name": "SL23",
+   "caption": "23",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL24",
+   "name": "SL24",
+   "caption": "24",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL25",
+   "name": "SL25",
+   "caption": "25",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL26",
+   "name": "SL26",
+   "caption": "26",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL27",
+   "name": "SL27",
+   "caption": "27",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL28",
+   "name": "SL28",
+   "caption": "28",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL29",
+   "name": "SL29",
+   "caption": "29",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL30",
+   "name": "SL30",
+   "caption": "30",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL31",
+   "name": "SL31",
+   "caption": "31",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL32",
+   "name": "SL32",
+   "caption": "32",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL33",
+   "name": "SL33",
+   "caption": "33",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL34",
+   "name": "SL34",
+   "caption": "34",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL35",
+   "name": "SL35",
+   "caption": "35",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL51",
+   "name": "SL51",
+   "caption": "51",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL52",
+   "name": "SL52",
+   "caption": "52",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL53",
+   "name": "SL53",
+   "caption": "53",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL54",
+   "name": "SL54",
+   "caption": "54",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL55",
+   "name": "SL55",
+   "caption": "55",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL56",
+   "name": "SL56",
+   "caption": "56",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL57",
+   "name": "SL57",
+   "caption": "57",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL58",
+   "name": "SL58",
+   "caption": "58",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL59",
+   "name": "SL59",
+   "caption": "59",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL60",
+   "name": "SL60",
+   "caption": "60",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL61",
+   "name": "SL61",
+   "caption": "61",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL62",
+   "name": "SL62",
+   "caption": "62",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL63",
+   "name": "SL63",
+   "caption": "63",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL64",
+   "name": "SL64",
+   "caption": "64",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL65",
+   "name": "SL65",
+   "caption": "65",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "ShoF2Ledger",
+   "name": "ShoF2Ledger",
+   "caption": "F2     Ledger Report",
+   "rightName": "Ledger Report",
+   "form": "RP_LEDR"
+  },
+  {
+   "handler": "ShoF3Stock",
+   "name": "ShoF3Stock",
+   "caption": "F3     Stock Report",
+   "rightName": "Stock Report",
+   "form": "RP_STOCK"
+  },
+  {
+   "handler": "ShoF4SalesOrder",
+   "name": "ShoF4SalesOrder",
+   "caption": "F4     Sales Order",
+   "rightName": "Sales Order",
+   "form": "TR_SALE_ORD"
+  },
+  {
+   "handler": "ShoF5SalesBill",
+   "name": "ShoF5SalesBill",
+   "caption": "F5     Sales Bill",
+   "rightName": "Bul Sales",
+   "form": "TR_BUL_SALE"
+  },
+  {
+   "handler": "Shof12TagWiseStock",
+   "name": "Shof12TagWiseStock",
+   "caption": "F12    Tag Wise Stock",
+   "rightName": "Tag Stock",
+   "form": "RP_TAG"
+  },
+  {
+   "handler": "ShoF7Purc",
+   "name": "ShoF7Purc",
+   "caption": "F7    Purchase Bill",
+   "rightName": "Purchase",
+   "form": "TR_PURC_HM"
+  },
+  {
+   "handler": "ShoF8CashRec",
+   "name": "ShoF8CashRec",
+   "caption": "F8    Cash Received",
+   "rightName": "Cash Received",
+   "form": "TR_CASH"
+  },
+  {
+   "handler": "ShoF9CashPayment",
+   "name": "ShoF9CashPayment",
+   "caption": "F9    Cash Payment",
+   "rightName": "Cash Payment",
+   "form": "TR_CASH"
+  },
+  {
+   "handler": "ShoF6WhSales",
+   "name": "ShoF6WhSales",
+   "caption": "F6     Wh Sales",
+   "rightName": "Wh Sales",
+   "form": "TR_WH_SALE"
+  },
+  {
+   "handler": "ShoF11Rojmel",
+   "name": "ShoF11Rojmel",
+   "caption": "F11    Rojmel",
+   "rightName": "Rojmel",
+   "form": "RP_ROJMEL"
+  },
+  {
+   "handler": "ShoCtrlF12TagEstmate",
+   "name": "ShoCtrlF12TagEstmate",
+   "caption": "F12 + Ctrl TagEstmate",
+   "rightName": "Tag Estmate",
+   "form": "RP_TAG_ESTMATE"
+  },
+  {
+   "handler": "BtnHome",
+   "name": "BtnHome",
+   "caption": "Reminder Rpt",
+   "rightName": "Reminder Rpt",
+   "form": "RP_REMINDER"
+  },
+  {
+   "handler": "F1CtrlDailyRateToolStripMenuItem",
+   "name": "F1CtrlDailyRate",
+   "caption": "F1 + Ctrl Daily Rate",
+   "rightName": "Daily Rate",
+   "form": "MS_RATE"
+  },
+  {
+   "handler": "F11CtrlCashBankToolStripMenuItem",
+   "name": "F11CtrlCashBank",
+   "caption": "F11+ Ctrl CashBank",
+   "rightName": "Cash Bank",
+   "form": "RP_CASH_BANK"
+  },
+  {
+   "handler": "elementCalendar",
+   "name": "elementCalendar",
+   "caption": "Calendar",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "elementPeople",
+   "name": "elementPeople",
+   "caption": "People",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL75",
+   "name": "SL75",
+   "caption": "75",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL76",
+   "name": "SL76",
+   "caption": "76",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL77",
+   "name": "SL77",
+   "caption": "77",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL78",
+   "name": "SL78",
+   "caption": "78",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL79",
+   "name": "SL79",
+   "caption": "79",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL80",
+   "name": "SL80",
+   "caption": "80",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL81",
+   "name": "SL81",
+   "caption": "81",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL82",
+   "name": "SL82",
+   "caption": "82",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL83",
+   "name": "SL83",
+   "caption": "83",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL84",
+   "name": "SL84",
+   "caption": "84",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL85",
+   "name": "SL85",
+   "caption": "85",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL86",
+   "name": "SL86",
+   "caption": "86",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL87",
+   "name": "SL87",
+   "caption": "87",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL88",
+   "name": "SL88",
+   "caption": "88",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL89",
+   "name": "SL89",
+   "caption": "89",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "SL90",
+   "name": "SL90",
+   "caption": "90",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "F2CtrlOrderZoomToolStripMenuItem",
+   "name": "F2CtrlOrderZoom",
+   "caption": "F2 + Ctrl Order Zoom",
+   "rightName": "Order Zoom",
+   "form": "RP_ORDER"
+  },
+  {
+   "handler": "elementMail",
+   "name": "elementMail",
+   "caption": "MainMenu",
+   "rightName": null,
+   "form": "UT_WINDOW"
+  },
+  {
+   "handler": "chkWappId",
+   "name": "chkWappId",
+   "caption": "Whatsapp Open",
+   "rightName": "Whatsapp",
+   "form": null
+  },
+  {
+   "handler": "LblUserRequest",
+   "name": "LblUserRequest",
+   "caption": "UReq :",
+   "rightName": "Reminder Rpt",
+   "form": "RP_REMINDER"
+  },
+  {
+   "handler": "ShoCtrlF8BankRec",
+   "name": "ShoCtrlF8BankRec",
+   "caption": "F8 + Ctrl Bank Rec",
+   "rightName": "Bank Received",
+   "form": "TR_CASH"
+  },
+  {
+   "handler": "ShoCtrlF9BankPay",
+   "name": "ShoCtrlF9BankPay",
+   "caption": "F9 + Ctrl Bank Pay",
+   "rightName": "Bank Payment",
+   "form": "TR_CASH"
+  },
+  {
+   "handler": "ShoCtrlF6RateCut",
+   "name": "ShoCtrlF6RateCut",
+   "caption": "F6 + Ctrl Rate Cut",
+   "rightName": "Rate Cut",
+   "form": "TR_WH_SALE"
+  },
+  {
+   "handler": "ShoCtrlF5BillRec",
+   "name": "ShoCtrlF5BillRec",
+   "caption": "F5 + Ctrl Bill Wise Rec",
+   "rightName": "Bill Wise Rec",
+   "form": "TR_BILL_TO"
+  },
+  {
+   "handler": "mMainDt",
+   "name": "mMainDt",
+   "caption": "01/11/2019",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "chkNextAi",
+   "name": "chkNextAi",
+   "caption": "Next Ai",
+   "rightName": null,
+   "form": null
+  },
+  {
+   "handler": "btnFan",
+   "name": "btnFan",
+   "caption": "Franchise",
+   "rightName": null,
+   "form": null
+  }
+ ],
+ "tree": {
+  "MainTrip": [
+   "MenuShort",
+   "ToolStripLabel2",
+   "mMainDt",
+   "ToolStripLabel1",
+   "btnHome",
+   "ToolStripSeparator2",
+   "BtnComp",
+   "Sp1",
+   "BtnMast",
+   "ToolStripSeparator1",
+   "BtnTran",
+   "Sp3",
+   "BtnTran2",
+   "SpTran2",
+   "BtnOth",
+   "Sp4",
+   "BtnKrgr",
+   "Sp6",
+   "BtnRpt",
+   "Sp5",
+   "BtnSchm",
+   "Sp7",
+   "BtnDhrn",
+   "Sp8",
+   "BtnMfg",
+   "Sp9",
+   "btnFan",
+   "Sp10",
+   "BtnExit"
+  ],
+  "MenuShort": [
+   "ShoF2Ledger",
+   "ShoF3Stock",
+   "ShoF4SalesOrder",
+   "ShoF5SalesBill",
+   "ShoF6WhSales",
+   "ShoF7Purc",
+   "ShoF8CashRec",
+   "ShoF9CashPayment",
+   "ShoF10Reminder",
+   "ShoF11Rojmel",
+   "Shof12TagWiseStock",
+   "F1CtrlDailyRateToolStripMenuItem",
+   "ShoCtrlF12TagEstmate",
+   "F11CtrlCashBankToolStripMenuItem",
+   "F2CtrlOrderZoomToolStripMenuItem",
+   "ShoCtrlF5BillRec",
+   "ShoCtrlF6RateCut",
+   "ShoCtrlF8BankRec",
+   "ShoCtrlF9BankPay"
+  ]
+ },
+ "menus": [
+  {
+   "menu": "MainTrip",
+   "caption": "Main Menu",
+   "children": [
+    {
+     "name": "MenuShort",
+     "caption": "MenuShort"
+    },
+    {
+     "name": "ToolStripLabel2",
+     "caption": "ToolStripLabel2"
+    },
+    {
+     "name": "mMainDt",
+     "caption": "01/11/2019"
+    },
+    {
+     "name": "ToolStripLabel1",
+     "caption": "ToolStripLabel1"
+    },
+    {
+     "name": "btnHome",
+     "caption": "Home"
+    },
+    {
+     "name": "ToolStripSeparator2",
+     "caption": "ToolStripSeparator2"
+    },
+    {
+     "name": "BtnComp",
+     "caption": "Company"
+    },
+    {
+     "name": "Sp1",
+     "caption": "Sp1"
+    },
+    {
+     "name": "BtnMast",
+     "caption": "Master"
+    },
+    {
+     "name": "ToolStripSeparator1",
+     "caption": "ToolStripSeparator1"
+    },
+    {
+     "name": "BtnTran",
+     "caption": "Tran 1"
+    },
+    {
+     "name": "Sp3",
+     "caption": "Sp3"
+    },
+    {
+     "name": "BtnTran2",
+     "caption": "Tran 2"
+    },
+    {
+     "name": "SpTran2",
+     "caption": "SpTran2"
+    },
+    {
+     "name": "BtnOth",
+     "caption": "Other"
+    },
+    {
+     "name": "Sp4",
+     "caption": "Sp4"
+    },
+    {
+     "name": "BtnKrgr",
+     "caption": "Karigar"
+    },
+    {
+     "name": "Sp6",
+     "caption": "Sp6"
+    },
+    {
+     "name": "BtnRpt",
+     "caption": "Reports"
+    },
+    {
+     "name": "Sp5",
+     "caption": "Sp5"
+    },
+    {
+     "name": "BtnSchm",
+     "caption": "Scheme"
+    },
+    {
+     "name": "Sp7",
+     "caption": "Sp7"
+    },
+    {
+     "name": "BtnDhrn",
+     "caption": "Dhiran"
+    },
+    {
+     "name": "Sp8",
+     "caption": "Sp8"
+    },
+    {
+     "name": "BtnMfg",
+     "caption": "M&fg"
+    },
+    {
+     "name": "Sp9",
+     "caption": "Sp9"
+    },
+    {
+     "name": "btnFan",
+     "caption": "Franchise"
+    },
+    {
+     "name": "Sp10",
+     "caption": "Sp10"
+    },
+    {
+     "name": "BtnExit",
+     "caption": "&Exit"
+    }
+   ]
+  },
+  {
+   "menu": "MenuShort",
+   "caption": "MenuShort",
+   "children": [
+    {
+     "name": "ShoF2Ledger",
+     "caption": "F2     Ledger Report"
+    },
+    {
+     "name": "ShoF3Stock",
+     "caption": "F3     Stock Report"
+    },
+    {
+     "name": "ShoF4SalesOrder",
+     "caption": "F4     Sales Order"
+    },
+    {
+     "name": "ShoF5SalesBill",
+     "caption": "F5     Sales Bill"
+    },
+    {
+     "name": "ShoF6WhSales",
+     "caption": "F6     Wh Sales"
+    },
+    {
+     "name": "ShoF7Purc",
+     "caption": "F7    Purchase Bill"
+    },
+    {
+     "name": "ShoF8CashRec",
+     "caption": "F8    Cash Received"
+    },
+    {
+     "name": "ShoF9CashPayment",
+     "caption": "F9    Cash Payment"
+    },
+    {
+     "name": "ShoF10Reminder",
+     "caption": "F10    Reminder"
+    },
+    {
+     "name": "ShoF11Rojmel",
+     "caption": "F11    Rojmel"
+    },
+    {
+     "name": "Shof12TagWiseStock",
+     "caption": "F12    Tag Wise Stock"
+    },
+    {
+     "name": "F1CtrlDailyRateToolStripMenuItem",
+     "caption": "F1 + Ctrl Daily Rate"
+    },
+    {
+     "name": "ShoCtrlF12TagEstmate",
+     "caption": "F12 + Ctrl TagEstmate"
+    },
+    {
+     "name": "F11CtrlCashBankToolStripMenuItem",
+     "caption": "F11+ Ctrl CashBank"
+    },
+    {
+     "name": "F2CtrlOrderZoomToolStripMenuItem",
+     "caption": "F2 + Ctrl Order Zoom"
+    },
+    {
+     "name": "ShoCtrlF5BillRec",
+     "caption": "F5 + Ctrl Bill Wise Rec"
+    },
+    {
+     "name": "ShoCtrlF6RateCut",
+     "caption": "F6 + Ctrl Rate Cut"
+    },
+    {
+     "name": "ShoCtrlF8BankRec",
+     "caption": "F8 + Ctrl Bank Rec"
+    },
+    {
+     "name": "ShoCtrlF9BankPay",
+     "caption": "F9 + Ctrl Bank Pay"
+    }
+   ]
+  }
+ ]
+}

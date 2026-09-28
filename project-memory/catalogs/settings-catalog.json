@@ -1,0 +1,350 @@
+{
+ "source": "CO_SET schema + UT_SETTING_MAIN.cs",
+ "storageTable": "CO_SET",
+ "totalKeys": 57,
+ "referencedInForm": 15,
+ "settings": [
+  {
+   "key": "BTN_NAME",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "THEME",
+   "type": "int",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "COUNTRY_CODE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "LBR_TYPE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "AC_LC_CODE_LEN",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "LOCK_DATE",
+   "type": "date",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "TAX_ROF",
+   "type": "int",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "RATE_PAR",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "SL_ROW_CHANGE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "VB_IMPORT",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "TAG_RPT",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "FINE_STK_TYPE",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "RATE_MAST_OPEN",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "LBR_RATE_GEN",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "DHRN_INT_TYPE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "INT_YEAR_DAYS",
+   "type": "float",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "OP_DHRN",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "INT_DAY",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "HELP_SERCH",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "WEIGHT_PORT",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "LDR_SUMM",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "SL_AMT_TYPE",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "SMS_LINK",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "OP_LOAN",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "LOAN_INT_TYPE",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "TRAD_FINE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "LBR_ROF",
+   "type": "float",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "REMINDER_OPEN",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "ITM_RATE_ROF",
+   "type": "float",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "ADMIN_SMS",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "CUST_SMS",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "PURC_WITH_LBR",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "DHIRN_COMPOUND",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "GRID_SCROLL",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "STK_RPT_TYPE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "TOUCH_AUTO_SAVE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "PAN_CARD_VAL",
+   "type": "float",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "DHRN_PRC",
+   "type": "float",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "DUP_PRINT",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "TAX_CODE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "IP_WITH_PC",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "CO_STK_MERGE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "STK_RPT_VIEW",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "PR_AMT_TYPE",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "CARD_COM_ADJ",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "CASH_PURC_AC",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "EMP_CODE_MANDATORY",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "STOCK_RPT_TYPE",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "LAST_DAY_LOCK",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "CASH_LIMIT",
+   "type": "float",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "DHRN_WAPP",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "SCHM_WAPP",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "LEDR_BILL_COL",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "ALL_ROF_REMOVE",
+   "type": "varchar",
+   "inForm": true,
+   "caption": null
+  },
+  {
+   "key": "OZ_CON_VAL",
+   "type": "float",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "FX_RATE",
+   "type": "float",
+   "inForm": false,
+   "caption": null
+  },
+  {
+   "key": "FX_CODE",
+   "type": "varchar",
+   "inForm": false,
+   "caption": null
+  }
+ ]
+}

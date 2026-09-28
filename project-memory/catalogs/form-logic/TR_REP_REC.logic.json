@@ -1,0 +1,64 @@
+{
+ "form": "TR_REP_REC",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BAR_DETL",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "REMARK_DATA",
+  "REP_DATA",
+  "REP_DETL",
+  "ROJ_MEL_DATA",
+  "TAX_DATA",
+  "TAX_MAST",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "REP_DETL"
+  ],
+  "DELETE": [
+   "AC_DATA",
+   "REMARK_DATA",
+   "REP_DATA",
+   "REP_DETL",
+   "ROJ_MEL_DATA",
+   "TAX_DATA",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BAR_DETL",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "REMARK_DATA",
+  "REP_DATA",
+  "REP_DETL",
+  "ROJ_MEL_DATA",
+  "TAX_DATA",
+  "TAX_MAST",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 23,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [
+  "CustClAmt = Conversion.Val(mSG2_TOTAL[9, 3]) - Math.Abs(CustOpAmt)",
+  "CustClAmt = CustOpAmt + Conversion.Val(mSG2_TOTAL[9, 3])",
+  "TAX_CODE = '\" + MSG2_TOTAL[2, 4] + \"'\"",
+  "TAX_NAME = '\" + TEXT_ENTRY_2.Text + \"' \""
+ ],
+ "loc": 6554
+}

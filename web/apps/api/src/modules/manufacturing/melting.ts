@@ -1,5 +1,6 @@
 import { withTenant } from '@datacare/db';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
+import { nextHiddenVoucherNoTx } from '../vouchers/lifecycle.js';
 import { postVoucherTx } from '../posting/posting.js';
 
 /**
@@ -47,6 +48,13 @@ export interface MeltInput {
   lossPct?: number;
   vchDate?: Date | string;
   lines: MeltLine[];
+  /**
+   * The operator saving the voucher.
+   *
+   * A melt destroys one item's weight and creates another's, and previously recorded NO acting user,
+   * NO VCH_TIME and NO HD_VCH_NO — although MLT_DATA and MLT_DETL carry all three columns.
+   */
+  mainUser?: string;
 }
 
 type VoucherKey = {
@@ -81,6 +89,8 @@ export async function meltProcess(
 
   const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
     const no = await nextVoucherNoTx(tx, { ...input.scope, coBook: 'MLT' });
+    // The hidden series is per book; a melt always books to 'MLT'.
+    const hdVchNo = await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: 'MLT' } as never);
     const key = keyOf(input.scope, no);
     const header = {
       ...key,
@@ -91,12 +101,18 @@ export async function meltProcess(
       AC_CODE: input.acCode ?? null,
       AC_NAME: input.acName ?? null,
       ISU_WT: totalNwt,
+      MAIN_USER: input.mainUser ?? null,
+      HD_VCH_NO: hdVchNo,
+      VCH_TIME: vchDate,
     };
     const detl = computed.map((c, i) => ({
       ...key,
       VCH_TYPE: 'MELT',
       ENTRY_TYPE: 'N',
       SR_NO: i + 1,
+      MAIN_USER: input.mainUser ?? null,
+      HD_VCH_NO: hdVchNo,
+      VCH_TIME: vchDate,
       IT_CODE: c.in.itCode ?? null,
       ITM_NWT: num(c.in.netWt),
       ITM_TOUCH: num(c.in.touch),

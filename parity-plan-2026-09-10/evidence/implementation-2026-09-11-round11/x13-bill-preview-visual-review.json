@@ -1,0 +1,52 @@
+{
+  "reviewedAtUtc": "2026-09-11T15:20:34.472078+00:00",
+  "method": "Root viewed all six actual Chromium PNGs through view_image after the successful real-stack run.",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "status": "reviewed-with-open-parity-limitations",
+  "observations": [
+    "Opening and changed bill tables are legible, retain separate saved/opened/after-change columns, and show source blank cells distinctly.",
+    "Second-prefix image shows saved166.75, opened167.00 and changed176.00 with tax7.00/7.00/16.00.",
+    "Actual controls show saved row identities, twelve-field editor, explicit commit/reload/close, retained conflict draft and no numeric writer.",
+    "Empty header displays its saved values and explicit unavailable/empty preview; no synthetic row is inserted.",
+    "Unknown closing is displayed without a numeric balance."
+  ],
+  "remaining": [
+    "No narrow-viewport, physical device, independent Windows, full accessibility or whole-form visual acceptance is claimed.",
+    "Source caption for hidden total c42 is unresolved; current preview uses its stable identifier. Resolve it with source/runtime evidence before full operator-form acceptance.",
+    "Shared existing disabled-button styling retains a strong primary color. Disabled behavior is browser-asserted, but a clearer disabled visual treatment remains UI polish debt.",
+    "Tall panels require scrolling in the existing main viewport; these PNGs intentionally capture different scroll positions and are not complete-page visual coverage."
+  ],
+  "screenshots": [
+    {
+      "path": "web/test-results/parity-real-stack-round11-final/sales-return-bill-opened.png",
+      "sha256": "169e3f965f7cd9591dfbd187f583ee81a666e11f22f3d777e020e17253f83f8e"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round11-final/sales-return-bill-totals.png",
+      "sha256": "64efeb7e2ffc71fbc0512870e1c303000a2cc934317d6f915ff379fec342df3c"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round11-final/sales-return-bill-prefix-2.png",
+      "sha256": "6c69312ffd3b146a5137e88a8f296e5ec258eaf93536fb5c9df4d34c057af72b"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round11-final/sales-return-bill-controls.png",
+      "sha256": "b3ca80f10da5579f438d6d63655f3787785bd0969d20e5cc5f5e5388d72494bc"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round11-final/sales-return-bill-conflict.png",
+      "sha256": "ba05b3b873ae320903f8740e6cb68c5b38568317d82de25890a476798c9e00d3"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round11-final/sales-return-bill-empty.png",
+      "sha256": "f16bd1d199ee58915cb895a468478d2a2b6f7f2d6bc0a31c1f8c88781c67a64c"
+    }
+  ],
+  "result": {
+    "path": "web/test-results/parity-real-stack-round11-final/result.json",
+    "sha256": "1e162f6d103e8001378d35f5c85a7e1660388442c77441c145884a0118db3882"
+  }
+}

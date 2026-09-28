@@ -1,0 +1,72 @@
+{
+ "form": "RP_DHRN_OS",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "DHRN_DATA",
+  "DHRN_ISU_DATA",
+  "DHRN_ISU_DETL",
+  "DHRN_REC_DATA",
+  "EMP_MAST",
+  "RATE_MAST",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "REPORT_DATA": [
+    "COL_1",
+    "COL_10",
+    "COL_11",
+    "COL_12",
+    "COL_13",
+    "COL_14",
+    "COL_15",
+    "COL_16",
+    "COL_17",
+    "COL_18",
+    "COL_19",
+    "COL_2",
+    "COL_20",
+    "COL_21",
+    "COL_22",
+    "COL_23",
+    "COL_3",
+    "COL_4",
+    "COL_5",
+    "COL_6",
+    "COL_7",
+    "COL_8",
+    "COL_9",
+    "CO_CODE",
+    "LC_CODE",
+    "SR_NO"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "REPORT_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "DHRN_DATA",
+  "DHRN_ISU_DATA",
+  "DHRN_ISU_DETL",
+  "DHRN_REC_DATA",
+  "EMP_MAST",
+  "RATE_MAST",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 6,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4254
+}

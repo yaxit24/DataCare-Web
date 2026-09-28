@@ -58,6 +58,29 @@ export async function resolveTaxPolicyTx(
   const interState = accountGstType === 'I';
   const pct = Number(args.taxPct ?? 0);
 
+  /**
+   * A 0% voucher with no code named gets NO tax code.
+   *
+   * With no `taxCode` the lookup below selects a master BY PERCENTAGE, so an untaxed voucher matched the 0% master
+   * and was stamped with its code. The desktop distinguishes the two cases: of 51 captured purchases, 39 store
+   * `TAX_CODE ''` at 0% and 7 store an explicit `'00'` at 0% — the same rate, differing only in whether the
+   * operator recorded a code. Resolving one by rate erases that distinction and invents a tax configuration for a
+   * voucher that has none.
+   *
+   * A supplied code still resolves normally, including `'00'`, which is how those 7 keep their value.
+   */
+  if (!args.taxCode?.trim() && pct === 0) {
+    return {
+      interState,
+      accountGstType,
+      taxCode: '',
+      taxGroup: '',
+      taxAc: null,
+      taxPct: 0,
+      components: new Map(),
+    };
+  }
+
   const params: unknown[] = [scope.tenantId, scope.coCode];
   let selector: string;
   if (args.taxCode?.trim()) {

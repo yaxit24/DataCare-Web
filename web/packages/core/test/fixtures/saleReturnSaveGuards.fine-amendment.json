@@ -1,0 +1,5250 @@
+{
+  "kind": "saved-return-save-guard-fine-amendment-v1",
+  "originalFixtureSha256": "6af7121c2952c9be055f1e83671d0e1bd0139c80a1d81bc9482c1edb90fd8e78",
+  "source": "TR_SALE_RTN12386-12403: candidate sums are credit+debit, or credit+debit+incomingFine18. Both nonzero proves this rejection false independently of registration.",
+  "qualification": "Guard result only; not financial fine-ledger admission or coherent whole-poststate acceptance. Negative fine F05 deliberately tests this predicate, not a released negative-weight writer.",
+  "replacements": [
+    {
+      "caseId": "G41",
+      "oldExpected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "unsupported-fine",
+          "guard": "profile"
+        },
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "passed"
+          },
+          {
+            "guard": "profile",
+            "outcome": "unsupported"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "100.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "1",
+                "incomingNet38": "100.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      },
+      "newExpected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "ready",
+        "diagnostic": null,
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "passed"
+          },
+          {
+            "guard": "profile",
+            "outcome": "passed"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "100.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "1",
+                "incomingNet38": "100.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "100.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalCases": [
+    {
+      "id": "F01",
+      "description": "Registration-independent amount predicate amendment; exact source branch sums, no registration authority.",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return-1",
+          "documentVersion": "document-v1",
+          "observationId": "observation-1"
+        },
+        "observations": {
+          "entry": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mode": "E",
+              "voucherNo": "00017",
+              "savedVoucherNo": "00017",
+              "hiddenVoucherNo": "00017",
+              "savedHiddenVoucherNo": "00017",
+              "instance": "17",
+              "employeeCode": "001",
+              "userUpdate": "N"
+            }
+          },
+          "employeeRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "defaulter": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "cardinality": "one",
+              "accountCode": "00002",
+              "rawFlag": "N"
+            }
+          },
+          "cashLimit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "0"
+          },
+          "bill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "post-events-before-save-fold",
+              "nAcCrAmt": "110.00",
+              "nAcDrAmt": "0.00",
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "period": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "voucherDate": "2025-06-15",
+              "openingDate": "2025-04-01",
+              "closingDate": "2026-03-31",
+              "lockDate": "2025-06-14"
+            }
+          },
+          "userEdit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "counterRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "incomingRows": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": [
+              {
+                "rowIdentity": "row-1",
+                "ordinal": 1,
+                "itemCode": "GOLD",
+                "counterCode": "01"
+              }
+            ]
+          },
+          "saveFold": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "save-fold-outgoing-then-incoming-no-bill",
+              "upDown": false,
+              "incomingFine18": "10.000",
+              "incomingNet38": "110.00",
+              "outgoingTotal24": "0.00"
+            }
+          },
+          "beforeBill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "edition": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "L"
+          },
+          "book": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mainBook": "SALES RETURNE",
+              "bookInout": "I"
+            }
+          },
+          "freshUpdate": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": true
+          }
+        }
+      },
+      "expected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "ready",
+        "diagnostic": null,
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "passed"
+          },
+          {
+            "guard": "profile",
+            "outcome": "passed"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "110.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "10.000",
+                "incomingNet38": "110.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "F02",
+      "description": "Registration-independent amount predicate amendment; exact source branch sums, no registration authority.",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return-1",
+          "documentVersion": "document-v1",
+          "observationId": "observation-1"
+        },
+        "observations": {
+          "entry": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mode": "E",
+              "voucherNo": "00017",
+              "savedVoucherNo": "00017",
+              "hiddenVoucherNo": "00017",
+              "savedHiddenVoucherNo": "00017",
+              "instance": "17",
+              "employeeCode": "001",
+              "userUpdate": "N"
+            }
+          },
+          "employeeRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "defaulter": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "cardinality": "one",
+              "accountCode": "00002",
+              "rawFlag": "N"
+            }
+          },
+          "cashLimit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "0"
+          },
+          "bill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "post-events-before-save-fold",
+              "nAcCrAmt": "111.00",
+              "nAcDrAmt": "0.00",
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "111.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "111.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "111.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "period": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "voucherDate": "2025-06-15",
+              "openingDate": "2025-04-01",
+              "closingDate": "2026-03-31",
+              "lockDate": "2025-06-14"
+            }
+          },
+          "userEdit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "counterRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "incomingRows": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": [
+              {
+                "rowIdentity": "row-1",
+                "ordinal": 1,
+                "itemCode": "GOLD",
+                "counterCode": "01"
+              }
+            ]
+          },
+          "saveFold": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "save-fold-outgoing-then-incoming-no-bill",
+              "upDown": false,
+              "incomingFine18": "10.000",
+              "incomingNet38": "111.00",
+              "outgoingTotal24": "0.00"
+            }
+          },
+          "beforeBill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "111.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "111.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "111.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "edition": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "L"
+          },
+          "book": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mainBook": "SALES RETURNE",
+              "bookInout": "I"
+            }
+          },
+          "freshUpdate": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": true
+          }
+        }
+      },
+      "expected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "ready",
+        "diagnostic": null,
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "passed"
+          },
+          {
+            "guard": "profile",
+            "outcome": "passed"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "111.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "111.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "111.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "111.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "10.000",
+                "incomingNet38": "111.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "111.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "111.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "111.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "F03",
+      "description": "Registration-independent amount predicate amendment; exact source branch sums, no registration authority.",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return-1",
+          "documentVersion": "document-v1",
+          "observationId": "observation-1"
+        },
+        "observations": {
+          "entry": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mode": "E",
+              "voucherNo": "00017",
+              "savedVoucherNo": "00017",
+              "hiddenVoucherNo": "00017",
+              "savedHiddenVoucherNo": "00017",
+              "instance": "17",
+              "employeeCode": "001",
+              "userUpdate": "N"
+            }
+          },
+          "employeeRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "defaulter": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "cardinality": "one",
+              "accountCode": "00002",
+              "rawFlag": "N"
+            }
+          },
+          "cashLimit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "0"
+          },
+          "bill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "post-events-before-save-fold",
+              "nAcCrAmt": "110.00",
+              "nAcDrAmt": "0.00",
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "period": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "voucherDate": "2025-06-15",
+              "openingDate": "2025-04-01",
+              "closingDate": "2026-03-31",
+              "lockDate": "2025-06-14"
+            }
+          },
+          "userEdit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "counterRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "incomingRows": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": [
+              {
+                "rowIdentity": "row-1",
+                "ordinal": 1,
+                "itemCode": "GOLD",
+                "counterCode": "01"
+              }
+            ]
+          },
+          "saveFold": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "save-fold-outgoing-then-incoming-no-bill",
+              "upDown": false,
+              "incomingFine18": "10.000",
+              "incomingNet38": "110.49",
+              "outgoingTotal24": "0.00"
+            }
+          },
+          "beforeBill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "edition": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "L"
+          },
+          "book": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mainBook": "SALES RETURNE",
+              "bookInout": "I"
+            }
+          },
+          "freshUpdate": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": true
+          }
+        }
+      },
+      "expected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "ready",
+        "diagnostic": null,
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "passed"
+          },
+          {
+            "guard": "profile",
+            "outcome": "passed"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "110.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "10.000",
+                "incomingNet38": "110.49",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "F04",
+      "description": "Registration-independent amount predicate amendment; exact source branch sums, no registration authority.",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return-1",
+          "documentVersion": "document-v1",
+          "observationId": "observation-1"
+        },
+        "observations": {
+          "entry": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mode": "E",
+              "voucherNo": "00017",
+              "savedVoucherNo": "00017",
+              "hiddenVoucherNo": "00017",
+              "savedHiddenVoucherNo": "00017",
+              "instance": "17",
+              "employeeCode": "001",
+              "userUpdate": "N"
+            }
+          },
+          "employeeRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "defaulter": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "cardinality": "one",
+              "accountCode": "00002",
+              "rawFlag": "N"
+            }
+          },
+          "cashLimit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "0"
+          },
+          "bill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "post-events-before-save-fold",
+              "nAcCrAmt": "110.00",
+              "nAcDrAmt": "0.00",
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "period": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "voucherDate": "2025-06-15",
+              "openingDate": "2025-04-01",
+              "closingDate": "2026-03-31",
+              "lockDate": "2025-06-14"
+            }
+          },
+          "userEdit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "counterRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "incomingRows": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": [
+              {
+                "rowIdentity": "row-1",
+                "ordinal": 1,
+                "itemCode": "GOLD",
+                "counterCode": "01"
+              }
+            ]
+          },
+          "saveFold": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "save-fold-outgoing-then-incoming-no-bill",
+              "upDown": false,
+              "incomingFine18": "-110.000",
+              "incomingNet38": "110.00",
+              "outgoingTotal24": "0.00"
+            }
+          },
+          "beforeBill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "edition": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "L"
+          },
+          "book": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mainBook": "SALES RETURNE",
+              "bookInout": "I"
+            }
+          },
+          "freshUpdate": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": true
+          }
+        }
+      },
+      "expected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "fine-branch-unqualified",
+          "guard": "amount-nonzero"
+        },
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "unsupported"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "110.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "-110.000",
+                "incomingNet38": "110.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "F05",
+      "description": "Registration-independent amount predicate amendment; exact source branch sums, no registration authority.",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return-1",
+          "documentVersion": "document-v1",
+          "observationId": "observation-1"
+        },
+        "observations": {
+          "entry": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mode": "E",
+              "voucherNo": "00017",
+              "savedVoucherNo": "00017",
+              "hiddenVoucherNo": "00017",
+              "savedHiddenVoucherNo": "00017",
+              "instance": "17",
+              "employeeCode": "001",
+              "userUpdate": "N"
+            }
+          },
+          "employeeRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "defaulter": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "cardinality": "one",
+              "accountCode": "00002",
+              "rawFlag": "N"
+            }
+          },
+          "cashLimit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "0"
+          },
+          "bill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "post-events-before-save-fold",
+              "nAcCrAmt": "110.00",
+              "nAcDrAmt": "0.00",
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "period": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "voucherDate": "2025-06-15",
+              "openingDate": "2025-04-01",
+              "closingDate": "2026-03-31",
+              "lockDate": "2025-06-14"
+            }
+          },
+          "userEdit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "counterRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "incomingRows": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": [
+              {
+                "rowIdentity": "row-1",
+                "ordinal": 1,
+                "itemCode": "GOLD",
+                "counterCode": "01"
+              }
+            ]
+          },
+          "saveFold": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "save-fold-outgoing-then-incoming-no-bill",
+              "upDown": false,
+              "incomingFine18": "-1.000",
+              "incomingNet38": "110.00",
+              "outgoingTotal24": "0.00"
+            }
+          },
+          "beforeBill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "110.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "edition": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "L"
+          },
+          "book": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mainBook": "SALES RETURNE",
+              "bookInout": "I"
+            }
+          },
+          "freshUpdate": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": true
+          }
+        }
+      },
+      "expected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "ready",
+        "diagnostic": null,
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "passed"
+          },
+          {
+            "guard": "profile",
+            "outcome": "passed"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "110.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "-1.000",
+                "incomingNet38": "110.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "110.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "F06",
+      "description": "Registration-independent amount predicate amendment; exact source branch sums, no registration authority.",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return-1",
+          "documentVersion": "document-v1",
+          "observationId": "observation-1"
+        },
+        "observations": {
+          "entry": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mode": "E",
+              "voucherNo": "00017",
+              "savedVoucherNo": "00017",
+              "hiddenVoucherNo": "00017",
+              "savedHiddenVoucherNo": "00017",
+              "instance": "17",
+              "employeeCode": "001",
+              "userUpdate": "N"
+            }
+          },
+          "employeeRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "defaulter": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "cardinality": "one",
+              "accountCode": "00002",
+              "rawFlag": "N"
+            }
+          },
+          "cashLimit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "0"
+          },
+          "bill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "post-events-before-save-fold",
+              "nAcCrAmt": "0.00",
+              "nAcDrAmt": "0.00",
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "period": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "voucherDate": "2025-06-15",
+              "openingDate": "2025-04-01",
+              "closingDate": "2026-03-31",
+              "lockDate": "2025-06-14"
+            }
+          },
+          "userEdit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "counterRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "incomingRows": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": [
+              {
+                "rowIdentity": "row-1",
+                "ordinal": 1,
+                "itemCode": "GOLD",
+                "counterCode": "01"
+              }
+            ]
+          },
+          "saveFold": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "save-fold-outgoing-then-incoming-no-bill",
+              "upDown": false,
+              "incomingFine18": "0.000",
+              "incomingNet38": "0.00",
+              "outgoingTotal24": "0.00"
+            }
+          },
+          "beforeBill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "edition": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "L"
+          },
+          "book": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mainBook": "SALES RETURNE",
+              "bookInout": "I"
+            }
+          },
+          "freshUpdate": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": true
+          }
+        }
+      },
+      "expected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "source-rejected",
+        "diagnostic": {
+          "code": "item-value-required",
+          "guard": "amount-nonzero"
+        },
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "source-rejected"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "0.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "0.000",
+                "incomingNet38": "0.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "F07",
+      "description": "Registration-independent amount predicate amendment; exact source branch sums, no registration authority.",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return-1",
+          "documentVersion": "document-v1",
+          "observationId": "observation-1"
+        },
+        "observations": {
+          "entry": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mode": "E",
+              "voucherNo": "00017",
+              "savedVoucherNo": "00017",
+              "hiddenVoucherNo": "00017",
+              "savedHiddenVoucherNo": "00017",
+              "instance": "17",
+              "employeeCode": "001",
+              "userUpdate": "N"
+            }
+          },
+          "employeeRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "defaulter": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "cardinality": "one",
+              "accountCode": "00002",
+              "rawFlag": "N"
+            }
+          },
+          "cashLimit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "0"
+          },
+          "bill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "post-events-before-save-fold",
+              "nAcCrAmt": "0.00",
+              "nAcDrAmt": "0.00",
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "period": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "voucherDate": "2025-06-15",
+              "openingDate": "2025-04-01",
+              "closingDate": "2026-03-31",
+              "lockDate": "2025-06-14"
+            }
+          },
+          "userEdit": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "counterRule": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "Y"
+          },
+          "incomingRows": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": [
+              {
+                "rowIdentity": "row-1",
+                "ordinal": 1,
+                "itemCode": "GOLD",
+                "counterCode": "01"
+              }
+            ]
+          },
+          "saveFold": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "phase": "save-fold-outgoing-then-incoming-no-bill",
+              "upDown": false,
+              "incomingFine18": "10.000",
+              "incomingNet38": "0.00",
+              "outgoingTotal24": "0.00"
+            }
+          },
+          "beforeBill": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "matrix": [
+                [
+                  "",
+                  "Sale Return",
+                  "%",
+                  "Payment",
+                  "Received",
+                  "Code"
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "0.00",
+                  ""
+                ],
+                [
+                  "",
+                  "",
+                  "",
+                  "0.00",
+                  "",
+                  ""
+                ]
+              ]
+            }
+          },
+          "edition": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": "L"
+          },
+          "book": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": {
+              "mainBook": "SALES RETURNE",
+              "bookInout": "I"
+            }
+          },
+          "freshUpdate": {
+            "status": "qualified",
+            "revision": "source-observation-r1",
+            "binding": "observation-1",
+            "value": true
+          }
+        }
+      },
+      "expected": {
+        "version": "saved-return-save-guards-v1",
+        "profile": "qualified-saved-incoming-zero-cash-non-e-v1",
+        "canCommit": false,
+        "status": "unsupported",
+        "diagnostic": {
+          "code": "fine-branch-unqualified",
+          "guard": "amount-nonzero"
+        },
+        "checks": [
+          {
+            "guard": "entry-mode",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-license",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "defaulter",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cash-limit",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "employee-required-repeat",
+            "outcome": "passed"
+          },
+          {
+            "guard": "cheque-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "card-bank",
+            "outcome": "passed"
+          },
+          {
+            "guard": "new-entry-company-type",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "new-entry-clock",
+            "outcome": "not-applicable"
+          },
+          {
+            "guard": "year-range",
+            "outcome": "passed"
+          },
+          {
+            "guard": "lock-date",
+            "outcome": "passed"
+          },
+          {
+            "guard": "ordinary-edit",
+            "outcome": "passed"
+          },
+          {
+            "guard": "voucher-number",
+            "outcome": "passed"
+          },
+          {
+            "guard": "counter-required",
+            "outcome": "passed"
+          },
+          {
+            "guard": "save-fold",
+            "outcome": "passed"
+          },
+          {
+            "guard": "amount-nonzero",
+            "outcome": "unsupported"
+          }
+        ],
+        "observation": {
+          "provenance": {
+            "documentIdentity": "saved-return-1",
+            "documentVersion": "document-v1",
+            "observationId": "observation-1"
+          },
+          "observations": {
+            "entry": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mode": "E",
+                "voucherNo": "00017",
+                "savedVoucherNo": "00017",
+                "hiddenVoucherNo": "00017",
+                "savedHiddenVoucherNo": "00017",
+                "instance": "17",
+                "employeeCode": "001",
+                "userUpdate": "N"
+              }
+            },
+            "employeeRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "defaulter": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "cardinality": "one",
+                "accountCode": "00002",
+                "rawFlag": "N"
+              }
+            },
+            "cashLimit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "0"
+            },
+            "bill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "post-events-before-save-fold",
+                "nAcCrAmt": "0.00",
+                "nAcDrAmt": "0.00",
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "period": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "voucherDate": "2025-06-15",
+                "openingDate": "2025-04-01",
+                "closingDate": "2026-03-31",
+                "lockDate": "2025-06-14"
+              }
+            },
+            "userEdit": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "counterRule": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "Y"
+            },
+            "incomingRows": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": [
+                {
+                  "rowIdentity": "row-1",
+                  "ordinal": 1,
+                  "itemCode": "GOLD",
+                  "counterCode": "01"
+                }
+              ]
+            },
+            "saveFold": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "phase": "save-fold-outgoing-then-incoming-no-bill",
+                "upDown": false,
+                "incomingFine18": "10.000",
+                "incomingNet38": "0.00",
+                "outgoingTotal24": "0.00"
+              }
+            },
+            "beforeBill": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "matrix": [
+                  [
+                    "",
+                    "Sale Return",
+                    "%",
+                    "Payment",
+                    "Received",
+                    "Code"
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "0.00",
+                    ""
+                  ],
+                  [
+                    "",
+                    "",
+                    "",
+                    "0.00",
+                    "",
+                    ""
+                  ]
+                ]
+              }
+            },
+            "edition": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": "L"
+            },
+            "book": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": {
+                "mainBook": "SALES RETURNE",
+                "bookInout": "I"
+              }
+            },
+            "freshUpdate": {
+              "status": "qualified",
+              "revision": "source-observation-r1",
+              "binding": "observation-1",
+              "value": true
+            }
+          }
+        }
+      }
+    }
+  ]
+}

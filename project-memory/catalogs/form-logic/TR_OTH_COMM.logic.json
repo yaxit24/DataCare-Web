@@ -1,0 +1,87 @@
+{
+ "form": "TR_OTH_COMM",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "DELETE_DATA",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "PAY_DATA",
+  "PAY_DETL",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TAX_DATA",
+  "TAX_MAST",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DELETE_DATA": [
+    "AC_CODE",
+    "BOOK_NAME",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "DELETE_DATE",
+    "DELETE_TIME",
+    "DELETE_USER",
+    "FINE_TYPE",
+    "HD_VCH_NO",
+    "LC_CODE",
+    "MAIN_USER",
+    "SR_NO",
+    "VCH_DATE",
+    "VCH_DESC",
+    "VCH_FINE_CR",
+    "VCH_FINE_DR",
+    "VCH_NO",
+    "VCH_TIME",
+    "VCH_TYPE",
+    "VCH_VAL_CR",
+    "VCH_VAL_DR"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "AC_DATA",
+   "PAY_DATA",
+   "PAY_DETL",
+   "REMARK_DATA",
+   "ROJ_MEL_DATA",
+   "TAX_DATA",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "PAY_DATA",
+  "PAY_DETL",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TAX_DATA",
+  "TAX_MAST",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 18,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [
+  "CustClAmt = Conversion.Val(mSG2_TOTAL[10, 3]) - Math.Abs(CustOpAmt)",
+  "CustClAmt = CustOpAmt + Conversion.Val(mSG2_TOTAL[10, 3])",
+  "TAX_CODE = '\" + MSG2_TOTAL[2, 4] + \"'\"",
+  "TAX_CODE = '\" + MSG2_TOTAL[4, 4] + \"'\"",
+  "TAX_CODE = '\" + TEXT_ENTRY.Text + \"' \"",
+  "TAX_CODE = '\" + mSG[DC_Main.M, 7] + \"' \"",
+  "TAX_NAME = '\" + TEXT_ENTRY_2.Text + \"' \""
+ ],
+ "loc": 4924
+}

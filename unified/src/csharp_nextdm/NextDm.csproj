@@ -1,0 +1,120 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <AssemblyName>DataCareNext</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>WinExe</OutputType>
+    <UseWindowsForms>True</UseWindowsForms>
+    <TargetFramework>net472</TargetFramework>
+    <Prefer32Bit>True</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <RootNamespace />
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Optimize>False</Optimize>
+    <NoWarn>CS0219;CS0168;CS0649;CS1998;CS8019</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="DataCareNext.exe.licenses" />
+    <EmbeddedResource Include="DataCareNext.exe.licenses" LogicalName="DataCareNext.exe.licenses" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AxInterop.Crystal">
+      <HintPath>libs\original\AxInterop.Crystal.dll</HintPath>
+    </Reference>
+    <Reference Include="AxInterop.MSFlexGridLib">
+      <HintPath>libs\original\AxInterop.MSFlexGridLib.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.CrystalReports.Engine">
+      <HintPath>libs\original\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared">
+      <HintPath>libs\original\CrystalDecisions.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.Windows.Forms">
+      <HintPath>libs\original\CrystalDecisions.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="DevComponents.DotNetBar2">
+      <HintPath>libs\original\DevComponents.DotNetBar2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v19.1">
+      <HintPath>libs\original\DevExpress.Data.v19.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v19.1">
+      <HintPath>libs\original\DevExpress.Utils.v19.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v19.1">
+      <HintPath>libs\original\DevExpress.XtraBars.v19.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v19.1">
+      <HintPath>libs\original\DevExpress.XtraCharts.v19.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v19.1.UI">
+      <HintPath>libs\original\DevExpress.XtraCharts.v19.1.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraDialogs.v19.1">
+      <HintPath>libs\original\DevExpress.XtraDialogs.v19.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v19.1">
+      <HintPath>libs\original\DevExpress.XtraEditors.v19.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v19.1">
+      <HintPath>libs\original\DevExpress.XtraGrid.v19.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevNet.WhatsApp.V2">
+      <HintPath>libs\original\DevNet.WhatsApp.V2.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.Crystal">
+      <HintPath>libs\original\Interop.Crystal.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.MSFlexGridLib">
+      <HintPath>libs\original\Interop.MSFlexGridLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>libs\original\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Qios.DevSuite.Components">
+      <HintPath>libs\original\Qios.DevSuite.Components.dll</HintPath>
+    </Reference>
+    <Reference Include="QRCoder">
+      <HintPath>libs\original\QRCoder.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp">
+      <HintPath>libs\original\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="TagitIce">
+      <HintPath>libs\original\TagitIce.dll</HintPath>
+    </Reference>
+    <Reference Include="WebDriver">
+      <HintPath>libs\original\WebDriver.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Microsoft.Office.Interop.Excel\**" />
+    <Compile Remove="Microsoft.Office.Interop.Word\**" />
+    <Compile Remove="Microsoft.Office.Interop.Outlook\**" />
+    <Compile Remove="Microsoft.Office.Core\**" />
+    <Compile Remove="stubs\**" />
+  </ItemGroup>
+</Project>

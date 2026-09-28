@@ -1,0 +1,37 @@
+{
+  "kind": "datacare.documentation-status-validation/1.0",
+  "checkedAtUtc": "2026-09-12T03:13:35.140390+00:00",
+  "status": "passed",
+  "errors": [],
+  "originalPackages": 83,
+  "executionCards": 34,
+  "allPackagesCovered": true,
+  "allCardsHaveCurrentRemainingGap": true,
+  "allAcceptancesRemainOpen": true,
+  "localMarkdownLinksChecked": 221,
+  "historicalFilesUnchanged": 383,
+  "checkpoint43Absent": true,
+  "qualification": "Documentation and static status integrity only; no product suite, desktop parity or new sealed checkpoint.",
+  "webDocReferences": {
+    "status": "passed",
+    "documents": 35,
+    "fileCitations": 196,
+    "lineReferences": 14,
+    "pinnedClaims": 1,
+    "log": "docs-refs.txt",
+    "sha256": "34801d717b082338af908622d9eb77bbeee7865aba5e263f969e1a55c7f76ec7"
+  },
+  "reviewedFinalFiles": {
+    "parity-plan-2026-09-10/02-implementation-plan.md": "8387e87d7d605b0914ed894851967336577e5c7330a765a89c7c0740f4c52a04",
+    "parity-plan-2026-09-10/42-implementation-progress-round15.md": "580f50ac290de240efbb9fad5ad753f4c1f594e9faa8b7da931735b9672b7699",
+    "parity-plan-2026-09-10/README.md": "5b0d8901f1bcf71678811825c9f1dc81ea092196e40bb0cc62f4044ff52e6a41",
+    "parity-plan-2026-09-10/execution-addendum-intro.md": "ba9eb0e0dc19c12425a53d8a742468042aaddcb60b74a1c7dbffc397a77c5bf8",
+    "web/docs/TECHNICAL-REFERENCE.md": "0539b3996df5c50fc8524c89dfc5ac999c7b361c2a17bef0b1446e3aea7aad5a",
+    "web/docs/HANDOFF.md": "968be02acbab4f872c7c122cfaa737ae46dea0ebcd945e477148dc565ff29de9",
+    "web/docs/STATE-OF-PARITY.md": "0ae472fdc4ef37e3e8e1ac95ec1940d63828466c34251ff73d9e977dfda578ec",
+    "parity-plan-2026-09-10/12-execution-addendum.md": "05b0bea3d66af0a9f57c13f81d617f6dfc246418aad7693e6ed773662ccdfbf4",
+    "parity-plan-2026-09-10/07-work-items.json": "572a09abcabd0ad502142037ceff6aba5b6f9de65ff5005de6cd69a3b731e2f5",
+    "parity-plan-2026-09-10/13-execution-backlog.json": "764a246e0d1e1ffcb5de1acea552f09ce074e78b416628675c348155dcee4a8d",
+    "parity-plan-2026-09-10/build_execution_addendum.py": "31e6e2adf40c2f19f7c71ae41eaf713fa77e9ea8f749e9d11a3d90c471fc308c"
+  }
+}

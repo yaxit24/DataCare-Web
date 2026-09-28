@@ -1,0 +1,441 @@
+﻿html {
+    height: 100%;
+}
+
+body {
+    background: #dcf3ff;
+    background: rgb(0,91,117);
+    background: linear-gradient(328deg, rgba(0,91,117,0.01) 0%, rgba(3,163,195,0.1) 100%);
+    /*background: -webkit-linear-gradient(to right, #e67817 60%, #B02A30);
+    background: linear-gradient(to bottom right, #e67817 60%, #B02A30);*/
+    font-family: Assistant, sans-serif;
+    display: flex;
+    margin: auto;
+    min-height: 90vh;
+    margin: 0;
+    padding: 0;
+    
+    font-family: sans-serif;
+    height: 100%;
+    width: 100%;
+}
+
+/*LOGO MATE*/
+img {
+    margin: auto;
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    padding-bottom: 1%;
+    margin-top:5%;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 500px;
+}
+/*LOGO NE RAKHVA MATE SECTION*/
+.section {
+    padding: 2%;
+}
+
+.section-co {
+    padding: 2%;
+}
+/*MAIN BOX-2*/
+
+.login-box {
+    /*background: #dcf3ff;
+    background: rgb(0,91,117);
+    background: linear-gradient(328deg, rgba(3,163,195,0.3) 0%, rgba(0,91,117,0.01) 100%);
+    box-shadow: 5px 5px 25px gray;*/
+    margin: auto;
+    
+    border-radius: 8px;
+    padding: 1.5%;
+    width: 70%;
+    height: 50%;
+}
+.year-box {
+   
+    margin: auto;
+    border-radius: 8px;
+    padding: 1.5%;
+    width: 70%;
+}
+
+/*DROPDOWN NA ICON SET KARVA*/
+.drop-icons i {
+    position: absolute;
+    margin-top: 5%;
+    padding-left: 100%;
+}
+/*LOGIN BOX NA ICON SET KARVA*/
+.input-icons i {
+    position: absolute;
+    margin-top: 2.5%;
+    padding-left: 5%;
+    color: #F99D27;
+    color: #e67817;
+    background: -webkit-linear-gradient(to bottom right, #e67817 75%, #B02A30);
+    background: linear-gradient(#fff,#fff) padding-box, linear-gradient(to bottom right, #e67817 0%, #B02A30 100%) border-box;
+}
+/* TEXT BOX DECORATION */
+/*USENAME DECORATION*/
+input[type="text"] {
+    font: 20px/40px 'Muli', sans-serif;
+    color: #005B75;
+    width: 100%;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+    padding-left: 10%;
+    text-transform: uppercase;
+}
+PASSWORD DECORATION
+input[type="password"] {
+    font: 20px/50px 'Muli', sans-serif;
+    color: #005B75;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+    padding-left: 10%;
+}
+
+:focus {
+    outline: none;
+}
+/*TEXT BOX AND PASSWORD BOX NU ALIGN MENT*/
+.col-3 {
+    margin: 10%;
+    position: relative;
+    appearance: none;
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+}
+
+.col-4 {
+    margin: 5%;
+    position: relative;
+    appearance: none;
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+
+
+input[type="text"] {
+    font: 20px40px "Lato", Arial, sans-serif;
+    color: #005B75;
+    width: 100%;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+    padding-left: 40px;
+    text-transform: uppercase;
+    margin: auto;
+    background:none;
+    border:3px solid;
+}
+
+input[type="password"] {
+    font: 20px/40px "Lato", Arial, sans-serif;
+    color: #005B75;
+    width: 100%;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+    padding-left: 40px;
+    background:none;
+    border:3px solid;
+}
+/*DROPDOWN BORDER SET*/
+.drop {
+    border: 3px solid #005B75;
+    background: url('arrow.png') no-repeat;
+    padding: 10px 14px;
+    background: transparent;
+    color: #005B75;
+    width: 100%;
+    font-size: 14px;
+}
+/*butoon login*/
+.loginbtn {
+    background: #ffffff;
+    background: rgb(0,91,117);
+    background: linear-gradient(328deg, rgba(0,91,117,1) 0%, rgba(3,163,195,1) 100%);
+    border: 3px solid transparent;
+    color: #ffffff;
+    background-color: white;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-radius: 5px;
+    margin-top: 20%;
+    margin-bottom: 0px;
+    font-weight: 600;
+    font-size:20px;
+    padding: 2% 3%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 50%;
+    margin-left: 25%;
+    margin-right: 25%;
+    animation: bn53bounce 2s infinite;
+    border: none;
+}
+
+    .loginbtn:hover {
+        background: linear-gradient(#fff,#fff) padding-box, linear-gradient(to bottom right, #03a3c3, #005b75 ) border-box;
+        border: 1px solid transparent;
+        color: #005b75;
+        transition: all .5s ease;
+        transition-property: all;
+        transition-duration: 0.5s;
+        transition-timing-function: ease;
+        transition-delay: 0s;
+    }
+/*BUTTON EFFECT
+@keyframes bn53bounce {
+    5%, 50% {
+        transform: scale(1);
+    }
+
+    10% {
+        transform: scale(1);
+    }
+
+    15% {
+        transform: scale(1);
+    }
+
+    20% {
+        transform: scale(1) rotate(-5deg);
+    }
+
+    25% {
+        transform: scale(1) rotate(5deg);
+    }
+
+    30% {
+        transform: scale(1) rotate(-3deg);
+    }
+
+    35% {
+        transform: scale(1) rotate(2deg);
+    }
+
+    40% {
+        transform: scale(1) rotate(0);
+    }
+}*/
+/*LABLE SIZE AND COLOR*/
+.lbl {
+    font: 18px/28px 'Muli', sans-serif;
+    color: #005B75;
+    font-weight: 600;
+    margin: auto;
+    margin-left: 5%
+}
+
+
+
+
+.font {
+    font: 50px/80px "Lato", Arial, sans-serif;
+    color: whitesmoke;
+    font-weight: 600;
+}
+
+
+
+/*=======================   Desktop View   =============================*/
+@media (min-width: 1024px) and (max-width: 1366px) {
+    /*LOGO MATE*/
+    img {
+        margin: auto;
+        width: 50%;
+        margin-left: 25%;
+        margin-right: 25%;
+        padding-bottom: 1%;
+        margin-top: 15%;
+    }
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 500px;
+    }
+    /*LOGO NE RAKHVA MATE SECTION*/
+    .section {
+        padding: 2%;
+    }
+
+    .section-co {
+        padding: 2%;
+    }
+    /*MAIN BOX-2*/
+
+    .login-box {
+        /*background: #dcf3ff;
+    background: rgb(0,91,117);
+    background: linear-gradient(328deg, rgba(3,163,195,0.3) 0%, rgba(0,91,117,0.01) 100%);
+    box-shadow: 5px 5px 25px gray;*/
+        margin: auto;
+        border-radius: 8px;
+        padding: 1.5%;
+        width: 40%;
+        height: 100%;
+    }
+
+    .year-box {
+        margin: auto;
+        border-radius: 8px;
+        padding: 1.5%;
+        width: 40%;
+    }
+
+    /*DROPDOWN NA ICON SET KARVA*/
+    .drop-icons i {
+        position: absolute;
+        margin-top: 5%;
+        padding-left: 100%;
+    }
+    /*LOGIN BOX NA ICON SET KARVA*/
+    .input-icons i {
+        position: absolute;
+        margin-top: 2.5%;
+        padding-left: 5%;
+        color: #F99D27;
+        color: #e67817;
+        background: -webkit-linear-gradient(to bottom right, #e67817 75%, #B02A30);
+        background: linear-gradient(#fff,#fff) padding-box, linear-gradient(to bottom right, #e67817 0%, #B02A30 100%) border-box;
+    }
+    /* TEXT BOX DECORATION */
+    /*USENAME DECORATION*/
+    input[type="text"] {
+        font: 30px/40px 'Muli', sans-serif;
+        color: #005B75;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: 1px;
+        padding-left: 10%;
+        text-transform: uppercase;
+    }
+    /*PASSWORD DECORATION*/
+    input[type="password"] {
+        font: 30px/40px 'Muli', sans-serif;
+        color: #005B75;
+        box-sizing: border-box;
+        letter-spacing: 1px;
+        padding-left: 10%;
+    }
+
+    :focus {
+        outline: none;
+    }
+    /*TEXT BOX AND PASSWORD BOX NU ALIGN MENT*/
+    .col-3 {
+        margin: 5%;
+        position: relative;
+        appearance: none;
+        width: 70%;
+        margin-left: 15%;
+        margin-right: 15%;
+    }
+
+    .col-4 {
+        margin: 1%;
+        position: relative;
+        appearance: none;
+        width: 100%;
+    }
+
+
+
+    input[type="text"] {
+        font: 20px/35px "Lato", Arial, sans-serif;
+        color: #005B75;
+        width: 70%;
+        box-sizing: border-box;
+        letter-spacing: 1px;
+        padding-left: 40px;
+        text-transform: uppercase;
+        margin: auto;
+        margin-left:15%;
+        background: none;
+        border: 3px solid;
+    }
+
+    input[type="password"] {
+        font: 20px/35px "Lato", Arial, sans-serif;
+        color: #005B75;
+        width: 70%;
+        box-sizing: border-box;
+        letter-spacing: 1px;
+        padding-left: 40px;
+        background: none;
+        margin-left: 15%;
+        border: 3px solid;
+    }
+    /*DROPDOWN BORDER SET*/
+    .drop {
+        border: 3px solid #005B75;
+        background: url('arrow.png') no-repeat;
+        padding: 10px 14px;
+        background: transparent;
+        color: #005B75;
+        width: 70%;
+        margin-left:15%;
+        font-size: 20px;
+    }
+    /*butoon login*/
+    .loginbtn {
+        background: #ffffff;
+        background: rgb(0,91,117);
+        background: linear-gradient(328deg, rgba(0,91,117,1) 0%, rgba(3,163,195,1) 100%);
+        border: 3px solid transparent;
+        color: #ffffff;
+        background-color: white;
+        border-top-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        border-radius: 5px;
+        margin-top: 10%;
+        margin-bottom: 0px;
+        font-weight: 600;
+        font-size: 20px;
+        padding: 2% 3%;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        width: 30%;
+        margin-left: 35%;
+        margin-right: 35%;
+        animation: bn53bounce 2s infinite;
+        border: none;
+    }
+
+        .loginbtn:hover {
+            background: linear-gradient(#fff,#fff) padding-box, linear-gradient(to bottom right, #03a3c3, #005b75 ) border-box;
+            border: 1px solid transparent;
+            color: #005b75;
+            transition: all .5s ease;
+            transition-property: all;
+            transition-duration: 0.5s;
+            transition-timing-function: ease;
+            transition-delay: 0s;
+        }
+
+    /*LABLE SIZE AND COLOR*/
+    .lbl {
+        font: 18px/30px 'Muli', sans-serif;
+        color: #005B75;
+        font-weight: 600;
+        margin: auto;
+        margin-left: 15%
+    }
+    .font {
+        font: 20px/50px "Lato", Arial, sans-serif;
+        color: whitesmoke;
+        font-weight: 200;
+    }
+}

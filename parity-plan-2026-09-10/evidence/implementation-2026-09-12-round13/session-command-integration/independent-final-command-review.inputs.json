@@ -1,0 +1,105 @@
+{
+  "status": "read-only-source-review-with-separate-staged-test",
+  "observedAt": "2026-09-11T22:02:09.820987+00:00",
+  "mainRepositoryEditsByAuthor": false,
+  "authorHeavyExecution": false,
+  "declaredFinancialCases": 15,
+  "parentReportedCorrectedFinancialPass": {
+    "cases": 15,
+    "seconds": 6.7,
+    "declaredInputsUnchanged": 1801,
+    "source": "parent message; root runtime artifacts authoritative"
+  },
+  "references": [
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/independent-final-command-review.md",
+      "sha256": "2d358ed783b98603b99d71b00fd6657705236337c6bfb3eb051c1d6f7973ef09",
+      "bytes": 5740
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/inputs.json",
+      "sha256": "a9ca2906a505255a136ed8b5f7c4bf362a26aa8b58fc6e4f95a2a8e8985366ff",
+      "bytes": 3616
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/extraction-comparison.json",
+      "sha256": "145b7d2f43fa0f0ef48814fe03d7691c517d4ba5338b2590a8922811d74cd5e8",
+      "bytes": 748
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8",
+      "bytes": 14128
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe",
+      "bytes": 5876
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "f309a2e2c5c58e080c91ba5b634dbc1c9d940b46361ea06a25d97497572ecd84",
+      "bytes": 86901
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/src/routes/txn.ts",
+      "sha256": "a4169b9a5bfd4b8d86b7f2e70ba3a60e03a1292488d6752c88f3d312be54d91d",
+      "bytes": 284925
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/test/sessionContextCommand.test.ts",
+      "sha256": "7293d6bf7d960fc6821714c693942067e88119d83cb8ce9bb15da25ac250913e",
+      "bytes": 16548
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/test/sessionContextCommand.db.test.ts",
+      "sha256": "aace25ae72e70a4027a8e88c0146564d4dd3253d3a66dcf396ee805672bb3eb3",
+      "bytes": 17948
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/test/salesOrderSessionCommand.db.test.ts",
+      "sha256": "dfe798fe215184a0962460b528fb0679efb8354334f8c6e58ce2777d4d16ae80",
+      "bytes": 37040
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/implementation-contract.md",
+      "sha256": "ef2e6acba21dca9b6696c3dbe6bac983db42587c56e70ec0a2169b7e8eaacbbe",
+      "bytes": 17583
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/session-command-independent.v1.json",
+      "sha256": "ed87f81e039273c6bd25c9a19184b7c964c7b48cbfd7a3bb39eb0c58032f4aa4",
+      "bytes": 14361
+    },
+    {
+      "path": "/tmp/admission-barrier-correction/inputs.json",
+      "sha256": "d018634c6fa6a0eedb13db968101566abd2753eda1520e25f7dd8096f937e650",
+      "bytes": 686
+    },
+    {
+      "path": "/tmp/admission-financial-sign-correction/inputs.json",
+      "sha256": "732af5f9d7820e4e1aa1afdbdf2593a5fea4588c10c5fdaa2064b5747efaf2cd",
+      "bytes": 2350
+    },
+    {
+      "path": "/tmp/admission-financial-sign-correction/web/apps/api/test/salesOrderSessionCommand.db.test.ts",
+      "sha256": "5bb87840b3ce10ac1b659ca12f5c9b990279ef6430fefdef9a23d63597ffe96a",
+      "bytes": 37038
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/salesOrderRound4.db.test.ts",
+      "sha256": "500f26578dbcb36434fd84415e11815008cc5de159285f2d46c0a7ee4138e0e6",
+      "bytes": 17935
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/salesOrderLifecycle.routes.db.test.ts",
+      "sha256": "3031006e1e6e54c69848b50d25564b2cfbff97cfab65592a1d4e57e719a54e63",
+      "bytes": 15565
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e",
+      "bytes": 32830
+    }
+  ]
+}

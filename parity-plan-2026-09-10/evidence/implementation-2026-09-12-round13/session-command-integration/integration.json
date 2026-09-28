@@ -1,0 +1,35 @@
+{
+  "atUtc": "2026-09-11T21:44:26.397930+00:00",
+  "allBaselinesAndStageInputsMatched": true,
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "f309a2e2c5c58e080c91ba5b634dbc1c9d940b46361ea06a25d97497572ecd84"
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "sha256": "a4169b9a5bfd4b8d86b7f2e70ba3a60e03a1292488d6752c88f3d312be54d91d"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextCommand.test.ts",
+      "sha256": "7293d6bf7d960fc6821714c693942067e88119d83cb8ce9bb15da25ac250913e"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextCommand.db.test.ts",
+      "sha256": "aace25ae72e70a4027a8e88c0146564d4dd3253d3a66dcf396ee805672bb3eb3"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionCommand.independent.json",
+      "sha256": "ed87f81e039273c6bd25c9a19184b7c964c7b48cbfd7a3bb39eb0c58032f4aa4"
+    }
+  ],
+  "status": "Integrated, compiler and tests pending; only Sales Order PUT adopts this financial transaction guard"
+}

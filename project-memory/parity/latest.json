@@ -1,0 +1,22 @@
+{
+  "updatedAt": "2026-06-28T02:35:00+05:30",
+  "note": "Tier-4 web-vs-desktop parity begins once the SQL Server golden master is restored (Task 8, mssql container). This file currently records Phase-1 DB verifications.",
+  "results": [
+    {
+      "check": "prisma-migrate",
+      "status": "pass",
+      "detail": "163 tables created (162 models + _prisma_migrations) from generated schema.prisma against Postgres 16.",
+      "ts": "2026-06-28T02:30:00+05:30"
+    },
+    {
+      "check": "rls-enabled",
+      "status": "pass",
+      "detail": "162/162 model tables have rowsecurity = true after applying rls.sql."
+    },
+    {
+      "check": "rls-tenant-isolation",
+      "status": "pass",
+      "detail": "Non-superuser app_user: tenant t2 sees 1 row, t1 sees 2, superuser bypass sees 3. Test: web/packages/db/test/rls_isolation.sql"
+    }
+  ]
+}

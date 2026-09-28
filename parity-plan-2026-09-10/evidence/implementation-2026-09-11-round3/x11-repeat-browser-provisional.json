@@ -1,0 +1,61 @@
+{
+  "status": "design-checks-passed-overall-run-failed",
+  "designRepeatChecks": [
+    "configured parent and component repeat without calculation",
+    "hidden repeated cost and independent parent image identity",
+    "Gross Enter focuses the active parent last component",
+    "Net Amount Enter appends with stable noncontiguous IDs",
+    "Ctrl+D confirm/cancel and no deleted ID reuse",
+    "invalid Enter retains focus/draft and blocks child allocation",
+    "blank Item Enter returns to the invoking parent and discards only an untouched placeholder",
+    "parent focus updates component context without mutating saved data",
+    "complete unchanged save after focus preserves the saved snapshot",
+    "item Enter waits for scoped defaults before moving focus",
+    "Weight Enter uses prior zero weight and current scoped fixed amount",
+    "cleared rate persists as source Conversion.Val zero",
+    "real save/reopen/delete and no unhandled page errors"
+  ],
+  "designRepeatCount": 13,
+  "designLifecycleCount": 8,
+  "designCalculationCount": 14,
+  "overallError": "\nInvalid `prisma.$executeRawUnsafe()` invocation:\n\n\nRaw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(15)`",
+  "overallFailureStage": "later order-image fixture seeding; before lot journey",
+  "mockedRequests": 0,
+  "result": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-browser-provisional-result.json",
+    "sha256": "c5e50e7384de47a38fafc18676ce1e687c667779e0b18863628d109dc8a6df7a"
+  },
+  "screenshots": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-identities-before-toolbar-fix.png",
+      "sha256": "0278173de103f923c547abbfe22efc6073934bfcdc4207c0ff6633d0b8eb1d4b"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-weight-enter-before-toolbar-fix.png",
+      "sha256": "39a651dd6827e65b9b75a767e1b67f42d4b60be4bc6c431df3eef5e225c5915d"
+    }
+  ],
+  "browserProductHashes": [
+    {
+      "path": "apps/web/app/(app)/masters/design-book/page.tsx",
+      "sha256": "28356d8954d0a38c1bcd77395db80d6669bf9b7a81b86f1da72cd60bcf4ec8b2"
+    },
+    {
+      "path": "apps/web/test/design-repeat.journey.mjs",
+      "sha256": "89be4864fc88a9937b0857f6c412d439161c41c7acc85a6c84dcdbd965a16059"
+    }
+  ],
+  "visualReview": {
+    "reviewed": true,
+    "finding": "Horizontal input focus scrolled the entire panel, hiding the component toolbar and clipping parent context.",
+    "fix": "Only table wrappers scroll; toolbar context and actions remain outside.",
+    "fixFiles": [
+      "apps/web/app/(app)/masters/design-book/page.tsx",
+      "apps/web/test/design-repeat.journey.mjs"
+    ],
+    "focusedWebTypecheck": "passed",
+    "focusedEslint": "passed",
+    "finalBrowserStatus": "pending after web rebuild",
+    "expectedNewRepeatChecks": 14
+  }
+}

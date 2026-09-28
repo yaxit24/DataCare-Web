@@ -1,0 +1,82 @@
+[
+  {
+    "path": "src/saleReturnHeaderFloat.ts",
+    "sha256": "f7d0db544f76a165ed112bd9d87557db59a482f5e57b755b0c3d8d10c47c1327"
+  },
+  {
+    "path": "src/saleReturnBillTaxPolicy.ts",
+    "sha256": "4e12c8b129cbdc168bafb01cb40a7a723e1db2bfb57af57a3c73f9099b809622"
+  },
+  {
+    "path": "src/calc.ts",
+    "sha256": "e0c46c2f17ec6e871309e96539bf2cd00782db9e6db667271421a539d16da291"
+  },
+  {
+    "path": "src/sessionLedgerMode.ts",
+    "sha256": "651c63fcc715b995d924d79ddb756d8fca504fcee4ae8cf9c64b4ad883844493"
+  },
+  {
+    "path": "src/designCalc.ts",
+    "sha256": "78f207dd2b8796f7f4ea9445c8baa971721f0d78ab82b50168bd67772a391116"
+  },
+  {
+    "path": "src/orderLabourWithCache.ts",
+    "sha256": "dd9f429992b33918e97b382d5ead1852219aece381ec7c9bb6a1cc21719f3e4f"
+  },
+  {
+    "path": "src/finePolicy.ts",
+    "sha256": "38d0ec8f3d6f131bcce490d19e418af8a59de3bdaa309ebf77c2255cc884e96b"
+  },
+  {
+    "path": "src/salesOrderDesign.ts",
+    "sha256": "e6b5b1a4e79a9d93d6fab540565d0159ccde9475714d4f56276c64ce101173af"
+  },
+  {
+    "path": "src/money.ts",
+    "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+  },
+  {
+    "path": "src/savedSaleReturnClock.ts",
+    "sha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec"
+  },
+  {
+    "path": "src/orderLabour.ts",
+    "sha256": "5981b6198035c845b447caf0d92fe84e3c25d1412e6b61b0eee0483f0224230d"
+  },
+  {
+    "path": "src/saleReturnIncomingAggregate.ts",
+    "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+  },
+  {
+    "path": "src/saleReturnIncomingSaveProjection.ts",
+    "sha256": "7278d4ef822b5cc6c0e48620a824ec890f69f948ee2023137a44fbd46f05d138"
+  },
+  {
+    "path": "src/saleReturnIncomingLabourCompose.ts",
+    "sha256": "62405dc4662d23978581f8a8b91708f659af681c014f75848d539c0386fd9865"
+  },
+  {
+    "path": "src/index.ts",
+    "sha256": "eda6daa65d62d5cf9af52b95b6bbd21397b80c7ae68187e5c4f29669764fe5d4"
+  },
+  {
+    "path": "src/saleReturnBillProjection.ts",
+    "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9"
+  },
+  {
+    "path": "src/saleReturnIncoming.ts",
+    "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+  },
+  {
+    "path": "src/saleReturnNBarCompanions.ts",
+    "sha256": "1ec25c5579ec58bd06db0f2ec5cd0161bd29bfe532af2e2e64e7f6e0940ff826"
+  },
+  {
+    "path": "src/saleReturnIncomingProjection.ts",
+    "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+  },
+  {
+    "path": "src/saleReturnIncomingLabour.ts",
+    "sha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81"
+  }
+]

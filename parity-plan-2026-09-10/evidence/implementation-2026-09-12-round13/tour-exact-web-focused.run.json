@@ -1,0 +1,26 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/web",
+    "exec",
+    "vitest",
+    "run",
+    "test/tourOrderExactValues.test.ts",
+    "test/tourOrderForm.test.ts",
+    "test/salesOrderForm.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T22:46:41.280480+00:00",
+  "finishedAtUtc": "2026-09-11T22:46:42.443162+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/tour-exact-web-focused.txt",
+  "logSha256": "6651e61313583b45e7a8d8e23d9a70d6725c32098d8babd762a08f363ecebb1c",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/tour-exact-web-focused.inputs.json",
+  "inputManifestSha256": "482b561bfe4aac6fafcdcf4bdd7fe35acae96d0d734b316710ea9a8b2d1fd393",
+  "inputCount": 1814,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

@@ -1,0 +1,140 @@
+{
+  "kind": "independent-source-derived-saved-return-c27-effect-inventory",
+  "status": "ready for Round14 prospective handoff; Option A direction, no writer/business acceptance",
+  "capturedAtUtc": "2026-09-12T00:23:42.058205+00:00",
+  "execution": {
+    "tests": false,
+    "database": false,
+    "browser": false,
+    "compiler": false,
+    "runtimeCodeChanged": false
+  },
+  "counts": {
+    "sourceSqlStatements": 11,
+    "sourceSqlColumnPairs": 338,
+    "orderedSaveAssignments": 253,
+    "conditionalFinancialRows": 7,
+    "financialColumnsPerPhase": 221,
+    "numericDeltaRowsIncludingSavedLineAndHeader": 9,
+    "remainingPrerequisites": 11
+  },
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "61b8f95299082ec5fa22b6c88541eb1819016b9f8bf6a793ef3540c9e65a058e",
+      "bytes": 1327
+    },
+    {
+      "path": "author-expected-inventory.py",
+      "sha256": "79956a739be982a73cd932b2c87a99ae0518d133c43ba90c7fd7c5782bedb2b0",
+      "bytes": 8018
+    },
+    {
+      "path": "derive-source-index.py",
+      "sha256": "9d6ecf1f5007bf79d41ab726941f2a37a6fd285dafd29742ef28cf26b15c28f7",
+      "bytes": 2975
+    },
+    {
+      "path": "effects-contract.md",
+      "sha256": "00c0d6551a0b08445835869c93bb19cafa42e879b841c315596581ec4f7b28c2",
+      "bytes": 18068
+    },
+    {
+      "path": "expected-before-after.inventory.json",
+      "sha256": "461cd378334806592661c141e72ecc4b5597cebad6609145e9878890a7e14cbc",
+      "bytes": 82368
+    },
+    {
+      "path": "remaining-blockers.json",
+      "sha256": "86aa52414f3f41f12e05a8141f7d15247cfb985096bf9d5fe73eb16a47eeea43",
+      "bytes": 2751
+    },
+    {
+      "path": "source-effect-index.json",
+      "sha256": "886f5a32611e412128e9c5b749a9da188c8fbbde5e9f266f09c7d20bc800c1fd",
+      "bytes": 86621
+    }
+  ],
+  "sourceReferences": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/implementation-contract.md",
+      "sha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+      "bytes": 28211
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/independent-candidates.json",
+      "sha256": "108e4c9f1145d7ae8a7b20d9b931e7657bd76d826beb20e8fc600e94adfc8c48",
+      "bytes": 18578
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/source-save-grid-map.json",
+      "sha256": "a4d017691828aadfcecdc836ba057b829f7179456bffd310b8fc624a949e2f72",
+      "bytes": 12104
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/review.md",
+      "sha256": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8",
+      "bytes": 10168
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/mandatory-stock-identity-erratum.json",
+      "sha256": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7",
+      "bytes": 4613
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+      "bytes": 85154
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "bytes": 575218
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+      "bytes": 1431083
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+      "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+      "bytes": 249435
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+      "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+      "bytes": 664044
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+      "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+      "bytes": 218454
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "bytes": 262459
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec",
+      "bytes": 25202
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac",
+      "bytes": 21546
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/salesReturn.ts",
+      "sha256": "612ddcd8f3b0cb8f0368435495125c8b50ed2f8cd03adad11f1cef12cf1d2a70",
+      "bytes": 30772
+    }
+  ]
+}

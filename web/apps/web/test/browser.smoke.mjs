@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 
@@ -72,19 +74,48 @@ const json = (route, status, body) =>
   });
 
 let browser;
+let page;
+const pageErrors = [];
+const consoleErrors = [];
+const requestFailures = [];
 let repairImageStored = null;
+let repairImageRevision = 0;
+const repairImageVersion = () => repairImageRevision.toString(16).padStart(64, '0');
 let repairImageRequestBody = null;
+let repairReceiptRequestBody = null;
+let repairReceiptStored = null;
+let repairReceiptReads = 0;
 let physicalStockRequestBody = null;
 let meltingRequestBody = null;
 let salesEditPath = null;
 let salesEditBody = null;
 let salesDeletePath = null;
+// Mock-only protocol compatibility. Business scope/fixtures below remain the same;
+// this descriptor is not a real authenticated session or database observation.
+let smokeContext = {
+  sessionId: '11111111-1111-4111-8111-111111111111',
+  contextEpoch: '1',
+  coCode: '01',
+  lcCode: '01',
+  coYear: '2024-2025',
+};
+const smokeLedgerContext = {
+  version: 'server-session-ledger-context-v1',
+  status: 'unknown',
+  mode: null,
+  reason: 'vendor-authority-unresolved',
+};
+const authJson = (route, status, body) => route.fulfill({
+  status,
+  contentType: 'application/json',
+  headers: { 'cache-control': 'no-store' },
+  body: JSON.stringify(body),
+});
 try {
   await waitForServer();
   browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  const page = await context.newPage();
-  const pageErrors = [];
+  page = await context.newPage();
   // Focus is committed after React commits a grid row change; poll rather than asserting on the
   // same tick. The application deliberately retries focus across a few frames.
   const expectFocused = async (locator, label) => {
@@ -95,6 +126,12 @@ try {
     assert.fail(`expected ${label ?? 'element'} to hold focus`);
   };
   page.on('pageerror', (error) => pageErrors.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('requestfailed', (request) => {
+    requestFailures.push({ url: request.url(), error: request.failure()?.errorText });
+  });
 
   await page.route('**/api/**', async (route) => {
     const request = route.request();
@@ -102,18 +139,59 @@ try {
     if (path === '/auth/login') {
       const input = request.postDataJSON();
       return input.password === 'correct-password'
-        ? json(route, 200, { forcedReset: false })
-        : json(route, 401, { error: 'invalid-credentials' });
+        ? authJson(route, 200, {
+            user: 'BROWSER',
+            rights: { view: true, edit: true, delete: true, print: true },
+            forcedReset: false,
+            scope: { coCode: '01', lcCode: '01', coYear: '2024-2025' },
+            context: smokeContext,
+            ledgerContext: smokeLedgerContext,
+          })
+        : authJson(route, 401, { error: 'invalid-credentials' });
     }
-    // The real route answers 404 when a tag has no photograph; the generic `200 []` fallback would look
-    // like an image to the panel.
+    // The state route distinguishes an empty photo from a failed read and carries the CAS token.
+    // This remains mock-only UI compatibility coverage; the real-stack journey proves database CAS.
+    if (path === '/stock/tag-image/state' || path === '/masters/design-book/image/state')
+      return json(route, 200, {
+        version: '0'.repeat(64),
+        canUpdate: true,
+        canDelete: false,
+        image: { state: 'absent' },
+      });
     if (path === '/stock/tag-image') return json(route, 404, { error: 'tag-image-not-found' });
     if (path === '/stock/tag-image/list') return json(route, 200, { images: [] });
-    if (path === '/auth/logout' || path === '/context/select')
-      return json(route, 200, { ok: true });
+    if (path === '/auth/logout') return json(route, 200, { ok: true });
+    if (path === '/auth/refresh')
+      return authJson(route, 200, {
+        refreshed: true, context: smokeContext, ledgerContext: smokeLedgerContext,
+      });
+    if (path === '/context/select') {
+      const input = request.postDataJSON();
+      // The existing smoke has one deliberate same-scope Open. Require the real
+      // request shape, then model only that successful transition; no retry/CAS credit.
+      assert.deepEqual(Object.keys(input).sort(), [
+        'coCode', 'coYear', 'expectedContextEpoch', 'lcCode', 'selectionId',
+      ]);
+      assert.deepEqual(
+        { coCode: input.coCode, lcCode: input.lcCode, coYear: input.coYear },
+        { coCode: '01', lcCode: '01', coYear: '2024-2025' },
+      );
+      assert.equal(input.expectedContextEpoch, smokeContext.contextEpoch);
+      assert.match(input.selectionId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      const headers = request.headers();
+      assert.equal(headers['x-session-context-id'], smokeContext.sessionId);
+      assert.equal(headers['x-session-context-epoch'], smokeContext.contextEpoch);
+      smokeContext = { ...smokeContext, contextEpoch: (BigInt(smokeContext.contextEpoch) + 1n).toString() };
+      return authJson(route, 200, {
+        coCode: '01', lcCode: '01', coYear: '2024-2025', scoped: true, replayed: false,
+        context: smokeContext, ledgerContext: smokeLedgerContext,
+      });
+    }
     if (path === '/me')
-      return json(route, 200, {
+      return authJson(route, 200, {
         user: 'BROWSER',
+        context: smokeContext,
+        ledgerContext: smokeLedgerContext,
         coCode: '01',
         lcCode: '01',
         coYear: '2024-2025',
@@ -126,6 +204,9 @@ try {
     if (path === '/context/locations')
       return json(route, 200, [{ LC_CODE: '01', LC_NAME: 'Main' }]);
     if (path === '/context/years') return json(route, 200, [{ year: '2024-2025' }]);
+    // GET /settings returns an object. An array from the generic list fallback has a callable
+    // `.values` property; the settings hook would receive Array.prototype.values as React state.
+    if (path === '/settings') return json(route, 200, { values: {} });
     if (path === '/context/books')
       return json(route, 200, [
         {
@@ -342,20 +423,65 @@ try {
           },
         ],
       });
-    if (path === '/repair-receipts' && request.method() === 'POST')
+    if (path === '/repair-receipts' && request.method() === 'POST') {
+      repairReceiptRequestBody = request.postDataJSON();
+      const input = repairReceiptRequestBody;
+      // This is the existing one-row smoke fixture, not an alternative receipt calculation engine.
+      assert.equal(input.lines.length, 1);
+      assert.equal(input.lines[0].itCode, 'GOLD');
+      const totals = {
+        netAmount: 95,
+        discountAmount: 0,
+        taxAmount: 0,
+        totalAmount: 95,
+        outstandingAmount: 80,
+      };
+      repairReceiptStored = {
+        voucherNo: '00001',
+        headerVoucherNo: '00001',
+        vchDate: input.vchDate,
+        billNo: input.billNo || '',
+        acCode: input.acCode,
+        acName: input.acName || 'Repair Customer',
+        employeeCode: input.employeeCode || '',
+        bankName: input.bankName || '',
+        description: input.description || '',
+        chequeAmount: input.chequeAmount || 0,
+        chequeAccount: input.chequeAccount || '',
+        chequeNo: input.chequeNo || '',
+        cardAmount: input.cardAmount || 0,
+        cardAccount: input.cardAccount || '',
+        cashAmount: input.cashAmount || 0,
+        totals,
+        lines: input.lines.map((line) => ({
+          ...line,
+          srNo: 1,
+          itemName: 'Gold Ornament',
+          netWt: 9,
+          labourAmount: 90,
+          netAmount: 95,
+        })),
+      };
       return json(route, 201, {
         vchNo: 1,
         voucherNo: '00001',
         headerVoucherNo: '00001',
         created: true,
-        totals: {
-          netAmount: 95,
-          discountAmount: 0,
-          taxAmount: 0,
-          totalAmount: 95,
-          outstandingAmount: 80,
-        },
+        totals,
       });
+    }
+    if (path === '/repair-receipts/00001' && request.method() === 'GET') {
+      if (!repairReceiptStored) return json(route, 404, { error: 'repair-receipt-not-found' });
+      const query = new URL(request.url()).searchParams;
+      for (const field of ['coCode', 'lcCode', 'coYear', 'coBook'])
+        assert.equal(
+          query.get(field),
+          repairReceiptRequestBody[field],
+          `Saved Repair read keeps ${field}`,
+        );
+      repairReceiptReads += 1;
+      return json(route, 200, repairReceiptStored);
+    }
     if (path === '/repair-karigar-issues/open-lines')
       return json(route, 200, [
         {
@@ -503,21 +629,40 @@ try {
       return repairImageStored
         ? json(route, 200, repairImageStored)
         : json(route, 404, { error: 'repair-image-not-found' });
+    if (path === '/repair-images/state')
+      return json(route, 200, {
+        version: repairImageVersion(),
+        canUpdate: true,
+        canDelete: repairImageStored !== null,
+        image: repairImageStored ? { state: 'present', ...repairImageStored } : { state: 'absent' },
+      });
     if (path === '/repair-images' && request.method() === 'POST') {
       const payload = JSON.parse(request.postData() || '{}');
+      assert.equal(
+        payload.version,
+        repairImageVersion(),
+        'Repair upload uses the loaded image token',
+      );
       repairImageRequestBody = payload;
       repairImageStored = {
-        imageNo: `01012024RCR0000${payload.srNo ?? 1}`,
+        imageNo: `${payload.coCode}${payload.lcCode}${(payload.imageYear || payload.coYear).slice(0, 4)}${payload.imageBook}${payload.vchNo}${payload.srNo}`,
         imageType: 'ReparingImage',
-        mimeType: 'image/png',
-        size: 68,
+        mimeType: payload.mimeType,
+        size: Buffer.from(payload.data, 'base64').length,
         entryTime: '2024-04-10T00:00:00.000Z',
-        data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==',
+        data: payload.data,
       };
+      repairImageRevision += 1;
       return json(route, 200, { imageNo: repairImageStored.imageNo, replaced: false });
     }
     if (path === '/repair-images' && request.method() === 'DELETE') {
+      assert.equal(
+        request.postDataJSON().version,
+        repairImageVersion(),
+        'Repair deletion uses the loaded image token',
+      );
       repairImageStored = null;
+      repairImageRevision += 1;
       return json(route, 200, { deleted: true });
     }
     if (path.startsWith('/reports/sales-register'))
@@ -571,10 +716,13 @@ try {
   await page.getByRole('button', { name: 'F2: Ledger report' }).waitFor();
 
   // Desktop MDI global accelerators remain active on voucher pages.
-  // The accelerator listener only exists after hydration, so wait for the hint row each time.
+  // The hint row is server-rendered. The configured book arrives from an effect-driven request,
+  // so wait for it as evidence that the form has hydrated before dispatching a global key.
   const readyForFormKeys = async () => {
     await page.getByRole('button', { name: 'F2: Ledger report' }).waitFor();
+    await expectValue(page.getByLabel('Configured book'), 'SAL', 'hydrated sales book');
   };
+  await readyForFormKeys();
   await page.keyboard.press('F4');
   await page.waitForURL('**/txn/sales-order');
   await page.goto(`${origin}/txn/sales`, { waitUntil: 'domcontentloaded' });
@@ -902,9 +1050,16 @@ try {
 
   // Repair-line image attachment: empty before upload and previewed after save.
   await page.getByTestId('repair-image-empty').waitFor();
+  assert.equal(
+    repairReceiptReads,
+    1,
+    'Images activate only after the authoritative saved receipt read',
+  );
+  assert.equal(repairReceiptStored.lines[0].srNo, 1);
+  assert.equal(await repairGridInput(0, 0).inputValue(), repairReceiptRequestBody.lines[0].itCode);
 
   // Device parity: the camera control must be present and must report an honest status. Headless
-  // Chromium has no camera, so this asserts the disabled-with-a-reason path rather than a fake capture.
+  // Chromium has no granted camera. Check its reported state and hidden preview without fake capture.
   await page.getByTestId('repair-image-camera-status').waitFor();
   const cameraStatus = (await page.getByTestId('repair-image-camera-status').textContent()) ?? '';
   assert.equal(
@@ -913,13 +1068,16 @@ try {
     `camera must report an honest status without hardware, got "${cameraStatus}"`,
   );
   assert.equal(/live/.test(cameraStatus), false, 'camera must never report live without a stream');
+  assert.equal(await page.getByTestId('repair-image-camera-start').isVisible(), true);
+  if (/unsupported/.test(cameraStatus))
+    assert.equal(await page.getByTestId('repair-image-camera-start').isDisabled(), true);
   // The preview element exists but stays hidden until a stream is actually granted.
   assert.equal(await page.getByTestId('repair-image-camera-preview').isVisible(), false);
   await page.locator('#repair-image-file').setInputFiles({
     name: 'repair.png',
     mimeType: 'image/png',
     buffer: Buffer.from(
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==',
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP4/x8AAwAB/2+Bq7YAAAAASUVORK5CYII=',
       'base64',
     ),
   });
@@ -1210,11 +1368,13 @@ try {
   // desktop chords did nothing. Both facts are asserted here.
   const ctrlChord = async (key, expectedPath) => {
     await page.goto(`${origin}/dashboard`, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(250);
+    await page.getByRole('button', { name: 'Logout' }).waitFor();
     await page.keyboard.down('Control');
     await page.keyboard.press(key);
     await page.keyboard.up('Control');
-    await page.waitForTimeout(700);
+    // Route rendering may outlast a fixed delay on a loaded workstation. Wait
+    // for this single key press to reach its exact destination; never re-press it.
+    await page.waitForURL((url) => url.pathname === expectedPath, { timeout: 10000 });
     assert.equal(
       new URL(page.url()).pathname,
       expectedPath,
@@ -1231,9 +1391,9 @@ try {
 
   // A plain F-key must work away from the transaction pages too.
   await page.goto(`${origin}/masters/accounts`, { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(250);
+  await page.getByRole('button', { name: 'Logout' }).waitFor();
   await page.keyboard.press('F5');
-  await page.waitForTimeout(700);
+  await page.waitForURL((url) => url.pathname === '/txn/sales', { timeout: 10000 });
   assert.equal(
     new URL(page.url()).pathname,
     '/txn/sales',
@@ -1246,6 +1406,30 @@ try {
   console.log(
     'Browser smoke passed: auth, scope, global F-key navigation, desktop Ctrl chords, tag images, sales lifecycle, tag/item-opening/item-lot accessible keyboard grids, all four repair workflow stages, repair images, MLT PRO, physical stock, dashboard, logout',
   );
+} catch (error) {
+  // Preserve the actual browser state before teardown so a missing control or key-navigation
+  // failure can be distinguished from a hydration error without weakening its assertion.
+  const directory = mkdtempSync(join(tmpdir(), 'datacare-browser-smoke-failure-'));
+  const diagnostics = {
+    error: String(error?.stack ?? error),
+    url: page?.url(),
+    pageErrors,
+    consoleErrors,
+    requestFailures,
+    serverLog,
+  };
+  if (page && !page.isClosed()) {
+    const results = await Promise.allSettled([
+      page.screenshot({ path: join(directory, 'page.png'), fullPage: true, timeout: 5000 }),
+      page.content().then((html) => writeFileSync(join(directory, 'page.html'), html)),
+    ]);
+    diagnostics.captureErrors = results
+      .filter((result) => result.status === 'rejected')
+      .map((result) => String(result.reason));
+  }
+  writeFileSync(join(directory, 'diagnostics.json'), JSON.stringify(diagnostics, null, 2));
+  console.error(`Browser smoke failure diagnostics: ${directory}`);
+  throw error;
 } finally {
   if (browser) await browser.close();
   stopServer();

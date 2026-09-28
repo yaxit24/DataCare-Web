@@ -1,0 +1,62 @@
+{
+ "form": "MS_DM",
+ "controlCount": 2,
+ "byKind": {
+  "textbox": 2
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "Label4",
+   "tShortName",
+   "nPrRate",
+   "tGrName",
+   "Label10",
+   "tGrCode",
+   "cboClear",
+   "Label3",
+   "cboCut",
+   "Label14",
+   "PnlBotam",
+   "Label6",
+   "Label7",
+   "nSlRate",
+   "DGV",
+   "Text1",
+   "Label1",
+   "Label2",
+   "tDmCode",
+   "tDmName",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tDmCode",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "0001",
+   "kind": "textbox"
+  },
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  }
+ ]
+}

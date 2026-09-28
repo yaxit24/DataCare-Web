@@ -1,0 +1,815 @@
+{
+  "kind": "session-ledger-mode-independent-vectors/1",
+  "authorship": "Literal outcomes derived from frozen source contract before implementation inspection; no application module imported or used to compute expectations. Fact-level vectors are adapted to the agreed typed envelope without deriving their outcomes.",
+  "profile": {
+    "completedBootstrapRequired": true,
+    "reachableEditions": [
+      "L",
+      "B",
+      "S",
+      "U",
+      "P",
+      "A",
+      "E"
+    ],
+    "initialOutputs": [
+      "A",
+      "B",
+      "C"
+    ],
+    "unknownExceptionForNonAE": "irrelevant because both source branches end C",
+    "selectedCompany": "02",
+    "catalogSourceCompany": "01",
+    "commands": "Already classified semantic commands only; no raw Windows shortcut delivery or entitlement decoding",
+    "collisionPolicy": "Relevant noncanonical/multiple company01 sentinel/alias observations are unsupported; not an assertion of measured SQL Server collation"
+  },
+  "sourceRefs": [
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "lines": "612-652;1459-1476;1478-1510"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+      "sha256": "cb91085c50d07a07ae5c5a8e6982ef6f9a2c533e2b55d61fc8c35f093f5dfbbc",
+      "lines": "11155-11247;12530;12616-12721;12723-12790"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-session-ledger-mode-next-contract.md",
+      "sha256": "180b315ae44c23c663a7d4a95ca1d5ddc98b4f460bb932db7735216f78ac93b0",
+      "sections": "2-5;8-9"
+    }
+  ],
+  "bootstrap": [
+    {
+      "id": "B01",
+      "bootstrapEdition": "L",
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B02",
+      "bootstrapEdition": "B",
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B03",
+      "bootstrapEdition": "S",
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B04",
+      "bootstrapEdition": "U",
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B05",
+      "bootstrapEdition": "P",
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B06",
+      "bootstrapEdition": "A",
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "A"
+      }
+    },
+    {
+      "id": "B07",
+      "bootstrapEdition": "E",
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "A"
+      }
+    },
+    {
+      "id": "B08",
+      "bootstrapEdition": "L",
+      "forceCombinedException": true,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B09",
+      "bootstrapEdition": "B",
+      "forceCombinedException": true,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B10",
+      "bootstrapEdition": "S",
+      "forceCombinedException": true,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B11",
+      "bootstrapEdition": "U",
+      "forceCombinedException": true,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B12",
+      "bootstrapEdition": "P",
+      "forceCombinedException": true,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B13",
+      "bootstrapEdition": "A",
+      "forceCombinedException": true,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B14",
+      "bootstrapEdition": "E",
+      "forceCombinedException": true,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B15",
+      "bootstrapEdition": "A",
+      "forceCombinedException": null,
+      "completedOpen": true,
+      "expected": {
+        "status": "unresolved",
+        "mode": null
+      }
+    },
+    {
+      "id": "B16",
+      "bootstrapEdition": "E",
+      "forceCombinedException": null,
+      "completedOpen": true,
+      "expected": {
+        "status": "unresolved",
+        "mode": null
+      }
+    },
+    {
+      "id": "B17",
+      "bootstrapEdition": "L",
+      "forceCombinedException": null,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B18",
+      "bootstrapEdition": "B",
+      "forceCombinedException": null,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B19",
+      "bootstrapEdition": "S",
+      "forceCombinedException": null,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B20",
+      "bootstrapEdition": "U",
+      "forceCombinedException": null,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B21",
+      "bootstrapEdition": "P",
+      "forceCombinedException": null,
+      "completedOpen": true,
+      "expected": {
+        "status": "resolved",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "B22",
+      "bootstrapEdition": null,
+      "forceCombinedException": false,
+      "completedOpen": true,
+      "expected": {
+        "status": "unresolved",
+        "mode": null
+      }
+    },
+    {
+      "id": "B23",
+      "bootstrapEdition": "A",
+      "forceCombinedException": false,
+      "completedOpen": false,
+      "expected": {
+        "status": "unresolved",
+        "mode": null
+      }
+    },
+    {
+      "id": "B24",
+      "bootstrapEdition": "E",
+      "forceCombinedException": true,
+      "completedOpen": null,
+      "expected": {
+        "status": "unresolved",
+        "mode": null
+      }
+    }
+  ],
+  "catalogs": {
+    "empty": [],
+    "mapBtoC": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "A",
+        "CON_NAME": "SENTINEL"
+      },
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "C",
+        "CON_NAME": "B"
+      }
+    ],
+    "sentinelNoB": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "A",
+        "CON_NAME": "SENTINEL"
+      }
+    ],
+    "generalRtoC": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "C",
+        "CON_NAME": "R"
+      }
+    ],
+    "company02Only": [
+      {
+        "CO_CODE": "02",
+        "CON_CODE": "C",
+        "CON_NAME": "R"
+      }
+    ],
+    "mixedCompanies": [
+      {
+        "CO_CODE": "02",
+        "CON_CODE": "B",
+        "CON_NAME": "R"
+      },
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "C",
+        "CON_NAME": "R"
+      }
+    ],
+    "company02Sentinel": [
+      {
+        "CO_CODE": "02",
+        "CON_CODE": "A",
+        "CON_NAME": "SENTINEL"
+      }
+    ],
+    "duplicateSentinel": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "A",
+        "CON_NAME": "FIRST"
+      },
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "A",
+        "CON_NAME": "SECOND"
+      }
+    ],
+    "duplicateAlias": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "B",
+        "CON_NAME": "R"
+      },
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "C",
+        "CON_NAME": "R"
+      }
+    ],
+    "paddedSentinel": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "A ",
+        "CON_NAME": "SENTINEL"
+      }
+    ],
+    "lowerSentinel": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "a",
+        "CON_NAME": "SENTINEL"
+      }
+    ],
+    "lowerAlias": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "B",
+        "CON_NAME": "r"
+      }
+    ],
+    "paddedAlias": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "B",
+        "CON_NAME": "R "
+      }
+    ],
+    "exactAndLowerAlias": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "B",
+        "CON_NAME": "R"
+      },
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "C",
+        "CON_NAME": "r"
+      }
+    ],
+    "exactAndPaddedAlias": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "B",
+        "CON_NAME": "R"
+      },
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "C",
+        "CON_NAME": "R "
+      }
+    ],
+    "paddedCompany": [
+      {
+        "CO_CODE": "01 ",
+        "CON_CODE": "B",
+        "CON_NAME": "R"
+      }
+    ],
+    "nullOutput": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": null,
+        "CON_NAME": "R"
+      }
+    ],
+    "blankOutput": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "",
+        "CON_NAME": "R"
+      }
+    ],
+    "lowerOutput": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "b",
+        "CON_NAME": "R"
+      }
+    ],
+    "paddedOutput": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "B ",
+        "CON_NAME": "R"
+      }
+    ],
+    "otherOutput": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "D",
+        "CON_NAME": "R"
+      }
+    ],
+    "longOutput": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "AB",
+        "CON_NAME": "R"
+      }
+    ],
+    "controlOutput": [
+      {
+        "CO_CODE": "01",
+        "CON_CODE": "B\n",
+        "CON_NAME": "R"
+      }
+    ]
+  },
+  "commands": [
+    {
+      "id": "C01",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "A",
+      "catalog": "empty",
+      "expected": {
+        "decision": "assigned",
+        "mode": "A"
+      }
+    },
+    {
+      "id": "C02",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "B",
+      "catalog": "empty",
+      "expected": {
+        "decision": "assigned",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C03",
+      "commandEdition": "E",
+      "previousMode": "A",
+      "kind": "special-letter",
+      "value": "C",
+      "catalog": "empty",
+      "expected": {
+        "decision": "assigned",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "C04",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "B",
+      "catalog": "mapBtoC",
+      "expected": {
+        "decision": "assigned",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "C05",
+      "commandEdition": "E",
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "B",
+      "catalog": "sentinelNoB",
+      "expected": {
+        "decision": "assigned",
+        "mode": "A"
+      }
+    },
+    {
+      "id": "C06",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "Q",
+      "catalog": "empty",
+      "expected": {
+        "decision": "retained",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C07",
+      "commandEdition": "E",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "generalRtoC",
+      "expected": {
+        "decision": "assigned",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "C08",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "mixedCompanies",
+      "expected": {
+        "decision": "assigned",
+        "mode": "C"
+      }
+    },
+    {
+      "id": "C09",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "company02Only",
+      "expected": {
+        "decision": "retained",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C10",
+      "commandEdition": "A",
+      "previousMode": "C",
+      "kind": "special-letter",
+      "value": "B",
+      "catalog": "company02Sentinel",
+      "expected": {
+        "decision": "assigned",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C11",
+      "commandEdition": "L",
+      "previousMode": "A",
+      "kind": "special-letter",
+      "value": "B",
+      "catalog": "empty",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "A"
+      }
+    },
+    {
+      "id": "C12",
+      "commandEdition": null,
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "C",
+      "catalog": "empty",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C13",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "B",
+      "catalog": "duplicateSentinel",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C14",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "duplicateAlias",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C15",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "C",
+      "catalog": "paddedSentinel",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C16",
+      "commandEdition": "E",
+      "previousMode": "B",
+      "kind": "special-letter",
+      "value": "C",
+      "catalog": "lowerSentinel",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C17",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "lowerAlias",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C18",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "paddedAlias",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C19",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "exactAndLowerAlias",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C20",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "exactAndPaddedAlias",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C21",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "paddedCompany",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C22",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "nullOutput",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C23",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "blankOutput",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C24",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "lowerOutput",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C25",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "paddedOutput",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C26",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "otherOutput",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C27",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "longOutput",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    },
+    {
+      "id": "C28",
+      "commandEdition": "A",
+      "previousMode": "B",
+      "kind": "general-alias",
+      "value": "R",
+      "catalog": "controlOutput",
+      "expected": {
+        "decision": "unsupported",
+        "mode": "B"
+      }
+    }
+  ],
+  "limits": [
+    "Pure prerequsite only: no auth/session persistence, generations, rights, DB atomicity or ledger query is verified.",
+    "No original Windows/IL key-routing, SQL Server collation, vendor registration classification or end-to-end business acceptance.",
+    "Bootstrap edition and command edition are separate observations; a command cannot silently rerun bootstrap."
+  ]
+}

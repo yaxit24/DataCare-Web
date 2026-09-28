@@ -1,0 +1,32 @@
+{
+  "status": "staged-and-unexecuted; separate from current session runtime milestone",
+  "ownership": "Only new /tmp/datacare-return-labour-staged files. No existing source, route, index, test, fixture or frozen proof changed.",
+  "declaredCases": {
+    "core": 73,
+    "apiControlledQuery": 16,
+    "apiActualPostgreSQL": 15,
+    "total": 104
+  },
+  "literalFixture": {
+    "cases": 24,
+    "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa",
+    "byteIdenticalToOriginal": true
+  },
+  "checks": {
+    "sourceRead": true,
+    "stagedPrettier": "completed",
+    "compiler": "not-run",
+    "runtimeTests": "not-run",
+    "database": "not-run",
+    "browser": "not-run",
+    "independentReview": "root bounded original-source and reader read: no blocking finding reported; no execution"
+  },
+  "inputsManifest": {
+    "path": "/tmp/datacare-return-labour-staged/inputs.json",
+    "sha256": "bf24425d4c18da25cc8fb02a57c45fedd1d959ff7bec305ed0aab36ef2b9323e"
+  },
+  "readme": {
+    "path": "/tmp/datacare-return-labour-staged/README.md",
+    "sha256": "da8fad6982512f4c6ac4899b4702f44691007930eb3f34dba89658dc80af0d75"
+  }
+}

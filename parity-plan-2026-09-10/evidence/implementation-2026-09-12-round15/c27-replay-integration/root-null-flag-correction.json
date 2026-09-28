@@ -1,0 +1,7 @@
+{
+  "beforeSourceSha256": "5c102ded89af3fb885b46967d979f45dcf91c45e4372fbce0369a7ff852c8ee4",
+  "afterSourceSha256": "fa74d7425e6acff819b4a5e9eef86fdb0717d6d3758a14f25edfa25af17ed577",
+  "reason": "Root integration review found nullish coalescing treated explicitly allowed SQL NULL issue flags as missing. Distinguish undefined absence from ownedNULL before the existing finite-profile membership check. Original staged44testsource/peerread retained; one added semantic test, no frozenliteral changes.",
+  "oldStagedTests": 44,
+  "newIntegratedTestsExpected": 45
+}

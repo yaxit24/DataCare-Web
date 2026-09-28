@@ -1,0 +1,51 @@
+{
+ "form": "MS_AC_GROUP",
+ "tables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "BOOK_IDTL",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "AC_GROUP": [
+    "AC_GR",
+    "AC_GR_NAME",
+    "AC_MAIN_GR",
+    "AC_SUB_GR",
+    "CO_CODE",
+    "MAIN_USER",
+    "USER_SHOW_GROUP"
+   ],
+   "BOOK_IDTL": [
+    "AC_CODE",
+    "AC_NAME",
+    "INOUT_TYPE",
+    "MAIN_BOOK",
+    "SR_NO",
+    "SVR_PWD"
+   ]
+  },
+  "UPDATE": [
+   "BOOK_IDTL"
+  ],
+  "DELETE": [
+   "AC_GROUP"
+  ]
+ },
+ "selectTables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "BOOK_IDTL",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 18,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2056
+}

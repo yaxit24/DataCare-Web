@@ -1,0 +1,20 @@
+{
+  "kind": "explicit-qualified-input-for-unchanged-required-check-set",
+  "originalFixtureSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+  "currentFixture": {
+    "path": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+    "sha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+    "bytes": 62711
+  },
+  "proof": {
+    "path": "/tmp/datacare-return-labour-preview-api-correction/fixture-diff-proof.json",
+    "sha256": "8ed3216f911e6e2beecb5ce2202b610182acb924801e34e4f55356e7fef23900",
+    "bytes": 2925
+  },
+  "requiredChecksPreserved": {
+    "path": "/tmp/datacare-return-labour-preview-browser/browser-required-checks.json",
+    "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+    "bytes": 1874
+  },
+  "qualification": "Only nine initial/prefix visible c09 strings change from1 to1.000. Actual numeric(12,3) SQL JSONB storage and direct saved source projection require the scale. Raw seed, arithmetic, caches, totals, every other literal and all12 required names remain unchanged. Original required manifest still records its historical source SHA; this addendum explicitly binds the current execution input. No runtime normalization or generated expectation."
+}

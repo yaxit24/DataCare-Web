@@ -1,0 +1,16 @@
+{
+  "command": "NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter @datacare/api exec tsc -p tsconfig.test.json --noEmit",
+  "project": "web/apps/api/tsconfig.test.json",
+  "status": "passed",
+  "heapMiB": 4096,
+  "priorAttempt": {
+    "command": "pnpm typecheck:tests (package uses 6144 MiB)",
+    "status": "terminated-for-memory-pressure",
+    "exitCode": 143,
+    "log": "test-types-resource-interrupted.txt"
+  },
+  "scope": "Same complete TypeScript project and strict options; only heap limit and direct invocation changed. No excluded files or skip options.",
+  "recordedAtUtc": "2026-09-11T10:29:04.656292+00:00",
+  "exitCode": 0,
+  "verifiedAtUtc": "2026-09-11T10:49:28.945971+00:00"
+}

@@ -1,0 +1,39 @@
+
+> datacare-web-saas@0.0.0 test:parity:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+23 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 173 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+PARITY_REAL_STACK_PASSED: real login, Design Book and Tour Order lifecycles, imported credit-note browse; zero mocked requests

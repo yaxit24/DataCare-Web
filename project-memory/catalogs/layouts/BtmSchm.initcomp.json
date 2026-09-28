@@ -1,0 +1,312 @@
+{
+ "form": "BtmSchm",
+ "controlCount": 29,
+ "byKind": {
+  "button": 24,
+  "panel": 1,
+  "label": 2,
+  "other": 1,
+  "textbox": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "btnMfgTrfr",
+   "btnIdtl",
+   "btnLotTrfr",
+   "btnReparing",
+   "brnOrdTraking",
+   "btnBulTrfr",
+   "btnVptrfr",
+   "btnBillOrnaIsu",
+   "lblJadtarTrfr",
+   "btnTimeLdr",
+   "btnBillOs",
+   "BtnApr",
+   "SimpleButton1",
+   "BtnLoan",
+   "BtnDhrn",
+   "BtnOrder",
+   "lblLcName",
+   "tYearCode",
+   "BtnAcBalence",
+   "BtnTagStock",
+   "BtnItmStk",
+   "ProgressBar1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnAcBalence",
+   "type": "SimpleButton",
+   "location": "522,112",
+   "size": "127,32",
+   "tabIndex": "1",
+   "text": "Ac Balance",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnItmStk",
+   "type": "SimpleButton",
+   "location": "522,150",
+   "size": "127,32",
+   "tabIndex": "2",
+   "text": "Item Stock",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnTagStock",
+   "type": "SimpleButton",
+   "location": "522,188",
+   "size": "127,32",
+   "tabIndex": "3",
+   "text": "Tag Stock",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Balance Transfer",
+   "kind": "label"
+  },
+  {
+   "name": "ProgressBar1",
+   "type": "ProgressBar",
+   "location": "0,426",
+   "size": "1309,23",
+   "tabIndex": "1152",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "tYearCode",
+   "type": "TextBox",
+   "location": "522,71",
+   "size": "127,27",
+   "tabIndex": "1153",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblLcName",
+   "type": "Label",
+   "location": "385,71",
+   "size": "131,25",
+   "tabIndex": "1154",
+   "text": "Transfer Year",
+   "kind": "label"
+  },
+  {
+   "name": "BtnOrder",
+   "type": "SimpleButton",
+   "location": "522,226",
+   "size": "127,32",
+   "tabIndex": "1155",
+   "text": "Sales Order",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDhrn",
+   "type": "SimpleButton",
+   "location": "522,340",
+   "size": "127,32",
+   "tabIndex": "1156",
+   "text": "Dhiran",
+   "kind": "button"
+  },
+  {
+   "name": "BtnLoan",
+   "type": "SimpleButton",
+   "location": "522,378",
+   "size": "127,32",
+   "tabIndex": "1157",
+   "text": "Loan",
+   "kind": "button"
+  },
+  {
+   "name": "SimpleButton1",
+   "type": "SimpleButton",
+   "location": "522,302",
+   "size": "127,32",
+   "tabIndex": "1158",
+   "text": "Scheme",
+   "kind": "button"
+  },
+  {
+   "name": "BtnApr",
+   "type": "SimpleButton",
+   "location": "522,264",
+   "size": "127,32",
+   "tabIndex": "1159",
+   "text": "Approval",
+   "kind": "button"
+  },
+  {
+   "name": "btnBillOs",
+   "type": "SimpleButton",
+   "location": "667,112",
+   "size": "127,32",
+   "tabIndex": "1160",
+   "text": "Bill Os Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "btnTimeLdr",
+   "type": "SimpleButton",
+   "location": "667,150",
+   "size": "127,32",
+   "tabIndex": "1161",
+   "text": "Time Ldr Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "lblJadtarTrfr",
+   "type": "SimpleButton",
+   "location": "809,150",
+   "size": "127,32",
+   "tabIndex": "1162",
+   "text": "Jadtar Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "btnBillOrnaIsu",
+   "type": "SimpleButton",
+   "location": "667,188",
+   "size": "127,32",
+   "tabIndex": "1163",
+   "text": "Bill Orna Isu",
+   "kind": "button"
+  },
+  {
+   "name": "btnVptrfr",
+   "type": "SimpleButton",
+   "location": "667,264",
+   "size": "127,32",
+   "tabIndex": "1164",
+   "text": "Vp Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "btnBulTrfr",
+   "type": "SimpleButton",
+   "location": "809,112",
+   "size": "127,32",
+   "tabIndex": "1165",
+   "text": "Bullion Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "brnOrdTraking",
+   "type": "SimpleButton",
+   "location": "667,302",
+   "size": "127,32",
+   "tabIndex": "1166",
+   "text": "Order Traking",
+   "kind": "button"
+  },
+  {
+   "name": "btnReparing",
+   "type": "SimpleButton",
+   "location": "667,226",
+   "size": "127,32",
+   "tabIndex": "1167",
+   "text": "Reparing Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "btnLotTrfr",
+   "type": "SimpleButton",
+   "location": "667,340",
+   "size": "127,32",
+   "tabIndex": "1168",
+   "text": "Item Lot Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "btnIdtl",
+   "type": "SimpleButton",
+   "location": "522,475",
+   "size": "127,32",
+   "tabIndex": "1169",
+   "text": "Tag Idtl Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "btnMfgTrfr",
+   "type": "SimpleButton",
+   "location": "809,188",
+   "size": "127,32",
+   "tabIndex": "1170",
+   "text": "Mfg Trfr",
+   "kind": "button"
+  }
+ ]
+}

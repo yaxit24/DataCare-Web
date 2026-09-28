@@ -1,0 +1,476 @@
+{
+ "report": "TagItmSumm",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 216,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 120,
+       "top": 16,
+       "width": 2540,
+       "height": 200,
+       "text": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1056,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 120,
+       "top": 90,
+       "width": 11205,
+       "height": 372,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 120,
+       "top": 480,
+       "width": 11205,
+       "height": 270,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 120,
+       "top": 750,
+       "width": 11190,
+       "height": 264,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 10800,
+       "top": 750,
+       "width": 510,
+       "height": 228,
+       "dataSource": "{@CurPag}"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 500,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 120,
+       "top": 30,
+       "width": 11205,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 1080,
+       "top": 120,
+       "width": 600,
+       "height": 255,
+       "text": "Code"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 2370,
+       "top": 120,
+       "width": 780,
+       "height": 255,
+       "text": "Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 6555,
+       "top": 120,
+       "width": 840,
+       "height": 255,
+       "text": "Tag Pcs"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 7575,
+       "top": 120,
+       "width": 840,
+       "height": 255,
+       "text": "Item Pcs"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 8760,
+       "top": 120,
+       "width": 945,
+       "height": 255,
+       "text": "Gross Wt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 10095,
+       "top": 120,
+       "width": 945,
+       "height": 255,
+       "text": "Net Wt"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 120,
+       "top": 480,
+       "width": 11205,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 361,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 210,
+       "top": 30,
+       "width": 2310,
+       "height": 226,
+       "dataSource": "{@ItType}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 6600,
+       "top": 30,
+       "width": 795,
+       "height": 238,
+       "dataSource": "Sum ({@TagPcs}, {TAG_STOCK_PRINT.VCH_TYPE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 7450,
+       "top": 30,
+       "width": 965,
+       "height": 238,
+       "dataSource": "Sum ({@TagQty}, {TAG_STOCK_PRINT.VCH_TYPE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 8610,
+       "top": 30,
+       "width": 1095,
+       "height": 238,
+       "dataSource": "Sum ({@TagGwt}, {TAG_STOCK_PRINT.VCH_TYPE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 9857,
+       "top": 30,
+       "width": 1183,
+       "height": 238,
+       "dataSource": "Sum ({@TagNwt}, {TAG_STOCK_PRINT.VCH_TYPE})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 165,
+       "top": 315,
+       "width": 11145,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "Detail",
+     "height": 350,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 1080,
+       "top": 24,
+       "width": 1200,
+       "height": 230,
+       "dataSource": "{TAG_STOCK_PRINT.IT_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 2370,
+       "top": 24,
+       "width": 4230,
+       "height": 226,
+       "dataSource": "{TAG_STOCK_PRINT.IT_DESC}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 6600,
+       "top": 24,
+       "width": 795,
+       "height": 228,
+       "dataSource": "{@TagPcs}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 7462,
+       "top": 24,
+       "width": 953,
+       "height": 228,
+       "dataSource": "{@TagQty}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 8625,
+       "top": 24,
+       "width": 1080,
+       "height": 228,
+       "dataSource": "{@TagGwt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 9873,
+       "top": 24,
+       "width": 1167,
+       "height": 228,
+       "dataSource": "{@TagNwt}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 1065,
+       "top": 330,
+       "width": 10095,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupFooter",
+     "height": 276,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 4155,
+       "top": 0,
+       "width": 7155,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area12",
+   "sections": [
+    {
+     "name": "Section14",
+     "kind": "ReportFooter",
+     "height": 515,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line10",
+       "left": 4080,
+       "top": 15,
+       "width": 7230,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text12",
+       "left": 5040,
+       "top": 60,
+       "width": 1320,
+       "height": 255,
+       "text": "TOTAL :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field37",
+       "left": 6600,
+       "top": 60,
+       "width": 795,
+       "height": 238,
+       "dataSource": "Sum ({@TagPcs})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 7575,
+       "top": 60,
+       "width": 840,
+       "height": 238,
+       "dataSource": "Sum ({@TagQty})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field31",
+       "left": 8560,
+       "top": 60,
+       "width": 1145,
+       "height": 238,
+       "dataSource": "Sum ({@TagGwt})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 9806,
+       "top": 60,
+       "width": 1234,
+       "height": 238,
+       "dataSource": "Sum ({@TagNwt})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area13",
+   "sections": [
+    {
+     "name": "Section15",
+     "kind": "PageFooter",
+     "height": 175,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+\" \"+{CO_MAST.CO_ADD2}+\" \"+{CO_MAST.CO_ADD3}+\" \"+{CO_MAST.CO_CITY}+\" Ph-\"+{CO_MAST.CO_PHONE}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2001,05,01)"
+  },
+  {
+   "name": "ItType",
+   "ref": "{@ItType}",
+   "type": "StringField",
+   "text": "if{TAG_STOCK_PRINT.VCH_TYPE} = 'G' THEN 'Gold' else if {TAG_STOCK_PRINT.VCH_TYPE} = 'S' THEN 'Silver' else if {TAG_STOCK_PRINT.VCH_TYPE} = 'P' THEN 'Pletinam' else if {TAG_STOCK_PRINT.VCH_TYPE} = 'D' "
+  },
+  {
+   "name": "NewBal",
+   "ref": "{@NewBal}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "\"STOCK LEDGER FOR PERIOD FROM DATE TO DATE\""
+  },
+  {
+   "name": "TagGwt",
+   "ref": "{@TagGwt}",
+   "type": "NumberField",
+   "text": "{TAG_STOCK_PRINT.ITM_GWT}"
+  },
+  {
+   "name": "TagNwt",
+   "ref": "{@TagNwt}",
+   "type": "NumberField",
+   "text": "{TAG_STOCK_PRINT.ITM_NWT}"
+  },
+  {
+   "name": "TagP",
+   "ref": "{@TagP}",
+   "type": "NumberField",
+   "text": "1"
+  },
+  {
+   "name": "TagPcs",
+   "ref": "{@TagPcs}",
+   "type": "NumberField",
+   "text": "{TAG_STOCK_PRINT.ITM_QTY}"
+  },
+  {
+   "name": "TagQty",
+   "ref": "{@TagQty}",
+   "type": "NumberField",
+   "text": "{TAG_STOCK_PRINT.ITM_PCS}"
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "beforereadingrecords; date(2006,07,21)"
+  },
+  {
+   "name": "VchSrno",
+   "ref": "{@VchSrno}",
+   "type": "NumberField",
+   "text": "if {TAG_STOCK_PRINT.ITM_SIGN} = '+' then {TAG_STOCK_PRINT.VCH_SRNO} else -{TAG_STOCK_PRINT.VCH_SRNO}"
+  }
+ ],
+ "sectionCount": 8,
+ "objectCount": 33,
+ "formulaCount": 13
+}

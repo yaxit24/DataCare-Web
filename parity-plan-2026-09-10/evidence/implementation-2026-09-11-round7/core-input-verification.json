@@ -1,0 +1,9 @@
+{
+  "verifiedAtUtc": "2026-09-11T08:57:32.548920+00:00",
+  "snapshot": "core-input-snapshot.json",
+  "snapshotSha256": "d78b24b2efcce6feb64f5ed645e79b54d4e3acf07221400a96ad76c5f677e742",
+  "inputs": 29,
+  "changed": [],
+  "added": [],
+  "status": "passed"
+}

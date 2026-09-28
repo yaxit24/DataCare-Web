@@ -1,0 +1,53 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/entityImageConcurrency.routes.db.test.ts" "test/repairImageConcurrency.routes.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/entityImageConcurrency.routes.db.test.ts (17 tests) 2452ms
+   ✓ generic entity image HTTP compare-and-swap > accepts a complete large generic image within the advertised 4 MB binary limit 308ms
+ ✓ test/repairImageConcurrency.routes.db.test.ts (9 tests) 2307ms
+   ✓ repair image HTTP compare-and-swap and source identity > keeps source book/year separate from the current stage and binds tokens to the exact saved row 662ms
+   ✓ repair image HTTP compare-and-swap and source identity > accepts a complete large Repair image above the default JSON limit and preserves source bytes 333ms
+
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+   Start at  06:59:14
+   Duration  7.13s (transform 962ms, setup 0ms, collect 1.84s, tests 4.76s, environment 0ms, prepare 76ms)
+

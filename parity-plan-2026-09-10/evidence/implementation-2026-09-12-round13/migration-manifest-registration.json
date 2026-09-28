@@ -1,0 +1,22 @@
+{
+  "recordedAtUtc": "2026-09-11T19:28:34.907985+00:00",
+  "initialFullSuite": {
+    "files": 245,
+    "tests": 2445,
+    "failedFiles": 1,
+    "failedTests": 2,
+    "run": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/api-after-context-storage.run.json"
+  },
+  "cause": "The installed29th migration was omitted from the28-entry API expected-migration manifest, so operational health correctly reported it as unexpected. This was an integration omission, not a threshold change or a waived health result.",
+  "fix": {
+    "path": "web/apps/api/src/modules/ops/migrationManifest.ts",
+    "beforeSha256": "bb1809a144d883898878665f506eac8a0ad4d9c5e4afa98435a16fb4fc67dd51",
+    "afterSha256": "dd62ff01446807175fc9975bd43a1804e4a818f4ab99e5c67341337f8a200a70"
+  },
+  "regression": {
+    "path": "web/apps/api/test/migrationManifest.test.ts",
+    "sha256": "32d57f1773ce65b027029103421681527c7bb6c094c43f65cbf4ea00403f0eae",
+    "scope": "Every filesystem migration must occur exactly once in the shipped expected manifest with its actual SHA256. Future missing, extra, duplicate or stale entries fail."
+  },
+  "rerun": "api-after-context-manifest; pending complete result"
+}

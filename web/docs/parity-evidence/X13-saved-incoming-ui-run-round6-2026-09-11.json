@@ -1,0 +1,319 @@
+{
+  "id": "X13-saved-incoming-ui-round6-2026-09-11",
+  "cards": [
+    "X13"
+  ],
+  "round": 6,
+  "status": "bounded-saved-ui-implemented-focused-and-rebuilt-browser-verified",
+  "capturedAtUtc": "2026-09-11T08:26:18.392058+00:00",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "pathBase": "web workspace root",
+  "sourceState": "shared dirty development tree; hashes identify a bounded slice, not a release candidate",
+  "x13Verified": false,
+  "all33FieldsClosed": false,
+  "observedDesktopExecution": false,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "ownership": {
+    "owned": [
+      "apps/web/app/(app)/txn/sale-return/page.tsx",
+      "apps/web/components/SaleReturnSavedPanel.tsx",
+      "apps/web/lib/salesReturnForm.ts",
+      "apps/web/test/salesReturnForm.test.ts"
+    ],
+    "integration": "API service, routes, schema, browser fixture/runner and whole-workspace checks were implemented or run independently by their assigned owners. This owner ran focused UI tests/lint/types and reviewed API source only.",
+    "databaseRunsByThisOwner": 0,
+    "browserRunsByThisOwner": 0
+  },
+  "files": [
+    {
+      "path": "apps/web/app/(app)/txn/sale-return/page.tsx",
+      "sha256": "3c8f6e46d9c175793321b852d3adbf434a4214cdd566afad0d1fc979079bb29b",
+      "bytes": 20990
+    },
+    {
+      "path": "apps/web/components/SaleReturnSavedPanel.tsx",
+      "sha256": "353b0e92f8859acc5f15e1a42b0c0216555fac0c987588d0cf8185cfc46ab99b",
+      "bytes": 24288
+    },
+    {
+      "path": "apps/web/lib/salesReturnForm.ts",
+      "sha256": "062386988f070b3a828238a594272407a8d3de49be24dc17de9703b0c244aeda",
+      "bytes": 14211
+    },
+    {
+      "path": "apps/web/test/salesReturnForm.test.ts",
+      "sha256": "7c81ac061f99315bfec417dab5026df8d1f81905cb320ec68b67ec1c0b01b0e9",
+      "bytes": 15429
+    }
+  ],
+  "integrationInputs": [
+    {
+      "path": "apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "05c2218ad69b0c0cd8cf1a4e542816a9fcae5c48057ed8c1b27dc1596ba94a06",
+      "bytes": 24233
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "3a769dd9fd4a8cc0280b9ba158f454b583632453702e99f0ad8f521bc358daa1",
+      "bytes": 277717
+    },
+    {
+      "path": "apps/web/components/BookSelect.tsx",
+      "sha256": "e20ea55a2817a0d0fe15253d99e228a410991c343ebb7eab1fc34ffb776cf1b3",
+      "bytes": 3149
+    },
+    {
+      "path": "apps/web/components/BusinessScope.tsx",
+      "sha256": "ffe8f4922dd0c65e7dc9bbb91ae8cdd10b67edd8b1349ef57388ee64d2119213",
+      "bytes": 835
+    },
+    {
+      "path": "apps/web/components/LookupPicker.tsx",
+      "sha256": "113d6bd103e08e9b9940a5e7c0464991624e15f9c6cd26972f9a5a861687d46a",
+      "bytes": 4935
+    },
+    {
+      "path": "apps/web/lib/api.ts",
+      "sha256": "7b07a3387e30d3a685d2974ad63f172ae381d6cebe1de7b1e1ddd147dfc7b5dc",
+      "bytes": 3391
+    },
+    {
+      "path": "apps/web/test/sales-return-saved.journey.mjs",
+      "sha256": "f116c5d68540d19ab82bb41a489937985f01d35789d191f3d1d5c24731d57f90",
+      "bytes": 30885
+    },
+    {
+      "path": "apps/web/test/parity.real-stack.mjs",
+      "sha256": "f2f5177074705829572aca0e01ea276546281196975513cff827d45abd145385",
+      "bytes": 20725
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    }
+  ],
+  "contracts": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-contract.md",
+      "sha256": "a1ab8a9d1f5db7470b27c2d29ca0d21c53c11e8194c46b0f1d66a0637f45a7cd",
+      "bytes": 31858
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-api-review.md",
+      "sha256": "619ace198d4e1d2dabe1d2935822b79e7e7c7b337236f3246e1cfd0bd06a23bc",
+      "bytes": 7696
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-review-followup.md",
+      "sha256": "edfc6470a3c04667effbaeb8508eaf45688ed1c9c6bf66882a92bcae26f7cebc",
+      "bytes": 4225
+    }
+  ],
+  "verification": {
+    "focusedUi": {
+      "status": "passed",
+      "files": 1,
+      "tests": 31,
+      "exitCode": 0,
+      "command": "pnpm --filter @datacare/web test -- test/salesReturnForm.test.ts",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-tests-diagnostics.txt",
+        "sha256": "6db1cb999fa88f6245f81257898cfc8a5d561a2966bec45ee9a742fea15fbc24",
+        "bytes": 462
+      }
+    },
+    "focusedLint": {
+      "status": "passed",
+      "exitCode": 0,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-lint-diagnostics.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "note": "Successful ESLint emits no output; zero exit was observed."
+    },
+    "webTypecheck": {
+      "status": "passed",
+      "exitCode": 0,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-types-diagnostics.txt",
+        "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b",
+        "bytes": 111
+      }
+    },
+    "rootFullWeb": {
+      "status": "passed",
+      "files": 24,
+      "tests": 168,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/web-tests.txt",
+        "sha256": "42499ab0a55273b71d7c6194a8bad4adfb9518ab487c80602645c744fcc0ec30",
+        "bytes": 1566
+      }
+    },
+    "rootBuild": {
+      "status": "passed",
+      "tasks": 7,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/build.txt",
+        "sha256": "2e25d6ec828213c79b6386d13899a8ea088b358ed3cb940e8deba651ea60b000",
+        "bytes": 15018
+      }
+    },
+    "rootLintAndTypes": {
+      "status": "passed",
+      "tasks": 10,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/lint.txt",
+        "sha256": "f434677f7d4569cf20d55eb9078f7279d19416b320702724bdcd02a8c0738cf2",
+        "bytes": 3504
+      }
+    },
+    "rootStrictApiTestTypes": {
+      "status": "passed",
+      "exitCode": 0,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/test-types.txt",
+        "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9",
+        "bytes": 188
+      }
+    },
+    "rootRealBrowser": {
+      "status": "passed",
+      "journeys": 13,
+      "startedAtUtc": "2026-09-11T08:22:27.795Z",
+      "finishedAtUtc": "2026-09-11T08:23:05.943Z",
+      "mockedResponses": 0,
+      "database": "disposable localhost:55433 / app_user",
+      "result": {
+        "path": "test-results/parity-real-stack-round6-complete/result.json",
+        "sha256": "4dc3cd1364b326f45ea4f2f800a7dea456f940a70e3546fced95d20bf7b50ed1",
+        "bytes": 33543
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-complete.txt",
+        "sha256": "7930ac9f5d3c78422e1cd04d4c312fb8402af0f03dd4d6ba134e57383ad0beda",
+        "bytes": 1214
+      },
+      "savedReturn": {
+        "status": "passed",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "R61"
+        },
+        "voucherNo": "00001",
+        "checks": [
+          "Configured SALES RETURNE books and fully scoped saved browse",
+          "Exact saved identities, source year/book/voucher, raw nulls/blanks/decimals/microseconds, known item fallback without false missing-master diagnostics, hidden hallmark/image values and two incoming children",
+          "HUID-only real PUT and authoritative reopen preserve complete database write-set and unchanged NULL description",
+          "Independent real HTTP edit causes409; readable conflict keeps browser draft and blocks automatic replay",
+          "Explicit discard/reload only reads; deliberate revised save preserves all other raw rows and values",
+          "Same voucher in another configured book stays isolated; historical admitted tag instance is visible with metadata writes explicitly denied",
+          "Real held database reads cannot revive cancelled or A\u2192B\u2192A obsolete observations",
+          "Every browser request carries exact scope; metadata bodies exclude numeric/source replacements; no page errors"
+        ],
+        "browserRequests": 15,
+        "mockedResponses": 0,
+        "desktopAcceptance": false
+      },
+      "screenshots": [
+        {
+          "path": "test-results/parity-real-stack-round6-complete/sales-return-saved-conflict-round6.png",
+          "sha256": "26910fa10ca4db17962087646b5ea5d2c482f9b5061143f88774a95275cd936c",
+          "bytes": 183050
+        },
+        {
+          "path": "test-results/parity-real-stack-round6-complete/sales-return-saved-hallmark-details-round6.png",
+          "sha256": "b66879a48a6ef7a01aa1ada75b12f3fea90b134155afb72955fe23e05a5d4e80",
+          "bytes": 174297
+        },
+        {
+          "path": "test-results/parity-real-stack-round6-complete/sales-return-saved-late-load-round6.png",
+          "sha256": "a95056c5242c9e2ff5999a07e00fcb69e3d5925a5a9e8b5d0e03cf08f01f75d3",
+          "bytes": 86904
+        },
+        {
+          "path": "test-results/parity-real-stack-round6-complete/sales-return-saved-loaded-round6.png",
+          "sha256": "4d3b23429c89b1abb5c103ab0b1e17407613bcff23eeb645b05be055d7489825",
+          "bytes": 173899
+        },
+        {
+          "path": "test-results/parity-real-stack-round6-complete/sales-return-saved-tagged-readonly-round6.png",
+          "sha256": "31f8a53d2af0fb66cdf4c32098d0f759e91eff810aa8d6a8bbc7b489a2d77835",
+          "bytes": 178701
+        }
+      ],
+      "visualReviewOwner": "tour_order_ui / root",
+      "boundary": "Known item fallback has no false missing-master reason; positive missing/ambiguous-name and infinity cases are API/helper verified, not a positive browser fixture. No desktop/business acceptance."
+    },
+    "rootFullApi": {
+      "status": "outside-this-ui-manifest",
+      "authority": "Root round6 final checkpoint and complete before-run/unchanged-after API snapshot. In progress when this scoped UI capture began; do not infer full-API success from UI checks."
+    }
+  },
+  "retainedIterations": [
+    {
+      "name": "initial focused UI",
+      "status": "passed-prior-source-stage",
+      "files": 1,
+      "tests": 26,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-tests-first.txt",
+        "sha256": "cdde3b6be25e053f38ecf69733f0da1107dec33df12fd8bc0b84e8e71abf0eda",
+        "bytes": 462
+      }
+    },
+    {
+      "name": "raw-identity guard typecheck",
+      "status": "failed-historical",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-types-guarded.txt",
+        "sha256": "666b903756ef0b07820c6655cc77a01e73794d240a3ac15c1f6ca7f029b05320",
+        "bytes": 439
+      },
+      "reason": "Two TypeScript unknown-property errors in a callback after prior runtime narrowing. Fixed with captured typed local aliases; no runtime validation removed."
+    },
+    {
+      "name": "corrected guard typecheck",
+      "status": "passed-prior-source-stage",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-ui-types-ready.txt",
+        "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b",
+        "bytes": 111
+      }
+    },
+    {
+      "name": "first combined browser",
+      "status": "passed-prior-source-stage",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-first.txt",
+        "sha256": "7930ac9f5d3c78422e1cd04d4c312fb8402af0f03dd4d6ba134e57383ad0beda",
+        "bytes": 1214
+      },
+      "reason": "Predates approved master diagnostic/date corrections; retained separately from final rebuilt browser."
+    }
+  ],
+  "implementedBoundary": [
+    "Separate Saved returns mode with configured SALES RETURNE book selection and dedicated fully scoped browse/load/metadata routes; legacy create draft remains separate.",
+    "Complete raw DTO validation, exact six-part saved line identities, separate description display fallback, decimal/null/blank/microsecond preservation and read-only related datasets.",
+    "Only explicitly dirty capability-approved HUID/Receive Item and one header Employee patch; no numeric/source/hidden replacement payload and no positional resave.",
+    "Synchronous scope generation and per-operation guards prevent cancelled or A-to-B-to-A stale responses from reviving; immutable loaded context controls mutation.",
+    "409 retains visible draft, blocks resubmission and requires explicit discard/reload; uncertain HTTP5xx/network and invalid post-commit observations also require reload.",
+    "Successful PUT hydrates the complete authoritative returned observation/version and clears only the committed metadata draft.",
+    "Missing/ambiguous company item/employee display reasons are visible and validated without raw-value repair or independent permission changes."
+  ],
+  "remaining": [
+    "No complete33-field or end-to-end X13 closure. Legacy original import/save/print defects remain recorded in the saved UI contract.",
+    "Incoming numeric cache/trigger replay, ghat/discount/MRP/manual total, coherent RTN versus outgoing header/accounting formulas are not implemented here.",
+    "Original-sale source selection, source children, new admitted tag identity/consumption and reversal need a separate source-proven transaction.",
+    "Tagged/issued/unsupported companion metadata remains read-only; outgoing exchange/UAE and full employee propagation across those modes are open.",
+    "Saved deletion/print and image mutation are not supplied by this metadata mode.",
+    "Actual missing-master diagnostic browser fixture, production-scale data/performance, desktop executable comparison and business acceptance are not inferred from these checks.",
+    "Root final API before/after source snapshot and final checkpoint are authoritative for whole-workspace acceptance."
+  ],
+  "frozenAtUtc": "2026-09-11T08:26:18.533630+00:00"
+}

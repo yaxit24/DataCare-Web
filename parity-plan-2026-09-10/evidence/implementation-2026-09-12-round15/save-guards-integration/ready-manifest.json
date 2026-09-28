@@ -1,0 +1,136 @@
+{
+  "kind": "round15-saved-return-save-guards-ready-v1",
+  "status": "ready-for-parent-integration",
+  "newProductFiles": [
+    "web/packages/core/src/saleReturnSaveGuards.ts"
+  ],
+  "testFiles": [
+    "web/packages/core/test/saleReturnSaveGuards.test.ts",
+    "web/packages/core/test/fixtures/saleReturnSaveGuards.independent.json",
+    "web/packages/core/test/fixtures/saleReturnSaveGuards.fine-amendment.json"
+  ],
+  "verification": {
+    "focusedTests": 123,
+    "strictTestTypes": "passed",
+    "unchangedScopedInputs": 7,
+    "run": "final-focused.run.json"
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "31702fbe5ad3ed05cfdd7122e8230f61d8aecf1894533e745f048a63ac369087"
+    },
+    {
+      "path": "contract-amendment.md",
+      "sha256": "4bbf9ba8f24a1eb5bc0877f23e5c706aee3174dfa62df2d4f87d76b582af7355"
+    },
+    {
+      "path": "final-focused.run.json",
+      "sha256": "3515c79ae7aaa3320c62b8e4068d7233fd1ce4495474c634468c3ee59940bbdf"
+    },
+    {
+      "path": "final-inputs.json",
+      "sha256": "8ac2588d137e63d4857e9c352e2c3b207379c27dc61b811e03afcbe87d8b527b"
+    },
+    {
+      "path": "fine-amendment-freeze.json",
+      "sha256": "e6b80ba6b830e598342e866749cdc3e9b0568411da22203c555b7fdcb530bcbf"
+    },
+    {
+      "path": "first-stage-inputs.json",
+      "sha256": "d39f72419b89c0d3e949dd2bc56117f3c895cf673a326e42c6ee7ed1fb66088d"
+    },
+    {
+      "path": "fixture-freeze.json",
+      "sha256": "a5d659d461878d0f5b0e81806c4725d22302a7dd9e2acd113fe4e19dbbe9563a"
+    },
+    {
+      "path": "focused-final.txt",
+      "sha256": "684a3cd08a794858d206292ed58261bb69edcb20b36d07d5fb54bb9045215c31"
+    },
+    {
+      "path": "focused-first.txt",
+      "sha256": "95d2cb0c8e9b1b52870d4647a0b44c75071fdb11ea31a2a32081f60f32e90b26"
+    },
+    {
+      "path": "formatting.txt",
+      "sha256": "88cd9597fa02bdec8924aa2e7a2d71df6ff133e5e1823b88344e84dbb37f1957"
+    },
+    {
+      "path": "freeze_fine_amendment.py",
+      "sha256": "af354e6ea121ee1573e44f2665f7cc354de3e955c714140117fd01af4676b6b2"
+    },
+    {
+      "path": "freeze_vectors.py",
+      "sha256": "7c14c2de1253c29466fef8c9c76bc5b91312701941a84b4bd2a3fb93a17748f3"
+    },
+    {
+      "path": "history/saleReturnSaveGuards.pre-fine-amendment.ts",
+      "sha256": "f9e4059ead44f85e72238a2dff82771d042a765f90dc5cbec197c2fbe55701f3"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "de7f4a6e51035d95f9340bc1152eeb7f5977eff1b6eeae821e2eda1146d42358"
+    },
+    {
+      "path": "run_focused_final.py",
+      "sha256": "3997bece1e723f5b70435bafb3c971da5ab9fb98b2cbe02d6ece085a092ef95b"
+    },
+    {
+      "path": "types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "types-first.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "web/package.json",
+      "sha256": "ddcd749afddb82a4c7ea34e56d0f26f53858cf7bd82813b57b56016a71b593ac"
+    },
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "3d718205936c94aa502058a868f5fcf61d945bbce1d14225ae8ef63829a05c62"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnSaveGuards.ts",
+      "sha256": "0022bfd0aa00085aabd2c0085341386e2b7c7b6168c0de5c6b421740479a5e7f"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnSaveGuards.fine-amendment.json",
+      "sha256": "87de6652da68f4400389e862edc590cfa4a919d882ddddd7b7ad51bed22790c5"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnSaveGuards.independent.json",
+      "sha256": "6af7121c2952c9be055f1e83671d0e1bd0139c80a1d81bc9482c1edb90fd8e78"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnSaveGuards.test.ts",
+      "sha256": "2e0dee599d776d0899d4bcd7db3674d160ddb6777f7558a0a573c109a1c55824"
+    },
+    {
+      "path": "web/vitest.config.mts",
+      "sha256": "3ddec2b9a7bda30ee1a5efbd95c351c8c0e719b9c7b238dec8315892472ba7f5"
+    }
+  ],
+  "externalReferences": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    },
+    {
+      "path": "/tmp/datacare-round15-save-guards-review/review-inputs.json",
+      "sha256": "9dcc48e7248e0263d4659a6379ea5ce9829c2962a18283ac8af0afcc87fbf841"
+    }
+  ],
+  "canCommit": false,
+  "limits": "Pure staged prerequisite only; no authenticated provider, persisted numeric writer, effect acceptance or whole-product parity."
+}

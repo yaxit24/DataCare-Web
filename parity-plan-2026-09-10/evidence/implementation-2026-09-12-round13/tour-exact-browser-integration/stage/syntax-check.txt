@@ -1,0 +1,3 @@
+Command: node --check web/apps/web/test/tour-order.journey.mjs
+Cwd: /tmp/datacare-tour-exact-browser
+Exit0; no diagnostics. Syntax only, no browser/server/DB/compiler execution.

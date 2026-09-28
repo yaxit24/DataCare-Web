@@ -1,0 +1,6 @@
+
+> datacare-web-saas@0.0.0 typecheck:tests /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> cd apps/api && NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.test.json --noEmit
+
+sh: line 1: 44074 Terminated: 15          NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.test.json --noEmit
+ ELIFECYCLE  Command failed with exit code 143.

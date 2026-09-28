@@ -1,0 +1,15 @@
+{
+  "fixture": "web/packages/core/test/fixtures/saleReturnHeaderFloat.independent.json",
+  "fixtureSha256": "a56f54ebec8c89fb47133f4cc43bcb868a8c267b78dc35115f9d7ae9c9696ae7",
+  "cases": 28,
+  "implementationExisted": false,
+  "source": {
+    "path": "web/packages/db/prisma/schema.prisma",
+    "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+    "lines": [
+      5708,
+      5709,
+      5714
+    ]
+  }
+}

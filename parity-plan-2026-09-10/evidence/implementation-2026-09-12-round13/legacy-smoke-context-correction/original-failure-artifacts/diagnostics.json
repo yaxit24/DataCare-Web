@@ -1,0 +1,11 @@
+{
+  "error": "AssertionError [ERR_ASSERTION]: scope select must become \"01\"\n\n'' !== '01'\n\n    at expectValue (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:52:10)\n    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:642:3",
+  "url": "http://127.0.0.1:4111/select",
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "requestFailures": [],
+  "serverLog": "   ▲ Next.js 15.1.6\n   - Local:        http://localhost:4111\n   - Network:      http://127.0.2.2:4111\n\n ✓ Starting...\n ✓ Ready in 261ms\n",
+  "captureErrors": []
+}

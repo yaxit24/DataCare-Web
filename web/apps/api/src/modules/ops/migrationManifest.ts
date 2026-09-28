@@ -74,4 +74,64 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20260801120000_column_type_parity',
     checksum: 'd90f7313519b2cd7a158a6ce55728e1d181807bfe2d8dc41506efffe55373413',
   },
+  {
+    // Provides least-privilege, transactional global sequence advancement for same-company restore.
+    name: '20260829010000_company_restore_sequence_guard',
+    checksum: '84afef22c62860d9227f6643e537aa5bd393ac93374f69a3b45d23374e609512',
+  },
+  {
+    // Append-only company backup ledger plus the authority evidence a destructive data repair records.
+    name: '20260830000000_data_repair_authority',
+    checksum: 'ede47cc4821cf4c0aaf28f948788df8b900ecf2e753bb483c9b79d9878650ced',
+  },
+  {
+    // UPI_DATA split identity uses the desktop SR_NO + ISR_NO key so one member line can carry multiple UPI tenders.
+    name: '20260910010000_upi_data_split_key',
+    checksum: '27a70022e5f51673fa2f1f086d1fd90723254f49ce74e3fdec31166cb4c18e7a',
+  },
+  {
+    // MFG_ISU_REC.ITM_LOT preserves the item-lot column used by manufacturing issue/receive rows.
+    name: '20260910020000_mfg_isu_rec_item_lot',
+    checksum: '27f5ee541cd03769e2e1c4de4ba80f936414f9ea964e05dc0ea0eafb4ae788d4',
+  },
+  {
+    // Desktop design-book style specification (MS_UPDATE.cs:6721).
+    name: '20260911010000_design_detail_style',
+    checksum: 'be9000ba6025d5623759473d1218e9e168eacc1229a46ef618c9bbed0682e2cb',
+  },
+  {
+    // AC_DATA.ENTRY_TIME retains the voucher wall clock used by desktop balance cutoffs.
+    name: '20260911020000_ledger_entry_timestamp',
+    checksum: 'b6dd19d5450d9c9a6ddfe12521bfbfed1e327979f0d67b4d980e3d1c6e3a2061',
+  },
+  {
+    // Preserve full saved order image identity without truncating existing keys.
+    name: '20260911030000_order_image_identity',
+    checksum: 'af42c4466169c9d325249855737870e404398ce69fbda486aaf3eafe307f5129',
+  },
+  {
+    // Primary desktop component material-lot identity and owner, independently confirmed in EXE.
+    name: '20260911040000_mfg_component_lot',
+    checksum: 'd34052b7e193a51366dfbcd137e6b70dbaebc2d75a01e665d0d5a5fdf1e1f575',
+  },
+  {
+    // MS_OPNCOMP sale/e-credit-note header ledger override.
+    name: '20260911050000_sale_header_ledger',
+    checksum: '2b94e2e048952bf2e3e9daaa7c0bf6c9e65713a3e55f84e9b862bd11f8f4a4e6',
+  },
+  {
+    // Persist web photo revisions across replacement/deletion for concurrent saved-order clients.
+    name: '20260911060000_image_revision',
+    checksum: 'a18e61bcd3460005986fdca31ec8ff63bc010130f2fe73b838228f8850d29570',
+  },
+  {
+    // MS_OPNCOMP:5844, incoming Return tag labour code retained independently from LBR_CODE.
+    name: '20260911070000_sale_return_tag_labour_code',
+    checksum: '585051aaa5d30794ff5248f3c370050cada7edfc2632cbd107dacac8353a9218',
+  },
+  {
+    // Server context generations and explicit unknown ledger state; runtime lifecycle is separate.
+    name: '20260912004500_session_context_epoch',
+    checksum: 'b2ebec67672c219db30e547cb1b6b7346f49e94cc3c621a12610e1e54bf35b7d',
+  },
 ];

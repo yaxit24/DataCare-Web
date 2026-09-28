@@ -1,0 +1,72 @@
+
+> datacare-web-saas@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> turbo run typecheck
+
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running typecheck in 7 packages
+   • Remote caching disabled
+
+@datacare/parity:typecheck: cache hit, replaying logs f4c88e5cd9351d8b
+@datacare/parity:typecheck: 
+@datacare/parity:typecheck: > @datacare/parity@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/parity
+@datacare/parity:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/parity:typecheck: 
+@datacare/core:typecheck: cache hit, replaying logs 2e52e9cf30f98d47
+@datacare/core:typecheck: 
+@datacare/core:typecheck: > @datacare/core@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+@datacare/core:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/core:typecheck: 
+@datacare/types:typecheck: cache hit, replaying logs f2fd982e1a5a7b6b
+@datacare/types:typecheck: 
+@datacare/types:typecheck: > @datacare/types@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/types
+@datacare/types:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/types:typecheck: 
+@datacare/reports:typecheck: cache hit, replaying logs 7e34a26f440a8a06
+@datacare/reports:typecheck: 
+@datacare/reports:typecheck: > @datacare/reports@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/reports
+@datacare/reports:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/reports:typecheck: 
+@datacare/db:typecheck: cache hit, replaying logs ac06c9a28d31eb48
+@datacare/db:typecheck: 
+@datacare/db:typecheck: > @datacare/db@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db
+@datacare/db:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/db:typecheck: 
+@datacare/db:build: cache hit, replaying logs cb2634a0ea4c5eb4
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/types:build: cache hit, replaying logs e4fdc400d95edad1
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/core:build: cache hit, replaying logs f47efd833a3c8ef9
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/api:typecheck: cache miss, executing 4be7ddeb9ea7d9c3
+@datacare/web:typecheck: cache miss, executing a78cf4fa7d625dbd
+@datacare/api:typecheck: 
+@datacare/api:typecheck: > @datacare/api@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+@datacare/api:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/api:typecheck: 
+@datacare/web:typecheck: 
+@datacare/web:typecheck: > @datacare/web@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+@datacare/web:typecheck: > tsc --noEmit
+@datacare/web:typecheck: 
+@datacare/api:typecheck: src/app.ts(642,54): error TS2345: Argument of type 'SelectionAccessDescriptor' is not assignable to parameter of type 'AccessInput'.
+@datacare/api:typecheck:   Index signature for type 'string' is missing in type 'SelectionAccessDescriptor'.
+@datacare/api:typecheck:  ELIFECYCLE  Command failed with exit code 2.
+ ERROR  @datacare/api#typecheck: command (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api) /opt/homebrew/bin/pnpm run typecheck exited (2)
+
+ Tasks:    8 successful, 10 total
+Cached:    8 cached, 10 total
+  Time:    5.015s 
+Failed:    @datacare/api#typecheck
+
+ ERROR  run failed: command  exited (2)
+ ELIFECYCLE  Command failed with exit code 2.

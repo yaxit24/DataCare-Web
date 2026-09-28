@@ -1,0 +1,56 @@
+--- a/apps/web/test/parity.real-stack.mjs
++++ b/apps/web/test/parity.real-stack.mjs
+@@ -61,6 +61,13 @@
+   salesReturnBillReplayFixtureTables,
+   exerciseSalesReturnBillReplay,
+ } from './sales-return-bill-replay.journey.mjs';
++
++import {
++  seedSalesReturnLabourReplay,
++  cleanupSalesReturnLabourReplay,
++  salesReturnLabourReplayFixtureTables,
++  exerciseSalesReturnLabourReplay,
++} from './sales-return-labour-replay.journey.mjs';
+ 
+ // Real Next production build -> real Fastify -> migrated PostgreSQL with app_user and forced RLS.
+ // Run through scripts/parity-test-env.mjs. This harness refuses the running application's database.
+@@ -94,6 +101,7 @@
+ const runtime = new PrismaClient();
+ const password = `Test-${randomBytes(18).toString('hex')}!`;
+ const tables = [
++  ...salesReturnLabourReplayFixtureTables,
+   ...salesReturnBillReplayFixtureTables,
+   ...salesReturnReplayFixtureTables,
+   ...salesReturnSavedFixtureTables,
+@@ -530,6 +538,14 @@
+   } finally {
+     await cleanupSalesReturnBillReplay(sql);
+   }
++  await seedSalesReturnLabourReplay(sql);
++  try {
++    result.salesReturnLabourReplay = await exerciseSalesReturnLabourReplay(page, {
++      checkpoint, owner, tenantId, password, sql,
++    });
++  } finally {
++    await cleanupSalesReturnLabourReplay(sql);
++  }
+   assert.deepEqual(errors, [], 'browser runtime errors');
+   const journeySummaries = [];
+   result.journeys = [
+@@ -546,6 +562,7 @@
+     ['sales-order', result.salesOrder],
+     ['sales-order-design', result.salesOrderDesign],
+     ['sales-return-bill-replay', result.salesReturnBillReplay],
++    ['sales-return-labour-replay', result.salesReturnLabourReplay],
+     ['sales-return-replay', result.salesReturnReplay],
+     ['sales-return-saved', result.salesReturnSaved],
+     ['tour-order', result.tourOrder],
+@@ -566,7 +583,7 @@
+   );
+   result.status = 'passed';
+   console.log(
+-    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation and bill preview; zero mocked requests',
++    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
+   );
+ } catch (error) {
+   result.status = 'failed';

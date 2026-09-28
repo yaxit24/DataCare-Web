@@ -1,0 +1,90 @@
+{
+  "kind": "x13-internal-account-balance-db-verification-v1",
+  "status": "focused-engineering-passed",
+  "databaseLeaseReleased": true,
+  "runtimeOrExpectedCorrectionsRequired": false,
+  "existingClosingApiAuthorityChanged": false,
+  "desktopRuntimeAcceptance": false,
+  "verification": [
+    {
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-db-first.txt",
+      "files": 1,
+      "tests": 54,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-regressions.txt",
+      "files": 14,
+      "tests": 420,
+      "skipped": 0,
+      "exitCode": 0
+    }
+  ],
+  "inputs": [
+    {
+      "path": "web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "sha256": "375629060abeb7454079996c19f61dcc3f8dbdff095616358257e1fa9ce4a2bd"
+    },
+    {
+      "path": "web/apps/api/test/desktopAccountBalance.db.test.ts",
+      "sha256": "da57beda30df821c8178f423a2b2f6142381348e1033ca386a56617322ca017c"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/desktopAccountBalance.independent.json",
+      "sha256": "32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7"
+    },
+    {
+      "path": "web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-independent-vectors.json",
+      "sha256": "32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-observation-contract.md",
+      "sha256": "faa7e216765256d0d67cced66cdabb2dac1cedd72accb85370586f3f0d0c3c21"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-observation-contract.run.json",
+      "sha256": "60686d0dce326d04e93e72ea62a3755cb0c3203593b39b563d5d77d757aecc08"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-vector-independent-review.json",
+      "sha256": "a1583443aa01b7f22b91da8bed6add5979fe910c745e16b6e026905235959acd"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-tests-ready.json",
+      "sha256": "ce796a4884a79d86febf6aee6f13bcff128bd322b367d2e05279a4057f9c6d31"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-db-first.txt",
+      "sha256": "694e3d84f8c5b68a7d7b89fb86b1ca0493743dc96673d8410693a2d7fa218f07"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-regressions.txt",
+      "sha256": "58677f4eca16948b6529c1ed74d0072d567dd6bd00b83987d350bc957ddb737e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-format-final.txt",
+      "sha256": "9b6855f943bd4340c1b1e5ad19a15b00bd9191eb36f01789219d407cf24146fb"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-db-verification.md",
+      "sha256": "4fdebf2d75a0440d15f3842e83718db6480ceb5ff6ef1c100706abfcb23b0e9c"
+    }
+  ]
+}

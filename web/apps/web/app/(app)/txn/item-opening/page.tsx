@@ -9,6 +9,9 @@ import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /** Item (non-tag) Opening Balance — TR_ITM_OPBL → ITM_OPBL + MAIN_STOCK 'ITOBL'. Bulk/loose opening stock. */
 interface Row {
+  diamondWt: string;
+  diamondRate: string;
+  diamondAmount: string;
   itCode: string;
   pcs: string;
   grossWt: string;
@@ -16,7 +19,17 @@ interface Row {
   touch: string;
   rate: string;
 }
-const blank = (): Row => ({ itCode: '', pcs: '', grossWt: '', netWt: '', touch: '', rate: '' });
+const blank = (): Row => ({
+  itCode: '',
+  pcs: '',
+  grossWt: '',
+  netWt: '',
+  touch: '',
+  rate: '',
+  diamondWt: '',
+  diamondRate: '',
+  diamondAmount: '',
+});
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
 const currentDate = () => new Date().toISOString().slice(0, 10);
@@ -81,6 +94,9 @@ export default function ItemOpeningPage() {
       setVoucherLookup(String(view.voucherNo));
       setVchDate(String(view.vchDate));
       const loaded = (view.lines ?? []).map((line: any): Row => ({
+        diamondWt: String(line.diamondWt ?? ''),
+        diamondRate: String(line.diamondRate ?? ''),
+        diamondAmount: String(line.diamondAmount ?? ''),
         itCode: String(line.itCode ?? ''),
         pcs: str(line.pcs),
         grossWt: str(line.grossWt),
@@ -118,6 +134,11 @@ export default function ItemOpeningPage() {
     const lines = rows
       .filter((row) => row.itCode.trim())
       .map((row) => ({
+        // P3: an opening row for a stone-set ornament values the diamond separately from the
+        // metal; without these the opening valuation is metal-only.
+        diamondWt: n(row.diamondWt) || undefined,
+        diamondRate: n(row.diamondRate) || undefined,
+        diamondAmount: n(row.diamondAmount) || undefined,
         itCode: row.itCode.trim(),
         pcs: n(row.pcs),
         grossWt: n(row.grossWt),

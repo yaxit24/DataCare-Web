@@ -1,0 +1,751 @@
+{
+  "kind": "datacare.session-selection-independent-outcomes/1.0",
+  "status": "prospective-literals-not-executed",
+  "authorship": "Written before staged selection coordinator implementation; only current baseline helpers and frozen prospective contract read. No SUT imported or executed.",
+  "fingerprintProfile": "SHA256 over UTF8 compact JSON of [version,coCode,lcPresenceTuple,yearPresenceTuple,expectedEpoch,selectionId]; version=session-context-selection-v1; optional [0] versus [1,value]; key order irrelevant; no trimming/coercion. Proposed profile pinned for staged implementation.",
+  "fixtures": {
+    "scope": {
+      "A": {
+        "coCode": "01",
+        "lcCode": "01",
+        "coYear": "2024-2025"
+      },
+      "B": {
+        "coCode": "02",
+        "lcCode": "02",
+        "coYear": "2025-2026"
+      }
+    },
+    "requests": {
+      "toB": {
+        "coCode": "02",
+        "lcCode": "02",
+        "coYear": "2025-2026",
+        "expectedContextEpoch": "9",
+        "selectionId": "10000000-0000-4000-8000-000000000001"
+      },
+      "sameA": {
+        "coCode": "01",
+        "lcCode": "01",
+        "coYear": "2024-2025",
+        "expectedContextEpoch": "9",
+        "selectionId": "20000000-0000-4000-8000-000000000002"
+      },
+      "backA": {
+        "coCode": "01",
+        "lcCode": "01",
+        "coYear": "2024-2025",
+        "expectedContextEpoch": "10",
+        "selectionId": "20000000-0000-4000-8000-000000000002"
+      },
+      "implicitB": {
+        "coCode": "02",
+        "expectedContextEpoch": "9",
+        "selectionId": "10000000-0000-4000-8000-000000000001"
+      }
+    },
+    "fingerprints": {
+      "toB": {
+        "utf8": "[\"session-context-selection-v1\",\"02\",[1,\"02\"],[1,\"2025-2026\"],\"9\",\"10000000-0000-4000-8000-000000000001\"]",
+        "sha256": "f17b87fce6162c7dc921e8a06476f6c27d1f941a860513b6c8bb7607bc69de6d"
+      },
+      "sameA": {
+        "utf8": "[\"session-context-selection-v1\",\"01\",[1,\"01\"],[1,\"2024-2025\"],\"9\",\"20000000-0000-4000-8000-000000000002\"]",
+        "sha256": "75e5b67b5ff2338563cf1f72c84bc258be3fc93c770ba19b7b966542c59fc3c1"
+      },
+      "backA": {
+        "utf8": "[\"session-context-selection-v1\",\"01\",[1,\"01\"],[1,\"2024-2025\"],\"10\",\"20000000-0000-4000-8000-000000000002\"]",
+        "sha256": "1c980a9fbd48ed5c439f2c82493806f34c6d59ff6a0c4ed950bb6dddf385f965"
+      },
+      "implicitB": {
+        "utf8": "[\"session-context-selection-v1\",\"02\",[0],[0],\"9\",\"10000000-0000-4000-8000-000000000001\"]",
+        "sha256": "7d421b0c8c7daf20f793184510554056bd546f425f8896ada04bf90e2d3fdc2f"
+      }
+    },
+    "databaseDay": "2026-09-12",
+    "databaseYesterday": "2026-09-11",
+    "initialEpoch": "9",
+    "immutableLoginCoCode": "01",
+    "ledgerContext": {
+      "version": "server-session-ledger-context-v1",
+      "status": "unknown",
+      "mode": null,
+      "reason": "vendor-authority-unresolved"
+    },
+    "unchangedSessionFields": [
+      "tenant_id",
+      "session_id",
+      "login_name",
+      "login_co_code",
+      "refresh_jti_hash",
+      "created_at",
+      "last_used_at",
+      "expires_at",
+      "revoked_at",
+      "revoke_reason"
+    ]
+  },
+  "cases": [
+    {
+      "id": "C01",
+      "given": "A9, target B allowed, target lock2026-09-09/Y, database day2026-09-12",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "scope": "B",
+        "epoch": "10",
+        "replayed": false,
+        "receiptId": "10000000-0000-4000-8000-000000000001",
+        "receiptFromEpoch": "9",
+        "receiptHash": "toB",
+        "targetLock": "2026-09-11",
+        "sessionWrites": 1,
+        "lockWrites": 1,
+        "signerPrincipalCompany": "02",
+        "signedLoginCoCode": "01"
+      }
+    },
+    {
+      "id": "C02",
+      "given": "A9, same scope A, new ID, old Y lock",
+      "request": "sameA",
+      "expect": {
+        "outcome": "applied",
+        "scope": "A",
+        "epoch": "10",
+        "replayed": false,
+        "receiptId": "20000000-0000-4000-8000-000000000002",
+        "receiptFromEpoch": "9",
+        "sessionWrites": 1,
+        "lockWrites": 1
+      }
+    },
+    {
+      "id": "C03",
+      "given": "Committed C01 B10; current authenticated token epoch10; exact original body epoch9",
+      "request": "toB",
+      "expect": {
+        "outcome": "replayed",
+        "scope": "B",
+        "epoch": "10",
+        "replayed": true,
+        "receiptUnchanged": true,
+        "sessionWrites": 0,
+        "lockHelperCalls": 0,
+        "targetResolverCalls": 0
+      }
+    },
+    {
+      "id": "C04",
+      "given": "Committed C01 B10; original stale bearer epoch9",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "session-invalid",
+        "writes": 0,
+        "signerCalls": 0
+      }
+    },
+    {
+      "id": "C05",
+      "given": "Committed C01 B10; fresh bearer10; same current receipt ID but request coCode01",
+      "expect": {
+        "outcome": "conflict",
+        "reason": "context-operation-conflict",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C06",
+      "given": "Committed implicitB B10; fresh bearer10; reuse same ID with explicit default lcCode02/coYear2025-2026",
+      "request": "toB",
+      "expect": {
+        "outcome": "conflict",
+        "reason": "context-operation-conflict",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C07",
+      "given": "Committed C01 B10; fresh bearer10; reuse same ID/body except expectedContextEpoch10",
+      "expect": {
+        "outcome": "conflict",
+        "reason": "context-operation-conflict",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C08",
+      "given": "Committed C01 B10; fresh bearer10; new operation ID but original expected epoch9",
+      "expect": {
+        "outcome": "conflict",
+        "reason": "context-stale",
+        "writes": 0,
+        "lockHelperCalls": 0
+      }
+    },
+    {
+      "id": "C09",
+      "given": "C01 then backA committed: A11/current receipt I2/from10; fresh bearer11; retry I1 original body9",
+      "request": "toB",
+      "expect": {
+        "outcome": "conflict",
+        "reason": "context-stale",
+        "scope": "A",
+        "epoch": "11",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C10",
+      "given": "C01 then backA committed A11; use older I1 deliberately with current expected11 and targetB; I1 is not current receipt",
+      "expect": {
+        "outcome": "applied",
+        "scope": "B",
+        "epoch": "12",
+        "receiptId": "10000000-0000-4000-8000-000000000001",
+        "receiptFromEpoch": "11",
+        "limit": "No universal historical selection-ID uniqueness is claimed"
+      }
+    },
+    {
+      "id": "C11",
+      "given": "Committed implicitB B10; target default year changes to2026-2027 while original B scope remains configured; exact recovery",
+      "request": "implicitB",
+      "expect": {
+        "outcome": "replayed",
+        "scope": "B",
+        "epoch": "10",
+        "year": "2025-2026",
+        "targetResolverCalls": 0,
+        "lockHelperCalls": 0
+      }
+    },
+    {
+      "id": "C12",
+      "given": "Committed C01 B10; fresh current principal rights changed",
+      "request": "toB",
+      "expect": {
+        "outcome": "replayed",
+        "epoch": "10",
+        "rights": "fresh B principal rights, not original response or request rights",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C13",
+      "given": "A9 with current principal reset required",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "password-reset-required",
+        "writes": 0,
+        "signerCalls": 0
+      }
+    },
+    {
+      "id": "C14",
+      "given": "A9, current principal permitted, target B principal reset required",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "target-password-reset-required",
+        "writes": 0,
+        "lockHelperCalls": 0,
+        "signerCalls": 0,
+        "basis": "Explicit root web-policy decision; not historical source-equivalence"
+      }
+    },
+    {
+      "id": "C15",
+      "given": "A9 current principal missing",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "principal-unavailable",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C16",
+      "given": "A9 current ordinary user, target company not permitted; supplied request/admin rights cannot grant it",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "company-unavailable",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C17",
+      "given": "A9 target B allowed but selected lcCode99 absent",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "location-unavailable",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C18",
+      "given": "A9 target B requested year absent or all configured years absent",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "year-unavailable",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C19",
+      "given": "A9 current admin at01; target02 ordinary principal exists with different rights/resetfalse",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "10",
+        "signedLoginCoCode": "01",
+        "signedRights": "target02 ordinary rights",
+        "noAdminInheritance": true
+      }
+    },
+    {
+      "id": "C20",
+      "given": "A9 current admin at01; target02 allowed but no target credential; source principal fallback chooses01",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "10",
+        "signedLoginCoCode": "01",
+        "signedRights": "fresh fallback01 rights",
+        "scope": "B"
+      }
+    },
+    {
+      "id": "C21",
+      "given": "A9 target Y lock2026-09-11 equal database yesterday",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "10",
+        "targetLock": "2026-09-11",
+        "lockWrites": 0
+      }
+    },
+    {
+      "id": "C22",
+      "given": "A9 target Y manual lock2026-09-20 later than database yesterday",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "10",
+        "targetLock": "2026-09-20",
+        "lockWrites": 0
+      }
+    },
+    {
+      "id": "C23",
+      "given": "A9 target LAST_DAY_LOCK N or blank",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "10",
+        "targetLock": "unchanged exact stored value",
+        "lockWrites": 0
+      }
+    },
+    {
+      "id": "C24",
+      "given": "A9 no target CO_SET row",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "10",
+        "lockResult": {
+          "applied": false,
+          "lockDate": null
+        },
+        "lockWrites": 0
+      }
+    },
+    {
+      "id": "C25",
+      "given": "A9 duplicate target CO_SET rows, including an invalid flag in one",
+      "request": "toB",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "10",
+        "lockResult": {
+          "applied": false,
+          "lockDate": null
+        },
+        "lockWrites": 0,
+        "basis": "Existing ambiguity branch precedes single-row flag validation"
+      }
+    },
+    {
+      "id": "C26",
+      "given": "A9 exactly one target CO_SET row with invalid nonblank flagX",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "LastDayLockConfigurationError",
+        "sessionAndSettings": "exactly unchanged",
+        "signerCalls": 0
+      }
+    },
+    {
+      "id": "C27",
+      "given": "A9 target Y lock advances tentatively; local signer throws before commit",
+      "request": "toB",
+      "expect": {
+        "outcome": "transaction-aborted",
+        "sessionAndSettings": "exactly unchanged including physical xmin/ctid visibility",
+        "cookiesPublished": 0,
+        "committedLockWrites": 0
+      }
+    },
+    {
+      "id": "C28",
+      "given": "A9 target Y lock advances tentatively; final guarded session UPDATE affects0",
+      "request": "toB",
+      "expect": {
+        "outcome": "transaction-aborted",
+        "sessionAndSettings": "exactly unchanged",
+        "cookiesPublished": 0
+      }
+    },
+    {
+      "id": "C29",
+      "given": "A9 all local preparation succeeds; DB commit definitely aborts",
+      "request": "toB",
+      "expect": {
+        "outcome": "transaction-aborted",
+        "sessionAndSettings": "exactly unchanged",
+        "cookiesPublished": 0
+      }
+    },
+    {
+      "id": "C30",
+      "given": "C01 commits but response is lost",
+      "request": "toB",
+      "expect": {
+        "outcome": "committed-response-lost",
+        "scope": "B",
+        "epoch": "10",
+        "receiptRetained": true,
+        "databaseRollback": false,
+        "recovery": "fresh current access plus explicit exact original body only"
+      }
+    },
+    {
+      "id": "C31",
+      "given": "Revoked or expired current session with exact current receipt",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "session-revoked or session-expired",
+        "writes": 0,
+        "signerCalls": 0
+      }
+    },
+    {
+      "id": "C32",
+      "given": "Signed subject, tenant, session ID, immutable login company or current scope/epoch differs from locked row",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "session-invalid",
+        "writes": 0,
+        "signerCalls": 0
+      }
+    },
+    {
+      "id": "C33",
+      "given": "Same sid in another tenant, different receipt/scope",
+      "request": "toB",
+      "expect": {
+        "outcome": "rejected",
+        "foreignRows": "exactly unchanged",
+        "noReceiptDisclosure": true
+      }
+    },
+    {
+      "id": "C34",
+      "given": "Current epoch9007199254740993; exact request expected epoch; valid target",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "9007199254740994",
+        "receiptFromEpoch": "9007199254740993",
+        "numberCoercion": false
+      }
+    },
+    {
+      "id": "C35",
+      "given": "Current epoch9223372036854775806; exact request expected epoch",
+      "expect": {
+        "outcome": "applied",
+        "epoch": "9223372036854775807",
+        "receiptFromEpoch": "9223372036854775806"
+      }
+    },
+    {
+      "id": "C36",
+      "given": "Current epoch9223372036854775807; new operation at exact epoch",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "context-epoch-exhausted",
+        "writes": 0
+      }
+    },
+    {
+      "id": "C37",
+      "given": "Current epoch9223372036854775807; valid exact last receipt from9223372036854775806",
+      "expect": {
+        "outcome": "replayed",
+        "epoch": "9223372036854775807",
+        "writes": 0,
+        "limit": "Do not compute next epoch on recovery"
+      }
+    },
+    {
+      "id": "C38",
+      "given": "Malformed persisted epoch, receipt partly null, or ledger object with known modeA",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "invalid persisted context",
+        "writes": 0,
+        "knownModeDefault": false
+      }
+    },
+    {
+      "id": "C39",
+      "given": "Current receipt from7 but current epoch10, despite matching ID/hash/body7",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "inconsistent receipt context",
+        "writes": 0,
+        "proposedInvariant": "Current epoch must equal receipt from epoch plus1; future nonselection epoch changes must clear receipt"
+      }
+    },
+    {
+      "id": "C40",
+      "given": "Malformed body: missing expected epoch/ID; numeric fields; unknown keys; supplied tenant/sid/login/rights/mode; explicit undefined/null optionals; nonplain/getter envelope",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "invalid request",
+        "transactionsStarted": 0,
+        "writes": 0
+      }
+    },
+    {
+      "id": "C41",
+      "given": "Same valid body properties supplied in another property order",
+      "expect": {
+        "outcome": "same fingerprint and same receipt disposition",
+        "normalization": "fixed versioned tuple, no trim/coercion, option-presence retained"
+      }
+    },
+    {
+      "id": "C42",
+      "given": "Selection waits on session lock until after absolute expiry",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "session-expired",
+        "writes": 0,
+        "clock": "fresh database clock_timestamp() read AFTER lock acquisition"
+      }
+    },
+    {
+      "id": "C43",
+      "given": "Target lock tentatively advanced; injected local signer delayed until after expiry",
+      "expect": {
+        "outcome": "transaction-aborted",
+        "reason": "session-expired",
+        "sessionAndSettings": "exactly unchanged",
+        "cookiesPublished": 0,
+        "clock": "final guarded update uses clock_timestamp()"
+      }
+    },
+    {
+      "id": "C44",
+      "given": "Exact receipt recovery starts before expiry; signer finishes after expiry",
+      "expect": {
+        "outcome": "rejected",
+        "reason": "session-expired",
+        "writes": 0,
+        "cookiesPublished": 0,
+        "clock": "recheck fresh database clock before recovery returns"
+      }
+    }
+  ],
+  "raceSchedules": [
+    {
+      "id": "R01",
+      "schedule": [
+        "X locks A9",
+        "Y requests different operation from9 and waits",
+        "X commits B10",
+        "Y resumes"
+      ],
+      "expect": {
+        "committedSelections": 1,
+        "finalEpoch": "10",
+        "loser": "context-stale or explicit retryable Serializable conflict",
+        "loserCommittedSettingsWrites": 0,
+        "automaticRetry": false
+      }
+    },
+    {
+      "id": "R02",
+      "schedule": [
+        "X locks A9",
+        "Y submits exact same I1/body9 while X holds lock",
+        "X commits B10",
+        "Y resumes"
+      ],
+      "expect": {
+        "committedSelections": 1,
+        "finalEpoch": "10",
+        "second": "replayed or retryable Serializable conflict",
+        "afterExplicitRetry": "replayed B10 without another lock call"
+      }
+    },
+    {
+      "id": "R03",
+      "schedule": [
+        "X opens B fromA9, commits10",
+        "Y opens A fromB10, commits11",
+        "old A9 token/response returns"
+      ],
+      "expect": {
+        "finalScope": "A",
+        "finalEpoch": "11",
+        "oldTokenAccepted": false,
+        "sameScopeTupleDoesNotRestoreAuthority": true
+      }
+    },
+    {
+      "id": "R04",
+      "schedule": [
+        "Manual writer locks target CO_SET",
+        "Manual writer advances LOCK_DATE to2026-09-20 and commits",
+        "Selector obtains settings lock"
+      ],
+      "expect": {
+        "targetLock": "2026-09-20",
+        "selector": "applies context without moving date backward, or retryable Serializable conflict",
+        "staleSettingsOverwrite": false
+      }
+    },
+    {
+      "id": "R05",
+      "schedule": [
+        "Selector locks session then target CO_SET",
+        "Selector advances to2026-09-11 and commits",
+        "Manual writer advances to2026-09-20"
+      ],
+      "expect": {
+        "finalTargetLock": "2026-09-20",
+        "committedSelections": 1
+      }
+    },
+    {
+      "id": "R06",
+      "schedule": [
+        "Refresh wins session lock and rotatesJ1toJ2 at epoch9",
+        "Selection then commits epoch10",
+        "Refresh response with access9 arrives last"
+      ],
+      "expect": {
+        "finalEpoch": "10",
+        "refreshHash": "J2",
+        "access9Accepted": false,
+        "selectionRotatesRefresh": false
+      }
+    },
+    {
+      "id": "R07",
+      "schedule": [
+        "Selection commits epoch10 first",
+        "Refresh wins next lock"
+      ],
+      "expect": {
+        "refreshAccessEpoch": "10",
+        "finalEpoch": "10",
+        "refreshPreservesReceiptAndLedgerContext": true
+      }
+    },
+    {
+      "id": "R08",
+      "schedule": [
+        "Revocation commits first",
+        "Selection obtains session lock"
+      ],
+      "expect": {
+        "selection": "session-revoked",
+        "contextWrites": 0,
+        "sessionUnrevoked": false
+      }
+    },
+    {
+      "id": "R09",
+      "schedule": [
+        "Selection commits first",
+        "Revocation commits next",
+        "Selection response arrives late"
+      ],
+      "expect": {
+        "lateAccessAccepted": false,
+        "sessionUnrevoked": false
+      }
+    },
+    {
+      "id": "R10",
+      "schedule": [
+        "Password reset locks LOGIN_MAST and waits on auth_session",
+        "Selection holds auth_session and reads fresh principal without taking LOGIN_MAST row lock",
+        "Selection releases or aborts; reset commits"
+      ],
+      "expect": {
+        "newInverseRowLockCycle": false,
+        "finalRevocationEffective": true,
+        "qualification": "Serializable abort is allowed; no timeout relaxation or automatic success"
+      }
+    },
+    {
+      "id": "R11",
+      "schedule": [
+        "Selection holds session; existing self-password change updates credentials and excludes this session from revocation"
+      ],
+      "expect": {
+        "existingActiveSessionExceptionPreserved": true,
+        "newInverseRowLockCycle": false,
+        "credentialHashWork": "outside selection transaction"
+      }
+    },
+    {
+      "id": "R12",
+      "schedule": [
+        "Ordinary financial request passes current pre-handler at epoch9",
+        "Selection commits10",
+        "Already-admitted financial request continues"
+      ],
+      "expect": {
+        "universalBusinessWriterCancellationClaim": false,
+        "requiredNextBoundary": "Same-transaction session epoch guard before future financial/document/config/ledger work"
+      }
+    }
+  ],
+  "globalInvariants": [
+    "No successful result/cookie before commit.",
+    "No refresh cookie replacement or JTI rotation on selection.",
+    "All unrelated tenant/company settings and business tables unchanged.",
+    "Exact current receipt recovery does not update last_used_at, epoch, receipt, scope or unknown context.",
+    "All after-write errors must roll back the whole tenant transaction, not return an error-shaped successful callback.",
+    "No known ledger mode, closing value or universal in-flight writer guarantee."
+  ],
+  "policyDecision": "Target forced-reset refusal explicitly approved by root; improvement in web authority/recovery, not asserted historical equality.",
+  "notes": [
+    "The two allowed outcomes for a blocked concurrent transaction are explicit, not a silent automatic retry. A later deliberate retry uses original ID/body.",
+    "Only current receipt is retained; reusing an older no-longer-retained ID with current epoch cannot be distinguished from a fresh operation.",
+    "Physical-row snapshot equality means no committed mutation; PostgreSQL transaction internals/WAL are not claimed absent."
+  ]
+}

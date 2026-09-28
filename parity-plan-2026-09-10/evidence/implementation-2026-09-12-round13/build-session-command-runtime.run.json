@@ -1,0 +1,19 @@
+{
+  "command": [
+    "pnpm",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:49:34.956652+00:00",
+  "finishedAtUtc": "2026-09-11T21:49:55.181725+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-session-command-runtime.txt",
+  "logSha256": "85401ad43d9a66664e4e028fe67d502cd22bc0bd0b7fe2b7a415199b01605d36",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-session-command-runtime.inputs.json",
+  "inputManifestSha256": "aa9f70f830ff4772a989f6d42b48c1e1acb5fc938fb367dbc16bdfdc10dd600c",
+  "inputCount": 1800,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

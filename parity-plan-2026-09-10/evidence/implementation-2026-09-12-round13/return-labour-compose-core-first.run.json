@@ -1,0 +1,24 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "exec",
+    "vitest",
+    "run",
+    "test/saleReturnIncomingLabourCompose.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T22:16:07.395151+00:00",
+  "finishedAtUtc": "2026-09-11T22:16:08.491493+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-compose-core-first.txt",
+  "logSha256": "cd0ee6d1403ae8ea54b04490fdfb03444dd588cbcba1e5c0afd74e39620a3239",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-compose-core-first.inputs.json",
+  "inputManifestSha256": "486a12e89249930c7ab92ce62e1bddfb531f905de89da274182412ee60eace3b",
+  "inputCount": 1807,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

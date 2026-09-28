@@ -1,0 +1,310 @@
+{
+ "form": "RP_STK_MOVE",
+ "controlCount": 28,
+ "byKind": {
+  "button": 7,
+  "masked": 2,
+  "grid": 2,
+  "combo": 1,
+  "label": 7,
+  "other": 1,
+  "panel": 2,
+  "textbox": 6
+ },
+ "grids": [
+  "DGV",
+  "DGV_VCH"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "Panel1": [
+   "DGV",
+   "DGV_VCH"
+  ],
+  "this": [
+   "Label6",
+   "tDesignNo",
+   "tGrName",
+   "tGrCode",
+   "tPrName",
+   "tPrCode",
+   "Label4",
+   "Label1",
+   "tTagNo",
+   "Label5",
+   "Label2",
+   "mToDt",
+   "mFromDt",
+   "Panel1",
+   "cboItemTyp",
+   "Label3",
+   "lblBook",
+   "PnlBotam",
+   "BtnDesign",
+   "BtnSize"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "Print",
+   "kind": "button"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "68,45",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "01/",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "Excel",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "154,45",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "10,13",
+   "size": "1160,423",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "314,46",
+   "size": "109,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "DGV_VCH",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "11,13",
+   "size": "1158,419",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Stock Move Report",
+   "kind": "label"
+  },
+  {
+   "name": "BtnDesign",
+   "type": "QButton",
+   "location": "852,79",
+   "size": "143,37",
+   "tabIndex": "8",
+   "text": "&Sales",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSize",
+   "type": "QButton",
+   "location": "1011,79",
+   "size": "143,37",
+   "tabIndex": "9",
+   "text": "Tag Stock",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "230,46",
+   "size": "79,20",
+   "tabIndex": "108",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "0,113",
+   "size": "1309,451",
+   "tabIndex": "110",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "12,45",
+   "size": "48,20",
+   "tabIndex": "122",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "tTagNo",
+   "type": "TextBox",
+   "location": "314,78",
+   "size": "109,22",
+   "tabIndex": "1171",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "432,46",
+   "size": "57,20",
+   "tabIndex": "1172",
+   "text": "PrCode",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "256,80",
+   "size": "53,20",
+   "tabIndex": "1173",
+   "text": "TagNo",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "432,80",
+   "size": "49,20",
+   "tabIndex": "1174",
+   "text": "Group",
+   "kind": "label"
+  },
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "492,46",
+   "size": "48,22",
+   "tabIndex": "1175",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tPrName",
+   "type": "TextBox",
+   "location": "543,46",
+   "size": "140,22",
+   "tabIndex": "1176",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "492,80",
+   "size": "48,22",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tGrName",
+   "type": "TextBox",
+   "location": "543,80",
+   "size": "140,22",
+   "tabIndex": "1178",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tDesignNo",
+   "type": "TextBox",
+   "location": "68,78",
+   "size": "162,22",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "3,77",
+   "size": "57,20",
+   "tabIndex": "1180",
+   "text": "Design",
+   "kind": "label"
+  }
+ ]
+}

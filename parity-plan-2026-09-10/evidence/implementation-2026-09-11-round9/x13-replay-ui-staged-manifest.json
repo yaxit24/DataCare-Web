@@ -1,0 +1,87 @@
+{
+  "status": "local checks passed; actual browser and global checks pending",
+  "fullX13Parity": false,
+  "ownedInputs": [
+    {
+      "path": "apps/web/lib/salesReturnReplay.ts",
+      "sha256": "60093c4f2a0ded2a675c68496c958b5c62dfd24b526dc346c4183e3d9dc6a1ef"
+    },
+    {
+      "path": "apps/web/lib/salesReturnForm.ts",
+      "sha256": "45e1f06c642a3fee536972baf6dfaa3592bd0176f6b6018fabb6e7da151c0e1f"
+    },
+    {
+      "path": "apps/web/components/SaleReturnReplayPanel.tsx",
+      "sha256": "dac7ad2c31fecba31eab712184c06db2f8c5fe35ffadd435728dee9edda930b7"
+    },
+    {
+      "path": "apps/web/components/SaleReturnSavedPanel.tsx",
+      "sha256": "e54fda24e44b8d0c359083f47e2debe1d8b201a7d9323d2b4e6fea6b8238e6cc"
+    },
+    {
+      "path": "apps/web/test/salesReturnReplay.test.ts",
+      "sha256": "8790bdb6503ec1924dbc8b54ad5de4387634c53cb9611b3a591aef6c44f9c7d0"
+    },
+    {
+      "path": "apps/web/test/sales-return-replay.journey.mjs",
+      "sha256": "24204661a2b1416e92c4a5b61059111952ed16e30b74eab43c6d0157167f278d"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "x13-replay-ui-contract.md",
+      "sha256": "cc2891e4d3be9c651a0139883f6eb031386715031cf92d1fa67fc7f8066a7fcd"
+    },
+    {
+      "path": "x13-replay-ui-implementation.md",
+      "sha256": "4ea059976b2124f01c4d30f7a91f7eb2d1caa910172972ed7da6b2426d557f7e"
+    },
+    {
+      "path": "replay-ui-tests-first.txt",
+      "sha256": "e05a802bd760f4f935ebaba0f717755dee0b85f080311a6afedbfbb626e9659c"
+    },
+    {
+      "path": "replay-ui-types-first.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "replay-ui-lint-first.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "replay-ui-tests-ready.txt",
+      "sha256": "3164b1cf1296ded386e034b4433d275e898447a844875258cb08b782c6d8abca"
+    },
+    {
+      "path": "replay-ui-types-ready.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "replay-ui-lint-ready.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "localChecks": {
+    "focusedWeb": {
+      "files": 2,
+      "tests": 63,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    "runtimeTypes": {
+      "exitCode": 0
+    },
+    "eslint": {
+      "exitCode": 0
+    },
+    "journeySyntax": {
+      "command": "node --check apps/web/test/sales-return-replay.journey.mjs",
+      "exitCode": 0
+    }
+  },
+  "plannedBrowser": {
+    "resultProperty": "salesReturnReplay",
+    "checks": 15,
+    "executed": false
+  }
+}

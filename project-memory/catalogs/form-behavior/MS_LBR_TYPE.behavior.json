@@ -1,0 +1,85 @@
+{
+ "form": "MS_LBR_TYPE",
+ "loc": 1723,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM LBR_MAST WHERE CO_CODE = ' ? ' ORDER BY LBR_CODE",
+  "DELETE FROM LBR_MAST WHERE CO_CODE = ' ? ' AND LBR_CODE = ' ? '",
+  "SELECT * FROM LBR_MAST WHERE CO_CODE = ' ? '",
+  "Curent Tag Stock Labour Value Update As Par Labour Code New Value.... ? SELECT A.TAG_NO,A.VCH_SRNO,B.ITM_GWT,B.ITM_NWT,B.LBR_TYPE,B.ITM_TOUCH,B.ITM_GHT_WT from (MAIN_STOCK AS A LEFT JOIN BAR_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.TAG_NO = B.TAG_NO AND A.VCH_SRNO = B.VCH_SRNO)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.TAG_NO <> 'N' AND B.LBR_CODE = ' ? ' ? AND C.PR_CODE = ' ? ' ? AND C.GR_CODE = ' ? ' ? GROUP BY A.TAG_NO,A.VCH_SRNO,B.ITM_GWT,B.ITM_NWT,B.LBR_TYPE,B.ITM_TOUCH,B.ITM_GHT_WT HAVING SUM(CASE WHEN ITM_SIGN='+' THEN A.VCH_SRNO ELSE -A.VCH_SRNO END) > 0 ORDER BY A.TAG_NO",
+  "SELECT A.TAG_NO,A.VCH_SRNO,B.ITM_GWT,B.ITM_NWT,B.LBR_TYPE,B.ITM_TOUCH,B.ITM_GHT_WT from (MAIN_STOCK AS A LEFT JOIN BAR_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.TAG_NO = B.TAG_NO AND A.VCH_SRNO = B.VCH_SRNO)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.TAG_NO <> 'N' AND B.LBR_CODE = ' ? ' ? AND C.PR_CODE = ' ? ' ? AND C.GR_CODE = ' ? ' ? GROUP BY A.TAG_NO,A.VCH_SRNO,B.ITM_GWT,B.ITM_NWT,B.LBR_TYPE,B.ITM_TOUCH,B.ITM_GHT_WT HAVING SUM(CASE WHEN ITM_SIGN='+' THEN A.VCH_SRNO ELSE -A.VCH_SRNO END) > 0 ORDER BY A.TAG_NO",
+  "UPDATE BAR_DETL SET LBR_RATE = ? ,LBR_AMT = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ' ? VCH_SRNO ? ' AND LBR_CODE = ' ? '",
+  "02 ? UPDATE BAR_DETL SET LBR_PRC = ? ,LBR_AMT = 0 WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ' ? VCH_SRNO ? ' AND LBR_CODE = ' ? '",
+  "03 ? UPDATE BAR_DETL SET LBR_PRC = 0,LBR_AMT = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ' ? VCH_SRNO ? ' AND LBR_CODE = ' ? '",
+  "UPDATE BAR_DETL SET ITM_WEST_PRC = ? ,ITM_FINE = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ' ? VCH_SRNO ? ' AND LBR_CODE = ' ? '",
+  "UPDATE BAR_DETL SET ITM_GHT_PRC = ? ,ITM_GHT_WT = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ' ? VCH_SRNO ? ' AND LBR_CODE = ' ? '",
+  "07 ? UPDATE BAR_DETL SET ITM_MRP = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ' ? VCH_SRNO ? ' AND LBR_CODE = ' ? '",
+  "Tag Labour is Update....",
+  "Please Select Dm Code For Delete.",
+  "SELECT * FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LBR_CODE = ' ? '",
+  "Select * From PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "SELECT PR_NAME As PrNameL,PR_CODE as PrCodeL FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_NAME",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME"
+ ],
+ "keyboard": {
+  "F1": 2,
+  "Enter": 5,
+  "Esc": 1,
+  "Backspace": 1
+ },
+ "calc": [
+  "double num4 = Conversions.ToDouble(Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[DC_Main.M][\"ITM_NWT\"])) * Conversion.Val(nlbrValue.Text) / 100.0), \"0.000\"));"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Enter Labour Code and Labour Value...",
+   "when": "(Operators.CompareString(tlbrCode.Text, \"\", false) == 0) | (Conversion.Val(nlbrValue.Text) == 0.0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Curent Tag Stock Labour Value Update As Par Labour Code New Value....?",
+   "when": "(int)Interaction.MsgBox((object)\"Curent Tag Stock Labour Value Update As Par Labour Code New Value....?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Tag Labour is Update....",
+   "when": ""
+  },
+  {
+   "message": "No Record Found...",
+   "when": ""
+  },
+  {
+   "message": "Please Select Dm Code For Delete.",
+   "when": "Operators.CompareString(tlbrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Cant Delete Record This Labour Code Use in Tag Entry....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Labour Type now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Labour Type now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Labour Type now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "This Lar Code already Exist Please Change Lbr Code...",
+   "when": "dataView.Count > 0"
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/verify_retain_browsers.py", line 237, in <module>
+    main()
+    ~~~~^^
+  File "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/verify_retain_browsers.py", line 177, in main
+    require(inputs['files'].get(ref['path']) == ref['sha256'], label + ' source binding: ' + ref['path'])
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/verify_retain_browsers.py", line 23, in require
+    raise ValueError(message)
+ValueError: browser-qualified source binding: parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json

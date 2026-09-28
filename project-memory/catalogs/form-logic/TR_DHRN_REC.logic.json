@@ -1,0 +1,91 @@
+{
+ "form": "TR_DHRN_REC",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "DELETE_DATA",
+  "DHRN_DATA",
+  "DHRN_ISU_DATA",
+  "DHRN_ISU_DETL",
+  "DHRN_REC_DATA",
+  "DHRN_REC_DETL",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DELETE_DATA": [
+    "AC_CODE",
+    "AC_NAME",
+    "BOOK_NAME",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "DELETE_DATE",
+    "DELETE_TIME",
+    "DELETE_USER",
+    "FINE_TYPE",
+    "HD_VCH_NO",
+    "LC_CODE",
+    "MAIN_USER",
+    "SR_NO",
+    "VCH_DATE",
+    "VCH_DESC",
+    "VCH_FINE_CR",
+    "VCH_FINE_DR",
+    "VCH_NO",
+    "VCH_TIME",
+    "VCH_TYPE",
+    "VCH_VAL_CR",
+    "VCH_VAL_DR"
+   ]
+  },
+  "UPDATE": [
+   "DHRN_ISU_DATA",
+   "DHRN_ISU_DETL"
+  ],
+  "DELETE": [
+   "AC_DATA",
+   "DHRN_DATA",
+   "DHRN_REC_DATA",
+   "DHRN_REC_DETL",
+   "MAIN_STOCK",
+   "REMARK_DATA",
+   "ROJ_MEL_DATA",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "DHRN_DATA",
+  "DHRN_ISU_DATA",
+  "DHRN_ISU_DETL",
+  "DHRN_REC_DATA",
+  "DHRN_REC_DETL",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 17,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [
+  "AdvanceRecAmt = Conversion.Val(nAdjDhiran.Text) + Conversion.Val(nAdjInt.Text)",
+  "CustClAmt = Conversion.Val(nIntRecAmt.Text) - Math.Abs(CustOpAmt)"
+ ],
+ "loc": 8064
+}

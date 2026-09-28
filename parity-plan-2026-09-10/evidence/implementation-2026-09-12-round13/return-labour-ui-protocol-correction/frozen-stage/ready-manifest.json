@@ -1,0 +1,41 @@
+{
+  "stage": "labour-ui-real-wire-scope-correction",
+  "runtimeChanges": 1,
+  "newDeclaredTests": 10,
+  "executed": false,
+  "baselineSource": "a5c5b4c21bf630d9fc99c86294660a2465c0d1392ee45f09f9b65cbd57139ae8",
+  "afterSource": "c9775c999e07f5827a9196f975aea7315da0ae275ab492f64c411f1c510a4905",
+  "fixtureCapture": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/test-results/parity-real-stack-round13-labour-diagnostic/labour-state-diagnostic.json",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "11b995913ee8836b2b88258ffa2c303cbe4a6684488a4d940475544f3929283f",
+      "bytes": 2165
+    },
+    {
+      "path": "baseline/web/apps/web/lib/salesReturnLabourReplay.ts",
+      "sha256": "a5c5b4c21bf630d9fc99c86294660a2465c0d1392ee45f09f9b65cbd57139ae8",
+      "bytes": 20916
+    },
+    {
+      "path": "runtime.patch",
+      "sha256": "b2facf5387b716bcae9a5898c81b5e21a2f0753c72557d13c8f66a9b3ef76c36",
+      "bytes": 531
+    },
+    {
+      "path": "staged/web/apps/web/lib/salesReturnLabourReplay.ts",
+      "sha256": "c9775c999e07f5827a9196f975aea7315da0ae275ab492f64c411f1c510a4905",
+      "bytes": 21057
+    },
+    {
+      "path": "staged/web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+      "sha256": "db718afe6248e75a0dc81eb5dfbb872042fadeb50c95d21d9ed49d45038120cb",
+      "bytes": 63009
+    },
+    {
+      "path": "staged/web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+      "sha256": "e3d8a48a929c1cf26bd0dfcd36a60e6d05840dbe4ec35b60b17ca0cc429e2044",
+      "bytes": 4480
+    }
+  ]
+}

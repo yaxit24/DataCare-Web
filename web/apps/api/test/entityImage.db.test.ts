@@ -80,7 +80,7 @@ d('entity image storage', () => {
 
   const clean = (t: string) =>
     withTenant(prisma, t, async (tx: any) => {
-      for (const tbl of ['ENTITY_IMAGE', 'TAG_IMAGE_DATA']) {
+      for (const tbl of ['ENTITY_IMAGE', 'ENTITY_IMAGE_REVISION', 'TAG_IMAGE_DATA']) {
         await tx.$executeRawUnsafe(`DELETE FROM "${tbl}" WHERE tenant_id=$1`, t);
       }
     });

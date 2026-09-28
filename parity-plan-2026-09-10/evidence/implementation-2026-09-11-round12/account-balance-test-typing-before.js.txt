@@ -1,0 +1,420 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const node_crypto_1 = require("node:crypto");
+const node_fs_1 = require("node:fs");
+const client_1 = require("@prisma/client");
+const db_1 = require("@datacare/db");
+const vitest_1 = require("vitest");
+const desktopAccountBalance_js_1 = require("../src/modules/shared/desktopAccountBalance.js");
+const desktopAccountBalance_independent_json_1 = __importDefault(require("./fixtures/desktopAccountBalance.independent.json"));
+const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? vitest_1.describe : vitest_1.describe.skip;
+const tenantId = 'r12-ledger-service';
+const otherTenant = 'r12-ledger-other';
+const tenants = [tenantId, otherTenant];
+const selected = { tenantId, coCode: '01', lcCode: '01', coYear: '2024-2025' };
+const input = {
+    scope: selected,
+    accountCode: 'CUST',
+    cutoffLocalSecond: '2024-07-10 12:00:00',
+    mode: 'C',
+};
+const tables = [
+    'AC_DATA',
+    'SL_DATA',
+    'SL_DETL_RTN',
+    'SL_DETL',
+    'SL_IDTL',
+    'BAR_DATA',
+    'BAR_DETL',
+    'BAR_IDTL',
+    'MAIN_STOCK',
+    'TAX_DATA',
+    'BILL_OS_DATA',
+    'ROJ_MEL_DATA',
+    'DM_DATA',
+    'REMARK_DATA',
+    'TEMP_BOOK_DATA',
+    'SRNO_MAST',
+    'TAG_SET',
+    'CO_SET',
+    'CO_SET_NEW',
+    'COL_MAST',
+    'BOOK_DATA',
+    'YEAR_MAST',
+    'ITEM_MAST',
+    'EMP_MAST',
+    'TAX_MAST',
+    'AC_MAST',
+    'CONV_MAST',
+];
+const sourceRows = desktopAccountBalance_independent_json_1.default.rowSets['scope-mode-and-cutoff'];
+run('internal source-qualified MsAcBal observation without mode or closing authority', () => {
+    let owner;
+    let runtime;
+    const sql = (query, ...values) => owner.$executeRawUnsafe(query, ...values);
+    const insert = async (rows) => {
+        for (const row of rows) {
+            const raw = {
+                ...row.raw,
+                tenant_id: row.raw.tenant_id === 'r12-other-tenant' ? otherTenant : tenantId,
+            };
+            const names = Object.keys(raw)
+                .map((key) => `"${key}"`)
+                .join(',');
+            await sql(`INSERT INTO "AC_DATA"(${names}) SELECT ${names} FROM jsonb_populate_record(NULL::"AC_DATA",$1::jsonb)`, JSON.stringify(raw));
+        }
+    };
+    const observe = (value = input) => (0, db_1.withTenant)(runtime, tenantId, (tx) => (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(tx, value), {
+        isolationLevel: 'RepeatableRead',
+    });
+    const cleanup = async () => {
+        for (const table of tables)
+            await sql(`DELETE FROM "${table}" WHERE tenant_id=ANY($1::text[])`, tenants);
+    };
+    const snapshot = async () => {
+        const all = {};
+        for (const table of tables)
+            all[table] = await owner.$queryRawUnsafe(`SELECT to_jsonb(t)::text raw,t.xmin::text revision,t.ctid::text locator FROM "${table}" t WHERE tenant_id=ANY($1::text[]) ORDER BY to_jsonb(t)::text`, tenants);
+        return all;
+    };
+    (0, vitest_1.beforeAll)(() => {
+        for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL]) {
+            if (!value || new URL(value).port !== '55433')
+                throw new Error('Only disposable parity database55433 is allowed.');
+        }
+        if (new URL(process.env.DATABASE_URL).username !== 'app_user')
+            throw new Error('Non-owner app_user runtime required.');
+        owner = new client_1.PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
+        runtime = new client_1.PrismaClient();
+    });
+    (0, vitest_1.beforeEach)(cleanup);
+    (0, vitest_1.afterAll)(async () => {
+        if (owner) {
+            await cleanup();
+            await owner.$disconnect();
+        }
+        if (runtime)
+            await runtime.$disconnect();
+    });
+    (0, vitest_1.it)('pins the independent fixture authored before reading the new reader', () => {
+        const bytes = (0, node_fs_1.readFileSync)(new URL('./fixtures/desktopAccountBalance.independent.json', import.meta.url));
+        (0, vitest_1.expect)((0, node_crypto_1.createHash)('sha256').update(bytes).digest('hex')).toBe('32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7');
+    });
+    vitest_1.it.each(desktopAccountBalance_independent_json_1.default.cases)('$id', async (fixture) => {
+        const rows = ('rowSet' in fixture ? sourceRows : fixture.rows);
+        await insert(rows);
+        const before = await snapshot();
+        const result = await observe({ ...fixture.input, scope: selected });
+        (0, vitest_1.expect)(result.status).toBe(fixture.expected.status);
+        (0, vitest_1.expect)(result.opening).toMatchObject(fixture.expected.opening);
+        (0, vitest_1.expect)(result.helperClosing).toMatchObject(fixture.expected.helperClosing);
+        (0, vitest_1.expect)(result.observationVersion).toMatch(/^[a-f0-9]{64}$/);
+        (0, vitest_1.expect)(result.scope).toEqual(selected);
+        (0, vitest_1.expect)(result.mode).toBe(fixture.input.mode);
+        (0, vitest_1.expect)(result.accountCode).toBe('CUST');
+        (0, vitest_1.expect)(result.cutoffLocalSecond).toBe(input.cutoffLocalSecond);
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('observes raw exact scale, NULL, both books, physical revisions and microsecond predicate evidence', async () => {
+        await insert(sourceRows);
+        const before = await snapshot();
+        const result = await observe();
+        const raw = result.observations.map((row) => row.raw);
+        (0, vitest_1.expect)(raw.map((row) => row.LEDR_KEY).sort()).toEqual([
+            'a-main',
+            'a-other-book',
+            'at-second',
+            'b-silver',
+            'future-document-date',
+            'null-mode',
+            'other-mode',
+        ].sort());
+        (0, vitest_1.expect)(raw.find((row) => row.LEDR_KEY === 'a-main')).toMatchObject({
+            CR_AMT: '10.00',
+            DR_AMT: '2.00',
+            FINE_WT: '1.250',
+            ENTRY_TIME: vitest_1.expect.stringContaining('11:59:59.9'),
+            IT_DESC: null,
+        });
+        (0, vitest_1.expect)(raw.find((row) => row.LEDR_KEY === 'null-mode')?.DATA_TYPE).toBeNull();
+        (0, vitest_1.expect)(raw.find((row) => row.LEDR_KEY === 'other-mode')?.SIGN).toBeNull();
+        (0, vitest_1.expect)(raw.find((row) => row.LEDR_KEY === 'a-other-book')?.CO_BOOK).toBe('Z09');
+        for (const row of result.observations) {
+            (0, vitest_1.expect)(row.revision).toMatch(/^\d+$/);
+            (0, vitest_1.expect)(row.locator).toMatch(/^\(\d+,\d+\)$/);
+            (0, vitest_1.expect)(row.physicalId).toMatch(/^\d+$/);
+            (0, vitest_1.expect)(row.entryTimeLocal).toMatch(/^2024-07-10 /);
+        }
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('binds eligible same-value physical updates and present-row recreation', async () => {
+        await insert([sourceRows[0]]);
+        const first = await observe();
+        await sql('UPDATE "AC_DATA" SET "CR_AMT"="CR_AMT" WHERE tenant_id=$1', tenantId);
+        const afterUpdate = await snapshot();
+        const second = await observe();
+        (0, vitest_1.expect)(second.observationVersion).not.toBe(first.observationVersion);
+        (0, vitest_1.expect)(second.opening).toEqual(first.opening);
+        (0, vitest_1.expect)(await snapshot()).toEqual(afterUpdate);
+        await sql('DELETE FROM "AC_DATA" WHERE tenant_id=$1', tenantId);
+        await insert([sourceRows[0]]);
+        const afterRecreate = await snapshot();
+        const third = await observe();
+        (0, vitest_1.expect)(third.observationVersion).not.toBe(second.observationVersion);
+        (0, vitest_1.expect)(third.opening).toEqual(second.opening);
+        (0, vitest_1.expect)(await snapshot()).toEqual(afterRecreate);
+    });
+    (0, vitest_1.it)('binds other-book eligible inserts but excludes future, null-time and foreign rows from its narrow token', async () => {
+        await insert([sourceRows[0]]);
+        const first = await observe();
+        await insert(sourceRows.filter((row) => [
+            'after-microsecond',
+            'null-time',
+            'foreign-tenant',
+            'foreign-company',
+            'foreign-location',
+            'foreign-year',
+            'foreign-account',
+        ].includes(row.id)));
+        const afterExcluded = await snapshot();
+        const second = await observe();
+        (0, vitest_1.expect)(second.observationVersion).toBe(first.observationVersion);
+        (0, vitest_1.expect)(second.opening).toEqual(first.opening);
+        (0, vitest_1.expect)(await snapshot()).toEqual(afterExcluded);
+        await insert([sourceRows[1]]);
+        const afterIncluded = await snapshot();
+        const third = await observe();
+        (0, vitest_1.expect)(third.observationVersion).not.toBe(second.observationVersion);
+        (0, vitest_1.expect)(third.opening).toMatchObject({ amount: '14.00', gold: '1.000' });
+        (0, vitest_1.expect)(await snapshot()).toEqual(afterIncluded);
+    });
+    (0, vitest_1.it)('records the empty-set absence cycle limitation without claiming universal ABA detection', async () => {
+        const empty = await observe();
+        await insert([sourceRows[0]]);
+        (0, vitest_1.expect)((await observe()).observationVersion).not.toBe(empty.observationVersion);
+        await sql('DELETE FROM "AC_DATA" WHERE tenant_id=$1', tenantId);
+        const before = await snapshot();
+        const absentAgain = await observe();
+        (0, vitest_1.expect)(absentAgain.observationVersion).toBe(empty.observationVersion);
+        (0, vitest_1.expect)(absentAgain.opening).toMatchObject({ groupPresent: false, amount: '0.00' });
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    const invalidInputs = [
+        {
+            id: 'missing-mode',
+            value: { scope: selected, accountCode: 'CUST', cutoffLocalSecond: input.cutoffLocalSecond },
+        },
+        { id: 'extra-client-mode-alias', value: { ...input, DATA_TYPE: 'A' } },
+        { id: 'unknown-book-predicate', value: { ...input, scope: { ...selected, coBook: 'R11' } } },
+        {
+            id: 'missing-account',
+            value: { scope: selected, cutoffLocalSecond: input.cutoffLocalSecond, mode: 'C' },
+        },
+        { id: 'lowercase-account', value: { ...input, accountCode: 'cust' } },
+        { id: 'blank-company', value: { ...input, scope: { ...selected, coCode: '' } } },
+        { id: 'overwidth-account', value: { ...input, accountCode: 'TOO-LONG9' } },
+        ...desktopAccountBalance_independent_json_1.default.inputRefusals.flatMap((group) => group.values.map((value, index) => ({
+            id: `${group.field}-${index}`,
+            value: { ...input, [group.field]: value },
+        }))),
+    ];
+    vitest_1.it.each(invalidInputs)('rejects $id without business writes or guessed defaults', async ({ value }) => {
+        await insert([sourceRows[0]]);
+        const before = await snapshot();
+        await (0, vitest_1.expect)(observe(value)).rejects.toMatchObject({
+            statusCode: 400,
+            code: 'invalid-input',
+        });
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('accepts legitimate short company/location and maximum-width financial-year identities without padding', async () => {
+        const value = {
+            ...input,
+            scope: { ...selected, coCode: '1', lcCode: '1', coYear: '2024-2025X' },
+        };
+        await insert([
+            {
+                ...sourceRows[0],
+                raw: { ...sourceRows[0].raw, CO_CODE: '1', LC_CODE: '1', CO_YEAR: '2024-2025X' },
+            },
+        ]);
+        const before = await snapshot();
+        const result = await observe(value);
+        (0, vitest_1.expect)(result.scope).toEqual(value.scope);
+        (0, vitest_1.expect)(result.status).toBe('ready');
+        (0, vitest_1.expect)(result.opening).toMatchObject({ groupPresent: true, amount: '8.00', gold: '1.250' });
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    vitest_1.it.each(['read-committed', 'unbound-tenant', 'wrong-tenant'])('refuses untrusted transaction context %s', async (kind) => {
+        await insert([sourceRows[0]]);
+        const before = await snapshot();
+        const operation = kind === 'read-committed'
+            ? (0, db_1.withTenant)(runtime, tenantId, (tx) => (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(tx, input))
+            : kind === 'wrong-tenant'
+                ? (0, db_1.withTenant)(runtime, otherTenant, (tx) => (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(tx, input), {
+                    isolationLevel: 'RepeatableRead',
+                })
+                : runtime.$transaction((tx) => (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(tx, input), {
+                    isolationLevel: 'RepeatableRead',
+                });
+        await (0, vitest_1.expect)(operation).rejects.toMatchObject({
+            statusCode: 400,
+            code: 'invalid-transaction-context',
+        });
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('allows an already tenant-bound Serializable caller without resolving any session mode', async () => {
+        await insert([sourceRows[0]]);
+        const before = await snapshot();
+        const result = await (0, db_1.withTenant)(runtime, tenantId, (tx) => (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(tx, input), { isolationLevel: 'Serializable' });
+        (0, vitest_1.expect)(result.status).toBe('ready');
+        (0, vitest_1.expect)(result.mode).toBe('C');
+        (0, vitest_1.expect)(result.opening.amount).toBe('8.00');
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    vitest_1.it.each([
+        { id: 'account-case', patch: { AC_CODE: 'cust' }, mode: 'C' },
+        { id: 'account-padding', patch: { AC_CODE: 'CUST ' }, mode: 'C' },
+        { id: 'year-padding', patch: { CO_YEAR: '2024-2025 ' }, mode: 'C' },
+        { id: 'mode-case', patch: { DATA_TYPE: 'a' }, mode: 'A' },
+        { id: 'gold-case', patch: { IT_TYPE: 'g' }, mode: 'C' },
+        { id: 'silver-case', patch: { IT_TYPE: 's' }, mode: 'C' },
+        { id: 'fullwidth-plus', patch: { SIGN: '＋' }, mode: 'C' },
+    ])('contains a discovered $id candidate rather than silently returning a partial balance', async ({ id, patch, mode }) => {
+        await insert([sourceRows[0]]);
+        const earlier = await observe({ ...input, mode });
+        await insert([
+            {
+                id: `alias-${id}`,
+                raw: {
+                    ...sourceRows[0].raw,
+                    ...patch,
+                    LEDR_KEY: `alias-${id}`,
+                },
+            },
+        ]);
+        const before = await snapshot();
+        const result = await observe({ ...input, mode });
+        (0, vitest_1.expect)(result.status).toBe('unsupported');
+        (0, vitest_1.expect)(result.observationVersion).not.toBe(earlier.observationVersion);
+        (0, vitest_1.expect)(result.observations).toHaveLength(2);
+        (0, vitest_1.expect)(result.diagnostics.length).toBeGreaterThan(0);
+        (0, vitest_1.expect)(result.opening).toMatchObject({ amount: null, gold: null, silver: null });
+        (0, vitest_1.expect)(result.helperClosing).toMatchObject({ amount: null, gold: null, silver: null });
+        (0, vitest_1.expect)(result.rawGroups.opening.length).toBeGreaterThan(0);
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('exposes source all-NULL SQL groups separately from initialized no-group output', async () => {
+        const absent = await observe();
+        (0, vitest_1.expect)(absent.rawGroups).toEqual({ opening: [], helperClosing: [] });
+        const row = sourceRows[0];
+        await insert([{ ...row, raw: { ...row.raw, CR_AMT: null, FINE_WT: null } }]);
+        const before = await snapshot();
+        const result = await observe();
+        (0, vitest_1.expect)(result.status).toBe('unsupported');
+        (0, vitest_1.expect)(result.opening).toMatchObject({
+            groupPresent: true,
+            eligibleRows: '1',
+            amount: null,
+            gold: null,
+            silver: '0.000',
+        });
+        (0, vitest_1.expect)(result.rawGroups.opening).toEqual([
+            vitest_1.expect.objectContaining({ accountCode: 'CUST', eligibleRows: '1', amount: null, gold: null }),
+        ]);
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('preserves fixed-decimal SQL sums beyond binary Number integer precision', async () => {
+        await insert(['large-one', 'large-two'].map((id) => ({
+            id,
+            raw: {
+                ...sourceRows[0].raw,
+                LEDR_KEY: id,
+                CR_AMT: '9999999999999999.99',
+                DR_AMT: '0.00',
+                FINE_WT: '99999999999.999',
+            },
+        })));
+        const before = await snapshot();
+        const result = await observe();
+        (0, vitest_1.expect)(result.status).toBe('ready');
+        // Two current-storage maxima; literal decimal addition, not a production calculation.
+        (0, vitest_1.expect)(result.opening).toMatchObject({
+            amount: '19999999999999999.98',
+            gold: '199999999999.998',
+            silver: '0.000',
+        });
+        (0, vitest_1.expect)(result.helperClosing).toEqual(result.opening);
+        (0, vitest_1.expect)(result.rawGroups.opening[0]).toMatchObject({
+            amount: '19999999999999999.98',
+            gold: '199999999999.998',
+        });
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('contains PostgreSQL numeric NaN as unsupported rather than claiming a zero balance', async () => {
+        await insert([{ ...sourceRows[0], raw: { ...sourceRows[0].raw, CR_AMT: 'NaN' } }]);
+        const before = await snapshot();
+        const result = await observe();
+        (0, vitest_1.expect)(result.status).toBe('unsupported');
+        (0, vitest_1.expect)(result.opening.amount).toBeNull();
+        (0, vitest_1.expect)(result.rawGroups.opening[0]?.amount).toBe('NaN');
+        (0, vitest_1.expect)(result.observations[0]?.raw.CR_AMT).toBe('NaN');
+        (0, vitest_1.expect)(result.diagnostics.length).toBeGreaterThan(0);
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('does not page the contributing ledger and observes raw rows plus groups in one SQL statement', async () => {
+        await insert(Array.from({ length: 151 }, (_, index) => ({
+            id: `many-${index}`,
+            raw: {
+                ...sourceRows[0].raw,
+                LEDR_KEY: `many-${index}`,
+                CR_AMT: '1.00',
+                DR_AMT: '0.00',
+                IT_TYPE: 'X',
+                FINE_WT: null,
+            },
+        })));
+        const before = await snapshot();
+        let statements = 0;
+        const result = await (0, db_1.withTenant)(runtime, tenantId, async (tx) => {
+            const observedTx = new Proxy(tx, {
+                get(target, key) {
+                    if (key === '$queryRawUnsafe')
+                        return async (query, ...values) => {
+                            statements++;
+                            return target.$queryRawUnsafe(query, ...values);
+                        };
+                    const property = Reflect.get(target, key);
+                    return typeof property === 'function' ? property.bind(target) : property;
+                },
+            });
+            return (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(observedTx, input);
+        }, { isolationLevel: 'RepeatableRead' });
+        (0, vitest_1.expect)(statements).toBe(1);
+        (0, vitest_1.expect)(result.observations).toHaveLength(151);
+        (0, vitest_1.expect)(result.opening).toMatchObject({
+            eligibleRows: '151',
+            amount: '151.00',
+            gold: '0.000',
+            silver: '0.000',
+        });
+        (0, vitest_1.expect)(result.helperClosing).toEqual(result.opening);
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+    (0, vitest_1.it)('keeps multiple observations in the caller RepeatableRead snapshot coherent with a real second client', async () => {
+        await insert([sourceRows[0]]);
+        await (0, db_1.withTenant)(runtime, tenantId, async (tx) => {
+            const first = await (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(tx, input);
+            await sql('UPDATE "AC_DATA" SET "CR_AMT"=20 WHERE tenant_id=$1', tenantId);
+            const second = await (0, desktopAccountBalance_js_1.observeDesktopAccountBalanceTx)(tx, input);
+            (0, vitest_1.expect)(second).toEqual(first);
+        }, { isolationLevel: 'RepeatableRead' });
+        const before = await snapshot();
+        const fresh = await observe();
+        (0, vitest_1.expect)(fresh.opening.amount).toBe('18.00');
+        (0, vitest_1.expect)(await snapshot()).toEqual(before);
+    });
+});

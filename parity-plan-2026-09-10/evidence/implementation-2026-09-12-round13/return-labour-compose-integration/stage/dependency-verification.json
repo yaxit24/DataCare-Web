@@ -1,0 +1,48 @@
+{
+  "method": "read-only SHA256 comparison, no execution",
+  "contractInputsSha256": "20a8ffcfba0bad984377a15f66ac87c5728e2379da8d0cdf34bb42b4e8f66dbb",
+  "checks": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "expectedSha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "actualSha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingLabour.ts",
+      "expectedSha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81",
+      "actualSha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "expectedSha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "actualSha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "expectedSha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "actualSha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/money.ts",
+      "expectedSha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131",
+      "actualSha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/fixtures/saleReturnIncomingLabour.independent.json",
+      "expectedSha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa",
+      "actualSha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/fixtures/sale-return-incoming-aggregate.v1.json",
+      "expectedSha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5",
+      "actualSha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5",
+      "unchanged": true
+    }
+  ]
+}

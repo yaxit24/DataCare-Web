@@ -1,0 +1,13 @@
+{
+  "scope": "read-only next-step scoping; no product changes",
+  "files": [
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TOUR_ORD.cs",
+      "sha256": "b27ad23a324b837bed8ef7a4d672a7ce82006c51485fb68fa4dced3e6bf49ced"
+    }
+  ]
+}

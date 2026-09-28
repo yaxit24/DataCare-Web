@@ -1,0 +1,137 @@
+{
+  "kind": "independent-source-review-inputs",
+  "capturedAtUtc": "2026-09-11T23:54:15.012674+00:00",
+  "status": "source-review-complete-no-execution",
+  "ownerManifestReferencesVerified": 16,
+  "requiredCaseBytesIdentical": true,
+  "sourceOrTestEditsByReviewer": false,
+  "testBrowserDatabaseCompilerBuildExecutedByReviewer": false,
+  "knownExecutionPrerequisite": "Parent-owned saved.scope tenantId helper correction and current production build; active UI references record review-time state only.",
+  "files": [
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/ready-manifest.json",
+      "sha256": "08881e62338fa3cd00bf8e171ecebaa4f6568add9e193a5b6e15818a26e36851",
+      "bytes": 3899
+    },
+    {
+      "path": "/tmp/datacare-labour-fault-independent-review/independent-source-review.md",
+      "sha256": "a98e2026ea74cd35a79154fc64004d1a2d4840491c8f7650dcbb48ca8121a679",
+      "bytes": 5638
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/README.md",
+      "sha256": "6f8bde4e5e09db18319baab4c865b4b189b8fe41f2e72a52e9de9caeff532c5c",
+      "bytes": 5829
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/browser-required-checks.json",
+      "sha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795",
+      "bytes": 5149
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/case-inputs.json",
+      "sha256": "4ff926ea9b74b5ba5e15204e24af25a9988d040a0f54e0e3db457abd8b0b9a5b",
+      "bytes": 1364
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/case-inputs-qualified.json",
+      "sha256": "71c09e6a617441fce4986e260d2edd067ede5329e74dedd68e9661e1c3c284d4",
+      "bytes": 1272
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/syntax-check.txt",
+      "sha256": "e621d6209e81bd54d5b24f9b1bc37123f2e4dab4989377747e40cf22adc5d029",
+      "bytes": 427
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+      "sha256": "1744ece8ab2ce1e9114a32b5ebd22d12be56fedcab92f93e607bd306e41db828",
+      "bytes": 27038
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+      "sha256": "4b52fdec40647f4615c03fc3d880953f58eef15c1f3df93038565c60b37415b4",
+      "bytes": 9141
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+      "sha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795",
+      "bytes": 5149
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context.journey.mjs",
+      "sha256": "98edbb25e246dcf59aeae669d4551779048ed721a2a3e4cff4918d2d6f1b1539",
+      "bytes": 29954
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context-response-observation.mjs",
+      "sha256": "c0282d1be8d7e8f107c9dca7d222e9580d7fea5e144e5dd01c80168600cbaf29",
+      "bytes": 6269
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-labour-replay.journey.mjs",
+      "sha256": "f8d1f44307f66d6776cda304339cbf5be39d4640753a54f50de3766df0588670",
+      "bytes": 29511
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "sha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+      "bytes": 62711
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+      "sha256": "37bb3caadde0ede84be2f7f1a188131b69563dffca0c040bcc340c4b8892382e",
+      "bytes": 27579
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnLabourReplay.ts",
+      "sha256": "c9775c999e07f5827a9196f975aea7315da0ae275ab492f64c411f1c510a4905",
+      "bytes": 21057
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a",
+      "bytes": 33029
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/fixture-diff-proof.json",
+      "sha256": "8ed3216f911e6e2beecb5ce2202b610182acb924801e34e4f55356e7fef23900",
+      "bytes": 2925
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/routes/txn.ts",
+      "sha256": "e8bfb98b1263cc2c7559a540b035aa10efa26f623dc68f7358004de5b15bc691",
+      "bytes": 288194
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "sha256": "caeca09dcbdff4990ce5ffbe00505605d498f92a63beaec640496398fb236626",
+      "bytes": 31130
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b",
+      "bytes": 13979
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnSavedPanel.tsx",
+      "sha256": "b086e6d847bbdf45bee7e65e1c48ac1d590402463cbd483d11e234150bc90f25",
+      "bytes": 27732
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/api.ts",
+      "sha256": "752786074a6de23482dc33560ed677751c59fc8d686c2d25d893ad82598cc015",
+      "bytes": 9026
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/pageContext.ts",
+      "sha256": "1f157fc8f55cee17e914bebbf77d5b709f42640f902f10228e41b4478dc20426",
+      "bytes": 7511
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+      "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+      "bytes": 1874
+    }
+  ]
+}

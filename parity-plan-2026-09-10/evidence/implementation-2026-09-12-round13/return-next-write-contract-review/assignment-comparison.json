@@ -1,0 +1,328 @@
+{
+  "kind": "read-only-literal-source-comparison",
+  "sourceSha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+  "assignmentIndexSha256": "a4d017691828aadfcecdc836ba057b829f7179456bffd310b8fc624a949e2f72",
+  "comparisons": [
+    {
+      "line": 14307,
+      "target": "SR_NO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14311,
+      "target": "OLD_SRNO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14315,
+      "target": "IT_CODE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14319,
+      "target": "ITM_REMARK",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14330,
+      "target": "TAG_NO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14334,
+      "target": "TAG_NO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14338,
+      "target": "TBL_CODE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14342,
+      "target": "DESIGN_NO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14346,
+      "target": "ITM_STYLE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14350,
+      "target": "ITM_SIZE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14354,
+      "target": "HM_ID",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14358,
+      "target": "ITM_PCS",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14362,
+      "target": "ITM_GWT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14366,
+      "target": "ITM_OTH_WT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14370,
+      "target": "ITM_NWT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14374,
+      "target": "ITM_GHT_PRC",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14378,
+      "target": "ITM_GHT_WT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14382,
+      "target": "ITM_TOUCH",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14386,
+      "target": "ITM_WEST_PRC",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14390,
+      "target": "ITM_FINE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14394,
+      "target": "ITM_RATE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14398,
+      "target": "ITM_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14402,
+      "target": "LBR_CODE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14406,
+      "target": "LBR_PRC",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14410,
+      "target": "LBR_TYPE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14414,
+      "target": "LBR_RATE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14418,
+      "target": "LBR_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14422,
+      "target": "DISC_PRC",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14426,
+      "target": "DISC_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14430,
+      "target": "OTH_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14434,
+      "target": "ITM_MRP",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14438,
+      "target": "TAG_LBR_CODE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14442,
+      "target": "TAG_LBR_PRC",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14446,
+      "target": "TAG_LBR_RATE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14450,
+      "target": "TAG_LBR_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14454,
+      "target": "TAG_OTH_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14458,
+      "target": "TAG_COST",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14462,
+      "target": "TAG_MRP",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14466,
+      "target": "TOT_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14470,
+      "target": "TAX_PRC",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14474,
+      "target": "NET_AMT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14478,
+      "target": "KR_NAME",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14493,
+      "target": "VCH_SRNO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14497,
+      "target": "VCH_SRNO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14501,
+      "target": "RATE_TYPE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14505,
+      "target": "PR_CODE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14509,
+      "target": "TAG_TYPE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14513,
+      "target": "TAG_SRNO",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14517,
+      "target": "HM_ID2",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14521,
+      "target": "HM_ID3",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14525,
+      "target": "HM_ID4",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14529,
+      "target": "HM_ID_WT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14533,
+      "target": "HM_ID2_WT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14537,
+      "target": "HM_ID3_WT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14541,
+      "target": "HM_ID4_WT",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14545,
+      "target": "APR_ISU",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14549,
+      "target": "EMP_ISU",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14553,
+      "target": "IT_TYPE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14557,
+      "target": "VCH_TIME",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14561,
+      "target": "MAIN_USER",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14565,
+      "target": "EMP_CODE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14569,
+      "target": "DESIGN_IMG_ID",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14580,
+      "target": "DATA_TYPE",
+      "matchesExactAssignment": true
+    },
+    {
+      "line": 14584,
+      "target": "DATA_TYPE",
+      "matchesExactAssignment": true
+    }
+  ],
+  "executionCredit": "No calculator, compiler, tests, DB or desktop runtime executed."
+}

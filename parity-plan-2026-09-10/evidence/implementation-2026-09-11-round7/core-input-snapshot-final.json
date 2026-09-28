@@ -1,0 +1,152 @@
+{
+  "capturedAtUtc": "2026-09-11T09:02:05.793827+00:00",
+  "pathBase": "web workspace root",
+  "scope": "Final core sources/tests/configuration after strict source negative-zero comparison correction; before final core test/build/typechecks.",
+  "files": [
+    {
+      "path": "package.json",
+      "sha256": "88b346ba7597fe1af78ae6151cc6e9ddeeb219f0049df90edbf4d8eaef3731c2",
+      "bytes": 2402
+    },
+    {
+      "path": "packages/core/containment.d.mts",
+      "sha256": "1473a76581387f5e4427e1480e138cef3ea8ed9ae5da53ab0722759e56e75b0f",
+      "bytes": 1575
+    },
+    {
+      "path": "packages/core/containment.mjs",
+      "sha256": "79108272df09bcaa6070ff7a3aebf0b2b7e754323a6943d73ef0bad589306b66",
+      "bytes": 6416
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608",
+      "bytes": 627
+    },
+    {
+      "path": "packages/core/src/calc.ts",
+      "sha256": "e0c46c2f17ec6e871309e96539bf2cd00782db9e6db667271421a539d16da291",
+      "bytes": 7284
+    },
+    {
+      "path": "packages/core/src/designCalc.ts",
+      "sha256": "78f207dd2b8796f7f4ea9445c8baa971721f0d78ab82b50168bd67772a391116",
+      "bytes": 18675
+    },
+    {
+      "path": "packages/core/src/finePolicy.ts",
+      "sha256": "38d0ec8f3d6f131bcce490d19e418af8a59de3bdaa309ebf77c2255cc884e96b",
+      "bytes": 2874
+    },
+    {
+      "path": "packages/core/src/index.ts",
+      "sha256": "19bfd8bd214c746e4cc5b4d37ede26bf923a0e5dced6aff50a611b5eaccdb301",
+      "bytes": 1978
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131",
+      "bytes": 3246
+    },
+    {
+      "path": "packages/core/src/orderLabour.ts",
+      "sha256": "5981b6198035c845b447caf0d92fe84e3c25d1412e6b61b0eee0483f0224230d",
+      "bytes": 4966
+    },
+    {
+      "path": "packages/core/src/orderLabourWithCache.ts",
+      "sha256": "dd9f429992b33918e97b382d5ead1852219aece381ec7c9bb6a1cc21719f3e4f",
+      "bytes": 2357
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "bytes": 18267
+    },
+    {
+      "path": "packages/core/src/salesOrderDesign.ts",
+      "sha256": "e6b5b1a4e79a9d93d6fab540565d0159ccde9475714d4f56276c64ce101173af",
+      "bytes": 2999
+    },
+    {
+      "path": "packages/core/test/calc.test.ts",
+      "sha256": "1109448f927c80461bab8e6c1cb2ed401ea8d9e4b30d8d9718a32d9554e60136",
+      "bytes": 2003
+    },
+    {
+      "path": "packages/core/test/containment.test.ts",
+      "sha256": "46e5aa4a753c1b29fa8d0af6b032978d07bb284d75c26cfec680666092e30b05",
+      "bytes": 2780
+    },
+    {
+      "path": "packages/core/test/designCalc.test.ts",
+      "sha256": "c41dad4c30d28f52e51146dd34104d49a6ec9e7ec498968d08ed91fba7f4ed0f",
+      "bytes": 11603
+    },
+    {
+      "path": "packages/core/test/designRepeat.test.ts",
+      "sha256": "b66b2087a5e9e3d8165f3f1f6b2c673890f767242284608a8ba357ffde213943",
+      "bytes": 9214
+    },
+    {
+      "path": "packages/core/test/fixtures/saleReturnIncoming.independent.json",
+      "sha256": "ad1184e6bb7f7256e42e85b5469ea3152404fba25566465389bc6a7ba4367527",
+      "bytes": 28830
+    },
+    {
+      "path": "packages/core/test/fixtures/saleReturnIncoming.widths.json",
+      "sha256": "3c0bef2a5aa86fca83d8c0e98b56e36c553595f2b941a06642409ce7e631d309",
+      "bytes": 10222
+    },
+    {
+      "path": "packages/core/test/money.test.ts",
+      "sha256": "09fdc90fecfaf405f6c24f4f6b1b9b42faf98f759958595383523c328e7c59d3",
+      "bytes": 658
+    },
+    {
+      "path": "packages/core/test/orderLabour.test.ts",
+      "sha256": "d19586b4f16c1a5027b2f8a0f447e4642193756677a41ef86c241078ad1e1a25",
+      "bytes": 5692
+    },
+    {
+      "path": "packages/core/test/orderLabourWithCache.test.ts",
+      "sha256": "85dab66d15d2b29ea53c82902bd2b0a451fb0ccb1f5f72bd9f3224276bdd6a66",
+      "bytes": 4096
+    },
+    {
+      "path": "packages/core/test/saleReturnIncoming.review.test.ts",
+      "sha256": "e0045153a2a5bb0b5fb2e61144ac825d4b58a2a2da9da67f06dd062825d30327",
+      "bytes": 15255
+    },
+    {
+      "path": "packages/core/test/saleReturnIncoming.test.ts",
+      "sha256": "25418ca3d52fba42012bf250da7bae6dca73ddcefda06185284fc5bac8a5c6aa",
+      "bytes": 15509
+    },
+    {
+      "path": "packages/core/test/salesOrderDesign.test.ts",
+      "sha256": "738c30cd6635858baa4d0f23e6a68b53921455be3c4b8a481eedc9daa878f61b",
+      "bytes": 4810
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59",
+      "bytes": 127
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9",
+      "bytes": 145165
+    },
+    {
+      "path": "scripts/restore-drill.mjs",
+      "sha256": "7a60b3ce527778c03241ebe39048cc327cc0a788064c877fb60783cd49a1490e",
+      "bytes": 6294
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336",
+      "bytes": 434
+    }
+  ]
+}

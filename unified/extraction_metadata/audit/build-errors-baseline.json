@@ -1,0 +1,132 @@
+{
+  "log": "build_errors.txt",
+  "parsed_error_lines": 11312,
+  "msbuild_summary_errors": 5656,
+  "total_errors": 5656,
+  "parsed_warning_lines": 0,
+  "errors_by_code": {
+    "CS0246": 11044,
+    "CS0234": 4,
+    "CS0596": 6,
+    "CS7036": 2,
+    "CS1908": 2,
+    "CS0621": 218,
+    "CS0104": 22,
+    "CS1069": 14
+  },
+  "missing_types": {
+    "DevExpress": 1252,
+    "CrystalDecisions": 12,
+    "DevNet": 40,
+    "DevComponents": 276,
+    "Qios": 98,
+    "AxMSFlexGridLib": 158,
+    "AxCrystal": 238,
+    "Crystal": 192,
+    "MSFlexGridLib": 126,
+    "TagitSDK": 4,
+    "SvgImage": 54,
+    "SimpleButton": 4968,
+    "Bar": 2,
+    "DataGridViewX": 422,
+    "XtraTabbedMdiManager": 2,
+    "BarStaticItem": 2,
+    "AccordionControl": 2,
+    "AccordionControlElement": 300,
+    "AxCrystalReport": 238,
+    "QButton": 1438,
+    "RowCellCustomDrawEventArgs": 6,
+    "GridView": 14,
+    "XtraForm": 10,
+    "SuperTabControl": 16,
+    "SuperTabControlPanel": 48,
+    "SuperTabItem": 48,
+    "SearchControl": 74,
+    "AxMSFlexGrid": 838,
+    "PanelControl": 2,
+    "DateEdit": 40,
+    "GridControl": 16,
+    "CameraControl": 2,
+    "TileControl": 4,
+    "TileGroup": 4,
+    "TileItem": 48,
+    "TileItemEventArgs": 24,
+    "TileView": 2,
+    "TagitDevices": 4,
+    "XtraFolderBrowserDialog": 4,
+    "FocusedRowChangedEventArgs": 4,
+    "CrystalReportViewer": 4,
+    "ReportDocument": 2,
+    "ImageCollection": 2,
+    "JavaScriptSerializer": 4
+  },
+  "top_files_by_code": {
+    "CS0246": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MDI_FORM.cs": 322,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_ALL.cs": 304,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_SETTING_MAIN.cs": 262,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_IMPORT.cs": 170,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_SETTING.cs": 132,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_TAG_ESTMATE.cs": 128,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_ACCT.cs": 112,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_TAG.cs": 112,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_TAG_OPBL.cs": 112,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_TAG_IMAGE.cs": 108,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_WHATSAPP.cs": 108,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_UPDATE.cs": 106,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_PURC.cs": 106,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_OS.cs": 104,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_STOCK.cs": 104,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_SALE.cs": 104,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/BtmSchm.cs": 102,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_PR_SL_UAE.cs": 96,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_ROJMEL.cs": 94,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_SLPR_ZOOM.cs": 94
+    },
+    "CS0234": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_SL_EBILL.cs": 2,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_SL_PR_ITEM.cs": 2
+    },
+    "CS0596": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/Microsoft.Office.Interop.Excel/DocEvents_Event.cs": 2,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/Microsoft.Office.Interop.Excel/WorkbookEvents_Event.cs": 2,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/Microsoft.Office.Interop.Excel/AppEvents_Event.cs": 2
+    },
+    "CS7036": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext.My/MySettings.cs": 2
+    },
+    "CS1908": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/Microsoft.Office.Interop.Excel/_Workbook.cs": 2
+    },
+    "CS0621": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_COMPANY.cs": 52,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MDI_FORM.cs": 22,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_WHATSAPP.cs": 16,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_LOCT.cs": 14,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_ACCT.cs": 14,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_MEMB.cs": 14,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_ADD_MAST.cs": 14,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_VCH_RE_NUMBR.cs": 14,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_SETTING_MAIN.cs": 14,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_SET_ADMIN.cs": 14,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_AI_TRFR.cs": 12,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_WAPP_WITH_API.cs": 4,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_REPORT.cs": 4,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/RP_TAG_IMAGE.cs": 4,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_SMS.cs": 4,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_REP_REC.cs": 2
+    },
+    "CS0104": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_WHATSAPP.cs": 8,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_WAPP_WITH_API.cs": 4,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_SMS.cs": 4,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_TAG_OPBL.cs": 4,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_REPORT.cs": 2
+    },
+    "CS1069": {
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/UT_IMPORT.cs": 6,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/TR_TAG_OPBL.cs": 6,
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/DataCareNext/MS_DESIGN_BOOK.cs": 2
+    }
+  }
+}

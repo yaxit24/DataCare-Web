@@ -1,0 +1,154 @@
+{
+  "kind": "staged-session-context-migration-disposable-verification-v1",
+  "startedAt": "2026-09-11T19:17:45.993Z",
+  "migrationSha256": "6f495c3b4948eba2c4f05449e48afac761ea5af0ce6520b9fde53812a93f6aa8",
+  "baselineSha256": "af35bc5be9c42a92685389473e73f616006ff204df180f3b566a8462f1f081c6",
+  "casesSha256": "1d0e891b2e8d56a4b37bd8b08d5d3495b378a3f0f0a779bf7c0527865a622bef",
+  "exactMigrationBytesPreserved": true,
+  "target": "localhost:55433; only generated datacare_context_migration_ databases",
+  "results": [
+    {
+      "id": "M01",
+      "expected": "success",
+      "passed": true
+    },
+    {
+      "id": "M02",
+      "expected": "success",
+      "passed": true
+    },
+    {
+      "id": "M03",
+      "expected": "success",
+      "passed": true
+    },
+    {
+      "id": "M04",
+      "expected": "success",
+      "passed": true
+    },
+    {
+      "id": "M05",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M06",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M07",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M08",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M09",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M10",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M11",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M12",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M13",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M14",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M15",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M16",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M17",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M18",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M19",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M20",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M21",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M22",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M23",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M24",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M25",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M26",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M27",
+      "expected": "failure",
+      "passed": true
+    },
+    {
+      "id": "M28",
+      "expected": "failure",
+      "passed": true
+    }
+  ],
+  "completedAt": "2026-09-11T19:18:34.861Z",
+  "passed": true,
+  "remainingOwnedDatabases": []
+}

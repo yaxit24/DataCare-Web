@@ -1,0 +1,595 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-round15-c27-replay/staged/web/packages/core
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts (44 tests | 26 failed) 27ms
+   × saved c27 complete hydration, ordered replay and Save fold > C01 4ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C02 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C03 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C04 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C05 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C06 4ms
+     → expected null to strictly equal { row: { …(5) }, …(2) }
+   × saved c27 complete hydration, ordered replay and Save fold > C07 1ms
+     → expected null to strictly equal { row: { …(5) }, …(2) }
+   × saved c27 complete hydration, ordered replay and Save fold > C08 2ms
+     → expected null to strictly equal { row: { …(5) }, …(2) }
+   × saved c27 complete hydration, ordered replay and Save fold > C09 1ms
+     → expected null to strictly equal { row: { …(5) }, …(2) }
+   × saved c27 complete hydration, ordered replay and Save fold > C10 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C11 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C12 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C13 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C14 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > C15 1ms
+     → expected null to strictly equal { row: { …(5) }, …(2) }
+   × saved c27 complete hydration, ordered replay and Save fold > C16 1ms
+     → expected null to strictly equal { row: { …(5) }, …(2) }
+   × saved c27 complete hydration, ordered replay and Save fold > preserves original editor text and every same-value event 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > stops at the first unsupported prefix even if a later value could restore the final amount 1ms
+     → expected [] to have a length of 2 but got +0
+   × saved c27 complete hydration, ordered replay and Save fold > does not apply an invalid event or later events to the retained successful prefix 1ms
+     → expected { code: 'unsupported-decimal', …(1) } to match object { code: 'event-calculation', …(1) }
+(1 matching property omitted from actual)
+   × saved c27 complete hydration, ordered replay and Save fold > missing projection raw 0ms
+     → expected 'unsupported-decimal' to be 'saved-row-projection' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > item ambiguity 0ms
+     → expected 'unsupported-decimal' to be 'saved-row-projection' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > nonzero header tender 0ms
+     → expected 'unsupported-decimal' to be 'unsupported-header-profile' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > unrepresentable old Float 0ms
+     → expected 'unsupported-decimal' to be 'header-storage' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > saved-open drift 0ms
+     → expected 'unsupported-decimal' to be 'saved-open-drift' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > unowned recalculation 0ms
+     → expected 'unsupported-decimal' to be 'row-save-projection' // Object.is equality
+   × saved c27 complete hydration, ordered replay and Save fold > detaches aliases and preserves opaque raw names and SQL text without prototype mutation 0ms
+     → expected 'unsupported' to be 'ready' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 26 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C01
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C02
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C03
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C04
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C05
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C10
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C11
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C12
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C13
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C14
+AssertionError: expected 'unsupported' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "unsupported"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:20:22
+     18|     const input = structuredClone(vector.input), before = structuredCl…
+     19|     const r = replaySaleReturnOtherAmount(input), e = vector.expected;
+     20|     expect(r.status).toBe(e.status);
+       |                      ^
+     21|     expect(r.loaded).toStrictEqual(e.loaded);
+     22|     expect(r.opened).toStrictEqual(e.opened);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C06
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C07
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C08
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C09
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C15
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C16
+AssertionError: expected null to strictly equal { row: { …(5) }, …(2) }
+
+- Expected: 
+Object {
+  "bill": Object {
+    "closing": Object {
+      "amount": null,
+      "color": "unknown",
+      "label": null,
+      "reason": "Customer balance requires a resolved ledger mode.",
+      "status": "unavailable",
+    },
+    "incomingRounded": "110.00",
+    "matrix": Array [
+      Array [
+        "",
+        "",
+        "",
+        "Payment    ",
+        "Received    ",
+        "",
+      ],
+      Array [
+        "Net Amt : ",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ],
+      Array [
+        "Sale Tax : ",
+        "Zero split tax",
+        "0.00",
+        "0.00",
+        "",
+        "01",
+      ],
+      Array [
+        "Total Amt : ",
+        "",
+        "",
+        "110.00",
+        "0.00",
+        "",
+      ],
+      Array [
+        "Cheque Amt : ",
+        "",
+        "",
+        "0.00",
+        "0.00",
+        "",
+      ],
+      Array [
+        "Card Amt : ",
+        "",
+        "",
+        "0.00",
+        "0.00",
+        "",
+      ],
+      Array [
+        "Cash Amt : ",
+        "",
+        "",
+        "0.00",
+        "0.00",
+        "",
+      ],
+      Array [
+        "Kasar Amt : ",
+        "",
+        "",
+        "0.00",
+        "0.00",
+        "",
+      ],
+      Array [
+        "Os Amt : ",
+        "",
+        "",
+        "110.00",
+        "0.00",
+        "",
+      ],
+    ],
+    "oldNetAmt": "110",
+    "oldTaxPrc": "0",
+    "outgoingRounded": "0.00",
+  },
+  "incomingTotals": Object {
+    "cells": Object {
+      "0": "",
+      "1": "",
+      "10": "",
+      "11": "",
+      "12": "",
+      "13": "",
+      "14": "",
+      "15": "",
+      "16": "",
+      "17": "",
+      "18": "",
+      "19": "",
+      "2": "",
+      "20": "",
+      "21": "",
+      "22": "",
+      "23": "",
+      "24": "",
+      "25": "",
+      "26": "",
+      "27": "",
+      "28": "",
+      "29": "",
+      "3": "",
+      "30": "",
+      "31": "",
+      "32": "",
+      "33": "",
+      "34": "",
+      "35": "",
+      "36": "",
+      "37": "",
+      "38": "",
+      "39": "",
+      "4": "",
+      "40": "",
+      "41": "",
+      "42": "",
+      "43": "",
+      "44": "",
+      "45": "",
+      "46": "",
+      "47": "",
+      "48": "",
+      "49": "",
+      "5": "",
+      "50": "",
+      "51": "",
+      "52": "",
+      "53": "",
+      "54": "",
+      "55": "",
+      "56": "",
+      "57": "",
+      "58": "",
+      "59": "",
+      "6": "",
+      "60": "",
+      "61": "",
+      "62": "",
+      "63": "",
+      "64": "",
+      "65": "",
+      "66": "",
+      "67": "",
+      "68": "",
+      "69": "",
+      "7": "",
+      "70": "",
+      "8": "",
+      "9": "",
+    },
+    "prOthAmtLess": "0",
+    "totCrFine": "0",
+  },
+  "row": Object {
+    "caches": Object {
+      "45": "10.000",
+      "46": "10.000",
+      "47": "100.00",
+      "48": "0.00",
+      "49": "10.00",
+      "58": "1.00",
+      "66": "0.00",
+      "67": "0.00",
+    },
+    "journal": Array [],
+    "raw": Object {
+      "AC_CODE": "CUST",
+      "APR_ISU": "N",
+      "BOOK_NAME": "SALES RETURNE",
+      "CO_BOOK": "R11",
+      "CO_CODE": "01",
+      "CO_YEAR": "2024-2025",
+      "DATA_TRFR": null,
+      "DATA_TYPE": "A",
+      "DESIGN_IMG_ID": null,
+      "DESIGN_NO": " D-raw ",
+      "DISC_AMT": "0.00",
+      "DISC_PRC": "0.0000",
+      "EMP_CODE": "E1",
+      "EMP_ISU": "N",
+      "ENTRY_TYPE": "P",
+      "FUTURE_EXTENSION": "raw
+text☃",
+      "HD_VCH_NO": "HD-17",
+      "HM_ID": "H1",
+      "HM_ID2": null,
+      "HM_ID2_WT": "0.000",
+      "HM_ID3": "H3",
+      "HM_ID3_WT": "0.000",
+      "HM_ID4": "H4",
+      "HM_ID4_WT": "0.000",
+      "HM_ID_WT": "0.000",
+      "INOUT_TYPE": "I",
+      "ITM_AMT": "100.00",
+      "ITM_COLOR": "retained color",
+      "ITM_FINE": "10.000",
+      "ITM_GHT_PRC": "0.0000",
+      "ITM_GHT_WT": "0.000",
+      "ITM_GWT": "10.000",
+      "ITM_LOT": null,
+      "ITM_MARGIN": null,
+      "ITM_MRP": "0.00",
+      "ITM_NWT": "10.000",
+      "ITM_OTH_WT": "0.000",
+      "ITM_PCS": "1.000",
+      "ITM_RATE": "10.00",
+      "ITM_REMARK": null,
+      "ITM_SIZE": null,
+      "ITM_STYLE": "Style",
+      "ITM_TOUCH": "100.000",
+      "ITM_WEST_PRC": "0.0000",
+      "IT_CODE": "GOLD",
+      "IT_TYPE": "G",
+      "KR_NAME": "KR",
+      "LBR_AMT": "10.00",
+      "LBR_CODE": "AA",
+      "LBR_PRC": "0.0000",
+      "LBR_RATE": "1.00",
+      "LBR_TYPE": "N",
+      "LC_CODE": "01",
+      "MAIN_USER": "original user",
+      "NET_AMT": "110.00",
+      "OLD_SRNO": "1",
+      "OTH_AMT": "0.00",
+      "PR_CODE": "P1",
+      "RATE_TYPE": "N",
+      "RTN_IT_TAX_AMT": null,
+      "SR_NO": "1",
+      "TAG_COST": "0.00",
+      "TAG_LBR_AMT": "0.00",
+      "TAG_LBR_CODE": "",
+      "TAG_LBR_PRC": "0.0000",
+      "TAG_LBR_RATE": "0.00",
+      "TAG_MRP": "0.00",
+      "TAG_NO": "N",
+      "TAG_OTH_AMT": "0.00",
+      "TAG_SRNO": "123",
+      "TAG_TYPE": "A",
+      "TAX_PRC": "0.0000",
+      "TBL_CODE": "001",
+      "TOT_AMT": "110.00",
+      "VCH_DATE": "2024-07-10",
+      "VCH_NO": "00017",
+      "VCH_SRNO": "500001",
+      "VCH_TIME": "2024-07-10T12:13:14",
+      "VCH_TYPE": "SR",
+    },
+    "rowIdentity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "visible": Object {
+      "0": "1",
+      "1": "GOLD",
+      "10": "10.000",
+      "11": "0.000",
+      "12": "10.000",
+      "13": "AA",
+      "14": "0.00",
+      "15": "0.000",
+      "16": "100.00",
+      "17": "0.00",
+      "18": "10.000",
+      "19": "10.00",
+      "2": "N",
+      "20": "100.00",
+      "21": "0.00",
+      "22": "N",
+      "23": "1.00",
+      "24": "10.00",
+      "25": "0.00",
+      "26": "0.00",
+      "27": "0.00",
+      "28": "0.00",
+      "29": "AA",
+      "3": "Current master name",
+      "30": "0.00",
+      "31": "0.00",
+      "32": "0.00",
+      "33": "0.00",
+      "34": "0.00",
+      "35": "0.00",
+      "36": "110.00",
+      "37": "0.00",
+      "38": "110.00",
+      "39": "KR",
+      "4": "001",
+      "40": "500001",
+      "41": "",
+      "42": "",
+      "43": "G",
+      "44": "N",
+      "5": " D-raw ",
+      "50": "N",
+      "51": "1",
+      "52": "P1",
+      "53": "P1",
+      "54": "A",
+      "55": "A",
+      "56": "123",
+      "57": "E",
+      "59": "",
+      "6": "Style",
+      "60": "H3",
+      "61": "H4",
+      "62": "0.000",
+      "63": "0.000",
+      "64": "0.000",
+      "65": "0.000",
+      "68": "N",
+      "69": "",
+      "7": "",
+      "70": "A",
+      "8": "H1",
+      "9": "1.000",
+    },
+  },
+}
+
++ Received: 
+null
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:21:22
+     19|     const r = replaySaleReturnOtherAmount(input), e = vector.expected;
+     20|     expect(r.status).toBe(e.status);
+     21|     expect(r.loaded).toStrictEqual(e.loaded);
+       |                      ^
+     22|     expect(r.opened).toStrictEqual(e.opened);
+     23|     expect(r.prefixes).toStrictEqual(e.prefixes);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > preserves original editor text and every same-value event
+AssertionError: expected 'unsupported' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "unsupported"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:44:22
+     42|   it('preserves original editor text and every same-value event', () =…
+     43|     const r = replaySaleReturnOtherAmount({ ...sample(), events: ['0',…
+     44|     expect(r.status).toBe('ready');
+       |                      ^
+     45|     expect(r.prefixes).toHaveLength(3);
+     46|     expect(r.final!.row.journal.map(j => j.event.kind === 'leaveCell' …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > stops at the first unsupported prefix even if a later value could restore the final amount
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:51:61
+     49|   it('stops at the first unsupported prefix even if a later value coul…
+     50|     const r = replaySaleReturnOtherAmount({ ...sample(), events: ['1',…
+     51|     expect(r.status).toBe('unsupported');expect(r.prefixes).toHaveLeng…
+       |                                                             ^
+     52|     expect(r.diagnostics[0]).toMatchObject({ code: 'bar-header-members…
+     53|     expect(r.final!.row.visible[27]).toBe('-11.00');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > does not apply an invalid event or later events to the retained successful prefix
+AssertionError: expected { code: 'unsupported-decimal', …(1) } to match object { code: 'event-calculation', …(1) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "code": "event-calculation",
+-   "eventIndex": 1,
++   "code": "unsupported-decimal",
+  }
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:57:30
+     55|   it('does not apply an invalid event or later events to the retained …
+     56|     const r = replaySaleReturnOtherAmount({ ...sample(), events: ['1',…
+     57|     expect(r.diagnostics[0]).toMatchObject({ code: 'event-calculation'…
+       |                              ^
+     58|     expect(r.prefixes).toHaveLength(1);expect(r.final!.row.visible[27]…
+     59|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > missing projection raw
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > item ambiguity
+AssertionError: expected 'unsupported-decimal' to be 'saved-row-projection' // Object.is equality
+
+Expected: "saved-row-projection"
+Received: "unsupported-decimal"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:86:36
+     84|     const x=sample();mutate(x);const r=replaySaleReturnOtherAmount(x);
+     85|     expect(r.status).toBe('unsupported');expect(r.candidate).toBeNull(…
+     86|     expect(r.diagnostics[0]!.code).toBe(code);frozen(r);
+       |                                    ^
+     87|   });
+     88|   it('refuses getters without invoking them', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > nonzero header tender
+AssertionError: expected 'unsupported-decimal' to be 'unsupported-header-profile' // Object.is equality
+
+Expected: "unsupported-header-profile"
+Received: "unsupported-decimal"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:86:36
+     84|     const x=sample();mutate(x);const r=replaySaleReturnOtherAmount(x);
+     85|     expect(r.status).toBe('unsupported');expect(r.candidate).toBeNull(…
+     86|     expect(r.diagnostics[0]!.code).toBe(code);frozen(r);
+       |                                    ^
+     87|   });
+     88|   it('refuses getters without invoking them', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > unrepresentable old Float
+AssertionError: expected 'unsupported-decimal' to be 'header-storage' // Object.is equality
+
+Expected: "header-storage"
+Received: "unsupported-decimal"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:86:36
+     84|     const x=sample();mutate(x);const r=replaySaleReturnOtherAmount(x);
+     85|     expect(r.status).toBe('unsupported');expect(r.candidate).toBeNull(…
+     86|     expect(r.diagnostics[0]!.code).toBe(code);frozen(r);
+       |                                    ^
+     87|   });
+     88|   it('refuses getters without invoking them', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > saved-open drift
+AssertionError: expected 'unsupported-decimal' to be 'saved-open-drift' // Object.is equality
+
+Expected: "saved-open-drift"
+Received: "unsupported-decimal"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:86:36
+     84|     const x=sample();mutate(x);const r=replaySaleReturnOtherAmount(x);
+     85|     expect(r.status).toBe('unsupported');expect(r.candidate).toBeNull(…
+     86|     expect(r.diagnostics[0]!.code).toBe(code);frozen(r);
+       |                                    ^
+     87|   });
+     88|   it('refuses getters without invoking them', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > unowned recalculation
+AssertionError: expected 'unsupported-decimal' to be 'row-save-projection' // Object.is equality
+
+Expected: "row-save-projection"
+Received: "unsupported-decimal"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:86:36
+     84|     const x=sample();mutate(x);const r=replaySaleReturnOtherAmount(x);
+     85|     expect(r.status).toBe('unsupported');expect(r.candidate).toBeNull(…
+     86|     expect(r.diagnostics[0]!.code).toBe(code);frozen(r);
+       |                                    ^
+     87|   });
+     88|   it('refuses getters without invoking them', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/26]⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > detaches aliases and preserves opaque raw names and SQL text without prototype mutation
+AssertionError: expected 'unsupported' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "unsupported"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:100:61
+     98|   it('detaches aliases and preserves opaque raw names and SQL text wit…
+     99|     const x=sample();Object.defineProperty(x.rawHeader,'__proto__',{va…
+    100|     const r=replaySaleReturnOtherAmount(x);expect(r.status).toBe('read…
+       |                                                             ^
+    101|     x.rawHeader.AC_NAME='Changed later';x.events[0]='9';
+    102|     expect(r.candidate!.afterHeader.AC_NAME).toBe('Current customer');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/26]⎯
+
+ Test Files  1 failed (1)
+      Tests  26 failed | 18 passed (44)
+   Start at  07:58:47
+   Duration  367ms (transform 82ms, setup 0ms, collect 95ms, tests 27ms, environment 0ms, prepare 44ms)
+

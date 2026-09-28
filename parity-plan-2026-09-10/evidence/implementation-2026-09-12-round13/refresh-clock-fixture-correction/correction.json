@@ -1,0 +1,10 @@
+{
+  "version": "refresh-clock-fixture-correction-v1",
+  "kind": "test-only PostgreSQL result-shape correction",
+  "priorTestSha256": "9f7be2ed11f7e2a04e0c1651cecd00bde8fe6096979973c66454f5f750ce7df8",
+  "testSha256": "360b4699d008380cd13bf9eebaca66488e70d1eda0b0092ed83af38a0edcc879",
+  "rootReportedFailure": "P2010: Failed to deserialize column of type void",
+  "change": "Cast pg_sleep void result to text AS waited; same real SQL clock interval plus0.02 seconds, no fabricated observations or product edits",
+  "priorReviewRetained": "/tmp/datacare-session-context-next/refresh-review/independent-coordinator-review.json",
+  "execution": "Unexecuted by reviewer; root owns corrected rerun"
+}

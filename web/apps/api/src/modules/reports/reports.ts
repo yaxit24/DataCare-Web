@@ -5,6 +5,7 @@ import { quoteIdent } from '../security/sql.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 import { fineStockValue, resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { stageListReportTx } from './reportGridStaging.js';
+import { trialBalance as trialBalanceDataset } from '../accounting/accounting.js';
 
 /**
  * Report dataset builders (read-only) reproducing the desktop .rpt field sets. The register shape
@@ -583,6 +584,137 @@ export async function balanceSheet(
       balanced: Math.abs(totalAssets - totalLiabilities) < 0.05,
     };
   });
+}
+
+
+/**
+ * Profit and Loss (RP_BALANCE → Ac_Final.AcBalInsert with RptData='P').
+ * Desktop rule: P&L accounts are those whose account master has AC_MAIN_GR >= '3'; balance-sheet
+ * accounts use AC_MAIN_GR < '3'. The desktop calculates BalAmt as Σ(CR_AMT - DR_AMT), so a positive
+ * balance is income and a negative balance is expense.
+ */
+export async function profitAndLoss(prisma: any, s: ReportScope): Promise<ListReport> {
+  return withTenant(prisma, s.tenantId, async (tx: any) => {
+    const conditions = ['d."CO_CODE"=$1', "coalesce(m.\"AC_MAIN_GR\",'') >= '3'"];
+    const params: unknown[] = [s.coCode];
+    if (s.lcCode) {
+      params.push(s.lcCode);
+      conditions.push(`d."LC_CODE"=$${params.length}`);
+    }
+    if (s.coYear) {
+      params.push(s.coYear);
+      conditions.push(`d."CO_YEAR"=$${params.length}`);
+    }
+    const dt = dateWhere(s, 'd."VCH_DATE"', params);
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT d."AC_CODE" AS "acCode",
+              max(coalesce(m."AC_NAME",'')) AS "account",
+              max(coalesce(m."AC_MAIN_GR",'')) AS "mainGroup",
+              max(coalesce(m."AC_GR",'')) AS "groupCode",
+              round(sum(${NN('d."DR_AMT"')}),2) AS dr,
+              round(sum(${NN('d."CR_AMT"')}),2) AS cr,
+              round(sum(${NN('d."CR_AMT"')}) - sum(${NN('d."DR_AMT"')}),2) AS balance
+         FROM "AC_DATA" d
+         LEFT JOIN "AC_MAST" m ON m."CO_CODE"::text=d."CO_CODE"::text AND m."AC_CODE"::text=d."AC_CODE"::text
+        WHERE ${conditions.join(' AND ')}${dt}
+        GROUP BY d."AC_CODE"
+       HAVING abs(sum(${NN('d."CR_AMT"')}) - sum(${NN('d."DR_AMT"')})) > 0.005
+        ORDER BY max(coalesce(m."AC_MAIN_GR",'')), max(coalesce(m."AC_GR",'')), d."AC_CODE"`,
+      ...params,
+    );
+    const out = rows.map((r) => {
+      const balance = round2(num(r.balance));
+      return {
+        acCode: String(r.acCode ?? ''),
+        account: String(r.account ?? ''),
+        mainGroup: String(r.mainGroup ?? ''),
+        groupCode: String(r.groupCode ?? ''),
+        dr: round2(num(r.dr)),
+        cr: round2(num(r.cr)),
+        balance,
+        class: balance >= 0 ? 'income' : 'expense',
+        income: balance > 0 ? balance : 0,
+        expense: balance < 0 ? round2(Math.abs(balance)) : 0,
+      };
+    });
+    const income = round2(out.reduce((sum, r) => sum + r.income, 0));
+    const expense = round2(out.reduce((sum, r) => sum + r.expense, 0));
+    return {
+      rows: out,
+      totals: {
+        accounts: out.length,
+        income,
+        expense,
+        netProfit: round2(income - expense),
+      },
+    };
+  });
+}
+
+/** Desktop Final Reports launcher (RP_BALANCE): Trial Balance, Profit & Loss, Balance Sheet. */
+export async function finalReports(
+  prisma: any,
+  s: ReportScope,
+  opts: {
+    closingDate?: Date | string;
+    goldRate?: number;
+    silverRate?: number;
+    ledgerFineGold?: number;
+    ledgerFineSilver?: number;
+  } = {},
+): Promise<ListReport & { detail: Record<string, unknown> }> {
+  const [trial, pnl, balance] = await Promise.all([
+    trialBalanceDataset(prisma, s),
+    profitAndLoss(prisma, s),
+    balanceSheet(prisma, s, opts),
+  ]);
+  const pnlTotals = pnl.totals ?? {};
+  const bal = balance as Record<string, any>;
+  return {
+    rows: [
+      {
+        statement: 'Trial Balance',
+        route: '/reports/trial-balance',
+        accounts: trial.accounts.length,
+        debit: trial.grandDr,
+        credit: trial.grandCr,
+        difference: round2(trial.grandDr - trial.grandCr),
+        status: trial.balanced ? 'balanced' : 'difference',
+      },
+      {
+        statement: 'Profit and Loss',
+        route: '/reports/profit-loss',
+        income: pnlTotals.income ?? 0,
+        expense: pnlTotals.expense ?? 0,
+        netProfit: pnlTotals.netProfit ?? 0,
+        status: (pnlTotals.netProfit ?? 0) >= 0 ? 'profit' : 'loss',
+      },
+      {
+        statement: 'Balance Sheet',
+        route: '/reports/balance-sheet',
+        assets: round2(num(bal.totalAssets)),
+        liabilities: round2(num(bal.totalLiabilities)),
+        closingStock: round2(num(bal.closingStock)),
+        difference: round2(num(bal.difference)),
+        status: bal.balanced ? 'balanced' : 'difference',
+      },
+    ],
+    totals: {
+      trialDebit: trial.grandDr,
+      trialCredit: trial.grandCr,
+      income: num(pnlTotals.income),
+      expense: num(pnlTotals.expense),
+      netProfit: num(pnlTotals.netProfit),
+      assets: round2(num(bal.totalAssets)),
+      liabilities: round2(num(bal.totalLiabilities)),
+      balanceDifference: round2(num(bal.difference)),
+    },
+    detail: {
+      trialBalance: trial,
+      profitAndLoss: pnl,
+      balanceSheet: balance,
+    },
+  };
 }
 
 /** Outstanding balances per account (AC_DATA ΣDr−ΣCr) with names; classified receivable/payable. */

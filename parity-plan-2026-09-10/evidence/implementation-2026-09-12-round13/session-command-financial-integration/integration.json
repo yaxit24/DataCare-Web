@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-09-11T21:54:18.249088+00:00",
+  "files": [
+    {
+      "path": "web/apps/api/test/salesOrderSessionCommand.db.test.ts",
+      "sha256": "dfe798fe215184a0962460b528fb0679efb8354334f8c6e58ce2777d4d16ae80"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextCommand.db.test.ts",
+      "sha256": "c64e604c7995d4ca299c94ac2767472be78f89eb7a784cca6cf18341ef2ce0d2"
+    }
+  ],
+  "status": "15 new financial/HTTP cases; four existing barrier waits now observe early operation failure; no production changes, checks pending"
+}

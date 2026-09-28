@@ -1,0 +1,19 @@
+{
+  "command": [
+    "pnpm",
+    "lint"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:56:42.117438+00:00",
+  "finishedAtUtc": "2026-09-11T23:56:48.432188+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/workspace-lint-labour-final.txt",
+  "logSha256": "413c8d1d130ec4fd851ea431b27f9100a9bfb8af46a71d16d3da3ad03a8461c2",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/workspace-lint-labour-final.inputs.json",
+  "inputManifestSha256": "0fe1c32c23591ee311d25c9aee5e81bec4d154fc1f132aa7c0eb88b5d3b7999d",
+  "inputCount": 1835,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

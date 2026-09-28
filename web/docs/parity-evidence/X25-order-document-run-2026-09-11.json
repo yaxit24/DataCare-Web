@@ -1,0 +1,60 @@
+{
+  "card": "X25",
+  "slice": "order-document-scope-family-date-snapshot",
+  "capturedAtUtc": "2026-09-10T21:33:01.633186+00:00",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "sourceState": "shared dirty development tree; coordinating agent will capture the final integrated candidate",
+  "inputFiles": [
+    {
+      "path": "apps/api/src/modules/sales/orderDoc.ts",
+      "sha256": "804924d2788cd41540c8b335336ba1df39f7358f3a9f487e6d60f273151dc655"
+    },
+    {
+      "path": "apps/api/src/modules/shared/bookPolicy.ts",
+      "sha256": "e5a9a6c75f2c4ccb66f7c2504253876ca9b9b3687e5003de8bf4c9362c03ed74"
+    },
+    {
+      "path": "apps/api/test/orderDocumentScope.db.test.ts",
+      "sha256": "2db7d3bebf8dfe2f9987d5504100535545fdd9f88c54fb9d1fa7735010544891"
+    },
+    {
+      "path": "apps/api/test/bookPolicy.test.ts",
+      "sha256": "79fa6e820b5159847c7f910776e1df71d81fd7fa84c27fe1a8eeffd2c724de0b"
+    },
+    {
+      "path": "apps/api/test/provisioning.db.test.ts",
+      "sha256": "6c81dde17fbae0f9116b4ea8dc097c4d3ac76aef18613497abafc247ec37f17e"
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "3efe334d55c0c9eb75e31cf246986a16ac428893c4772f25bbc3d99ba4cbfcba"
+    },
+    {
+      "path": "apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "8084b27072dff73bd69b801f78ccdfe23df08d9c22aebda757e07dba5f113329"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "4bc635dca02eecd36d414fd317c1b3f97a5446e312036a36b815073b25eea9c0"
+    }
+  ],
+  "inputBundleSha256": "27f28ebccbf0e1e41d9f2766e1a3d88f3e18ee02ec41d5236faee6c8e95cb110",
+  "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- orderDocumentScope.db.test.ts bookPolicy.test.ts provisioning.db.test.ts",
+  "result": {
+    "filesPassed": 3,
+    "testsPassed": 25,
+    "testsSkipped": 0,
+    "exitCode": 0
+  },
+  "database": "isolated localhost:55433; non-owner runtime role; forced RLS",
+  "testMode": "synthetic fixtures; real DB reads/competing transactions; instrumented concurrency schedule; no browser or desktop acceptance",
+  "log": "docs/parity-evidence/X25-order-document-test-2026-09-11.txt",
+  "logSha256": "7ce4cb24b7e72b2fcf9bd34d2b3f0f25921a5be2acbb4b7e8313fc959cfa3d9b",
+  "typecheck": "passed",
+  "implementationState": "partial",
+  "desktopAcceptance": null,
+  "browserAcceptance": "coordinating real-stack run required",
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "contractAndCases": "docs/parity-evidence/X25-order-document-scope-2026-09-11.md"
+}

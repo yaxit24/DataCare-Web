@@ -7,6 +7,7 @@ import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 type OutLine = {
   itCode: string;
@@ -20,6 +21,7 @@ type OutLine = {
 };
 
 type ResultLine = {
+  recoveredFine: string;
   itCode: string;
   itemName: string;
   itemType: string;
@@ -71,6 +73,7 @@ const blankOut = (): OutLine => ({
   lotNo: '',
 });
 const blankResult = (): ResultLine => ({
+  recoveredFine: '',
   itCode: '',
   itemName: '',
   itemType: 'G',
@@ -112,10 +115,39 @@ export default function MeltingPage() {
   const [description, setDescription] = useState('');
   const [lotNo, setLotNo] = useState('');
   const [outLines, setOutLines] = useState<OutLine[]>([blankOut()]);
+  // P1-5: desktop grids are keyboard-first — arrows move, Enter advances and appends at the end,
+  // Ctrl/Cmd+D removes a row (TR_SALE.cs:12250-12320).
+  const handleOutGridKey = useGridKeyboard({
+    rowCount: outLines.length,
+    onAppendRow: () => setOutLines((current) => [...current, blankOut()]),
+    onRemoveRow: (row) => {
+      setOutLines((current) =>
+        current.length === 1 ? [blankOut()] : current.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [resultLines, setResultLines] = useState<ResultLine[]>([blankResult()]);
+  // P1-5: desktop grids are keyboard-first — arrows move, Enter advances and appends at the end,
+  // Ctrl/Cmd+D removes a row (TR_SALE.cs:12250-12320).
+  const handleResultGridKey = useGridKeyboard({
+    rowCount: resultLines.length,
+    onAppendRow: () => setResultLines((current) => [...current, blankResult()]),
+    onRemoveRow: (row) => {
+      setResultLines((current) =>
+        current.length === 1 ? [blankResult()] : current.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [saved, setSaved] = useState<SaveResult | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  // P3: a melt loses metal. The desktop records the loss percentage on the voucher and the
+  // recovered fine per result line; the screen could send neither.
+  const [lossPct, setLossPct] = useState('');
 
   const outComputed = useMemo(
     () =>
@@ -297,6 +329,8 @@ export default function MeltingPage() {
       );
       setResultLines(
         view.resultLines.map((row) => ({
+          // P3: recovered fine must be restored on load, else a reopen-and-save blanks it.
+          recoveredFine: inputValue(row, 'recoveredFine'),
           itCode: inputValue(row, 'itCode'),
           itemName: inputValue(row, 'itemName'),
           itemType: inputValue(row, 'itemType') || 'G',
@@ -423,7 +457,7 @@ export default function MeltingPage() {
 
       <div className="panel" style={{ overflowX: 'auto' }}>
         <h2>Material Out</h2>
-        <table className="grid" data-testid="melting-out-grid">
+        <table className="grid" data-testid="melting-out-grid" onKeyDown={handleOutGridKey}>
           <thead>
             <tr>
               <th>Sr</th>
@@ -535,7 +569,7 @@ export default function MeltingPage() {
 
       <div className="panel" style={{ overflowX: 'auto' }}>
         <h2>Melting Result</h2>
-        <table className="grid" data-testid="melting-result-grid">
+        <table className="grid" data-testid="melting-result-grid" onKeyDown={handleResultGridKey}>
           <thead>
             <tr>
               <th>Sr</th>

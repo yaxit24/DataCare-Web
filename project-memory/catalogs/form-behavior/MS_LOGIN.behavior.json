@@ -1,0 +1,33 @@
+{
+ "form": "MS_LOGIN",
+ "loc": 653,
+ "gridColumns": {},
+ "inlineSql": [
+  "SELECT * FROM TILE_DATA WHERE SM_MAIN_NAME = 'Opning Form'",
+  "DELETE FROM AC_MAST_SRNO WHERE CO_CODE = '01' AND LC_CODE = '00' AND AC_CODE = '00001' AND MAIN_USER = 'ABC'",
+  "INSERT INTO AC_MAST_SRNO(CO_CODE,LC_CODE,AC_CODE,AC_NAME,AC_GR,MAIN_USER)VALUES('01','00','00001','CASH ON HAND',' ? ','ABC')",
+  "SELECT * FROM LOGIN_MAST where LOGIN_NAME = 'ABC' AND PC_W <> 0",
+  "SELECT * FROM LOGIN_MAST where LOGIN_NAME=' ? '",
+  "SELECT CO_CODE FROM CO_MAST WHERE RTGS_TYPE = 'Y'",
+  "DELETE From CO_MAST WHERE CO_CODE = ' ? CO_CODE ? '",
+  "SELECT * FROM LOGIN_MAST where LOGIN_NAME=' ? ' AND LOGIN_PWD=' ? '"
+ ],
+ "keyboard": {
+  "Enter": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Passward is Not Valid....",
+   "when": "Conversions.ToBoolean(Operators.AndObject(Operators.CompareObjectEqual(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[0][\"LOGIN_PWD\"], (object)\"\"), (object)\"\", "
+  },
+  {
+   "message": "Passward is Not Valid ...",
+   "when": ""
+  },
+  {
+   "message": "Please Check User Name ...",
+   "when": ""
+  }
+ ]
+}

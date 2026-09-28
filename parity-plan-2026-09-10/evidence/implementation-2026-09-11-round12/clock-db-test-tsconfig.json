@@ -1,0 +1,13 @@
+{
+  "extends": "../../../web/apps/api/tsconfig.test.json",
+  "files": [],
+  "include": [
+    "../../../web/apps/api/test/savedSaleReturnClock.db.test.ts"
+  ],
+  "exclude": [],
+  "compilerOptions": {
+    "typeRoots": [
+      "../../../web/apps/api/node_modules/@types"
+    ]
+  }
+}

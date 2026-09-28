@@ -1,0 +1,527 @@
+{
+ "report": "MembRpt",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1070,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 255,
+       "top": 60,
+       "width": 11010,
+       "height": 345,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 465,
+       "top": 495,
+       "width": 11100,
+       "height": 255,
+       "dataSource": "{@CoAdd1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 255,
+       "top": 750,
+       "width": 11310,
+       "height": 240,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 10739,
+       "top": 750,
+       "width": 826,
+       "height": 230,
+       "dataSource": "PageNumber"
+      }
+     ]
+    },
+    {
+     "name": "Section3",
+     "kind": "PageHeader",
+     "height": 510,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 120,
+       "top": 45,
+       "width": 11445,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 465,
+       "top": 120,
+       "width": 480,
+       "height": 255,
+       "text": "Code"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 1275,
+       "top": 120,
+       "width": 3030,
+       "height": 255,
+       "text": "Member Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 5985,
+       "top": 120,
+       "width": 1335,
+       "height": 255,
+       "text": "Scheme Date"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 7425,
+       "top": 120,
+       "width": 1365,
+       "height": 255,
+       "text": "Scheme Tot"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 8890,
+       "top": 120,
+       "width": 1265,
+       "height": 255,
+       "text": "Adj Amount"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 10259,
+       "top": 120,
+       "width": 1306,
+       "height": 255,
+       "text": "Memb Bal"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 120,
+       "top": 465,
+       "width": 11445,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 391,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 120,
+       "top": 120,
+       "width": 720,
+       "height": 226,
+       "dataSource": "{AD_MEMB.SCHM_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 960,
+       "top": 120,
+       "width": 4320,
+       "height": 226,
+       "dataSource": "{AD_MAST.SCHM_NAME}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 120,
+       "top": 360,
+       "width": 11445,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 315,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 465,
+       "top": 60,
+       "width": 735,
+       "height": 230,
+       "dataSource": "{AD_MEMB.MEMB_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 1275,
+       "top": 60,
+       "width": 4755,
+       "height": 226,
+       "dataSource": "{AD_MEMB.MEMB_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 5985,
+       "top": 60,
+       "width": 1436,
+       "height": 216,
+       "dataSource": "{AD_MEMB.EXP_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 7425,
+       "top": 60,
+       "width": 1365,
+       "height": 238,
+       "dataSource": "Sum ({@Amount}, {@MembCode})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 8939,
+       "top": 60,
+       "width": 1216,
+       "height": 238,
+       "dataSource": "Sum ({@AdjAmt}, {@MembCode})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 10259,
+       "top": 60,
+       "width": 1306,
+       "height": 238,
+       "dataSource": "Sum ({@BalAmt}, {@MembCode})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 1080,
+       "top": 300,
+       "width": 10320,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupHeader",
+     "height": 226,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 0,
+       "top": 0,
+       "width": 5616,
+       "height": 226,
+       "dataSource": "GroupName ({AD_OS.SIGN})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "Detail",
+     "height": 305,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 5985,
+       "top": 15,
+       "width": 1215,
+       "height": 204,
+       "dataSource": "{AD_OS.SCHM_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 7425,
+       "top": 15,
+       "width": 1365,
+       "height": 204,
+       "dataSource": "{@Amount}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 8910,
+       "top": 15,
+       "width": 1245,
+       "height": 204,
+       "dataSource": "{@AdjAmt}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line7",
+       "left": 5520,
+       "top": 270,
+       "width": 4215,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "GroupFooter",
+     "height": 358,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section10",
+     "kind": "GroupFooter",
+     "height": 330,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 120,
+       "top": 0,
+       "width": 11280,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 480,
+       "top": 75,
+       "width": 4320,
+       "height": 226,
+       "dataSource": "{AD_MAST.SCHM_NAME}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 5025,
+       "top": 75,
+       "width": 675,
+       "height": 255,
+       "text": "Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 7425,
+       "top": 75,
+       "width": 1365,
+       "height": 240,
+       "dataSource": "Sum ({@Amount}, {AD_OS.SCHM_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 8939,
+       "top": 75,
+       "width": 1216,
+       "height": 238,
+       "dataSource": "Sum ({@AdjAmt}, {AD_OS.SCHM_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 10259,
+       "top": 75,
+       "width": 1306,
+       "height": 238,
+       "dataSource": "Sum ({@BalAmt}, {AD_OS.SCHM_CODE})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area10",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "ReportFooter",
+     "height": 490,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 5880,
+       "top": 45,
+       "width": 5520,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 3600,
+       "top": 135,
+       "width": 1995,
+       "height": 255,
+       "text": "Grand Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 7425,
+       "top": 135,
+       "width": 1365,
+       "height": 240,
+       "dataSource": "Sum ({@Amount})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 8939,
+       "top": 135,
+       "width": 1216,
+       "height": 238,
+       "dataSource": "Sum ({@AdjAmt})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 10259,
+       "top": 135,
+       "width": 1306,
+       "height": 238,
+       "dataSource": "Sum ({@BalAmt})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area11",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "PageFooter",
+     "height": 255,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AdjAmt",
+   "ref": "{@AdjAmt}",
+   "type": "NumberField",
+   "text": "if {AD_OS.SIGN} = '-' then {AD_OS.ADJ_AMT} else 0"
+  },
+  {
+   "name": "Amount",
+   "ref": "{@Amount}",
+   "type": "NumberField",
+   "text": "IF {AD_OS.SIGN} = '+' THEN {AD_OS.ADJ_AMT} ELSE 0"
+  },
+  {
+   "name": "BalAmt",
+   "ref": "{@BalAmt}",
+   "type": "NumberField",
+   "text": "{@Amount}-{@AdjAmt}"
+  },
+  {
+   "name": "CoAdd1",
+   "ref": "{@CoAdd1}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+\" \"+{CO_MAST.CO_ADD2}+\" \"+{CO_MAST.CO_ADD3}+\" \"+{CO_MAST.CO_CITY}+\" Ph-\"+{CO_MAST.CO_PHONE}"
+  },
+  {
+   "name": "MembCode",
+   "ref": "{@MembCode}",
+   "type": "StringField",
+   "text": "{AD_MEMB.MEMB_CODE}"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'STOCK REPORT '"
+  }
+ ],
+ "sectionCount": 12,
+ "objectCount": 38,
+ "formulaCount": 6
+}

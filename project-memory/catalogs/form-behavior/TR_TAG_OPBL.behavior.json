@@ -1,0 +1,462 @@
+{
+ "form": "TR_TAG_OPBL",
+ "loc": 14665,
+ "gridColumns": {
+  "cSrNo": 0,
+  "c1SrNo": 0,
+  "cJdtDesign": 1,
+  "c1ItCode": 1,
+  "cMfgOrdNo": 2,
+  "c1ItName": 2,
+  "cItCode": 3,
+  "c1DmCode": 3,
+  "cOrdNo": 4,
+  "c1DmName": 4,
+  "cTagNo": 5,
+  "c1DmColor": 5,
+  "cCounter": 6,
+  "c1DmSize": 6,
+  "cDesign": 7,
+  "c1DmOrigin": 7,
+  "cStyle": 8,
+  "c1DmRemark": 8,
+  "cColor": 9,
+  "c1DmSfNo": 9,
+  "cSize": 10,
+  "c1MotiPcs": 10,
+  "cHmId": 11,
+  "c1MotiWt": 11,
+  "cBagWt": 12,
+  "c1Pcs": 12,
+  "cPcs": 13,
+  "c1PcsWt": 13,
+  "cGrWt": 14,
+  "c1KrActWt": 14,
+  "cOthWt": 15,
+  "c1KrActPrc": 15,
+  "cNetWt": 16,
+  "c1KrWt": 16,
+  "cKrOthWt": 17,
+  "c1KrPrc": 17,
+  "cKrNetWt": 18,
+  "c1KrLsWt": 18,
+  "cKrGhatPrc": 19,
+  "c1GrWt": 19,
+  "cKrGhatWt": 20,
+  "c1ConPrc": 20,
+  "cKrTouch": 21,
+  "c1RateType": 21,
+  "cKrWestPrc": 22,
+  "c1ItRate": 22,
+  "cKrFine": 23,
+  "c1ItmAmt": 23,
+  "cLbrCode": 24,
+  "c1DiscPrc": 24,
+  "cGhtPrc": 25,
+  "c1DiscAmt": 25,
+  "cGhtWt": 26,
+  "c1KrConPrc": 26,
+  "cTouch": 27,
+  "c1KrRateType": 27,
+  "cWestPrc": 28,
+  "c1KrRate": 28,
+  "cFine": 29,
+  "c1KrAmt": 29,
+  "cLbrPrc": 30,
+  "c1KrLRate": 30,
+  "cLbrType": 31,
+  "c1KrLAmt": 31,
+  "cLbrRate": 32,
+  "c1LbrRate": 32,
+  "cLbrAmt": 33,
+  "c1LbrAmt": 33,
+  "cOthAmt": 34,
+  "c1NetAmt": 34,
+  "cKrLRate": 35,
+  "c1ConWt": 35,
+  "cKrLAmt": 36,
+  "c1KrConWt": 36,
+  "cKrOthAmt": 37,
+  "c1ItType": 37,
+  "cSlType": 38,
+  "c1RowSr": 38,
+  "cKrOthRate": 39,
+  "c1oldKrWt": 39,
+  "cKrOthFine": 40,
+  "c1oldGrWt": 40,
+  "cKrTotFine": 41,
+  "cKrGwtTouch": 42,
+  "cItRate": 43,
+  "cItAmt": 44,
+  "cPrCost": 45,
+  "cTagCost": 46,
+  "cMainMargin": 47,
+  "cMainMrp": 48,
+  "cMargin": 49,
+  "cMrp": 50,
+  "cImageTake": 51,
+  "cItRemark": 52,
+  "cKrName": 53,
+  "cJdtNet": 54,
+  "cGhatWt": 55,
+  "cKundan": 56,
+  "cKndTch": 57,
+  "cKndNwt": 58,
+  "cWax": 59,
+  "cKrWax": 60,
+  "cTagSrNo": 61,
+  "cOldSrNo": 62,
+  "cRateType": 63,
+  "cItType": 64,
+  "cTagType": 65,
+  "cPrCode": 66,
+  "cVchSrno": 67,
+  "cItName": 68,
+  "cEntryMod": 69,
+  "cOldTagType": 70,
+  "cOldPrCode": 71,
+  "cOldGrWt": 72,
+  "cOldNtWt": 73,
+  "cOldGhatPrc": 74,
+  "cOldGhatWt": 75,
+  "cOldTouch": 76,
+  "cOldWestPrc": 77,
+  "cOldKrNetWt": 78,
+  "cOldKrTouch": 79,
+  "cOldKrWest": 80,
+  "cAprIsu": 81,
+  "cHmId2": 82,
+  "cHmId3": 83,
+  "cHmId4": 84,
+  "cHmIdWt": 85,
+  "cHmId2Wt": 86,
+  "cHmId3Wt": 87,
+  "cHmId4Wt": 88,
+  "cDataType": 89,
+  "cOrdSrNo": 90,
+  "cOrdYrcd": 91,
+  "cOrdDbCd": 92,
+  "cOrdName": 93,
+  "cOrdAc": 94,
+  "cOrLcCode": 95,
+  "cOldMargin": 96,
+  "cOldTagNo": 97,
+  "cOldMainMargin": 98,
+  "cOldKrGhatWt": 99,
+  "cEmpIsu": 100,
+  "cDesignImgId": 101,
+  "cStkDate": 102,
+  "cMfgYrcd": 103,
+  "cMfgDbCd": 104,
+  "cMfgNo": 105,
+  "cMfgSrNo": 106,
+  "cMfgCustOrdNo": 107,
+  "cOldKrOthRate": 108,
+  "cLotTouch": 109,
+  "cLotWest": 110,
+  "cLotFine": 111
+ },
+ "inlineSql": [
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItemNameL,A.IT_CODE as ItCodeL, B.GR_NAME AS GroupL,A.PR_CODE As PrCodeL,A.IT_TYPE As ItTypeL,A.TAG_TYPE As TagTypeL FROM ITEM_MAST AS A LEFT JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_NAME",
+  "Select * From DM_MAST WHERE CO_CODE = ' ? ' AND DM_CODE = ' ? '",
+  "SELECT A.DM_NAME As ItemNameL,A.DM_CODE as ItCodeL,B.GR_NAME As GroupL FROM DM_MAST AS A LEFT JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.DM_NAME",
+  "Select Max(TAG_SRNO) AS SrNo FROM SRNO_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(TAG_SRNO) = 6 Having Max(TAG_SRNO) > 0",
+  "SELECT * FROM Win32_PnPEntity WHERE Name IS NOT NULL",
+  "SELECT CO_BOOK,VCH_NO,TAG_NO,VCH_SRNO FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? AND ITM_SIGN = '-'",
+  "INSERT INTO DELETE_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,DELETE_DATE,VCH_TYPE,VCH_TIME,DELETE_TIME, BOOK_NAME,AC_CODE,AC_NAME,VCH_VAL_DR,VCH_VAL_CR,FINE_TYPE,VCH_FINE_DR,VCH_FINE_CR,HD_VCH_NO,MAIN_USER,DELETE_USER,VCH_DESC) SELECT A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,OLD_SRNO,VCH_DATE,' ? MM/dd/yyyy ? ',B.BOOK_SNAME,VCH_TIME,' ? MM/dd/yyyy HH:mm:ss ? ', B.BOOK_NAME,KR_NAME,TAG_NO,ITM_GWT,ITM_NWT,IT_TYPE,LBR_AMT,OTH_AMT,HD_VCH_NO,A.MAIN_USER,' ? ','ItCode' + '/' + IT_CODE + ' TagNo' + '/' + TAG_NO FROM BAR_DETL AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND TAG_NO = ' ? '",
+  "SELECT IT_DESIGN as DesignL From ITM_WT_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? ' GROUP BY IT_DESIGN ORDER BY IT_DESIGN",
+  "SELECT A.DESIGN_NO as DesignL,A.ITM_STYLE As StyleL,BOOK_NAME As BookNameL,A.DIE_NO As RemarkL,A.ITM_SIZE as SizeL,A.KR_NAME As KrNameL,A.ITM_GWT As GrwtW,A.ITM_TOUCH As TouchR,A.ITM_WEST_PRC AS WestPrcR,A.LBR_PRC AS LbrPrcR,A.LBR_RATE As LbrRateR,A.DESIGN_IMG_ID As DesignIdL FROM (DESIGN_DETL AS A LEFT JOIN PRODUCT_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.PR_CODE = B.PR_CODE) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.PR_CODE = C.PR_CODE WHERE A.CO_CODE = ' ? ' AND C.IT_CODE = ' ? ' ORDER BY A.BOOK_NAME,A.DESIGN_NO,A.SR_NO",
+  "SELECT A.DESIGN_NO as DesignL,A.ITM_STYLE As StyleL,BOOK_NAME As BookNameL,B.PR_NAME As ProductL,A.ITM_SIZE as SizeL,A.KR_NAME As KrNameL,A.ITM_GWT As GrwtW,A.ITM_TOUCH As TouchR,A.ITM_WEST_PRC AS WestPrcR,A.LBR_PRC AS LbrPrcR,A.LBR_RATE As LbrRateR,A.DESIGN_IMG_ID As DesignIdL FROM (DESIGN_DETL AS A LEFT JOIN PRODUCT_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.PR_CODE = B.PR_CODE) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.PR_CODE = C.PR_CODE WHERE A.CO_CODE = ' ? ' AND C.IT_CODE = ' ? ' ORDER BY A.BOOK_NAME,A.DESIGN_NO,A.SR_NO",
+  "SELECT A.IT_CODE,A.LBR_CODE,B.LBR_CATG,B.LBR_VAL FROM ITM_WT_MAST AS A LEFT JOIN LBR_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.LBR_CODE = B.LBR_CODE WHERE A.CO_CODE = ' ? ' AND A.IT_CODE = ' ? ' AND A.LBR_CODE <> '' AND A.FROM_WT <= ? AND A.TO_WT >= ? ",
+  "No LabCode Found Please Update Itm Stock Limit Mast and Try..",
+  "SELECT AC_NAME As KarigarL,AC_SHORT as CodeL FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_SHORT <> '' ORDER BY AC_NAME",
+  "SELECT '' As KarigarL,AC_SHORT as CodeL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_SHORT <> '' ORDER BY AC_NAME",
+  "SELECT AC_NAME As KarigarL,AC_SHORT as CodeL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_SHORT <> '' ORDER BY AC_NAME",
+  "SELECT A.ISU_AC_NAME as CustNameL,A.ISU_NO As VchNoL,A.DESIGN_NO As DesignL,B.IT_NAME As ItNameL,A.ITM_REMARK AS OrderDesc,A.ITM_SIZE as SizeL,A.ISU_SRNO AS SrNoM,A.ISU_YRCD As YearL,A.ISU_DBCD As BookL,A.ISU_AC_CODE,C.AC_NAME As KrgrL,A.IT_CODE as ItCodeL,C.AC_SHORT As AcShortL,A.VCH_DATE As RecDateM,'' As ColorL,A.ISU_LC_CODE As OrdLcM FROM (APR_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE) LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.BOOK_NAME = 'KARIGAR ORDER' AND A.ISU_REC = 'N' UNION ALL SELECT F.AC_NAME as CustNameL,D.VCH_NO As VchNoL,D.DESIGN_NO As DesignL,E.IT_NAME As ItNameL,D.ITM_REMARK AS OrderDesc,D.ITM_SIZE as SizeL,D.OLD_SRNO AS SrNoM,D.CO_YEAR As YearL,D.CO_BOOK As BookL,D.AC_CODE,'' As KrgrL,D.IT_CODE as ItCodeL,'' As AcShortL,D.VCH_DATE,D.ITM_COLOR,D.LC_CODE FROM (SL_ORD_DATA AS F INNER JOIN SL_ORD_DETL AS D ON F.CO_CODE = D.CO_CODE AND F.LC_CODE = D.LC_CODE AND F.CO_YEAR = D.CO_YEAR AND F.CO_BOOK = D.CO_BOOK AND F.VCH_NO = D.VCH_NO) LEFT JOIN ITEM_MAST AS E ON D.CO_CODE = E.CO_CODE AND D.IT_CODE = E.IT_CODE WHERE D.CO_CODE = ' ? ' AND D.LC_CODE = ' ? ' AND D.TAG_GEN = 'N' AND D.DESIGN_ISU = 'N'",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? ' ? AND IT_TYPE = ' ? ' ? ",
+  "Select A.*,B.IT_NAME FROM MFG_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.OLD_SRNO = ' ? ' AND A.VCH_NO = ' ? '",
+  "Select A.TAG_NO AS LotTagL,B.IT_NAME As ItNameL,C.AC_NAME as KrNameL,A.VCH_NO As VchNoL,A.ENTRY_TYPE AS MfgTypeL,A.ITM_GWT AS GrWtW,A.ITM_NWT AS NetWtW,A.OLD_SRNO AS SrNoM,A.CO_YEAR aS YearL,A.CO_BOOK BookL,A.IT_CODE as ItCodeL,D.AC_NAME As CustNameL,A.LOT_NO As ItmLotM From ((MFG_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE)LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.KR_CODE = C.AC_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.ORD_AC_CODE = D.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.REP_ADJ = 'N' AND INOUT_TYPE = 'I' ORDER BY ENTRY_TYPE,A.DESIGN_NO",
+  "Select A.DESIGN_NO AS DesignL,B.IT_NAME As ItNameL,C.AC_NAME as KrNameL,A.VCH_NO As VchNoL,A.ENTRY_TYPE AS MfgTypeL,A.ITM_GWT AS GrWtW,A.ITM_NWT AS NetWtW,A.OLD_SRNO AS SrNoM,A.CO_YEAR aS YearL,A.CO_BOOK BookL,A.IT_CODE as ItCodeL,D.AC_NAME As CustNameL,A.LOT_NO As LotNoM From ((MFG_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE)LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.KR_CODE = C.AC_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.ORD_AC_CODE = D.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.REP_ADJ = 'N' AND INOUT_TYPE = 'I' ORDER BY ENTRY_TYPE,A.DESIGN_NO",
+  "SELECT ITM_TOUCH,ITM_WEST_PRC FROM ITM_LOT_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LOT_NO = ' ? LOT_NO ? '",
+  "SELECT A.*,B.IT_NAME FROM MFG_IDTL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' AND A.SR_NO = ? ",
+  "Select A.DESIGN_NO AS DesignL,B.IT_NAME As ItNameL,C.AC_NAME as KrNameL,A.VCH_NO As VchNoL,A.ENTRY_TYPE AS EntryTypeL,A.ITM_GWT AS GrWtW,A.ITM_NWT AS NetWtW,A.OLD_SRNO AS SrNoM,A.CO_YEAR aS YearL,A.CO_BOOK BookL,A.IT_CODE as ItCodeL,A.ENTRY_TYPE As EntTypeL From (MFG_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE)LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.REP_ADJ = 'N' AND ENTRY_TYPE IN ('G','J','F','C','P') AND INOUT_TYPE = 'I' ORDER BY ENTRY_TYPE,A.DESIGN_NO",
+  "SELECT ITM_NWT FROM MFG_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND DESIGN_NO = ' ? DESIGN_NO ? ' AND BOOK_NAME = 'GHAT REC'",
+  "SELECT ITM_GWT,KR_KUNDAN_WT,KR_WAX_WT FROM MFG_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND DESIGN_NO = ' ? DESIGN_NO ? ' AND BOOK_NAME = 'JDTR REC'",
+  "SELECT MODEL_NAME From MODEL_MAST WHERE CO_CODE = ' ? ' AND MODEL_NAME = ' ? '",
+  "SELECT DISTINCT MODEL_NAME as StyleL From MODEL_MAST ORDER BY MODEL_NAME",
+  "SELECT ITM_COLOR From BAR_DETL WHERE CO_CODE = ' ? ' AND ITM_COLOR = ' ? '",
+  "SELECT DISTINCT ITM_COLOR as ColorL From BAR_DETL ORDER BY ITM_COLOR",
+  "SELECT DESIGN_NO From BAR_DETL WHERE CO_CODE = ' ? ' AND DESIGN_NO = ' ? '",
+  "SELECT LBR_RATE,LBR_AMT,DESIGN_NO From BAR_DETL WHERE CO_CODE = ' ? ' AND DESIGN_NO = ' ? ' ORDER BY VCH_DATE DESC",
+  "SELECT DISTINCT DESIGN_NO as DesignL From BAR_DETL ORDER BY DESIGN_NO",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? ' AND IMAGE_TYPE = 'D'",
+  "Select * From TABLE_MAST WHERE CO_CODE = ' ? ' and LC_CODE = ' ? ' AND TABLE_CODE = ' ? '",
+  "SELECT TABLE_NAME As CounterL,TABLE_CODE as CodeL FROM TABLE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY TABLE_NAME",
+  "SELECT * FROM ITM_WT_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? ' ? AND IT_DESIGN = 'N' ? AND IT_DESIGN = ' ? ' ? AND FROM_WT <= ? AND TO_WT >= ? ",
+  "SELECT * FROM ITM_WT_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? ' AND FROM_WT <= ? AND TO_WT >= ? ",
+  "Select * From LBR_MAST WHERE CO_CODE = ' ? ' AND LBR_CODE = ' ? '",
+  "SELECT LBR_CODE As LbrCodeL,LBR_CATG as CategoryL,LBR_VAL As LbrValueR FROM LBR_MAST WHERE CO_CODE = ' ? ' ORDER BY LBR_CATG,LBR_CODE",
+  "SELECT AC_SHORT FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_SHORT = ' ? ' AND AC_SHORT <> ''",
+  "INSERT INTO TAG_SET(CO_CODE,LC_CODE,CO_BOOK,VCH_NO,TAG_NO,VCH_SRNO,TAG_TYPE,PR_CODE) VALUES (' ? ',' ? ',' ? ',' ? ',' ? ',' ? ',' ? ',' ? ')",
+  "INSERT INTO TAG_SET(CO_CODE,LC_CODE,CO_BOOK,VCH_NO,TAG_NO,VCH_SRNO,TAG_TYPE,PR_CODE) VALUES (' ? ',' ? ','OLD',' ? ',' ? ',' ? ',' ? ',' ? ')",
+  "DELETE FROM TAG_PRINT_DATA",
+  "INSERT INTO TAG_PRINT_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO,VCH_DATE,STK_DATE,VCH_TIME,VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME, AC_CODE,IT_CODE,TAG_NO,LOT_NO,DESIGN_NO,TBL_CODE,ITM_SIZE,ITM_PCS,BAG_WT,ITM_GWT,ITM_OTH_WT,ITM_NWT,ITM_GHT_PRC,ITM_GHT_WT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE, LBR_PRC,LBR_RATE,LBR_TYPE,LBR_AMT,OTH_AMT,ITM_RATE,ITM_AMT,TAG_COST,ITM_MARGIN,ITM_MRP,ITM_REMARK,SF_NO,KR_NAME,VCH_SRNO,RATE_TYPE,IT_TYPE,TAG_TYPE,PR_CODE, HM_ID,HM_ID2,HM_ID3,HM_ID4,HM_ID_WT,HM_ID2_WT,HM_ID3_WT,HM_ID4_WT,ITM_STYLE) SELECT ' ? ',LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO,VCH_DATE,STK_DATE,VCH_TIME,VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME, AC_CODE,IT_CODE,TAG_NO,LOT_NO,DESIGN_NO,TBL_CODE,ITM_SIZE,ITM_PCS,BAG_WT,ITM_GWT,ITM_OTH_WT,ITM_NWT,ITM_GHT_PRC,ITM_GHT_WT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE, LBR_PRC,LBR_RATE,LBR_TYPE,LBR_AMT,OTH_AMT,ITM_RATE,ITM_AMT,TAG_COST,ITM_MARGIN,ITM_MRP,ITM_REMARK,SF_NO,KR_NAME,VCH_SRNO,RATE_TYPE,IT_TYPE,TAG_TYPE,PR_CODE, HM_ID,HM_ID2,HM_ID3,HM_ID4,HM_ID_WT,HM_ID2_WT,HM_ID3_WT,HM_ID4_WT,ITM_STYLE FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND SR_NO = ? ",
+  "SELECT * FROM IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT * FROM TAG_PRINT_DATA",
+  "SELECT * FROM BAR_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT MAX(VCH_NO) AS VchNo From BAR_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 4,
+  "Up": 3,
+  "Down": 3,
+  "Enter": 14,
+  "Right": 2,
+  "Left": 2
+ },
+ "calc": [
+  "mSG_IDTL[mSG_IDTL.Row, 14] = Strings.Format((object)(Conversion.Val(mSG_IDTL[mSG_IDTL.Row, 12]) * Conversion.Val(TEXT_IDTL.Text)), \"0.000\");",
+  "mSG_IDTL[mSG_IDTL.Row, 16] = Strings.Format((object)(Conversion.Val(mSG_IDTL[mSG_IDTL.Row, 12]) * Conversion.Val(TEXT_IDTL.Text)), \"0.000\");",
+  "mSG_IDTL[CRow, 13] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 11]) / Conversion.Val(mSG_IDTL[CRow, 10])), \"0.000000\");",
+  "mSG_IDTL[CRow, 13] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 11]) / Conversion.Val(mSG_IDTL[CRow, 10])), \"0.0000\");",
+  "mSG_IDTL[CRow, 14] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 12]) * Conversion.Val(mSG_IDTL[CRow, 13])), \"0.000\");",
+  "mSG_IDTL[CRow, 16] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 14]) * Conversion.Val(mSG_IDTL[CRow, 15]) / 100.0), \"0.000\");",
+  "mSG_IDTL[CRow, 19] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 14]) * Conversion.Val(mSG_IDTL[CRow, 17]) / 100.0), \"0.000\");",
+  "mSG_IDTL[CRow, 35] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 19]) * Conversion.Val(mSG_IDTL[CRow, 20])), \"0.000\");",
+  "mSG_IDTL[CRow, 36] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 16]) * Conversion.Val(mSG_IDTL[CRow, 26])), \"0.000\");",
+  "mSG_IDTL[CRow, 36] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 16]) * Conversion.Val(mSG_IDTL[CRow, 20])), \"0.000\");",
+  "mSG_IDTL[CRow, 16] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 12]) * Conversion.Val(mSG_IDTL[CRow, 13])), \"0.000\");",
+  "mSG_IDTL[CRow, 18] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 16]) * Conversion.Val(mSG_IDTL[CRow, 17]) / 100.0), \"0.000\");",
+  "mSG_IDTL[CRow, 19] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 16]) - Conversion.Val(mSG_IDTL[CRow, 18])), \"0.000\");",
+  "mSG_IDTL[CRow, 19] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 16]) * Conversion.Val(mSG_IDTL[CRow, 17]) / 100.0), \"0.000\");",
+  "mSG_IDTL[CRow, 23] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 22]) * Conversion.Val(mSG_IDTL[CRow, 12])), \"0.00\");",
+  "mSG_IDTL[CRow, 23] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 22]) * Conversion.Val(mSG_IDTL[CRow, 19])), \"0.00\");",
+  "mSG_IDTL[CRow, 29] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 28]) * Conversion.Val(mSG_IDTL[CRow, 12])), \"0.00\");",
+  "mSG_IDTL[CRow, 29] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 28]) * Conversion.Val(mSG_IDTL[CRow, 16])), \"0.00\");",
+  "mSG_IDTL[mSG_IDTL.Row, 25] = Strings.Format((object)Math.Round(Conversion.Val(mSG_IDTL[mSG_IDTL.Row, 23]) * Conversion.Val(mSG_IDTL[mSG_IDTL.Row, 24]) / 100.0, 0), \"0.00\");",
+  "mSG_IDTL[CRow, 33] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 32]) * Conversion.Val(mSG_IDTL[CRow, 12])), \"0.00\");",
+  "mSG_IDTL[CRow, 31] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 30]) * Conversion.Val(mSG_IDTL[CRow, 12])), \"0.00\");",
+  "mSG_IDTL[CRow, 34] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 23]) - Conversion.Val(mSG_IDTL[CRow, 25]) + Conversion.Val(mSG_IDTL[CRow, 33])), \"0.00\");",
+  "num2 = num2 + Conversion.Val(mSG_IDTL[DC_Main.M, 29]) + Conversion.Val(mSG_IDTL[DC_Main.M, 31]);",
+  "MSG[MSG.Row, 16] = Strings.Format((object)(Conversion.Val(MSG[MSG.Row, 14]) - Conversion.Val(MSG[MSG.Row, 15])), \"0.000\");",
+  "MSG[MSG.Row, 18] = Strings.Format((object)(Conversion.Val(MSG[MSG.Row, 14]) - Conversion.Val(MSG[MSG.Row, 17])), \"0.000\");",
+  "MSG[MSG.Row, 16] = Strings.Format((object)(Conversion.Val(MSG[MSG.Row, 14]) - num3), \"0.000\");",
+  "mSG_TOT[0, 13] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 13]) + Conversion.Val(MSG[DC_Main.M, 13]))), \"0\");",
+  "mSG_TOT[0, 12] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 12]) + Conversion.Val(MSG[DC_Main.M, 12]))), \"0.000\");",
+  "mSG_TOT[0, 14] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 14]) + Conversion.Val(MSG[DC_Main.M, 14]))), \"0.000\");",
+  "mSG_TOT[0, 15] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 15]) + Conversion.Val(MSG[DC_Main.M, 15]))), \"0.000\");",
+  "mSG_TOT[0, 16] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 16]) + Conversion.Val(MSG[DC_Main.M, 16]))), \"0.000\");",
+  "mSG_TOT[0, 26] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 26]) + Conversion.Val(MSG[DC_Main.M, 26]))), \"0.000\");",
+  "mSG_TOT[0, 29] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 29]) + Conversion.Val(MSG[DC_Main.M, 29]))), \"0.000\");",
+  "mSG_TOT[0, 44] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 44]) + Conversion.Val(MSG[DC_Main.M, 44]))), \"0.00\");",
+  "mSG_TOT[0, 33] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 33]) + Conversion.Val(MSG[DC_Main.M, 33]))), \"0.00\");",
+  "mSG_TOT[0, 34] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 34]) + Conversion.Val(MSG[DC_Main.M, 34]))), \"0.00\");",
+  "mSG_TOT[0, 46] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 46]) + Conversion.Val(MSG[DC_Main.M, 46]))), \"0.00\");",
+  "mSG_TOT[0, 50] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 50]) + Conversion.Val(MSG[DC_Main.M, 50]))), \"0.000\");",
+  "mSG_TOT[0, 17] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 17]) + Conversion.Val(MSG[DC_Main.M, 17]))), \"0.000\");",
+  "mSG_TOT[0, 18] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 18]) + Conversion.Val(MSG[DC_Main.M, 18]))), \"0.000\");",
+  "mSG_TOT[0, 20] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 20]) + Conversion.Val(MSG[DC_Main.M, 20]))), \"0.000\");",
+  "mSG_TOT[0, 23] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 23]) + Conversion.Val(MSG[DC_Main.M, 23]))), \"0.000\");",
+  "mSG_TOT[0, 36] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 36]) + Conversion.Val(MSG[DC_Main.M, 36]))), \"0.00\");",
+  "mSG_TOT[0, 37] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 37]) + Conversion.Val(MSG[DC_Main.M, 37]))), \"0.00\");",
+  "mSG_TOT[0, 45] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 45]) + Conversion.Val(MSG[DC_Main.M, 45]))), \"0.00\");",
+  "NewValTot = Conversion.Val(MSG_TOT[0, 14]) + Conversion.Val(MSG_TOT[0, 16]) + Conversion.Val(MSG_TOT[0, 18]) + Conversion.Val(MSG_TOT[0, 34]) + Conversion.Val(MSG_TOT[0, 33]) + Conversion.Val(MSG_TOT[0, 50]);",
+  "mSG[mSG.Row, 62] = Conversions.ToString(Conversion.Val(mSG[mSG.Rows - 2, 62]) + 1.0);",
+  "int num = (int)Math.Round(Conversion.Val(mSG[mSG.Rows - 2, 62]) + 1.0);",
+  "MsVchSrno = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[0][\"SrNo\"])) + 1.0), \"000000\");",
+  "MsVchSrno = Strings.Format((object)(Conversion.Val(MsVchSrno) + 1.0), \"000000\");",
+  "mSG[mSG.Row, 67] = Conversions.ToString(Conversion.Val(DC_Main.MCo_code)) + DC_Main.MLc_code + Strings.Mid(mVchDate.Text, 10, 1) + Strings.Mid(mVchDate.Text, 4, 2) + MsVchSrno;",
+  "val[val.Row, 16] = Strings.Format((object)(Conversion.Val(val[val.Row, 14]) - Conversion.Val(val[val.Row, 15])), \"0.000\");",
+  "val[val.Row, 18] = Strings.Format((object)(Conversion.Val(val[val.Row, 14]) - Conversion.Val(val[val.Row, 17])), \"0.000\");",
+  "val[val.Row, 29] = Strings.Format((object)((Conversion.Val(val[val.Row, 16]) + Conversion.Val(val[val.Row, 26])) * (Conversion.Val(val[val.Row, 27]) + Conversion.Val(val[val.Row, 28])) / 100.0), \"0.000\");",
+  "val[val.Row, 26] = Strings.Format((object)(Conversion.Val(val[val.Row, 16]) * Conversion.Val(val[val.Row, 25]) / 100.0), \"0.000\");",
+  "val[val.Row, 29] = Strings.Format((object)(Conversion.Val(val[val.Row, 16]) + Conversion.Val(val[val.Row, 26])), \"0.000\");",
+  "if ((Conversion.Val(val[val.Row, 29]) == 0.0) & (Conversion.Val(val[val.Row, 27]) + Conversion.Val(val[val.Row, 28]) != 0.0))",
+  "val[val.Row, 23] = Strings.Format((object)((Conversion.Val(val[val.Row, 18]) + Conversion.Val(val[val.Row, 20])) * (Conversion.Val(val[val.Row, 21]) + Conversion.Val(val[val.Row, 22])) / 100.0), \"0.000\");",
+  "val[val.Row, 23] = Strings.Format((object)(Conversion.Val(val[val.Row, 18]) + Conversion.Val(val[val.Row, 20])), \"0.000\");",
+  "if ((Conversion.Val(val[val.Row, 23]) == 0.0) & (Conversion.Val(val[val.Row, 21]) + Conversion.Val(val[val.Row, 22]) != 0.0))",
+  "val[val.Row, 111] = Strings.Format((object)(Conversion.Val(val[val.Row, 18]) + Conversion.Val(val[val.Row, 20])), \"0.000\");",
+  "val[val.Row, 44] = Strings.Format((object)Math.Round(num5 * Conversion.Val(val[val.Row, 43]), 0), \"0.00\");",
+  "val[val.Row, 44] = Strings.Format((object)Math.Round(num5 * (Conversion.Val(val[val.Row, 43]) / 1000.0), 0), \"0.00\");",
+  "val[val.Row, 44] = Strings.Format((object)Math.Round(num5 * (Conversion.Val(val[val.Row, 43]) / 10.0), 0), \"0.00\");",
+  "val[val.Row, 44] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 13]) * Conversion.Val(val[val.Row, 43]), 0), \"0.00\");",
+  "val[val.Row, 33] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 14]) * Conversion.Val(val[val.Row, 32]), 0), \"0.00\");",
+  "val[val.Row, 33] = Strings.Format((object)Math.Round((Conversion.Val(val[val.Row, 16]) + Conversion.Val(val[val.Row, 26])) * (Conversion.Val(val[val.Row, 32]) / 1000.0), 0), \"0.00\");",
+  "val[val.Row, 33] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 16]) * Conversion.Val(val[val.Row, 32]), 0), \"0.00\");",
+  "val[val.Row, 33] = Strings.Format((object)Math.Round((Conversion.Val(val[val.Row, 16]) + Conversion.Val(val[val.Row, 26])) * Conversion.Val(val[val.Row, 32]), 0), \"0.00\");",
+  "val[val.Row, 33] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 13]) * Conversion.Val(val[val.Row, 32]), 0), \"0.00\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserDelete, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "This Row Record will Removed permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"This Row Record will Removed permantley ?\", (MsgBoxStyle)36, (object)null) == 6"
+  },
+  {
+   "message": "Record is Deleted....",
+   "when": ""
+  },
+  {
+   "message": "Available ports:",
+   "when": "string.IsNullOrEmpty(comPortByFriendlyName)"
+  },
+  {
+   "message": "Port open error:",
+   "when": ""
+  },
+  {
+   "message": "Please Save This Voucher Then Effect....",
+   "when": ""
+  },
+  {
+   "message": "No LabCode Found Please Update Itm Stock Limit Mast and Try..",
+   "when": ""
+  },
+  {
+   "message": "You Cant Change ItCode In Edit Mode Please Tag Transfer And Generate New Tag...",
+   "when": "ItCodeLock"
+  },
+  {
+   "message": "Duplicate Entry",
+   "when": "Operators.CompareString(mSG[mSG.Row, 2], \"\", false) != 0 && ((Operators.CompareString(mSG[DC_Main.X, 2], mSG[mSG.Row, 2], false) == 0) & (Conversion.Val(mSG[DC_"
+  },
+  {
+   "message": "Duplicate Tag No",
+   "when": "(Operators.CompareString(mSG[DC_Main.X, 5], TEXT_ENTRY.Text, false) == 0) & (mSG.Row != DC_Main.X)"
+  },
+  {
+   "message": "Add New Color ?",
+   "when": "DC_Main.Rshlp.Rows.Count == 0 && unchecked((int)Interaction.MsgBox((object)\"Add New Color ? \", (MsgBoxStyle)292, (object)\"Message\")) != 6"
+  },
+  {
+   "message": "Duplicate Design No",
+   "when": "(Operators.CompareString(mSG[DC_Main.X, 7], TEXT_ENTRY.Text, false) == 0) & (mSG.Row != DC_Main.X)"
+  },
+  {
+   "message": "Add New Design ?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Add New Design ? \", (MsgBoxStyle)292, (object)\"Message\")) != 6"
+  },
+  {
+   "message": "You Cant Generate New Tag Plese Add Stock First",
+   "when": "Operators.CompareString(DC_Main.SSRegSrNo, \"VK142NEVK\", false) == 0 && Operators.CompareString(FormMainBook, \"TAG GEN\", false) == 0 && Conversion.Val(nitGwt.Tex"
+  },
+  {
+   "message": "Please Save Voucher Befoure Exit...",
+   "when": "Operators.CompareString(MSG[DC_Main.M, 69], \"A\", false) == 0"
+  },
+  {
+   "message": "You Cant Save New Entry Because Your lIcence Has been Expired Please Renew lIcence....",
+   "when": "(Operators.CompareString(DC_Main.MsSoftNoUse, \"Y\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "Please Change VchNo its Not Valid......",
+   "when": "Strings.Len(tVchNo.Text) < 2"
+  },
+  {
+   "message": "You Cant Save This Voucher Becouse This Company Type is B......",
+   "when": "(Operators.CompareString(DC_Main.MCo_Type, \"B\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "Please Select Employee Code and Try......",
+   "when": "(Operators.CompareString(DC_Main.MsEmpCodeMendetry, \"Y\", false) == 0) & (Operators.CompareString(tEmpCode.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save Entry Because Voucher Date Not Grater Then Closing Date... Please Change Date...",
+   "when": "DateTime.Compare(Conversions.ToDate(DC_Main.MCo_ClDate), Conversions.ToDate(mVchDate.Text)) < 0"
+  },
+  {
+   "message": "Error Found : Please Enter Book Detail First...",
+   "when": "Operators.CompareString(tVchNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Counter Code and Try Because It is Mandatory...",
+   "when": "Operators.CompareString(MSG[DC_Main.M, 6], \"\", false) == 0"
+  },
+  {
+   "message": "Stock item code Insert First...",
+   "when": "(Operators.CompareString(FormMainBook, \"TAG GEN\", false) == 0) & (Operators.CompareString(tItCode.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "You Cant Delete This Voucher Because  Tag Use in Sales Transection....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Voucher now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Last Record...",
+   "when": "Conversion.Val(tVchNo.Text) >= Conversion.Val(LastVchNo)"
+  },
+  {
+   "message": "Tag Print Report Default Set",
+   "when": ""
+  },
+  {
+   "message": "Please Insert HmId2 Weight and try...",
+   "when": "(Operators.CompareString(tHmId2.Text, \"\", false) != 0) & (Operators.CompareString(nHmWt2.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Please Insert HmId3 Weight and try...",
+   "when": "(Operators.CompareString(tHmId3.Text, \"\", false) != 0) & (Operators.CompareString(nHmWt3.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Please Insert HmId4 Weight and try...",
+   "when": "(Operators.CompareString(tHmId4.Text, \"\", false) != 0) & (Operators.CompareString(nHmWt4.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "This Item Tag No Re Numbaring ?",
+   "when": "(int)Interaction.MsgBox((object)\"This Item Tag No Re Numbaring ?\", (MsgBoxStyle)20, (object)null) != 6"
+  },
+  {
+   "message": "This Is Not a Oppning Tag Voucher....You Cant Re Numbaring This Voucher...",
+   "when": "Operators.CompareString(Strings.Format((object)Conversions.ToDate(mVchDate.Text), \"MM/dd/yyyy\"), Strings.Format((object)DC_Main.MOp_dt, \"MM/dd/yyyy\"), false) >="
+  },
+  {
+   "message": "This Voucher Tag is Already Re Numbering...",
+   "when": "num > 0"
+  },
+  {
+   "message": "Process are Complite....",
+   "when": "num > 0"
+  },
+  {
+   "message": "No Record Found....",
+   "when": ""
+  },
+  {
+   "message": "Tag List Is Generate Successfully...",
+   "when": ""
+  },
+  {
+   "message": "Missing Tag Other Detail Import From Last Year... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Missing Tag Other Detail Import From Last Year... ?\", (MsgBoxStyle)20, (object)null) != 6"
+  },
+  {
+   "message": "Data Import Is Ok...",
+   "when": ""
+  },
+  {
+   "message": "Main Stock Tabel To BarDetl Stock Import Ok....",
+   "when": ""
+  }
+ ]
+}

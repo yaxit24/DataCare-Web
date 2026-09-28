@@ -1,0 +1,31 @@
+{
+ "form": "RP_LC_INOUT",
+ "tables": [
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "INOUT_DETL",
+  "LOCT_MAST",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "INOUT_DETL",
+  "LOCT_MAST",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 2,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2948
+}

@@ -1,0 +1,6 @@
+Staged JavaScript syntax only; no module import, browser, database, server, compiler or build execution.
+node --check /tmp/datacare-return-labour-preview-faults/web/apps/web/test/labour-preview-lifecycle.journey.mjs
+exit0
+node --check /tmp/datacare-return-labour-preview-faults/web/apps/web/test/labour-preview-lifecycle.real-stack.mjs
+exit0
+Both staged files formatted with the existing project Prettier configuration; exit0.

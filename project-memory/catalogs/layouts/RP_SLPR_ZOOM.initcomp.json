@@ -1,0 +1,477 @@
+{
+ "form": "RP_SLPR_ZOOM",
+ "controlCount": 44,
+ "byKind": {
+  "button": 14,
+  "masked": 2,
+  "grid": 4,
+  "other": 2,
+  "combo": 2,
+  "label": 7,
+  "panel": 4,
+  "check": 4,
+  "textbox": 5
+ },
+ "grids": [
+  "DGV",
+  "DGV_VCH",
+  "DGV_ITM",
+  "DGV_DATE"
+ ],
+ "tabs": [],
+ "gridColumns": 2,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "Panel1": [
+   "PnlIt",
+   "DGV",
+   "DGV_DATE",
+   "DGV_VCH"
+  ],
+  "PnlIt": [
+   "btnAll",
+   "btnItCancel",
+   "btnOk",
+   "DGV_ITM"
+  ],
+  "Panel2": [
+   "tAcCode",
+   "tAcName",
+   "Label5"
+  ],
+  "this": [
+   "Panel2",
+   "chkBookSelect",
+   "tBookCode",
+   "Label4",
+   "chkOnlyTag",
+   "cboSalesType",
+   "Label1",
+   "tGrCode",
+   "Label7",
+   "chkItmSelect",
+   "tLcCode",
+   "chkSalesRtn",
+   "Label2",
+   "mToDt",
+   "mFromDt",
+   "Panel1",
+   "cboItemTyp",
+   "Label3",
+   "tSerchAll",
+   "lblBook",
+   "PnlBotam",
+   "BtnGroup",
+   "BtnProduct",
+   "BtnItem",
+   "BtnDesign",
+   "BtnSize",
+   "btnState"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "Print",
+   "kind": "button"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "61,45",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "Excel",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "147,45",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "10,13",
+   "size": "1160,420",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tSerchAll",
+   "type": "SearchControl",
+   "location": "232,45",
+   "size": "113,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "442,46",
+   "size": "109,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "DGV_VCH",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "11,13",
+   "size": "1158,419",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnItem",
+   "type": "QButton",
+   "location": "693,86",
+   "size": "143,37",
+   "tabIndex": "5",
+   "text": "&Party Wise",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Sales Zoom Report",
+   "kind": "label"
+  },
+  {
+   "name": "BtnProduct",
+   "type": "QButton",
+   "location": "534,86",
+   "size": "143,37",
+   "tabIndex": "6",
+   "text": "&City Wise",
+   "kind": "button"
+  },
+  {
+   "name": "BtnGroup",
+   "type": "QButton",
+   "location": "217,86",
+   "size": "143,37",
+   "tabIndex": "7",
+   "text": "&Month Wise",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDesign",
+   "type": "QButton",
+   "location": "852,86",
+   "size": "143,37",
+   "tabIndex": "8",
+   "text": "&Item Wise",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSize",
+   "type": "QButton",
+   "location": "1011,86",
+   "size": "143,37",
+   "tabIndex": "9",
+   "text": "-",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "353,46",
+   "size": "79,20",
+   "tabIndex": "108",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "0,119",
+   "size": "1309,447",
+   "tabIndex": "110",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "12,45",
+   "size": "44,20",
+   "tabIndex": "122",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "chkSalesRtn",
+   "type": "CheckBox",
+   "location": "16,7",
+   "size": "159,19",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "DGV_ITM",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "11,11",
+   "size": "433,229",
+   "tabIndex": "1156",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "btnOk",
+   "type": "QButton",
+   "location": "182,249",
+   "size": "100,38",
+   "tabIndex": "1157",
+   "text": "Ok",
+   "kind": "button"
+  },
+  {
+   "name": "btnItCancel",
+   "type": "QButton",
+   "location": "312,249",
+   "size": "100,38",
+   "tabIndex": "1158",
+   "text": "Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "1068,6",
+   "size": "44,22",
+   "tabIndex": "1159",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnAll",
+   "type": "QButton",
+   "location": "50,249",
+   "size": "100,38",
+   "tabIndex": "1160",
+   "text": "All",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "146,13",
+   "size": "76,23",
+   "tabIndex": "1166",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "231,13",
+   "size": "282,23",
+   "tabIndex": "1167",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "52,16",
+   "size": "85,20",
+   "tabIndex": "1168",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "chkItmSelect",
+   "type": "CheckBox",
+   "location": "566,47",
+   "size": "105,19",
+   "tabIndex": "1204",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "748,45",
+   "size": "53,23",
+   "tabIndex": "1205",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "683,47",
+   "size": "60,20",
+   "tabIndex": "1206",
+   "text": "Gr Code",
+   "kind": "label"
+  },
+  {
+   "name": "PnlIt",
+   "type": "Panel",
+   "location": "537,13",
+   "size": "456,299",
+   "tabIndex": "1207",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "DGV_DATE",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "10,13",
+   "size": "1160,420",
+   "tabIndex": "1208",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "cboSalesType",
+   "type": "ComboBox",
+   "location": "94,89",
+   "size": "110,22",
+   "tabIndex": "1208",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "-4,88",
+   "size": "92,20",
+   "tabIndex": "1209",
+   "text": "Sales Type",
+   "kind": "label"
+  },
+  {
+   "name": "btnState",
+   "type": "QButton",
+   "location": "375,86",
+   "size": "143,37",
+   "tabIndex": "1210",
+   "text": "&State Wise",
+   "kind": "button"
+  },
+  {
+   "name": "chkOnlyTag",
+   "type": "CheckBox",
+   "location": "979,38",
+   "size": "133,22",
+   "tabIndex": "1211",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "tBookCode",
+   "type": "TextBox",
+   "location": "899,45",
+   "size": "62,23",
+   "tabIndex": "1212",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "811,46",
+   "size": "80,20",
+   "tabIndex": "1213",
+   "text": "Book Code",
+   "kind": "label"
+  },
+  {
+   "name": "chkBookSelect",
+   "type": "CheckBox",
+   "location": "979,61",
+   "size": "105,19",
+   "tabIndex": "1214",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "Panel2",
+   "type": "Panel",
+   "location": "0,72",
+   "size": "687,46",
+   "tabIndex": "1215",
+   "text": "",
+   "kind": "panel"
+  }
+ ]
+}

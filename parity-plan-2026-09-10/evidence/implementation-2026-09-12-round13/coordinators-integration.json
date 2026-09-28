@@ -1,0 +1,32 @@
+{
+  "status": "integrated-internal-unexecuted-unwired",
+  "atUtc": "2026-09-11T20:06:35.042522+00:00",
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextSelection.ts",
+      "beforeSha256": null,
+      "afterSha256": "8487bacd3a2cc8eb27ea010c1c33a74dc3d69f29a42d342dc56dd0ebc044a9c9"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/lastDayLock.ts",
+      "beforeSha256": "d7fa20f7c174b2c8ac1fba41a6e38a23cd219295242e4621379cc25f1c8bd096",
+      "afterSha256": "639e4e531ac7b0856b7c139b9e359f2805df699fc9baeb4ce1d6cbdb56c17add"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextSelection.db.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "5f8a248aae4bdf9e0c247f87e7bc67b572fc130e64dd9a9fb0419ff35e9e4faa"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextRefresh.ts",
+      "beforeSha256": null,
+      "afterSha256": "46fcfb4a39c45a0315a720c022e31c386b7f40d5e187855113dde879d2d9cc00"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextLogin.ts",
+      "beforeSha256": null,
+      "afterSha256": "6d32b25270c7a09bedcd6d876c95490368391936238de74f52c675b5c143c5d5"
+    }
+  ],
+  "limit": "Source integration only. Existing endpoints still use old session lifecycle; no live epoch or whole-workflow claim."
+}

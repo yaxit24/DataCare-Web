@@ -110,6 +110,31 @@ describe('CO_SET behavior defaults', () => {
       fxCode: null,
       adminSms: null,
       customerSms: null,
+      // ---- CO_SET_NEW business switches (P4) ----------------------------------------------
+      // Defaults transcribed from MS_OPNCOMP.cs's blank-fill block, NOT chosen. Two are the
+      // PERMISSIVE value, which is why a uniform false was wrong: a company that never opened
+      // these settings allows negative stock and includes ghat in the labour base.
+      negativeStockSale: true,
+      labourIncludesGhat: true,
+      purchaseWithHallmarkTax: false,
+      salesWithHallmarkTax: false,
+      saleNetWeightLocked: false,
+      itemFineLocked: false,
+      stockRefreshFromDateOnly: false,
+      estimateBankLocked: false,
+      estimateTax: false,
+      purchaseTdsEnabled: false,
+      oldPurchaseTouchGenerated: false,
+      silverThreeDigit: false,
+      otherItemWeightRemoved: false,
+      orderReducesTagStock: false,
+      saleTagWeightDiffReconciled: false,
+      purchaseLot: false,
+      itemWithLotStock: false,
+      totalFineStockType: 'I',
+      branchAllAccountShow: false,
+      duplicatePrint: false,
+      qrCodeGeneration: false,
     });
   });
 
@@ -121,7 +146,10 @@ describe('CO_SET behavior defaults', () => {
     ['INT_DAY', '3'],
     ['LOAN_INT_TYPE', 'X'],
     ['DHIRN_COMPOUND', 'X'],
-    ['FINE_STK_TYPE', 'F'],
+    // 'F' was previously listed here as invalid, but 'F' is what the desktop STORES and defaults to
+    // (MS_OPNCOMP.cs:765-767), and it is the value present in Live24, Next23, Next24 and Next25. Rejecting it
+    // made resolveSettingsBehavior throw for every real installation. 'X' is genuinely not a member.
+    ['FINE_STK_TYPE', 'X'],
     ['SL_AMT_TYPE', 'X'],
     ['PR_AMT_TYPE', 'X'],
     ['PURC_WITH_LBR', 'X'],

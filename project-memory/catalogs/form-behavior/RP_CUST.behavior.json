@@ -1,0 +1,25 @@
+{
+ "form": "RP_CUST",
+ "loc": 1590,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT AC_GR_NAME As AcGrName,AC_GR as Code FROM AC_GROUP WHERE CO_CODE = ' ? ' AND AC_GR IN ('04','15','05','10','19','20') ORDER BY AC_GR",
+  "SELECT A.AC_CODE,(SELECT TOP(1) VCH_DATE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = A.AC_CODE ORDER BY VCH_DATE DESC) As VchDate,(SELECT TOP(1) CO_BOOK FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = A.AC_CODE ORDER BY VCH_DATE DESC) As CoBook FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.AC_GR IN ('04','15','05','10','19','20') ORDER BY A.AC_CODE DESC",
+  "UPDATE AC_MAST SET LAST_VISIT = ' ? VchDate ? MM/dd/yyyy ? ',VISIT_TRAN = ' ? CoBook ? ' WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? AC_CODE ? '",
+  "SELECT ROW_NUMBER() OVER (ORDER BY A.LAST_VISIT DESC) AS SrNo,A.AC_NAME As AcName,A.AC_MOBILE As Mobile,A.LAST_VISIT As LastVisit,B.BOOK_NAME As LastTran,AC_CITY As City, A.AC_ADD1 As Address1,A.AC_AREA As Area,A.AC_GR As AcGroup,A.AC_CODE As AcCode from AC_MAST AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.VISIT_TRAN = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ? C ? AND B.DATA_TYPE = ' ? ' ? AND AC_GR IN ('04','05','10','15','20','45','19')AND A.LAST_VISIT >= ' ? MM/dd/yyyy ? ' AND A.LAST_VISIT <= ' ? MM/dd/yyyy ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 3
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Default Report Display....",
+   "when": "(int)Interaction.MsgBox((object)\"Default Report Display....\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  }
+ ]
+}

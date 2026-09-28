@@ -1,0 +1,75 @@
+{
+ "form": "RP_TRADING",
+ "loc": 3322,
+ "gridColumns": {
+  "cSrNoSl": 0,
+  "cTradDate": 1,
+  "cBookSl": 2,
+  "cVchNoSl": 3,
+  "cLdAcNameSl": 4,
+  "cSlFine": 5,
+  "cSlRate": 6,
+  "cSlAmt": 7,
+  "cBookPr": 9,
+  "cVchNoPr": 10,
+  "cLdAcNamePr": 11,
+  "cPrFine": 12,
+  "cPrRate": 13,
+  "cPrAmt": 14,
+  "cBookCodeCr": 15,
+  "cBookNameCr": 16,
+  "cBookCodeDr": 17,
+  "cBookNameDr": 18,
+  "cVchDate": 19
+ },
+ "inlineSql": [
+  "SELECT A.CO_CODE,CO_YEAR,CO_BOOK,VCH_NO,A.ITM_SIGN,B.IT_TYPE,SUM(ITM_FINE) As FineStk FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE)LEFT JOIN GROUP_MAST AS C ON B.CO_CODE = C.CO_CODE AND B.GR_CODE = C.GR_CODE WHERE A.CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_DATE >= ' ? MM/dd/yyyy ? ' AND VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND DATA_TYPE = ' ? ' ? AND C.SALE_AC = ' ? ' GROUP BY A.CO_CODE,CO_YEAR,CO_BOOK,VCH_NO,ITM_SIGN,B.IT_TYPE",
+  "SELECT CO_CODE,CO_YEAR,CO_BOOK,VCH_NO,SIGN,SUM(FINE_WT) As RCutFine FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CR_AMT + DR_AMT <> 0 AND FINE_WT <> 0 AND VCH_DATE >= ' ? MM/dd/yyyy ? ' AND VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND DATA_TYPE = ' ? ' ? GROUP BY CO_CODE,CO_YEAR,CO_BOOK,VCH_NO,SIGN HAVING SUM(FINE_WT) <> 0",
+  "SELECT A.CO_YEAR,A.CO_BOOK,A.VCH_NO,B.AC_NAME FROM MAIN_STOCK AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND VCH_DATE <= ' ? MM/dd/yyyy ? ' UNION ALL SELECT C.CO_YEAR,C.CO_BOOK,C.VCH_NO,D.AC_NAME FROM AC_DATA AS C LEFT JOIN AC_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.PARTY_AC_CODE = D.AC_CODE WHERE C.CO_CODE = ' ? ' AND C.LC_CODE = ' ? ' AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND VCH_DATE <= ' ? MM/dd/yyyy ? ' AND C.PARTY_AC_CODE <> ''",
+  "SELECT A.VCH_TYPE,A.CO_BOOK,B.MAIN_BOOK AS BOOK_NAME,A.VCH_NO,A.VCH_DATE,SUM(A.CR_AMT) AS CR_AMT,SUM(A.DR_AMT) AS DR_AMT FROM AC_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE And A.LC_CODE = B.LC_CODE And A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.CO_BOOK IN ( ? ) ? AND A.FINE_RATE = 0 and A.AC_CODE IN (' ? ' ,' ? ') AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.VCH_TYPE,A.CO_BOOK,B.MAIN_BOOK,A.VCH_NO,A.VCH_DATE ORDER BY A.VCH_DATE,SUM(A.CR_AMT),A.VCH_TYPE,A.CO_BOOK,A.VCH_NO",
+  "SELECT A.VCH_TYPE,A.CO_BOOK,B.MAIN_BOOK AS BOOK_NAME,A.VCH_NO,A.VCH_DATE,SUM(A.DR_AMT) AS CR_AMT,SUM(A.CR_AMT) AS DR_AMT FROM AC_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE And A.LC_CODE = B.LC_CODE And A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.CO_BOOK IN ( ? ) ? AND A.FINE_RATE <> 0 and A.LD_CODE IN (' ? ' ,' ? ') AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND B.MAIN_BOOK IN ('WH SALES','RATE CUT') GROUP BY A.VCH_TYPE,A.CO_BOOK,B.MAIN_BOOK,A.VCH_NO,A.VCH_DATE ORDER BY A.VCH_DATE,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT Sum(CR_AMT - DR_AMT) as BalAmt FROM AC_DATA WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? ' and VCH_DATE < ' ? MM/dd/yyyy ? ' HAVING SUM(CR_AMT-DR_AMT) <> 0",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT C.AC_NAME As AcNameL,C.AC_CODE As AcCodeL,D.AC_GR_NAME AS GroupL,C.AC_AREA As AreaL,C.AC_ADD1 As AddressL,C.AC_CITY As CityL,C.AC_MOBILE As MobileL FROM AC_MAST AS C LEFT JOIN AC_GROUP AS D ON C.CO_CODE = D.CO_CODE AND C.AC_GR = D.AC_GR WHERE C.CO_CODE = ' ? ' AND CAST(C.AC_CODE AS INT) < 100 UNION ALL SELECT A.AC_NAME,A.AC_CODE,B.AC_GR_NAME,A.AC_AREA,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CAST(A.AC_CODE AS INT) >=200 ORDER BY C.AC_NAME",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL,B.AC_GR_NAME AS GroupL,A.AC_AREA As AreaL,A.AC_ADD1 As AddressL,A.AC_CITY As CityL,A.AC_MOBILE As MobileL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ORDER BY A.AC_NAME",
+  "SELECT BOOK_NAME ,CO_BOOK ,BOOK_TYPE,ITM_TYPE,MAIN_BOOK,BOOK_SNAME,BOOK_INOUT,MENU_NAME FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT A.CO_BOOK,A.BOOK_NAME FROM BOOK_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.MAIN_BOOK Not IN ('OPSTK','CASH REC','CASH PAY','BANK REC','BANK PAY','TAG GEN','TAG CANCEL','APR ISU','APR RTN','OUTWORD','INWORD','MEMB ENTRY','MEMB OPENING','MEMB ADJUST','PHY STOCK') ORDER BY A.CO_BOOK"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 6
+ },
+ "calc": [
+  "((DataGridView)dGV_DETL)[6, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, DC_Main.R].Value)) / Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[5, DC_Main.R].Value))), \"0.00\");",
+  "((DataGridView)dGV_DETL)[13, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[14, DC_Main.R].Value)) / Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[12, DC_Main.R].Value))), \"0.00\");",
+  "((DataGridView)DGV_DETL)[14, DC_Main.R].Value = Strings.Format((object)(num + Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[14, 0].Value))), \"0\");",
+  "((DataGridView)DGV_DETL)[7, DC_Main.R].Value = Strings.Format((object)(num2 + Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[7, 0].Value))), \"0\");",
+  "((DataGridView)DGV_DETL)[12, DC_Main.R].Value = Strings.Format((object)(num3 + Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[12, 0].Value))), \"0.000\");",
+  "((DataGridView)DGV_DETL)[5, DC_Main.R].Value = Strings.Format((object)(num4 + Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[5, 0].Value))), \"0.000\");",
+  "((DataGridView)DGV_DETL)[13, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[14, DC_Main.R].Value)) / Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[12, DC_Main.R].Value))), \"0.00\");",
+  "((DataGridView)DGV_DETL)[6, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[7, DC_Main.R].Value)) / Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[5, DC_Main.R].Value))), \"0.00\");",
+  "double num8 = Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[12, DC_Main.R].Value)) - Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[5, DC_Main.R].Value));",
+  "double num9 = Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[14, DC_Main.R].Value)) - Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[7, DC_Main.R].Value));"
+ ],
+ "validations": [
+  {
+   "message": "Please Insert Cr AcCode or Dr AcCode and Try....",
+   "when": "(Operators.CompareString(tSlAcCode.Text, \"\", false) == 0) | (Operators.CompareString(tPrAcCode.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": ""
+  },
+  {
+   "message": "Book Selection Not Done...",
+   "when": "Operators.CompareString(ScelectBook, \"\", false) == 0"
+  },
+  {
+   "message": "Book Selection is Ok...",
+   "when": ""
+  }
+ ]
+}

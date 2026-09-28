@@ -1,0 +1,262 @@
+{
+  "version": "order-command-independent-v1",
+  "status": "prospective literals frozen before next-stage implementation; unexecuted",
+  "basis": "Existing source arithmetic and unchanged lifecycle behavior plus explicitly authorized modern Tour version requirement",
+  "fixture": {
+    "scope": {
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "salesBook": "N13",
+      "tourBook": "N14"
+    },
+    "vchDate": "2024-07-10",
+    "clock": "09:10:11.123456",
+    "account": "PARTY",
+    "cashAccount": "CASH",
+    "parents": [
+      {
+        "srNo": 7,
+        "itCode": "GOLD",
+        "pcs": 1,
+        "grossWt": 10,
+        "netWt": 10,
+        "touch": 100,
+        "rate": 20,
+        "making": 0,
+        "components": [
+          {
+            "isrNo": 3,
+            "itCode": "STN1",
+            "pcs": 1,
+            "grossWt": 0.1,
+            "amount": 11,
+            "netAmount": 11
+          },
+          {
+            "isrNo": 13,
+            "itCode": "STN2",
+            "pcs": 2,
+            "grossWt": 0.2,
+            "amount": 13,
+            "netAmount": 13
+          }
+        ]
+      },
+      {
+        "srNo": 19,
+        "itCode": "SILVR",
+        "pcs": 1,
+        "grossWt": 2,
+        "netWt": 2,
+        "touch": 100,
+        "rate": 30,
+        "making": 0,
+        "components": []
+      }
+    ],
+    "taxRatePct": 0,
+    "advance": 25,
+    "editedAdvance": 40,
+    "expected": {
+      "total": "260.00",
+      "parentTotals": {
+        "7": "200.00",
+        "19": "60.00"
+      },
+      "ledgerCreate": [
+        {
+          "account": "CASH",
+          "debit": "25.00",
+          "credit": "0.00"
+        },
+        {
+          "account": "PARTY",
+          "debit": "0.00",
+          "credit": "25.00"
+        }
+      ],
+      "ledgerEdit": [
+        {
+          "account": "CASH",
+          "debit": "40.00",
+          "credit": "0.00"
+        },
+        {
+          "account": "PARTY",
+          "debit": "0.00",
+          "credit": "40.00"
+        }
+      ],
+      "rojmelCreateCredit": "25.00",
+      "rojmelEditCredit": "40.00",
+      "cancelEvidenceDebit": "0.00",
+      "cancelEvidenceCredit": "40.00",
+      "sessionDelta": {}
+    }
+  },
+  "schedules": [
+    {
+      "id": "O01",
+      "path": "sales-create",
+      "given": "fresh View allowed, full fixture",
+      "expected": "commit; voucher00001/hidden00001; total260; advance25; two ledger legs; one credit25 Rojmel; parents7/19 and children3/13"
+    },
+    {
+      "id": "O02",
+      "path": "tour-create",
+      "given": "fresh View allowed, full fixture",
+      "expected": "same amounts/identities as O01; configured TUROD/I/TOUR ORDER stamps"
+    },
+    {
+      "id": "O03",
+      "path": "tour-edit",
+      "given": "fresh View+Edit; saved version; advance25\u219240",
+      "expected": "one replacement; total260 unchanged; ledger/Rojmel40; identities/raw hidden/null/clock preserved; version changes"
+    },
+    {
+      "id": "O04",
+      "path": "sales-cancel",
+      "given": "saved edited advance40; fresh View+Delete; canonical version",
+      "expected": "delete complete11-table financial footprint except one DELETE_DATA credit40; unrelated scope unchanged"
+    },
+    {
+      "id": "O05",
+      "path": "tour-cancel",
+      "given": "saved edited advance40; fresh View+Delete; canonical version",
+      "expected": "same reverse/evidence as O04 with configured Tour stamps; no refund ledger inserted"
+    },
+    {
+      "id": "O06",
+      "path": "tour-edit",
+      "given": "missing/noncanonical expectedVersion",
+      "expected": "validation refusal before transaction; entire raw physical snapshot unchanged"
+    },
+    {
+      "id": "O07",
+      "path": "tour-cancel",
+      "given": "missing/noncanonical expectedVersion",
+      "expected": "validation refusal before transaction; entire raw physical snapshot unchanged"
+    },
+    {
+      "id": "O08",
+      "path": "sales-cancel",
+      "given": "missing/noncanonical expectedVersion",
+      "expected": "validation refusal before transaction; entire raw physical snapshot unchanged"
+    },
+    {
+      "id": "O09",
+      "path": "all-five",
+      "given": "missing identity, malformed epoch, wrong subject or stale A\u2192B\u2192A epoch",
+      "expected": "no financial callback/writes; unchanged snapshot excluding legitimate actor transition"
+    },
+    {
+      "id": "O10",
+      "path": "create-both",
+      "given": "ViewY/EditN/DeleteN",
+      "expected": "create allowed under existing form semantics; later edit/delete denied"
+    },
+    {
+      "id": "O11",
+      "path": "mutate-both",
+      "given": "fresh form right revoked after prehandler",
+      "expected": "403 in command admission; no financial write despite old JWT/prehandler permission"
+    },
+    {
+      "id": "O12",
+      "path": "create-sales",
+      "given": "missing date",
+      "expected": "existing validation refusal; no session transaction or allocation"
+    },
+    {
+      "id": "O13",
+      "path": "create-tour",
+      "given": "missing date with open current period",
+      "expected": "existing clock default remains; do not claim a fixed default timestamp or Sales fiscal validation"
+    },
+    {
+      "id": "O14",
+      "path": "tour-edit",
+      "given": "single legacy flattened component input; then multi-child saved input missing components",
+      "expected": "legacy single-child path retained; multi-child omission refuses before deletion"
+    },
+    {
+      "id": "O15",
+      "path": "tour-edit",
+      "given": "old saved version after another committed edit",
+      "expected": "document conflict; current complete saved state unchanged"
+    },
+    {
+      "id": "O16",
+      "path": "cancel-both",
+      "given": "consumed/issued/tagged/allocation or locked saved date",
+      "expected": "existing domain refusal; entire write set retained"
+    },
+    {
+      "id": "O17",
+      "path": "create-both",
+      "given": "late invalid child after allocation, before posting",
+      "expected": "rollback includes allocated temporary/header/child/ledger writes; next clean create derives the same maximum"
+    },
+    {
+      "id": "O18",
+      "path": "cancel-both",
+      "given": "injected DELETE_DATA insert failure after reversal",
+      "expected": "confirmed rollback restores all original financial/temp rows; no deletion evidence/session changes"
+    },
+    {
+      "id": "O19",
+      "path": "all-five",
+      "given": "business callback completes but final SQL observes expired session",
+      "expected": "whole callback rollback; old session expiry/JTI/epoch unchanged; no committed refund or partial replacement"
+    },
+    {
+      "id": "O20",
+      "path": "create-both",
+      "given": "two same-book session commands start from empty book",
+      "expected": "both may commit; distinct vouchers00001/00002 and hidden00001/00002; sum advances50; no duplicate number"
+    },
+    {
+      "id": "O21",
+      "path": "tour-edit",
+      "given": "two concurrent commands share one saved version",
+      "expected": "one edit40 commits; one stale version conflict; no accumulated65 or duplicate children"
+    },
+    {
+      "id": "O22",
+      "path": "create-or-cancel",
+      "given": "command holds session SHARE then selection attempts UPDATE",
+      "expected": "selection waits; command commit or rollback occurs first; later selection cannot undo committed financial result"
+    },
+    {
+      "id": "O23",
+      "path": "all-five",
+      "given": "selection UPDATE commits before waiting command SHARE",
+      "expected": "command sees changed context/epoch and refuses before any financial write"
+    },
+    {
+      "id": "O24",
+      "path": "all-five",
+      "given": "caller mutates original scope/amount/date/children during session wait",
+      "expected": "captured detached input remains authoritative; no rebase to changed input"
+    },
+    {
+      "id": "O25",
+      "path": "create-after-cancel",
+      "given": "highest voucher cancellation commits before next create",
+      "expected": "existing MAX rule may reuse deleted00001; DELETE_DATA evidence remains distinct; no idempotency claim"
+    },
+    {
+      "id": "O26",
+      "path": "all-five",
+      "given": "committed financial result but response lost",
+      "expected": "commit remains; no automatic retry/rebase; outcome inspection required, especially non-idempotent create"
+    }
+  ],
+  "limits": [
+    "Generic helper tests are not proof every listed financial schedule ran.",
+    "Unconverted adjustment/refund/consumption flows remain outside admission.",
+    "ReadCommitted does not freeze all settings or permissions.",
+    "No original desktop transaction or known ledger-mode acceptance."
+  ]
+}

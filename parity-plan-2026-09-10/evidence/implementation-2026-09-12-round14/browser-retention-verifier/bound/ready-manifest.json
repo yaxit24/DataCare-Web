@@ -1,0 +1,38 @@
+{
+  "kind": "staged-browser-retention-helper-bound/v1",
+  "status": "staged-not-executed",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "1d6e58d1c9756ef552a627f34b0e74d350e379794f58222b8dd670172a02b6cd",
+      "bytes": 889
+    },
+    {
+      "path": "contract.json",
+      "sha256": "3fc625b7dc3b78fc9b230b06b4478b082881af106c1a527d05c4af10e66043b0",
+      "bytes": 6292
+    },
+    {
+      "path": "prior-ready-manifest.json",
+      "sha256": "3fb1e13b4a03d59555836bfe7b74347f0ad7c4b4204c10b9aaf84dfe0d2f2100",
+      "bytes": 1171
+    },
+    {
+      "path": "revision.json",
+      "sha256": "6a6608f371b3cf5f123fd3b701bee0d63dff9a18ee89cfb60b17dd6e1c23e5f2",
+      "bytes": 1238
+    },
+    {
+      "path": "revision.patch",
+      "sha256": "49588ba778868ff3750093bb3f301df658d5bc43592e32e46969d25e2bafe7ba",
+      "bytes": 2056
+    },
+    {
+      "path": "verify_retain_browsers.py",
+      "sha256": "e78d78f631678e032d5e8202c7d0fc33b7d66215aa21cd1e0bf40010f21afacb",
+      "bytes": 13963
+    }
+  ],
+  "contractUnchanged": true,
+  "noActiveEdits": true
+}

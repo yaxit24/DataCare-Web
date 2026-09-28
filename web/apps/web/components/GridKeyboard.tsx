@@ -81,15 +81,65 @@ function horizontalBoundaries(target: HTMLElement): { start: boolean; end: boole
   return { start: start === 0 && end === 0, end: start === target.value.length && end === start };
 }
 
+/**
+ * Locate the row/column of the cell containing `target`.
+ *
+ * Explicit `data-grid-row` / `data-grid-column` attributes win when present, because a page may
+ * deliberately number its grid differently from the DOM (hidden columns, extended-mode toggles).
+ *
+ * When they are absent we DERIVE the position from the table geometry. That fallback is why the
+ * shared keyboard contract can reach every voucher screen: it was mounted on only 15 of 66
+ * transaction pages, and the barrier was never the hook — it was that adopting it meant hand-adding
+ * two attributes to every cell of every grid. Deriving position makes adoption a five-line change
+ * per page, which is the difference between a contract that spreads and one that does not.
+ */
+function locateCell(
+  container: HTMLElement,
+  target: HTMLElement,
+): { row: number; column: number; explicit: boolean } | null {
+  const tagged = target.closest<HTMLElement>('[data-grid-row][data-grid-column]');
+  if (tagged && container.contains(tagged)) {
+    const row = Number(tagged.dataset.gridRow);
+    const column = Number(tagged.dataset.gridColumn);
+    if (Number.isInteger(row) && Number.isInteger(column)) return { row, column, explicit: true };
+  }
+  const td = target.closest<HTMLTableCellElement>('td');
+  const tr = td?.closest<HTMLTableRowElement>('tr');
+  if (!td || !tr || !container.contains(tr)) return null;
+  // Row index within the body only: a header row must not shift every data row by one.
+  const body = tr.closest<HTMLElement>('tbody') ?? container;
+  const rows = Array.from(body.querySelectorAll<HTMLTableRowElement>(':scope > tr'));
+  const row = rows.indexOf(tr);
+  const column = Array.from(tr.children).indexOf(td);
+  if (row < 0 || column < 0) return null;
+  return { row, column, explicit: false };
+}
+
+/** Focus a cell addressed by derived DOM position rather than explicit attributes. */
+function focusPositionalCell(container: HTMLElement, row: number, column: number): boolean {
+  const body = container.querySelector<HTMLElement>('tbody') ?? container;
+  const tr = Array.from(body.querySelectorAll<HTMLTableRowElement>(':scope > tr'))[row];
+  const td = tr ? (tr.children[column] as HTMLElement | undefined) : undefined;
+  const focusTarget = td ? focusableElements(td)[0] : undefined;
+  if (!focusTarget) return false;
+  focusTarget.focus();
+  if (focusTarget instanceof HTMLInputElement || focusTarget instanceof HTMLTextAreaElement)
+    focusTarget.select();
+  return true;
+}
+
 function focusGridCell(container: HTMLElement, row: number, column: number): boolean {
   const cell = container.querySelector<HTMLElement>(
     `[data-grid-row="${row}"][data-grid-column="${column}"]`,
   );
   const target = cell ? focusableElements(cell)[0] : undefined;
-  if (!target) return false;
-  target.focus();
-  if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) target.select();
-  return true;
+  if (target) {
+    target.focus();
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)
+      target.select();
+    return true;
+  }
+  return focusPositionalCell(container, row, column);
 }
 
 function focusAfterRender(container: HTMLElement, row: number, column: number): void {
@@ -114,7 +164,8 @@ function focusAfterRender(container: HTMLElement, row: number, column: number): 
 
 export interface GridKeyboardOptions {
   rowCount: number;
-  columnCount: number;
+  /** Optional: when 0 or omitted, the row's own cell count is used (positional grids). */
+  columnCount?: number;
   onAppendRow: () => void;
   onRemoveRow: (row: number) => boolean | void;
   onEscape: () => void;
@@ -124,19 +175,22 @@ export function useGridKeyboard(options: GridKeyboardOptions) {
   return (event: ReactKeyboardEvent<HTMLElement>): void => {
     const target = event.target as HTMLElement | null;
     if (!target || event.defaultPrevented) return;
-    const cell = target.closest<HTMLElement>('[data-grid-row][data-grid-column]');
-    if (!cell || !event.currentTarget.contains(cell)) return;
+    const located = locateCell(event.currentTarget, target);
+    if (!located) return;
 
-    const row = Number(cell.dataset.gridRow);
-    const column = Number(cell.dataset.gridColumn);
-    if (!Number.isInteger(row) || !Number.isInteger(column)) return;
+    const { row, column } = located;
     const boundary = horizontalBoundaries(target);
     const action = resolveGridKey({
       key: event.key,
       row,
       column,
       rowCount: options.rowCount,
-      columnCount: options.columnCount,
+      // A page that does not declare a column count can still navigate: the row's own cell count
+      // is the truth for a positionally-addressed grid.
+      columnCount:
+        (options.columnCount ?? 0) > 0
+          ? (options.columnCount as number)
+          : (target.closest('tr')?.children.length ?? 0),
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
       altKey: event.altKey,

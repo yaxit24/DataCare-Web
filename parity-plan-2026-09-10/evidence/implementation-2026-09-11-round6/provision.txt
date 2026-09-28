@@ -1,0 +1,41 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+Applying migration `20260911070000_sale_return_tag_labour_code`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260911070000_sale_return_tag_labour_code/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS

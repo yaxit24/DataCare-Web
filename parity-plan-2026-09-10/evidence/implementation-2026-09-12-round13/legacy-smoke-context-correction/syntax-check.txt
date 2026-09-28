@@ -1,0 +1,4 @@
+Command: node --check web/apps/web/test/browser.smoke.mjs
+Cwd: /tmp/session-legacy-smoke-correction
+Exit: 0
+No diagnostic output; syntax check only, no browser/server or test execution.

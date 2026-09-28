@@ -1,0 +1,44 @@
+{
+ "form": "MS_ADD_MAST",
+ "tables": [
+  "AC_DATA",
+  "ADD_MAST",
+  "OP_DATA",
+  "STATE_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "ADD_MAST": [
+    "AC_CODE",
+    "AC_GR",
+    "AC_MOBILE",
+    "AC_NAME",
+    "CO_CODE",
+    "LC_CODE"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "AC_DATA",
+   "ADD_MAST",
+   "OP_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "ADD_MAST",
+  "OP_DATA",
+  "STATE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 16,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4668
+}

@@ -1,0 +1,543 @@
+{
+ "kind": "datacare.parity-diff/1.0",
+ "comparedAt": "2026-08-01T18:15:35.336Z",
+ "desktop": {
+  "capturedAt": "2026-08-01T14:42:11.266Z",
+  "database": "Live24",
+  "engine": "sqlserver",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU26) (KB5093420) - 16.0.4265.3 (X64) ",
+  "host": "127.0.0.1"
+ },
+ "web": {
+  "capturedAt": "2026-08-01T18:15:35.280Z",
+  "database": "datacare",
+  "engine": "postgres"
+ },
+ "matched": false,
+ "cases": [
+  {
+   "caseId": "cashrec-001-00001",
+   "description": "",
+   "desktopVoucher": "001/00001",
+   "webVoucher": "001/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 4,
+     "webRows": 4,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 100,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=60000.00",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=60000.00",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "C",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=60000.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=60000.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=60000.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-03",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=60000.00 CR_AMT=0.00",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=60000.00 CR_AMT=0.00",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "D",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=60000.00 CR_AMT=0.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=60000.00 CR_AMT=0.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=60000.00 CR_AMT=0.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-03",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=60000.00 CR_AMT=0.00",
+       "column": "PARTY_AC_CODE",
+       "desktop": "",
+       "web": "00001",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=771.00",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=771.00",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "C",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=771.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=771.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000926 DR_AMT=0.00 CR_AMT=771.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-03",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00057 DR_AMT=771.00 CR_AMT=0.00",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00057 DR_AMT=771.00 CR_AMT=0.00",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "D",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00057 DR_AMT=771.00 CR_AMT=0.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00057 DR_AMT=771.00 CR_AMT=0.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00057 DR_AMT=771.00 CR_AMT=0.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-03",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00057 DR_AMT=771.00 CR_AMT=0.00",
+       "column": "PARTY_AC_CODE",
+       "desktop": "",
+       "web": "00057",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "CASH_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 26,
+     "fieldsExcluded": 7,
+     "differences": [
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "SR_NO",
+       "desktop": "1",
+       "web": "(null)",
+       "scale": 0
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "AC_NAME",
+       "desktop": "KASHYAP KAMBALIYA",
+       "web": "CASH PARTY",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "CHQ_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "BANK_NAME",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "EMP_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "ADD_USER",
+       "desktop": "(null)",
+       "web": "parity-replay",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "REC_AC_CODE",
+       "desktop": "(null)",
+       "web": "00001",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "CHQ_PRINT_NAME",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "CLR_DATE",
+       "desktop": "2024-04-03",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "USER_DELETE",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "CASH_DATA",
+       "rowKey": "AC_CODE=000926",
+       "column": "BANK_CHARGES",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "OP_LDR",
+     "presentOn": "desktop-only",
+     "desktopRows": 2,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:",
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "CR_AMT",
+      "CR_GL_FINE",
+      "CR_SL_FINE",
+      "DATA_TYPE",
+      "DR_AMT",
+      "DR_GL_FINE",
+      "DR_SL_FINE",
+      "ENTRY_TYPE",
+      "INOUT_TYPE",
+      "LC_CODE",
+      "VCH_DATE",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 3,
+     "webRows": 3,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 99,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000101         1",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000101         1",
+       "column": "AC_NAME",
+       "desktop": "KASHYAP KAMBALIYA",
+       "web": "CASH PARTY",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000101         1",
+       "column": "MEMB_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000101         1",
+       "column": "SCHM_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000101         1",
+       "column": "REF_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000102         1",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000102         1",
+       "column": "AC_NAME",
+       "desktop": "KSR - KASHYAP KAMBALIYA",
+       "web": "CASH PARTY",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000102         1",
+       "column": "MEMB_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000102         1",
+       "column": "SCHM_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000102         1",
+       "column": "REF_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000103         1",
+       "column": "BOOK_NAME",
+       "desktop": "CASH REC",
+       "web": "Cash Received",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000103         1",
+       "column": "AC_NAME",
+       "desktop": "KSR - KASHYAP KAMBALIYA",
+       "web": "CASH PARTY",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000103         1",
+       "column": "MEMB_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000103         1",
+       "column": "SCHM_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250010000103         1",
+       "column": "REF_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 4,
+     "fieldsExcluded": 1,
+     "differences": []
+    }
+   ],
+   "totals": {
+    "tablesCompared": 4,
+    "tablesDesktopOnly": 1,
+    "tablesWebOnly": 0,
+    "rowsMissing": 2,
+    "rowsExtra": 0,
+    "fieldsCompared": 229,
+    "fieldsExcluded": 14,
+    "fieldDifferences": 50
+   }
+  }
+ ],
+ "desktopOnlyCases": [
+  "cashpay-002-00029"
+ ],
+ "webOnlyCases": [],
+ "totals": {
+  "cases": 1,
+  "casesMatched": 0,
+  "tablesCompared": 4,
+  "tablesDesktopOnly": 1,
+  "tablesWebOnly": 0,
+  "rowsMissing": 2,
+  "rowsExtra": 0,
+  "fieldsCompared": 229,
+  "fieldsExcluded": 14,
+  "fieldDifferences": 50
+ }
+}

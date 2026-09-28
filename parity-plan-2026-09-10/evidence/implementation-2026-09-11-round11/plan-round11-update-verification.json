@@ -1,0 +1,65 @@
+{
+  "kind": "round11-mutable-plan-contract-check/1",
+  "capturedAt": "2026-09-11T15:12:02.052312+00:00",
+  "result": "passed",
+  "tasksCompared": 34,
+  "completeWorkItemsCompared": 83,
+  "unchangedTaskFields": [
+    "id",
+    "status",
+    "parents",
+    "startAfter",
+    "implementationSteps",
+    "verificationCases",
+    "acceptance",
+    "requiredEvidence",
+    "closureRule"
+  ],
+  "allTaskStatuses": "open",
+  "completionContractUnchanged": true,
+  "generatorIdempotent": true,
+  "latestImplementationProgress": "parity-plan-2026-09-10/34-implementation-progress-round11.md",
+  "scope": "Documentation consistency only; no application/browser/desktop acceptance credit. Parent owns final validator and checkpoint35 capture.",
+  "files": [
+    {
+      "path": "02-implementation-plan.md",
+      "sha256": "3cab13937035bc22767daddb2bc2b99c4787161b6ca98ca595966a90b899c28a"
+    },
+    {
+      "path": "README.md",
+      "sha256": "7cb3a7f00fd29ee30f8c3fefee86120d4fdc89ab1e4bccab772502ddf33fcdca"
+    },
+    {
+      "path": "execution-addendum-intro.md",
+      "sha256": "eade40e24ef6002ed149b0c149be6bf74aecb4ff4dc8a2eb7e93c171ef4a1d2b"
+    },
+    {
+      "path": "build_execution_addendum.py",
+      "sha256": "84664920bb65b2183e48bcd08614533168844a0fc6ff4e90f934e4bcabfc446f"
+    },
+    {
+      "path": "07-work-items.json",
+      "sha256": "e6f6ca332e52c0b9c715a1eee9356a5ef75069fc9a9b573285a26d6a82884b11"
+    },
+    {
+      "path": "12-execution-addendum.md",
+      "sha256": "6f5c07eb4612391ff366943b2a2b2a524c1acdfd7bf35e44b92434a1cdc64b03"
+    },
+    {
+      "path": "13-execution-backlog.json",
+      "sha256": "ea13bb7b51a19e7b9d0432203e26c6beddcad99159b9a3eef172998b8bfb9033"
+    },
+    {
+      "path": "../web/docs/HANDOFF.md",
+      "sha256": "27ac43296ade3fd7592cb9fac3f43b736a04f1813eff6c2ff5b42b3a8d704112"
+    },
+    {
+      "path": "../web/docs/STATE-OF-PARITY.md",
+      "sha256": "a49af9d1a9f7a01f9e7c2ed53b36e7f861142530f4339269442890ed7094a692"
+    },
+    {
+      "path": "../web/docs/TECHNICAL-REFERENCE.md",
+      "sha256": "6552a36430389e7814754774f757a38316d67c8adea126c8ad474c7fc33dcbeb"
+    }
+  ]
+}

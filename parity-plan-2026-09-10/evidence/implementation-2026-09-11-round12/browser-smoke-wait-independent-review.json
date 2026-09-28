@@ -1,0 +1,26 @@
+{
+  "kind": "round12-mocked-shortcut-wait-independent-review/1",
+  "reviewedAtUtc": "2026-09-11T16:37:45.831907+00:00",
+  "disposition": "bounded-read-review-agrees",
+  "findings": [
+    "Authenticated-shell Logout visibility precedes each delivered shortcut.",
+    "Each Ctrl chord still has exactly one Control-down/key-press/Control-up; plainF5 still has one press.",
+    "Each waits for the exact expected pathname and retains its explicit equality assertion; no re-press, navigation retry, forced destination or weaker matching introduced.",
+    "Initial diagnostics retain dashboard assertion and empty pageErrors; target order-lot-zoom RSC request was observed as aborted. That is compatible with cleanup after a premature timing assertion, not proof of a product-navigation defect."
+  ],
+  "limits": "Read-only current-flow/retained-diagnostic review. No browser rerun by this reviewer; compatibility mock coverage is separate from real-stack or desktop acceptance. The supplied correction record describes the prior delta; the previous full source text was not reconstructed.",
+  "references": [
+    {
+      "path": "web/apps/web/test/browser.smoke.mjs",
+      "sha256": "50f6f4951b7126fc50ea01b50b0c7b26850f4cf1e4243286c07f6bddbe2b44a9"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/browser-smoke-wait-correction.json",
+      "sha256": "9938db158c59af6967aee18e5a2715b5d1b8723bf9261daa088ea968b4cda066"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/browser-smoke-first-diagnostics/diagnostics.json",
+      "sha256": "5df78b82d4062ac058ce4d88906180be1ef7be068dcfa7384ad2afe487dcf295"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+ "form": "MS_GOLD_MAST",
+ "tables": [
+  "AC_MAST",
+  "BOOK_IDTL",
+  "DG_GOLD_MAST",
+  "ITEM_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DG_GOLD_MAST": [
+    "API_KEY",
+    "BANK_AC_CODE",
+    "BOOK_WITH_LIVE_RATE",
+    "COUNTRY_CODE",
+    "CO_CODE",
+    "CURRENCY_RATE",
+    "CUST_BUY_RATE_ADD",
+    "CUST_SALE_RATE_LESS",
+    "GOLD_CONV",
+    "GOLD_FIX_RATE",
+    "MAIN_USER",
+    "OUNCES_CONV",
+    "SHOW_DG_GOLD",
+    "SILVER_CONV",
+    "SILVER_FIX_RATE"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "DG_GOLD_MAST"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BOOK_IDTL",
+  "DG_GOLD_MAST",
+  "ITEM_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 9,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 1627
+}

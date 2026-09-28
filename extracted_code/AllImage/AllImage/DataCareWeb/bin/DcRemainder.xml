@@ -1,0 +1,2759 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+DcRemainder
+</name>
+</assembly>
+<members>
+<member name="T:DcRemainder.My.MyWebExtension">
+ <summary>
+ Module used to define the properties that are available in the My Namespace for Web projects.
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="P:DcRemainder.My.MyWebExtension.Computer">
+ <summary>
+ Returns information about the host computer.
+ </summary>
+</member>
+<member name="P:DcRemainder.My.MyWebExtension.User">
+ <summary>
+ Returns information for the current Web user.
+ </summary>
+</member>
+<member name="P:DcRemainder.My.MyWebExtension.Request">
+ <summary>
+ Returns Request object.
+ </summary>
+</member>
+<member name="P:DcRemainder.My.MyWebExtension.Response">
+ <summary>
+ Returns Response object.
+ </summary>
+</member>
+<member name="P:DcRemainder.My.MyWebExtension.Log">
+ <summary>
+ Returns the Asp log object.
+ </summary>
+</member>
+<member name="F:DcRemainder.MS_ACCT._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tAcCode">
+<summary>
+tAcCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tAcName">
+<summary>
+tAcName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._cboAcGrCode">
+<summary>
+cboAcGrCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tMobile">
+<summary>
+tMobile control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tAddress1">
+<summary>
+tAddress1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tAddress2">
+<summary>
+tAddress2 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tAddress3">
+<summary>
+tAddress3 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._Aeria">
+<summary>
+Aeria control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._cboCity">
+<summary>
+cboCity control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tPinCode">
+<summary>
+tPinCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._tGstNo">
+<summary>
+tGstNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._cboState">
+<summary>
+cboState control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._cboDist">
+<summary>
+cboDist control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._btnSave">
+<summary>
+btnSave control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._btnCancle">
+<summary>
+btnCancle control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._btnMsHome">
+<summary>
+btnMsHome control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._btnMsNoti">
+<summary>
+btnMsNoti control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_ACCT._btnMsUs">
+<summary>
+btnMsUs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_LOGIN._pagestyle">
+<summary>
+pagestyle control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_LOGIN._USERNAME">
+<summary>
+USERNAME control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_LOGIN._PASSWORD">
+<summary>
+PASSWORD control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_LOGIN._button">
+<summary>
+button control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._MS_PARTY_MASTER">
+<summary>
+MS_PARTY_MASTER control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnEstimate">
+<summary>
+btnEstimate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnTrSale">
+<summary>
+btnTrSale control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnTrWhSale">
+<summary>
+btnTrWhSale control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnTrOrder">
+<summary>
+btnTrOrder control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnTagReport">
+<summary>
+btnTagReport control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._ImageButton3">
+<summary>
+ImageButton3 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._ImageButton4">
+<summary>
+ImageButton4 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnNotification">
+<summary>
+btnNotification control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._Notification">
+<summary>
+Notification control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnCashRec">
+<summary>
+btnCashRec control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnBankRec">
+<summary>
+btnBankRec control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._btnLDR_Report">
+<summary>
+btnLDR_Report control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._CONAME">
+<summary>
+CONAME control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_MDIFORM._UserName">
+<summary>
+UserName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_NOTIFICATION._NotiDGV">
+<summary>
+NotiDGV control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_OPNCOMP._pagestyle">
+<summary>
+pagestyle control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_OPNCOMP._cboCompany">
+<summary>
+cboCompany control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_OPNCOMP._cboLc">
+<summary>
+cboLc control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_OPNCOMP._cboYear">
+<summary>
+cboYear control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.MS_OPNCOMP._COSELECT">
+<summary>
+COSELECT control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.OR_ITEMSELECT._QRresult">
+<summary>
+QRresult control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.OR_ITEMSELECT._QRSAND">
+<summary>
+QRSAND control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.Print._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.Print._Button1">
+<summary>
+Button1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._CoName">
+<summary>
+CoName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._Label6">
+<summary>
+Label6 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._VchDate">
+<summary>
+VchDate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._Label7">
+<summary>
+Label7 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._Label4">
+<summary>
+Label4 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._ACNAME">
+<summary>
+ACNAME control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._VCHNO">
+<summary>
+VCHNO control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._ACMONO">
+<summary>
+ACMONO control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._lbltotal">
+<summary>
+lbltotal control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._lblCashAmt">
+<summary>
+lblCashAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._Label1">
+<summary>
+Label1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._lblAmtWord">
+<summary>
+lblAmtWord control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_CASHREC._btnPrintExit">
+<summary>
+btnPrintExit control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._CoName">
+<summary>
+CoName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label6">
+<summary>
+Label6 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._VchDate">
+<summary>
+VchDate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label7">
+<summary>
+Label7 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label4">
+<summary>
+Label4 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._ACNAME">
+<summary>
+ACNAME control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._VCHNO">
+<summary>
+VCHNO control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._ACMONO">
+<summary>
+ACMONO control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label8">
+<summary>
+Label8 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._PTISUGRID">
+<summary>
+PTISUGRID control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._RECLBL">
+<summary>
+RECLBL control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._PTRECGRID">
+<summary>
+PTRECGRID control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label17">
+<summary>
+Label17 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._nTot_Fine_Cr">
+<summary>
+nTot_Fine_Cr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label11">
+<summary>
+Label11 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._nTot_Fine_Dr">
+<summary>
+nTot_Fine_Dr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label10">
+<summary>
+Label10 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._nTot_Amt_Cr">
+<summary>
+nTot_Amt_Cr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label15">
+<summary>
+Label15 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._nTot_Amt_Dr">
+<summary>
+nTot_Amt_Dr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label12">
+<summary>
+Label12 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._n_Tot_Fine_OS">
+<summary>
+n_Tot_Fine_OS control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._Label18">
+<summary>
+Label18 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._n_Tot_Amt_OS">
+<summary>
+n_Tot_Amt_OS control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.PT_WHSALE._btnPrintExit">
+<summary>
+btnPrintExit control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._UpdatePanel1">
+<summary>
+UpdatePanel1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._ScriptManager1">
+<summary>
+ScriptManager1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._PartyMasterSearch">
+<summary>
+PartyMasterSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._cboAcGrCode">
+<summary>
+cboAcGrCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._cboCity">
+<summary>
+cboCity control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._Label1">
+<summary>
+Label1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._WithZero">
+<summary>
+WithZero control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._LDRDGV">
+<summary>
+LDRDGV control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_LDR._btnNameSrc">
+<summary>
+btnNameSrc control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._UpdatePanel1">
+<summary>
+UpdatePanel1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._ScriptManager1">
+<summary>
+ScriptManager1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Or_Image">
+<summary>
+Or_Image control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label1">
+<summary>
+Label1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._tDesignNo">
+<summary>
+tDesignNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label3">
+<summary>
+Label3 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._tItName">
+<summary>
+tItName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label2">
+<summary>
+Label2 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._tTagNo">
+<summary>
+tTagNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label6">
+<summary>
+Label6 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nPcs">
+<summary>
+nPcs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label4">
+<summary>
+Label4 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nGrWt">
+<summary>
+nGrWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label5">
+<summary>
+Label5 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nNetWt">
+<summary>
+nNetWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label8">
+<summary>
+Label8 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nItemRate">
+<summary>
+nItemRate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label10">
+<summary>
+Label10 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nItemAmt">
+<summary>
+nItemAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label12">
+<summary>
+Label12 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nLbrPrc">
+<summary>
+nLbrPrc control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label14">
+<summary>
+Label14 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nLbrRate">
+<summary>
+nLbrRate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label16">
+<summary>
+Label16 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._tLbrType">
+<summary>
+tLbrType control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label18">
+<summary>
+Label18 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nLbrAmt">
+<summary>
+nLbrAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label20">
+<summary>
+Label20 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nOthAmt">
+<summary>
+nOthAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label22">
+<summary>
+Label22 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nDiscAmt">
+<summary>
+nDiscAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label24">
+<summary>
+Label24 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nNetAmt">
+<summary>
+nNetAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label26">
+<summary>
+Label26 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nTaxAmt">
+<summary>
+nTaxAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._Label28">
+<summary>
+Label28 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._nTotalAmt">
+<summary>
+nTotalAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGESTIMATE._btnGeneratePDF">
+<summary>
+btnGeneratePDF control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGREPORT._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGREPORT._TextBox1">
+<summary>
+TextBox1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGREPORT._TagReport">
+<summary>
+TagReport control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGREPORT._btnMsHome">
+<summary>
+btnMsHome control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGREPORT._btnMsNoti">
+<summary>
+btnMsNoti control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.RP_TAGREPORT._btnMsUs">
+<summary>
+btnMsUs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._UpdatePanel1">
+<summary>
+UpdatePanel1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._tVchNo">
+<summary>
+tVchNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._tVchDate">
+<summary>
+tVchDate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._tAcCode">
+<summary>
+tAcCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._tAcName">
+<summary>
+tAcName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._nCheqNo">
+<summary>
+nCheqNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._nBankAMTRec">
+<summary>
+nBankAMTRec control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._nCharges">
+<summary>
+nCharges control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._nKasar">
+<summary>
+nKasar control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._tEmpCode">
+<summary>
+tEmpCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._tRemark">
+<summary>
+tRemark control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._tBankName">
+<summary>
+tBankName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnSave">
+<summary>
+btnSave control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnCancle">
+<summary>
+btnCancle control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnPrint">
+<summary>
+btnPrint control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnDelete">
+<summary>
+btnDelete control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._Label1">
+<summary>
+Label1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._ScriptManager1">
+<summary>
+ScriptManager1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._ModalPopupExtender1">
+<summary>
+ModalPopupExtender1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._modalpan">
+<summary>
+modalpan control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnPartyMasterSearch">
+<summary>
+btnPartyMasterSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._AccHelpGrid">
+<summary>
+AccHelpGrid control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnMsHome">
+<summary>
+btnMsHome control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnMsNoti">
+<summary>
+btnMsNoti control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnMsUs">
+<summary>
+btnMsUs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_BANKREC._btnACFIRE">
+<summary>
+btnACFIRE control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._UpdatePanel1">
+<summary>
+UpdatePanel1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._tVchNo">
+<summary>
+tVchNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._tVchDate">
+<summary>
+tVchDate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._tAcCode">
+<summary>
+tAcCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._tAcName">
+<summary>
+tAcName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._nAmtRec">
+<summary>
+nAmtRec control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._nKasar">
+<summary>
+nKasar control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._tEmpCode">
+<summary>
+tEmpCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._tRemark">
+<summary>
+tRemark control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnSave">
+<summary>
+btnSave control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnCancle">
+<summary>
+btnCancle control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnPrint">
+<summary>
+btnPrint control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnDelete">
+<summary>
+btnDelete control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._Label1">
+<summary>
+Label1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._ScriptManager1">
+<summary>
+ScriptManager1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._ModalPopupExtender1">
+<summary>
+ModalPopupExtender1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._modalpan">
+<summary>
+modalpan control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnPartyMasterSearch">
+<summary>
+btnPartyMasterSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._AccHelpGrid">
+<summary>
+AccHelpGrid control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnMsHome">
+<summary>
+btnMsHome control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnMsNoti">
+<summary>
+btnMsNoti control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnMsUs">
+<summary>
+btnMsUs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_CASHREC._btnACFIRE">
+<summary>
+btnACFIRE control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._UpdatePanel1">
+<summary>
+UpdatePanel1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tVchNo">
+<summary>
+tVchNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tVchDate">
+<summary>
+tVchDate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tAcCode">
+<summary>
+tAcCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tAcName">
+<summary>
+tAcName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tItCode">
+<summary>
+tItCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tItName">
+<summary>
+tItName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tDesignNo">
+<summary>
+tDesignNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nPcs">
+<summary>
+nPcs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nGrWt">
+<summary>
+nGrWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nNetWt">
+<summary>
+nNetWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nTouch">
+<summary>
+nTouch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nFine">
+<summary>
+nFine control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tRemark">
+<summary>
+tRemark control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._BtnGridFill">
+<summary>
+BtnGridFill control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._DGV">
+<summary>
+DGV control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nTotFine">
+<summary>
+nTotFine control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._tEmpCode">
+<summary>
+tEmpCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nRecFine">
+<summary>
+nRecFine control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nCashAmt">
+<summary>
+nCashAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._nBankAmt">
+<summary>
+nBankAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._btnSave">
+<summary>
+btnSave control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._btnCancle">
+<summary>
+btnCancle control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._btnPrint">
+<summary>
+btnPrint control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._btnDelete">
+<summary>
+btnDelete control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._imgContainer">
+<summary>
+imgContainer control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._Or_Image">
+<summary>
+Or_Image control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._Label1">
+<summary>
+Label1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._ScriptManager1">
+<summary>
+ScriptManager1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._ModalPopupExtender1">
+<summary>
+ModalPopupExtender1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._modalpan">
+<summary>
+modalpan control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._AccHelpGrid">
+<summary>
+AccHelpGrid control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._Label2">
+<summary>
+Label2 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._ModalItmSearch">
+<summary>
+ModalItmSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._ItmSearch">
+<summary>
+ItmSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._ItmHelpGrid">
+<summary>
+ItmHelpGrid control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._btnMsHome">
+<summary>
+btnMsHome control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._btnMsNoti">
+<summary>
+btnMsNoti control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_ORDER_ENTRY._btnMsUs">
+<summary>
+btnMsUs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._form1">
+<summary>
+form1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._UpdatePanel1">
+<summary>
+UpdatePanel1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tVchNo">
+<summary>
+tVchNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tVchDate">
+<summary>
+tVchDate control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnVchRePrint">
+<summary>
+btnVchRePrint control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tAcCode">
+<summary>
+tAcCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tAcName">
+<summary>
+tAcName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._Issue">
+<summary>
+Issue control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._Recive">
+<summary>
+Recive control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._IRpanal">
+<summary>
+IRpanal control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._WHIssue">
+<summary>
+WHIssue control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tIsuTagNo">
+<summary>
+tIsuTagNo control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._QrScan">
+<summary>
+QrScan control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tIsuItCode">
+<summary>
+tIsuItCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tIsuItName">
+<summary>
+tIsuItName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuPcs">
+<summary>
+nIsuPcs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuGrWt">
+<summary>
+nIsuGrWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuOthWt">
+<summary>
+nIsuOthWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuNetWt">
+<summary>
+nIsuNetWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuTouch">
+<summary>
+nIsuTouch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuWestPrc">
+<summary>
+nIsuWestPrc control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuFine">
+<summary>
+nIsuFine control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuLbrAmt">
+<summary>
+nIsuLbrAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuOthAmt">
+<summary>
+nIsuOthAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuMrp">
+<summary>
+nIsuMrp control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nIsuTotAmt">
+<summary>
+nIsuTotAmt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._BtnIsuGridFill">
+<summary>
+BtnIsuGridFill control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._IsuDGV">
+<summary>
+IsuDGV control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._WHRecive">
+<summary>
+WHRecive control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tRecItCode">
+<summary>
+tRecItCode control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._tRecItName">
+<summary>
+tRecItName control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nRecPcs">
+<summary>
+nRecPcs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nRecGrWt">
+<summary>
+nRecGrWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nRecOthWt">
+<summary>
+nRecOthWt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nRecNetwt">
+<summary>
+nRecNetwt control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nRecTouch">
+<summary>
+nRecTouch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nRecWestPrc">
+<summary>
+nRecWestPrc control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nRecFine">
+<summary>
+nRecFine control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._BtnRecGridFill">
+<summary>
+BtnRecGridFill control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._RecDGV">
+<summary>
+RecDGV control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nTotFineDr">
+<summary>
+nTotFineDr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nTotFineCr">
+<summary>
+nTotFineCr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nTotAmtDr">
+<summary>
+nTotAmtDr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._nTotAmtCr">
+<summary>
+nTotAmtCr control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnSave">
+<summary>
+btnSave control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnCancle">
+<summary>
+btnCancle control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnPrint">
+<summary>
+btnPrint control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnDelete">
+<summary>
+btnDelete control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnMsHome">
+<summary>
+btnMsHome control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnMsNoti">
+<summary>
+btnMsNoti control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnMsUs">
+<summary>
+btnMsUs control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._ScriptManager1">
+<summary>
+ScriptManager1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._Label1">
+<summary>
+Label1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._ModalPopupExtender1">
+<summary>
+ModalPopupExtender1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._modalpan">
+<summary>
+modalpan control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnPartyMasterSearch">
+<summary>
+btnPartyMasterSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._AccHelpGrid">
+<summary>
+AccHelpGrid control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._Label2">
+<summary>
+Label2 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._ModalItmSearch">
+<summary>
+ModalItmSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._ItmSearch">
+<summary>
+ItmSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._ItmNameSearch">
+<summary>
+ItmNameSearch control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._ItmHelpGrid">
+<summary>
+ItmHelpGrid control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._Label3">
+<summary>
+Label3 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._ModalVchNoHelp">
+<summary>
+ModalVchNoHelp control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._VchNoHelp">
+<summary>
+VchNoHelp control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._TextBox1">
+<summary>
+TextBox1 control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._VchNoHelpDGV">
+<summary>
+VchNoHelpDGV control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnACFIRE">
+<summary>
+btnACFIRE control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+<member name="F:DcRemainder.TR_WHSALE._btnITMFIRE">
+<summary>
+btnITMFIRE control.
+</summary>
+<remarks>
+Auto-generated field.
+To modify move field declaration from designer file to code-behind file.
+</remarks>
+</member>
+</members>
+</doc>

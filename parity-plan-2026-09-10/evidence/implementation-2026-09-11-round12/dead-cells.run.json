@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "scripts/check-dead-cells.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T16:23:49.947214+00:00",
+  "finishedAtUtc": "2026-09-11T16:27:26.528844+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/dead-cells.txt"
+}

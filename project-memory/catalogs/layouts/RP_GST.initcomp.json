@@ -1,0 +1,327 @@
+{
+ "form": "RP_GST",
+ "controlCount": 30,
+ "byKind": {
+  "button": 11,
+  "combo": 1,
+  "textbox": 6,
+  "label": 7,
+  "panel": 1,
+  "other": 1,
+  "masked": 2,
+  "grid": 1
+ },
+ "grids": [
+  "MSG_VCH"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "BtnGstr1",
+   "BtnCsvFile",
+   "btnGstrCsv"
+  ],
+  "this": [
+   "MSG_VCH",
+   "Label4",
+   "mToDt",
+   "mFromDt",
+   "BtnGst1Zoom",
+   "BtnGst2Zoom",
+   "BtnGst3Zoom",
+   "tLcCode",
+   "tLcName",
+   "Label6",
+   "Cr",
+   "cboSectionType",
+   "lblCity",
+   "tAcCode",
+   "tAcName",
+   "Label3",
+   "Label2",
+   "tBookCode",
+   "tBookName",
+   "Label1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnGstr1",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "Gstr 1",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "Gstr 2",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "Gstr 3",
+   "kind": "button"
+  },
+  {
+   "name": "cboSectionType",
+   "type": "ComboBox",
+   "location": "120,75",
+   "size": "226,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tBookCode",
+   "type": "TextBox",
+   "location": "442,42",
+   "size": "65,23",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "441,76",
+   "size": "66,23",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "840,42",
+   "size": "56,23",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnCsvFile",
+   "type": "SimpleButton",
+   "location": "633,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "Csv Fil",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Gst Report",
+   "kind": "label"
+  },
+  {
+   "name": "BtnGst1Zoom",
+   "type": "QButton",
+   "location": "121,114",
+   "size": "143,37",
+   "tabIndex": "6",
+   "text": "Gstr 1",
+   "kind": "button"
+  },
+  {
+   "name": "BtnGst2Zoom",
+   "type": "QButton",
+   "location": "280,114",
+   "size": "143,37",
+   "tabIndex": "7",
+   "text": "Gstr 2",
+   "kind": "button"
+  },
+  {
+   "name": "btnGstrCsv",
+   "type": "SimpleButton",
+   "location": "504,3",
+   "size": "123,37",
+   "tabIndex": "7",
+   "text": "Gsrt1 Csv",
+   "kind": "button"
+  },
+  {
+   "name": "BtnGst3Zoom",
+   "type": "QButton",
+   "location": "438,114",
+   "size": "143,37",
+   "tabIndex": "8",
+   "text": "Gstr 3",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1246,507",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "386,41",
+   "size": "48,20",
+   "tabIndex": "1160",
+   "text": "Book",
+   "kind": "label"
+  },
+  {
+   "name": "tBookName",
+   "type": "TextBox",
+   "location": "514,41",
+   "size": "250,23",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "12,43",
+   "size": "102,20",
+   "tabIndex": "1162",
+   "text": "From  Date",
+   "kind": "label"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "514,76",
+   "size": "250,23",
+   "tabIndex": "1164",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "360,77",
+   "size": "75,20",
+   "tabIndex": "1165",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "lblCity",
+   "type": "Label",
+   "location": "12,75",
+   "size": "102,19",
+   "tabIndex": "1166",
+   "text": "Section Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "774,42",
+   "size": "60,20",
+   "tabIndex": "1176",
+   "text": "Lc Code",
+   "kind": "label"
+  },
+  {
+   "name": "tLcName",
+   "type": "TextBox",
+   "location": "902,42",
+   "size": "204,23",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "120,43",
+   "size": "76,23",
+   "tabIndex": "1178",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "270,42",
+   "size": "76,23",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "202,44",
+   "size": "62,20",
+   "tabIndex": "1180",
+   "text": "To Date",
+   "kind": "label"
+  },
+  {
+   "name": "MSG_VCH",
+   "type": "AxMSFlexGrid",
+   "location": "11,147",
+   "size": "1160,406",
+   "tabIndex": "1181",
+   "text": "",
+   "kind": "grid"
+  }
+ ]
+}

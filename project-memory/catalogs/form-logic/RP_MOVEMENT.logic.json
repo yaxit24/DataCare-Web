@@ -1,0 +1,31 @@
+{
+ "form": "RP_MOVEMENT",
+ "tables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "BOOK_DATA",
+  "ITEM_MAST",
+  "LOCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "BOOK_DATA",
+  "ITEM_MAST",
+  "LOCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 5257
+}

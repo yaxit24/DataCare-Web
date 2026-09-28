@@ -1,0 +1,139 @@
+{
+  "kind": "prospective-source-and-profile-review-cases",
+  "originalCandidates": {
+    "path": "/tmp/datacare-return-next-write-contract/independent-candidates.json",
+    "sha256": "108e4c9f1145d7ae8a7b20d9b931e7657bd76d826beb20e8fc600e94adfc8c48",
+    "unchanged": true
+  },
+  "execution": "No implementation, reducer or database executed; R02\u2013R04 explicitly require a complete independently frozen P1 branch fixture.",
+  "cases": [
+    {
+      "id": "R01",
+      "name": "exact incoming stock ownership",
+      "source": "Ac_Stock.cs:247",
+      "input": {
+        "incoming.SR_NO": "1",
+        "incoming.VCH_SRNO": "500001",
+        "incoming.DATA_TYPE": "A",
+        "book.DATA_TYPE": "B"
+      },
+      "expected": {
+        "MAIN_STOCK.SR_NO": "2",
+        "MAIN_STOCK.ISR_NO": "1",
+        "MAIN_STOCK.VCH_SRNO": "500001",
+        "MAIN_STOCK.DATA_TYPE": "A",
+        "AC_DATA.DATA_TYPE": "B",
+        "inventSR_REC_ISU": false
+      }
+    },
+    {
+      "id": "R02",
+      "name": "post-replay zero ordinary bill",
+      "source": "TR_SALE_RTN.cs:5075\u20135081,12376\u201312403",
+      "conditions": "Complete future P1 fixture must pin the ordinary no-MRP/no-discount/no-tax branch, retained metal100/labour10 and no qualified special fine exception; this is not a complete executable fixture.",
+      "input": {
+        "c12": "10",
+        "c20": "100",
+        "c24": "10",
+        "event.c27": "-110"
+      },
+      "expected": {
+        "c36": "0.00",
+        "c38": "0.00",
+        "ordinarySaveAmountGuard": "refuse",
+        "businessDml": false
+      }
+    },
+    {
+      "id": "R03",
+      "name": "post-replay source row omission",
+      "source": "TR_SALE_RTN.cs:5075\u20135081,14252",
+      "conditions": "Same complete plain P1 branch prerequisite as R02.",
+      "input": {
+        "c12": "10",
+        "c20": "100",
+        "c24": "10",
+        "event.c27": "-120"
+      },
+      "expected": {
+        "c36": "-10.00",
+        "c38": "-10.00",
+        "sourceWouldInclude": false,
+        "firstWriter": "refuse row-removal profile",
+        "businessDml": false
+      }
+    },
+    {
+      "id": "R04",
+      "name": "post-replay payment to received direction switch",
+      "source": "TR_SALE_RTN.cs:5075\u20135081,16385\u201316419",
+      "conditions": "Same complete plain P1 branch prerequisite as R02; outgoing0 and tenders0.",
+      "input": {
+        "c12": "10",
+        "c20": "100",
+        "c24": "10",
+        "event.c27": "-200"
+      },
+      "expected": {
+        "c36": "-90.00",
+        "c38": "-90.00",
+        "receivedTotal": "90.00",
+        "sourceWouldInclude": true,
+        "firstWriter": "refuse unsupported received-side state",
+        "businessDml": false
+      }
+    },
+    {
+      "id": "R05",
+      "name": "existing cash alone can trigger limit guard",
+      "source": "TR_SALE_RTN.cs:12149\u201312171",
+      "input": {
+        "account": "CUST",
+        "MsCashLimit": "100",
+        "qualifiedAcCash": "101",
+        "receivedCash": "0"
+      },
+      "expected": {
+        "sourceCashGuard": "refuse",
+        "businessDml": false,
+        "unavailableClosingDoesNotBypass": true
+      }
+    },
+    {
+      "id": "R06",
+      "name": "SQL NULL GST type does not satisfy non-interstate predicate",
+      "source": "Ac_Tax.cs:191,193",
+      "input": {
+        "nonUae": true,
+        "bookType": "T",
+        "rtnNet": "111",
+        "tax": "0",
+        "taxMasterSr": [
+          1,
+          2
+        ],
+        "AC_GST_TYPE": null
+      },
+      "expected": {
+        "theseTwoInsertBranchesQualify": false,
+        "guessNullAsN": false,
+        "firstWriter": "unsupported unless explicitly qualified"
+      }
+    },
+    {
+      "id": "R07",
+      "name": "same-value c27 is not automatically no-effect",
+      "source": "TR_SALE_RTN.cs:4866\u20135158",
+      "input": {
+        "event.c27": "0",
+        "priorVisible.c27": "0.00",
+        "otherRecalculatedPersistedValueDiffers": true
+      },
+      "expected": {
+        "skipReplay": false,
+        "claimNoOpFromEditorEquality": false,
+        "firstWriter": "refuse an uncontracted persisted effect; otherwise require explicit ownership before release"
+      }
+    }
+  ]
+}

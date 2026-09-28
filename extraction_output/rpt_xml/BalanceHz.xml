@@ -1,0 +1,1415 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report Name="" FileName="D:\a\datacare-rpt-extract\datacare-rpt-extract\reports\BalanceHz.rpt" HasSavedData="False">
+  <Embedinfo />
+  <Summaryinfo KeywordsinReport="" ReportAuthor="" ReportComments="" ReportSubject="" ReportTitle="" />
+  <ReportOptions EnableSaveDataWithReport="False" EnableSavePreviewPicture="False" EnableSaveSummariesWithReport="True" EnableUseDummyData="False" initialDataContext="" initialReportPartName="" />
+  <PrintOptions PageContentHeight="16623" PageContentWidth="11475" PaperOrientation="Portrait" PaperSize="PaperA4" PaperSource="Manual" PrinterDuplex="Default" PrinterName="">
+    <PageMargins bottomMargin="0" leftMargin="288" rightMargin="144" topMargin="216" />
+    <PageMarginConditionFormulas />
+  </PrintOptions>
+  <SubReports>
+    <Report Name="Ch_bsgrsub1.rpt">
+      <Database>
+        <TableLinks>
+          <TableLink JoinType="LeftOuter">
+            <SourceFields>
+              <Field FormulaName="{LEDR_AC_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{LEDR_AC_DATA.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+            </SourceFields>
+            <DestinationFields>
+              <Field FormulaName="{AC_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{AC_MAST.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+            </DestinationFields>
+          </TableLink>
+          <TableLink JoinType="LeftOuter">
+            <SourceFields>
+              <Field FormulaName="{AC_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{AC_MAST.AC_GR}" Kind="DatabaseField" Name="AC_GR" NumberOfBytes="6" ValueType="StringField" />
+            </SourceFields>
+            <DestinationFields>
+              <Field FormulaName="{AC_GROUP.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{AC_GROUP.AC_GR}" Kind="DatabaseField" Name="AC_GR" NumberOfBytes="6" ValueType="StringField" />
+            </DestinationFields>
+          </TableLink>
+        </TableLinks>
+        <Tables>
+          <Table Alias="AC_GROUP" ClassName="CrystalReports.Table" Name="AC_GROUP">
+            <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+            <Fields>
+              <Field Description="" FormulaForm="{AC_GROUP.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_GROUP.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_GROUP.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="4" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_GR_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_GROUP.AC_GR_NAME" Name="AC_GR_NAME" ShortName="AC_GR_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_MAIN_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_GROUP.AC_MAIN_GR" Name="AC_MAIN_GR" ShortName="AC_MAIN_GR" Type="crFieldValueTypeStringField" UseCount="1" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_SUB_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_GROUP.AC_SUB_GR" Name="AC_SUB_GR" ShortName="AC_SUB_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_GROUP.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_GROUP.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+            </Fields>
+          </Table>
+          <Table Alias="LEDR_AC_DATA" ClassName="CrystalReports.Table" Name="LEDR_AC_DATA">
+            <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+            <Fields>
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="20" LongName="LEDR_AC_DATA.CO_YEAR" Name="CO_YEAR" ShortName="CO_YEAR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="LEDR_AC_DATA.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.VCH_DT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.VCH_DT" Name="VCH_DT" ShortName="VCH_DT" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_AMT" Name="CR_AMT" ShortName="CR_AMT" Type="crFieldValueTypeNumberField" UseCount="3" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_AMT" Name="DR_AMT" ShortName="DR_AMT" Type="crFieldValueTypeNumberField" UseCount="1" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.ADD_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.ADD_USER" Name="ADD_USER" ShortName="ADD_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.ADD_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.ADD_DATE" Name="ADD_DATE" ShortName="ADD_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DATA_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.DATA_TYPE" Name="DATA_TYPE" ShortName="DATA_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_FINE_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_FINE_WT" Name="CR_FINE_WT" ShortName="CR_FINE_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_FINE_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_FINE_WT" Name="DR_FINE_WT" ShortName="DR_FINE_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.IT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.IT_TYPE" Name="IT_TYPE" ShortName="IT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_SL_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_SL_FINE" Name="CR_SL_FINE" ShortName="CR_SL_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_SL_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_SL_FINE" Name="DR_SL_FINE" ShortName="DR_SL_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CO_BOOK" Name="CO_BOOK" ShortName="CO_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.VCH_NO" Name="VCH_NO" ShortName="VCH_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+            </Fields>
+          </Table>
+          <Table Alias="AC_MAST" ClassName="CrystalReports.Table" Name="AC_MAST">
+            <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+            <Fields>
+              <Field Description="" FormulaForm="{AC_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_NAME" Name="AC_NAME" ShortName="AC_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_SHORT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="AC_MAST.AC_SHORT" Name="AC_SHORT" ShortName="AC_SHORT" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_MAIN_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_MAIN_GR" Name="AC_MAIN_GR" ShortName="AC_MAIN_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PERSON}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.AC_PERSON" Name="AC_PERSON" ShortName="AC_PERSON" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_ADD1}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD1" Name="AC_ADD1" ShortName="AC_ADD1" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_ADD2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD2" Name="AC_ADD2" ShortName="AC_ADD2" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_ADD3}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD3" Name="AC_ADD3" ShortName="AC_ADD3" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_COUNTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_COUNTRY" Name="AC_COUNTRY" ShortName="AC_COUNTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_STATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_STATE" Name="AC_STATE" ShortName="AC_STATE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_DISTRICT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_DISTRICT" Name="AC_DISTRICT" ShortName="AC_DISTRICT" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_CITY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_CITY" Name="AC_CITY" ShortName="AC_CITY" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="AC_MAST.AC_AREA" Name="AC_AREA" ShortName="AC_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_PIN" Name="AC_PIN" ShortName="AC_PIN" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PHONE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE" Name="AC_PHONE" ShortName="AC_PHONE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PHONE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE2" Name="AC_PHONE2" ShortName="AC_PHONE2" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE" Name="AC_MOBILE" ShortName="AC_MOBILE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE2" Name="AC_MOBILE2" ShortName="AC_MOBILE2" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_EMAIL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_EMAIL" Name="AC_EMAIL" ShortName="AC_EMAIL" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_GSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_GSTNO" Name="AC_GSTNO" ShortName="AC_GSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_GST_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_GST_TYPE" Name="AC_GST_TYPE" ShortName="AC_GST_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PANNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_PANNO" Name="AC_PANNO" ShortName="AC_PANNO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_REF_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_REF_CODE" Name="AC_REF_CODE" ShortName="AC_REF_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_KHATA_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_KHATA_NO" Name="AC_KHATA_NO" ShortName="AC_KHATA_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BR_DATE" Name="BR_DATE" ShortName="BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.L_BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.L_BR_DATE" Name="L_BR_DATE" ShortName="L_BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AN_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AN_DATE" Name="AN_DATE" ShortName="AN_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_CR_DAYS}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_CR_DAYS" Name="AC_CR_DAYS" ShortName="AC_CR_DAYS" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_INT_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_INT_PRC" Name="AC_INT_PRC" ShortName="AC_INT_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.DPC_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.DPC_PRC" Name="DPC_PRC" ShortName="DPC_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.BANK_NAME" Name="BANK_NAME" ShortName="BANK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.BANK_AREA" Name="BANK_AREA" ShortName="BANK_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_AC_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_AC_NO" Name="BANK_AC_NO" ShortName="BANK_AC_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_RTGS_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_RTGS_NO" Name="BANK_RTGS_NO" ShortName="BANK_RTGS_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_DETL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BANK_DETL" Name="BANK_DETL" ShortName="BANK_DETL" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_TYPE" Name="AC_TYPE" ShortName="AC_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.LAST_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_DATE" Name="LAST_DATE" ShortName="LAST_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.LAST_VISIT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_VISIT" Name="LAST_VISIT" ShortName="LAST_VISIT" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.VISIT_TRAN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.VISIT_TRAN" Name="VISIT_TRAN" ShortName="VISIT_TRAN" Type="crFieldValueTypeStringField" UseCount="0" />
+            </Fields>
+          </Table>
+        </Tables>
+      </Database>
+      <DataDefinition>
+        <GroupSelectionFormula />
+        <RecordSelectionFormula> (   (  {AC_GROUP.AC_MAIN_GR} &lt; "3"  AND   (  {LEDR_AC_DATA.CR_AMT} &lt;&gt; 0  )   )   AND  {LEDR_AC_DATA.CO_CODE} = {?Pm-LEDR_AC_DATA.CO_CODE}  )  </RecordSelectionFormula>
+        <Groups>
+          <Group ConditionField="{@gr1}" />
+          <Group ConditionField="{LEDR_AC_DATA.AC_CODE}" />
+        </Groups>
+        <SortFields>
+          <SortField Field="{@gr1}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+          <SortField Field="{LEDR_AC_DATA.AC_CODE}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+        </SortFields>
+        <FormulaFieldDefinitions>
+          <FormulaFieldDefinition FormulaName="{@AcAmt}" Kind="FormulaField" Name="AcAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">{LEDR_AC_DATA.CR_AMT}
+</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@AcName}" Kind="FormulaField" Name="AcName" NumberOfBytes="102" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{AC_MAST.AC_NAME} 
+</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@ADD}" Kind="FormulaField" Name="ADD" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">{COMP_PARM.CO_ADD1}+" "+{COMP_PARM.CO_ADD2}+" "+{COMP_PARM.CO_ADD3}+"  "+{COMP_PARM.CO_CITY}</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@CR_AMT}" Kind="FormulaField" Name="CR_AMT" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal"></FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@DR_AMT}" Kind="FormulaField" Name="DR_AMT" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal"></FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@FirstGrCode}" Kind="FormulaField" Name="FirstGrCode" NumberOfBytes="6" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+StringVar FirstGrCode := {AC_GROUP.AC_GR};</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@gr1}" Kind="FormulaField" Name="gr1" NumberOfBytes="6" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{AC_GROUP.AC_GR}
+</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@SR_NO}" Kind="FormulaField" Name="SR_NO" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">whileprintingrecords;
+numberVar srno := numberVar srno+1;</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@TotalAmt}" Kind="FormulaField" Name="TotalAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">Sum ({LEDR_AC_DATA.CR_AMT})-Sum ({LEDR_AC_DATA.DR_AMT})
+</FormulaFieldDefinition>
+        </FormulaFieldDefinitions>
+        <GroupNameFieldDefinitions>
+          <GroupNameFieldDefinition FormulaName="GroupName ({@gr1})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #1 Name: @gr1" Kind="GroupNameField" Name="GroupName ({@gr1})" NumberOfBytes="65534" ValueType="StringField" />
+          <GroupNameFieldDefinition FormulaName="GroupName ({LEDR_AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #2 Name: LEDR_AC_DATA.AC_CODE" Kind="GroupNameField" Name="GroupName ({LEDR_AC_DATA.AC_CODE})" NumberOfBytes="65534" ValueType="StringField" />
+        </GroupNameFieldDefinitions>
+        <ParameterFieldDefinitions>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-LEDR_AC_DATA.CO_CODE}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-LEDR_AC_DATA.CO_CODE" NumberOfBytes="510" ParameterFieldName="Pm-LEDR_AC_DATA.CO_CODE" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Pm-LEDR_AC_DATA.CO_CODE" ReportName="Ch_bsgrsub1.rpt" ValueType="StringField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+        </ParameterFieldDefinitions>
+        <RunningTotalFieldDefinitions />
+        <SQLExpressionFields />
+        <SummaryFields>
+          <SummaryFieldDefinition FormulaName="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+          <SummaryFieldDefinition FormulaName="Sum ({@AcAmt}, {@gr1})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@AcAmt}, {@gr1})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+          <SummaryFieldDefinition FormulaName="Sum ({@AcAmt})" Kind="SummaryField" Name="Sum ({@AcAmt})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+        </SummaryFields>
+      </DataDefinition>
+      <CustomFunctions />
+      <SubReportLinks>
+        <SubReportLink LinkedParameterName="{?Pm-LEDR_AC_DATA.CO_CODE}" MainReportFieldName="{LEDR_AC_DATA.CO_CODE}" SubreportFieldName="{LEDR_AC_DATA.CO_CODE}" />
+      </SubReportLinks>
+      <ReportDefinition>
+        <Areas>
+          <Area Kind="ReportHeader" Name="Area1">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="True" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="230" Kind="ReportHeader" Name="Section1">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+              <Section Height="435" Kind="ReportHeader" Name="Section2">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <TextObject Name="Text3" Kind="TextObject" Top="120" Left="15" Width="2617" Height="255" MaxNumberOfLines="0">
+                    <Text>LIABILITIES</Text>
+                    <Color Name="Maroon" A="255" R="128" G="0" B="0" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </TextObject>
+                  <LineObject Name="Line1" Kind="LineObject" Top="345" Left="15" Width="5265" Height="0" Bottom="345" EnableExtendToBottomOfSection="False" EndSectionName="Section2" LineStyle="SingleLine" LineThickness="20" Right="5280">
+                    <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </LineObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupHeader" Name="Area2">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False">
+              <GroupAreaFormat EnableKeepGroupTogether="False" EnableRepeatGroupHeader="False" VisibleGroupNumberPerPage="0" />
+            </AreaFormat>
+            <Sections>
+              <Section Height="275" Kind="GroupHeader" Name="Section3">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas EnableSuppress="( Sum ({LEDR_AC_DATA.CR_AMT}, {@gr1})-Sum ({LEDR_AC_DATA.DR_AMT}, {@gr1}) ) = 0&#xD;&#xA;" />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field1" Kind="FieldObject" Top="75" Left="15" Width="420" Height="200" DataSource="{AC_GROUP.AC_GR}">
+                    <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <FieldObject Name="Field2" Kind="FieldObject" Top="75" Left="435" Width="4620" Height="200" DataSource="{AC_GROUP.AC_GR_NAME}">
+                    <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <FieldObject Name="Field3" Kind="FieldObject" Top="0" Left="6720" Width="720" Height="200" DataSource="{@FirstGrCode}">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Courier New" GdiCharSet="1" GdiVerticalFont="False" Height="19" IsSystemFont="False" Italic="False" Name="Courier New" OriginalFontName="Courier New" Size="12" SizeinPoints="12" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="True" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupHeader" Name="Area6">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False">
+              <GroupAreaFormat EnableKeepGroupTogether="False" EnableRepeatGroupHeader="False" VisibleGroupNumberPerPage="0" />
+            </AreaFormat>
+            <Sections>
+              <Section Height="211" Kind="GroupHeader" Name="Section8">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas EnableSuppress="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE}) = 0&#xD;&#xA;" />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field14" Kind="FieldObject" Top="0" Left="435" Width="3285" Height="210" DataSource="{@AcName}">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <FieldObject Name="Field5" Kind="FieldObject" Top="0" Left="3545" Width="1715" Height="211" DataSource="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="Detail" Name="Area3">
+            <AreaFormat EnableHideForDrillDown="True" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="230" Kind="Detail" Name="Section4">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas EnableSuppress="WhilePrintingRecords;&#xD;&#xA;StringVar FirstGrCode;&#xD;&#xA;If {AC_GROUP.AC_GR} = FirstGrCode then true" />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field4" Kind="FieldObject" Top="0" Left="3480" Width="1800" Height="230" DataSource="{@AcAmt}">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Times New Roman" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Times New Roman" OriginalFontName="Times New Roman" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupFooter" Name="Area7">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="230" Kind="GroupFooter" Name="Section9">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupFooter" Name="Area4">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="246" Kind="GroupFooter" Name="Section5">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field7" Kind="FieldObject" Top="30" Left="3438" Width="1842" Height="216" DataSource="Sum ({@AcAmt}, {@gr1})">
+                    <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <LineObject Name="Line3" Kind="LineObject" Top="0" Left="3960" Width="1320" Height="0" Bottom="0" EnableExtendToBottomOfSection="False" EndSectionName="Section5" LineStyle="SingleLine" LineThickness="20" Right="5280">
+                    <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </LineObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="ReportFooter" Name="Area5">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="405" Kind="ReportFooter" Name="Section6">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <LineObject Name="Line2" Kind="LineObject" Top="30" Left="15" Width="5265" Height="0" Bottom="30" EnableExtendToBottomOfSection="False" EndSectionName="Section6" LineStyle="SingleLine" LineThickness="20" Right="5280">
+                    <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </LineObject>
+                  <FieldObject Name="Field6" Kind="FieldObject" Top="105" Left="3271" Width="2009" Height="240" DataSource="Sum ({@AcAmt})">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+              <Section Height="600" Kind="ReportFooter" Name="Section7">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+            </Sections>
+          </Area>
+        </Areas>
+      </ReportDefinition>
+    </Report>
+    <Report Name="Ch_bsgrsub2.rpt">
+      <Database>
+        <TableLinks>
+          <TableLink JoinType="LeftOuter">
+            <SourceFields>
+              <Field FormulaName="{LEDR_AC_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{LEDR_AC_DATA.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+            </SourceFields>
+            <DestinationFields>
+              <Field FormulaName="{AC_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{AC_MAST.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+            </DestinationFields>
+          </TableLink>
+          <TableLink JoinType="LeftOuter">
+            <SourceFields>
+              <Field FormulaName="{AC_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{AC_MAST.AC_GR}" Kind="DatabaseField" Name="AC_GR" NumberOfBytes="6" ValueType="StringField" />
+            </SourceFields>
+            <DestinationFields>
+              <Field FormulaName="{AC_GROUP.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+              <Field FormulaName="{AC_GROUP.AC_GR}" Kind="DatabaseField" Name="AC_GR" NumberOfBytes="6" ValueType="StringField" />
+            </DestinationFields>
+          </TableLink>
+        </TableLinks>
+        <Tables>
+          <Table Alias="AC_GROUP" ClassName="CrystalReports.Table" Name="AC_GROUP">
+            <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+            <Fields>
+              <Field Description="" FormulaForm="{AC_GROUP.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_GROUP.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_GROUP.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="4" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_GR_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_GROUP.AC_GR_NAME" Name="AC_GR_NAME" ShortName="AC_GR_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_MAIN_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_GROUP.AC_MAIN_GR" Name="AC_MAIN_GR" ShortName="AC_MAIN_GR" Type="crFieldValueTypeStringField" UseCount="1" />
+              <Field Description="" FormulaForm="{AC_GROUP.AC_SUB_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_GROUP.AC_SUB_GR" Name="AC_SUB_GR" ShortName="AC_SUB_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_GROUP.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_GROUP.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+            </Fields>
+          </Table>
+          <Table Alias="LEDR_AC_DATA" ClassName="CrystalReports.Table" Name="LEDR_AC_DATA">
+            <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+            <Fields>
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="20" LongName="LEDR_AC_DATA.CO_YEAR" Name="CO_YEAR" ShortName="CO_YEAR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="LEDR_AC_DATA.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.VCH_DT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.VCH_DT" Name="VCH_DT" ShortName="VCH_DT" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_AMT" Name="CR_AMT" ShortName="CR_AMT" Type="crFieldValueTypeNumberField" UseCount="1" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_AMT" Name="DR_AMT" ShortName="DR_AMT" Type="crFieldValueTypeNumberField" UseCount="3" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.ADD_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.ADD_USER" Name="ADD_USER" ShortName="ADD_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.ADD_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.ADD_DATE" Name="ADD_DATE" ShortName="ADD_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DATA_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.DATA_TYPE" Name="DATA_TYPE" ShortName="DATA_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_FINE_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_FINE_WT" Name="CR_FINE_WT" ShortName="CR_FINE_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_FINE_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_FINE_WT" Name="DR_FINE_WT" ShortName="DR_FINE_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.IT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.IT_TYPE" Name="IT_TYPE" ShortName="IT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_SL_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_SL_FINE" Name="CR_SL_FINE" ShortName="CR_SL_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_SL_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_SL_FINE" Name="DR_SL_FINE" ShortName="DR_SL_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CO_BOOK" Name="CO_BOOK" ShortName="CO_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{LEDR_AC_DATA.VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.VCH_NO" Name="VCH_NO" ShortName="VCH_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+            </Fields>
+          </Table>
+          <Table Alias="AC_MAST" ClassName="CrystalReports.Table" Name="AC_MAST">
+            <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+            <Fields>
+              <Field Description="" FormulaForm="{AC_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_NAME" Name="AC_NAME" ShortName="AC_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_SHORT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="AC_MAST.AC_SHORT" Name="AC_SHORT" ShortName="AC_SHORT" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_MAIN_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_MAIN_GR" Name="AC_MAIN_GR" ShortName="AC_MAIN_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PERSON}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.AC_PERSON" Name="AC_PERSON" ShortName="AC_PERSON" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_ADD1}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD1" Name="AC_ADD1" ShortName="AC_ADD1" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_ADD2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD2" Name="AC_ADD2" ShortName="AC_ADD2" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_ADD3}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD3" Name="AC_ADD3" ShortName="AC_ADD3" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_COUNTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_COUNTRY" Name="AC_COUNTRY" ShortName="AC_COUNTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_STATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_STATE" Name="AC_STATE" ShortName="AC_STATE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_DISTRICT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_DISTRICT" Name="AC_DISTRICT" ShortName="AC_DISTRICT" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_CITY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_CITY" Name="AC_CITY" ShortName="AC_CITY" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="AC_MAST.AC_AREA" Name="AC_AREA" ShortName="AC_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_PIN" Name="AC_PIN" ShortName="AC_PIN" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PHONE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE" Name="AC_PHONE" ShortName="AC_PHONE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PHONE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE2" Name="AC_PHONE2" ShortName="AC_PHONE2" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE" Name="AC_MOBILE" ShortName="AC_MOBILE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE2" Name="AC_MOBILE2" ShortName="AC_MOBILE2" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_EMAIL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_EMAIL" Name="AC_EMAIL" ShortName="AC_EMAIL" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_GSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_GSTNO" Name="AC_GSTNO" ShortName="AC_GSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_GST_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_GST_TYPE" Name="AC_GST_TYPE" ShortName="AC_GST_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_PANNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_PANNO" Name="AC_PANNO" ShortName="AC_PANNO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_REF_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_REF_CODE" Name="AC_REF_CODE" ShortName="AC_REF_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_KHATA_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_KHATA_NO" Name="AC_KHATA_NO" ShortName="AC_KHATA_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BR_DATE" Name="BR_DATE" ShortName="BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.L_BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.L_BR_DATE" Name="L_BR_DATE" ShortName="L_BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AN_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AN_DATE" Name="AN_DATE" ShortName="AN_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_CR_DAYS}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_CR_DAYS" Name="AC_CR_DAYS" ShortName="AC_CR_DAYS" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_INT_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_INT_PRC" Name="AC_INT_PRC" ShortName="AC_INT_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.DPC_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.DPC_PRC" Name="DPC_PRC" ShortName="DPC_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.BANK_NAME" Name="BANK_NAME" ShortName="BANK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.BANK_AREA" Name="BANK_AREA" ShortName="BANK_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_AC_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_AC_NO" Name="BANK_AC_NO" ShortName="BANK_AC_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_RTGS_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_RTGS_NO" Name="BANK_RTGS_NO" ShortName="BANK_RTGS_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.BANK_DETL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BANK_DETL" Name="BANK_DETL" ShortName="BANK_DETL" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.AC_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_TYPE" Name="AC_TYPE" ShortName="AC_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.LAST_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_DATE" Name="LAST_DATE" ShortName="LAST_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.LAST_VISIT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_VISIT" Name="LAST_VISIT" ShortName="LAST_VISIT" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{AC_MAST.VISIT_TRAN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.VISIT_TRAN" Name="VISIT_TRAN" ShortName="VISIT_TRAN" Type="crFieldValueTypeStringField" UseCount="0" />
+            </Fields>
+          </Table>
+        </Tables>
+      </Database>
+      <DataDefinition>
+        <GroupSelectionFormula />
+        <RecordSelectionFormula> (   (  {AC_GROUP.AC_MAIN_GR} &lt; "3"  AND   (  {LEDR_AC_DATA.DR_AMT} &lt;&gt; 0  )   )   AND  {LEDR_AC_DATA.CO_CODE} = {?Pm-LEDR_AC_DATA.CO_CODE}  )  </RecordSelectionFormula>
+        <Groups>
+          <Group ConditionField="{@gr1}" />
+          <Group ConditionField="{LEDR_AC_DATA.AC_CODE}" />
+        </Groups>
+        <SortFields>
+          <SortField Field="{@gr1}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+          <SortField Field="{LEDR_AC_DATA.AC_CODE}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+        </SortFields>
+        <FormulaFieldDefinitions>
+          <FormulaFieldDefinition FormulaName="{@AcAmt}" Kind="FormulaField" Name="AcAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">{LEDR_AC_DATA.DR_AMT}
+</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@AcName}" Kind="FormulaField" Name="AcName" NumberOfBytes="102" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{AC_MAST.AC_NAME} 
+</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@ADD}" Kind="FormulaField" Name="ADD" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">{COMP_PARM.CO_ADD1}+" "+{COMP_PARM.CO_ADD2}+" "+{COMP_PARM.CO_ADD3}+"  "+{COMP_PARM.CO_CITY}</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@CR_AMT}" Kind="FormulaField" Name="CR_AMT" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal"></FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@DR_AMT}" Kind="FormulaField" Name="DR_AMT" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal"></FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@FirstGrCode}" Kind="FormulaField" Name="FirstGrCode" NumberOfBytes="6" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+StringVar FirstGrCode := {AC_GROUP.AC_GR};</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@gr1}" Kind="FormulaField" Name="gr1" NumberOfBytes="12" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">left({AC_GROUP.AC_GR},2)</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@SR_NO}" Kind="FormulaField" Name="SR_NO" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">whileprintingrecords;
+numberVar srno := numberVar srno+1;</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@TotalAmt}" Kind="FormulaField" Name="TotalAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">Sum ({LEDR_AC_DATA.DR_AMT})-Sum ({LEDR_AC_DATA.CR_AMT})
+</FormulaFieldDefinition>
+        </FormulaFieldDefinitions>
+        <GroupNameFieldDefinitions>
+          <GroupNameFieldDefinition FormulaName="GroupName ({@gr1})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #1 Name: @gr1" Kind="GroupNameField" Name="GroupName ({@gr1})" NumberOfBytes="65534" ValueType="StringField" />
+          <GroupNameFieldDefinition FormulaName="GroupName ({LEDR_AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #2 Name: LEDR_AC_DATA.AC_CODE" Kind="GroupNameField" Name="GroupName ({LEDR_AC_DATA.AC_CODE})" NumberOfBytes="65534" ValueType="StringField" />
+        </GroupNameFieldDefinitions>
+        <ParameterFieldDefinitions>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-LEDR_AC_DATA.CO_CODE}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-LEDR_AC_DATA.CO_CODE" NumberOfBytes="510" ParameterFieldName="Pm-LEDR_AC_DATA.CO_CODE" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Pm-LEDR_AC_DATA.CO_CODE" ReportName="Ch_bsgrsub2.rpt" ValueType="StringField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+        </ParameterFieldDefinitions>
+        <RunningTotalFieldDefinitions />
+        <SQLExpressionFields />
+        <SummaryFields>
+          <SummaryFieldDefinition FormulaName="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+          <SummaryFieldDefinition FormulaName="Sum ({@AcAmt}, {@gr1})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@AcAmt}, {@gr1})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+          <SummaryFieldDefinition FormulaName="Sum ({@AcAmt})" Kind="SummaryField" Name="Sum ({@AcAmt})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+        </SummaryFields>
+      </DataDefinition>
+      <CustomFunctions />
+      <SubReportLinks>
+        <SubReportLink LinkedParameterName="{?Pm-LEDR_AC_DATA.CO_CODE}" MainReportFieldName="{LEDR_AC_DATA.CO_CODE}" SubreportFieldName="{LEDR_AC_DATA.CO_CODE}" />
+      </SubReportLinks>
+      <ReportDefinition>
+        <Areas>
+          <Area Kind="ReportHeader" Name="Area1">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="True" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="225" Kind="ReportHeader" Name="Section1">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+              <Section Height="450" Kind="ReportHeader" Name="Section2">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <TextObject Name="Text4" Kind="TextObject" Top="90" Left="15" Width="3044" Height="255" MaxNumberOfLines="0">
+                    <Text>ASSETS</Text>
+                    <Color Name="Maroon" A="255" R="128" G="0" B="0" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </TextObject>
+                  <LineObject Name="Line1" Kind="LineObject" Top="345" Left="15" Width="5445" Height="0" Bottom="345" EnableExtendToBottomOfSection="False" EndSectionName="Section2" LineStyle="SingleLine" LineThickness="20" Right="5460">
+                    <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </LineObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupHeader" Name="Area2">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False">
+              <GroupAreaFormat EnableKeepGroupTogether="False" EnableRepeatGroupHeader="False" VisibleGroupNumberPerPage="0" />
+            </AreaFormat>
+            <Sections>
+              <Section Height="260" Kind="GroupHeader" Name="Section3">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas EnableSuppress="(Sum ({LEDR_AC_DATA.DR_AMT}, {@gr1})-Sum ({LEDR_AC_DATA.CR_AMT}, {@gr1})) = 0&#xD;&#xA;" />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field1" Kind="FieldObject" Top="60" Left="0" Width="465" Height="200" DataSource="{AC_GROUP.AC_GR}">
+                    <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <FieldObject Name="Field2" Kind="FieldObject" Top="60" Left="465" Width="6120" Height="200" DataSource="{AC_GROUP.AC_GR_NAME}">
+                    <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <FieldObject Name="Field3" Kind="FieldObject" Top="10" Left="6825" Width="720" Height="200" DataSource="{@FirstGrCode}">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Courier New" GdiCharSet="1" GdiVerticalFont="False" Height="19" IsSystemFont="False" Italic="False" Name="Courier New" OriginalFontName="Courier New" Size="12" SizeinPoints="12" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="True" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupHeader" Name="Area6">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False">
+              <GroupAreaFormat EnableKeepGroupTogether="False" EnableRepeatGroupHeader="False" VisibleGroupNumberPerPage="0" />
+            </AreaFormat>
+            <Sections>
+              <Section Height="226" Kind="GroupHeader" Name="Section8">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas EnableSuppress="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE}) = 0&#xD;&#xA;" />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field14" Kind="FieldObject" Top="15" Left="465" Width="3360" Height="210" DataSource="{@AcName}">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <FieldObject Name="Field5" Kind="FieldObject" Top="15" Left="3537" Width="1923" Height="211" DataSource="Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="Detail" Name="Area3">
+            <AreaFormat EnableHideForDrillDown="True" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="230" Kind="Detail" Name="Section4">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas EnableSuppress="WhilePrintingRecords;&#xD;&#xA;StringVar FirstGrCode;&#xD;&#xA;If {AC_GROUP.AC_GR} = FirstGrCode then true" />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field4" Kind="FieldObject" Top="0" Left="3442" Width="2018" Height="230" DataSource="{@AcAmt}">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Times New Roman" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Times New Roman" OriginalFontName="Times New Roman" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupFooter" Name="Area7">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="230" Kind="GroupFooter" Name="Section9">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="GroupFooter" Name="Area4">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="275" Kind="GroupFooter" Name="Section5">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field7" Kind="FieldObject" Top="45" Left="3395" Width="2065" Height="216" DataSource="Sum ({@AcAmt}, {@gr1})">
+                    <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                  <LineObject Name="Line3" Kind="LineObject" Top="15" Left="4200" Width="1260" Height="0" Bottom="15" EnableExtendToBottomOfSection="False" EndSectionName="Section5" LineStyle="SingleLine" LineThickness="20" Right="5460">
+                    <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </LineObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="ReportFooter" Name="Area5">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="390" Kind="ReportFooter" Name="Section6">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <LineObject Name="Line2" Kind="LineObject" Top="30" Left="15" Width="5445" Height="0" Bottom="30" EnableExtendToBottomOfSection="False" EndSectionName="Section6" LineStyle="SingleLine" LineThickness="20" Right="5460">
+                    <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </LineObject>
+                  <FieldObject Name="Field6" Kind="FieldObject" Top="90" Left="3208" Width="2252" Height="240" DataSource="Sum ({@AcAmt})">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+              <Section Height="600" Kind="ReportFooter" Name="Section7">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+            </Sections>
+          </Area>
+        </Areas>
+      </ReportDefinition>
+    </Report>
+  </SubReports>
+  <Database>
+    <TableLinks>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{LEDR_AC_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{CO_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{LEDR_AC_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{LEDR_AC_DATA.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{AC_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{AC_MAST.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{AC_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{AC_MAST.AC_GR}" Kind="DatabaseField" Name="AC_GR" NumberOfBytes="6" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{AC_GROUP.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{AC_GROUP.AC_GR}" Kind="DatabaseField" Name="AC_GR" NumberOfBytes="6" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+    </TableLinks>
+    <Tables>
+      <Table Alias="CO_MAST" ClassName="CrystalReports.Table" Name="CO_MAST">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{CO_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_NAME" Name="CO_NAME" ShortName="CO_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_SNAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="CO_MAST.CO_SNAME" Name="CO_SNAME" ShortName="CO_SNAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD1}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD1" Name="CO_ADD1" ShortName="CO_ADD1" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD2" Name="CO_ADD2" ShortName="CO_ADD2" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD3}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD3" Name="CO_ADD3" ShortName="CO_ADD3" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_COUNTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_COUNTRY" Name="CO_COUNTRY" ShortName="CO_COUNTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_STATE_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.CO_STATE_CODE" Name="CO_STATE_CODE" ShortName="CO_STATE_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_STATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_STATE" Name="CO_STATE" ShortName="CO_STATE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_CITY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_CITY" Name="CO_CITY" ShortName="CO_CITY" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="CO_MAST.CO_PIN" Name="CO_PIN" ShortName="CO_PIN" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PHONE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_PHONE" Name="CO_PHONE" ShortName="CO_PHONE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PHONE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_PHONE2" Name="CO_PHONE2" ShortName="CO_PHONE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MOBILE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_MOBILE" Name="CO_MOBILE" ShortName="CO_MOBILE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MOBILE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_MOBILE2" Name="CO_MOBILE2" ShortName="CO_MOBILE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MAIL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_MAIL" Name="CO_MAIL" ShortName="CO_MAIL" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_JUD}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_JUD" Name="CO_JUD" ShortName="CO_JUD" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_LSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_LSTNO" Name="CO_LSTNO" ShortName="CO_LSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_CSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_CSTNO" Name="CO_CSTNO" ShortName="CO_CSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_GST_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_GST_NO" Name="CO_GST_NO" ShortName="CO_GST_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PAN_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_PAN_NO" Name="CO_PAN_NO" ShortName="CO_PAN_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.DHIRAN_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.DHIRAN_NO" Name="DHIRAN_NO" ShortName="DHIRAN_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.BANK_NAME" Name="BANK_NAME" ShortName="BANK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="CO_MAST.BANK_AREA" Name="BANK_AREA" ShortName="BANK_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_AC_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.BANK_AC_NO" Name="BANK_AC_NO" ShortName="BANK_AC_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_RTGS_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.BANK_RTGS_NO" Name="BANK_RTGS_NO" ShortName="BANK_RTGS_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.CO_TYPE" Name="CO_TYPE" ShortName="CO_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.ALTER_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.ALTER_YEAR" Name="ALTER_YEAR" ShortName="ALTER_YEAR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MSG}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="202" LongName="CO_MAST.CO_MSG" Name="CO_MSG" ShortName="CO_MSG" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.REP_ADD_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.REP_ADD_TYPE" Name="REP_ADD_TYPE" ShortName="REP_ADD_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.WORK_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.WORK_TYPE" Name="WORK_TYPE" ShortName="WORK_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.METAL_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.METAL_TYPE" Name="METAL_TYPE" ShortName="METAL_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="LEDR_AC_DATA" ClassName="CrystalReports.Table" Name="LEDR_AC_DATA">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="20" LongName="LEDR_AC_DATA.CO_YEAR" Name="CO_YEAR" ShortName="CO_YEAR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="LEDR_AC_DATA.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.VCH_DT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.VCH_DT" Name="VCH_DT" ShortName="VCH_DT" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_AMT" Name="CR_AMT" ShortName="CR_AMT" Type="crFieldValueTypeNumberField" UseCount="2" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_AMT" Name="DR_AMT" ShortName="DR_AMT" Type="crFieldValueTypeNumberField" UseCount="1" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="LEDR_AC_DATA.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.ADD_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.ADD_USER" Name="ADD_USER" ShortName="ADD_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.ADD_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.ADD_DATE" Name="ADD_DATE" ShortName="ADD_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.DATA_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.DATA_TYPE" Name="DATA_TYPE" ShortName="DATA_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_FINE_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_FINE_WT" Name="CR_FINE_WT" ShortName="CR_FINE_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_FINE_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_FINE_WT" Name="DR_FINE_WT" ShortName="DR_FINE_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.IT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="LEDR_AC_DATA.IT_TYPE" Name="IT_TYPE" ShortName="IT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.CR_SL_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CR_SL_FINE" Name="CR_SL_FINE" ShortName="CR_SL_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.DR_SL_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.DR_SL_FINE" Name="DR_SL_FINE" ShortName="DR_SL_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.CO_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="LEDR_AC_DATA.CO_BOOK" Name="CO_BOOK" ShortName="CO_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{LEDR_AC_DATA.VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="LEDR_AC_DATA.VCH_NO" Name="VCH_NO" ShortName="VCH_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="AC_MAST" ClassName="CrystalReports.Table" Name="AC_MAST">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{AC_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_NAME" Name="AC_NAME" ShortName="AC_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_SHORT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="AC_MAST.AC_SHORT" Name="AC_SHORT" ShortName="AC_SHORT" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_MAIN_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_MAIN_GR" Name="AC_MAIN_GR" ShortName="AC_MAIN_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PERSON}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.AC_PERSON" Name="AC_PERSON" ShortName="AC_PERSON" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_ADD1}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD1" Name="AC_ADD1" ShortName="AC_ADD1" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_ADD2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD2" Name="AC_ADD2" ShortName="AC_ADD2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_ADD3}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD3" Name="AC_ADD3" ShortName="AC_ADD3" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_COUNTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_COUNTRY" Name="AC_COUNTRY" ShortName="AC_COUNTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_STATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_STATE" Name="AC_STATE" ShortName="AC_STATE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_DISTRICT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_DISTRICT" Name="AC_DISTRICT" ShortName="AC_DISTRICT" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_CITY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_CITY" Name="AC_CITY" ShortName="AC_CITY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="AC_MAST.AC_AREA" Name="AC_AREA" ShortName="AC_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_PIN" Name="AC_PIN" ShortName="AC_PIN" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PHONE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE" Name="AC_PHONE" ShortName="AC_PHONE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PHONE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE2" Name="AC_PHONE2" ShortName="AC_PHONE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE" Name="AC_MOBILE" ShortName="AC_MOBILE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE2" Name="AC_MOBILE2" ShortName="AC_MOBILE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_EMAIL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_EMAIL" Name="AC_EMAIL" ShortName="AC_EMAIL" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_GSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_GSTNO" Name="AC_GSTNO" ShortName="AC_GSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_GST_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_GST_TYPE" Name="AC_GST_TYPE" ShortName="AC_GST_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PANNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_PANNO" Name="AC_PANNO" ShortName="AC_PANNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_REF_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_REF_CODE" Name="AC_REF_CODE" ShortName="AC_REF_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_KHATA_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_KHATA_NO" Name="AC_KHATA_NO" ShortName="AC_KHATA_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BR_DATE" Name="BR_DATE" ShortName="BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.L_BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.L_BR_DATE" Name="L_BR_DATE" ShortName="L_BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AN_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AN_DATE" Name="AN_DATE" ShortName="AN_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_CR_DAYS}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_CR_DAYS" Name="AC_CR_DAYS" ShortName="AC_CR_DAYS" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_INT_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_INT_PRC" Name="AC_INT_PRC" ShortName="AC_INT_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.DPC_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.DPC_PRC" Name="DPC_PRC" ShortName="DPC_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.BANK_NAME" Name="BANK_NAME" ShortName="BANK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.BANK_AREA" Name="BANK_AREA" ShortName="BANK_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_AC_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_AC_NO" Name="BANK_AC_NO" ShortName="BANK_AC_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_RTGS_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_RTGS_NO" Name="BANK_RTGS_NO" ShortName="BANK_RTGS_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_DETL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BANK_DETL" Name="BANK_DETL" ShortName="BANK_DETL" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_TYPE" Name="AC_TYPE" ShortName="AC_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.LAST_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_DATE" Name="LAST_DATE" ShortName="LAST_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.LAST_VISIT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_VISIT" Name="LAST_VISIT" ShortName="LAST_VISIT" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.VISIT_TRAN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.VISIT_TRAN" Name="VISIT_TRAN" ShortName="VISIT_TRAN" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="AC_GROUP" ClassName="CrystalReports.Table" Name="AC_GROUP">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{AC_GROUP.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_GROUP.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_GROUP.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_GROUP.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_GROUP.AC_GR_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_GROUP.AC_GR_NAME" Name="AC_GR_NAME" ShortName="AC_GR_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_GROUP.AC_MAIN_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_GROUP.AC_MAIN_GR" Name="AC_MAIN_GR" ShortName="AC_MAIN_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_GROUP.AC_SUB_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_GROUP.AC_SUB_GR" Name="AC_SUB_GR" ShortName="AC_SUB_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_GROUP.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_GROUP.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+    </Tables>
+  </Database>
+  <DataDefinition>
+    <GroupSelectionFormula />
+    <RecordSelectionFormula />
+    <Groups>
+      <Group ConditionField="{CO_MAST.CO_CODE}" />
+      <Group ConditionField="{LEDR_AC_DATA.AC_CODE}" />
+    </Groups>
+    <SortFields>
+      <SortField Field="{CO_MAST.CO_CODE}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+      <SortField Field="{LEDR_AC_DATA.AC_CODE}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+    </SortFields>
+    <FormulaFieldDefinitions>
+      <FormulaFieldDefinition FormulaName="{@1Amt}" Kind="FormulaField" Name="1Amt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">0
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@2Amt}" Kind="FormulaField" Name="2Amt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">0
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@AcAmt}" Kind="FormulaField" Name="AcAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">Sum({LEDR_AC_DATA.DR_AMT},{LEDR_AC_DATA.AC_CODE}) - Sum({LEDR_AC_DATA.CR_AMT},{LEDR_AC_DATA.AC_CODE})
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CoAdd}" Kind="FormulaField" Name="CoAdd" NumberOfBytes="360" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{CO_MAST.CO_ADD1}+" "+{CO_MAST.CO_ADD2}+" "+{CO_MAST.CO_ADD3}+"  "+{CO_MAST.CO_CITY}</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CoName}" Kind="FormulaField" Name="CoName" NumberOfBytes="2" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">''
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CrDiff}" Kind="FormulaField" Name="CrDiff" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">if ({@2Amt} - {@1Amt}) &gt;= 0 then 
+    Abs({@2Amt} - {@1Amt})
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CurPag}" Kind="FormulaField" Name="CurPag" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">PageNumber
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@DrDiff}" Kind="FormulaField" Name="DrDiff" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">if ({@2Amt} - {@1Amt}) &lt; 0 then 
+    Abs({@2Amt} - {@1Amt})
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Gr1}" Kind="FormulaField" Name="Gr1" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">{AC_GROUP.GR_CODE}[1]='1' AND  {AC_GROUP.GR_CODE}[1]='2'
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@LblDiff}" Kind="FormulaField" Name="LblDiff" NumberOfBytes="26" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NUmberVar TotCrAmt;
+NUmberVar TotDrAmt;
+if (TotDrAmt - TotCrAmt) &lt;&gt; 0 then
+  'Difference :'
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@RptTitel}" Kind="FormulaField" Name="RptTitel" NumberOfBytes="50" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">"TRIAL BALANCE AS ON DATE"</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@RunTotal}" Kind="FormulaField" Name="RunTotal" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar TotCrAmt;
+NumberVar TotDrAmt;
+
+IF {@AcAmt} &gt;= 0 and {@AcAmt} &lt;&gt; 0   then
+(
+    TotDrAmt := TotDrAmt + {@AcAmt})
+else
+(
+    TotCrAmt := TotCrAmt + Abs({@AcAmt}))
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@TotCrAmt}" Kind="FormulaField" Name="TotCrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NUmberVar TotCrAmt;
+TotCrAmt
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@TotDrAmt}" Kind="FormulaField" Name="TotDrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NUmberVar TotDrAmt;
+TotDrAmt
+</FormulaFieldDefinition>
+    </FormulaFieldDefinitions>
+    <GroupNameFieldDefinitions>
+      <GroupNameFieldDefinition FormulaName="GroupName ({CO_MAST.CO_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #1 Name: CO_MAST.CO_CODE" Kind="GroupNameField" Name="GroupName ({CO_MAST.CO_CODE})" NumberOfBytes="65534" ValueType="StringField" />
+      <GroupNameFieldDefinition FormulaName="GroupName ({LEDR_AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #2 Name: LEDR_AC_DATA.AC_CODE" Kind="GroupNameField" Name="GroupName ({LEDR_AC_DATA.AC_CODE})" NumberOfBytes="65534" ValueType="StringField" />
+    </GroupNameFieldDefinitions>
+    <ParameterFieldDefinitions>
+      <ParameterFieldDefinition Name="Pm-LEDR_AC_DATA.CO_CODE" IsLinkedToSubreport="True" ReportName="Ch_bsgrsub1.rpt" />
+      <ParameterFieldDefinition Name="Pm-LEDR_AC_DATA.CO_CODE" IsLinkedToSubreport="True" ReportName="Ch_bsgrsub2.rpt" />
+    </ParameterFieldDefinitions>
+    <RunningTotalFieldDefinitions>
+      <RunningTotalFieldDefinition EvaluationConditionType="NoCondition" FormulaName="{#RTotal0}" Kind="RunningTotalField" Name="RTotal0" NumberOfBytes="8" Operation="Sum" OperationParameter="0" ResetConditionType="NoCondition" SummarizedField="{LEDR_AC_DATA.CR_AMT}" ValueType="NumberField" />
+    </RunningTotalFieldDefinitions>
+    <SQLExpressionFields />
+    <SummaryFields />
+  </DataDefinition>
+  <CustomFunctions />
+  <ReportDefinition>
+    <Areas>
+      <Area Kind="ReportHeader" Name="Area1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="True" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="336" Kind="ReportHeader" Name="Section1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="Text1" Kind="TextObject" Top="12" Left="15" Width="2540" Height="200" MaxNumberOfLines="0">
+                <Text />
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Microsoft Sans Serif" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Microsoft Sans Serif" OriginalFontName="Draft 12cpi" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageHeader" Name="Area2">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="1020" Kind="PageHeader" Name="Section2">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field1" Kind="FieldObject" Top="450" Left="180" Width="11100" Height="244" DataSource="{@CoAdd}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Microsoft Sans Serif" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Microsoft Sans Serif" OriginalFontName="Microsoft Sans Serif" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field4" Kind="FieldObject" Top="60" Left="180" Width="11100" Height="336" DataSource="{CO_MAST.CO_NAME}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="22" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="14" SizeinPoints="14" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field5" Kind="FieldObject" Top="690" Left="180" Width="11100" Height="255" DataSource="{@RptTitel}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Verdana" GdiCharSet="1" GdiVerticalFont="False" Height="17" IsSystemFont="False" Italic="False" Name="Verdana" OriginalFontName="Verdana" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <LineObject Name="Line2" Kind="LineObject" Top="975" Left="180" Width="11100" Height="0" Bottom="975" EnableExtendToBottomOfSection="False" EndSectionName="Section2" LineStyle="SingleLine" LineThickness="10" Right="11280">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+              <FieldObject Name="Field28" Kind="FieldObject" Top="690" Left="10770" Width="510" Height="228" DataSource="{@CurPag}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupHeader" Name="Area3">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False">
+          <GroupAreaFormat EnableKeepGroupTogether="False" EnableRepeatGroupHeader="False" VisibleGroupNumberPerPage="0" />
+        </AreaFormat>
+        <Sections>
+          <Section Height="375" Kind="GroupHeader" Name="Section3">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <SubreportObject Name="Subreport1" Kind="SubreportObject" Top="75" Left="5760" Width="5520" Height="210" SubreportName="Ch_bsgrsub2.rpt" EnableOnDemand="False">
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="True" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </SubreportObject>
+              <SubreportObject Name="Subreport2" Kind="SubreportObject" Top="75" Left="180" Width="5340" Height="225" SubreportName="Ch_bsgrsub1.rpt" EnableOnDemand="False">
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="True" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </SubreportObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupHeader" Name="Area8">
+        <AreaFormat EnableHideForDrillDown="True" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False">
+          <GroupAreaFormat EnableKeepGroupTogether="False" EnableRepeatGroupHeader="False" VisibleGroupNumberPerPage="0" />
+        </AreaFormat>
+        <Sections>
+          <Section Height="230" Kind="GroupHeader" Name="Section9">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field12" Kind="FieldObject" Top="0" Left="5347" Width="878" Height="230" DataSource="{@AcAmt}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Times New Roman" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Times New Roman" OriginalFontName="Times New Roman" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field13" Kind="FieldObject" Top="0" Left="6360" Width="450" Height="230" DataSource="{@RunTotal}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Courier New" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Courier New" OriginalFontName="Courier New" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="True" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="Detail" Name="Area4">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="140" Kind="Detail" Name="Section4">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupFooter" Name="Area9">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="0" Kind="GroupFooter" Name="Section10">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupFooter" Name="Area5">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="75" Kind="GroupFooter" Name="Section5">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="ReportFooter" Name="Area6">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="405" Kind="ReportFooter" Name="Section6">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <LineObject Name="Line1" Kind="LineObject" Top="0" Left="180" Width="11100" Height="0" Bottom="0" EnableExtendToBottomOfSection="False" EndSectionName="Section6" LineStyle="SingleLine" LineThickness="20" Right="11280">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+              <TextObject Name="Text9" Kind="TextObject" Top="75" Left="960" Width="2730" Height="270" MaxNumberOfLines="0">
+                <Text>Grand Total :</Text>
+                <Color Name="Maroon" A="255" R="128" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <LineObject Name="Line3" Kind="LineObject" Top="360" Left="180" Width="11100" Height="0" Bottom="360" EnableExtendToBottomOfSection="False" EndSectionName="Section6" LineStyle="SingleLine" LineThickness="20" Right="11280">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+              <FieldObject Name="Field6" Kind="FieldObject" Top="75" Left="3878" Width="1560" Height="240" DataSource="{@1Amt}">
+                <Color Name="Maroon" A="255" R="128" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field7" Kind="FieldObject" Top="75" Left="9645" Width="1560" Height="240" DataSource="{@2Amt}">
+                <Color Name="Maroon" A="255" R="128" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+          <Section Height="390" Kind="ReportFooter" Name="Section11">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas EnableSuppress="({@DrDiff}-{@CrDiff} )= 0&#xD;&#xA;" />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field19" Kind="FieldObject" Top="45" Left="3840" Width="1608" Height="245" DataSource="{@CrDiff}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Tahoma" GdiCharSet="1" GdiVerticalFont="False" Height="17" IsSystemFont="False" Italic="False" Name="Tahoma" OriginalFontName="Tahoma" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field20" Kind="FieldObject" Top="45" Left="9570" Width="1635" Height="245" DataSource="{@DrDiff}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Tahoma" GdiCharSet="1" GdiVerticalFont="False" Height="17" IsSystemFont="False" Italic="False" Name="Tahoma" OriginalFontName="Tahoma" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field21" Kind="FieldObject" Top="45" Left="720" Width="2910" Height="195" DataSource="{@LblDiff}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Tahoma" GdiCharSet="1" GdiVerticalFont="False" Height="17" IsSystemFont="False" Italic="False" Name="Tahoma" OriginalFontName="Tahoma" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <LineObject Name="Line4" Kind="LineObject" Top="360" Left="180" Width="11100" Height="0" Bottom="360" EnableExtendToBottomOfSection="False" EndSectionName="Section11" LineStyle="SingleLine" LineThickness="20" Right="11280">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageFooter" Name="Area7">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="True" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="180" Kind="PageFooter" Name="Section7">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+    </Areas>
+  </ReportDefinition>
+</Report>

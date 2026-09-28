@@ -1,0 +1,14 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "test"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T14:05:12.163745+00:00",
+  "finishedAtUtc": "2026-09-11T14:05:13.486984+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-tests-verified.txt"
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "independent-depth-review-ready-v1",
+  "noExecution": true,
+  "noActiveWorkspaceEdits": true,
+  "verifiedInputCount": 17,
+  "changedReadInputs": [],
+  "artifacts": [
+    {
+      "path": "independent-review.md",
+      "sha256": "b9063d98cf35b899a32f10fe073bba45d7a6840095e9c39c96be8fc9fbee50fa"
+    },
+    {
+      "path": "comparison.json",
+      "sha256": "b6bcb45477c1af7cea6f250c8e92370c4d1a914e9940ec2ef0ca611d85c5a7f1"
+    },
+    {
+      "path": "inputs.json",
+      "sha256": "850b74134e54aa19b331f54b2451663fb6671411526ef5627fc3cefdf2da7b0a"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+22 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 173 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "reportBind.test.ts" "reportEngine.test.ts" "reportRender.db.test.ts" "reportChildren.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/reportChildren.db.test.ts (12 tests) 561ms
+ ✓ test/reportRender.db.test.ts (5 tests) 228ms
+ ✓ test/reportBind.test.ts (29 tests) 26ms
+ ✓ test/reportEngine.test.ts (4 tests) 7ms
+
+ Test Files  4 passed (4)
+      Tests  50 passed (50)
+   Start at  21:21:04
+   Duration  2.28s (transform 132ms, setup 0ms, collect 268ms, tests 823ms, environment 1ms, prepare 184ms)
+

@@ -1,4 +1,15 @@
 import { withTenant } from '@datacare/db';
+import {
+  lockImageRevisionTx,
+  readImageRevisionTx,
+  advanceImageRevisionTx,
+} from './imageRevision.js';
+import {
+  compareImageVersion,
+  imageStateVersion,
+  imagePreview,
+  validateImagePixels,
+} from './imageState.js';
 
 /**
  * Entity images — the shared media surface behind the desktop's `BtnImgS` (select), `BtnImgC` (capture)
@@ -13,11 +24,11 @@ import { withTenant } from '@datacare/db';
  *   AC     + account code  + 0                party / karigar photo (`MS_ACCT`, `TR_DHRN_ISU`)
  *   MEMB   + member code   + 0                membership photo (`MS_MEMB`)
  *   SCHM   + scheme code   + 0                scheme artwork (`MS_PRODUCT`)
- *   DESIGN + design number + 0                design book image (`MS_DESIGN_BOOK`)
+ *   DESIGN + saved DESIGN_IMG_ID + 0                design book image (`MS_DESIGN_BOOK`)
  *
  * STORAGE
- * The desktop keeps bytes on a Windows file share and treats `TAG_IMAGE_DATA` as an index — that table has
- * no byte column. A multi-tenant server cannot depend on a shop's file share, and this codebase already
+ * The desktop keeps local image files and can also store MOB_IMAGE base64 in its separate image database.
+ * The web's TAG_IMAGE_DATA model currently imports index fields only. A multi-tenant server cannot depend on a shop's file share, and this codebase already
  * proves the alternative: the repair workflow stores bytes in a tenant-scoped `bytea` (`REP_IMAGE`). Only the
  * TAG entity is mirrored into `TAG_IMAGE_DATA`, whose primary key has no room for another entity kind.
  *
@@ -66,6 +77,8 @@ export interface EntityImageKey {
   /** Voucher instance for a tag; 0 for master records. */
   instance?: number;
   imageType?: string;
+  /** Design Book routes accept only the saved desktop DESIGN_IMG_ID in the active company. */
+  requireDesignParent?: boolean;
 }
 
 export interface EntityImageRecord {
@@ -89,6 +102,23 @@ interface NormalKey {
   imageType: string;
 }
 
+async function designParentExists(tx: any, k: NormalKey, required?: boolean): Promise<boolean> {
+  if (!required) return true;
+  if (k.entityType !== 'DESIGN' || k.lcCode !== '' || k.instance !== 0 || k.imageType !== 'D') {
+    throw new EntityImageError('invalid Design Book image identity');
+  }
+  // Keep the selected parent alive until this image transaction completes. Images are company-wide,
+  // like DESIGN_DETL, and use the saved desktop key, never a caller-supplied bare design number.
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT "DESIGN_IMG_ID" FROM "DESIGN_DETL"
+     WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "DESIGN_IMG_ID"=$3 FOR KEY SHARE`,
+    k.tenantId,
+    k.coCode,
+    k.entityKey,
+  );
+  return rows.length > 0;
+}
+
 function normalise(key: EntityImageKey): NormalKey {
   const entityKey = String(key.entityKey ?? '').trim();
   if (!entityKey) throw new EntityImageError('image requires an entity key');
@@ -99,13 +129,16 @@ function normalise(key: EntityImageKey): NormalKey {
   if (!(ENTITY_TYPES as readonly string[]).includes(type)) {
     throw new EntityImageError(`unknown image entity type: ${type}`);
   }
+  const instance = Number(key.instance ?? 0);
+  if (!Number.isFinite(instance) || instance < 0)
+    throw new EntityImageError('image instance must be a finite non-negative number');
   return {
     tenantId: key.tenantId,
     coCode: String(key.coCode),
     lcCode: String(key.lcCode ?? ''),
     entityType: type as EntityType,
     entityKey,
-    instance: Number(key.instance ?? 0) || 0,
+    instance,
     // One character only: the desktop column is varchar(1).
     imageType: (
       String(key.imageType ?? DEFAULT_IMAGE_TYPE)
@@ -145,15 +178,102 @@ export function decodeEntityImage(input: { data?: string; mimeType?: string }): 
   return { bytes, mimeType: detected.mime };
 }
 
+async function entityImageSnapshotTx(tx: any, k: NormalKey, requireParent?: boolean) {
+  let parents: unknown[] = [];
+  if (requireParent) {
+    if (!(await designParentExists(tx, k, true)))
+      throw new EntityImageError('save the design in this company before editing its image');
+    parents = await tx.$queryRawUnsafe(
+      `SELECT "BOOK_NAME","PR_CODE","SR_NO"::text,"OLD_SRNO"::text,xmin::text AS "generation",ctid::text AS "tuple"
+       FROM "DESIGN_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "DESIGN_IMG_ID"=$3
+       ORDER BY "BOOK_NAME","PR_CODE","SR_NO"`,
+      k.tenantId,
+      k.coCode,
+      k.entityKey,
+    );
+  }
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT "IMAGE_TYPE","MIME_TYPE","IMAGE_SIZE","IMAGE_BYTES","MAIN_USER","ENTRY_TIME"::text AS "entryTime"
+     FROM "ENTITY_IMAGE" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "ENTITY_TYPE"=$4 AND "ENTITY_KEY"=$5 AND "INSTANCE"=$6`,
+    k.tenantId,
+    k.coCode,
+    k.lcCode,
+    k.entityType,
+    k.entityKey,
+    k.instance,
+  );
+  const index: any[] =
+    k.entityType === 'TAG'
+      ? await tx.$queryRawUnsafe(
+          `SELECT "IMAGE_TYPE" FROM "TAG_IMAGE_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"=$4 AND "VCH_SRNO"=$5`,
+          k.tenantId,
+          k.coCode,
+          k.lcCode,
+          k.entityKey,
+          k.instance,
+        )
+      : [];
+  const revision = await readImageRevisionTx(tx, k);
+  const version = imageStateVersion([
+    [k.tenantId, k.coCode, k.lcCode, k.entityType, k.entityKey, k.instance],
+    revision,
+    parents,
+    rows.map(({ IMAGE_BYTES, ...r }) => ({
+      ...r,
+      data: Buffer.from(IMAGE_BYTES ?? []).toString('base64'),
+    })),
+    index,
+  ]);
+  return { version, rows, index };
+}
+
+/** A single snapshot includes absent/unavailable bytes and a version suitable for explicit replacement. */
+export async function getEntityImageState(prisma: any, key: EntityImageKey) {
+  const k = normalise(key);
+  return withTenant(
+    prisma,
+    k.tenantId,
+    async (tx: any) => {
+      const snapshot = await entityImageSnapshotTx(tx, k, key.requireDesignParent);
+      const row = snapshot.rows[0];
+      return {
+        version: snapshot.version,
+        image: await imagePreview(
+          row
+            ? {
+                bytes: Buffer.from(row.IMAGE_BYTES ?? []),
+                mimeType: String(row.MIME_TYPE ?? ''),
+                size: Number(row.IMAGE_SIZE),
+                validType: snapshot.rows.length === 1 && row.IMAGE_TYPE === k.imageType,
+              }
+            : null,
+          snapshot.index.length > 0,
+        ),
+      };
+    },
+    { isolationLevel: 'RepeatableRead' },
+  );
+}
+
 /** Store or replace an entity's image. TAG entities also keep the desktop `TAG_IMAGE_DATA` index in step. */
 export async function saveEntityImage(
   prisma: any,
   key: EntityImageKey,
-  input: { data?: string; mimeType?: string; user?: string },
+  input: { data?: string; mimeType?: string; user?: string; version?: string },
 ): Promise<{ saved: true; size: number; mimeType: string }> {
   const k = normalise(key);
   const { bytes, mimeType } = decodeEntityImage(input);
+  if (input.version !== undefined) await validateImagePixels(bytes, mimeType);
   await withTenant(prisma, k.tenantId, async (tx: any) => {
+    if (!(await designParentExists(tx, k, key.requireDesignParent))) {
+      throw new EntityImageError('save the design in this company before uploading its image');
+    }
+    await lockImageRevisionTx(tx, k);
+    if (input.version !== undefined)
+      compareImageVersion(
+        input.version,
+        (await entityImageSnapshotTx(tx, k, key.requireDesignParent)).version,
+      );
     await tx.$executeRawUnsafe(
       `INSERT INTO "ENTITY_IMAGE"(tenant_id,"CO_CODE","LC_CODE","ENTITY_TYPE","ENTITY_KEY","INSTANCE",
          "IMAGE_TYPE","MIME_TYPE","IMAGE_SIZE","IMAGE_BYTES","MAIN_USER")
@@ -189,6 +309,7 @@ export async function saveEntityImage(
         k.imageType,
       );
     }
+    await advanceImageRevisionTx(tx, k);
   });
   return { saved: true, size: bytes.length, mimeType };
 }
@@ -199,6 +320,7 @@ export async function getEntityImage(
 ): Promise<EntityImageRecord | null> {
   const k = normalise(key);
   return withTenant(prisma, k.tenantId, async (tx: any) => {
+    if (!(await designParentExists(tx, k, key.requireDesignParent))) return null;
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "ENTITY_TYPE","ENTITY_KEY","INSTANCE","IMAGE_TYPE","MIME_TYPE","IMAGE_SIZE","IMAGE_BYTES",
               "ENTRY_TIME"
@@ -230,9 +352,21 @@ export async function getEntityImage(
 export async function deleteEntityImage(
   prisma: any,
   key: EntityImageKey,
+  version?: string,
 ): Promise<{ deleted: boolean }> {
   const k = normalise(key);
   return withTenant(prisma, k.tenantId, async (tx: any) => {
+    if (!(await designParentExists(tx, k, key.requireDesignParent))) {
+      if (version !== undefined)
+        throw new EntityImageError('save the design in this company before editing its image');
+      return { deleted: false };
+    }
+    await lockImageRevisionTx(tx, k);
+    if (version !== undefined)
+      compareImageVersion(
+        version,
+        (await entityImageSnapshotTx(tx, k, key.requireDesignParent)).version,
+      );
     const n: number = await tx.$executeRawUnsafe(
       `DELETE FROM "ENTITY_IMAGE"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "ENTITY_TYPE"=$4
@@ -255,6 +389,7 @@ export async function deleteEntityImage(
         k.instance,
       );
     }
+    await advanceImageRevisionTx(tx, k);
     return { deleted: n > 0 };
   });
 }

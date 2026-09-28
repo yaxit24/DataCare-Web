@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnHeaderFloat.test.ts (47 tests) 7ms
+ ✓ test/saleReturnIncomingSaveProjection.test.ts (63 tests) 31ms
+
+ Test Files  2 passed (2)
+      Tests  110 passed (110)
+   Start at  06:02:08
+   Duration  352ms (transform 147ms, setup 0ms, collect 162ms, tests 37ms, environment 0ms, prepare 82ms)
+

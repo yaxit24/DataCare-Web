@@ -1,0 +1,108 @@
+{
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "criticalLines": [
+        10104,
+        10106,
+        12607,
+        12885,
+        13100,
+        13108,
+        13928,
+        13932,
+        14115,
+        14279,
+        14557
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+      "criticalLines": [
+        1324,
+        1326
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+      "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+      "criticalLines": [
+        247
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+      "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+      "criticalLines": [
+        586,
+        588
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+      "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+      "criticalLines": []
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "criticalLines": [
+        10,
+        20,
+        35,
+        768,
+        769,
+        804,
+        805,
+        806,
+        3866,
+        3867,
+        3898,
+        3906,
+        5609,
+        5610,
+        5655,
+        5656,
+        5874,
+        5876,
+        5880,
+        6664
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/savedSaleReturnClock.ts",
+      "sha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec",
+      "criticalLines": [
+        1,
+        4
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnNBarCompanions.ts",
+      "sha256": "1ec25c5579ec58bd06db0f2ec5cd0161bd29bfe532af2e2e64e7f6e0940ff826",
+      "criticalLines": [
+        1,
+        4
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/return-save-effects-analysis/effects-contract.md",
+      "sha256": "00c0d6551a0b08445835869c93bb19cafa42e879b841c315596581ec4f7b28c2",
+      "criticalLines": [
+        23,
+        32,
+        33,
+        72,
+        86
+      ]
+    }
+  ],
+  "documentation": [
+    {
+      "url": "https://learn.microsoft.com/en-us/sql/t-sql/functions/str-transact-sql?view=sql-server-ver17",
+      "use": "STR default length10/decimal0 and right justification; finite exact integer1 has no rounding. No SQL Server harness executed."
+    }
+  ]
+}

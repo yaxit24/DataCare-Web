@@ -1,0 +1,75 @@
+{
+  "kind": "tour-exact-browser-staged-unexecuted",
+  "createdAtUtc": "2026-09-11T22:41:10.353155+00:00",
+  "existing16ChecksAndActionsUnchanged": true,
+  "expectedJourneyCount": 16,
+  "expectedTourCheckCount": 17,
+  "requiredNewCheck": "exact saved Tour scalars survive API JSON, browser unchanged/advance-only saves and SQL readback",
+  "ownerAndTenantMandatory": true,
+  "browserExecuted": false,
+  "databaseExecuted": false,
+  "syntaxCheckExitCode": 0,
+  "runnerBaseSha256": "67e3e7a36fbf6fe1487168b3ad2f10f18eb8da1d40e4e2916940ca6dc7cd3264",
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/tour-order.journey.mjs",
+      "sha256": "67587a68b5139c039bcccebe0499140093496e04b5b2813350cc27e129cbc904"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "67e3e7a36fbf6fe1487168b3ad2f10f18eb8da1d40e4e2916940ca6dc7cd3264"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity-real-stack-evidence.mjs",
+      "sha256": "e899d6ea9bf797d86006f815146d58534fb95c0dd3b180af71d6fef3ace37438"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-browser/web/apps/web/test/tour-order.journey.mjs",
+      "sha256": "8f18fd57cedee25dc63cb21591a0a17dd351dc40164ba4ffa6fd4d48a9cd8d3d"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-browser/journey.patch",
+      "sha256": "4d4b1a78c1534ee8aed543fc6092eed66b798481d9837aad03ceb383a8239b17"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-browser/runner-call.patch",
+      "sha256": "51e163d3a903f2f2d34e5e226d890af893c9ffc835a502e32390ceb9767ae3e3"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-browser/syntax-check.txt",
+      "sha256": "79dbfbe23a84bfcc5f695be56832e8227e5370dd045e94f3bb379cd5b5043762"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-browser/README.md",
+      "sha256": "8be0be4eeb05bdefb5af2f08b01a94b2d09e74471f052502db6ef50a54104774"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-browser/runtime-independent-review.md",
+      "sha256": "e57df89dafa2170352d040a22d8fe90b610ab0144815489af6a002529ca1e2e3"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-values/implementation-contract.md",
+      "sha256": "03e67f8a1f22f55c02adf8020ab7b9e0a108f9a5bee1cf60395916ecf8c8a390"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-values/contract-inputs.json",
+      "sha256": "8578deff862267d6b30921ca264f6861bb0306f0057f9d6ba19a7c4bac240bfa"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-values/tour-exact-values-independent.v1.json",
+      "sha256": "4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-values/staged/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "d0c880975689647e30379bf91b2fcd46115719fa216618c5c29c1f248e67c884"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-values/staged/web/apps/web/lib/tourOrderForm.ts",
+      "sha256": "4b67a1f5de37b591eecbe6a90a5371e2d08716e694e64ff556fb8df97d3358e1"
+    },
+    {
+      "path": "/tmp/datacare-tour-exact-values/staged/web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "71fe70a4a8580749fc04b1225970d3269b709a76f7d70662cf131724debb7113"
+    }
+  ]
+}

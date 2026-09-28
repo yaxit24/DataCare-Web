@@ -1,0 +1,746 @@
+{
+  "kind": "prospective-source-profile-candidates-not-runtime-tests",
+  "authorship": "Literal values authored from primary source and frozen prerequisites, without executing any new writer/ledger/preview/calculator. Some are explicitly partial consequences and must be expanded into complete fixtures before implementation.",
+  "baselineP1": {
+    "description": "ordinary primary saved P/I incoming-only credit Return",
+    "row": {
+      "SR_NO": "1",
+      "OLD_SRNO": "1",
+      "VCH_SRNO": "500001",
+      "TAG_SRNO": "123",
+      "IT_CODE": "GOLD",
+      "TAG_NO": "N",
+      "ITM_GWT": "10.000",
+      "ITM_NWT": "10.000",
+      "ITM_TOUCH": "100.000",
+      "ITM_RATE": "10.00",
+      "ITM_AMT": "100.00",
+      "LBR_RATE": "1.00",
+      "LBR_AMT": "10.00",
+      "OTH_AMT": "0.00",
+      "TOT_AMT": "110.00",
+      "NET_AMT": "110.00",
+      "ENTRY_TYPE": "P",
+      "INOUT_TYPE": "I"
+    },
+    "header": {
+      "TAX_PRC": "0",
+      "TAX_AMT": "0",
+      "RTN_NET_AMT": "110",
+      "RTN_TOT_AMT": "110",
+      "RTN_BILL_OS": "110",
+      "NET_AMT": "0",
+      "TOT_AMT": "0"
+    },
+    "conditions": "all tenders/kasar0; no outgoing/components; source/configuration masters exact; complete effect set still to be frozen; known closing not supplied"
+  },
+  "cases": [
+    {
+      "id": "W01",
+      "area": "first-commit",
+      "name": "Other0\u21921 on ordinary incoming credit",
+      "input": {
+        "baseline": "P1",
+        "events": [
+          {
+            "fieldId": "x13.primary-incoming.c27",
+            "editorText": "1"
+          }
+        ]
+      },
+      "expected": {
+        "row": {
+          "OTH_AMT": "1",
+          "TOT_AMT": "111",
+          "NET_AMT": "111"
+        },
+        "header": {
+          "RTN_NET_AMT": "111",
+          "RTN_TOT_AMT": "111",
+          "RTN_BILL_OS": "111",
+          "NET_AMT": "0",
+          "TOT_AMT": "0",
+          "TAX_AMT": "0"
+        },
+        "accountLegs": [
+          {
+            "role": "customer",
+            "CR_AMT": "111",
+            "DR_AMT": "0",
+            "SIGN": ""
+          },
+          {
+            "role": "group-sale-account",
+            "CR_AMT": "0",
+            "DR_AMT": "111",
+            "SIGN": ""
+          }
+        ],
+        "stock": {
+          "OTH_AMT": "1",
+          "NET_AMT": "111",
+          "ITM_SIGN": "+",
+          "ITM_QTY": "1"
+        },
+        "closing": "unavailable permitted",
+        "coverage": "partial known consequences; full Rojmel/tax/remark rows must be independently frozen before code"
+      },
+      "source": [
+        "TR_SALE_RTN:14394-14474,12623-12809",
+        "Ac_Ledr:1324,1326",
+        "Ac_Stock:247"
+      ]
+    },
+    {
+      "id": "W02",
+      "area": "first-commit",
+      "name": "same-value no-effect patch retains raw",
+      "input": {
+        "baseline": "P1",
+        "events": [
+          {
+            "fieldId": "x13.primary-incoming.c27",
+            "editorText": "0"
+          }
+        ]
+      },
+      "expected": {
+        "businessDml": false,
+        "rawAndPhysicalRows": "unchanged",
+        "audit": "separately intentional",
+        "descriptionNull": "retained",
+        "closing": "unavailable"
+      },
+      "source": [
+        "bounded raw-preserving web edit profile; not desktop whole-row rewrite"
+      ]
+    },
+    {
+      "id": "W03",
+      "area": "first-commit",
+      "name": "return from1\u21920",
+      "input": {
+        "baseline": "W01 committed result",
+        "events": [
+          {
+            "fieldId": "x13.primary-incoming.c27",
+            "editorText": "0"
+          }
+        ]
+      },
+      "expected": {
+        "rowNet": "110",
+        "headerPayment": "110",
+        "customerCredit": "110",
+        "stockOther": "0",
+        "additionalVoucherOrInstance": false
+      },
+      "source": [
+        "TR_SALE_RTN:4866-5158,12707,12789",
+        "Ac_Ledr:1324"
+      ]
+    },
+    {
+      "id": "W04",
+      "area": "first-commit",
+      "name": "fractional Other affects row before whole bill",
+      "input": {
+        "baseline": "P1",
+        "events": [
+          {
+            "fieldId": "x13.primary-incoming.c27",
+            "editorText": "0.01"
+          }
+        ]
+      },
+      "expected": {
+        "rowNet": "110.01",
+        "incomingRounded": "110.00",
+        "RTN_NET_AMT": "110",
+        "RTN_TOT_AMT": "110",
+        "customerPerRowCredit": "110.01",
+        "note": "Complete effect conservation must handle source differing row/rounded header; do not force them equal or silently add a generic roundoff leg."
+      },
+      "source": [
+        "TR_SALE_RTN:16385-16406",
+        "Ac_Ledr:1324,1326"
+      ]
+    },
+    {
+      "id": "W05",
+      "area": "first-commit",
+      "name": "preview-capable event outside first writer",
+      "input": {
+        "baseline": "P1",
+        "event": {
+          "kind": "labourEnter",
+          "fieldId": "x13.primary-incoming.c13",
+          "editorText": "BB",
+          "observationVersion": "qualified"
+        }
+      },
+      "expected": {
+        "commit": "unsupported-profile",
+        "businessDml": false,
+        "existingPreview": "unchanged"
+      },
+      "source": [
+        "initial bounded writer policy"
+      ]
+    },
+    {
+      "id": "W06",
+      "area": "first-commit",
+      "name": "zero tax can still have tax rows",
+      "input": {
+        "bookType": "T",
+        "RTN_NET_AMT": "111",
+        "RTN_TOT_AMT": "111",
+        "TAX_AMT": "0",
+        "accountGstType": "N",
+        "taxMasterSr": [
+          1,
+          2
+        ]
+      },
+      "expected": {
+        "eligibleHeaderTaxRows": 2,
+        "eachTaxAmount": "0",
+        "eachNetBase": "111",
+        "eachTotal": "111",
+        "missingMasterCannotBeGuessed": true
+      },
+      "source": [
+        "Ac_Tax:191,193"
+      ]
+    },
+    {
+      "id": "W07",
+      "area": "first-commit",
+      "name": "incoming-only credit is not received outstanding",
+      "input": {
+        "account": "CUST",
+        "receivedTotal": "0",
+        "paymentOutstanding": "111"
+      },
+      "expected": {
+        "sourceBillOsInserted": false,
+        "unknownExistingBillOs": "refuse before DML"
+      },
+      "source": [
+        "TR_SALE_RTN:13194-13225"
+      ]
+    },
+    {
+      "id": "P01",
+      "area": "projection",
+      "name": "pieces storage scale is not integer load rounding",
+      "input": {
+        "rawITM_PCS": "1.000",
+        "visible9": "1.000"
+      },
+      "expected": {
+        "numericSaveValue": "1",
+        "rawRetained": "1.000",
+        "untouchedWrite": false
+      },
+      "source": [
+        "TR_SALE_RTN:10376,14358",
+        "current PG numeric12,3 profile"
+      ]
+    },
+    {
+      "id": "P02",
+      "area": "projection",
+      "name": "blank numeric cleared by code",
+      "input": {
+        "visible23": "",
+        "visible24": "0.00"
+      },
+      "expected": {
+        "LBR_RATE": "0",
+        "LBR_AMT": "0",
+        "rawNullIfUntouched": "preserve"
+      },
+      "source": [
+        "TR_SALE_RTN:14414,14418"
+      ]
+    },
+    {
+      "id": "P03",
+      "area": "projection",
+      "name": "source row cancellation",
+      "input": {
+        "visible1": "GOLD",
+        "visible12": "10.000",
+        "visible38": "-10.00"
+      },
+      "expected": {
+        "sourceWouldInclude": false,
+        "initialCommit": "unsupported-row-removal"
+      },
+      "source": [
+        "TR_SALE_RTN:14252"
+      ]
+    },
+    {
+      "id": "P04",
+      "area": "projection",
+      "name": "display serial differs from saved key",
+      "input": {
+        "rawSR_NO": "17",
+        "ordinal": 1,
+        "visible0": "1"
+      },
+      "expected": {
+        "sourceCandidateSR_NO": "1",
+        "initialCommit": "unsupported-identity-normalization"
+      },
+      "source": [
+        "TR_SALE_RTN:10359,14307"
+      ]
+    },
+    {
+      "id": "P05",
+      "area": "projection",
+      "name": "zero instance requires allocation",
+      "input": {
+        "rawVCH_SRNO": "0",
+        "visible40": "0"
+      },
+      "expected": {
+        "initialCommit": "unsupported-instance-allocation",
+        "inventedClockOrInstance": false
+      },
+      "source": [
+        "TR_SALE_RTN:14482-14497"
+      ]
+    },
+    {
+      "id": "P06",
+      "area": "projection",
+      "name": "rate/item/tag source mapping",
+      "input": {
+        "visible43": "G",
+        "visible44": "N",
+        "visible54": "A",
+        "visible55": "G"
+      },
+      "expected": {
+        "IT_TYPE": "G",
+        "RATE_TYPE": "N",
+        "TAG_TYPE": "A",
+        "column55WritesTagType": false
+      },
+      "source": [
+        "TR_SALE_RTN:14501,14509,14553"
+      ]
+    },
+    {
+      "id": "P07",
+      "area": "projection",
+      "name": "description fallback is untouched raw",
+      "input": {
+        "rawITM_REMARK": null,
+        "visible3": "Current master name",
+        "event": "c27 only"
+      },
+      "expected": {
+        "storedITM_REMARK": null,
+        "sourceFullReserializeWouldUse": "Current master name",
+        "profileDifference": "explicit"
+      },
+      "source": [
+        "TR_SALE_RTN:10362-10368,14319",
+        "bounded preservation policy"
+      ]
+    },
+    {
+      "id": "P08",
+      "area": "projection",
+      "name": "target precision narrower than calculator",
+      "input": {
+        "target": "numeric(18,2)",
+        "candidate": "9999999999999999.999"
+      },
+      "expected": {
+        "commit": "unsupported-storage-precision",
+        "truncateOrRoundWithoutContract": false
+      },
+      "source": [
+        "current schema target; finite Decimal is insufficient"
+      ]
+    },
+    {
+      "id": "P09",
+      "area": "projection",
+      "name": "plain-data bad inputs",
+      "input": {
+        "values": [
+          "12\n",
+          "12\r",
+          "12\u2028",
+          "1e3",
+          "12x",
+          null
+        ]
+      },
+      "expected": {
+        "requiredNumericSaveField": "unsupported",
+        "partialMutation": false
+      },
+      "source": [
+        "bounded existing decimal profile"
+      ]
+    },
+    {
+      "id": "L01",
+      "area": "closing",
+      "name": "date plus clock day mismatch and truncation",
+      "input": {
+        "VCH_DATE": "2024-07-10",
+        "VCH_TIME": "2024-07-09T23:59:59.999999"
+      },
+      "expected": {
+        "cutoffLocalSecond": "2024-07-10 23:59:59",
+        "rawTime": "unchanged"
+      },
+      "source": [
+        "TR_SALE_RTN:10104-10106,10197"
+      ]
+    },
+    {
+      "id": "L02",
+      "area": "closing",
+      "name": "strict opening versus inclusive helper",
+      "input": {
+        "mode": "A",
+        "cutoff": "2024-07-10 12:00:00",
+        "ledger": [
+          {
+            "time": "2024-07-10 11:59:59.999999",
+            "book": "B01",
+            "CR": "10",
+            "DR": "0"
+          },
+          {
+            "time": "2024-07-10 12:00:00.000000",
+            "book": "B02",
+            "CR": "4",
+            "DR": "0"
+          },
+          {
+            "time": "2024-07-10 12:00:00.000001",
+            "book": "B03",
+            "CR": "100",
+            "DR": "0"
+          }
+        ]
+      },
+      "expected": {
+        "openingAmount": "10.00",
+        "helperClosingAmount": "14.00",
+        "allBooks": true
+      },
+      "source": [
+        "DC_Main:1471,1479"
+      ]
+    },
+    {
+      "id": "L03",
+      "area": "closing",
+      "name": "combined mode includes null and other modes",
+      "input": {
+        "beforeCutoff": [
+          {
+            "mode": "A",
+            "CR": "10",
+            "DR": "0"
+          },
+          {
+            "mode": "B",
+            "CR": "0",
+            "DR": "3"
+          },
+          {
+            "mode": null,
+            "CR": "5",
+            "DR": "0"
+          }
+        ]
+      },
+      "expected": {
+        "A": "10.00",
+        "B": "-3.00",
+        "C": "12.00"
+      },
+      "source": [
+        "DC_Main:1471,1479"
+      ]
+    },
+    {
+      "id": "L04",
+      "area": "closing",
+      "name": "no group versus null group",
+      "input": {
+        "case1": "no eligible rows",
+        "case2": "eligible group all required amount operands NULL"
+      },
+      "expected": {
+        "case1Opening": "0.00",
+        "case2Opening": null,
+        "case2Status": "unsupported"
+      },
+      "source": [
+        "DC_Main:1465-1477; frozen reader profile"
+      ]
+    },
+    {
+      "id": "L05",
+      "area": "closing",
+      "name": "metal conversion is part of source helper",
+      "input": {
+        "amount": "10.00",
+        "gold": null,
+        "silver": "0.000"
+      },
+      "expected": {
+        "completeHelper": "unsupported",
+        "knownFullClosing": false
+      },
+      "source": [
+        "DC_Main:1475-1477; round10 source addendum"
+      ]
+    },
+    {
+      "id": "L06",
+      "area": "closing",
+      "name": "helper loaded close differs from bill close",
+      "input": {
+        "opening": "10",
+        "helperClosing": "14",
+        "paymentOS": "111",
+        "receivedOS": "0"
+      },
+      "expected": {
+        "billClosing": "121",
+        "loadedHelperClosing": "14",
+        "label": "121.00 : Cr Amt",
+        "color": "blue"
+      },
+      "source": [
+        "TR_SALE_RTN:10198-10227,16424-16455"
+      ]
+    },
+    {
+      "id": "L07",
+      "area": "closing",
+      "name": "negative opening and zero color history",
+      "input": {
+        "opening": "-111",
+        "paymentOS": "111",
+        "receivedOS": "0",
+        "priorColor": "red"
+      },
+      "expected": {
+        "billClosing": "0",
+        "label": ": Amt",
+        "color": "red"
+      },
+      "source": [
+        "TR_SALE_RTN:16424-16455"
+      ]
+    },
+    {
+      "id": "M01",
+      "area": "authority",
+      "name": "unknown persisted mode cannot be made known by caller",
+      "input": {
+        "ledgerContext": {
+          "version": "server-session-ledger-context-v1",
+          "status": "unknown",
+          "mode": null,
+          "reason": "vendor-authority-unresolved"
+        },
+        "clientMode": "A"
+      },
+      "expected": {
+        "knownClosing": false,
+        "acceptClientMode": false,
+        "boundedC27CommitMayProceedIfIndependentlyQualified": true
+      },
+      "source": [
+        "deployed unknown schema/parser; separate writer profile"
+      ]
+    },
+    {
+      "id": "M02",
+      "area": "authority",
+      "name": "resolved bootstrap facts and exception",
+      "input": {
+        "completed": true,
+        "edition": "A",
+        "forceCombined": true
+      },
+      "expected": {
+        "semanticMode": "C",
+        "authenticatedModeAuthority": "not implied"
+      },
+      "source": [
+        "MS_OPNCOMP:1459-1475"
+      ]
+    },
+    {
+      "id": "M03",
+      "area": "authority",
+      "name": "special fallback versus missing general alias",
+      "input": {
+        "edition": "A",
+        "previousMode": "B",
+        "sourceCompany": "01",
+        "sentinelAExists": true,
+        "mappedAliasAbsent": true
+      },
+      "expected": {
+        "specialC": "A",
+        "generalD": "B"
+      },
+      "source": [
+        "MDI_FORM:12726-12757,12784-12790"
+      ]
+    },
+    {
+      "id": "M04",
+      "area": "authority",
+      "name": "mode or scope ABA",
+      "input": {
+        "bearerEpoch": "8",
+        "durableEpoch": "10",
+        "sameScope": true,
+        "sameFinalMode": "A"
+      },
+      "expected": {
+        "request": "context-stale",
+        "rebaseDraft": false
+      },
+      "source": [
+        "new known-mode protocol must preserve current context generation invariants"
+      ]
+    },
+    {
+      "id": "T01",
+      "area": "transaction",
+      "name": "old version after successful changed commit",
+      "input": {
+        "requestDocumentVersion": "old",
+        "currentDocumentVersion": "new"
+      },
+      "expected": {
+        "status": 409,
+        "additionalBusinessDml": false
+      },
+      "source": [
+        "proposed versioned commit"
+      ]
+    },
+    {
+      "id": "T02",
+      "area": "transaction",
+      "name": "session mutation wins before first lock",
+      "input": {
+        "schedule": [
+          "selection commits epoch+1",
+          "old command acquires session SHARE"
+        ]
+      },
+      "expected": {
+        "oldCommand": "refused",
+        "financialDml": false
+      },
+      "source": [
+        "existing session admission lock protocol"
+      ]
+    },
+    {
+      "id": "T03",
+      "area": "transaction",
+      "name": "command lock wins before selection",
+      "input": {
+        "schedule": [
+          "command SHARE lock",
+          "selection UPDATE waits",
+          "financial command commits",
+          "selection continues"
+        ]
+      },
+      "expected": {
+        "command": "only old admitted context effects",
+        "selection": "after command",
+        "universalOtherWriterGuarantee": false
+      },
+      "source": [
+        "existing session admission lock protocol"
+      ]
+    },
+    {
+      "id": "T04",
+      "area": "transaction",
+      "name": "failure after any planned write family",
+      "input": {
+        "faultAfter": [
+          "SL_DETL_RTN",
+          "SL_DATA",
+          "AC_DATA",
+          "MAIN_STOCK",
+          "TAX_DATA",
+          "ROJ_MEL_DATA"
+        ]
+      },
+      "expected": {
+        "allBusinessRawRows": "original",
+        "receiptIfAdded": "rolled back",
+        "intentionalAudit": "separately measured"
+      },
+      "source": [
+        "required transaction atomicity"
+      ]
+    },
+    {
+      "id": "T05",
+      "area": "transaction",
+      "name": "foreign child/config phantom during Serializable",
+      "input": {
+        "schedule": [
+          "observe full version and membership",
+          "concurrent reference/config change",
+          "attempt commit"
+        ]
+      },
+      "expected": {
+        "result": "serialize/refuse or valid serial order",
+        "silentlyDiscardChild": false,
+        "implicitRetryNewScope": false
+      },
+      "source": [
+        "required transactional admission; no latest-at-response claim"
+      ]
+    },
+    {
+      "id": "T06",
+      "area": "transaction",
+      "name": "lost acknowledgment",
+      "input": {
+        "operation": "changed commit",
+        "acknowledgment": "unknown"
+      },
+      "expected": {
+        "browserDraft": "retained",
+        "automaticOldBodyResubmit": "no",
+        "recovery": "explicit reload/inspection unless separate durable financial receipt exists"
+      },
+      "source": [
+        "proposed first profile; context selection receipt is not financial receipt"
+      ]
+    }
+  ]
+}

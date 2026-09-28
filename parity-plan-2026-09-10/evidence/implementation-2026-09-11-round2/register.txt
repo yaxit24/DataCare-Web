@@ -1,0 +1,8 @@
+
+> datacare-web-saas@0.0.0 register:check /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/check-completion-register.mjs
+
+completion register: 198 desktop menu item(s)
+   198  implemented-unverified
+  ordering signal only: form referenced in web 175, never 14, label unresolved 9
+REGISTER_OK every entry is well-formed and honestly evidenced

@@ -1,0 +1,21 @@
+{
+  "command": [
+    "env",
+    "PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round13-independent-editor",
+    "pnpm",
+    "test:parity:browser"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:33:00.233562+00:00",
+  "finishedAtUtc": "2026-09-11T21:33:28.803442+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-existing-journeys-independent-editor.txt",
+  "logSha256": "6b94ad7d1e61f53134a70413506b624c3db1045306f5dbd12a375b50a8c076a8",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-existing-journeys-independent-editor.inputs.json",
+  "inputManifestSha256": "ed5e642a39cb5f221c03551d40c167fa0b1e676c68c2808b9fed9f56cc7f33ff",
+  "inputCount": 1788,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

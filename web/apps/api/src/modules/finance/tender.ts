@@ -1,12 +1,17 @@
 import type { LedgerLine } from '../posting/posting.js';
+import { requirePostingAccount } from '../shared/postingAccounts.js';
 
 /**
  * Shared settlement/tender legs (F2). Voucher bodies post their core ledger (e.g. Cr supplier total /
  * Dr expense), then APPEND these self-balanced pairs for the amount settled now — mirroring how sales
  * appends HM/TCS/Kasar. No tender ⇒ no legs ⇒ identical to the un-settled voucher (backward-compatible).
  *
- *  • payoutLegs  — money OUT (pay a supplier/expense): per tender, Dr party / Cr cash|bank ; kasar Dr party / Cr KASAR (discount received). Reduces the party's net Cr (payable) to the unpaid balance.
- *  • receiptLegs — money IN  (refund/receive): per tender, Dr cash|bank / Cr party ; kasar Dr KASAR / Cr party (write-off). Reduces the party's net Dr (receivable).
+ *  • payoutLegs  — money OUT (pay a supplier/expense): per tender, Dr party / Cr cash|bank ; kasar Dr party / Cr kasar account (discount received). Reduces the party's net Cr (payable) to the unpaid balance.
+ *  • receiptLegs — money IN  (refund/receive): per tender, Dr cash|bank / Cr party ; kasar Dr kasar account / Cr party (write-off). Reduces the party's net Dr (receivable).
+ *
+ * ACCOUNTS ARE NOT DEFAULTED (P0-04). Each account is demanded only when its own amount is non-zero, so a
+ * caller settling cash alone never has to name a bank or kasar account — but a caller settling cash without
+ * naming the cash account is refused instead of posting to a literal `'CASH'` that no real dataset contains.
  */
 const R2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
 
@@ -19,9 +24,14 @@ export interface TenderParams {
   cardAmt?: number;
   upiAmt?: number;
   kasar?: number;
-  cashAc?: string; // default 'CASH'
-  bankAc?: string; // default 'BANK' (cheque+card+upi land here)
-  kasarAc?: string; // default 'KASAR'
+  /** Required when `cashAmt` is non-zero. Resolve it from the book's configured slot. */
+  cashAc?: string;
+  /** Required when cheque/card/UPI settle here. */
+  bankAc?: string;
+  /** Required when `kasar` is non-zero. */
+  kasarAc?: string;
+  /** Names the voucher family in a refusal, e.g. `purchase 035/00017`. */
+  context?: string;
 }
 export interface TenderResult {
   legs: LedgerLine[];
@@ -62,13 +72,19 @@ export interface TenderLegCodes {
 
 export function payoutLegs(base: Record<string, unknown>, p: TenderParams): TenderResult {
   const { cashAmt, bankPaid, kasar, paidNow } = amounts(p);
+  const where = p.context ?? 'tender payout';
   const legs: LedgerLine[] = [];
   if (cashAmt > 0) {
+    const cashAc = requirePostingAccount(
+      'cash-settlement',
+      p.cashAc,
+      `${where} settles ${cashAmt} in cash`,
+    );
     legs.push({
       ...base,
       ...(p.legs?.cashParty != null ? { legType: p.legs.cashParty } : {}),
       AC_CODE: p.partyAc,
-      LD_CODE: p.cashAc ?? 'CASH',
+      LD_CODE: cashAc,
       DR_AMT: cashAmt,
       CR_AMT: 0,
       SIGN: 'D',
@@ -76,7 +92,7 @@ export function payoutLegs(base: Record<string, unknown>, p: TenderParams): Tend
     legs.push({
       ...base,
       ...(p.legs?.cash != null ? { legType: p.legs.cash } : {}),
-      AC_CODE: p.cashAc ?? 'CASH',
+      AC_CODE: cashAc,
       LD_CODE: p.partyAc,
       DR_AMT: 0,
       CR_AMT: cashAmt,
@@ -84,17 +100,22 @@ export function payoutLegs(base: Record<string, unknown>, p: TenderParams): Tend
     } as LedgerLine);
   }
   if (bankPaid > 0) {
+    const bankAc = requirePostingAccount(
+      'bank-settlement',
+      p.bankAc,
+      `${where} settles ${bankPaid} by cheque/card/UPI`,
+    );
     legs.push({
       ...base,
       AC_CODE: p.partyAc,
-      LD_CODE: p.bankAc ?? 'BANK',
+      LD_CODE: bankAc,
       DR_AMT: bankPaid,
       CR_AMT: 0,
       SIGN: 'D',
     } as LedgerLine);
     legs.push({
       ...base,
-      AC_CODE: p.bankAc ?? 'BANK',
+      AC_CODE: bankAc,
       LD_CODE: p.partyAc,
       DR_AMT: 0,
       CR_AMT: bankPaid,
@@ -102,17 +123,18 @@ export function payoutLegs(base: Record<string, unknown>, p: TenderParams): Tend
     } as LedgerLine);
   }
   if (kasar > 0) {
+    const kasarAc = requirePostingAccount('kasar', p.kasarAc, `${where} writes off ${kasar}`);
     legs.push({
       ...base,
       AC_CODE: p.partyAc,
-      LD_CODE: p.kasarAc ?? 'KASAR',
+      LD_CODE: kasarAc,
       DR_AMT: kasar,
       CR_AMT: 0,
       SIGN: 'D',
     } as LedgerLine);
     legs.push({
       ...base,
-      AC_CODE: p.kasarAc ?? 'KASAR',
+      AC_CODE: kasarAc,
       LD_CODE: p.partyAc,
       DR_AMT: 0,
       CR_AMT: kasar,
@@ -122,14 +144,20 @@ export function payoutLegs(base: Record<string, unknown>, p: TenderParams): Tend
   return { legs, paidNow, kasar, cashAmt, bankPaid };
 }
 
-/** Money IN (refund / receive): Dr cash|bank / Cr party + kasar Dr KASAR / Cr party. */
+/** Money IN (refund / receive): Dr cash|bank / Cr party + kasar Dr kasar account / Cr party. */
 export function receiptLegs(base: Record<string, unknown>, p: TenderParams): TenderResult {
   const { cashAmt, bankPaid, kasar, paidNow } = amounts(p);
+  const where = p.context ?? 'tender receipt';
   const legs: LedgerLine[] = [];
   if (cashAmt > 0) {
+    const cashAc = requirePostingAccount(
+      'cash-settlement',
+      p.cashAc,
+      `${where} receives ${cashAmt} in cash`,
+    );
     legs.push({
       ...base,
-      AC_CODE: p.cashAc ?? 'CASH',
+      AC_CODE: cashAc,
       LD_CODE: p.partyAc,
       DR_AMT: cashAmt,
       CR_AMT: 0,
@@ -138,16 +166,21 @@ export function receiptLegs(base: Record<string, unknown>, p: TenderParams): Ten
     legs.push({
       ...base,
       AC_CODE: p.partyAc,
-      LD_CODE: p.cashAc ?? 'CASH',
+      LD_CODE: cashAc,
       DR_AMT: 0,
       CR_AMT: cashAmt,
       SIGN: 'C',
     } as LedgerLine);
   }
   if (bankPaid > 0) {
+    const bankAc = requirePostingAccount(
+      'bank-settlement',
+      p.bankAc,
+      `${where} receives ${bankPaid} by cheque/card/UPI`,
+    );
     legs.push({
       ...base,
-      AC_CODE: p.bankAc ?? 'BANK',
+      AC_CODE: bankAc,
       LD_CODE: p.partyAc,
       DR_AMT: bankPaid,
       CR_AMT: 0,
@@ -156,16 +189,17 @@ export function receiptLegs(base: Record<string, unknown>, p: TenderParams): Ten
     legs.push({
       ...base,
       AC_CODE: p.partyAc,
-      LD_CODE: p.bankAc ?? 'BANK',
+      LD_CODE: bankAc,
       DR_AMT: 0,
       CR_AMT: bankPaid,
       SIGN: 'C',
     } as LedgerLine);
   }
   if (kasar > 0) {
+    const kasarAc = requirePostingAccount('kasar', p.kasarAc, `${where} writes off ${kasar}`);
     legs.push({
       ...base,
-      AC_CODE: p.kasarAc ?? 'KASAR',
+      AC_CODE: kasarAc,
       LD_CODE: p.partyAc,
       DR_AMT: kasar,
       CR_AMT: 0,
@@ -174,7 +208,7 @@ export function receiptLegs(base: Record<string, unknown>, p: TenderParams): Ten
     legs.push({
       ...base,
       AC_CODE: p.partyAc,
-      LD_CODE: p.kasarAc ?? 'KASAR',
+      LD_CODE: kasarAc,
       DR_AMT: 0,
       CR_AMT: kasar,
       SIGN: 'C',

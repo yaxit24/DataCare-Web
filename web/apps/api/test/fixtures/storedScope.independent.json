@@ -1,0 +1,664 @@
+{
+  "version": "validate-stored-scope-independent-v1",
+  "status": "literal-proposed-unexecuted",
+  "authoredBeforeHelperImplementation": true,
+  "source": "Current companyTx/locationTx/yearTx SQL and root-requested exact/no-default stored-scope profile. No application function executed to derive outputs.",
+  "cases": [
+    {
+      "id": "S01",
+      "reason": "Exact persisted location/year retain identity; company default99 is not used",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            "2024-2025"
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            },
+            {
+              "year": "2025-2026"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "stored-scope-fixture",
+          "coCode": "02",
+          "lcCode": "03",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S02",
+      "reason": "Absent year performs no YEAR_MAST query and yields own undefined",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "stored-scope-fixture",
+          "coCode": "02",
+          "lcCode": "03"
+        }
+      },
+      "ownUndefinedOutputKeys": [
+        "coYear"
+      ]
+    },
+    {
+      "id": "S03",
+      "reason": "Own undefined year remains absent rather than acquiring newest year",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "stored-scope-fixture",
+          "coCode": "02",
+          "lcCode": "03"
+        }
+      },
+      "ownUndefinedInputKeys": [
+        "coYear"
+      ],
+      "ownUndefinedOutputKeys": [
+        "coYear"
+      ]
+    },
+    {
+      "id": "S04",
+      "reason": "Missing exact company stops before location/year",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": []
+        }
+      ],
+      "expected": {
+        "errorCode": "company-unavailable"
+      }
+    },
+    {
+      "id": "S05",
+      "reason": "Ordinary company membership remains required",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "allowed": false
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "company-unavailable"
+      }
+    },
+    {
+      "id": "S06",
+      "reason": "Admin bypass is explicit company query parameter",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": true,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            "2024-2025"
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            },
+            {
+              "year": "2025-2026"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "stored-scope-fixture",
+          "coCode": "02",
+          "lcCode": "03",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S07",
+      "reason": "Missing persisted branch is refused despite company default99",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "location-unavailable"
+      }
+    },
+    {
+      "id": "S08",
+      "reason": "Empty stored branch must not choose the default",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "",
+        "coYear": "2024-2025"
+      },
+      "queries": [],
+      "expected": {
+        "errorCode": "location-unavailable"
+      }
+    },
+    {
+      "id": "S09",
+      "reason": "Present empty year must not choose latest year",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": ""
+      },
+      "queries": [],
+      "expected": {
+        "errorCode": "year-unavailable"
+      }
+    },
+    {
+      "id": "S10",
+      "reason": "Present SQL-like null must be projected to undefined by caller, never coerced here",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": null
+      },
+      "queries": [],
+      "expected": {
+        "errorCode": "year-unavailable"
+      }
+    },
+    {
+      "id": "S11",
+      "reason": "Missing exact stored year refuses instead of choosing another year",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            "2024-2025"
+          ],
+          "rows": [
+            {
+              "year": "2025-2026"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "year-unavailable"
+      }
+    },
+    {
+      "id": "S12",
+      "reason": "Requested year is not silently trimmed",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": " 2024-2025 "
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            " 2024-2025 "
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            },
+            {
+              "year": "2025-2026"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "year-unavailable"
+      }
+    },
+    {
+      "id": "S13",
+      "reason": "Empty stored company refuses before reads",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [],
+      "expected": {
+        "errorCode": "company-unavailable"
+      }
+    },
+    {
+      "id": "S14",
+      "reason": "Requested location is not silently trimmed",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": " 03 ",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            " 03 ",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "location-unavailable"
+      }
+    },
+    {
+      "id": "S15",
+      "reason": "Missing required persisted branch must not choose company default",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "coYear": "2024-2025"
+      },
+      "queries": [],
+      "expected": {
+        "errorCode": "location-unavailable"
+      }
+    },
+    {
+      "id": "S16",
+      "reason": "Raw database read failure propagates unchanged",
+      "input": {
+        "tenantId": "stored-scope-fixture",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coCode": "02",
+        "lcCode": "03",
+        "coYear": "2024-2025"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LC_CODE": "99",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "03",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "03"
+            },
+            {
+              "LC_CODE": "99"
+            }
+          ],
+          "errorMessage": "stored-scope-query-sentinel"
+        }
+      ],
+      "expected": {
+        "errorCode": "query-failure"
+      },
+      "sameErrorIdentity": true
+    }
+  ],
+  "invariants": [
+    "Caller-bound Tx only; no withTenant/set_config/$transaction here",
+    "No known mode, locks, writes, principal or session mutation",
+    "Existing public resolver wrappers unchanged",
+    "Absence is undefined; present empty/null year refuses; inputs are not normalized",
+    "Queries are already ordered observations, not an emulated SQL engine"
+  ]
+}

@@ -1,0 +1,1234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report Name="" FileName="D:\a\datacare-rpt-extract\datacare-rpt-extract\reports\GoldInterest.rpt" HasSavedData="False">
+  <Embedinfo />
+  <Summaryinfo KeywordsinReport="" ReportAuthor="" ReportComments="" ReportSubject="" ReportTitle="" />
+  <ReportOptions EnableSaveDataWithReport="False" EnableSavePreviewPicture="False" EnableSaveSummariesWithReport="True" EnableUseDummyData="False" initialDataContext="" initialReportPartName="" />
+  <PrintOptions PageContentHeight="16550" PageContentWidth="11680" PaperOrientation="Portrait" PaperSize="PaperA4" PaperSource="278" PrinterDuplex="Default" PrinterName="">
+    <PageMargins bottomMargin="0" leftMargin="227" rightMargin="0" topMargin="289" />
+    <PageMarginConditionFormulas />
+  </PrintOptions>
+  <SubReports />
+  <Database>
+    <TableLinks>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{AC_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{AC_DATA.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{AC_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{AC_MAST.AC_CODE}" Kind="DatabaseField" Name="AC_CODE" NumberOfBytes="18" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+      <TableLink JoinType="Equal">
+        <SourceFields>
+          <Field FormulaName="{AC_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{CO_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{AC_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{AC_DATA.LC_CODE}" Kind="DatabaseField" Name="LC_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{AC_DATA.CO_BOOK}" Kind="DatabaseField" Name="CO_BOOK" NumberOfBytes="8" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{BOOK_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{BOOK_DATA.LC_CODE}" Kind="DatabaseField" Name="LC_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{BOOK_DATA.CO_BOOK}" Kind="DatabaseField" Name="CO_BOOK" NumberOfBytes="8" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+    </TableLinks>
+    <Tables>
+      <Table Alias="AC_DATA" ClassName="CrystalReports.Table" Name="AC_DATA">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next24" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{AC_DATA.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_DATA.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_DATA.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.CO_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="20" LongName="AC_DATA.CO_YEAR" Name="CO_YEAR" ShortName="CO_YEAR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.CO_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_DATA.CO_BOOK" Name="CO_BOOK" ShortName="CO_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.VCH_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="AC_DATA.VCH_TYPE" Name="VCH_TYPE" ShortName="VCH_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_DATA.VCH_NO" Name="VCH_NO" ShortName="VCH_NO" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{AC_DATA.VCH_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.VCH_DATE" Name="VCH_DATE" ShortName="VCH_DATE" Type="crFieldValueTypeDateField" UseCount="7" />
+          <Field Description="" FormulaForm="{AC_DATA.LEDR_KEY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_DATA.LEDR_KEY" Name="LEDR_KEY" ShortName="LEDR_KEY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.BOOK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_DATA.BOOK_NAME" Name="BOOK_NAME" ShortName="BOOK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.BILL_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_DATA.BILL_NO" Name="BILL_NO" ShortName="BILL_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.BILL_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.BILL_DATE" Name="BILL_DATE" ShortName="BILL_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.CHQ_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_DATA.CHQ_NO" Name="CHQ_NO" ShortName="CHQ_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_DATA.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="3" />
+          <Field Description="" FormulaForm="{AC_DATA.LD_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_DATA.LD_CODE" Name="LD_CODE" ShortName="LD_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.CR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_DATA.CR_AMT" Name="CR_AMT" ShortName="CR_AMT" Type="crFieldValueTypeNumberField" UseCount="1" />
+          <Field Description="" FormulaForm="{AC_DATA.DR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_DATA.DR_AMT" Name="DR_AMT" ShortName="DR_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.IT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.IT_TYPE" Name="IT_TYPE" ShortName="IT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.SIGN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.SIGN" Name="SIGN" ShortName="SIGN" Type="crFieldValueTypeStringField" UseCount="3" />
+          <Field Description="" FormulaForm="{AC_DATA.FINE_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_DATA.FINE_WT" Name="FINE_WT" ShortName="FINE_WT" Type="crFieldValueTypeNumberField" UseCount="4" />
+          <Field Description="" FormulaForm="{AC_DATA.IT_DESC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="302" LongName="AC_DATA.IT_DESC" Name="IT_DESC" ShortName="IT_DESC" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.ENTRY_TIME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.ENTRY_TIME" Name="ENTRY_TIME" ShortName="ENTRY_TIME" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.HD_VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_DATA.HD_VCH_NO" Name="HD_VCH_NO" ShortName="HD_VCH_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.CLR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.CLR_DATE" Name="CLR_DATE" ShortName="CLR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.DATA_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.DATA_TYPE" Name="DATA_TYPE" ShortName="DATA_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_DATA.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_DATA.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.FINE_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_DATA.FINE_RATE" Name="FINE_RATE" ShortName="FINE_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.PARTY_AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_DATA.PARTY_AC_CODE" Name="PARTY_AC_CODE" ShortName="PARTY_AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_DATA.LDR_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="122" LongName="AC_DATA.LDR_NAME" Name="LDR_NAME" ShortName="LDR_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="AC_MAST" ClassName="CrystalReports.Table" Name="AC_MAST">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next24" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{AC_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_NAME" Name="AC_NAME" ShortName="AC_NAME" Type="crFieldValueTypeStringField" UseCount="2" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_SHORT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="AC_MAST.AC_SHORT" Name="AC_SHORT" ShortName="AC_SHORT" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_MAIN_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_MAIN_GR" Name="AC_MAIN_GR" ShortName="AC_MAIN_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_GR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="AC_MAST.AC_GR" Name="AC_GR" ShortName="AC_GR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PERSON}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.AC_PERSON" Name="AC_PERSON" ShortName="AC_PERSON" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_ADD1}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD1" Name="AC_ADD1" ShortName="AC_ADD1" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_ADD2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD2" Name="AC_ADD2" ShortName="AC_ADD2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_ADD3}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_ADD3" Name="AC_ADD3" ShortName="AC_ADD3" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_COUNTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_COUNTRY" Name="AC_COUNTRY" ShortName="AC_COUNTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_STATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_STATE" Name="AC_STATE" ShortName="AC_STATE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_DISTRICT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_DISTRICT" Name="AC_DISTRICT" ShortName="AC_DISTRICT" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_CITY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="AC_MAST.AC_CITY" Name="AC_CITY" ShortName="AC_CITY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="AC_MAST.AC_AREA" Name="AC_AREA" ShortName="AC_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_PIN" Name="AC_PIN" ShortName="AC_PIN" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PHONE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE" Name="AC_PHONE" ShortName="AC_PHONE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PHONE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_PHONE2" Name="AC_PHONE2" ShortName="AC_PHONE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE" Name="AC_MOBILE" ShortName="AC_MOBILE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_MOBILE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_MOBILE2" Name="AC_MOBILE2" ShortName="AC_MOBILE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_EMAIL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_EMAIL" Name="AC_EMAIL" ShortName="AC_EMAIL" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_GSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_GSTNO" Name="AC_GSTNO" ShortName="AC_GSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_GST_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_GST_TYPE" Name="AC_GST_TYPE" ShortName="AC_GST_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_PANNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.AC_PANNO" Name="AC_PANNO" ShortName="AC_PANNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_REF_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.AC_REF_CODE" Name="AC_REF_CODE" ShortName="AC_REF_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_KHATA_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="AC_MAST.AC_KHATA_NO" Name="AC_KHATA_NO" ShortName="AC_KHATA_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BR_DATE" Name="BR_DATE" ShortName="BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.L_BR_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.L_BR_DATE" Name="L_BR_DATE" ShortName="L_BR_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AN_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AN_DATE" Name="AN_DATE" ShortName="AN_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_CR_DAYS}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_CR_DAYS" Name="AC_CR_DAYS" ShortName="AC_CR_DAYS" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_INT_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AC_INT_PRC" Name="AC_INT_PRC" ShortName="AC_INT_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.DPC_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.DPC_PRC" Name="DPC_PRC" ShortName="DPC_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.BANK_NAME" Name="BANK_NAME" ShortName="BANK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="AC_MAST.BANK_AREA" Name="BANK_AREA" ShortName="BANK_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_AC_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_AC_NO" Name="BANK_AC_NO" ShortName="BANK_AC_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_RTGS_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="AC_MAST.BANK_RTGS_NO" Name="BANK_RTGS_NO" ShortName="BANK_RTGS_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.BANK_DETL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.BANK_DETL" Name="BANK_DETL" ShortName="BANK_DETL" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.AC_TYPE" Name="AC_TYPE" ShortName="AC_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.LAST_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_DATE" Name="LAST_DATE" ShortName="LAST_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.LAST_VISIT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.LAST_VISIT" Name="LAST_VISIT" ShortName="LAST_VISIT" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.VISIT_TRAN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.VISIT_TRAN" Name="VISIT_TRAN" ShortName="VISIT_TRAN" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.APP_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.APP_TRFR" Name="APP_TRFR" ShortName="APP_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_REF_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="AC_MAST.AC_REF_NAME" Name="AC_REF_NAME" ShortName="AC_REF_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AC_ADHAR_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.AC_ADHAR_NO" Name="AC_ADHAR_NO" ShortName="AC_ADHAR_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.DEFAULTER_AC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.DEFAULTER_AC" Name="DEFAULTER_AC" ShortName="DEFAULTER_AC" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.AMT_LIMIT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.AMT_LIMIT" Name="AMT_LIMIT" ShortName="AMT_LIMIT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.GOLD_LIMIT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.GOLD_LIMIT" Name="GOLD_LIMIT" ShortName="GOLD_LIMIT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.SILVER_LIMIT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="AC_MAST.SILVER_LIMIT" Name="SILVER_LIMIT" ShortName="SILVER_LIMIT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.WITH_TDS_TAX}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="AC_MAST.WITH_TDS_TAX" Name="WITH_TDS_TAX" ShortName="WITH_TDS_TAX" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.MAIN_AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="AC_MAST.MAIN_AC_CODE" Name="MAIN_AC_CODE" ShortName="MAIN_AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{AC_MAST.PASSPORT_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="AC_MAST.PASSPORT_NO" Name="PASSPORT_NO" ShortName="PASSPORT_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="BOOK_DATA" ClassName="CrystalReports.Table" Name="BOOK_DATA">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next24" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{BOOK_DATA.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="BOOK_DATA.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="BOOK_DATA.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.CO_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BOOK_DATA.CO_BOOK" Name="CO_BOOK" ShortName="CO_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="BOOK_DATA.BOOK_NAME" Name="BOOK_NAME" ShortName="BOOK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_SNAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="BOOK_DATA.BOOK_SNAME" Name="BOOK_SNAME" ShortName="BOOK_SNAME" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{BOOK_DATA.CUR_USE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.CUR_USE" Name="CUR_USE" ShortName="CUR_USE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_INOUT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.BOOK_INOUT" Name="BOOK_INOUT" ShortName="BOOK_INOUT" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.MAIN_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="BOOK_DATA.MAIN_BOOK" Name="MAIN_BOOK" ShortName="MAIN_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.ITM_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.ITM_TYPE" Name="ITM_TYPE" ShortName="ITM_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.BOOK_TYPE" Name="BOOK_TYPE" ShortName="BOOK_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_VCH_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="BOOK_DATA.BOOK_VCH_TYPE" Name="BOOK_VCH_TYPE" ShortName="BOOK_VCH_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="BOOK_DATA.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_SR_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="BOOK_DATA.BOOK_SR_NAME" Name="BOOK_SR_NAME" ShortName="BOOK_SR_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.RESET_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.RESET_BOOK" Name="RESET_BOOK" ShortName="RESET_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.DATA_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.DATA_TYPE" Name="DATA_TYPE" ShortName="DATA_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.TRFR_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.TRFR_BOOK" Name="TRFR_BOOK" ShortName="TRFR_BOOK" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.MENU_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="BOOK_DATA.MENU_NAME" Name="MENU_NAME" ShortName="MENU_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_TBL_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="BOOK_DATA.BOOK_TBL_NAME" Name="BOOK_TBL_NAME" ShortName="BOOK_TBL_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.USER_EMP_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BOOK_DATA.USER_EMP_CODE" Name="USER_EMP_CODE" ShortName="USER_EMP_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.WITH_MOBILE_ENTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BOOK_DATA.WITH_MOBILE_ENTRY" Name="WITH_MOBILE_ENTRY" ShortName="WITH_MOBILE_ENTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{BOOK_DATA.BOOK_TBL_DETL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="BOOK_DATA.BOOK_TBL_DETL" Name="BOOK_TBL_DETL" ShortName="BOOK_TBL_DETL" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="CO_MAST" ClassName="CrystalReports.Table" Name="CO_MAST">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next24" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{CO_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_NAME" Name="CO_NAME" ShortName="CO_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_SNAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="CO_MAST.CO_SNAME" Name="CO_SNAME" ShortName="CO_SNAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD1}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD1" Name="CO_ADD1" ShortName="CO_ADD1" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD2" Name="CO_ADD2" ShortName="CO_ADD2" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD3}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD3" Name="CO_ADD3" ShortName="CO_ADD3" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_COUNTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_COUNTRY" Name="CO_COUNTRY" ShortName="CO_COUNTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_STATE_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.CO_STATE_CODE" Name="CO_STATE_CODE" ShortName="CO_STATE_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_STATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_STATE" Name="CO_STATE" ShortName="CO_STATE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_CITY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_CITY" Name="CO_CITY" ShortName="CO_CITY" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="CO_MAST.CO_PIN" Name="CO_PIN" ShortName="CO_PIN" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PHONE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_PHONE" Name="CO_PHONE" ShortName="CO_PHONE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PHONE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_PHONE2" Name="CO_PHONE2" ShortName="CO_PHONE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MOBILE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_MOBILE" Name="CO_MOBILE" ShortName="CO_MOBILE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MOBILE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_MOBILE2" Name="CO_MOBILE2" ShortName="CO_MOBILE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MAIL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_MAIL" Name="CO_MAIL" ShortName="CO_MAIL" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_JUD}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_JUD" Name="CO_JUD" ShortName="CO_JUD" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_LSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_LSTNO" Name="CO_LSTNO" ShortName="CO_LSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_CSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_CSTNO" Name="CO_CSTNO" ShortName="CO_CSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_GST_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_GST_NO" Name="CO_GST_NO" ShortName="CO_GST_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PAN_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_PAN_NO" Name="CO_PAN_NO" ShortName="CO_PAN_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.DHIRAN_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.DHIRAN_NO" Name="DHIRAN_NO" ShortName="DHIRAN_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.BANK_NAME" Name="BANK_NAME" ShortName="BANK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="CO_MAST.BANK_AREA" Name="BANK_AREA" ShortName="BANK_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_AC_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.BANK_AC_NO" Name="BANK_AC_NO" ShortName="BANK_AC_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_RTGS_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.BANK_RTGS_NO" Name="BANK_RTGS_NO" ShortName="BANK_RTGS_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.CO_TYPE" Name="CO_TYPE" ShortName="CO_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.ALTER_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.ALTER_YEAR" Name="ALTER_YEAR" ShortName="ALTER_YEAR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MSG}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="202" LongName="CO_MAST.CO_MSG" Name="CO_MSG" ShortName="CO_MSG" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.REP_ADD_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.REP_ADD_TYPE" Name="REP_ADD_TYPE" ShortName="REP_ADD_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.WORK_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.WORK_TYPE" Name="WORK_TYPE" ShortName="WORK_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.METAL_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.METAL_TYPE" Name="METAL_TYPE" ShortName="METAL_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.URL_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="302" LongName="CO_MAST.URL_NAME" Name="URL_NAME" ShortName="URL_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.URL_ID}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.URL_ID" Name="URL_ID" ShortName="URL_ID" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.URL_PWD}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.URL_PWD" Name="URL_PWD" ShortName="URL_PWD" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.HTTP_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="302" LongName="CO_MAST.HTTP_NAME" Name="HTTP_NAME" ShortName="HTTP_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+    </Tables>
+  </Database>
+  <DataDefinition>
+    <GroupSelectionFormula />
+    <RecordSelectionFormula />
+    <Groups>
+      <Group ConditionField="{AC_DATA.AC_CODE}" />
+    </Groups>
+    <SortFields>
+      <SortField Field="{AC_DATA.AC_CODE}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+      <SortField Field="{AC_DATA.VCH_DATE}" SortDirection="AscendingOrder" SortType="RecordSortField" />
+      <SortField Field="{AC_DATA.CR_AMT}" SortDirection="AscendingOrder" SortType="RecordSortField" />
+    </SortFields>
+    <FormulaFieldDefinitions>
+      <FormulaFieldDefinition FormulaName="{@AcCrAmt}" Kind="FormulaField" Name="AcCrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar OpCrAmt;
+NumberVar OpDrAmt;
+if OpCrAmt - OpDrAmt &gt; 0 then
+  {@TranCrAmt} + OpCrAmt - OpDrAmt + {@CloseCrAmt}
+else
+  {@TranCrAmt} + {@CloseCrAmt};</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@AcDrAmt}" Kind="FormulaField" Name="AcDrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar OpCrAmt;
+NumberVar OpDrAmt;
+if OpCrAmt - OpDrAmt &lt;= 0 then
+ {@TranDrAmt} + OpDrAmt - OpCrAmt + {@CloseDrAmt}
+else
+  {@TranDrAmt} + {@CloseDrAmt};</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@AcPayInt}" Kind="FormulaField" Name="AcPayInt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">12
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@AcRecInt}" Kind="FormulaField" Name="AcRecInt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">12
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@BalAmt}" Kind="FormulaField" Name="BalAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar BalAmt;
+BalAmt :=  BalAmt + {@CrAmt} - {@DrAmt};
+BalAmt;
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Balance}" Kind="FormulaField" Name="Balance" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">EvaluateAfter ({@BalAmt});
+WhilePrintingRecords;
+NumberVar BalAmt;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@BalCrDr}" Kind="FormulaField" Name="BalCrDr" NumberOfBytes="6" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">EvaluateAfter ({@BalAmt});
+WhilePrintingRecords;
+NumberVar BalAmt;
+if BalAmt &gt; 0 then
+  'Cr'
+else if BalAmt &lt; 0 then
+  'Dr';</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@BillNo}" Kind="FormulaField" Name="BillNo" NumberOfBytes="22" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">if {AC_DATA.CO_BOOK} &gt;='0010' and {AC_DATA.CO_BOOK} &lt;'0200' then
+    {AC_DATA.CHQ_NO}
+else
+    {AC_DATA.BILL_NO}</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CloseCrAmt}" Kind="FormulaField" Name="CloseCrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar BalAmt ;
+NumberVar TranCrAmt;
+NumberVar TranDrAmt;
+if BalAmt  &lt;= 0 then
+   Abs(BalAmt) </FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CloseDrAmt}" Kind="FormulaField" Name="CloseDrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar BalAmt ;
+NumberVar TranCrAmt;
+NumberVar TranDrAmt;
+if BalAmt &gt; 0 then
+   abs(BalAmt); </FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Co_Add1}" Kind="FormulaField" Name="Co_Add1" NumberOfBytes="378" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3} + {CO_MAST.CO_CITY}+' '+{CO_MAST.CO_PIN}
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Co_Add2}" Kind="FormulaField" Name="Co_Add2" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">{UNIT_NAME.CO_CITY}+' '+{UNIT_NAME.CO_PIN}+' '+'Phone :  ' +{UNIT_NAME.CO_PHONE}+' '+' Fax  :'+{UNIT_NAME.CO_FAX}
+
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@co_name}" Kind="FormulaField" Name="co_name" NumberOfBytes="102" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{CO_MAST.CO_NAME}
+
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CrAmt}" Kind="FormulaField" Name="CrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">if {@FromDate} &lt;= {AC_DATA.VCH_DATE} then
+    if {AC_DATA.SIGN} = '+' then
+        {AC_DATA.FINE_WT}
+    ELSE
+        0
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@CurPag}" Kind="FormulaField" Name="CurPag" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">PageNumber
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@days}" Kind="FormulaField" Name="days" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">NumberVar Days;
+Days=0;
+Days :=({@ToDate}-{AC_DATA.VCH_DATE})+1;
+Days;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@dbcd}" Kind="FormulaField" Name="dbcd" NumberOfBytes="8" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">//if isnull({DYBK_MAST.BOOK_SNAME}) or trim({DYBK_MAST.BOOK_SNAME}) = "" then
+    {AC_DATA.CO_BOOK}
+//else
+//    {DYBK_MAST.BOOK_SNAME}
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Description}" Kind="FormulaField" Name="Description" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">trim({AC_DATA.DESCR})
+//trim({TRAN_DEDC.VCH_DESC})
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Divider}" Kind="FormulaField" Name="Divider" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">365
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@DrAmt}" Kind="FormulaField" Name="DrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">if {@FromDate} &lt;= {AC_DATA.VCH_DATE} then
+    if {AC_DATA.SIGN} = '-' then
+        {AC_DATA.FINE_WT}
+    ELSE
+        0
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@DueDate}" Kind="FormulaField" Name="DueDate" NumberOfBytes="4" ValueType="DateField" Syntax="crFormulaSyntaxCrystal">{AC_DATA.VCH_DATE} 
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@FromDate}" Kind="FormulaField" Name="FromDate" NumberOfBytes="4" ValueType="DateField" Syntax="crFormulaSyntaxCrystal">date(2012,04,01)
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@GroupDate}" Kind="FormulaField" Name="GroupDate" NumberOfBytes="4" ValueType="DateField" Syntax="crFormulaSyntaxCrystal"> {AC_DATA.VCH_DATE}
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@HaderPrint}" Kind="FormulaField" Name="HaderPrint" NumberOfBytes="2" ValueType="BooleanField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+BooleanVar HeaderPrint:= True;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@InitBalAmt}" Kind="FormulaField" Name="InitBalAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+if OnFirstRecord or {AC_DATA.AC_CODE} &lt;&gt; Previous({AC_DATA.AC_CODE})  then
+(
+NumberVar BalAmt := 0 ;
+booleanVar OpBalPrint := False;
+NumberVar TranCrAmt:=0;
+NumberVar TranDrAmt:=0;
+NumberVar OpCrAmt :=0 ;
+NumberVar OpDrAmt := 0;
+NumberVar IntTotSum := 0;
+NumberVar SrNo := SrNo + 1;
+)</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@interest}" Kind="FormulaField" Name="interest" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">if{AC_DATA.SIGN} = '+' and {AC_DATA.FINE_WT} &lt;&gt; 0 then
+    if {@days} = 367 then
+        round((({AC_DATA.FINE_WT} * {@AcPayInt} /100)/{@divider})*({@days}-1),3)
+    else
+        round((({AC_DATA.FINE_WT} * {@AcPayInt} /100)/{@divider})*{@days},3)
+else if {AC_DATA.SIGN} = '-' and {AC_DATA.FINE_WT} &lt;&gt; 0 then
+    if {@days} = 367 then
+        -(ROUND((({AC_DATA.FINE_WT} * {@AcRecInt} /100)/{@divider})*({@days}-1),3))
+    else
+       -(ROUND((({AC_DATA.FINE_WT} * {@AcRecInt} /100)/{@divider})*{@days},3))
+
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@IntLabel}" Kind="FormulaField" Name="IntLabel" NumberOfBytes="30" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">if Sum ({@interest}, {AC_DATA.AC_CODE}) &gt; 0 then
+    "Net Payable"
+else if Sum ({@interest}, {AC_DATA.AC_CODE}) &lt; 0 then
+    "Net Receivable"
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@intSumm}" Kind="FormulaField" Name="intSumm" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar IntTotSum;
+IntTotSum :=  IntTotSum +{@interest};
+IntTotSum;
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@LblGrandTotal}" Kind="FormulaField" Name="LblGrandTotal" NumberOfBytes="42" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">if Sum ({@interest}) &gt; 0 then
+    "Net Payable Tota;"
+else if Sum ({@interest}) &lt; 0 then
+    "Net Receivable Total"
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@MnthCrAmt}" Kind="FormulaField" Name="MnthCrAmt" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">if Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, "monthly") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, "monthly") &lt; 0 then
+  abs(Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, "monthly") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, "monthly"))
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@MnthDrAmt}" Kind="FormulaField" Name="MnthDrAmt" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">if Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, "monthly") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, "monthly") &gt; 0 then
+  Sum ({@DrAmt}, {AC_DATA.VCH_DATE}, "monthly") - Sum ({@CrAmt}, {AC_DATA.VCH_DATE}, "monthly")
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@NetClosing}" Kind="FormulaField" Name="NetClosing" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">Sum ({@CrAmt}, {AC_DATA.AC_CODE})+Sum ({@interest}, {AC_DATA.AC_CODE}) -Sum ({@DrAmt}, {AC_DATA.AC_CODE})
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@NetClosingCrDr}" Kind="FormulaField" Name="NetClosingCrDr" NumberOfBytes="6" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">if {@NetClosing}&gt; 0 then
+    'Cr'
+else if {@NetClosing}&lt; 0 then
+    'Dr'
+
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@NextDate}" Kind="FormulaField" Name="NextDate" NumberOfBytes="4" ValueType="DateField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+dateVar NextDate;
+if {@GroupDate} &gt;= {@FromDate} then
+    if OnLastRecord or {AC_DATA.AC_CODE} &lt;&gt; Next({AC_DATA.AC_CODE}) then
+        NextDate := {@ToDate}
+    else
+        NextDate := Next({@GroupDate});
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OnlyOpIntr}" Kind="FormulaField" Name="OnlyOpIntr" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar TranDrAmt;
+NumberVar TranCrAmt;
+NumberVar OpDrAmt;
+NumberVar OpCrAmt;
+NumberVar TotIntAmt;
+if not (TranDrAmt &lt;&gt; 0 Or TranCrAmt &lt;&gt; 0 or (OpCrAmt - OpDrAmt) = 0) then
+    TotIntAmt := TotIntAmt + {@OpInterest};
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpBal}" Kind="FormulaField" Name="OpBal" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar BalAmt;
+   abs(BalAmt);
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpBalCrDr}" Kind="FormulaField" Name="OpBalCrDr" NumberOfBytes="6" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar BalAmt;
+if BalAmt &gt; 0 then
+  'Cr'
+else if BalAmt &lt; 0 then
+  'Dr';</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpBalPrint}" Kind="FormulaField" Name="OpBalPrint" NumberOfBytes="2" ValueType="BooleanField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+booleanVar OpBalPrint;
+if {AC_DATA.VCH_DATE} &gt;= {@FromDate} then
+OpBalPrint := True;</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpCredit}" Kind="FormulaField" Name="OpCredit" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar BalAmt;
+if BalAmt &gt; 0 then
+   BalAmt
+else
+  0;</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpDays}" Kind="FormulaField" Name="OpDays" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">NumberVar Days;
+    Days := {@ToDate} -{AC_DATA.VCH_DATE};
+ Days;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpDebit}" Kind="FormulaField" Name="OpDebit" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar BalAmt;
+if BalAmt &lt; 0 then
+   BalAmt
+else
+  0;</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpInterest}" Kind="FormulaField" Name="OpInterest" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">whileprintingrecords;
+if {@Opproduct} &lt; 0 then
+    {@Opproduct} * {@pay_int}/({@divider}*100)
+else
+    {@Opproduct} * {@rec_int}/({@divider}*100)
+    
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OpProduct}" Kind="FormulaField" Name="OpProduct" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">whileprintingrecords;
+NumberVar BalAmt;
+NumberVar Days;
+BalAmt * Days * -1;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Pay_Int}" Kind="FormulaField" Name="Pay_Int" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">{@AcPayInt}</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@product}" Kind="FormulaField" Name="product" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">EvaluateAfter ({@Balance});
+whileprintingrecords;
+NumberVar Product;
+NumberVar BalAmt;
+NumberVar Days;
+Product := BalAmt * {@Days} * -1;
+Product;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Rec_Int}" Kind="FormulaField" Name="Rec_Int" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">{@AcRecInt}
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@ReportOnDueDate}" Kind="FormulaField" Name="ReportOnDueDate" NumberOfBytes="2" ValueType="BooleanField" Syntax="crFormulaSyntaxCrystal">True
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@reset}" Kind="FormulaField" Name="reset" NumberOfBytes="2" ValueType="BooleanField" Syntax="crFormulaSyntaxCrystal">//WhilePrintingRecords;
+//NumberVar opg ;
+//NumberVar cpg  := Pagenumber;
+//booleanvar zprn;
+//zprn=false;
+
+//if pagenumber=1 then
+   //( zprn  := true;
+//    opg := Pagenumber)
+//else
+//    if opg &lt;&gt; cpg then
+//       ( zprn := false;
+//         opg := Pagenumber)
+//    else
+//       (zprn  := true;
+//        opg := Pagenumber);
+//
+//
+//zprn;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@ResetHeaderPrint}" Kind="FormulaField" Name="ResetHeaderPrint" NumberOfBytes="2" ValueType="BooleanField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+BooleanVar HeaderPrint := False;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@ResetRunInterest}" Kind="FormulaField" Name="ResetRunInterest" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">whileprintingrecords;
+if not InRepeatedGroupHeader then
+    NumberVar TotIntAmt := 0;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@RptTitel}" Kind="FormulaField" Name="RptTitel" NumberOfBytes="28" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">"LEDGER REPORT"</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@RunOpInterest}" Kind="FormulaField" Name="RunOpInterest" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">whileprintingrecords;
+BooleanVar OpBalPrint;
+EvaluateAfter ({@OpInterest});
+//if {AC_DATA.VCH_DATE} &lt;= {@FromDate} then
+if Not ({@GroupDate} &lt; {@FromDate} or OpBalPrint = True) then
+    NumberVar TotIntAmt := {@OpInterest};
+
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@RunTotInterest}" Kind="FormulaField" Name="RunTotInterest" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar TotIntAmt;
+if {@GroupDate} &gt;= {@FromDate} then
+    if OnLastRecord or {@GroupDate} &lt;&gt; Next({@GroupDate}) then
+        TotIntAmt := TotIntAmt + {@Interest};
+TotIntAmt;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@SrNo}" Kind="FormulaField" Name="SrNo" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar SrNo;
+//if not InRepeatedGroupHeader then
+//SrNo := SrNo + 1;
+SrNo;</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@ToDate}" Kind="FormulaField" Name="ToDate" NumberOfBytes="4" ValueType="DateField" Syntax="crFormulaSyntaxCrystal">date(2031,03,31)
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@TotInterest}" Kind="FormulaField" Name="TotInterest" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@TranCrAmt}" Kind="FormulaField" Name="TranCrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar TranCrAmt;
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@TranDrAmt}" Kind="FormulaField" Name="TranDrAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar TranDrAmt;</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@TranTotal}" Kind="FormulaField" Name="TranTotal" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">WhilePrintingRecords;
+NumberVar TranCrAmt;
+NumberVar TranDrAmt;
+NumberVar OpCrAmt;
+NumberVar OpDrAmt;
+if {AC_DATA.VCH_DATE} &gt;= {@FromDate} then
+(
+  TranCrAmt := TranCrAmt + {@CrAmt};
+  TranDrAmt := TranDrAmt + {@DrAmt};
+)
+else
+(
+  OpCrAmt := OpCrAmt + {@CrAmt};
+  OpDrAmt := OpDrAmt + {@DrAmt};
+)</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@VchDate}" Kind="FormulaField" Name="VchDate" NumberOfBytes="4" ValueType="DateField" Syntax="crFormulaSyntaxCrystal">{AC_DATA.VCH_DATE}
+</FormulaFieldDefinition>
+    </FormulaFieldDefinitions>
+    <GroupNameFieldDefinitions>
+      <GroupNameFieldDefinition FormulaName="GroupName ({AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #1 Name: AC_DATA.AC_CODE" Kind="GroupNameField" Name="GroupName ({AC_DATA.AC_CODE})" NumberOfBytes="65534" ValueType="StringField" />
+    </GroupNameFieldDefinitions>
+    <ParameterFieldDefinitions />
+    <RunningTotalFieldDefinitions />
+    <SQLExpressionFields />
+    <SummaryFields>
+      <SummaryFieldDefinition FormulaName="Sum ({@DrAmt}, {AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@DrAmt}, {AC_DATA.AC_CODE})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+      <SummaryFieldDefinition FormulaName="Sum ({@CrAmt}, {AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@CrAmt}, {AC_DATA.AC_CODE})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+      <SummaryFieldDefinition FormulaName="Sum ({@interest}, {AC_DATA.AC_CODE})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@interest}, {AC_DATA.AC_CODE})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+      <SummaryFieldDefinition FormulaName="Sum ({@interest})" Kind="SummaryField" Name="Sum ({@interest})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+    </SummaryFields>
+  </DataDefinition>
+  <CustomFunctions />
+  <ReportDefinition>
+    <Areas>
+      <Area Kind="ReportHeader" Name="Area1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="True" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="390" Kind="ReportHeader" Name="Section1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageHeader" Name="Area2">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="1119" Kind="PageHeader" Name="Section2">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field1" Kind="FieldObject" Top="836" Left="135" Width="11250" Height="200" DataSource="{@RptTitel}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field3" Kind="FieldObject" Top="165" Left="135" Width="11250" Height="375" DataSource="{@co_name}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="22" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="14" SizeinPoints="14" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <TextObject Name="Text2" Kind="TextObject" Top="36" Left="60" Width="957" Height="114" MaxNumberOfLines="0">
+                <Text>        </Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Microsoft Sans Serif" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Microsoft Sans Serif" OriginalFontName="Draft 12cpi" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="True" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <FieldObject Name="Field4" Kind="FieldObject" Top="570" Left="135" Width="11250" Height="200" DataSource="{@Co_Add1}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field2" Kind="FieldObject" Top="810" Left="10875" Width="510" Height="228" DataSource="{@CurPag}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+          <Section Height="285" Kind="PageHeader" Name="Section4">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas EnableSuppress="PageNumber = 1&#xD;&#xA;" />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field8" Kind="FieldObject" Top="45" Left="2265" Width="7020" Height="220" DataSource="{AC_MAST.AC_NAME}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field17" Kind="FieldObject" Top="45" Left="1140" Width="1125" Height="200" DataSource="GroupName ({AC_DATA.AC_CODE})">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field18" Kind="FieldObject" Top="45" Left="360" Width="393" Height="240" DataSource="{@SrNo}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+          <Section Height="455" Kind="PageHeader" Name="Section3">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas EnableSuppress="//IF OnFirstRecord OR {AC_DATA.AC_CODE} &lt;&gt; Previous({AC_DATA.AC_CODE}) THEN TRUE&#xD;&#xA;" />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="Text3" Kind="TextObject" Top="75" Left="7335" Width="1395" Height="240" MaxNumberOfLines="0">
+                <Text>Balance Fine</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <TextObject Name="Text4" Kind="TextObject" Top="75" Left="360" Width="660" Height="246" MaxNumberOfLines="0">
+                <Text>Book</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <TextObject Name="Text5" Kind="TextObject" Top="75" Left="1140" Width="1125" Height="240" MaxNumberOfLines="0">
+                <Text>Vch No</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <LineObject Name="Line1" Kind="LineObject" Top="0" Left="360" Width="11025" Height="0" Bottom="0" EnableExtendToBottomOfSection="False" EndSectionName="Section3" LineStyle="SingleLine" LineThickness="10" Right="11385">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+              <LineObject Name="Line2" Kind="LineObject" Top="360" Left="360" Width="11040" Height="0" Bottom="360" EnableExtendToBottomOfSection="False" EndSectionName="Section3" LineStyle="SingleLine" LineThickness="10" Right="11400">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+              <TextObject Name="Text6" Kind="TextObject" Top="75" Left="3300" Width="1080" Height="255" MaxNumberOfLines="0">
+                <Text>Due Date</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <TextObject Name="Text8" Kind="TextObject" Top="75" Left="2265" Width="1230" Height="255" MaxNumberOfLines="0">
+                <Text>VchDate</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <TextObject Name="Text9" Kind="TextObject" Top="75" Left="5880" Width="1365" Height="255" MaxNumberOfLines="0">
+                <Text>Credit Fine</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <TextObject Name="Text10" Kind="TextObject" Top="75" Left="4401" Width="1374" Height="255" MaxNumberOfLines="0">
+                <Text>Debit Fine</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <TextObject Name="Text11" Kind="TextObject" Top="75" Left="9088" Width="632" Height="240" MaxNumberOfLines="0">
+                <Text>Days</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <TextObject Name="Text13" Kind="TextObject" Top="75" Left="9540" Width="1455" Height="240" MaxNumberOfLines="0">
+                <Text>Interest</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupHeader" Name="Area3">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False">
+          <GroupAreaFormat EnableKeepGroupTogether="False" EnableRepeatGroupHeader="False" VisibleGroupNumberPerPage="0" />
+        </AreaFormat>
+        <Sections>
+          <Section Height="293" Kind="GroupHeader" Name="Section5">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas EnableSuppress="WhilePrintingRecords;&#xD;&#xA;BooleanVar HeaderPrint;&#xD;&#xA;if HeaderPrint = True then True;&#xD;&#xA;" />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field9" Kind="FieldObject" Top="0" Left="1140" Width="1125" Height="200" DataSource="GroupName ({AC_DATA.AC_CODE})">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field10" Kind="FieldObject" Top="0" Left="2280" Width="7020" Height="220" DataSource="{AC_MAST.AC_NAME}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field11" Kind="FieldObject" Top="0" Left="7335" Width="1395" Height="210" DataSource="{@InitBalAmt}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Microsoft Sans Serif" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Microsoft Sans Serif" OriginalFontName="Draft 12cpi" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="True" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field12" Kind="FieldObject" Top="0" Left="360" Width="393" Height="240" DataSource="{@SrNo}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="Detail" Name="Area5">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="296" Kind="Detail" Name="Section9">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="True" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas EnableSuppress="{AC_DATA.VCH_DATE} &lt; {@FromDate} OR {AC_DATA.FINE_WT} = 0&#xD;&#xA;" />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field23" Kind="FieldObject" Top="0" Left="5880" Width="1365" Height="211" DataSource="{@CrAmt}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field24" Kind="FieldObject" Top="0" Left="4401" Width="1374" Height="211" DataSource="{@DrAmt}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field27" Kind="FieldObject" Top="0" Left="8790" Width="330" Height="245" DataSource="{@BalCrDr}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field28" Kind="FieldObject" Top="0" Left="1380" Width="750" Height="245" DataSource="{AC_DATA.VCH_NO}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field29" Kind="FieldObject" Top="0" Left="2265" Width="751" Height="211" DataSource="{AC_DATA.VCH_DATE}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field30" Kind="FieldObject" Top="0" Left="360" Width="1020" Height="240" DataSource="{BOOK_DATA.BOOK_SNAME}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field32" Kind="FieldObject" Top="0" Left="9780" Width="1215" Height="211" DataSource="{@interest}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field36" Kind="FieldObject" Top="0" Left="3300" Width="751" Height="211" DataSource="{@DueDate}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field37" Kind="FieldObject" Top="0" Left="7335" Width="1395" Height="211" DataSource="{@Balance}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field5" Kind="FieldObject" Top="0" Left="11220" Width="211" Height="226" DataSource="{@BalAmt}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Times New Roman" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Times New Roman" OriginalFontName="Times New Roman" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="True" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field13" Kind="FieldObject" Top="62" Left="11385" Width="226" Height="226" DataSource="{@intSumm}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Times New Roman" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Times New Roman" OriginalFontName="Times New Roman" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="True" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field31" Kind="FieldObject" Top="0" Left="9088" Width="632" Height="211" DataSource="{@days}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas EnableSuppress="{@days}=367&#xD;&#xA;" />
+              </FieldObject>
+              <TextObject Name="Text1" Kind="TextObject" Top="0" Left="9346" Width="374" Height="240" MaxNumberOfLines="0">
+                <Text>366</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas EnableSuppress="{@days}&lt;&gt;367&#xD;&#xA;" />
+              </TextObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupFooter" Name="Area7">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="980" Kind="GroupFooter" Name="Section12">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="Text27" Kind="TextObject" Top="105" Left="1845" Width="2550" Height="200" MaxNumberOfLines="0">
+                <Text>Accoutns Total :</Text>
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <LineObject Name="Line7" Kind="LineObject" Top="0" Left="3945" Width="7275" Height="0" Bottom="0" EnableExtendToBottomOfSection="False" EndSectionName="Section12" LineStyle="SingleLine" LineThickness="10" Right="11220">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+              <FieldObject Name="Field54" Kind="FieldObject" Top="105" Left="8160" Width="1560" Height="248" DataSource="{@IntLabel}">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <TextObject Name="Text30" Kind="TextObject" Top="435" Left="6705" Width="3015" Height="270" MaxNumberOfLines="0">
+                <Text>Party Net Closing Balance</Text>
+                <Color Name="Red" A="255" R="255" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+              <FieldObject Name="Field55" Kind="FieldObject" Top="435" Left="9780" Width="1215" Height="216" DataSource="{@NetClosing}">
+                <Color Name="Red" A="255" R="255" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field56" Kind="FieldObject" Top="435" Left="10995" Width="272" Height="234" DataSource="{@NetClosingCrDr}">
+                <Color Name="Red" A="255" R="255" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field6" Kind="FieldObject" Top="105" Left="5849" Width="1396" Height="216" DataSource="Sum ({@CrAmt}, {AC_DATA.AC_CODE})">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field7" Kind="FieldObject" Top="105" Left="4370" Width="1405" Height="216" DataSource="Sum ({@DrAmt}, {AC_DATA.AC_CODE})">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field14" Kind="FieldObject" Top="105" Left="9752" Width="1243" Height="216" DataSource="Sum ({@interest}, {AC_DATA.AC_CODE})">
+                <Color Name="Navy" A="255" R="0" G="0" B="128" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="ReportFooter" Name="Area8">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="600" Kind="ReportFooter" Name="Section13">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field15" Kind="FieldObject" Top="90" Left="9495" Width="1500" Height="238" DataSource="Sum ({@interest})">
+                <Color Name="Maroon" A="255" R="128" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field16" Kind="FieldObject" Top="90" Left="7440" Width="2016" Height="226" DataSource="{@LblGrandTotal}">
+                <Color Name="Maroon" A="255" R="128" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="RightAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <LineObject Name="Line3" Kind="LineObject" Top="45" Left="345" Width="10875" Height="0" Bottom="45" EnableExtendToBottomOfSection="False" EndSectionName="Section13" LineStyle="SingleLine" LineThickness="20" Right="11220">
+                <LineColor Name="Black" A="255" R="0" G="0" B="0" />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="SingleLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </LineObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageFooter" Name="Area9">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="True" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="204" Kind="PageFooter" Name="Section14">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+    </Areas>
+  </ReportDefinition>
+</Report>

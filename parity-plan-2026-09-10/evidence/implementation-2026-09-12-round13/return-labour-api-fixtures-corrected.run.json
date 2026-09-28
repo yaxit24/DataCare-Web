@@ -1,0 +1,32 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/saleReturnLabourReplay.test.ts",
+    "test/saleReturnLabourReplay.db.test.ts",
+    "test/saleReturnLabourReplay.routes.db.test.ts",
+    "test/saleReturnBillReplay.db.test.ts",
+    "test/saleReturnBillReplay.routes.db.test.ts",
+    "test/routePolicy.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:29:09.897193+00:00",
+  "finishedAtUtc": "2026-09-11T23:29:23.316671+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-api-fixtures-corrected.txt",
+  "logSha256": "6babba3f64a6885262785efe6c006772b5cfe1fe5868a56c9c37e9d373ebb00c",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-api-fixtures-corrected.inputs.json",
+  "inputManifestSha256": "8558ce47540ed78690cdabacdfddc95d78e9421f0322a21bdb88aeb499b3d25f",
+  "inputCount": 1829,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

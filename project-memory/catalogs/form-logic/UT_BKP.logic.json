@@ -1,0 +1,21 @@
+{
+ "form": "UT_BKP",
+ "tables": [
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 6,
+ "timers": 2,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 1299
+}

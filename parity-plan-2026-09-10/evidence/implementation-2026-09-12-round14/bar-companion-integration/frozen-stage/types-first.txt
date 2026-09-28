@@ -1,0 +1,3 @@
+src/saleReturnNBarCompanions.ts(622,40): error TS18047: 'ctx' is possibly 'null'.
+src/saleReturnNBarCompanions.ts(622,44): error TS2339: Property 'values' does not exist on type 'SaleReturnNBarContext'.
+  Property 'values' does not exist on type '{ readonly status: "unavailable"; readonly reason: string; }'.

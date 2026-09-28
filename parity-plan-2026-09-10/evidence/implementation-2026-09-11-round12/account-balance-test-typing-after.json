@@ -1,0 +1,11 @@
+{
+  "capturedAtUtc": "2026-09-11T17:17:20.783Z",
+  "typescript": "5.9.3",
+  "source": "web/apps/api/test/desktopAccountBalance.db.test.ts",
+  "beforeSourceSha256": "da57beda30df821c8178f423a2b2f6142381348e1033ca386a56617322ca017c",
+  "afterSourceSha256": "3cad287d96b7039a24162d9c7ac7a21ab78836aee0b52f16fbebb0b35377fa74",
+  "erasedJavaScriptSha256": "fc7f7f10253a0b610337d0aaa5f02f7a6cc35df4797717bd1eb68a2202961450",
+  "erasedJavaScriptByteIdentical": true,
+  "fixtureSha256": "32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7",
+  "claim": "Type annotation only; no runtime/fixture/assertion change. Strict focused check recorded separately."
+}

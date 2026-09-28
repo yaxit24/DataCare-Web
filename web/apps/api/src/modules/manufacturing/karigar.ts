@@ -1,5 +1,12 @@
-import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
+import { readStoneSubDetail, type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
+import {
+  buildKarigarRojmel,
+  rojmelMetalFor,
+  type KarigarRojmelLine,
+  type RojmelRow,
+} from '../shared/rojmel.js';
 import { withTenant } from '@datacare/db';
+import { resolveLiveTagIdentityTx } from '../stock/stock.js';
 import {
   formatVoucherNo,
   nextVoucherNoTx,
@@ -21,6 +28,9 @@ import {
   voucherTimestamp,
 } from '../vouchers/lifecycle.js';
 import { fineFor } from '../shared/finePolicy.js';
+// Shared with the job-work path so the labour bases have exactly one definition. There is no
+// import cycle: mfg.ts does not import karigar.ts.
+import { labourAmount } from './mfg.js';
 
 /**
  * Karigar (goldsmith) metal flow. The shop issues raw fine metal OUT to the karigar, who returns
@@ -75,6 +85,14 @@ export interface KarigarLine {
   tblCode?: string; // counter
   itmSize?: string;
   tagNo?: string; // supplied tag; or auto-generated when `tag` is set (receive-side tagging, F3)
+  /**
+   * Pins an exact tag instance when the tag text alone is ambiguous.
+   *
+   * Desktop grid column 40 (`TR_KR_ISU.cs:3368, :3464, :6899` fill it from the tag lookup, `:4766` restores it
+   * on reopen, `:5150` persists it to the detail row). Its availability query adds `AND A.VCH_SRNO = <col 40>`
+   * only when that cell is non-zero (`:3318`), so an absent value means "whichever instance is available".
+   */
+  vchSrno?: number;
   tag?: boolean; // receive: put this finished ornament into barcoded stock (BAR_DETL)
   pcs?: number;
   grossWt?: number;
@@ -102,6 +120,15 @@ export interface KarigarLine {
   amount?: number; // mSG_PR[i,31] :13138
   otherRate?: number; // mSG_PR[i,37] :13129
   otherFine?: number; // mSG_PR[i,38] :13130
+  /** Old-item/old-gold Kun fields (TR_PURC.cs:7310-7317, :13114-13116). */
+  kundanWt?: number; // KUNDAN_WT
+  kundanTouch?: number; // KUNDAN_TOUCH
+  kunFine?: number; // KUNDAN_FINE
+  silverFine?: number; // SILVER_FINE
+  ghtPct?: number; // ITM_GHT_PRC
+  urdRateType?: string; // URD_RATE_TYPE
+  commissionPct?: number; // COMM_PRC
+  commissionAmount?: number; // COMM_AMT
   mrp?: number; // mSG_PR[i,39] :13139
   totalAmount?: number; // mSG_PR[i,40] :13142
   taxRatePct?: number; // mSG_PR[i,43] :13143
@@ -187,6 +214,8 @@ export interface IssueInput {
   accountGstType?: string; // AcGstType           :13022
   saleBillNo?: string; // tSlBill.Text        :13047
   saleBillBook?: string; // tSlBill_DbCd.Text   :13050
+  /** OLD ITEM SALES only: desktop writes operator-visible `nPartyFine` to KR_DATA.PARTY_FINE. */
+  partyFine?: number;
 }
 
 export interface ReceiveInput extends IssueInput {
@@ -200,7 +229,17 @@ export interface ReceiveInput extends IssueInput {
 
 type CompleteKarigarScope = VoucherScope & { coYear: string; coBook: string };
 
-type KarigarBookPolicy = { bookName: string; vchType: string };
+type KarigarBookPolicy = { bookName: string; vchType: string; mainBook: string; inout: string };
+
+const normalizeMainBook = (value: unknown): string =>
+  String(value ?? '')
+    .trim()
+    .toUpperCase();
+
+const OLD_ITEM_SALES_MAIN_BOOK = 'OLD ITEM SALES';
+const KARIGAR_MAIN_BOOKS = new Set(['KARIGAR', 'KARIGAR ISSUE', 'KARIGAR RECEIPT', 'JOBWORK ISSUE', 'JOBWORK RECEIPT']);
+
+type KarigarBookGuard = 'karigar' | 'old-item-sale';
 
 function completeScope(scope: VoucherScope): CompleteKarigarScope {
   if (!scope.coYear || !scope.coBook)
@@ -212,8 +251,8 @@ async function karigarBookPolicyTx(
   tx: any,
   scope: CompleteKarigarScope,
 ): Promise<KarigarBookPolicy> {
-  const rows: Array<{ BOOK_NAME: unknown; BOOK_SNAME: unknown }> = await tx.$queryRawUnsafe(
-    `SELECT "BOOK_NAME","BOOK_SNAME" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2
+  const rows: Array<{ BOOK_NAME: unknown; BOOK_SNAME: unknown; MAIN_BOOK: unknown; BOOK_INOUT: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2
       AND "LC_CODE"=$3 AND "CO_BOOK"=$4 ORDER BY row_id LIMIT 2`,
     scope.tenantId,
     scope.coCode,
@@ -224,9 +263,26 @@ async function karigarBookPolicyTx(
     throw new KarigarValidationError(`book ${scope.coBook} is not configured unambiguously`);
   const bookName = String(rows[0]?.BOOK_NAME ?? '').trim();
   const vchType = String(rows[0]?.BOOK_SNAME ?? '').trim();
-  if (!bookName || !vchType)
+  const mainBook = normalizeMainBook(rows[0]?.MAIN_BOOK);
+  const inout = String(rows[0]?.BOOK_INOUT ?? '').trim() || INOUT_RECEIPT;
+  if (!bookName || !vchType || !mainBook)
     throw new KarigarValidationError(`book ${scope.coBook} has incomplete desktop identity`);
-  return { bookName, vchType };
+  return { bookName, vchType, mainBook, inout };
+}
+
+function assertKarigarBookGuard(scope: CompleteKarigarScope, policy: KarigarBookPolicy, guard: KarigarBookGuard) {
+  if (guard === 'old-item-sale') {
+    if (policy.mainBook !== OLD_ITEM_SALES_MAIN_BOOK) {
+      throw new KarigarValidationError(`book ${scope.coBook} is ${policy.mainBook || 'not configured'}; expected OLD ITEM SALES`);
+    }
+    return;
+  }
+  if (policy.mainBook === OLD_ITEM_SALES_MAIN_BOOK) {
+    throw new KarigarValidationError('use the old item sales workflow for OLD ITEM SALES books');
+  }
+  if (!KARIGAR_MAIN_BOOKS.has(policy.mainBook)) {
+    throw new KarigarValidationError(`book ${scope.coBook} is ${policy.mainBook}; expected a karigar book`);
+  }
 }
 
 async function tempBookRowTx(
@@ -249,6 +305,81 @@ const num = (v: unknown): number => (v == null ? 0 : Number(v));
 
 const issueFine = (line: KarigarLine): number => fineFor('karigarIssue', line);
 const receiptFine = (line: KarigarLine): number => fineFor('karigarReceipt', line);
+const oldItemSaleFine = (line: KarigarLine): number =>
+  fineFor('purchaseOldGold', {
+    netWt: line.netWt,
+    ghtWt: line.ghtWt,
+    touch: line.touch,
+    westPct: line.westPct,
+    lesTouch: line.lessTouch,
+    kunFine: line.kunFine,
+  });
+
+/**
+ * Per-line karigar labour: the operator's amount when given, otherwise DERIVED from the line's
+ * labour type and rate.
+ *
+ * The desktop derives it (TR_KR_ISU.cs:4025-4129) across the same bases `labourAmount` implements:
+ * 'P' per piece, 'N' per (net + ghat), 'K' per kilo of (net + ghat), default per gross. This module
+ * previously wrote `num(l.lbrAmt)` straight through, so `LBR_TYPE` and `LBR_RATE` were persisted
+ * but never used — a karigar line could carry "per gram at 50" and still be charged nothing.
+ *
+ * `mfg.ts` already had this derivation for the job-work path (`lineLbrAmt`), which is why job-work
+ * and karigar disagreed on identical input. Reusing that helper keeps one definition of the bases
+ * rather than a second copy that can drift.
+ */
+const lineLabour = (line: KarigarLine): number =>
+  line.lbrAmt != null
+    ? round2(num(line.lbrAmt))
+    : labourAmount(line.lbrType, {
+        pcs: line.pcs,
+        net: line.netWt,
+        ghtWt: line.ghtWt,
+        gross: line.grossWt,
+        lbrRate: line.lbrRate,
+      });
+
+
+type KarigarReceiveWorkflow = {
+  guard: KarigarBookGuard;
+  fineOf: (line: KarigarLine) => number;
+  includeLabourSettlement: boolean;
+  includeBarcodes: boolean;
+  inoutType: (policy: KarigarBookPolicy) => string;
+  partyFineOf?: (input: ReceiveInput, lineFineTotal: number) => number;
+};
+
+const KARIGAR_RECEIVE_WORKFLOW: KarigarReceiveWorkflow = {
+  guard: 'karigar',
+  fineOf: receiptFine,
+  includeLabourSettlement: true,
+  includeBarcodes: true,
+  inoutType: () => INOUT_RECEIPT,
+};
+
+const OLD_ITEM_SALE_WORKFLOW: KarigarReceiveWorkflow = {
+  guard: 'old-item-sale',
+  fineOf: oldItemSaleFine,
+  includeLabourSettlement: false,
+  includeBarcodes: false,
+  // TR_PURC OLD ITEM SALES writes FormBookInOut into KR_DETL; the book controls whether stock is in or out.
+  inoutType: (policy) => policy.inout || INOUT_RECEIPT,
+  partyFineOf: (input, lineFineTotal) =>
+    input.partyFine != null ? round3(num(input.partyFine)) : lineFineTotal,
+};
+
+function oldItemSaleValue(input: ReceiveInput, fineTotal: number): number {
+  return round2(
+    (input.lines ?? []).reduce(
+      (sum, line) =>
+        sum +
+        (line.totalAmount != null
+          ? num(line.totalAmount)
+          : num(line.amount) + lineLabour(line) + num(line.othAmt)),
+      0,
+    ),
+  ) + Math.abs(fineTotal);
+}
 
 function keyOf(s: VoucherScope, vchNo: number, book: string): VoucherKey {
   return {
@@ -270,67 +401,87 @@ function detlRows(
   identity: { vchDate: Date; hiddenVoucherNo: string; mainUser?: string; vchClock?: unknown },
   bookName?: string,
   saleBill?: { no?: string; book?: string },
+  /**
+   * Serial per tagged line index (WP-08e).
+   *
+   * `TAG_NO` and `VCH_SRNO` here were modelled on TR_PURC's shared detail block, but the karigar form has its
+   * OWN save routine and it differs on exactly these two columns: `TR_KR_ISU.cs:5109`/`:5113` writes the `'N'`
+   * sentinel when the grid's tag cell is blank rather than a null, and `:5150` persists the tag's serial from
+   * grid column 40 rather than a literal 0.
+   */
+  tagIdentities?: Map<number, number>,
 ) {
   const txtD = (v: unknown, len: number): string | null =>
     String(v ?? '')
       .trim()
       .slice(0, len) || null;
-  return lines.map((l, idx) => ({
-    ...key,
-    VCH_DATE: identity.vchDate,
-    VCH_TIME: voucherTimestamp(identity.vchDate, identity.vchClock),
-    HD_VCH_NO: identity.hiddenVoucherNo,
-    MAIN_USER: identity.mainUser ?? null,
-    VCH_TYPE: vchType,
-    INOUT_TYPE: inout,
-    SR_NO: idx + 1,
-    AC_CODE: karigarAc,
-    IT_CODE: l.itCode ?? null,
-    IT_DESC: l.itDesc ?? null,
-    DESIGN_NO: l.designNo ?? null,
-    TBL_CODE: l.tblCode ?? null,
-    ITM_SIZE: l.itmSize ?? null,
-    TAG_NO: l.tagNo ?? null,
-    ITM_PCS: num(l.pcs),
-    ITM_GWT: num(l.grossWt),
-    ITM_OTH_WT: num(l.othWt),
-    ITM_NWT: num(l.netWt),
-    ITM_GHT_WT: num(l.ghtWt),
-    ITM_TOUCH: num(l.touch),
-    ITM_WEST_PRC: num(l.westPct),
-    ITM_FINE: fineOf(l),
-    LBR_TYPE: l.lbrType ?? null,
-    LBR_RATE: num(l.lbrRate),
-    LBR_PRC: num(l.lbrPct),
-    LBR_AMT: num(l.lbrAmt),
-    OTH_AMT: num(l.othAmt),
-    NET_AMT: round2(num(l.lbrAmt) + num(l.othAmt)),
-    // Desktop KR_DETL columns via TR_PURC's shared detail block (TR_PURC.cs:13096-13188), which
-    // targets KR_DETL for karigar-receipt books. Blank desktop grid cells persist as ''/0.
-    BOOK_NAME: bookName ?? null, // FormMainBook          :13096
-    OLD_SRNO: l.oldSrNo ?? idx + 1, // mSG_PR[i,57]          :13098
-    LOT_NO: txtD(l.lotNo, 10), // mSG_PR[i,5]           :13104
-    WITH_STOCK: txtD(l.withStock, 1), // mSG_PR[i,7]           :13151
-    BAG_WT: num(l.bagWt), // mSG_PR[i,8]           :13107
-    ITM_LOSS_WT: num(l.lossWt), // mSG_PR[i,14]          :13112
-    ITM_LESS_TCH: num(l.lessTouch), // mSG_PR[i,23]          :13121
-    CONV_RATE: num(l.convRate), // mSG_PR[i,27]          :13131
-    CONV_PRC: num(l.convPct), // mSG_PR[i,28]          :13132
-    ITM_RATE: num(l.rate), // mSG_PR[i,29]          :13136
-    ITM_AMT: round2(num(l.amount)), // mSG_PR[i,31]          :13138
-    ITM_OTH_RATE: num(l.otherRate), // mSG_PR[i,37]          :13129
-    ITM_OTH_FINE: num(l.otherFine), // mSG_PR[i,38]          :13130
-    ITM_MRP: num(l.mrp), // mSG_PR[i,39]          :13139
-    TOT_AMT: round2(num(l.totalAmount)), // mSG_PR[i,40]          :13142
-    TAX_PRC: num(l.taxRatePct), // mSG_PR[i,43]          :13143
-    RATE_TYPE: txtD(l.rateType, 1), // mSG_PR[i,46]          :13145
-    SL_BILL_NO: txtD(saleBill?.no, 10), // tSlBill.Text          :13169
-    SL_BILL_LC: key.LC_CODE, // MLc_code              :13170
-    SL_BILL_YRCD: key.CO_YEAR, // MCo_year              :13171
-    SL_BILL_DBCD: txtD(saleBill?.book, 3), // tSlBill_DbCd.Text     :13172
-    TAG_COST: 0, // literal               :13184
-    VCH_SRNO: 0, // literal               :13188
-  }));
+  return lines.map((l, idx) => {
+    const srno = tagIdentities?.get(idx);
+    const tagNo = String(l.tagNo ?? '').trim();
+    const tagged = Boolean(tagNo) && srno != null && srno > 0;
+    return {
+      ...key,
+      VCH_DATE: identity.vchDate,
+      VCH_TIME: voucherTimestamp(identity.vchDate, identity.vchClock),
+      HD_VCH_NO: identity.hiddenVoucherNo,
+      MAIN_USER: identity.mainUser ?? null,
+      VCH_TYPE: vchType,
+      INOUT_TYPE: inout,
+      ENTRY_TYPE: 'P',
+      SR_NO: idx + 1,
+      AC_CODE: karigarAc,
+      IT_CODE: l.itCode ?? null,
+      IT_DESC: l.itDesc ?? null,
+      DESIGN_NO: l.designNo ?? null,
+      TBL_CODE: l.tblCode ?? null,
+      ITM_SIZE: l.itmSize ?? null,
+      TAG_NO: tagged ? tagNo : 'N', // mSG[i,1] via :5109/:5113
+      ITM_PCS: num(l.pcs),
+      ITM_GWT: num(l.grossWt),
+      ITM_OTH_WT: num(l.othWt),
+      ITM_NWT: num(l.netWt),
+      ITM_GHT_WT: num(l.ghtWt),
+      ITM_GHT_PRC: num(l.ghtPct),
+      ITM_TOUCH: num(l.touch),
+      ITM_WEST_PRC: num(l.westPct),
+      SILVER_FINE: num(l.silverFine),
+      ITM_FINE: fineOf(l),
+      LBR_TYPE: l.lbrType ?? null,
+      LBR_RATE: num(l.lbrRate),
+      LBR_PRC: num(l.lbrPct),
+      LBR_AMT: lineLabour(l),
+      OTH_AMT: num(l.othAmt),
+      NET_AMT: round2(lineLabour(l) + num(l.othAmt)),
+      // Desktop KR_DETL columns via TR_PURC's shared detail block (TR_PURC.cs:13096-13188), which
+      // targets KR_DETL for karigar-receipt books. Blank desktop grid cells persist as ''/0.
+      BOOK_NAME: bookName ?? null, // FormMainBook          :13096
+      OLD_SRNO: l.oldSrNo ?? idx + 1, // mSG_PR[i,57]          :13098
+      LOT_NO: txtD(l.lotNo, 10), // mSG_PR[i,5]           :13104
+      WITH_STOCK: txtD(l.withStock, 1), // mSG_PR[i,7]           :13151
+      BAG_WT: num(l.bagWt), // mSG_PR[i,8]           :13107
+      ITM_LOSS_WT: num(l.lossWt), // mSG_PR[i,14]          :13112
+      ITM_LESS_TCH: num(l.lessTouch), // mSG_PR[i,23]          :13121
+      CONV_RATE: num(l.convRate), // mSG_PR[i,27]          :13131
+      CONV_PRC: num(l.convPct), // mSG_PR[i,28]          :13132
+      ITM_RATE: num(l.rate), // mSG_PR[i,29]          :13136
+      URD_RATE_TYPE: txtD(l.urdRateType, 1),
+      ITM_AMT: round2(num(l.amount)), // mSG_PR[i,31]          :13138
+      COMM_PRC: num(l.commissionPct),
+      COMM_AMT: round2(num(l.commissionAmount)),
+      ITM_OTH_RATE: num(l.otherRate), // mSG_PR[i,37]          :13129
+      ITM_OTH_FINE: num(l.otherFine), // mSG_PR[i,38]          :13130
+      ITM_MRP: num(l.mrp), // mSG_PR[i,39]          :13139
+      TOT_AMT: round2(num(l.totalAmount)), // mSG_PR[i,40]          :13142
+      TAX_PRC: num(l.taxRatePct), // mSG_PR[i,43]          :13143
+      RATE_TYPE: txtD(l.rateType, 1), // mSG_PR[i,46]          :13145
+      SL_BILL_NO: txtD(saleBill?.no, 10), // tSlBill.Text          :13169
+      SL_BILL_LC: key.LC_CODE, // MLc_code              :13170
+      SL_BILL_YRCD: key.CO_YEAR, // MCo_year              :13171
+      SL_BILL_DBCD: txtD(saleBill?.book, 3), // tSlBill_DbCd.Text     :13172
+      TAG_COST: 0, // literal               :13184
+      VCH_SRNO: tagged ? srno : 0, // mSG[i,40]             :5150
+    };
+  });
 }
 
 /** MAIN_STOCK metal movement for a karigar voucher (issue ⇒ TR_TYPE 'O'/sign '-', receipt ⇒ 'I'/'+'). */
@@ -343,25 +494,50 @@ function stockRows(
   vchDate: Date,
   fineOf: (line: KarigarLine) => number,
   lines: KarigarLine[],
+  bookName = 'KARIGAR',
+  /**
+   * Serial per tagged line index, from `resolveKarigarTagIdentitiesTx`.
+   *
+   * WP-08d. This builder wrote neither `TAG_NO` nor `VCH_SRNO`, so a karigar-received ornament got a barcode
+   * record with an **untagged** stock movement. That made it invisible twice over: tag-level views select tagged
+   * rows, and the desktop's loose-stock views select `TAG_NO = 'N'` (TR_KR_ISU.cs:6961), and a row carrying
+   * neither matches neither. The ornament was in stock and appeared in no stock view.
+   *
+   * The desktop writes the tagged `+` movement from the barcode row for manufacturing tag books —
+   * `Ac_Stock.cs:28` selects `A.TAG_NO, A.VCH_SRNO` from `BAR_DETL` where `B.MAIN_BOOK IN ('OPSTK','JDTR TAG',
+   * 'MFG TAG')` with `ITM_SIGN '+'` and `ITM_QTY 1` — which is exactly the karigar receipt case, so the tagged
+   * movement is parity, not an addition.
+   *
+   * Untagged lines take the desktop's `'N'`/0 sentinel (Ac_Stock.cs:54), not '' or NULL.
+   */
+  tagIdentities?: Map<number, number>,
 ) {
-  return lines.map((l, idx) => ({
-    ...key,
-    SR_NO: idx + 1,
-    VCH_DATE: vchDate,
-    VCH_TYPE: vchType,
-    BOOK_NAME: 'KARIGAR',
-    AC_CODE: karigarAc,
-    IT_CODE: l.itCode ?? null,
-    TR_TYPE: trType,
-    ITM_SIGN: sign,
-    ITM_QTY: num(l.netWt),
-    ITM_PCS: num(l.pcs),
-    ITM_GWT: num(l.grossWt),
-    ITM_NWT: num(l.netWt),
-    ITM_TOUCH: num(l.touch),
-    ITM_WEST: num(l.westPct),
-    ITM_FINE: fineOf(l),
-  }));
+  return lines.map((l, idx) => {
+    const srno = tagIdentities?.get(idx);
+    const tagNo = String(l.tagNo ?? '').trim();
+    // A line is tagged only when it has both a tag number and an allocated serial.
+    const tagged = Boolean(tagNo) && srno != null && srno > 0;
+    return {
+      ...key,
+      SR_NO: idx + 1,
+      VCH_DATE: vchDate,
+      VCH_TYPE: vchType,
+      BOOK_NAME: bookName,
+      AC_CODE: karigarAc,
+      IT_CODE: l.itCode ?? null,
+      TAG_NO: tagged ? tagNo : 'N',
+      VCH_SRNO: tagged ? srno : 0,
+      TR_TYPE: trType,
+      ITM_SIGN: sign,
+      ITM_QTY: 1,
+      ITM_PCS: num(l.pcs),
+      ITM_GWT: num(l.grossWt),
+      ITM_NWT: num(l.netWt),
+      ITM_TOUCH: num(l.touch),
+      ITM_WEST: num(l.westPct),
+      ITM_FINE: fineOf(l),
+    };
+  });
 }
 
 function header(
@@ -448,11 +624,30 @@ export async function issueKarigar(
 
   const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
     const policy = await karigarBookPolicyTx(tx, scope);
+    assertKarigarBookGuard(scope, policy, 'karigar');
     const hiddenVoucherNo = await nextHiddenVoucherNoTx(tx, scope);
     const no = await nextVoucherNoTx(tx, scope);
     const key = keyOf(scope, no, 'KIS');
     const identity = { vchDate, hiddenVoucherNo, mainUser: input.mainUser };
     await tempBookRowTx(tx, scope, hiddenVoucherNo, policy.bookName);
+    // The day book — plan item F3.1. Metal OUT to the karigar: book 050 type `05`, SIGN '-'.
+    const rojmelRows = await karigarRojmelRowsTx(tx, scope, {
+      key,
+      coBook: String(key.CO_BOOK),
+      vchNo: String(key.VCH_NO),
+      vchDate,
+      vchType: policy.vchType,
+      bookName: policy.bookName,
+      karigarAc: input.karigarAc,
+      karigarName: input.karigarName,
+      direction: 'issue',
+      lines: input.lines,
+      fineOf: issueFine,
+    });
+    // WP-08e. Resolved before the write set because both the detail rows and the stock movements name the tag.
+    // An unavailable or ambiguous tag throws here, so the voucher never posts a `-` movement for stock that is
+    // not there to send.
+    const tagIdentities = await resolveIssuedKarigarTagIdentitiesTx(tx, scope, input.lines);
     await postVoucherTx(tx, tenantId, {
       // metal sub-ledger: karigar fine OUT — desktop AC_DATA leg IT_TYPE 'G'/SIGN '-' (book 050, FINE_WT=fine issued)
       ledger: {
@@ -504,6 +699,7 @@ export async function issueKarigar(
             identity,
             policy.bookName,
             { no: input.saleBillNo, book: input.saleBillBook },
+            tagIdentities,
           ),
         },
         ...(idtlRows(
@@ -541,8 +737,11 @@ export async function issueKarigar(
             vchDate,
             issueFine,
             input.lines,
+            policy.bookName,
+            tagIdentities,
           ),
         },
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return no;
@@ -554,6 +753,7 @@ export async function issueKarigar(
 export async function receiveKarigar(
   prisma: any,
   input: ReceiveInput,
+  workflow: KarigarReceiveWorkflow = KARIGAR_RECEIVE_WORKFLOW,
 ): Promise<{
   vchNo: number;
   fineReceived: number;
@@ -566,45 +766,48 @@ export async function receiveKarigar(
 
   const scope = completeScope(input.scope);
   const tenantId = scope.tenantId;
-  const perLineLabour = round2(input.lines.reduce((s, l) => s + num(l.lbrAmt), 0));
-  const labourAmt = round2(input.labourAmt != null ? num(input.labourAmt) : perLineLabour);
+  const perLineLabour = round2(input.lines.reduce((s, l) => s + lineLabour(l), 0));
+  const labourAmt = workflow.includeLabourSettlement
+    ? round2(input.labourAmt != null ? num(input.labourAmt) : perLineLabour)
+    : 0;
   const labourAc = input.labourAc ?? 'LABOUR';
   const gstAc = input.gstAc ?? 'GST';
-  const labourGstPct = num(input.labourGstPct);
+  const labourGstPct = workflow.includeLabourSettlement ? num(input.labourGstPct) : 0;
   const labourGst = round2((labourAmt * labourGstPct) / 100);
   const othAmt = round2(input.lines.reduce((s, l) => s + num(l.othAmt), 0));
   const creditToKarigar = round2(labourAmt + labourGst);
-  const fineReceived = round3(input.lines.reduce((sum, line) => sum + receiptFine(line), 0));
+  const lineFineTotal = round3(input.lines.reduce((sum, line) => sum + workflow.fineOf(line), 0));
+  const fineReceived = workflow.partyFineOf?.(input, lineFineTotal) ?? lineFineTotal;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const inter = !!input.interState;
 
   return withTenant(prisma, tenantId, async (tx: any) => {
     const policy = await karigarBookPolicyTx(tx, scope);
+    assertKarigarBookGuard(scope, policy, workflow.guard);
+    const inoutType = workflow.inoutType(policy) || INOUT_RECEIPT;
+    const stockOut = inoutType === INOUT_ISSUE;
+    const stockSign = stockOut ? '-' : '+';
     const hiddenVoucherNo = await nextHiddenVoucherNoTx(tx, scope);
     const no = await nextVoucherNoTx(tx, scope);
-    const key = keyOf(scope, no, 'KRC');
+    const key = keyOf(scope, no, stockOut ? 'KIS' : 'KRC');
     const identity = { vchDate, hiddenVoucherNo, mainUser: input.mainUser };
     await tempBookRowTx(tx, scope, hiddenVoucherNo, policy.bookName);
 
     // Resolve barcodes for finished ornaments flagged for tagging (auto via SRNO_MAST.TAG_SRNO, F3).
-    const tagNos: string[] = [];
-    for (const l of input.lines) {
-      if (l.tag || l.tagNo) {
-        if (l.tagNo) {
-          tagNos.push(l.tagNo);
-        } else {
-          const t = await nextTagNoTx(tx, input.scope, {
-            prefix:
-              input.tagPrefix ?? (l.itCode ? String(l.itCode).slice(0, 3).toUpperCase() : 'KRG'),
-          });
-          l.tagNo = t.tagNo;
-          tagNos.push(t.tagNo);
-        }
-      }
-    }
+    //
+    // WP-08c: the serial is now kept. This loop used to call the allocator only for an untyped tag and take
+    // just the tag number, so no karigar tag carried a `VCH_SRNO` identity.
+    const tagIdentities = workflow.includeBarcodes
+      ? await resolveKarigarTagIdentitiesTx(tx, scope, input.lines, {
+          tagPrefix: input.tagPrefix,
+        })
+      : new Map<number, number>();
+    const tagNos: string[] = workflow.includeBarcodes
+      ? input.lines.filter((l) => l.tagNo).map((l) => String(l.tagNo))
+      : [];
 
     const ledger: LedgerLine[] = [];
-    if (labourAmt > 0) {
+    if (workflow.includeLabourSettlement && labourAmt > 0) {
       ledger.push({
         ...key,
         VCH_TYPE: policy.vchType,
@@ -637,7 +840,7 @@ export async function receiveKarigar(
       VCH_TYPE: policy.vchType,
       AC_CODE: input.karigarAc,
       IT_TYPE: 'G',
-      SIGN: '+',
+      SIGN: stockSign,
       FINE_WT: fineReceived,
       FINE_RATE: 0,
       DR_AMT: 0,
@@ -645,33 +848,9 @@ export async function receiveKarigar(
     });
 
     // Barcode records for tagged finished ornaments (BAR_DETL).
-    const barDetl = input.lines
-      .filter((l) => l.tagNo)
-      .map((l, i) => ({
-        ...key,
-        SR_NO: i + 1,
-        VCH_DATE: vchDate,
-        VCH_TYPE: policy.vchType,
-        BOOK_NAME: 'KARIGAR',
-        INOUT_TYPE: 'I',
-        ENTRY_TYPE: 'O',
-        TBL_CODE: l.tblCode ?? '001',
-        TAG_NO: l.tagNo,
-        IT_CODE: l.itCode ?? null,
-        DESIGN_NO: l.designNo ?? null,
-        ITM_SIZE: l.itmSize ?? null,
-        ITM_PCS: num(l.pcs),
-        ITM_GWT: num(l.grossWt),
-        ITM_OTH_WT: num(l.othWt),
-        ITM_NWT: num(l.netWt),
-        ITM_TOUCH: num(l.touch),
-        ITM_FINE: receiptFine(l),
-        LBR_TYPE: l.lbrType ?? null,
-        LBR_RATE: num(l.lbrRate),
-        LBR_PRC: num(l.lbrPct),
-        LBR_AMT: num(l.lbrAmt),
-        OTH_AMT: num(l.othAmt),
-      }));
+    const barDetl = workflow.includeBarcodes
+      ? karigarBarcodeRows(key, policy.vchType, vchDate, input.lines, tagIdentities)
+      : [];
 
     const gstExtra =
       labourGst > 0
@@ -703,6 +882,20 @@ export async function receiveKarigar(
       input,
     );
 
+    // The day book — plan item F3.1. Metal IN from the karigar: book 052 type `11`, SIGN '+'.
+    const rojmelRows = await karigarRojmelRowsTx(tx, scope, {
+      key,
+      coBook: String(key.CO_BOOK),
+      vchNo: String(key.VCH_NO),
+      vchDate,
+      vchType: policy.vchType,
+      bookName: policy.bookName,
+      karigarAc: input.karigarAc,
+      karigarName: input.karigarName,
+      direction: stockOut ? 'issue' : 'receive',
+      lines: input.lines,
+      fineOf: workflow.fineOf,
+    });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: policy.bookName,
@@ -713,19 +906,20 @@ export async function receiveKarigar(
           rows: detlRows(
             key,
             policy.vchType,
-            INOUT_RECEIPT,
+            inoutType,
             input.karigarAc,
-            receiptFine,
+            workflow.fineOf,
             input.lines,
             identity,
             policy.bookName,
             { no: input.saleBillNo, book: input.saleBillBook },
+            tagIdentities,
           ),
         },
         ...(idtlRows(
           key,
           policy.vchType,
-          INOUT_RECEIPT,
+          inoutType,
           input.karigarAc,
           vchDate,
           input.lines,
@@ -737,7 +931,7 @@ export async function receiveKarigar(
                 rows: idtlRows(
                   key,
                   policy.vchType,
-                  INOUT_RECEIPT,
+                  inoutType,
                   input.karigarAc,
                   vchDate,
                   input.lines,
@@ -751,19 +945,33 @@ export async function receiveKarigar(
           rows: stockRows(
             key,
             policy.vchType,
-            'I',
-            '+',
+            stockOut ? 'O' : 'I',
+            stockSign,
             input.karigarAc,
             vchDate,
-            receiptFine,
+            workflow.fineOf,
             input.lines,
+            policy.bookName,
+            tagIdentities,
           ),
         },
         ...(barDetl.length ? [{ table: 'BAR_DETL', rows: barDetl }] : []),
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return { vchNo: no, fineReceived, labourAmt, labourGst, tagNos };
   });
+}
+
+export async function createOldItemSale(
+  prisma: any,
+  input: ReceiveInput,
+): Promise<{ vchNo: number; fineReceived: number; labourAmt: number; labourGst: number; tagNos: string[] }> {
+  const lineFineTotal = round3(input.lines?.reduce((sum, line) => sum + oldItemSaleFine(line), 0) ?? 0);
+  if (oldItemSaleValue(input, input.partyFine != null ? num(input.partyFine) : lineFineTotal) <= 0) {
+    throw new KarigarValidationError('old item sales requires party fine or item amount');
+  }
+  return receiveKarigar(prisma, input, OLD_ITEM_SALE_WORKFLOW);
 }
 
 async function balanceTx(tx: any, s: VoucherScope, karigarAc: string): Promise<number> {
@@ -876,6 +1084,221 @@ function idtlRows(
   );
 }
 
+/**
+ * Resolve the tag identity for every tagged line of a karigar receipt.
+ *
+ * WP-08c. Two things were wrong before this existed.
+ *
+ * The serial was thrown away: the tag loop called `nextTagNoTx` purely to obtain a tag NUMBER and discarded
+ * `srno`, and it did not allocate at all when the operator typed the number. The `BAR_DETL` builder then never
+ * named `VCH_SRNO`, so every karigar-created tag carried the column default. Plan §7 requires the identity to
+ * preserve the serial, and `issueTagTx` resolves an exact instance on `(CO, LC, TAG_NO, VCH_SRNO)` — without it
+ * two instances of the same tag text are indistinguishable.
+ *
+ * Purchase allocates a serial even for a manually typed tag, deliberately ("each purchased tag receives the
+ * desktop VCH_SRNO identity even when TAG_NO is manual"). This follows that rule.
+ *
+ * `persisted` carries the serials this voucher already holds, so an EDIT keeps each tag's identity instead of
+ * minting a new one. It is CONSUMED as it is read: two lines naming one tag must not share a serial, which
+ * would create a duplicate identity that `BAR_DETL` has no constraint to catch.
+ */
+/**
+ * Resolve the identities of EXISTING tags being ISSUED OUT to a karigar (WP-08e).
+ *
+ * The mirror of the receive-side resolver above, and deliberately not the same operation. Receive *allocates* a
+ * serial for a newly tagged ornament; issue must *look up* the serial of an ornament that already exists, and
+ * refuse when it is not available — otherwise a voucher could send out a tag that was already sold.
+ *
+ * Desktop evidence that this path is real: `TR_KR_ISU.cs:3318` resolves availability for the issue screen from
+ * `MAIN_STOCK` grouped by `(TAG_NO, VCH_SRNO)` with `HAVING SUM(CASE WHEN ITM_SIGN='+' THEN VCH_SRNO ELSE
+ * -VCH_SRNO END) > 0` and `B.EMP_ISU <> 'Y'`, and the save routine persists both columns on the detail row
+ * (`:5109`/`:5113` for `TAG_NO` with the `'N'` sentinel, `:5150` for `VCH_SRNO`).
+ *
+ * `resolveLiveTagIdentityTx` already implements that exact rule — including the signed `VCH_SRNO` sum rather
+ * than a piece count, and the employee-issue exclusion — so this reuses it rather than restating it. It
+ * resolves WITHOUT consuming, because the desktop has no live-tag table here (`TR_KR_ISU.cs` names `TAG_STOCK`
+ * zero times): an issued tag is recorded solely as the signed `-` movement this voucher posts, which is what
+ * makes it unavailable afterwards.
+ */
+async function resolveIssuedKarigarTagIdentitiesTx(
+  tx: any,
+  scope: CompleteKarigarScope,
+  lines: KarigarLine[],
+): Promise<Map<number, number>> {
+  const identities = new Map<number, number>();
+  const seen = new Map<string, number>();
+  for (const [index, line] of lines.entries()) {
+    const tagNo = String(line.tagNo ?? '').trim();
+    if (!tagNo) continue;
+    /**
+     * One tag cannot be issued twice on one voucher.
+     *
+     * The desktop refuses this outright with "Duplicate Tag No" (`TR_KR_ISU.cs:3352`, comparing the typed value
+     * against every other row's column 1). Without the check both lines resolve the same identity and the
+     * voucher posts two `-` movements for one ornament, taking its signed on-hand to -1 — a §7.1 invariant 3
+     * violation manufactured by the voucher itself.
+     */
+    const duplicateOf = seen.get(`${tagNo.toLowerCase()}|${line.vchSrno ?? ''}`);
+    if (duplicateOf != null) {
+      throw new KarigarValidationError(
+        `Duplicate tag ${tagNo} on lines ${duplicateOf + 1} and ${index + 1}: a tag can only be issued once.`,
+      );
+    }
+    seen.set(`${tagNo.toLowerCase()}|${line.vchSrno ?? ''}`, index);
+    const resolved = await resolveLiveTagIdentityTx(tx, {
+      CO_CODE: scope.coCode,
+      LC_CODE: scope.lcCode,
+      TAG_NO: tagNo,
+      // Absent means "whichever instance is available", matching the desktop's conditional serial filter.
+      ...(line.vchSrno != null ? { VCH_SRNO: line.vchSrno } : {}),
+      ...(line.itCode ? { IT_CODE: String(line.itCode) } : {}),
+    });
+    identities.set(index, resolved.VCH_SRNO);
+  }
+  return identities;
+}
+
+async function resolveKarigarTagIdentitiesTx(
+  tx: any,
+  scope: CompleteKarigarScope,
+  lines: KarigarLine[],
+  options: { tagPrefix?: string; persisted?: Map<string, number> } = {},
+): Promise<Map<number, number>> {
+  const persisted = new Map(options.persisted ?? []);
+  const identities = new Map<number, number>();
+  for (const [index, line] of lines.entries()) {
+    if (!line.tag && !line.tagNo) continue;
+    const typed = String(line.tagNo ?? '').trim();
+    if (typed) {
+      const reused = persisted.get(typed);
+      if (reused != null && reused > 0) {
+        persisted.delete(typed);
+        identities.set(index, reused);
+        continue;
+      }
+    }
+    const allocated = await nextTagNoTx(tx, scope, {
+      prefix:
+        options.tagPrefix ?? (line.itCode ? String(line.itCode).slice(0, 3).toUpperCase() : 'KRG'),
+    });
+    // A typed tag number is kept; only the serial comes from the allocator.
+    if (!typed) line.tagNo = allocated.tagNo;
+    identities.set(index, allocated.srno);
+  }
+  return identities;
+}
+
+/**
+ * Barcode rows for the tagged finished ornaments of a karigar receipt.
+ *
+ * Extracted so the EDIT path can rebuild them. `karigarWriteSet` includes `BAR_DETL` and the edit deletes the
+ * whole write set, but only the create path had a builder — so an edit destroyed the tag's barcode record and
+ * left the physical ornament unsellable, since `issueTagTx` resolves availability from `TAG_STOCK` or
+ * `BAR_DETL`. Plan §7.1 invariant 11 requires an edit to restore the complete prior state.
+ */
+function karigarBarcodeRows(
+  key: VoucherKey,
+  vchType: string,
+  vchDate: Date,
+  lines: KarigarLine[],
+  identities: Map<number, number>,
+): Array<Record<string, unknown>> {
+  const rows: Array<Record<string, unknown>> = [];
+  lines.forEach((l, index) => {
+    if (!l.tagNo) return;
+    rows.push({
+      ...key,
+      SR_NO: rows.length + 1,
+      VCH_DATE: vchDate,
+      VCH_TYPE: vchType,
+      BOOK_NAME: 'KARIGAR',
+      INOUT_TYPE: 'I',
+      ENTRY_TYPE: 'O',
+      TBL_CODE: l.tblCode ?? '001',
+      TAG_NO: l.tagNo,
+      VCH_SRNO: identities.get(index) ?? 0,
+      IT_CODE: l.itCode ?? null,
+      DESIGN_NO: l.designNo ?? null,
+      ITM_SIZE: l.itmSize ?? null,
+      ITM_PCS: num(l.pcs),
+      ITM_GWT: num(l.grossWt),
+      ITM_OTH_WT: num(l.othWt),
+      ITM_NWT: num(l.netWt),
+      ITM_TOUCH: num(l.touch),
+      ITM_FINE: receiptFine(l),
+      LBR_TYPE: l.lbrType ?? null,
+      LBR_RATE: num(l.lbrRate),
+      LBR_PRC: num(l.lbrPct),
+      LBR_AMT: lineLabour(l),
+      OTH_AMT: num(l.othAmt),
+      /**
+       * P8: the KARIGAR COST BASIS, without which every sale of a karigar-made tag posts zeros.
+       *
+       * `stock.ts:88-93` records the measurement: a SALE LINE COPIES KR_NET_WT / KR_TOUCH / KR_FINE
+       * FROM THE TAG — `SL_DETL.KR_TOUCH` equals `BAR_DETL.KR_TOUCH` and `SL_DETL.KR_FINE` equals
+       * `BAR_DETL.KR_FINE` on 102 of 102 tagged sale lines in the real customer database, and they are
+       * NOT derivable (`KR_NET_WT x KR_TOUCH/100` fits only 7 of 92 rows). The tag is the only source.
+       *
+       * The sale path was already asking for these columns; this writer — the one that CREATES tags from
+       * a karigar receipt — never populated them, so the cost basis behind profit reporting was zero for
+       * every such tag.
+       *
+       * The values are the karigar's own side of the receipt, which is exactly what this voucher settles.
+       */
+      KR_NET_WT: num(l.netWt),
+      KR_TOUCH: num(l.touch),
+      KR_WEST_PRC: num(l.westPct),
+      KR_FINE: receiptFine(l),
+      // Wastage and ghat belong on the tag too: they are part of the fine base everywhere else, and a
+      // tag that omits them cannot reproduce its own fine.
+      ITM_WEST_PRC: num(l.westPct),
+      ITM_GHT_WT: num(l.ghtWt),
+      ITM_MRP: num(l.mrp),
+      // MAIN_USER / ADD_USER / HD_VCH_NO are DELIBERATELY NOT SET HERE. Adding them broke
+      // mfgLifecycle's "keeps a tagged karigar receipt intact across reopen and save unchanged":
+      // on an EDIT the original creator must be preserved, and writing input.mainUser overwrote
+      // `mfg-user` with the editor's value (or blank). The write path already stamps attribution
+      // correctly, so an explicit column here is not an improvement — it is a regression that a
+      // passing invariant caught.
+    });
+  });
+  return rows;
+}
+
+/**
+ * The tag serials this karigar voucher already persisted, keyed by tag number.
+ *
+ * Read before the write set is deleted so an edit can keep each tag's identity. A tag number appearing twice
+ * would make the identity ambiguous, so the first is kept and the resolver allocates a fresh serial for any
+ * further line — never two lines sharing one.
+ */
+async function persistedKarigarTagSrnosTx(
+  tx: any,
+  scope: CompleteKarigarScope,
+  voucherNo: string,
+): Promise<Map<string, number>> {
+  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "TAG_NO","VCH_SRNO" FROM "BAR_DETL"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+        AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+        AND NULLIF(btrim(coalesce("TAG_NO"::text,'')),'') IS NOT NULL
+      ORDER BY "TAG_NO",row_id FOR UPDATE`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear,
+    scope.coBook,
+    voucherNo,
+  );
+  const persisted = new Map<string, number>();
+  for (const row of rows) {
+    const tagNo = String(row.TAG_NO ?? '').trim();
+    if (!tagNo || persisted.has(tagNo)) continue;
+    persisted.set(tagNo, Number(row.VCH_SRNO ?? 0));
+  }
+  return persisted;
+}
+
 const karigarWriteSet = [
   'BAR_DETL',
   'MAIN_STOCK',
@@ -883,7 +1306,99 @@ const karigarWriteSet = [
   'KR_IDTL',
   'KR_DETL',
   'KR_DATA',
+  /**
+   * The day book — plan item F3.1.
+   *
+   * Added with the Rojmel projection below. It belongs in the WRITE SET and not only in the writer, because
+   * this list is what `deleteVoucherWriteSetTx` reverses: a projection without a matching reversal leaves
+   * orphan day-book rows that no delete can reach, and since `LEDR_KEY` is unique the next voucher reusing
+   * that number then fails to post. The same coupling was caught on contra.
+   */
+  'ROJ_MEL_DATA',
 ] as const;
+
+/**
+ * Resolve each detail line's day-book contra account, and build the karigar Rojmel rows.
+ *
+ * `LD_CODE` is the ITEM GROUP's `PURC_AC` — verified on **25 of 25** real metal rows across both karigar
+ * books. Metal moving to or from a karigar is booked against purchase gold, reached through
+ * `GROUP_MAST.PURC_AC`, which is the route `purchase.ts` already uses. Deriving it rather than hardcoding
+ * 00008 means a shop whose item groups point at a different account still gets its own.
+ *
+ * A line whose item has no resolvable group account contributes NO day-book row rather than a row naming a
+ * blank account: a Rojmel row that names nothing cannot be reconciled, and silently writing one would be
+ * worse than the gap this closes.
+ */
+async function karigarRojmelRowsTx(
+  tx: any,
+  scope: { tenantId: string; coCode: string; lcCode: string; coYear?: string },
+  args: {
+    key: Record<string, unknown>;
+    coBook: string;
+    vchNo: string;
+    vchDate: unknown;
+    vchType: string;
+    bookName: string;
+    karigarAc: string;
+    karigarName?: string;
+    direction: 'issue' | 'receive';
+    lines: KarigarLine[];
+    fineOf: (line: KarigarLine) => number;
+  },
+): Promise<RojmelRow[]> {
+  const itCodes = [
+    ...new Set(args.lines.map((l) => String(l.itCode ?? '').trim()).filter(Boolean)),
+  ];
+  if (!itCodes.length) return [];
+  const rows: Array<{ ic: string; typ: string | null; pac: string | null }> =
+    await tx.$queryRawUnsafe(
+      `SELECT i."IT_CODE" ic, i."IT_TYPE" typ, g."PURC_AC" pac FROM "ITEM_MAST" i
+         LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
+          AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
+        WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text = ANY($3::text[])`,
+      scope.tenantId,
+      scope.coCode,
+      itCodes,
+    );
+  const byItem = new Map(rows.map((r) => [String(r.ic).trim(), r]));
+
+  const built: KarigarRojmelLine[] = [];
+  args.lines.forEach((l, index) => {
+    const item = String(l.itCode ?? '').trim();
+    const meta = byItem.get(item);
+    const contraAc = String(meta?.pac ?? '').trim();
+    if (!item || !contraAc) return;
+    built.push({
+      lineNo: index + 1,
+      itCode: item,
+      metal: rojmelMetalFor(meta?.typ),
+      contraAc,
+      pcs: Number(l.pcs ?? 0),
+      grossWt: Number(l.grossWt ?? 0),
+      netWt: Number(l.netWt ?? 0),
+      touch: Number(l.touch ?? 0),
+      fine: args.fineOf(l),
+    });
+  });
+  if (!built.length) return [];
+
+  return buildKarigarRojmel(
+    {
+      scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear! },
+      key: args.key,
+      coBook: args.coBook,
+      vchNo: args.vchNo,
+      vchDate: args.vchDate,
+      vchType: args.vchType,
+      bookName: args.bookName,
+      // AC_CODE on every karigar day-book row is the karigar itself — 21 of 21 real rows match KR_DATA.AC_CODE.
+      partyName: args.karigarName ?? '',
+      partyCode: args.karigarAc,
+    },
+    args.direction,
+    built,
+  );
+}
 const isoDate = (value: unknown): string => new Date(value as any).toISOString().slice(0, 10);
 
 async function assertKarigarReplacementSafeTx(
@@ -917,6 +1432,7 @@ export async function getKarigar(
   prisma: any,
   scopeInput: VoucherScope,
   vchNoInput: number | string,
+  guard: KarigarBookGuard = 'karigar',
 ) {
   const scope = completeScope(scopeInput);
   const vchNo = formatVoucherNo(vchNoInput);
@@ -932,6 +1448,8 @@ export async function getKarigar(
       vchNo,
     );
     if (headers.length !== 1) throw new KarigarValidationError(`voucher not found: ${vchNo}`);
+    const policy = await karigarBookPolicyTx(tx, scope);
+    assertKarigarBookGuard(scope, policy, guard);
     const details: Record<string, unknown>[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "KR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
        AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
@@ -942,6 +1460,30 @@ export async function getKarigar(
       scope.coBook,
       vchNo,
     );
+    /**
+     * Stone sub-detail (`KR_IDTL`). Read because `karigarWriteSet` contains it, so an edit deletes
+     * and rebuilds these rows from its input: a reader that omitted them meant an unchanged save
+     * destroyed every stone on the voucher. Reached by four screens — karigar issue/receive and
+     * job-work issue/receive all share `KarigarForm`. Same defect class as `PR_IDTL` on purchase,
+     * found by the sub-detail case in `test/operatorDepth.roundtrip.db.test.ts`.
+     */
+    const stoneRows: Record<string, unknown>[] = await tx.$queryRawUnsafe(
+      `SELECT * FROM "KR_IDTL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+       AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO","ISR_NO"`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      vchNo,
+    );
+    const stonesBySrNo = new Map<number, Record<string, unknown>[]>();
+    for (const row of stoneRows) {
+      const srNo = Number(row.SR_NO ?? 0);
+      const list = stonesBySrNo.get(srNo) ?? [];
+      list.push(readStoneSubDetail(row));
+      stonesBySrNo.set(srNo, list);
+    }
     const h = headers[0]!;
     // TR_KR_ISU.cs:4624-4625,4689 DISPLAY_DATA preserves VCH_TIME, HD_VCH_NO and MAIN_USER.
     return {
@@ -954,6 +1496,8 @@ export async function getKarigar(
       karigarName: h.AC_NAME,
       labourAmt: Number(h.LBR_AMT ?? 0),
       labourGstPct: Number(h.TAX_PRC ?? 0),
+      partyFine: Number(h.PARTY_FINE ?? 0),
+      billOutstanding: Number(h.BILL_OS ?? 0),
       mode: String(details[0]?.INOUT_TYPE ?? '') === INOUT_RECEIPT ? 'receive' : 'issue',
       lines: details.map((d) => ({
         itCode: d.IT_CODE,
@@ -974,12 +1518,46 @@ export async function getKarigar(
         lbrPct: Number(d.LBR_PRC ?? 0),
         lbrAmt: Number(d.LBR_AMT ?? 0),
         othAmt: Number(d.OTH_AMT ?? 0),
+        oldSrNo: Number(d.OLD_SRNO ?? 0),
+        lotNo: d.LOT_NO,
+        withStock: d.WITH_STOCK,
+        bagWt: Number(d.BAG_WT ?? 0),
+        lossWt: Number(d.ITM_LOSS_WT ?? 0),
+        lessTouch: Number(d.ITM_LESS_TCH ?? 0),
+        convRate: Number(d.CONV_RATE ?? 0),
+        convPct: Number(d.CONV_PRC ?? 0),
+        rate: Number(d.ITM_RATE ?? 0),
+        amount: Number(d.ITM_AMT ?? 0),
+        otherRate: Number(d.ITM_OTH_RATE ?? 0),
+        otherFine: Number(d.ITM_OTH_FINE ?? 0),
+        silverFine: Number(d.SILVER_FINE ?? 0),
+        ghtPct: Number(d.ITM_GHT_PRC ?? 0),
+        urdRateType: d.URD_RATE_TYPE,
+        commissionPct: Number(d.COMM_PRC ?? 0),
+        commissionAmount: Number(d.COMM_AMT ?? 0),
+        mrp: Number(d.ITM_MRP ?? 0),
+        totalAmount: Number(d.TOT_AMT ?? 0),
+        taxRatePct: Number(d.TAX_PRC ?? 0),
+        rateType: d.RATE_TYPE,
+        stones: stonesBySrNo.get(Number(d.SR_NO ?? 0)) ?? [],
       })),
     };
   });
 }
 
-export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
+export async function getOldItemSale(
+  prisma: any,
+  scopeInput: VoucherScope,
+  vchNoInput: number | string,
+) {
+  return getKarigar(prisma, scopeInput, vchNoInput, 'old-item-sale');
+}
+
+export async function editKarigar(
+  prisma: any,
+  input: KarigarLifecycleInput,
+  workflow?: KarigarReceiveWorkflow,
+) {
   if (!input.karigarAc) throw new KarigarValidationError('karigar account is required');
   if (!input.lines?.length) throw new KarigarValidationError('at least one line is required');
   const scope = completeScope(input.scope);
@@ -1000,36 +1578,50 @@ export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
     await check(prior.VCH_DATE);
     await check(requestedDate);
     await assertFiscalDateTx(tx, scope, isoDate(requestedDate));
-    await assertKarigarReplacementSafeTx(
-      tx,
-      scope,
-      vchNo,
-      input.karigarAc,
-      input.mode,
-      input.lines,
-    );
     const policy = await karigarBookPolicyTx(tx, scope);
+    const receive = input.mode === 'receive';
+    const activeWorkflow = workflow ?? (receive ? KARIGAR_RECEIVE_WORKFLOW : {
+      ...KARIGAR_RECEIVE_WORKFLOW,
+      fineOf: issueFine,
+      includeLabourSettlement: false,
+      includeBarcodes: false,
+      inoutType: () => INOUT_ISSUE,
+    });
+    assertKarigarBookGuard(scope, policy, activeWorkflow.guard);
+    const inoutType = activeWorkflow.inoutType(policy) || (receive ? INOUT_RECEIPT : INOUT_ISSUE);
+    const stockOut = inoutType === INOUT_ISSUE;
+    const stockSign = stockOut ? '-' : '+';
+    if (activeWorkflow.guard === 'karigar') {
+      await assertKarigarReplacementSafeTx(
+        tx,
+        scope,
+        vchNo,
+        input.karigarAc,
+        input.mode,
+        input.lines,
+      );
+    }
     const hiddenVoucherNo = String(prior.HD_VCH_NO ?? '').trim();
     if (!hiddenVoucherNo)
       throw new KarigarValidationError('persisted voucher has no hidden identity');
     const mainUser = String(prior.MAIN_USER ?? '').trim() || input.mainUser;
-    const key = keyOf(scope, Number(vchNo), input.mode === 'issue' ? 'KIS' : 'KRC');
+    const key = keyOf(scope, Number(vchNo), stockOut ? 'KIS' : 'KRC');
     const identity = {
       vchDate: requestedDate,
       hiddenVoucherNo,
       mainUser,
       vchClock: prior.VCH_CLOCK,
     };
-    const receive = input.mode === 'receive';
-    const fineOf = receive ? receiptFine : issueFine;
-    const fineTotal = round3(input.lines.reduce((sum, line) => sum + fineOf(line), 0));
-    const labourAmt = receive
-      ? round2(input.labourAmt ?? input.lines.reduce((s, line) => s + num(line.lbrAmt), 0))
+    const fineOf = activeWorkflow.fineOf;
+    const lineFineTotal = round3(input.lines.reduce((sum, line) => sum + fineOf(line), 0));
+    const fineTotal = activeWorkflow.partyFineOf?.(input, lineFineTotal) ?? lineFineTotal;
+    const labourAmt = receive && activeWorkflow.includeLabourSettlement
+      ? round2(input.labourAmt ?? input.lines.reduce((s, line) => s + lineLabour(line), 0))
       : 0;
-    const gstPct = receive ? num(input.labourGstPct) : 0;
+    const gstPct = receive && activeWorkflow.includeLabourSettlement ? num(input.labourGstPct) : 0;
     const gst = round2((labourAmt * gstPct) / 100);
     const ledger: LedgerLine[] = [];
-    if (receive && labourAmt > 0) {
+    if (receive && activeWorkflow.includeLabourSettlement && labourAmt > 0) {
       ledger.push(
         {
           ...key,
@@ -1063,7 +1655,7 @@ export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
       VCH_TYPE: policy.vchType,
       AC_CODE: input.karigarAc,
       IT_TYPE: 'G',
-      SIGN: receive ? '+' : '-',
+      SIGN: stockSign,
       FINE_WT: fineTotal,
       FINE_RATE: 0,
       DR_AMT: 0,
@@ -1087,6 +1679,25 @@ export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
       },
       input,
     );
+    /**
+     * Tag identities are resolved BEFORE the write set is built, because the stock movements now carry them too.
+     *
+     * The persisted serials are read before the delete so each tag keeps its identity across the rewrite
+     * (WP-08c). Ordering matters: `resolveKarigarTagIdentitiesTx` also fills in `line.tagNo` for lines that were
+     * tagged without a number, and `stockRows` reads that.
+     */
+    const persistedTagSrnos = !stockOut && activeWorkflow.includeBarcodes
+      ? await persistedKarigarTagSrnosTx(tx, scope, vchNo)
+      : new Map<string, number>();
+    const tagIdentities = !stockOut && activeWorkflow.includeBarcodes
+      ? await resolveKarigarTagIdentitiesTx(tx, scope, input.lines, {
+          persisted: persistedTagSrnos,
+        })
+      : stockOut && activeWorkflow.guard === 'karigar'
+        ? // An EDIT of a karigar issue resolves the same way a create does. Otherwise the two paths would disagree
+          // about what a tagged issue line means: create refuses an unavailable tag and records its identity.
+          await resolveIssuedKarigarTagIdentitiesTx(tx, scope, input.lines)
+        : new Map<number, number>();
     const writes = [
       { table: 'KR_DATA', rows: [hdr] },
       {
@@ -1094,19 +1705,20 @@ export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
         rows: detlRows(
           key,
           policy.vchType,
-          receive ? INOUT_RECEIPT : INOUT_ISSUE,
+          inoutType,
           input.karigarAc,
           fineOf,
           input.lines,
           identity,
           policy.bookName,
           { no: input.saleBillNo, book: input.saleBillBook },
+          tagIdentities,
         ),
       },
       ...(idtlRows(
         key,
         policy.vchType,
-        INOUT_RECEIPT,
+        inoutType,
         input.karigarAc,
         identity.vchDate,
         input.lines,
@@ -1118,7 +1730,7 @@ export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
               rows: idtlRows(
                 key,
                 policy.vchType,
-                INOUT_RECEIPT,
+                inoutType,
                 input.karigarAc,
                 identity.vchDate,
                 input.lines,
@@ -1132,15 +1744,37 @@ export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
         rows: stockRows(
           key,
           policy.vchType,
-          receive ? 'I' : 'O',
-          receive ? '+' : '-',
+          stockOut ? 'O' : 'I',
+          stockSign,
           input.karigarAc,
           requestedDate,
           fineOf,
           input.lines,
+          policy.bookName,
+          tagIdentities,
         ),
       },
     ];
+    /**
+     * Rebuild the barcode records the delete below removes.
+     *
+     * WP-08c: `karigarWriteSet` includes `BAR_DETL`, so the delete took the tag's barcode row with it, and only
+     * the CREATE path had a builder — the row was never written back. The physical ornament then existed with
+     * no tag record at all, and `issueTagTx` (which resolves availability from `TAG_STOCK` or `BAR_DETL`) could
+     * no longer sell it. Plan §7.1 invariant 11 requires an edit to restore the complete prior state.
+     *
+     * The identities were resolved above, before the write set, because the stock movements carry them too.
+     */
+    if (!stockOut && activeWorkflow.includeBarcodes) {
+      const barcodeRows = karigarBarcodeRows(
+        key,
+        policy.vchType,
+        requestedDate,
+        input.lines,
+        tagIdentities,
+      );
+      if (barcodeRows.length) writes.push({ table: 'BAR_DETL', rows: barcodeRows });
+    }
     // TR_KR_ISU.cs:5033-5039 deletes the complete derived write set before reposting. Its sole
     // INSERT INTO DELETE_DATA is in delete at TR_KR_ISU.cs:5373, so edit intentionally writes none.
     await deleteVoucherWriteSetTx(tx, {
@@ -1158,9 +1792,25 @@ export async function editKarigar(prisma: any, input: KarigarLifecycleInput) {
   });
 }
 
+export async function editOldItemSale(
+  prisma: any,
+  input: Omit<KarigarLifecycleInput, 'mode'> & { mode?: 'receive' },
+) {
+  const lineFineTotal = round3(input.lines?.reduce((sum, line) => sum + oldItemSaleFine(line), 0) ?? 0);
+  if (oldItemSaleValue(input, input.partyFine != null ? num(input.partyFine) : lineFineTotal) <= 0) {
+    throw new KarigarValidationError('old item sales requires party fine or item amount');
+  }
+  return editKarigar(
+    prisma,
+    { ...input, mode: 'receive' } as KarigarLifecycleInput,
+    OLD_ITEM_SALE_WORKFLOW,
+  );
+}
+
 export async function deleteKarigar(
   prisma: any,
   input: DeleteKarigarInput,
+  guard: KarigarBookGuard = 'karigar',
 ): Promise<{ reversed: true }> {
   const scope = completeScope({ ...input.scope, coBook: input.scope.coBook ?? input.book });
   const vchNo = formatVoucherNo(input.vchNo);
@@ -1176,6 +1826,7 @@ export async function deleteKarigar(
       writes: [{ table: 'KR_DATA', rows: [{ CO_CODE: scope.coCode, VCH_DATE: h.VCH_DATE }] }],
     });
     const policy = await karigarBookPolicyTx(tx, scope);
+    assertKarigarBookGuard(scope, policy, guard);
     const details: Record<string, unknown>[] = await tx.$queryRawUnsafe(
       `SELECT "SR_NO","AC_CODE","IT_CODE","TAG_NO","NET_AMT","IT_TYPE","ITM_NWT","ITM_FINE","INOUT_TYPE"
        FROM "KR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
@@ -1188,7 +1839,9 @@ export async function deleteKarigar(
       vchNo,
     );
     const mode = String(details[0]?.INOUT_TYPE ?? '') === INOUT_RECEIPT ? 'receive' : 'issue';
-    await assertKarigarReplacementSafeTx(tx, scope, vchNo, String(h.AC_CODE ?? ''), mode, []);
+    if (guard === 'karigar') {
+      await assertKarigarReplacementSafeTx(tx, scope, vchNo, String(h.AC_CODE ?? ''), mode, []);
+    }
     const now = new Date();
     const base = {
       CO_CODE: scope.coCode,
@@ -1242,4 +1895,11 @@ export async function deleteKarigar(
     });
     return { reversed: true };
   });
+}
+
+export async function deleteOldItemSale(
+  prisma: any,
+  input: DeleteKarigarInput,
+): Promise<{ reversed: true }> {
+  return deleteKarigar(prisma, input, 'old-item-sale');
 }

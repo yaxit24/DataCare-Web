@@ -1,0 +1,12 @@
+{
+  "command": [
+    "pnpm",
+    "test:browser"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T15:17:17.014042+00:00",
+  "finishedAtUtc": "2026-09-11T15:17:36.141965+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/browser-smoke.txt"
+}

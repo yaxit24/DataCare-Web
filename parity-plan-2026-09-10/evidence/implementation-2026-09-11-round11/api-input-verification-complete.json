@@ -1,0 +1,11 @@
+{
+  "verifiedAtUtc": "2026-09-11T15:08:20.608374+00:00",
+  "capturedInputs": 1313,
+  "changedInputs": [
+    "web/apps/web/test/sales-return-bill-replay.journey.mjs"
+  ],
+  "addedInputs": [],
+  "status": "failed",
+  "snapshot": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/api-input-snapshot-complete.json",
+  "snapshotSha256": "b982cb84adbbb55c08b6fa2087945eb1242092704edd28107fd27784c43011cd"
+}

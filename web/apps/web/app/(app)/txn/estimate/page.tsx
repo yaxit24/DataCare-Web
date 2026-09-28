@@ -2,6 +2,13 @@
 import { useState } from 'react';
 import { post, downloadPdf, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { fineFor, labourCharge } from '@datacare/core';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 interface Line {
   itCode: string;
@@ -11,7 +18,142 @@ interface Line {
   touch: string;
   rate: string;
   making: string;
+  tagNo: string;
+  ordNo: string;
+  ordYrcd: string;
+  ordDbcd: string;
+  ordSrno: string;
+  isuNo: string;
+  isuYrcd: string;
+  isuDbcd: string;
+  isuSrno: string;
+  ghtWt: string;
+  westPct: string;
+  fineWt: string;
+  metalAmount: string;
+  labourPct: string;
+  labourFixed: string;
+  otherAmount: string;
+  huid: string;
+  designNo: string;
+  itmSize: string;
+  lessWt: string;
+  tblCode: string;
+  mrp: string;
+  bagWt: string;
+  tagGrossWt: string;
+  tagNetWt: string;
+  ghtPct: string;
+  itemLot: string;
+  remark: string;
+  discountPct: string;
+  ghatAmount: string;
+  rateWith: string;
+  rateType: string;
+  tagCost: string;
+  karigarNetWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
+  karigarName: string;
+  employeeCode: string;
+  prCode: string;
+  designImageId: string;
+  hallmarkId2: string;
+  hallmarkId3: string;
+  hallmarkId4: string;
+  hallmarkIdWt: string;
+  hallmarkId2Wt: string;
+  hallmarkId3Wt: string;
+  hallmarkId4Wt: string;
 }
+/**
+ * P7 extended grid columns: desktop columns this form has and the web did not.
+ *
+ * Every entry was verified against the WRITER, not the API interface — a field present on the
+ * interface is not necessarily persisted (purchase hard-codes ITM_SIZE to blank, and five
+ * SaleLineInput fields have no SL_DETL column at all), and such a cell would silently discard
+ * what the operator types.
+ */
+const extendedLineFields: Array<[keyof Line, string]> = [
+  ['tagNo', 'TagNo'],
+  ['ordNo', 'OrdNo'],
+  ['ordYrcd', 'OrdYr'],
+  ['ordDbcd', 'OrdBk'],
+  ['ordSrno', 'OrdSr'],
+  ['isuNo', 'IsuNo'],
+  ['isuYrcd', 'IsuYr'],
+  ['isuDbcd', 'IsuBk'],
+  ['isuSrno', 'IsuSr'],
+  ['ghtWt', 'GhtWt'],
+  ['westPct', 'West%'],
+  ['fineWt', 'Fine'],
+  ['metalAmount', 'ItAmt'],
+  ['labourPct', 'Lbr%'],
+  ['labourFixed', 'LbrFix'],
+  ['otherAmount', 'OthAmt'],
+  ['huid', 'HuId'],
+  ['designNo', 'Design'],
+  ['itmSize', 'Size'],
+  ['lessWt', 'LsWt'],
+  ['tblCode', 'Counter'],
+  ['mrp', 'Mrp'],
+  ['bagWt', 'BagWt'],
+  ['tagGrossWt', 'TagGwt'],
+  ['tagNetWt', 'TagNwt'],
+  ['ghtPct', 'Ght%'],
+  ['itemLot', 'ItmLot'],
+  ['remark', 'Remark'],
+  ['discountPct', 'LDisc%'],
+  ['ghatAmount', 'GhtAmt'],
+  ['rateWith', 'RtWith'],
+  ['rateType', 'RateType'],
+  ['tagCost', 'TagCost'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
+  ['karigarName', 'KrCode'],
+  ['employeeCode', 'EmpCod'],
+  ['prCode', 'PrCost'],
+  ['designImageId', 'Image'],
+  ['hallmarkId2', 'HmId2'],
+  ['hallmarkId3', 'HmId3'],
+  ['hallmarkId4', 'HmId4'],
+  ['hallmarkIdWt', 'HmIdWt'],
+  ['hallmarkId2Wt', 'HmId2Wt'],
+  ['hallmarkId3Wt', 'HmId3Wt'],
+  ['hallmarkId4Wt', 'HmId4Wt'],
+];
+
+/** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
+const NUMERIC_EXTENDED = new Set<string>([
+  'ordSrno',
+  'isuSrno',
+  'ghtWt',
+  'westPct',
+  'fineWt',
+  'metalAmount',
+  'labourPct',
+  'otherAmount',
+  'lessWt',
+  'bagWt',
+  'tagGrossWt',
+  'tagNetWt',
+  'ghtPct',
+  'discountPct',
+  'ghatAmount',
+  'tagCost',
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+  'hallmarkIdWt',
+  'hallmarkId2Wt',
+  'hallmarkId3Wt',
+  'hallmarkId4Wt',
+]);
+
 const blank = (): Line => ({
   itCode: 'GOLD',
   pcs: '1',
@@ -20,6 +162,54 @@ const blank = (): Line => ({
   touch: '',
   rate: '',
   making: '',
+  tagNo: '',
+  ordNo: '',
+  ordYrcd: '',
+  ordDbcd: '',
+  ordSrno: '',
+  isuNo: '',
+  isuYrcd: '',
+  isuDbcd: '',
+  isuSrno: '',
+  ghtWt: '',
+  westPct: '',
+  fineWt: '',
+  metalAmount: '',
+  labourPct: '',
+  labourFixed: '',
+  otherAmount: '',
+  huid: '',
+  designNo: '',
+  itmSize: '',
+  lessWt: '',
+  tblCode: '',
+  mrp: '',
+  bagWt: '',
+  tagGrossWt: '',
+  tagNetWt: '',
+  ghtPct: '',
+  itemLot: '',
+  remark: '',
+  discountPct: '',
+  ghatAmount: '',
+  rateWith: '',
+  rateType: '',
+  tagCost: '',
+  karigarNetWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
+  karigarName: '',
+  employeeCode: '',
+  prCode: '',
+  designImageId: '',
+  hallmarkId2: '',
+  hallmarkId3: '',
+  hallmarkId4: '',
+  hallmarkIdWt: '',
+  hallmarkId2Wt: '',
+  hallmarkId3Wt: '',
+  hallmarkId4Wt: '',
 });
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
@@ -31,6 +221,20 @@ export default function EstimatePage() {
   const [discountAmount, setDiscountAmount] = useState('');
   const [interState, setInterState] = useState(false);
   const [lines, setLines] = useState<Line[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [res, setRes] = useState<any>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -39,9 +243,16 @@ export default function EstimatePage() {
 
   // live line preview (matches sales/computeLine): fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
   const calc = (l: Line) => {
-    const fine = r2((n(l.netWt) * n(l.touch)) / 100);
+    const fine = fineFor('sale', { netWt: n(l.netWt), touch: n(l.touch) });
     const metal = r2(fine * n(l.rate));
-    const mk = r2(n(l.netWt) * n(l.making));
+    // P5/P7: this grid now carries ghat, so per-gram labour is (net + ghat) x rate unless the company
+    // switches ghat off (LBR_WITH_GHT, desktop blank default 'Y').
+    const mk = labourCharge('per_gram', {
+      netWt: n(l.netWt),
+      ghatWt: n(l.ghtWt),
+      withGhat: true,
+      rate: n(l.making),
+    });
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
@@ -66,6 +277,17 @@ export default function EstimatePage() {
           lines: lines
             .filter((l) => l.itCode && (l.netWt || l.rate))
             .map((l) => ({
+              // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+              // explicit zero is an override at the writer and defeats the server's own derivation.
+              ...Object.fromEntries(
+                extendedLineFields
+                  .map(([key]) => [
+                    key,
+                    String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                  ])
+                  .filter(([, v]) => v !== '')
+                  .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+              ),
               itCode: l.itCode,
               pcs: n(l.pcs),
               grossWt: n(l.grossWt),
@@ -146,7 +368,13 @@ export default function EstimatePage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Items</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="estimate-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -158,6 +386,7 @@ export default function EstimatePage() {
                 <th className="num">Making/g</th>
                 <th className="num">Fine</th>
                 <th className="num">Amount</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -218,6 +447,14 @@ export default function EstimatePage() {
                     </td>
                     <td className="num">{c.fine.toLocaleString('en-IN')}</td>
                     <td className="num">{c.net.toLocaleString('en-IN')}</td>
+                    <ExtendedBodyCells
+                      full={fullGrid}
+                      fields={extendedLineFields}
+                      line={l}
+                      row={i}
+                      baseColumns={10}
+                      setValue={(row, key, value) => setLine(row, key, value)}
+                    />
                     <td>
                       <button
                         type="button"

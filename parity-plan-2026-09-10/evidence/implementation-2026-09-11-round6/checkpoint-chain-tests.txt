@@ -1,0 +1,39 @@
+{
+  "validatedAt": "2026-09-11T08:31:46.918921+00:00",
+  "status": "passed",
+  "positiveControl": "In-memory current checkpoint chained to unchanged prior bytes",
+  "priorCheckpoint": "23-implementation-checkpoint-round5.json",
+  "priorCheckpointSha256": "2f702b34c8e04aa7ad2704e7dc1c3d70846c5e0d35761b206b35a03e112a0498",
+  "negativeControls": [
+    {
+      "name": "omitted-implementation-source",
+      "rejected": true
+    },
+    {
+      "name": "stale-implementation-source",
+      "rejected": true
+    },
+    {
+      "name": "omitted-prior-source",
+      "rejected": true
+    },
+    {
+      "name": "missing-prior-checkpoint",
+      "rejected": true
+    },
+    {
+      "name": "tampered-prior-checkpoint",
+      "rejected": true
+    },
+    {
+      "name": "stale-verification-artifact",
+      "rejected": true
+    },
+    {
+      "name": "stale-implementation-artifact",
+      "rejected": true
+    }
+  ],
+  "errors": [],
+  "limits": "Validator self-test only. No checkpoint created or changed; no application acceptance."
+}

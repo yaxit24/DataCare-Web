@@ -1,0 +1,5 @@
+{
+  "purpose": "Retain actual synthetic saved/state JSON only when actual UI refuses a200state response, and fail promptly. No auth tokens/passwords/bodies are included. No response or product is changed.",
+  "beforeSha256": "70a1f89707581ea7df40b2a1975349d6c8a913248fd2c04d82909ffac1b6a4eb",
+  "afterSha256": "978424a28461111d666aa51fb685384590c66c8e52790626e074a5cbd97dbf4d"
+}

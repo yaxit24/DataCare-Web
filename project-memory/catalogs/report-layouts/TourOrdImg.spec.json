@@ -1,0 +1,330 @@
+{
+ "report": "TourOrdImg",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 275,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 180,
+       "top": 30,
+       "width": 1679,
+       "height": 240,
+       "text": "Received Item"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 3736,
+       "top": 30,
+       "width": 839,
+       "height": 240,
+       "text": "Pcs"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 4966,
+       "top": 30,
+       "width": 839,
+       "height": 240,
+       "text": "Weight"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 6121,
+       "top": 30,
+       "width": 839,
+       "height": 240,
+       "text": "Touch"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 60,
+       "top": 255,
+       "width": 10230,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 60,
+       "top": 255,
+       "width": 0,
+       "height": 405
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 270,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 180,
+       "top": 15,
+       "width": 3540,
+       "height": 226,
+       "dataSource": "{SL_PR_DETL.IT_DESC}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 3922,
+       "top": 15,
+       "width": 653,
+       "height": 204,
+       "dataSource": "{SL_PR_DETL.ITM_PCS}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 5079,
+       "top": 15,
+       "width": 726,
+       "height": 204,
+       "dataSource": "{SL_PR_DETL.ITM_NWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 6162,
+       "top": 15,
+       "width": 798,
+       "height": 204,
+       "dataSource": "{SL_PR_DETL.ITM_TOUCH}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 7457,
+       "top": 15,
+       "width": 1273,
+       "height": 216,
+       "dataSource": "{SL_PR_DETL.ITM_RATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 9000,
+       "top": 15,
+       "width": 1185,
+       "height": 216,
+       "dataSource": "{SL_PR_DETL.NET_AMT}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 60,
+       "top": 270,
+       "width": 10230,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 330,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 60,
+       "top": 0,
+       "width": 7020,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 2880,
+       "top": 60,
+       "width": 839,
+       "height": 240,
+       "text": "Total :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 3908,
+       "top": 60,
+       "width": 667,
+       "height": 216,
+       "dataSource": "Sum ({SL_PR_DETL.ITM_PCS})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 5063,
+       "top": 60,
+       "width": 742,
+       "height": 216,
+       "dataSource": "Sum ({SL_PR_DETL.ITM_NWT})"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "StringField",
+   "text": "'Gst No : ' + {AC_MAST.AC_GSTNO}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_MOBILE} <> '' then 'Mo : ' + {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then 'Ph : ' + {AC_MAST.AC_MOBILE} else 'Mo : ' + {AC_MAST.AC_MOBILE2}"
+  },
+  {
+   "name": "ClAmt",
+   "ref": "{@ClAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "ClAmtCrDr",
+   "ref": "{@ClAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@ClAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "CoAdd1",
+   "ref": "{@CoAdd1}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD1} else {CO_MAST.CO_ADD1}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD2} + ' , ' + {LOCT_MAST.LC_ADD3} else {CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_CITY} + ' Mo : ' + {LOCT_MAST.LC_MOBILE} + ' Ph : ' + {LOCT_MAST.LC_PHONE} else {CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE} + ' Ph : ' + {CO_M"
+  },
+  {
+   "name": "CoName",
+   "ref": "{@CoName}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_NAME} ELSE {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "InVoiceType",
+   "ref": "{@InVoiceType}",
+   "type": "StringField",
+   "text": "'ORIGINAL'"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "StringField",
+   "text": "{ITEM_MAST.IT_NAME} + ' Dsgn : ' + {SL_ORD_DETL.DESIGN_NO}"
+  },
+  {
+   "name": "OldItem",
+   "ref": "{@OldItem}",
+   "type": "StringField",
+   "text": "'N'"
+  },
+  {
+   "name": "OpAmt",
+   "ref": "{@OpAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpAmtCrDr",
+   "ref": "{@OpAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@OpAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "Tax",
+   "ref": "{@Tax}",
+   "type": "StringField",
+   "text": "'Tax : ' & {SL_ORD_DATA.TAX_PRC} & '% :'"
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": "{SL_ORD_DATA.CASH_AMT} +{SL_ORD_DATA.CARD_AMT}+{SL_ORD_DATA.CHQ_AMT}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{SL_ORD_DATA.CO_YEAR}+{SL_ORD_DATA.CO_BOOK}+{SL_ORD_DATA.VCH_NO}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "StringField",
+   "text": "if {SL_ORD_DATA.TOT_AMT} <> 0 then ucase(ToWords ({SL_ORD_DATA.TOT_AMT},0 ))"
+  }
+ ],
+ "sectionCount": 3,
+ "objectCount": 17,
+ "formulaCount": 22
+}

@@ -197,10 +197,23 @@ describe('a sale projects to the desktop’s four Rojmel rows', () => {
   it('reverses direction for an inward voucher (a purchase brings metal IN)', () => {
     const purchase = buildSaleRojmel(ctx, lines, { partyAmount: 1515 }, false);
     expect(purchase.filter((r) => r.IT_TYPE !== 'A').every((r) => r.SIGN === '+')).toBe(true);
-    // Revenue debited, party credited — the mirror of a sale.
-    expect(purchase[0]!.DR_AMT).toBe(1087);
-    expect(purchase[0]!.CR_AMT).toBe(0);
-    const party = purchase.find((r) => r.AC_CODE === '000888')!;
+    /**
+     * Selected by ROW TYPE, not by array position.
+     *
+     * These lines carry no rate, so an inward voucher now also emits the unpriced-metal row (type `14`) measured on
+     * all 51 captured purchases — one per line, on the party, carrying fine, with no money. Asserting `purchase[0]`
+     * was asserting the emission ORDER, which the day book does not depend on: rows are identified by `LEDR_KEY`.
+     */
+    const typeOf = (r: { LEDR_KEY: string }) => r.LEDR_KEY.slice(21, 23);
+    const money = purchase.find((r) => typeOf(r) === '01')!;
+    expect(money.DR_AMT).toBe(1087);
+    expect(money.CR_AMT).toBe(0);
+    // One metal row per line, and it books weight rather than money.
+    const metal = purchase.filter((r) => typeOf(r) === '14');
+    expect(metal).toHaveLength(lines.length);
+    expect(metal.every((r) => r.DR_AMT === 0 && r.CR_AMT === 0)).toBe(true);
+    expect(metal.every((r) => r.AC_CODE === '000888')).toBe(true);
+    const party = purchase.find((r) => r.AC_CODE === '000888' && r.IT_TYPE === 'A')!;
     expect(party.CR_AMT).toBe(1515);
     expect(party.DR_AMT).toBe(0);
   });

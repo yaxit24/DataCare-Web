@@ -1,0 +1,23 @@
+{
+  "capturedAtUtc": "2026-09-11T16:32:19.728029+00:00",
+  "initialResult": "failed",
+  "failure": "Ctrl+F2 exact URL assertion at fixed 700ms observed dashboard",
+  "pageErrors": [],
+  "targetRouteRequestObserved": true,
+  "correction": "Wait for authenticated shell visibility and exact URL from one key press, preserving all destinations and assertions. No route retry or product code change.",
+  "source": "web/apps/web/test/browser.smoke.mjs",
+  "artifacts": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/browser-smoke-first-diagnostics/diagnostics.json",
+      "sha256": "5df78b82d4062ac058ce4d88906180be1ef7be068dcfa7384ad2afe487dcf295"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/browser-smoke-first-diagnostics/page.html",
+      "sha256": "cb7ec64276b6fcf84a925e51179f0def47104c2bf733888bb9aa64765b284ebd"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/browser-smoke-first-diagnostics/page.png",
+      "sha256": "e1c1f4a68fbdb581272592443d7fe9474f5ba1d882659a378e046b471770aea3"
+    }
+  ]
+}

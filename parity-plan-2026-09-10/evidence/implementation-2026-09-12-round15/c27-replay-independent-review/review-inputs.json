@@ -1,0 +1,99 @@
+{
+  "status": "source-and-fixture-reviewed",
+  "reviewerExecutedTests": 0,
+  "ownerReportedTests": 44,
+  "fixtureCases": 16,
+  "completePhaseSnapshots": 65,
+  "confirmedRuntimeDefects": [],
+  "compositionIssue": "Current c27 baselineFine10 does not satisfy separate guard finiteFine0 profile; no common ready fixture yet.",
+  "references": [
+    {
+      "path": "/tmp/datacare-round15-c27-replay/ready-manifest.json",
+      "sha256": "3a0fa39831b2ce7e63465be4477a0c5fc3c7368a5b6aa66dfaf917a0e9d66957"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/implementation-contract.md",
+      "sha256": "c6103813d60698e0d3fbb49f19a8bb0f53ac0cd38c65647f6300acba973f8e91"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/author-fixture.py",
+      "sha256": "51ddb4f98b5515b3503c613744c8f9775f5d44c82bcac38746e7a3f4c83da586"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/original-independent-fixture.json",
+      "sha256": "30169f426d943e0ebfde4f82bbde957603421a4163b4fa0ffafcec9e5a24da10"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/fixture-freeze.json",
+      "sha256": "28d0590afd37b4c061808a8a2150d1843bc8711d9881c24574238d581560a5af"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/fixture-schema-completeness-correction.json",
+      "sha256": "6aa4ade366595a46624a8877b210090057dedbfe89c34d569f15acbf3654316e"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/staged/web/packages/core/src/saleReturnOtherAmountReplay.ts",
+      "sha256": "5c102ded89af3fb885b46967d979f45dcf91c45e4372fbce0369a7ff852c8ee4"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/staged/web/packages/core/test/saleReturnOtherAmountReplay.test.ts",
+      "sha256": "e7f6e21f1d4609679ddf9a3a8578d0296f7b3bb9fcf5733a7f087dbe76f89137"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/staged/web/packages/core/test/fixtures/saleReturnOtherAmountReplay.independent.json",
+      "sha256": "928fb13f279c70eba0401fa4c7115bc1cfed5a8070a75f3b28e4e4ee2c823d28"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/focused-tests.txt",
+      "sha256": "da7f946eb6ffae82af12472e64842af85f83be8cc58e52499ce567651b81010f"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay/strict-types-first.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingSaveProjection.ts",
+      "sha256": "7278d4ef822b5cc6c0e48620a824ec890f69f948ee2023137a44fbd46f05d138"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnHeaderFloat.ts",
+      "sha256": "f7d0db544f76a165ed112bd9d87557db59a482f5e57b755b0c3d8d10c47c1327"
+    },
+    {
+      "path": "/tmp/datacare-round15-save-guards/implementation-contract.md",
+      "sha256": "de7f4a6e51035d95f9340bc1152eeb7f5977eff1b6eeae821e2eda1146d42358"
+    },
+    {
+      "path": "/tmp/datacare-round15-save-guards/web/packages/core/test/fixtures/saleReturnSaveGuards.independent.json",
+      "sha256": "6af7121c2952c9be055f1e83671d0e1bd0139c80a1d81bc9482c1edb90fd8e78"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay-review/literal-structure-review.json",
+      "sha256": "05f808ff6c2316867473abea261137f4745de315042c9302c92471650185a46b"
+    },
+    {
+      "path": "/tmp/datacare-round15-c27-replay-review/review.md",
+      "sha256": "bb0dcbc83d2b99268091dd6dfd5311e7e4816bea2a2535aaf090d235d6a5c1c2"
+    }
+  ]
+}

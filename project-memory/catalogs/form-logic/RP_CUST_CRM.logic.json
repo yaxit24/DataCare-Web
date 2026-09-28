@@ -1,0 +1,37 @@
+{
+ "form": "RP_CUST_CRM",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "CUST_DATA",
+  "CUST_DETL",
+  "EMP_MAST",
+  "TAG_IMAGE_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "CUST_DETL"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "CUST_DATA",
+  "CUST_DETL",
+  "EMP_MAST",
+  "TAG_IMAGE_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 4,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4237
+}

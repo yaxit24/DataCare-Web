@@ -1,0 +1,46 @@
+{
+ "form": "TR_EMP_JV",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "APR_IDTL",
+  "EMP_DATA",
+  "EMP_MAST",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "AC_DATA",
+   "APR_IDTL",
+   "EMP_DATA",
+   "REMARK_DATA",
+   "ROJ_MEL_DATA",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "APR_IDTL",
+  "EMP_DATA",
+  "EMP_MAST",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 17,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 3557
+}

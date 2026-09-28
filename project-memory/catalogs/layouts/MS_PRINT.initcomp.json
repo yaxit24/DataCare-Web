@@ -1,0 +1,87 @@
+{
+ "form": "MS_PRINT",
+ "controlCount": 7,
+ "byKind": {
+  "button": 3,
+  "panel": 1,
+  "check": 3
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PanelControl1": [
+   "chkOrg",
+   "BtnExit",
+   "chkTrip",
+   "BtnPrint",
+   "BtnView",
+   "ChkDup"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "205,104",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "PanelControl1",
+   "type": "PanelControl",
+   "location": "12,12",
+   "size": "307,165",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "108,104",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnView",
+   "type": "SimpleButton",
+   "location": "11,104",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&View",
+   "kind": "button"
+  },
+  {
+   "name": "chkOrg",
+   "type": "CheckBox",
+   "location": "105,23",
+   "size": "99,20",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "ChkDup",
+   "type": "CheckBox",
+   "location": "37,64",
+   "size": "112,20",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "chkTrip",
+   "type": "CheckBox",
+   "location": "167,64",
+   "size": "113,20",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "check"
+  }
+ ]
+}

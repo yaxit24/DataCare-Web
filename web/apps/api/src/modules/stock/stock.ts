@@ -206,9 +206,19 @@ export async function createTag(
   });
 }
 
-/** Resolve and reserve a tag under an identity advisory lock. TAG_STOCK rows are removed; imported
- * BAR_DETL rows remain and become unavailable when this transaction writes its MAIN_STOCK '-' leg. */
-export async function issueTagTx(tx: any, key: TagKey): Promise<ResolvedTagIdentity> {
+/**
+ * Resolve a live tag identity WITHOUT consuming it.
+ *
+ * Same resolution and same refusals as `issueTagTx` — this is that function's first half, extracted so a caller
+ * that must learn a tag's serial does not have to reserve the tag to find it out. Karigar issue needs exactly
+ * that: the desktop records an issued tag as a signed `-` movement and has no live-tag table at all
+ * (`TR_KR_ISU.cs` references `TAG_STOCK` zero times), so consuming the web's `TAG_STOCK` row would add a
+ * reversal obligation the desktop does not have.
+ *
+ * The advisory lock is still taken, and is transaction-scoped, so a caller that goes on to consume the tag in
+ * the same transaction holds the same lock throughout.
+ */
+export async function resolveLiveTagIdentityTx(tx: any, key: TagKey): Promise<ResolvedTagIdentity> {
   await tx.$executeRawUnsafe(
     'SELECT pg_advisory_xact_lock(hashtext($1))',
     `tag-issue|${key.CO_CODE}|${key.LC_CODE}|${key.TAG_NO}`,
@@ -221,7 +231,6 @@ export async function issueTagTx(tx: any, key: TagKey): Promise<ResolvedTagIdent
   if (stockRows.length > 1) throw new TagIdentityAmbiguousValidationError(key.TAG_NO);
   if (stockRows.length === 1) {
     const row = stockRows[0] as Record<string, unknown>;
-    await tx.$executeRawUnsafe(`DELETE FROM "TAG_STOCK" WHERE ${w.sql}`, ...w.params);
     return {
       CO_CODE: key.CO_CODE,
       LC_CODE: key.LC_CODE,
@@ -246,6 +255,17 @@ export async function issueTagTx(tx: any, key: TagKey): Promise<ResolvedTagIdent
     source: 'BAR_DETL',
     stock: row,
   };
+}
+
+/** Resolve and reserve a tag under an identity advisory lock. TAG_STOCK rows are removed; imported
+ * BAR_DETL rows remain and become unavailable when this transaction writes its MAIN_STOCK '-' leg. */
+export async function issueTagTx(tx: any, key: TagKey): Promise<ResolvedTagIdentity> {
+  const identity = await resolveLiveTagIdentityTx(tx, key);
+  if (identity.source === 'TAG_STOCK') {
+    const w = buildTagWhere(key);
+    await tx.$executeRawUnsafe(`DELETE FROM "TAG_STOCK" WHERE ${w.sql}`, ...w.params);
+  }
+  return identity;
 }
 
 export async function restoreTagTx(
@@ -781,7 +801,7 @@ export async function stockAdjust(
       TBL_CODE: l.tblCode ?? '000',
       TR_TYPE: 'A',
       ITM_SIGN: l.sign === '-' ? '-' : '+',
-      ITM_QTY: N(l.netWt) || N(l.pcs) || 1,
+      ITM_QTY: N(l.pcs) || 1,
       ITM_PCS: N(l.pcs),
       ITM_GWT: N(l.grossWt),
       ITM_NWT: N(l.netWt),
@@ -918,7 +938,7 @@ export async function tagTransfer(
         DESIGN_NO: l.designNo ?? null,
         ITM_SIZE: l.itmSize ?? null,
         ITM_WEST: N(l.westPct),
-        ITM_QTY: N(l.netWt) || N(l.pcs) || 1,
+        ITM_QTY: N(l.pcs) || 1,
         ITM_PCS: N(l.pcs),
         ITM_GWT: N(l.grossWt),
         ITM_NWT: N(l.netWt),
@@ -1034,7 +1054,7 @@ export async function counterTransfer(
         TR_TYPE: 'A',
         IT_CODE: l.itCode,
         TAG_NO: l.tagNo ?? 'N',
-        ITM_QTY: N(l.netWt) || N(l.pcs) || 1,
+        ITM_QTY: N(l.pcs) || 1,
         ITM_PCS: N(l.pcs),
         ITM_GWT: N(l.grossWt),
         ITM_NWT: N(l.netWt),

@@ -1,0 +1,7 @@
+# Saved Return book-switch regression found by the first combined Round9 browser
+
+The first actual combined browser run stopped in the **existing** saved Return delayed-load A→B→A journey at `sales-return-saved.journey.mjs:493`. The new saved-card integration disabled its configured-book selector for every `busy` state, preventing the established workflow that changes scope while a read is still pending. This failure occurred before the new replay journey; no new replay browser acceptance is claimed for that run.
+
+The narrow correction in `apps/web/components/SaleReturnSavedPanel.tsx` changes that selector's condition from `busy || dirty || previewActive` to `saving || dirty || previewActive`. An ordinary pending read can again be invalidated by a deliberate book change. In-flight metadata writes, unsaved metadata and active previews remain protected. The existing scope/request generation logic prevents the late read from repopulating the new book; no new identity policy or financial behavior is introduced.
+
+The prior staged and ready manifests remain immutable historical local-check stages. Root will rebuild and rerun the **unchanged existing delayed-load assertions**, as well as the new preview journey. That real held-read regression is the meaningful check; no test was added merely to restate a JSX disabled property. Further local checks await root's serialized compiler schedule. No DB, browser or build was started by this agent.

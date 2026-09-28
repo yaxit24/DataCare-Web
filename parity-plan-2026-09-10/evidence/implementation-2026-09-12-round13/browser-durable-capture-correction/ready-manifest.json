@@ -1,0 +1,68 @@
+{
+  "kind": "session-context-browser-durable-cdp-observation-v1",
+  "status": "ready-unexecuted",
+  "createdAtUtc": "2026-09-11T21:32:51.117068+00:00",
+  "priorCorrectionManifest": {
+    "path": "/tmp/datacare-session-context-next/browser-response-capture-corrected/ready-manifest.json",
+    "sha256": "6ae933ac365a51841d5f4addf5507aafc2b0ea5ce681f4c688b31c19947e6aba"
+  },
+  "failedRerun": {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/test-results/session-context-real-stack-response-corrected/result.json",
+    "sha256": "94c897a180e0049328cf5041852b4c4e7a4eaedeae74cb5cf56e5238a19d2d00",
+    "status": "failed",
+    "passedChecks": 1,
+    "error": "Could not acquire the actual response from /api/context/select at its response event: response.body: Protocol error (Network.getResponseBody): No resource with given identifier found"
+  },
+  "protocol": {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/playwright-core@1.61.1/node_modules/playwright-core/types/protocol.d.ts",
+    "sha256": "17c6561066a9708a09115ad4b49ff23cf81a607f54278c9b9b5865964906f415",
+    "lines": "12766\u201312780"
+  },
+  "journeyComparison": [
+    {
+      "name": "session-context.journey.mjs",
+      "priorSha256": "d4f3819cc97fdc794b62664553da617cfec99e323013bbb76a6f19f2ec7ffd54",
+      "currentSha256": "e17e926998cde474c8757b6feabe3f8a0614fb67bdfc99a57496a8cfaf7db0bd",
+      "requiredCheckStringsUnchanged": true
+    },
+    {
+      "name": "session-context-lifecycle.journey.mjs",
+      "priorSha256": "bc4dcb18b7ccb2b10ae4e4f892de4fdeb73de82d69d3097ded74c0c32bd37a29",
+      "currentSha256": "3037c004c16d3634507bdb1c5553c3c320bf441215693ad38e11df57fa40b708",
+      "requiredCheckStringsUnchanged": true
+    }
+  ],
+  "requiredChecks": 14,
+  "explicitTransportFaults": 5,
+  "navigationCorrection": "Shell acknowledged success reloads current route; Select success still navigates to dashboard. Fresh Design Book blank Style replaces former dashboard no-Style assertion.",
+  "files": [
+    {
+      "path": "correction.md",
+      "sha256": "bce8a0b0c9a9cb3aaaa03c3a2461bfe3b91d74b959c862ae2171421d0f892d36"
+    },
+    {
+      "path": "durable-observation.patch",
+      "sha256": "c834d3fd05db1001eb4a67e66d4a9f6ee083a3a85bf9eddee8ac43eac63b767d"
+    },
+    {
+      "path": "web/apps/web/test/session-context-lifecycle.journey.mjs",
+      "sha256": "3037c004c16d3634507bdb1c5553c3c320bf441215693ad38e11df57fa40b708"
+    },
+    {
+      "path": "web/apps/web/test/session-context-response-observation.mjs",
+      "sha256": "a536c7d74d7f3c1005ead2c9bad04ecddc3083baeb5473d745630cfc520c4e68"
+    },
+    {
+      "path": "web/apps/web/test/session-context.journey.mjs",
+      "sha256": "e17e926998cde474c8757b6feabe3f8a0614fb67bdfc99a57496a8cfaf7db0bd"
+    }
+  ],
+  "execution": {
+    "browser": false,
+    "database": false,
+    "compiler": false,
+    "tests": false,
+    "formatter": "staged JS only"
+  },
+  "rootRerunRequired": true
+}

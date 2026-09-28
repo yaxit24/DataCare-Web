@@ -1,0 +1,149 @@
+{
+  "schema": "datacare-x13-saved-return-browser-review-v1",
+  "pathBase": "imodule-extracted",
+  "reviewDate": "2026-09-11",
+  "status": "engineering-passed",
+  "desktopAcceptance": false,
+  "run": {
+    "startedAt": "2026-09-11T08:22:27.795Z",
+    "finishedAt": "2026-09-11T08:23:05.943Z",
+    "status": "passed",
+    "database": "disposable localhost:55433 / app_user",
+    "mockedRequests": 0
+  },
+  "journeysPassed": 13,
+  "salesReturnSaved": {
+    "status": "passed",
+    "scope": {
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "R61"
+    },
+    "voucherNo": "00001",
+    "checks": [
+      "Configured SALES RETURNE books and fully scoped saved browse",
+      "Exact saved identities, source year/book/voucher, raw nulls/blanks/decimals/microseconds, known item fallback without false missing-master diagnostics, hidden hallmark/image values and two incoming children",
+      "HUID-only real PUT and authoritative reopen preserve complete database write-set and unchanged NULL description",
+      "Independent real HTTP edit causes409; readable conflict keeps browser draft and blocks automatic replay",
+      "Explicit discard/reload only reads; deliberate revised save preserves all other raw rows and values",
+      "Same voucher in another configured book stays isolated; historical admitted tag instance is visible with metadata writes explicitly denied",
+      "Real held database reads cannot revive cancelled or A\u2192B\u2192A obsolete observations",
+      "Every browser request carries exact scope; metadata bodies exclude numeric/source replacements; no page errors"
+    ],
+    "browserRequests": 15,
+    "mockedResponses": 0,
+    "desktopAcceptance": false
+  },
+  "sources": [
+    {
+      "path": "web/apps/web/test/sales-return-saved.journey.mjs",
+      "sha256": "f116c5d68540d19ab82bb41a489937985f01d35789d191f3d1d5c24731d57f90",
+      "bytes": 30885
+    },
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "f2f5177074705829572aca0e01ea276546281196975513cff827d45abd145385",
+      "bytes": 20725
+    },
+    {
+      "path": "web/apps/web/components/SaleReturnSavedPanel.tsx",
+      "sha256": "353b0e92f8859acc5f15e1a42b0c0216555fac0c987588d0cf8185cfc46ab99b",
+      "bytes": 24288
+    },
+    {
+      "path": "web/apps/web/lib/salesReturnForm.ts",
+      "sha256": "062386988f070b3a828238a594272407a8d3de49be24dc17de9703b0c244aeda",
+      "bytes": 14211
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+      "sha256": "3c8f6e46d9c175793321b852d3adbf434a4214cdd566afad0d1fc979079bb29b",
+      "bytes": 20990
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "05c2218ad69b0c0cd8cf1a4e542816a9fcae5c48057ed8c1b27dc1596ba94a06",
+      "bytes": 24233
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "sha256": "3a769dd9fd4a8cc0280b9ba158f454b583632453702e99f0ad8f521bc358daa1",
+      "bytes": 277717
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "8a88e5f0cbf642a11e6053c870284aaaabfbe6641d97418975535c97e0c062a9",
+      "bytes": 34512
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754",
+      "bytes": 261920
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911070000_sale_return_tag_labour_code/migration.sql",
+      "sha256": "585051aaa5d30794ff5248f3c370050cada7edfc2632cbd107dacac8353a9218",
+      "bytes": 260
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "web/test-results/parity-real-stack-round6-complete/result.json",
+      "sha256": "4dc3cd1364b326f45ea4f2f800a7dea456f940a70e3546fced95d20bf7b50ed1",
+      "bytes": 33543
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round6-first/result.json",
+      "sha256": "e63ba61a0fd7c836e47564a1661a5cbb8984f40d4fa31f0ee1088b280badc027",
+      "bytes": 33882
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-complete.txt",
+      "sha256": "7930ac9f5d3c78422e1cd04d4c312fb8402af0f03dd4d6ba134e57383ad0beda",
+      "bytes": 1214
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-first.txt",
+      "sha256": "7930ac9f5d3c78422e1cd04d4c312fb8402af0f03dd4d6ba134e57383ad0beda",
+      "bytes": 1214
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-browser-review.md",
+      "sha256": "0c708a416d654db7ff7e0310ab3a050f0b2854875bf6f4500b627c60879979b5",
+      "bytes": 7553
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round6-complete/sales-return-saved-loaded-round6.png",
+      "sha256": "4d3b23429c89b1abb5c103ab0b1e17407613bcff23eeb645b05be055d7489825",
+      "bytes": 173899
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round6-complete/sales-return-saved-conflict-round6.png",
+      "sha256": "26910fa10ca4db17962087646b5ea5d2c482f9b5061143f88774a95275cd936c",
+      "bytes": 183050
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round6-complete/sales-return-saved-tagged-readonly-round6.png",
+      "sha256": "31f8a53d2af0fb66cdf4c32098d0f759e91eff810aa8d6a8bbc7b489a2d77835",
+      "bytes": 178701
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round6-complete/sales-return-saved-hallmark-details-round6.png",
+      "sha256": "b66879a48a6ef7a01aa1ada75b12f3fea90b134155afb72955fe23e05a5d4e80",
+      "bytes": 174297
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round6-complete/sales-return-saved-late-load-round6.png",
+      "sha256": "a95056c5242c9e2ff5999a07e00fcb69e3d5925a5a9e8b5d0e03cf08f01f75d3",
+      "bytes": 86904
+    }
+  ],
+  "limits": [
+    "Scoped saved HUID/description metadata only; no complete X13/desktop acceptance.",
+    "Known item and blank employee no-false-diagnostic cases only; missing/ambiguous masters not exercised in this browser fixture.",
+    "Historical tag state is seeded and read-only; creation/admission/consumption are not exercised.",
+    "First result is pre-diagnostic evidence.",
+    "Full API suite outcome is owned by the root and is not asserted by this review."
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "status": "source text comparison only; no runtime/type/DB/browser execution",
+  "apiOutsideReadProjectionByteIdentical": true,
+  "apiExistingExactProjectionBodyIdenticalAfterRemovingOneIndentLevel": true,
+  "readProjectionOnlyChange": "apply existing mapped exact values to Tour as well as Sales",
+  "webDeclaredCases": 19,
+  "apiDeclaredCases": 8,
+  "historicalFamilyCasesUnchanged": 34,
+  "frozenIndependentCases": 16
+}

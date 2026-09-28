@@ -1,0 +1,32 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:41:00.323523+00:00",
+  "finishedAtUtc": "2026-09-11T21:41:01.231778+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-export-core-build.txt",
+  "logSha256": "79da90d454c83eb7b7c76d1548b439a13925b548ccc7911efbe41f4e31f94aa5",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-export-core-build.inputs.json",
+  "inputManifestSha256": "7fcd959ed66776f068f846fb264181e0fe79059e2d61f494d8edf37ca3b5472d",
+  "inputCount": 1796,
+  "changedInputs": [
+    {
+      "path": "web/packages/core/dist/index.d.ts",
+      "beforeSha256": "22cf4d52bd0ba7f1a0dc42531a55e2b7948b3ffc9fe33f61ce157d9a592ae7d0",
+      "afterSha256": "27d64c3ccadea39f7cdfc2c706309355b4cd572522c4748b89cf96f870a4b22d"
+    },
+    {
+      "path": "web/packages/core/dist/index.js",
+      "beforeSha256": "604d6271e47ffefa9b162d64dbd786d5234fc7b84c755f4b494f4250d52a1426",
+      "afterSha256": "6fc4b40302b89111ed4012873b550d588a59258c83ef2299c3bf6bfc52d249f2"
+    }
+  ],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

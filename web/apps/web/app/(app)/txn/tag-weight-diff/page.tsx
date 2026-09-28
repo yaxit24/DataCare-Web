@@ -4,6 +4,9 @@ import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { ParityContainmentNotice } from '../../../../components/ParityContainmentNotice';
+import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /**
  * Tag Weight Change (TR_TAG_WT_DIFF) entry — books the net weight difference (newNetWt − oldNetWt)
@@ -35,6 +38,7 @@ const r2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
 const lineDiff = (l: Line): number => r3(N(l.newNetWt) - N(l.oldNetWt)); // signed (new − old)
 const lineDiffFine = (l: Line): number => r3((Math.abs(lineDiff(l)) * N(l.touch)) / 100); // |diff|·touch/100
 const lineValue = (l: Line): number => r2(lineDiffFine(l) * N(l.rate)); // diffFine·rate
+const containment = parityContainmentRule('tag-weight-difference');
 
 export default function TagWeightDiffPage() {
   const { lcCode, coYear } = useBusinessScope();
@@ -44,9 +48,24 @@ export default function TagWeightDiffPage() {
   const [payAc, setPayAc] = useState('');
   const [payAmt, setPayAmt] = useState('');
   const [lines, setLines] = useState<Line[]>([blank()]);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [res, setRes] = useState<any>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  // P3: absorbSign selects whether the weight difference is absorbed as a gain or a loss.
+  const [absorbSign, setAbsorbSign] = useState('');
   const setLine = (i: number, k: keyof Line, v: string) =>
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
 
@@ -63,10 +82,15 @@ export default function TagWeightDiffPage() {
     e.preventDefault();
     setErr('');
     setRes(null);
+    if (containment.blocked) {
+      setErr(parityContainmentMessage('tag-weight-difference'));
+      return;
+    }
     setBusy(true);
     try {
       setRes(
         await post('/stock/tag-weight-diff', {
+          absorbSign: absorbSign.trim() || undefined,
           coBook: coBook || undefined,
           coYear: coYear || undefined,
           lcCode: lcCode || undefined,
@@ -96,6 +120,7 @@ export default function TagWeightDiffPage() {
   return (
     <div>
       <h1>Tag Weight Difference</h1>
+      <ParityContainmentNotice operation="tag-weight-difference" />
       <p className="muted">
         Correct a tag&apos;s net weight. The net difference (new − old) is booked as a signed stock
         movement and valued at rate. Pick a tag to autofill its item, current net weight, touch and
@@ -103,6 +128,12 @@ export default function TagWeightDiffPage() {
       </p>
       <form onSubmit={submit}>
         <div className="panel">
+          <div className="row">
+            <div className="field">
+              <label>Absorb Sign (+/-)</label>
+              <input value={absorbSign} onChange={(e) => setAbsorbSign(e.target.value)} />
+            </div>
+          </div>
           <div className="row">
             <div className="field">
               <label>Book</label>
@@ -140,7 +171,7 @@ export default function TagWeightDiffPage() {
         </div>
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Weight Changes</h2>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Tag</th>
@@ -272,7 +303,7 @@ export default function TagWeightDiffPage() {
               Net diff {totDiff} g · Diff fine {totDiffFine} g · Value ₹
               {totValue.toLocaleString('en-IN')}
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" disabled={busy || containment.blocked}>
               {busy ? 'Posting…' : 'Post Weight Change'}
             </button>
           </div>

@@ -1,0 +1,425 @@
+{
+  "kind": "x13-configuration-independent-expectations-v1",
+  "createdAtUtc": "2026-09-11T09:30:13.728793+00:00",
+  "status": "source-derived before service implementation review; not desktop execution",
+  "source": [
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/x13-next-configuration-contract.md",
+      "sha256": "e1cb24964b8d1e9ab5dc2fa687f520a5084d08ef9fbe510e9eaad85265171a46"
+    }
+  ],
+  "baseSettings": {
+    "SL_AMT_TYPE": "N",
+    "LBR_ROF": "0",
+    "LBR_RATE_GEN": "N",
+    "ALL_ROF_REMOVE": "N",
+    "LBR_TYPE": "G"
+  },
+  "baseNewSettings": {
+    "LBR_WITH_GHT": "Y"
+  },
+  "basePrerequisites": "one correctly scoped active primary Return book and valid selected year, one CO_SET and CO_SET_NEW, no relevant column overrides, runtime edition unresolved, zero-predicate scale profile",
+  "cases": [
+    {
+      "id": "precision-0",
+      "settings": {
+        "LBR_ROF": "0"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 0
+      }
+    },
+    {
+      "id": "precision-1",
+      "settings": {
+        "LBR_ROF": "1"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 1
+      }
+    },
+    {
+      "id": "precision-2",
+      "settings": {
+        "LBR_ROF": "2"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 2
+      }
+    },
+    {
+      "id": "precision-3",
+      "settings": {
+        "LBR_ROF": "3"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 3
+      }
+    },
+    {
+      "id": "precision4-clamps0",
+      "settings": {
+        "LBR_ROF": "4"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 0
+      }
+    },
+    {
+      "id": "precision-max-int32-clamps0",
+      "settings": {
+        "LBR_ROF": "2147483647"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 0
+      }
+    },
+    {
+      "id": "final-Y-overrides-0",
+      "settings": {
+        "LBR_ROF": "0",
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 2
+      }
+    },
+    {
+      "id": "final-Y-overrides-4",
+      "settings": {
+        "LBR_ROF": "4",
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 2
+      }
+    },
+    {
+      "id": "final-Y-overrides--1",
+      "settings": {
+        "LBR_ROF": "-1",
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 2
+      }
+    },
+    {
+      "id": "final-Y-overrides--2147483648",
+      "settings": {
+        "LBR_ROF": "-2147483648",
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "labourRoundingDecimals": 2
+      }
+    },
+    {
+      "id": "unsupported-negative",
+      "settings": {
+        "LBR_ROF": "-1"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "unsupported-negative-min-int32",
+      "settings": {
+        "LBR_ROF": "-2147483648"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "unsupported-null",
+      "settings": {
+        "LBR_ROF": null
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "unsupported-blank",
+      "settings": {
+        "LBR_ROF": ""
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "unsupported-fraction",
+      "settings": {
+        "LBR_ROF": "1.5"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "unsupported-nan",
+      "settings": {
+        "LBR_ROF": "NaN"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "unsupported-infinite",
+      "settings": {
+        "LBR_ROF": "Infinity"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "Y-cannot-rescue-overflow",
+      "settings": {
+        "LBR_ROF": "2147483648",
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "Y-cannot-rescue-underflow",
+      "settings": {
+        "LBR_ROF": "-2147483649",
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "Y-cannot-rescue-null",
+      "settings": {
+        "LBR_ROF": null,
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "Y-cannot-rescue-fraction",
+      "settings": {
+        "LBR_ROF": "2.5",
+        "ALL_ROF_REMOVE": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "exact-empty-defaults",
+      "settings": {
+        "SL_AMT_TYPE": "",
+        "LBR_RATE_GEN": "",
+        "ALL_ROF_REMOVE": "",
+        "LBR_TYPE": ""
+      },
+      "newSettings": {
+        "LBR_WITH_GHT": ""
+      },
+      "expected": {
+        "saleAmountType": "N",
+        "generateLabourRate": false,
+        "labourIncludesGhat": true,
+        "newRowLabourType": "G"
+      }
+    },
+    {
+      "id": "canonical-P-global-not-pieces",
+      "settings": {
+        "SL_AMT_TYPE": "P"
+      },
+      "newSettings": {},
+      "expected": {
+        "saleAmountType": "P"
+      }
+    },
+    {
+      "id": "canonical-F-width-policy",
+      "settings": {
+        "SL_AMT_TYPE": "F"
+      },
+      "newSettings": {},
+      "expected": {
+        "saleAmountType": "F",
+        "fineColumnWidth": 1000
+      }
+    },
+    {
+      "id": "exact-generation-Y",
+      "settings": {
+        "LBR_RATE_GEN": "Y"
+      },
+      "newSettings": {},
+      "expected": {
+        "generateLabourRate": true
+      }
+    },
+    {
+      "id": "exact-ghat-N",
+      "settings": {},
+      "newSettings": {
+        "LBR_WITH_GHT": "N"
+      },
+      "expected": {
+        "labourIncludesGhat": false
+      }
+    },
+    {
+      "id": "noncanonical-SL_AMT_TYPE-f",
+      "settings": {
+        "SL_AMT_TYPE": "f"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "noncanonical-SL_AMT_TYPE- F",
+      "settings": {
+        "SL_AMT_TYPE": " F"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "noncanonical-LBR_RATE_GEN-y",
+      "settings": {
+        "LBR_RATE_GEN": "y"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "noncanonical-ALL_ROF_REMOVE-Y ",
+      "settings": {
+        "ALL_ROF_REMOVE": "Y "
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "noncanonical-LBR_TYPE-g",
+      "settings": {
+        "LBR_TYPE": "g"
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "noncanonical-LBR_TYPE-None",
+      "settings": {
+        "LBR_TYPE": null
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "noncanonical-SL_AMT_TYPE-None",
+      "settings": {
+        "SL_AMT_TYPE": null
+      },
+      "newSettings": {},
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "noncanonical-ghat-lowercase",
+      "settings": {},
+      "newSettings": {
+        "LBR_WITH_GHT": "n"
+      },
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    },
+    {
+      "id": "null-ghat-not-empty",
+      "settings": {},
+      "newSettings": {
+        "LBR_WITH_GHT": null
+      },
+      "expected": {
+        "canCalculate": false,
+        "policy": null
+      }
+    }
+  ],
+  "limits": [
+    "Expected rejection of NULL/noncanonical/fractional/overflow settings is the proposed strict web profile, not measured VB conversion parity.",
+    "Valid Int32 conversion precedes source >3 clamp and final ALL_ROF_REMOVE override. Unsupported conversion cannot be rescued by finalY.",
+    "Global amount P stays P in policy and follows primary net+ghat inside frozen core; row RATE_TYPE independently selects pieces.",
+    "Width tests reuse the separately frozen8 source/IL vectors; no new expected arithmetic is generated by service or reducer."
+  ]
+}

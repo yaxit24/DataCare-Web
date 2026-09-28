@@ -1,96 +1,61 @@
-# =====================================================================================================
-# Repository scope
-#
-# This repository contains the WEB application only. It deliberately excludes the decompiled desktop
-# source, the installer, and the Crystal report definitions that sit alongside it in the working tree.
-#
-# Those excluded directories are the DataCareNext desktop product: decompiled C# (~969k lines), the
-# extracted installer, and 35 .rpt files. They are the owner's intellectual property and there is no
-# reason for them to leave the working machine — nothing in this repository needs them at runtime, and
-# the parity extraction that runs on the Windows box reads the live SQL Server rather than any source.
-#
-# If they are ever needed in version control, that is a separate, deliberate decision about a separate
-# private repository — not a side effect of publishing the web application.
-# =====================================================================================================
+# DataCare-Web is an owner-authorized private plaintext engineering snapshot.
+# Desktop originals, decompiled/reconstructed source, SQL Server databases, parity captures,
+# implementation plans, project memory, and local project environment snapshots are intentionally
+# versioned. Do not reuse this ignore file as a security boundary or publish the repository.
 
-# ---- Decompiled desktop product and installer: never published --------------------------------------
-/unified/
-/DataCareSetup/
-/DataCareSetup_extracted/
-/extracted_code/
-/extraction_output/
-/zip_contents/
-*.rpt
-*.exe
-*.dll
-*.msi
-*.cab
-
-# The desktop product's own source tree and a zipped copy of it. The Windows box already has the
-# application installed, so putting its source in a repository adds no capability and does move a copy of
-# the owner's product off the machine. Excluded by default; a deliberate decision could include it.
-/DataCareNext_Source/
-/new/
-/build_test/
-/extracted/
-/decompiled/
-
-# ---- Working notes and analysis output --------------------------------------------------------------
-# The audit scripts and gap register quote decompiled logic, so they stay local by default. The parity
-# BUNDLE directory is kept (empty) because the extractors write into it.
-/project-memory/*
-!/project-memory/parity/
-/project-memory/parity/*
-!/project-memory/parity/bundles/
-/project-memory/parity/bundles/*
-!/project-memory/parity/bundles/README.md
-!/project-memory/parity/bundles/.gitkeep
-!/project-memory/parity/g5/
-/project-memory/parity/g5/*
-!/project-memory/parity/g5/.gitkeep
-
-# ---- Assistant and editor state --------------------------------------------------------------------
-/.kiro/
-/.verify_*.md
+# Operating-system and editor metadata
 .DS_Store
+**/.DS_Store
 *.swp
+*.swo
+*~
 .idea/
 .vscode/
 
-# ---- Dependencies and build output -----------------------------------------------------------------
+# JavaScript dependencies and generated outputs
 node_modules/
-dist/
-build/
+.pnpm-store/
 .next/
 .turbo/
+dist/
+build/
 out/
 coverage/
+test-results/
+playwright-report/
+blob-report/
 *.tsbuildinfo
 
-# ---- Secrets: never commit -------------------------------------------------------------------------
-# `.env.example` files ARE committed; real ones are not.
-.env
-.env.*
-!.env.example
-!**/.env.example
-*.pem
-*.key
-*.p12
-*.pfx
-secrets.json
+# Python/tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# 14 MB of compiler output from a prior build attempt; noise, not source.
-/build_errors.txt
-/build_test/
+# Reconstructed-source compiler intermediates (source and original deployment binaries remain tracked)
+/build_test/bin/
+/build_test/obj/
+/extracted_code/DataCareNext/bin/
+/extracted_code/DataCareNext/obj/
+/extracted_code/NextDm/bin/
+/extracted_code/NextDm/obj/
+/DataCareNext_Source/bin/
+/DataCareNext_Source/obj/
+/new/DataCareNext_Source/bin/
+/new/DataCareNext_Source/obj/
+/unified/src/csharp/bin/
+/unified/src/csharp/obj/
+/unified/src/csharp_nextdm/bin/
+/unified/src/csharp_nextdm/obj/
+/unified/src/vbnet/bin/
+/unified/src/vbnet/obj/
 
-# ---- Local runtime artifacts -----------------------------------------------------------------------
-*.log
+# Local runtime volumes and disposable scratch space
 pgdata/
 tmp/
-.pnpm-store/
+*.pid
+*.sock
 
-# ---- Parity captures: data, not code ---------------------------------------------------------------
-# A bundle contains real voucher rows from a live database. Captures are evidence for a review, not
-# repository content, and a desktop bundle may carry customer data.
-/project-memory/parity/bundles/*.json
-/project-memory/parity/g5/*.json
+# Generated tool caches; extraction logs and evidence logs are intentionally retained
+*.cache

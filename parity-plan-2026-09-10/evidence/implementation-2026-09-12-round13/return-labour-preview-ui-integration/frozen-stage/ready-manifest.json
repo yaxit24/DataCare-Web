@@ -1,0 +1,103 @@
+{
+  "version": "return-labour-preview-ui-stage-v1",
+  "status": "frozen staged source and65 declared tests; unexecuted",
+  "declaredTests": 65,
+  "independentUiCases": 26,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "25517835d086d6b22e5f28e9b09cc6669ea03daf33ef850275246576993479a7",
+      "bytes": 4405
+    },
+    {
+      "path": "baseline/apps/web/components/SaleReturnBillReplayPanel.tsx",
+      "sha256": "11478a6b1bb4f59009491606bfcd1ff3ccadd709b08ffce49e021925aee0e54b",
+      "bytes": 24021
+    },
+    {
+      "path": "baseline/apps/web/components/SaleReturnSavedPanel.tsx",
+      "sha256": "79b0af1731dfc0e15b1ecc57070413750c639d8964807f331f09fa10b75ae65b",
+      "bytes": 27145
+    },
+    {
+      "path": "baseline/apps/web/lib/api.ts",
+      "sha256": "752786074a6de23482dc33560ed677751c59fc8d686c2d25d893ad82598cc015",
+      "bytes": 9026
+    },
+    {
+      "path": "baseline/apps/web/lib/pageContext.ts",
+      "sha256": "1f157fc8f55cee17e914bebbf77d5b709f42640f902f10228e41b4478dc20426",
+      "bytes": 7511
+    },
+    {
+      "path": "baseline/apps/web/lib/salesReturnBillReplay.ts",
+      "sha256": "9c7621a1ddce3e81fee8f15991398e5210035a5cd04b404124b0e69b14b8933b",
+      "bytes": 14764
+    },
+    {
+      "path": "baseline/apps/web/lib/salesReturnReplay.ts",
+      "sha256": "60093c4f2a0ded2a675c68496c958b5c62dfd24b526dc346c4183e3d9dc6a1ef",
+      "bytes": 13631
+    },
+    {
+      "path": "baseline/apps/web/test/salesReturnBillReplay.test.ts",
+      "sha256": "9e7a5ee1dc3b2f0f552c00d09d05eebcdf0100a1d9472adc49661a5fe654e113",
+      "bytes": 24817
+    },
+    {
+      "path": "baseline-inputs.json",
+      "sha256": "9943bc358221403f89dae4fe119745238347e2fd4493c9eaf48a32f3e19b77bf",
+      "bytes": 1368
+    },
+    {
+      "path": "external-inputs.json",
+      "sha256": "99802f838572bc8f1a43bd8476d03f4a844e9ba4b824e5d705738d6d06ffe0c3",
+      "bytes": 721
+    },
+    {
+      "path": "staged/ownership-integration.patch",
+      "sha256": "a393e3183cf4a0ba2231055e18bd63660e59d9d54fd68618d8bedec8a0526688",
+      "bytes": 2412
+    },
+    {
+      "path": "staged/web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+      "sha256": "e495e93df528bd6e2808f14b152faaa737ce145b65e1411cc359f7d374e0e2a9",
+      "bytes": 27541
+    },
+    {
+      "path": "staged/web/apps/web/components/SaleReturnSavedPanel.tsx",
+      "sha256": "b086e6d847bbdf45bee7e65e1c48ac1d590402463cbd483d11e234150bc90f25",
+      "bytes": 27732
+    },
+    {
+      "path": "staged/web/apps/web/lib/salesReturnBillReplay.ts",
+      "sha256": "9cc7de492facb40f02c05ae0537e9fc48dac19f1bd48222ffdf4395a98ee9924",
+      "bytes": 14775
+    },
+    {
+      "path": "staged/web/apps/web/lib/salesReturnLabourReplay.ts",
+      "sha256": "33aa5e913b5eaa41cc948fa755e860fbfe64bc707379bde0e6e9f2f1f77a3752",
+      "bytes": 20874
+    },
+    {
+      "path": "staged/web/apps/web/test/fixtures/returnLabourUiTransitions.independent.json",
+      "sha256": "e11b9b1c9597bb72fa3c3a74e3ee1e541355f2b5defdf6b1644a2fe8d9d553d5",
+      "bytes": 3831
+    },
+    {
+      "path": "staged/web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+      "sha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+      "bytes": 62675
+    },
+    {
+      "path": "staged/web/apps/web/test/salesReturnLabourReplay.test.ts",
+      "sha256": "c73bb2dbb07ba41946508d03720564069d64679398f1b47e598ab9d9b679d5e1",
+      "bytes": 27007
+    },
+    {
+      "path": "ui-independent-transitions.json",
+      "sha256": "e11b9b1c9597bb72fa3c3a74e3ee1e541355f2b5defdf6b1644a2fe8d9d553d5",
+      "bytes": 3831
+    }
+  ]
+}

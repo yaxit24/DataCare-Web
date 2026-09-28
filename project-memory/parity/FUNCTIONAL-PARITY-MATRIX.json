@@ -1,0 +1,1049 @@
+{
+  "kind": "datacare.functional-parity-matrix/1.0",
+  "measuredAt": "2026-08-02T16:32:38.018Z",
+  "note": "Operator-lifecycle capability per voucher family, derived from registered route verbs, module write targets, lock references and database-backed tests. liveVouchers is the reference company's one-year count, so 0 means configured-but-unused rather than unimportant.",
+  "families": [
+    {
+      "family": "Sales invoice",
+      "desktopForms": [
+        "TR_SALE"
+      ],
+      "liveVouchers": 189,
+      "basePath": "/sales",
+      "module": "sales/sales.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 16
+    },
+    {
+      "family": "Hallmark sale",
+      "desktopForms": [
+        "TR_SALE_HM"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/sales",
+      "module": "sales/sales.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 16
+    },
+    {
+      "family": "Sales return",
+      "desktopForms": [
+        "TR_SALE_RTN"
+      ],
+      "liveVouchers": 1,
+      "basePath": "/sales-returns",
+      "module": "sales/salesReturn.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Sales order",
+      "desktopForms": [
+        "TR_SALE_ORD"
+      ],
+      "liveVouchers": 39,
+      "basePath": "/sales-orders",
+      "module": "sales/salesOrder.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 6
+    },
+    {
+      "family": "Order cancel",
+      "desktopForms": [
+        "TR_SL_ORD_ADJ"
+      ],
+      "liveVouchers": 1,
+      "basePath": "/sales-orders",
+      "module": "sales/salesOrder.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 6
+    },
+    {
+      "family": "Labour invoice",
+      "desktopForms": [
+        "TR_SALE_LBR"
+      ],
+      "liveVouchers": 3,
+      "basePath": "/labour-invoice",
+      "module": "sales/labourInvoice.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 3
+    },
+    {
+      "family": "Rate cut / wholesale",
+      "desktopForms": [
+        "TR_PR_SL_HEDG",
+        "TR_WH_SALE"
+      ],
+      "liveVouchers": 40,
+      "basePath": "/rate-cut",
+      "module": "sales/rateCut.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 3
+    },
+    {
+      "family": "VP parcel",
+      "desktopForms": [
+        "TR_VP"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/sales/vp-parcel",
+      "module": "sales/vpParcel.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Wholesale sale return",
+      "desktopForms": [
+        "TR_WH_SALE_RTN"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/sales/wholesale-sale-return",
+      "module": "sales/wholesaleSaleReturn.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Purchase",
+      "desktopForms": [
+        "TR_PURC"
+      ],
+      "liveVouchers": 51,
+      "basePath": "/purchases",
+      "module": "purchase/purchase.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 5
+    },
+    {
+      "family": "Purchase HM",
+      "desktopForms": [
+        "TR_PURC_HM"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/purchases",
+      "module": "purchase/purchase.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 5
+    },
+    {
+      "family": "Purchase return",
+      "desktopForms": [
+        "TR_PURC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/purchase-returns",
+      "module": "purchase/purchaseReturn.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 2
+    },
+    {
+      "family": "Other purchase",
+      "desktopForms": [
+        "TR_OTH_PURC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/other-purchase",
+      "module": "purchase/purchase.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 2
+    },
+    {
+      "family": "Other commission",
+      "desktopForms": [
+        "TR_OTH_COMM"
+      ],
+      "liveVouchers": 3,
+      "basePath": "/other-commission",
+      "module": "purchase/otherCommission.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Cash receipt",
+      "desktopForms": [
+        "TR_CASH"
+      ],
+      "liveVouchers": 56,
+      "basePath": "/receipts",
+      "module": "finance/finance.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 6
+    },
+    {
+      "family": "Cash payment",
+      "desktopForms": [
+        "TR_CASH"
+      ],
+      "liveVouchers": 133,
+      "basePath": "/payments",
+      "module": "finance/finance.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 5
+    },
+    {
+      "family": "Contra / journal",
+      "desktopForms": [
+        "TR_CONTRA"
+      ],
+      "liveVouchers": 37,
+      "basePath": "/contra",
+      "module": "finance/finance.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Fine JV",
+      "desktopForms": [
+        "TR_FINE_SL_PR"
+      ],
+      "liveVouchers": 14,
+      "basePath": "/fine-jv",
+      "module": "finance/fineJv.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 3
+    },
+    {
+      "family": "Ledger adjust",
+      "desktopForms": [
+        "TR_LEDR_ADJ"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/ledger-adjust",
+      "module": "finance/ledgerAdjust.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 2
+    },
+    {
+      "family": "Employee JV",
+      "desktopForms": [
+        "TR_EMP_JV"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/employee-jv",
+      "module": "finance/employeeJv.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 2
+    },
+    {
+      "family": "Account opening",
+      "desktopForms": [
+        "TR_AC_OPBL"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/ac-opbl",
+      "module": "finance/acOpening.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": false,
+      "routeCount": 2
+    },
+    {
+      "family": "Bill to bill",
+      "desktopForms": [
+        "TR_BILL_TO"
+      ],
+      "liveVouchers": 1,
+      "basePath": "/bill-to-bill",
+      "module": "finance/billToBill.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 3
+    },
+    {
+      "family": "Gold book",
+      "desktopForms": [
+        "TR_GOLD_BOOK"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/finance/gold-book",
+      "module": "finance/goldBook.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Location amount",
+      "desktopForms": [
+        "TR_LOCT_AMT"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/finance/location-amount",
+      "module": "finance/locationAmount.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "VP adjustment",
+      "desktopForms": [
+        "TR_VP_ADJ"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/finance/vp-adjustment",
+      "module": "finance/vpAdjustment.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Karigar issue",
+      "desktopForms": [
+        "TR_KR_ISU"
+      ],
+      "liveVouchers": 1,
+      "basePath": "/karigar/issue",
+      "module": "manufacturing/karigar.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Karigar receipt",
+      "desktopForms": [
+        "TR_MFG_KR_ISU_REC"
+      ],
+      "liveVouchers": 16,
+      "basePath": "/karigar/receive",
+      "module": "manufacturing/karigar.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Job-work issue",
+      "desktopForms": [
+        "TR_JDT_REC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/mfg/jobwork-issue",
+      "module": "manufacturing/mfg.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Job-work receive",
+      "desktopForms": [
+        "TR_JDT_REC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/mfg/jobwork-receive",
+      "module": "manufacturing/mfg.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Manufacturing issue",
+      "desktopForms": [
+        "TR_MFG_ISU_REC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/mfg/issue",
+      "module": "manufacturing/mfg.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Manufacturing receive",
+      "desktopForms": [
+        "TR_MFG_ISU_REC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/mfg/receive",
+      "module": "manufacturing/mfg.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": true,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Melting",
+      "desktopForms": [
+        "TR_MLT_PRO"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/melting",
+      "module": "manufacturing/meltingPro.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Repair receipt",
+      "desktopForms": [
+        "TR_REP_REC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/repair-receipts",
+      "module": "repair/repairReceipt.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": true,
+      "TESTED": true,
+      "routeCount": 6
+    },
+    {
+      "family": "Tag opening",
+      "desktopForms": [
+        "TR_TAG_OPBL"
+      ],
+      "liveVouchers": 1,
+      "basePath": "/stock/tag-opening",
+      "module": "stock/stock.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Item opening",
+      "desktopForms": [
+        "TR_ITM_OPBL"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/stock/item-opening",
+      "module": "stock/stock.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Item lot",
+      "desktopForms": [
+        "TR_ITM_LOT"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/stock/item-lot",
+      "module": "stock/stock.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Tag split",
+      "desktopForms": [
+        "TR_TAG_SPLIT"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/stock/tag-split",
+      "module": "stock/tagSplit.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": false,
+      "routeCount": 2
+    },
+    {
+      "family": "Tag cancel",
+      "desktopForms": [
+        "TR_TAG_CAN"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/stock/tag-cancel",
+      "module": "stock/tagOps.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": false,
+      "routeCount": 2
+    },
+    {
+      "family": "Tag weight diff",
+      "desktopForms": [
+        "TR_TAG_WT_DIFF"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/stock/tag-weight-diff",
+      "module": "stock/tagOps.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": false,
+      "routeCount": 2
+    },
+    {
+      "family": "Physical stock",
+      "desktopForms": [
+        "TR_PHYSTK"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/stock/physical-stock",
+      "module": "stock/physicalStock.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": true,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 4
+    },
+    {
+      "family": "Stock adjust",
+      "desktopForms": [
+        "TR_INOUT"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/stock/adjust",
+      "module": "stock/stock.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 2
+    },
+    {
+      "family": "Fine in/out",
+      "desktopForms": [
+        "TR_FN_INOUT"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/inout/fine",
+      "module": "inout/fineInout.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": false,
+      "routeCount": 2
+    },
+    {
+      "family": "Scheme enrol",
+      "desktopForms": [
+        "TR_MEMB_ENT"
+      ],
+      "liveVouchers": 841,
+      "basePath": "/scheme/enroll",
+      "module": "membership/scheme.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 2
+    },
+    {
+      "family": "Scheme instalment",
+      "desktopForms": [
+        "TR_MEMB_ENT"
+      ],
+      "liveVouchers": 841,
+      "basePath": "/scheme/installment",
+      "module": "membership/scheme.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 3
+    },
+    {
+      "family": "Scheme maturity",
+      "desktopForms": [
+        "TR_MEMB_ADJ"
+      ],
+      "liveVouchers": 17,
+      "basePath": "/scheme/maturity",
+      "module": "membership/scheme.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": true,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 3
+    },
+    {
+      "family": "Dhrn issue",
+      "desktopForms": [
+        "TR_DHRN_ISU"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/dhrn/issue",
+      "module": "dhrn/dhrn.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": false,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 1
+    },
+    {
+      "family": "Dhrn receipt",
+      "desktopForms": [
+        "TR_DHRN_REC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/dhrn/receipt",
+      "module": "dhrn/dhrn.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": false,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 1
+    },
+    {
+      "family": "Dhrn interest",
+      "desktopForms": [
+        "TR_DHRN_INTREC"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/dhrn/interest",
+      "module": "dhrn/dhrn.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": false,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 1
+    },
+    {
+      "family": "Bullion booking",
+      "desktopForms": [
+        "TR_BUL_BOOKING"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/bullion/booking",
+      "module": "bullion/bullion.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": false,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": false,
+      "TAX": false,
+      "TESTED": false,
+      "routeCount": 1
+    },
+    {
+      "family": "Fine sale/purchase",
+      "desktopForms": [
+        "TR_FINE_SL_PR"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/fine-sale",
+      "module": "bullion/fineSalePurchase.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": true,
+      "TESTED": false,
+      "routeCount": 2
+    },
+    {
+      "family": "Tour issue",
+      "desktopForms": [
+        "TR_TOUR",
+        "TR_APR_ISU"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/tour/issue",
+      "module": "tour/tour.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": false,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 1
+    },
+    {
+      "family": "Tour return",
+      "desktopForms": [
+        "TR_TOUR"
+      ],
+      "liveVouchers": 0,
+      "basePath": "/tour/return",
+      "module": "tour/tour.ts",
+      "moduleFound": true,
+      "CREATE": true,
+      "OPEN": false,
+      "EDIT": false,
+      "DELETE": true,
+      "LOCK": false,
+      "LEDGER": true,
+      "STOCK": true,
+      "TAX": false,
+      "TESTED": true,
+      "routeCount": 2
+    }
+  ]
+}

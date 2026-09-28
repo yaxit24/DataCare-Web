@@ -1,0 +1,51 @@
+﻿body {
+}
+.HeadName {
+    font-family: 'Arial Rounded MT';
+    font-size: 26px;
+    text-align:center;
+    padding-bottom:100px;
+}
+.line{
+    width:90%;
+    margin:auto;
+}
+.codetail {
+    width: 100%;
+    font-family: Bahnschrift;
+    font-size: 16px;
+    text-align:right;
+}
+.AcDetile {
+    width: 100%;
+    font-family: Bahnschrift;
+    float: left;
+    font-size: 16px;
+}
+.IRItem{
+    color:blue;
+    min-width:500PX;
+}
+.btnExit {
+    font-size: 12px;
+    font-family: Bahnschrift;
+    font-weight: 700;
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-top: 3%;
+    padding-bottom: 3%;
+    border: 3px solid;
+    border-color: #66abd9;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-top-right-radius: 40px;
+    border-top-left-radius: 40px;
+    background-color: white;
+    color: #a52323cc;
+    margin-top: 50px;
+   
+    cursor: pointer;
+    min-width:98%;
+    border:none;
+
+}

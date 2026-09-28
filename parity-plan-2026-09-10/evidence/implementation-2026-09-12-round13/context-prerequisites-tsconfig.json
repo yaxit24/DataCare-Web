@@ -1,0 +1,16 @@
+{
+  "extends": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/tsconfig.test.json",
+  "compilerOptions": {
+    "rootDir": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api",
+    "typeRoots": [
+      "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/@types"
+    ],
+    "noEmit": true
+  },
+  "include": [
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContext.extraction.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextValue.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/auth.session.test.ts",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/rbac.authorization.test.ts"
+  ]
+}

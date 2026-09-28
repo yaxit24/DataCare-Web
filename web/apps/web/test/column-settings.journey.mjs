@@ -1,0 +1,403 @@
+import assert from 'node:assert/strict';
+import { request as requestFactory } from 'playwright';
+
+const scope = { coCode: '01', lcCode: '01', coYear: '2024-2025' };
+const familyA = 'R8 FAMILY A',
+  familyB = 'R8 FAMILY B',
+  pagesFamily = 'R8 PAGES';
+const otherYear = '2025-2026';
+const loginName = 'r8-column-view';
+export async function cleanupColumnSettings(sql) {
+  await sql(
+    `DELETE FROM "COL_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND ("BOOK_NAME" LIKE 'R8 %' OR "BOOK_NAME"=' R8 MALFORMED')`,
+  );
+  await sql(`DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"='r8-column-view'`);
+  await sql(`DELETE FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "LOGIN_NAME"='r8-column-view'`);
+  await sql(
+    `DELETE FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_YEAR"='2025-2026'`,
+  );
+}
+export async function seedColumnSettings(sql) {
+  await cleanupColumnSettings(sql);
+  await sql(`INSERT INTO "COL_MAST"(tenant_id,"CO_CODE","BOOK_NAME","COL_NAME","COL_NEW_NAME","COL_RPT","YES_NO") VALUES
+    ($1,'01','R8 FAMILY A','Fine',NULL,NULL,'N'),
+    ($1,'01','R8 FAMILY B','Fine','Other form caption','Y','Y'),
+    ($1,'01','R8 DUPLICATE','Fine','Duplicate one',NULL,'Y'),
+    ($1,'01','R8 DUPLICATE','Fine','Duplicate two',NULL,'N'),
+    ($1,'01',' R8 MALFORMED','Fine','Preserved malformed identity',NULL,NULL)`);
+  await sql(`INSERT INTO "COL_MAST"(tenant_id,"CO_CODE","BOOK_NAME","COL_NAME","COL_NEW_NAME","YES_NO")
+    SELECT $1,'01','R8 PAGES','Column ' || lpad(n::text,3,'0'),'Caption ' || n::text,'Y' FROM generate_series(1,60) n`);
+  await sql(
+    `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES($1,'01','2025-2026','2025-04-01','2026-03-31')`,
+  );
+  await sql(`INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
+    SELECT $1,'01','r8-column-view',"LOGIN_PWD",'USER','N','N','N','N' FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LOGIN_NAME"='browser'`);
+  await sql(`INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+    VALUES($1,'01','01','r8-column-view','Masters','Styles / Columns','Y','N','N','N')`);
+}
+
+/** Actual production page -> Fastify -> isolated PostgreSQL. No HTTP mocks. */
+export async function exerciseColumnSettings(
+  page,
+  { checkpoint, password, tenantId = 'browser-parity' } = {},
+) {
+  assert.equal(typeof password, 'string', 'Runner supplies the synthetic login password');
+  const origin = new URL(page.url()).origin;
+  const otherClient = await requestFactory.newContext({
+    baseURL: origin,
+  });
+  const checks = [],
+    errors = [],
+    requests = [];
+  const onError = (e) => errors.push(e.message);
+  const onRequest = (request) => {
+    if (new URL(request.url()).pathname === '/api/masters/styles') requests.push(request);
+  };
+  page.on('pageerror', onError);
+  page.on('request', onRequest);
+  const endpoint = `/api/masters/styles?${new URLSearchParams(scope)}`;
+  const list = async (family) => {
+    const response = await otherClient.get(`${endpoint}&family=${encodeURIComponent(family)}`);
+    assert.equal(response.status(), 200, await response.text());
+    assert.equal(response.headers()['cache-control'], 'no-store');
+    return response.json();
+  };
+  const panel = () => page.getByTestId('column-settings');
+  const rows = () => panel().locator('tbody tr');
+  const row = (family) =>
+    rows().filter({ has: page.getByRole('cell', { name: family, exact: true }) });
+  const ready = async () => {
+    await page.waitForFunction(() => {
+      const button = [...document.querySelectorAll('[data-testid="column-settings"] button')].find(
+        (el) => el.textContent.trim() === 'New column setting',
+      );
+      return button && !button.disabled;
+    });
+  };
+  const filter = async (family) => {
+    const response = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'GET' &&
+        new URL(r.url()).pathname === '/api/masters/styles' &&
+        new URL(r.url()).searchParams.get('family') === family,
+    );
+    await panel().getByLabel('Filter form').fill(family);
+    assert.equal((await response).status(), 200);
+    await ready();
+  };
+  const save = async (expected) => {
+    const response = page.waitForResponse(
+      (r) => r.request().method() === 'PUT' && new URL(r.url()).pathname === '/api/masters/styles',
+    );
+    await panel().getByRole('button', { name: 'Save column setting', exact: true }).click();
+    const saved = await response;
+    assert.equal(saved.status(), expected, await saved.text());
+    return saved;
+  };
+  let restricted;
+  try {
+    // This fixture is a second signed-in operator session, not a stale copy of the
+    // first session's access cookie. Its authority must survive the first page's A→B→A.
+    const otherLogin = await otherClient.post('/api/auth/login', {
+      headers: { 'x-tenant-id': tenantId },
+      data: { ...scope, loginName: 'browser', password },
+    });
+    assert.equal(otherLogin.status(), 200, await otherLogin.text());
+    const mainMe = await page.context().request.get('/api/me');
+    assert.equal(mainMe.status(), 200, await mainMe.text());
+    assert.notEqual((await otherLogin.json()).context.sessionId, (await mainMe.json()).context.sessionId);
+    await page.goto(`${origin}/masters/styles`);
+    await ready();
+    const beforeA = (await list(familyA))[0],
+      beforeB = (await list(familyB))[0];
+    assert(beforeA && beforeB);
+    assert.equal(beforeA.COL_NEW_NAME, null);
+    assert.equal(beforeA.COL_RPT, null);
+    assert.notEqual(beforeA._columnVersion, beforeB._columnVersion);
+    checks.push(
+      'same original heading in two forms has separate exact identities and observed versions',
+    );
+
+    await filter(pagesFamily);
+    assert.equal(await rows().count(), 50);
+    const firstIds = await rows().evaluateAll((elements) =>
+      elements.map((el) => el.getAttribute('data-testid')),
+    );
+    await panel().getByTestId('column-settings-load-more').click();
+    await ready();
+    assert.equal(await rows().count(), 60);
+    const allIds = await rows().evaluateAll((elements) =>
+      elements.map((el) => el.getAttribute('data-testid')),
+    );
+    assert.equal(new Set(allIds).size, 60);
+    assert.deepEqual(allIds.slice(0, 50), firstIds);
+    assert.equal(await panel().getByTestId('column-settings-load-more').count(), 0);
+    checks.push('50 plus 10 settings are reachable without duplicate or missing rows');
+
+    await filter(familyA);
+    assert.equal(await rows().count(), 1);
+    await row(familyA).getByRole('button', { name: 'Edit', exact: true }).click();
+    assert.equal(await panel().getByLabel('Form family').inputValue(), familyA);
+    assert.equal(await panel().getByLabel('Form family').getAttribute('readonly'), '');
+    assert.equal(await panel().getByLabel('Original column').getAttribute('readonly'), '');
+    assert.equal(await panel().getByTestId('entity-image').count(), 0);
+    checks.push(
+      'exact family filter resets pagination and original identity is immutable with no unrelated image editor',
+    );
+
+    await panel().getByLabel('Visible', { exact: true }).selectOption('Y');
+    const changed = await save(200);
+    await ready();
+    const body = changed.request().postDataJSON();
+    assert.deepEqual(
+      Object.keys(body).sort(),
+      ['BOOK_NAME', 'COL_NAME', 'CO_CODE', 'YES_NO', 'version'].sort(),
+    );
+    const afterA = (await list(familyA))[0],
+      afterB = (await list(familyB))[0];
+    assert.equal(afterA.YES_NO, 'Y');
+    assert.equal(afterA.COL_NEW_NAME, null);
+    assert.equal(afterA.COL_RPT, null);
+    assert.equal(afterA.row_id, beforeA.row_id);
+    assert.deepEqual(
+      afterB,
+      beforeB._columnCollectionVersion === afterB._columnCollectionVersion
+        ? beforeB
+        : { ...beforeB, _columnCollectionVersion: afterB._columnCollectionVersion },
+    );
+    checks.push(
+      'visibility-only update preserves untouched NULLs and the identically named other form',
+    );
+
+    await row(familyA).getByRole('button', { name: 'Edit', exact: true }).click();
+    await panel().getByLabel('Caption', { exact: true }).fill('Retained browser draft');
+    const external = await otherClient.put(endpoint, {
+      data: {
+        CO_CODE: '01',
+        BOOK_NAME: familyA,
+        COL_NAME: 'Fine',
+        version: afterA._columnVersion,
+        COL_NEW_NAME: 'Other client caption',
+      },
+    });
+    assert.equal(external.status(), 200, await external.text());
+    const putsBefore = requests.filter((r) => r.method() === 'PUT').length;
+    await save(409);
+    await panel().getByTestId('column-settings-conflict').waitFor();
+    assert.equal(
+      await panel().getByLabel('Caption', { exact: true }).inputValue(),
+      'Retained browser draft',
+    );
+    assert.equal(
+      await panel().getByRole('button', { name: 'Save column setting', exact: true }).isEnabled(),
+      false,
+    );
+    assert.equal(requests.filter((r) => r.method() === 'PUT').length, putsBefore + 1);
+    if (checkpoint) await checkpoint('column-settings-conflict', page);
+    checks.push('second client change produces 409 with draft retained and no automatic replay');
+
+    await panel().getByRole('button', { name: 'Discard draft and reload', exact: true }).click();
+    await ready();
+    assert.equal(await panel().getByTestId('column-settings-editor').count(), 0);
+    await row(familyA).getByRole('button', { name: 'Edit', exact: true }).click();
+    assert.equal(
+      await panel().getByLabel('Caption', { exact: true }).inputValue(),
+      'Other client caption',
+    );
+    await panel().getByLabel('Caption', { exact: true }).fill('Explicit fresh retry');
+    await save(200);
+    await ready();
+    assert.equal((await list(familyA))[0].COL_NEW_NAME, 'Explicit fresh retry');
+    checks.push('deliberate draft-discard reload observes the new value before explicit retry');
+
+    await filter('R8 DUPLICATE');
+    assert.equal(await rows().count(), 2);
+    for (const button of await rows().getByRole('button').all())
+      assert.equal(await button.isEnabled(), false);
+    await filter(' R8 MALFORMED');
+    assert.equal(await rows().count(), 1);
+    assert.equal(
+      await rows().getByRole('button', { name: 'Edit', exact: true }).isEnabled(),
+      false,
+    );
+    checks.push(
+      'duplicate and malformed imported identities stay readable with mutations disabled',
+    );
+
+    await filter(familyA);
+    await row(familyA).getByRole('button', { name: 'Edit', exact: true }).click();
+    await panel().getByLabel('Caption', { exact: true }).fill('Must disappear on scope switch');
+    // A scope change closes this draft only after the operator explicitly confirms.
+    page.once('dialog', async (dialog) => {
+      assert.equal(dialog.type(), 'confirm');
+      assert.match(dialog.message(), /unsaved work/i);
+      await dialog.accept();
+    });
+    await Promise.all([
+      page.waitForEvent('load'),
+      page.getByLabel('Financial year', { exact: true }).selectOption(otherYear),
+    ]);
+    await ready();
+    assert.equal(await page.getByLabel('Financial year', { exact: true }).inputValue(), otherYear);
+    assert.equal(await panel().getByTestId('column-settings-editor').count(), 0);
+    assert.equal(await panel().getByLabel('Filter form').inputValue(), '');
+    // A scope change closes this draft only after the operator explicitly confirms.
+    page.once('dialog', async (dialog) => {
+      assert.equal(dialog.type(), 'confirm');
+      assert.match(dialog.message(), /unsaved work/i);
+      await dialog.accept();
+    });
+    await Promise.all([
+      page.waitForEvent('load'),
+      page.getByLabel('Financial year', { exact: true }).selectOption(scope.coYear),
+    ]);
+    await ready();
+    assert.equal(await panel().getByTestId('column-settings-editor').count(), 0);
+    assert.equal((await list(familyA))[0].COL_NEW_NAME, 'Explicit fresh retry');
+    checks.push(
+      'actual year A to B to A transition clears pending drafts and observations without writing',
+    );
+
+    restricted = await page.context().browser().newContext({ baseURL: origin });
+    const signedIn = await restricted.request.post('/api/auth/login', {
+      headers: { 'x-tenant-id': tenantId },
+      data: { ...scope, loginName, password },
+    });
+    assert.equal(signedIn.status(), 200, await signedIn.text());
+    const viewPage = await restricted.newPage();
+    await viewPage.goto('/masters/styles');
+    await viewPage
+      .getByTestId('column-settings')
+      .getByRole('button', { name: 'New column setting', exact: true })
+      .waitFor();
+    await viewPage.waitForFunction(
+      () => document.querySelectorAll('[data-testid="column-settings"] tbody tr').length > 0,
+    );
+    for (const button of await viewPage
+      .getByTestId('column-settings')
+      .getByRole('button', { name: /^(Edit|Delete)$/ })
+      .all())
+      assert.equal(await button.isEnabled(), false);
+    const meta = await restricted.request.get(
+      `/api/masters/styles/meta?${new URLSearchParams(scope)}`,
+    );
+    assert.equal(meta.headers()['cache-control'], 'no-store');
+    assert.deepEqual((await meta.json()).capabilities, {
+      canCreate: true,
+      canUpdate: false,
+      canDelete: false,
+    });
+    assert.equal(await viewPage.getByTestId('entity-image').count(), 0);
+    if (checkpoint) await checkpoint('column-settings-read-only', viewPage);
+    checks.push(
+      'fresh owning Styles rights disable edit/delete while retaining inherited view-create behavior',
+    );
+
+    await filter(familyB);
+    await row(familyB).getByRole('button', { name: 'Edit', exact: true }).click();
+    await panel().getByLabel('Caption', { exact: true }).fill('Other form deliberate edit');
+    await save(200);
+    await ready();
+    assert.equal((await list(familyA))[0].COL_NEW_NAME, 'Explicit fresh retry');
+    assert.equal((await list(familyB))[0].COL_NEW_NAME, 'Other form deliberate edit');
+    if (checkpoint) await checkpoint('column-settings-family-qualified', page);
+    checks.push('independent subsequent edit targets the other form without changing the first');
+
+    await panel().getByRole('button', { name: 'New column setting', exact: true }).click();
+    await panel().getByLabel('Form family', { exact: true }).fill(familyB);
+    await panel().getByLabel('Original column', { exact: true }).fill('New source heading');
+    await panel().getByLabel('Caption', { exact: true }).fill('New visible caption');
+    await panel().getByLabel('Visible', { exact: true }).selectOption('Y');
+    const createResponse = page.waitForResponse(
+      (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/masters/styles',
+    );
+    await panel().getByRole('button', { name: 'Save column setting', exact: true }).click();
+    const created = await createResponse;
+    assert.equal(created.status(), 201, await created.text());
+    await ready();
+    const createdRows = await list(familyB);
+    assert.equal(createdRows.length, 2);
+    const newRow = createdRows.find((r) => r.COL_NAME === 'New source heading');
+    assert(newRow);
+    assert.equal(newRow.COL_NEW_NAME, 'New visible caption');
+    assert.match(newRow._columnVersion, /^[a-f0-9]{64}$/);
+    checks.push(
+      'new setting saves its explicit family and original name and receives a fresh observation',
+    );
+
+    const newRowElement = rows().filter({
+      has: page.getByRole('cell', { name: 'New source heading', exact: true }),
+    });
+    const deleteResponse = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'DELETE' && new URL(r.url()).pathname === '/api/masters/styles',
+    );
+    page.once('dialog', (dialog) => void dialog.accept());
+    await newRowElement.getByRole('button', { name: 'Delete', exact: true }).click();
+    const deleted = await deleteResponse;
+    assert.equal(deleted.status(), 200, await deleted.text());
+    await ready();
+    assert.deepEqual(deleted.request().postDataJSON(), {
+      CO_CODE: '01',
+      BOOK_NAME: familyB,
+      COL_NAME: 'New source heading',
+      version: newRow._columnVersion,
+    });
+    const surviving = await list(familyB);
+    assert.equal(surviving.length, 1);
+    assert.equal(surviving[0].COL_NAME, 'Fine');
+    assert.equal(surviving[0].COL_NEW_NAME, 'Other form deliberate edit');
+    checks.push(
+      'explicit confirmed delete carries the complete observed identity and preserves its sibling',
+    );
+
+    const importResponse = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'POST' &&
+        new URL(r.url()).pathname === '/api/masters/styles/import',
+    );
+    await panel()
+      .getByTestId('column-settings-import')
+      .setInputFiles({
+        name: 'columns.csv',
+        mimeType: 'text/csv',
+        buffer: Buffer.from(
+          '\uFEFF"CO_CODE","BOOK_NAME","COL_NAME","COL_NEW_NAME","YES_NO"\r\n"01","R8 IMPORT","Fine","Imported caption","Y"\r\n"01","R8 FAMILY B","Fine","Must not overwrite","N"\r\n',
+        ),
+      });
+    const imported = await importResponse;
+    assert.equal(imported.status(), 200, await imported.text());
+    assert.equal((await imported.json()).created, 1);
+    assert.equal((await imported.json()).failed, 1);
+    await ready();
+    assert.match(
+      await panel().getByTestId('column-settings-message').textContent(),
+      /Imported 1; failed 1/,
+    );
+    assert.equal((await list(familyB))[0].COL_NEW_NAME, 'Other form deliberate edit');
+    await filter('R8 IMPORT');
+    assert.equal(await rows().count(), 1);
+    assert.equal((await list('R8 IMPORT'))[0].COL_NEW_NAME, 'Imported caption');
+    checks.push(
+      'real BOM CSV import reports per-row create and duplicate refusal without overwriting a saved form',
+    );
+
+    for (const request of requests) {
+      const query = new URL(request.url()).searchParams;
+      assert.equal(query.get('coCode'), '01');
+      assert.equal(query.get('lcCode'), '01');
+      assert([scope.coYear, otherYear].includes(query.get('coYear')));
+    }
+    checks.push(
+      'all observed list and mutation requests carry explicit selected company location and year',
+    );
+    assert.deepEqual(errors, []);
+    checks.push('no browser runtime errors');
+    return { checks, status: 'passed', mockedRequests: 0 };
+  } finally {
+    page.off('pageerror', onError);
+    page.off('request', onRequest);
+    await otherClient.dispose();
+    if (restricted) await restricted.close();
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "capturedAtUtc": "2026-09-11T14:54:10.287696+00:00",
+  "files": [
+    {
+      "path": "web/package.json",
+      "sha256": "88b346ba7597fe1af78ae6151cc6e9ddeeb219f0049df90edbf4d8eaef3731c2"
+    },
+    {
+      "path": "web/packages/core/containment.d.mts",
+      "sha256": "1473a76581387f5e4427e1480e138cef3ea8ed9ae5da53ab0722759e56e75b0f"
+    },
+    {
+      "path": "web/packages/core/containment.mjs",
+      "sha256": "79108272df09bcaa6070ff7a3aebf0b2b7e754323a6943d73ef0bad589306b66"
+    },
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "web/packages/core/src/calc.ts",
+      "sha256": "e0c46c2f17ec6e871309e96539bf2cd00782db9e6db667271421a539d16da291"
+    },
+    {
+      "path": "web/packages/core/src/designCalc.ts",
+      "sha256": "78f207dd2b8796f7f4ea9445c8baa971721f0d78ab82b50168bd67772a391116"
+    },
+    {
+      "path": "web/packages/core/src/finePolicy.ts",
+      "sha256": "38d0ec8f3d6f131bcce490d19e418af8a59de3bdaa309ebf77c2255cc884e96b"
+    },
+    {
+      "path": "web/packages/core/src/index.ts",
+      "sha256": "aa032f19dc25ed6563ee58b0d5310a70c93e25d234a994980e52c02b0eedda24"
+    },
+    {
+      "path": "web/packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "web/packages/core/src/orderLabour.ts",
+      "sha256": "5981b6198035c845b447caf0d92fe84e3c25d1412e6b61b0eee0483f0224230d"
+    },
+    {
+      "path": "web/packages/core/src/orderLabourWithCache.ts",
+      "sha256": "dd9f429992b33918e97b382d5ead1852219aece381ec7c9bb6a1cc21719f3e4f"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnBillTaxPolicy.ts",
+      "sha256": "4e12c8b129cbdc168bafb01cb40a7a723e1db2bfb57af57a3c73f9099b809622"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+    },
+    {
+      "path": "web/packages/core/src/salesOrderDesign.ts",
+      "sha256": "e6b5b1a4e79a9d93d6fab540565d0159ccde9475714d4f56276c64ce101173af"
+    },
+    {
+      "path": "web/packages/core/test/calc.test.ts",
+      "sha256": "1109448f927c80461bab8e6c1cb2ed401ea8d9e4b30d8d9718a32d9554e60136"
+    },
+    {
+      "path": "web/packages/core/test/containment.test.ts",
+      "sha256": "46e5aa4a753c1b29fa8d0af6b032978d07bb284d75c26cfec680666092e30b05"
+    },
+    {
+      "path": "web/packages/core/test/designCalc.test.ts",
+      "sha256": "c41dad4c30d28f52e51146dd34104d49a6ec9e7ec498968d08ed91fba7f4ed0f"
+    },
+    {
+      "path": "web/packages/core/test/designRepeat.test.ts",
+      "sha256": "b66b2087a5e9e3d8165f3f1f6b2c673890f767242284608a8ba357ffde213943"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/sale-return-bill-projection.v1.json",
+      "sha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/sale-return-incoming-aggregate.v1.json",
+      "sha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncoming.independent.json",
+      "sha256": "ad1184e6bb7f7256e42e85b5469ea3152404fba25566465389bc6a7ba4367527"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncoming.projection.json",
+      "sha256": "0f29c29e9ccfc8cd4663c36b0ed9b2def4123fab7a3556239ad507aba6477b78"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncoming.widths.json",
+      "sha256": "3c0bef2a5aa86fca83d8c0e98b56e36c553595f2b941a06642409ce7e631d309"
+    },
+    {
+      "path": "web/packages/core/test/money.test.ts",
+      "sha256": "09fdc90fecfaf405f6c24f4f6b1b9b42faf98f759958595383523c328e7c59d3"
+    },
+    {
+      "path": "web/packages/core/test/orderLabour.test.ts",
+      "sha256": "d19586b4f16c1a5027b2f8a0f447e4642193756677a41ef86c241078ad1e1a25"
+    },
+    {
+      "path": "web/packages/core/test/orderLabourWithCache.test.ts",
+      "sha256": "85dab66d15d2b29ea53c82902bd2b0a451fb0ccb1f5f72bd9f3224276bdd6a66"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnBillProjection.test.ts",
+      "sha256": "fd2f21128607f588fe4bc4b9698345facac60196d43b6458bf0135c87832fe87"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnBillTaxPolicy.test.ts",
+      "sha256": "1ec8f36a00953de378e6d851e04eda7c305e384ff00c0c6ee58902c95122fdea"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncoming.review.test.ts",
+      "sha256": "e0045153a2a5bb0b5fb2e61144ac825d4b58a2a2da9da67f06dd062825d30327"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncoming.test.ts",
+      "sha256": "25418ca3d52fba42012bf250da7bae6dca73ddcefda06185284fc5bac8a5c6aa"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncomingAggregate.test.ts",
+      "sha256": "316f9d7e2187d252bfa9e7fa754869b79ea227daccfd23a608d022d274d56d12"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncomingProjection.test.ts",
+      "sha256": "15e26f97b869c4798e9735489ff328dd444cae91647deb678bdab9d02382a2e7"
+    },
+    {
+      "path": "web/packages/core/test/salesOrderDesign.test.ts",
+      "sha256": "738c30cd6635858baa4d0f23e6a68b53921455be3c4b8a481eedc9daa878f61b"
+    },
+    {
+      "path": "web/packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "web/pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    },
+    {
+      "path": "web/tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    }
+  ]
+}

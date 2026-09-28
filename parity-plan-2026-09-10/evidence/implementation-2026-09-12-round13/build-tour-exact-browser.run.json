@@ -1,0 +1,21 @@
+{
+  "command": [
+    "env",
+    "API_ORIGIN=http://127.0.0.1:4410",
+    "pnpm",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T22:54:05.451599+00:00",
+  "finishedAtUtc": "2026-09-11T22:54:26.174796+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-tour-exact-browser.txt",
+  "logSha256": "f4f6a510c3d55779a673affee458fc34c69b0292fa710a6d96ef4fc3618c1a73",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-tour-exact-browser.inputs.json",
+  "inputManifestSha256": "484e707ad0475bd3fd35eb6e480a3d867fc4e4112d0114bda91354457cf9136c",
+  "inputCount": 1814,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

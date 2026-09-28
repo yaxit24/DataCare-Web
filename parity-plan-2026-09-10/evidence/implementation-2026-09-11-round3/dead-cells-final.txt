@@ -1,0 +1,6 @@
+dead-cell audit: 712 extended columns checked across 21 pages (23 mapped pages)
+  nested wholesale-sale.issueYear: POST /rate-cut lines[].isuRef.yrcd -> postRateCut -> ISU_YRCD (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:826)
+  nested wholesale-sale.issueBook: POST /rate-cut lines[].isuRef.dbcd -> postRateCut -> ISU_DBCD (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:827)
+  nested wholesale-sale.issueNo: POST /rate-cut lines[].isuRef.no -> postRateCut -> ISU_NO (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:828)
+  nested wholesale-sale.issueSrno: POST /rate-cut lines[].isuRef.srno -> postRateCut -> ISU_SRNO (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:829)
+  all checked extended grid columns have static writer-consumption evidence (not runtime parity).

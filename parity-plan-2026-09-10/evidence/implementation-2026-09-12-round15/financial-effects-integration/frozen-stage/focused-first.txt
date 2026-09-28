@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-round15-financial-effects/web/packages/core
+
+ ❯ test/saleReturnFinancialEffects.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnFinancialEffects.test.ts [ test/saleReturnFinancialEffects.test.ts ]
+Error: Transform failed with 1 error:
+/private/tmp/datacare-round15-financial-effects/web/packages/core/src/saleReturnFinancialEffects.ts:47:604: ERROR: Expected ";" but found ")"
+  Plugin: vite:esbuild
+  File: /private/tmp/datacare-round15-financial-effects/web/packages/core/src/saleReturnFinancialEffects.ts:47:604
+  
+  Expected ";" but found ")"
+  45 |  function wholeClock(v:string|null|undefined):string|null{if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.0{1,6})?$/.test(v)||!clock(v.slice(0,19)))return null;return v.slice(0,19)}
+  46 |  function phase(v:unknown):SaleReturnFinancialPhase {const r=rec(v);exact(r,['incoming','header']);return Object.freeze({incoming:raw(r.incoming,'SL_DETL_RTN'),header:raw(r.header,'SL_DATA')})}
+  47 |  function observed(v:unknown):SaleReturnFinancialObserved {const r=rec(v);exact(r,['acData','rojMel','mainStock','taxData']);return Object.freeze(Object.fromEntries((['acData','rojMel','mainStock','taxData'] as const).map((g,i)=>[g,Object.freeze(arr(r[g]).map(v=>{const x=rec(v);exact(x,['physicalIdentity','version','raw']);if(typeof x.physicalIdentity!=='string'||!x.physicalIdentity||x.physicalIdentity.length>128||!hash(x.version))fail('invalid-input','Physical identity and observed version are required.');return Object.freeze({physicalIdentity:x.physicalIdentity,version:x.version,raw:raw(x.raw)}) )])) ) as unknown as SaleReturnFinancialObserved}
+     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ^
+  48 |  function recover(v:unknown):SaleReturnFinancialObserved|null{try{if(!v||typeof v!=='object')return null;const d=Object.getOwnPropertyDescriptor(v,'observed');return d&&Object.hasOwn(d,'value')?observed(d.value):null}catch{return null}}
+  49 |  const MASTER = {book:['CO_CODE','LC_CODE','CO_BOOK','MAIN_BOOK','BOOK_INOUT','BOOK_TYPE','BOOK_TBL_NAME','BOOK_SNAME','DATA_TYPE'],bookDetail:['CO_CODE','LC_CODE','CO_BOOK','MAIN_BOOK','BOOK_INOUT','BOOK_TYPE','BOOK_SNAME','DATA_TYPE','SR_NO','AC_CODE'],item:['CO_CODE','IT_CODE','GR_CODE'],group:['CO_CODE','GR_CODE','SALE_AC'],account:['CO_CODE','AC_CODE','AC_GST_TYPE'],taxes:['CO_CODE','TAX_CODE','SR_NO','TAX_GROUP','TAX_PRC']} as const;
+  
+ ❯ failureErrorWithLog ../../../../../../Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/esbuild@0.21.5/node_modules/esbuild/lib/main.js:1472:15
+ ❯ ../../../../../../Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/esbuild@0.21.5/node_modules/esbuild/lib/main.js:755:50
+ ❯ responseCallbacks.<computed> ../../../../../../Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/esbuild@0.21.5/node_modules/esbuild/lib/main.js:622:9
+ ❯ handleIncomingPacket ../../../../../../Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/esbuild@0.21.5/node_modules/esbuild/lib/main.js:677:12
+ ❯ Socket.readFromStdout ../../../../../../Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/esbuild@0.21.5/node_modules/esbuild/lib/main.js:600:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  08:09:47
+   Duration  204ms (transform 29ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 39ms)
+

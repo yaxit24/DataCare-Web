@@ -17,6 +17,9 @@ import { LookupPicker } from '../../../../components/LookupPicker';
 import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { ParityContainmentFieldset } from '../../../../components/ParityContainmentNotice';
+import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
+import { fineFor } from '@datacare/core';
 
 /** Tag Opening (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
  *  when left blank. Rich per-tag fields → BAR_DETL (Counter/Design/Size/LsWt/Lbr%/LbrRate/OthAmt). */
@@ -227,6 +230,8 @@ export default function TagOpeningPage() {
   const [res, setRes] = useState<{ vchNo: number; tags: number; tagNos: string[] } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  // P3: The loose-stock item code the opened tag draws its metal from.
+  const [stockItCode, setStockItCode] = useState('');
   const submitRef = useRef<HTMLButtonElement>(null);
   // Desktop parity: TR_TAG_OPBL reads the scale only while the NET WEIGHT cell is current
   // (`if (MSG.Col != 14) continue;`), so the row that owns focus is tracked and a reading is discarded
@@ -258,7 +263,13 @@ export default function TagOpeningPage() {
   });
   const setLine = (i: number, k: keyof Line, v: string) =>
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
-  const fine = (l: Line) => r3((n(l.netWt) * n(l.touch)) / 100);
+  const fine = (l: Line) =>
+    fineFor('tagOpening', {
+      netWt: n(l.netWt),
+      touch: n(l.touch),
+      ghtWt: n(l.ghtWt),
+      westPct: n(l.westPct),
+    });
   const scopeQuery = `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
   const errorText = (error: unknown) =>
     error instanceof ApiError
@@ -335,6 +346,7 @@ export default function TagOpeningPage() {
     setBusy(true);
     try {
       const body = {
+        stockItCode: stockItCode.trim() || undefined,
         coBook: coBook || undefined,
         coYear,
         lcCode,
@@ -352,11 +364,16 @@ export default function TagOpeningPage() {
             empIsu: line.empIsu || undefined,
             fineWt: Number(line.fineWt || 0) || undefined,
             ghtWt: Number(line.ghtWt || 0) || undefined,
-            hallmarkId2: Number(line.hallmarkId2 || 0) || undefined,
+            // P0-06/WP-08: HUIDs are ALPHANUMERIC and the contract types them as strings
+            // (stockVoucherLifecycle.ts:61-63; the writer stores text(...).slice(0, 10) at :647).
+            // This page sent Number(...), so any id containing a letter became NaN and was then
+            // dropped by `|| undefined` — the id was silently lost on every save. The *_WT fields
+            // beside these ARE numeric, so their coercion is correct and is left alone.
+            hallmarkId2: line.hallmarkId2?.trim() || undefined,
             hallmarkId2Wt: Number(line.hallmarkId2Wt || 0) || undefined,
-            hallmarkId3: Number(line.hallmarkId3 || 0) || undefined,
+            hallmarkId3: line.hallmarkId3?.trim() || undefined,
             hallmarkId3Wt: Number(line.hallmarkId3Wt || 0) || undefined,
-            hallmarkId4: Number(line.hallmarkId4 || 0) || undefined,
+            hallmarkId4: line.hallmarkId4?.trim() || undefined,
             hallmarkId4Wt: Number(line.hallmarkId4Wt || 0) || undefined,
             hallmarkIdWt: Number(line.hallmarkIdWt || 0) || undefined,
             itmColor: line.itmColor || undefined,
@@ -438,6 +455,12 @@ export default function TagOpeningPage() {
         <div className="panel">
           <div className="row">
             <div className="field">
+              <label>Stock Item Code</label>
+              <input value={stockItCode} onChange={(e) => setStockItCode(e.target.value)} />
+            </div>
+          </div>
+          <div className="row">
+            <div className="field">
               <label>Voucher No</label>
               <input
                 aria-label="Voucher No"
@@ -477,7 +500,11 @@ export default function TagOpeningPage() {
             </div>
           </div>
         </div>
-        <div className="panel" style={{ overflow: 'auto' }}>
+        <fieldset
+          className="panel"
+          aria-label="Opening tag details"
+          style={{ overflow: 'auto', minWidth: 0, border: 0, padding: 0, margin: 0 }}
+        >
           <div className="toolbar" style={{ marginBottom: 6 }}>
             <h2 style={{ margin: 0 }}>Opening Tags</h2>
             <span className="spacer" />
@@ -642,7 +669,7 @@ export default function TagOpeningPage() {
           <EntityImagePanel
             entityType="TAG"
             entityKey={lines[imageRow]?.tagNo ?? ''}
-            instance={imageRow + 1}
+            instance={lines[imageRow]?.vchSrno ?? imageRow + 1}
             label="Tag image"
             testId="tag-opening-image"
           />
@@ -678,7 +705,7 @@ export default function TagOpeningPage() {
               {busy ? 'Saving…' : loadedVchNo ? 'Update Opening' : 'Load Opening Stock'}
             </button>
           </div>
-        </div>
+        </fieldset>
       </form>
       {err && <div className="msg err">{err}</div>}
       {res && (

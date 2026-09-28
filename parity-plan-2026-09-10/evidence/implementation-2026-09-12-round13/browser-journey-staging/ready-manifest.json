@@ -1,0 +1,97 @@
+{
+  "kind": "session-context-lifecycle-browser-staged-v1",
+  "status": "ready-unexecuted",
+  "createdAtUtc": "2026-09-11T21:11:39.351321+00:00",
+  "baseManifest": {
+    "path": "/tmp/datacare-session-context-next/browser-journey-staged/ready-manifest.json",
+    "sha256": "fd535709204de1aed6cd976d0bb96a6998fcc7b045bed8a67eca03617121ae1b"
+  },
+  "originalFilesUnchanged": true,
+  "mainRepositoryModified": false,
+  "sharedHarnessModified": false,
+  "checks": {
+    "base": 12,
+    "additional": 2,
+    "combined": 14
+  },
+  "transportFaults": {
+    "base": 3,
+    "additional": 2,
+    "combined": 5
+  },
+  "execution": {
+    "browser": false,
+    "database": false,
+    "compiler": false,
+    "tests": false,
+    "formatting": "New staged JavaScript files only"
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "ab886a021cb26839d89bf32f22bfee6736e1333a31a865063223ea58052d6ead"
+    },
+    {
+      "path": "browser-required-checks-addendum.json",
+      "sha256": "4b7a32632e55652d273836da23fa9252db6395dca9a8ee7a0075bb55f00a333f"
+    },
+    {
+      "path": "optional-runner-addendum.patch",
+      "sha256": "7a1e568e2eaa89e939fa347f973a8607a16f96ff48f43021e68a5a1060dc4098"
+    },
+    {
+      "path": "review.md",
+      "sha256": "cdf9feb320c29905349ee1366ee53a1842784d1cb8f88373172713b98799507d"
+    },
+    {
+      "path": "web/apps/web/test/session-context-lifecycle.journey.mjs",
+      "sha256": "1a5ca4dbedacd9dc28627a9bf3601873aae220916f5ddc0633ef1f0be3e72cc3"
+    },
+    {
+      "path": "web/apps/web/test/session-context.journey.mjs",
+      "sha256": "3fbefbb8c61da36d202a77be04bad6c4e1689feed710b10f6880ecf40b3092e5"
+    },
+    {
+      "path": "web/apps/web/test/session-context.real-stack.additive.mjs",
+      "sha256": "7b0cafbfe88b39ef8deb7a2b8987463285350e30e7adf59275f91309b78a06c4"
+    }
+  ],
+  "reviewedActiveInputs": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/contextSelection.ts",
+      "sha256": "b66344f45ea33af2e01e5aadd443011c03666edebbf91b53f9594b68a49db2dd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/api.ts",
+      "sha256": "752786074a6de23482dc33560ed677751c59fc8d686c2d25d893ad82598cc015"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/pageContext.ts",
+      "sha256": "1f157fc8f55cee17e914bebbf77d5b709f42640f902f10228e41b4478dc20426"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/Shell.tsx",
+      "sha256": "162a4ded277d4e7a829e45eb5f1b030fb8794c2faeba07d912c3a4a056a872eb"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/useOperationLease.ts",
+      "sha256": "584e1e1b609aa1a5d1fb10f0801ec5d4e4c3d28269b810a6d54b4ecfae87912b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/select/page.tsx",
+      "sha256": "2e3965ceb00575dc5e4a7e8552c93885aa03567cfb4274636ca9ea2bbdbfc038"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/(app)/layout.tsx",
+      "sha256": "451a47d79eabbd5088786662ad782fdfd1af69dda84694c87bbb0fbfb0d9ae38"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/(app)/masters/design-book/page.tsx",
+      "sha256": "54c1e7df99173c733fde69e6a9b6861f5ee9a3d4b34b04a1a6e9a98001620cda"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/(app)/masters/[name]/page.tsx",
+      "sha256": "e9db9de8d262f7877aa8af9c1da1e960f7b9ac46931a386a64fc929e5452eb82"
+    }
+  ]
+}

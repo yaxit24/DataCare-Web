@@ -1,0 +1,14 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run "test/orderLabour.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/orderLabour.test.ts (23 tests) 7ms
+
+ Test Files  1 passed (1)
+      Tests  23 passed (23)
+   Start at  05:02:57
+   Duration  683ms (transform 106ms, setup 0ms, collect 101ms, tests 7ms, environment 0ms, prepare 92ms)
+

@@ -1,0 +1,24 @@
+{
+  "command": [
+    "env",
+    "SESSION_CONTEXT_ARTIFACT_DIR=test-results/session-context-real-stack-item-settled",
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "node",
+    "apps/web/test/session-context.real-stack.additive.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:46:50.429599+00:00",
+  "finishedAtUtc": "2026-09-11T23:46:59.189887+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-context-item-lookup-settled.txt",
+  "logSha256": "06d736ac24ea33b0b4237235b4c92278fc6cedc35f9c230a3f448b5c20bdbf06",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-context-item-lookup-settled.inputs.json",
+  "inputManifestSha256": "fa503dab9b542dea97964316cc79f6c27f3799edf86d1f10c4d10ea00b7dfda2",
+  "inputCount": 1830,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

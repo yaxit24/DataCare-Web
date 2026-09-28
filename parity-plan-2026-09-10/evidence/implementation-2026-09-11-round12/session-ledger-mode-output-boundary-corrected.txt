@@ -1,0 +1,8 @@
+input { nodes: 76089, text: 8388608 } remaining adjustment 0
+result applied { nodes: 76093, text: 8388631 } []
+next invalid-input false [
+  {
+    code: 'input-limit',
+    message: 'The observation exceeds this bounded semantic profile.'
+  }
+]

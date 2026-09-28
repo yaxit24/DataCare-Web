@@ -1,0 +1,20 @@
+{
+  "command": [
+    "node",
+    "scripts/check-completion-register.mjs",
+    "--strict"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T00:14:46.295254+00:00",
+  "finishedAtUtc": "2026-09-12T00:14:46.459394+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/completion-register-final.txt",
+  "logSha256": "750edf3a249abadc5699b69fb037f9504ef4f1d4d777828942babeef7538c29e",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/completion-register-final.inputs.json",
+  "inputManifestSha256": "42a2194e2ce22c069e1b6755f48e2e511c8ad01f7070bcf215572910b2e3a92e",
+  "inputCount": 1856,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

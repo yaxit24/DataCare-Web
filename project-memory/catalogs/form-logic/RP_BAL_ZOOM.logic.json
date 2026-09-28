@@ -1,0 +1,70 @@
+{
+ "form": "RP_BAL_ZOOM",
+ "tables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "BOOK_DATA",
+  "LEDR_AC_DATA",
+  "LOCT_MAST",
+  "MAIN_STOCK",
+  "RATE_MAST",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "REPORT_DATA": [
+    "COL_1",
+    "COL_2",
+    "COL_3",
+    "COL_4",
+    "COL_5",
+    "COL_6",
+    "COL_7",
+    "CO_CODE",
+    "LC_CODE",
+    "SR_NO"
+   ],
+   "LEDR_AC_DATA": [
+    "AC_CODE",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "CR_FINE_WT",
+    "CR_SL_FINE",
+    "DATA_TYPE",
+    "DR_AMT",
+    "DR_FINE_WT",
+    "DR_SL_FINE",
+    "LC_CODE",
+    "VCH_DT"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "AC_DATA",
+   "LEDR_AC_DATA",
+   "REPORT_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "BOOK_DATA",
+  "LEDR_AC_DATA",
+  "LOCT_MAST",
+  "MAIN_STOCK",
+  "RATE_MAST",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 2,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 7178
+}

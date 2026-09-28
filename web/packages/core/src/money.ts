@@ -39,6 +39,23 @@ export function roundHalfEven(value: DecimalJs.Value, dp: number): number {
   return new DecimalJs(value).toDecimalPlaces(dp, DecimalJs.ROUND_HALF_EVEN).toNumber();
 }
 
+/** Exact decimal cell text, without the Number roundtrip used by the older APIs.
+ * Mathematical half-up is the selected port policy; this does not establish
+ * all legacy Double/Val/Strings.Format culture and midpoint behavior.
+ */
+export function decimalCellText(value: DecimalJs.Value, dp: number): string {
+  const decimal = new DecimalJs(value);
+  if (!decimal.isFinite()) throw new Error('A finite decimal is required');
+  return decimal.toFixed(dp, DecimalJs.ROUND_HALF_UP);
+}
+
+/** Decimal-valued midpoint-to-even primitive for explicit source Math.Round sites. */
+export function roundHalfEvenDecimal(value: DecimalJs.Value, dp: number): DecimalJs {
+  const decimal = new DecimalJs(value);
+  if (!decimal.isFinite()) throw new Error('A finite decimal is required');
+  return decimal.toDecimalPlaces(dp, DecimalJs.ROUND_HALF_EVEN);
+}
+
 /** Fine (pure-metal) weight = netWt * touch / 100. (Req 12.1) */
 export function fineWeight(
   netWt: DecimalJs.Value,

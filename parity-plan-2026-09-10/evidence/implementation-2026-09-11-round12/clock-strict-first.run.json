@@ -1,0 +1,27 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "exec",
+    "tsc",
+    "--noEmit",
+    "--strict",
+    "--noUncheckedIndexedAccess",
+    "--target",
+    "ES2022",
+    "--module",
+    "NodeNext",
+    "--moduleResolution",
+    "NodeNext",
+    "--skipLibCheck",
+    "src/savedSaleReturnClock.ts",
+    "test/savedSaleReturnClock.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T17:53:06.732124+00:00",
+  "finishedAtUtc": "2026-09-11T17:53:08.050163+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-strict-first.txt"
+}

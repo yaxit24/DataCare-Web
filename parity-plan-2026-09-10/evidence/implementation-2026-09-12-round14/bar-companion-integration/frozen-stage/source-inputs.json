@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/effects-contract.md",
+      "sha256": "00c0d6551a0b08445835869c93bb19cafa42e879b841c315596581ec4f7b28c2"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/source-effect-index.json",
+      "sha256": "886f5a32611e412128e9c5b749a9da188c8fbbde5e9f266f09c7d20bc800c1fd"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/expected-before-after.inventory.json",
+      "sha256": "461cd378334806592661c141e72ecc4b5597cebad6609145e9878890a7e14cbc"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/ready-manifest.json",
+      "sha256": "93dfd6b82a9ce811db6ec9665c126d337f0537b101d3ecc92da433aafcf6ba84"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    }
+  ]
+}

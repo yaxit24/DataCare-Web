@@ -1,0 +1,37 @@
+{
+  "atUtc": "2026-09-11T21:40:59.829143+00:00",
+  "stageManifestSha256": "ffe2722477d56bbf8912703320d81bfe35273498fe4947e1959594c84831e19a",
+  "allPinnedInputsUnchangedAtInitialIntegration": true,
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "sha256": "c2d34d7a4270fe35a9af9455ecf402376e450377b95d392382c79268b99658ba"
+    },
+    {
+      "path": "web/apps/api/test/saleReturnIncomingLabour.db.test.ts",
+      "sha256": "fd520c12cec05804f40df80172b60988432a45e80b3520ffad5148ac4475e65c"
+    },
+    {
+      "path": "web/apps/api/test/saleReturnIncomingLabour.test.ts",
+      "sha256": "8759a2d530870462b0fbe3e5345e28b81aed371a746b81d3da699c082e1ccc81"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingLabour.ts",
+      "sha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncomingLabour.independent.json",
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncomingLabour.test.ts",
+      "sha256": "74da7d6d1b15d49fcf738533c4b7d6da90f173bd2db0f23b455f89f4c5cbd663"
+    },
+    {
+      "path": "web/packages/core/src/index.ts",
+      "sha256": "8588058539f00bf1093a34ea37a561f3dbf4e01563f6493d166b97282671880a"
+    }
+  ],
+  "qualification": "Initial integration assertion stopped after copying six files because export instruction contained a comment. Index remained unchanged; subsequent core build passed source compilation but omitted public export. The two new dist outputs are that build result, not concurrent source edits. This continuation validates copied bytes and applies the single required export. Fresh build and tests follow.",
+  "status": "integrated; tests pending; no preview/HTTP/numeric writer adoption"
+}

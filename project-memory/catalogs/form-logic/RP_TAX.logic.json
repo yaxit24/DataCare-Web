@@ -1,0 +1,33 @@
+{
+ "form": "RP_TAX",
+ "tables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "LOCT_MAST",
+  "TAX_DATA",
+  "TAX_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "LOCT_MAST",
+  "TAX_DATA",
+  "TAX_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 0,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [
+  "TAX_CODE = '\" + tTaxCode.Text + \"' \""
+ ],
+ "loc": 2406
+}

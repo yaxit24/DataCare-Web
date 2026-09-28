@@ -1,0 +1,346 @@
+
+> datacare-web-saas@0.0.0 test:parity:api /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/salesFamilyLifecycle.db.test.ts (29 tests) 3765ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance 373ms
+   ✓ database-backed sales-family voucher lifecycles > a sale return writes exactly its declared set of tables 302ms
+   ✓ database-backed sales-family voucher lifecycles > a sales order posts the ledger only when it carries an advance 353ms
+ ✓ test/repairReceipt.db.test.ts (9 tests) 1310ms
+   ✓ database-backed customer repair receipt integrity > persists, edits, and reverses the source write-set using configured accounts and persisted lock date 307ms
+ ✓ test/purchase.lifecycle.db.test.ts (18 tests) 2409ms
+   ✓ database-backed purchase voucher lifecycle > creates, opens and edits with independent numbering and preserved identity without delete audit 376ms
+ ✓ test/mfgLifecycle.db.test.ts (9 tests) 808ms
+   ✓ database-backed karigar/manufacturing edit lifecycle > covers karigar issue create/get/edit/persisted-date lock/delete against PostgreSQL 333ms
+ ✓ test/sales.lifecycle.db.test.ts (18 tests) 1984ms
+ ✓ test/rojmel.test.ts (66 tests) 18ms
+ ✓ test/routePolicy.test.ts (54 tests) 27ms
+ ✓ test/rateCutSettlement.db.test.ts (19 tests) 1777ms
+ ✓ test/operatorDepth.roundtrip.db.test.ts (3 tests) 2071ms
+   ✓ operator depth — lossless round trips > purchase preserves every supplied field across an unchanged save 523ms
+   ✓ operator depth — lossless round trips > manufacturing preserves every supplied component field across an unchanged save 713ms
+ ✓ test/savedSaleReturn.db.test.ts (26 tests) 2747ms
+ ✓ test/columnSettings.db.test.ts (21 tests) 1440ms
+ ✓ test/tourOrderHydration.db.test.ts (14 tests) 2953ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions 462ms
+   ✓ Tour Order configured-book and complete editor round trip > blocks the allocated source order while allowing the same number in another book, branch or year 806ms
+ ✓ test/entityImageConcurrency.routes.db.test.ts (17 tests) 3411ms
+   ✓ generic entity image HTTP compare-and-swap > accepts a complete large generic image within the advertised 4 MB binary limit 579ms
+   ✓ generic entity image HTTP compare-and-swap > accepts a complete large design image within the advertised 4 MB binary limit 403ms
+ ✓ test/dataRepair.db.test.ts (15 tests) 1025ms
+ ✓ test/backupRestore.db.test.ts (13 tests) 24487ms
+   ✓ WP-02A company logical backup/restore > classifies the complete live schema and seals a lossless v2 document 1061ms
+   ✓ WP-02A company logical backup/restore > exports every row beyond the former 100000-row ceiling 2934ms
+   ✓ WP-02A company logical backup/restore > round-trips exact rows while preserving the other company, tenant, shared data, and sequences 6073ms
+   ✓ WP-02A company logical backup/restore > rejects a tampered checksum before deleting any target row 672ms
+   ✓ WP-02A company logical backup/restore > rolls back every delete when a validly sealed row overflows its database type 2002ms
+   ✓ WP-02A company logical backup/restore > rolls back when persisted values do not match the sealed SHA-256 checksum 3360ms
+   ✓ WP-02A company logical backup/restore > rolls back the whole replace transaction on a primary-key conflict 3093ms
+   ✓ WP-02A company logical backup/restore > rejects malformed document shape without a TypeError or database mutation 576ms
+   ✓ WP-02A company logical backup/restore > rejects wrong authenticated tenant or company scope before mutation 1023ms
+   ✓ WP-02A company logical backup/restore > rejects a self-consistent but non-live schema manifest before deletion 829ms
+   ✓ WP-02A company logical backup/restore > preflights internal company and external tenant-shared foreign keys before live replacement 2723ms
+ ✓ test/transaction.integrity.db.test.ts (5 tests) 1345ms
+   ✓ database-backed transaction integrity > allocates padded MAX+1 independently by company/location/year/book under concurrency 428ms
+   ✓ database-backed transaction integrity > posts tagged and loose stock atomically and derives locked reversals from persisted state 431ms
+ ✓ test/settingsBehavior.db.test.ts (12 tests) 718ms
+ ✓ test/dataRepairBatch2.db.test.ts (12 tests) 560ms
+ ✓ test/saleReturnIncomingReplay.db.test.ts (43 tests) 4573ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > hydrates exact raw identities, rawNULL/blank/decimals/microseconds, eight caches and an empty journal without recalculation or business writes 306ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > contains hidden, known unsupported and malformed events without widening the twelve-field profile 314ms
+ ✓ test/saleReturnSource.db.test.ts (41 tests) 1944ms
+ ✓ test/wholesaleSaleReturn.db.test.ts (4 tests) 610ms
+   ✓ database-backed wholesale sale return lifecycle > creates every desktop family, reads, safely replaces, locks, rejects resold tags and audits delete 396ms
+ ✓ test/vpParcel.db.test.ts (1 test) 346ms
+   ✓ database-backed VP parcel lifecycle > creates, reads, replaces, guards, locks and desktop-deletes a VP parcel atomically 331ms
+ ✓ test/stockLifecycle.db.test.ts (5 tests) 505ms
+ ✓ test/goldBookLoctAmt.db.test.ts (2 tests) 331ms
+ ✓ test/documents.test.ts (17 tests) 46ms
+ ✓ test/mfgLotRead.db.test.ts (8 tests) 485ms
+ ✓ test/saleReturnIncomingReplay.routes.db.test.ts (12 tests) 2317ms
+ ✓ test/repairImageConcurrency.routes.db.test.ts (9 tests) 2249ms
+   ✓ repair image HTTP compare-and-swap and source identity > accepts a complete large Repair image above the default JSON limit and preserves source bytes 532ms
+ ✓ test/saleReturnIncomingConfiguration.review.test.ts (69 tests) 60ms
+stdout | test/reportContract.test.ts > Crystal report data-source contracts > classifies every token and resolves every non-allowlisted database field to Prisma
+REPORT_CONTRACT_TOTALS {"specs":254,"distinctTokens":2407,"database":1223,"formula":408,"special":776,"unresolvable":0,"resolvedDatabase":1133,"allowlistedDatabaseGaps":90}
+
+ ✓ test/reportContract.test.ts (1 test) 101ms
+ ✓ test/salesOrderRound4.db.test.ts (10 tests) 1085ms
+   ✓ Sales ordinary saved state and ordered design source replay > preserves complete imported business rows, six-digit clock, nullable values and exact large decimals on unchanged edit 354ms
+ ✓ test/releaseCertification.test.ts (31 tests) 27ms
+ ✓ test/stockInout.db.test.ts (3 tests) 316ms
+ ✓ test/financeLifecycle.db.test.ts (4 tests) 536ms
+ ✓ test/orderReport.db.test.ts (9 tests) 512ms
+ ✓ test/physicalStock.db.test.ts (5 tests) 408ms
+ ✓ test/goldenVectors.test.ts (27 tests) 6ms
+ ✓ test/tagCancelIdentity.db.test.ts (10 tests) 2650ms
+   ✓ tag cancel resolves one live serial identity > cancels a live tag and records the out-movement against the resolved instance 319ms
+   ✓ tag cancel resolves one live serial identity > restores a TAG_STOCK-only tag when the cancel is deleted, instead of losing it 875ms
+ ✓ test/saleReturnIncomingConfiguration.db.test.ts (26 tests) 1042ms
+ ✓ test/otherCommission.db.test.ts (1 test) 303ms
+ ✓ test/dhrnReceipt.db.test.ts (5 tests) 377ms
+ ✓ test/salesOrderLifecycle.routes.db.test.ts (13 tests) 1734ms
+ ✓ test/cashReceiptLegs.db.test.ts (7 tests) 1941ms
+   ✓ cash receipt ledger legs > writes a pair per movement, so a receipt with a discount has FOUR legs 376ms
+   ✓ cash payment ledger legs > uses legs 05-08, which a receipt never uses, and pairs each movement 381ms
+ ✓ test/saleReturnIncomingConfiguration.routes.db.test.ts (9 tests) 1534ms
+ ✓ test/reopenVoucher.db.test.ts (8 tests) 597ms
+ ✓ test/orderImageWrite.db.test.ts (11 tests) 425ms
+ ✓ test/app.security.db.test.ts (5 tests) 935ms
+ ✓ test/reportChildren.db.test.ts (12 tests) 483ms
+ ✓ test/savedSaleReturn.routes.db.test.ts (9 tests) 1633ms
+ ✓ test/settingsEffect.db.test.ts (7 tests) 2040ms
+   ✓ settings that must change an outcome > NEGATIVE_STK_SALE refuses an oversell when N and permits it when Y 453ms
+ ✓ test/saleReturnSource.routes.db.test.ts (7 tests) 1164ms
+ ✓ test/tourOrderPrint.routes.db.test.ts (5 tests) 1073ms
+ ✓ test/savedSaleReturnEmpty.db.test.ts (6 tests) 1319ms
+ ✓ test/settingsBehavior.test.ts (93 tests) 11ms
+ ✓ test/vpLifecycle.db.test.ts (1 test) 252ms
+ ✓ test/karigarDayBook.db.test.ts (5 tests) 445ms
+ ✓ test/estimateReset.db.test.ts (1 test) 686ms
+   ✓ UT_IMPORT Estimate Reset utility > previews and applies reset-book estimate, tag-cancel and wholesale cleanup 547ms
+ ✓ test/reportAuthorization.test.ts (12 tests) 206ms
+ ✓ test/meltingPro.db.test.ts (3 tests) 461ms
+ ✓ test/lineComponentRounding.db.test.ts (4 tests) 1200ms
+   ✓ per-line tax allocation > rounds the line tax ONCE, and the lines sum to the header tax 430ms
+ ✓ test/parityBundleDiff.test.ts (24 tests) 8ms
+ ✓ test/conditionalRules.test.ts (25 tests) 11ms
+ ✓ test/orderImageReport.db.test.ts (5 tests) 948ms
+ ✓ test/integrationWireContract.test.ts (14 tests) 7ms
+ ✓ test/kernelConformance.test.ts (13 tests) 29ms
+ ✓ test/oldItemSales.db.test.ts (2 tests) 271ms
+ ✓ test/otherIncome.db.test.ts (2 tests) 812ms
+   ✓ database-backed TR_OTH_PURC Other Income mode > creates, reads, edits and desktop-deletes an OTH INC PAY voucher 498ms
+ ✓ test/yearEndCarry.db.test.ts (11 tests) 276ms
+ ✓ test/orderDesignSelection.db.test.ts (12 tests) 778ms
+ ✓ test/tagInvariants.db.test.ts (14 tests) 233ms
+ ✓ test/correctionWorkflow.db.test.ts (4 tests) 897ms
+ ✓ test/p9Reports.db.test.ts (8 tests) 2403ms
+   ✓ P9 report workflows > lists hallmarked tags with their HUIDs, keeping ids as text 770ms
+ ✓ test/utilities.db.test.ts (4 tests) 266ms
+ ✓ test/tagOpeningRoundTrip.db.test.ts (4 tests) 1171ms
+   ✓ tag opening survives a reopen-and-save unchanged > returns every field it accepts, so a reopen loses nothing 352ms
+ ✓ test/designBook.routes.db.test.ts (5 tests) 797ms
+ ✓ test/consignmentPurchase.db.test.ts (1 test) 403ms
+   ✓ database-backed TR_PR_SL_UAE consignment purchase mode > imports open CON REC lines, posts CON PUR, preserves references on edit, and reverses source flags on delete 379ms
+ ✓ test/ledgerStaging.db.test.ts (6 tests) 153ms
+ ✓ test/designComponents.db.test.ts (9 tests) 396ms
+ ✓ test/entityImage.db.test.ts (18 tests) 242ms
+ ✓ test/contraDelete.db.test.ts (4 tests) 418ms
+ ✓ test/stoneDmCf.db.test.ts (2 tests) 441ms
+   ✓ TR_PHYSTK Stone/Dm-Cf SF PRINT mode > saves, reads, edits and deletes SF PRINT certificate rows without moving stock 394ms
+ ✓ test/reportDateFilter.db.test.ts (10 tests) 134ms
+ ✓ test/contractIntegrity.test.ts (17 tests) 9ms
+ ✓ test/labourDesktop.test.ts (22 tests) 6ms
+ ✓ test/mfgLotRoutes.db.test.ts (5 tests) 1126ms
+ ✓ test/bullionSale.db.test.ts (2 tests) 248ms
+ ✓ test/designCalculations.db.test.ts (7 tests) 259ms
+ ✓ test/manufacturingReports.db.test.ts (5 tests) 185ms
+ ✓ test/tourIdtl.db.test.ts (3 tests) 402ms
+   ✓ database-backed approval sub-detail > writes every desktop APR_IDTL column and reverses it on delete 304ms
+ ✓ test/companySettings.db.test.ts (7 tests) 321ms
+ ✓ test/designRepeat.db.test.ts (6 tests) 264ms
+ ✓ test/dataRepairAuthority.test.ts (7 tests) 175ms
+ ✓ test/reportFiltersApplied.db.test.ts (6 tests) 170ms
+ ✓ test/billToBillDelete.db.test.ts (4 tests) 353ms
+ ✓ test/orderTagReports.db.test.ts (7 tests) 134ms
+ ✓ test/orderDocumentScope.db.test.ts (6 tests) 325ms
+ ✓ test/tagAdjust.db.test.ts (2 tests) 722ms
+   ✓ TR_TAG_CAN Tag Adjust mode > records a BAR_CAN voucher and updates live tag data type on save, edit and delete 424ms
+ ✓ test/reportDiff.test.ts (19 tests) 7ms
+ ✓ test/fineInoutGrid.db.test.ts (3 tests) 916ms
+   ✓ fine in/out persists the desktop detail grid > stores every desktop grid column the contract accepts 459ms
+ ✓ test/parityRatchet.test.ts (17 tests) 6ms
+ ✓ test/salesQuotation.db.test.ts (1 test) 319ms
+ ✓ test/closingStock.db.test.ts (6 tests) 145ms
+ ✓ test/settings.db.test.ts (14 tests) 92ms
+ ✓ test/reportFamilyReports.db.test.ts (5 tests) 1260ms
+   ✓ RP_ALL report family parity builders > runs the Approval Rpt pending mode with party, product, and geography filters 332ms
+ ✓ test/purchase.test.ts (16 tests) 6ms
+ ✓ test/orderReport.test.ts (14 tests) 120ms
+ ✓ test/saleReturnIncomingConfiguration.test.ts (37 tests) 37ms
+ ✓ test/purchaseQuotation.db.test.ts (1 test) 380ms
+   ✓ database-backed TR_PURC purchase quotation mode > persists PR QUOT rows without posting stock, ledger, tax, rojmel, bill-OS, or lot rows 360ms
+ ✓ test/completionRegister.test.ts (11 tests) 11ms
+ ✓ test/reportRender.db.test.ts (5 tests) 260ms
+ ✓ test/tourOrder.db.test.ts (2 tests) 537ms
+   ✓ TR_SALE_ORD Tour Order lifecycle parity > creates, reads, edits, lists, and deletes TOUR ORDER rows with desktop order stamps 510ms
+ ✓ test/dhrnLoanLifecycle.db.test.ts (2 tests) 235ms
+ ✓ test/schemeGoldAdjust.db.test.ts (1 test) 520ms
+   ✓ scheme gold adjustment desktop lifecycle > writes AD_ADJ, AD_OS amount/gold rows, ledger, rojmel, readback and reversal 364ms
+ ✓ test/desktopMessages.db.test.ts (8 tests) 571ms
+ ✓ test/postingAccountLiterals.test.ts (5 tests) 362ms
+ ✓ test/configTables.db.test.ts (6 tests) 172ms
+ ✓ test/postingAccountFailClosed.db.test.ts (3 tests) 809ms
+ ✓ test/reportXlsx.test.ts (10 tests) 29ms
+ ✓ test/tourReports.db.test.ts (3 tests) 211ms
+ ✓ test/orderImageReport.test.ts (7 tests) 32ms
+ ✓ test/provisioning.db.test.ts (10 tests) 195ms
+ ✓ test/schemeLedgerLegs.db.test.ts (2 tests) 726ms
+   ✓ scheme instalment ledger legs > writes a 33-character key per member line, liability first, with the contra 383ms
+ ✓ test/rateCut.test.ts (12 tests) 5ms
+ ✓ test/settlement.test.ts (20 tests) 6ms
+ ✓ test/tagPrintStaging.db.test.ts (3 tests) 167ms
+ ✓ test/workflows.test.ts (19 tests) 6ms
+ ✓ test/graphReport.db.test.ts (5 tests) 182ms
+ ✓ test/orderTrackReport.db.test.ts (2 tests) 239ms
+ ✓ test/reportFilterGuard.test.ts (9 tests) 484ms
+ ✓ test/creditNoteRead.db.test.ts (3 tests) 230ms
+ ✓ test/taxMasterGst.db.test.ts (5 tests) 60ms
+ ✓ test/integrationReadiness.test.ts (13 tests) 5ms
+ ✓ test/messageLogIsolation.db.test.ts (4 tests) 101ms
+ ✓ test/cutover.test.ts (4 tests) 6ms
+ ✓ test/einvoiceProductionGuard.test.ts (10 tests) 6ms
+ ✓ test/ecreditNoteIrn.db.test.ts (2 tests) 142ms
+ ✓ test/masterFormFields.test.ts (5 tests) 5ms
+ ✓ test/bundleDiffPairing.test.ts (5 tests) 4ms
+ ✓ test/routeInputForwarding.test.ts (5 tests) 5ms
+ ✓ test/designBook.db.test.ts (5 tests) 101ms
+ ✓ test/stockLimitMaster.db.test.ts (5 tests) 162ms
+ ✓ test/reportGridStaging.db.test.ts (4 tests) 154ms
+ ✓ test/billProfit.test.ts (13 tests) 4ms
+ ✓ test/reportFilters.test.ts (11 tests) 4ms
+ ✓ test/ledgerKeyFormat.db.test.ts (1 test) 50ms
+ ✓ test/billProfitInputs.db.test.ts (7 tests) 113ms
+ ✓ test/repairKarigarReceipt.test.ts (10 tests) 4ms
+ ✓ test/entryCheckReport.db.test.ts (3 tests) 788ms
+ ✓ test/einvoice_gsp.test.ts (5 tests) 4ms
+ ✓ test/tradingReport.db.test.ts (2 tests) 226ms
+ ✓ test/einvoiceExport.db.test.ts (2 tests) 587ms
+ ✓ test/orderReports.db.test.ts (2 tests) 106ms
+ ✓ test/auth.session.test.ts (3 tests) 5ms
+ ✓ test/userWorkReport.db.test.ts (2 tests) 647ms
+   ✓ RP_USER User Report parity > builds the desktop user transaction grid from voucher, stock, ledger and payment sources 335ms
+ ✓ test/seedCompleteness.db.test.ts (4 tests) 522ms
+ ✓ test/provenance.test.ts (9 tests) 3ms
+ ✓ test/parityStrictSettings.test.ts (7 tests) 3ms
+ ✓ test/creditNoteIrnAmounts.test.ts (8 tests) 9ms
+ ✓ test/dhrnLoanReports.db.test.ts (2 tests) 569ms
+ ✓ test/designMoveReport.db.test.ts (2 tests) 107ms
+ ✓ test/sales.test.ts (12 tests) 5ms
+ ✓ test/oldStockReport.db.test.ts (2 tests) 93ms
+ ✓ test/meltingParity.test.ts (5 tests) 4ms
+ ✓ test/tagLabelSkip.db.test.ts (6 tests) 64ms
+ ✓ test/messaging.db.test.ts (4 tests) 166ms
+ ✓ test/consiReport.db.test.ts (2 tests) 153ms
+ ✓ test/otherItemReport.db.test.ts (2 tests) 90ms
+ ✓ test/dataExport.db.test.ts (1 test) 955ms
+   ✓ UT_EXPORT data export utility > previews scoped DATA_TRFR rows, packages them, marks exported, and resets flags 821ms
+ ✓ test/pageEndpointFamily.test.ts (7 tests) 7ms
+ ✓ test/health.test.ts (7 tests) 151ms
+ ✓ test/footprintLoud.db.test.ts (4 tests) 110ms
+ ✓ test/purchaseRojmel.test.ts (4 tests) 3ms
+ ✓ test/customerAccountReports.db.test.ts (2 tests) 707ms
+   ✓ customer/account desktop report ports > reports Last Visit from stored AC_MAST fields with latest AC_DATA fallback 363ms
+ ✓ test/columnSettings.test.ts (37 tests) 7ms
+ ✓ test/windowTiles.db.test.ts (5 tests) 141ms
+ ✓ test/schemeMonthlyReport.db.test.ts (2 tests) 85ms
+ ✓ test/reportBind.test.ts (34 tests) 34ms
+ ✓ test/opsInvariants.db.test.ts (2 tests) 188ms
+ ✓ test/settingsRealValues.test.ts (5 tests) 3ms
+ ✓ test/parityContainmentRoutes.test.ts (3 tests) 198ms
+ ✓ test/finalReports.db.test.ts (1 test) 460ms
+   ✓ RP_BALANCE final reports > uses AC_MAIN_GR >= 3 for Profit and Loss and returns the launcher rows 321ms
+ ✓ test/branchInoutReport.db.test.ts (2 tests) 83ms
+ ✓ test/finePolicy.test.ts (13 tests) 3ms
+ ✓ test/clearanceDateBooks.test.ts (26 tests) 4ms
+ ✓ test/ledgerTimestamp.db.test.ts (1 test) 156ms
+ ✓ test/rbac.authorization.test.ts (5 tests) 5ms
+ ✓ test/scheme.test.ts (8 tests) 3ms
+ ✓ test/metrics.test.ts (3 tests) 23ms
+ ✓ test/repairImage.test.ts (5 tests) 13ms
+ ✓ test/roundingPolicy.test.ts (14 tests) 5ms
+ ✓ test/saleReturnIncomingReplay.test.ts (31 tests) 7ms
+ ✓ test/scaleProtocol.test.ts (10 tests) 3ms
+ ✓ test/repairReceipt.test.ts (6 tests) 3ms
+ ✓ test/security.test.ts (8 tests) 307ms
+   ✓ workspace secret literal policy > finds plausible assigned credentials and ignores placeholders or environment reads 300ms
+ ✓ test/runtimeConfig.test.ts (9 tests) 3ms
+ ✓ test/barcode.test.ts (3 tests) 19ms
+ ✓ test/gst.test.ts (6 tests) 14ms
+ ✓ test/posting.test.ts (5 tests) 4ms
+ ✓ test/bookPolicy.test.ts (9 tests) 4ms
+ ✓ test/whatsapp.test.ts (3 tests) 4ms
+ ✓ test/finance.test.ts (4 tests) 3ms
+ ✓ test/masters.test.ts (6 tests) 3ms
+ ✓ test/integrationReadiness.db.test.ts (2 tests) 80ms
+ ✓ test/businessScope.test.ts (5 tests) 5ms
+ ✓ test/app.runtime.test.ts (1 test) 199ms
+ ✓ test/einvoice.test.ts (6 tests) 3ms
+ ✓ test/auth.jwt.test.ts (5 tests) 6ms
+ ✓ test/dhrn.test.ts (6 tests) 3ms
+ ✓ test/integrations.test.ts (8 tests) 3ms
+ ✓ test/auth.service.test.ts (5 tests) 95ms
+ ✓ test/financeWriters.test.ts (7 tests) 3ms
+ ✓ test/requestContext.test.ts (6 tests) 4ms
+ ✓ test/signAlphabet.test.ts (3 tests) 2ms
+ ✓ test/render.test.ts (5 tests) 20ms
+ ✓ test/rbac.policy.test.ts (5 tests) 4ms
+ ✓ test/rates.test.ts (4 tests) 3ms
+ ✓ test/registry.test.ts (3 tests) 4ms
+ ✓ test/audit.test.ts (2 tests) 4ms
+ ✓ test/taxPolicy.test.ts (2 tests) 3ms
+ ✓ test/voucherLifecycle.test.ts (4 tests) 4ms
+ ✓ test/deviceBridge.test.ts (5 tests) 3ms
+ ✓ test/salesReturn.test.ts (2 tests) 2ms
+ ✓ test/crystalFormula.test.ts (6 tests) 4ms
+ ✓ test/reportEngine.test.ts (4 tests) 9ms
+ ✓ test/chequePrint.test.ts (3 tests) 20ms
+ ✓ test/auth.password.test.ts (4 tests) 116ms
+ ✓ test/purchaseReturn.test.ts (1 test) 2ms
+ ✓ test/accounting.test.ts (3 tests) 2ms
+ ✓ test/numbering.test.ts (3 tests) 3ms
+ ✓ test/formLayoutEngine.test.ts (3 tests) 44ms
+ ✓ test/karigar.test.ts (4 tests) 2ms
+ ✓ test/reports.test.ts (2 tests) 2ms
+ ✓ test/stock.test.ts (3 tests) 2ms
+ ✓ test/melting.test.ts (3 tests) 2ms
+ ✓ test/parity.test.ts (1 test) 3ms
+
+ Test Files  235 passed (235)
+      Tests  2115 passed (2115)
+   Start at  13:04:51
+   Duration  209.85s (transform 3.50s, setup 0ms, collect 23.72s, tests 126.35s, environment 31ms, prepare 10.01s)
+

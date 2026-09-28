@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-09-11T05:51:25.132036+00:00",
+  "status": "passed",
+  "beforeRunSnapshotSha256": "16e1a9723fd48031f8c52fb2df2cefee76d7d5ac2afed0c7f777d783b8d5e3c3",
+  "matchedInputs": 997,
+  "fullRegression": {
+    "files": 219,
+    "tests": 1713,
+    "skipped": 0
+  },
+  "limits": "Post-source-blank API/core/db source, tests including binary fixtures, schema and runtime inputs were captured before and unchanged after final full regression. Engineering evidence only."
+}

@@ -1,0 +1,16 @@
+{
+  "inputs": [
+    {
+      "path": "web/packages/core/src/sessionLedgerMode.ts",
+      "sha256": "651c63fcc715b995d924d79ddb756d8fca504fcee4ae8cf9c64b4ad883844493"
+    },
+    {
+      "path": "web/packages/core/test/sessionLedgerMode.test.ts",
+      "sha256": "e93a9c610aa258b0d48fdc2307491388681453861835890d5f9fc06e6fe53cd5"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/session-ledger-mode.v1.json",
+      "sha256": "f6974c2f079073bba1cfb04305d824fb72c9e651c308999a72c01ea1962645f5"
+    }
+  ]
+}

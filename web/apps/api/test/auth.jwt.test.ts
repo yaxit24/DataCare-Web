@@ -18,6 +18,7 @@ const accessClaims = {
   lcCode: '01',
   coYear: '2024',
   sid: 'session-1',
+  contextEpoch: '1',
   rights,
 };
 

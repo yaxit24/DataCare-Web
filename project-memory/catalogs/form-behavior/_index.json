@@ -1,0 +1,1637 @@
+{
+ "forms": 204,
+ "index": [
+  {
+   "form": "TR_PURC",
+   "gridCols": 228,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 35
+  },
+  {
+   "form": "TR_TAG_SPLIT",
+   "gridCols": 237,
+   "sql": 50,
+   "keys": 6,
+   "calc": 70,
+   "validations": 21
+  },
+  {
+   "form": "TR_SALE",
+   "gridCols": 190,
+   "sql": 50,
+   "keys": 9,
+   "calc": 70,
+   "validations": 35
+  },
+  {
+   "form": "TR_WH_SALE",
+   "gridCols": 184,
+   "sql": 50,
+   "keys": 6,
+   "calc": 70,
+   "validations": 30
+  },
+  {
+   "form": "TR_SALE_RTN",
+   "gridCols": 176,
+   "sql": 50,
+   "keys": 6,
+   "calc": 70,
+   "validations": 23
+  },
+  {
+   "form": "TR_TOUR_SALE",
+   "gridCols": 170,
+   "sql": 50,
+   "keys": 6,
+   "calc": 70,
+   "validations": 26
+  },
+  {
+   "form": "TR_TAG_OPBL",
+   "gridCols": 153,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 42
+  },
+  {
+   "form": "TR_SALE_HM",
+   "gridCols": 162,
+   "sql": 50,
+   "keys": 9,
+   "calc": 70,
+   "validations": 25
+  },
+  {
+   "form": "TR_SALE_LBR",
+   "gridCols": 153,
+   "sql": 50,
+   "keys": 6,
+   "calc": 70,
+   "validations": 19
+  },
+  {
+   "form": "TR_SALE_ORD",
+   "gridCols": 142,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 30
+  },
+  {
+   "form": "TR_WH_SALE_RTN",
+   "gridCols": 150,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 16
+  },
+  {
+   "form": "TR_MFG_KR_ISU_REC",
+   "gridCols": 143,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 17
+  },
+  {
+   "form": "TR_BUL_SALE",
+   "gridCols": 141,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 15
+  },
+  {
+   "form": "TR_SL_PR_ITEM",
+   "gridCols": 128,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 27
+  },
+  {
+   "form": "TR_PURC_HM",
+   "gridCols": 132,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 20
+  },
+  {
+   "form": "TR_TAG_WT_DIFF",
+   "gridCols": 134,
+   "sql": 50,
+   "keys": 6,
+   "calc": 70,
+   "validations": 18
+  },
+  {
+   "form": "TR_SALE_RTN_UAE",
+   "gridCols": 124,
+   "sql": 50,
+   "keys": 9,
+   "calc": 70,
+   "validations": 21
+  },
+  {
+   "form": "TR_TOUR_ORD",
+   "gridCols": 119,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 25
+  },
+  {
+   "form": "TR_SL_EBILL",
+   "gridCols": 116,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 26
+  },
+  {
+   "form": "TR_FN_INOUT",
+   "gridCols": 120,
+   "sql": 50,
+   "keys": 8,
+   "calc": 70,
+   "validations": 21
+  },
+  {
+   "form": "TR_PR_SL_UAE",
+   "gridCols": 119,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 22
+  },
+  {
+   "form": "TR_INOUT",
+   "gridCols": 127,
+   "sql": 50,
+   "keys": 8,
+   "calc": 59,
+   "validations": 21
+  },
+  {
+   "form": "TR_MFG_ORD_REC",
+   "gridCols": 116,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 20
+  },
+  {
+   "form": "TR_MFG_ORD_ISU",
+   "gridCols": 113,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 21
+  },
+  {
+   "form": "TR_APR_ISU",
+   "gridCols": 99,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 22
+  },
+  {
+   "form": "TR_JDT_REC",
+   "gridCols": 101,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 20
+  },
+  {
+   "form": "TR_MFG_ITEM",
+   "gridCols": 106,
+   "sql": 50,
+   "keys": 7,
+   "calc": 68,
+   "validations": 17
+  },
+  {
+   "form": "TR_VP",
+   "gridCols": 96,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 14
+  },
+  {
+   "form": "TR_MFG_WITH_LOT",
+   "gridCols": 90,
+   "sql": 50,
+   "keys": 7,
+   "calc": 60,
+   "validations": 17
+  },
+  {
+   "form": "TR_TOUR",
+   "gridCols": 94,
+   "sql": 45,
+   "keys": 7,
+   "calc": 54,
+   "validations": 17
+  },
+  {
+   "form": "TR_TAG_CAN",
+   "gridCols": 83,
+   "sql": 49,
+   "keys": 7,
+   "calc": 57,
+   "validations": 14
+  },
+  {
+   "form": "TR_MFG_ISU_REC",
+   "gridCols": 84,
+   "sql": 50,
+   "keys": 7,
+   "calc": 50,
+   "validations": 17
+  },
+  {
+   "form": "TR_KR_ISU",
+   "gridCols": 60,
+   "sql": 50,
+   "keys": 7,
+   "calc": 70,
+   "validations": 16
+  },
+  {
+   "form": "TR_MFG_GHAT_REC",
+   "gridCols": 72,
+   "sql": 43,
+   "keys": 7,
+   "calc": 49,
+   "validations": 15
+  },
+  {
+   "form": "MS_DESIGN_BOOK",
+   "gridCols": 76,
+   "sql": 34,
+   "keys": 7,
+   "calc": 46,
+   "validations": 20
+  },
+  {
+   "form": "TR_REP_REC",
+   "gridCols": 63,
+   "sql": 50,
+   "keys": 6,
+   "calc": 44,
+   "validations": 18
+  },
+  {
+   "form": "RP_SLPR_ZOOM",
+   "gridCols": 138,
+   "sql": 30,
+   "keys": 4,
+   "calc": 1,
+   "validations": 4
+  },
+  {
+   "form": "TR_FINE_SL_PR",
+   "gridCols": 57,
+   "sql": 48,
+   "keys": 7,
+   "calc": 45,
+   "validations": 14
+  },
+  {
+   "form": "TR_DHRN_REC",
+   "gridCols": 28,
+   "sql": 47,
+   "keys": 7,
+   "calc": 57,
+   "validations": 13
+  },
+  {
+   "form": "RP_LEDR",
+   "gridCols": 81,
+   "sql": 50,
+   "keys": 5,
+   "calc": 0,
+   "validations": 12
+  },
+  {
+   "form": "UT_TAG_PRINT",
+   "gridCols": 71,
+   "sql": 37,
+   "keys": 7,
+   "calc": 19,
+   "validations": 6
+  },
+  {
+   "form": "TR_BILL_TO",
+   "gridCols": 39,
+   "sql": 40,
+   "keys": 6,
+   "calc": 34,
+   "validations": 15
+  },
+  {
+   "form": "RP_INOUT",
+   "gridCols": 80,
+   "sql": 30,
+   "keys": 2,
+   "calc": 12,
+   "validations": 2
+  },
+  {
+   "form": "TR_MLT_PRO",
+   "gridCols": 38,
+   "sql": 35,
+   "keys": 6,
+   "calc": 35,
+   "validations": 16
+  },
+  {
+   "form": "RP_BILL_PROFIT",
+   "gridCols": 65,
+   "sql": 24,
+   "keys": 4,
+   "calc": 29,
+   "validations": 4
+  },
+  {
+   "form": "TR_DHRN_ISU",
+   "gridCols": 27,
+   "sql": 39,
+   "keys": 7,
+   "calc": 41,
+   "validations": 14
+  },
+  {
+   "form": "TR_PHYSTK",
+   "gridCols": 32,
+   "sql": 50,
+   "keys": 7,
+   "calc": 19,
+   "validations": 19
+  },
+  {
+   "form": "MS_AUTO_ITEM",
+   "gridCols": 54,
+   "sql": 50,
+   "keys": 5,
+   "calc": 4,
+   "validations": 11
+  },
+  {
+   "form": "TR_ITM_LOT",
+   "gridCols": 36,
+   "sql": 37,
+   "keys": 7,
+   "calc": 33,
+   "validations": 11
+  },
+  {
+   "form": "UT_SETTING_MAIN",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 2,
+   "calc": 0,
+   "validations": 64
+  },
+  {
+   "form": "TR_OTH_PURC",
+   "gridCols": 32,
+   "sql": 37,
+   "keys": 6,
+   "calc": 26,
+   "validations": 14
+  },
+  {
+   "form": "TR_MEMB_ENT",
+   "gridCols": 28,
+   "sql": 46,
+   "keys": 7,
+   "calc": 17,
+   "validations": 16
+  },
+  {
+   "form": "RP_TAG_ESTMATE",
+   "gridCols": 48,
+   "sql": 34,
+   "keys": 4,
+   "calc": 11,
+   "validations": 11
+  },
+  {
+   "form": "TR_SL_ORD_ADJ",
+   "gridCols": 33,
+   "sql": 40,
+   "keys": 7,
+   "calc": 15,
+   "validations": 13
+  },
+  {
+   "form": "RP_DHRN_OS",
+   "gridCols": 60,
+   "sql": 18,
+   "keys": 2,
+   "calc": 19,
+   "validations": 3
+  },
+  {
+   "form": "TR_OTH_COMM",
+   "gridCols": 31,
+   "sql": 34,
+   "keys": 7,
+   "calc": 22,
+   "validations": 13
+  },
+  {
+   "form": "RP_ROJMEL",
+   "gridCols": 41,
+   "sql": 50,
+   "keys": 2,
+   "calc": 2,
+   "validations": 4
+  },
+  {
+   "form": "UT_E_INVOICE",
+   "gridCols": 88,
+   "sql": 5,
+   "keys": 2,
+   "calc": 3,
+   "validations": 1
+  },
+  {
+   "form": "TR_AC_OPBL",
+   "gridCols": 19,
+   "sql": 31,
+   "keys": 6,
+   "calc": 29,
+   "validations": 16
+  },
+  {
+   "form": "RP_ORDER",
+   "gridCols": 73,
+   "sql": 16,
+   "keys": 4,
+   "calc": 4,
+   "validations": 1
+  },
+  {
+   "form": "RP_STOCK",
+   "gridCols": 38,
+   "sql": 49,
+   "keys": 4,
+   "calc": 2,
+   "validations": 5
+  },
+  {
+   "form": "RP_BAL_ZOOM",
+   "gridCols": 41,
+   "sql": 35,
+   "keys": 4,
+   "calc": 16,
+   "validations": 1
+  },
+  {
+   "form": "RP_TOUR_ZOOM",
+   "gridCols": 77,
+   "sql": 12,
+   "keys": 4,
+   "calc": 2,
+   "validations": 2
+  },
+  {
+   "form": "RP_STK_MOVE",
+   "gridCols": 38,
+   "sql": 14,
+   "keys": 4,
+   "calc": 39,
+   "validations": 1
+  },
+  {
+   "form": "RP_TAG",
+   "gridCols": 29,
+   "sql": 50,
+   "keys": 5,
+   "calc": 0,
+   "validations": 12
+  },
+  {
+   "form": "TR_EMP_JV",
+   "gridCols": 25,
+   "sql": 25,
+   "keys": 7,
+   "calc": 28,
+   "validations": 11
+  },
+  {
+   "form": "RP_MOVEMENT",
+   "gridCols": 49,
+   "sql": 25,
+   "keys": 4,
+   "calc": 9,
+   "validations": 2
+  },
+  {
+   "form": "RP_USER",
+   "gridCols": 54,
+   "sql": 26,
+   "keys": 2,
+   "calc": 1,
+   "validations": 3
+  },
+  {
+   "form": "TR_BUL_BOOKING",
+   "gridCols": 19,
+   "sql": 28,
+   "keys": 7,
+   "calc": 21,
+   "validations": 15
+  },
+  {
+   "form": "TR_MEMB_ADJ",
+   "gridCols": 23,
+   "sql": 33,
+   "keys": 7,
+   "calc": 16,
+   "validations": 11
+  },
+  {
+   "form": "TR_PR_SL_HEDG",
+   "gridCols": 16,
+   "sql": 37,
+   "keys": 7,
+   "calc": 18,
+   "validations": 12
+  },
+  {
+   "form": "MS_ACCT",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 7,
+   "calc": 8,
+   "validations": 24
+  },
+  {
+   "form": "RP_STOCK_FINE",
+   "gridCols": 45,
+   "sql": 24,
+   "keys": 4,
+   "calc": 11,
+   "validations": 2
+  },
+  {
+   "form": "UT_IMPORT",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 2,
+   "calc": 8,
+   "validations": 22
+  },
+  {
+   "form": "MS_UPDATE",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 3,
+   "calc": 1,
+   "validations": 26
+  },
+  {
+   "form": "TR_DHRN_INTREC",
+   "gridCols": 0,
+   "sql": 29,
+   "keys": 5,
+   "calc": 38,
+   "validations": 9
+  },
+  {
+   "form": "MS_PRODUCT",
+   "gridCols": 0,
+   "sql": 47,
+   "keys": 5,
+   "calc": 1,
+   "validations": 26
+  },
+  {
+   "form": "TR_GOLD_BOOK",
+   "gridCols": 19,
+   "sql": 24,
+   "keys": 7,
+   "calc": 16,
+   "validations": 13
+  },
+  {
+   "form": "RP_MFG_ZOOM",
+   "gridCols": 43,
+   "sql": 25,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "MS_USER",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 4,
+   "calc": 0,
+   "validations": 18
+  },
+  {
+   "form": "UT_EXPORT",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 2,
+   "calc": 6,
+   "validations": 12
+  },
+  {
+   "form": "MS_COMPANY",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 8,
+   "calc": 0,
+   "validations": 17
+  },
+  {
+   "form": "RP_ORD_TRACK",
+   "gridCols": 50,
+   "sql": 16,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "RP_STOCK_VALUE",
+   "gridCols": 45,
+   "sql": 9,
+   "keys": 4,
+   "calc": 12,
+   "validations": 1
+  },
+  {
+   "form": "UT_SETTING",
+   "gridCols": 6,
+   "sql": 32,
+   "keys": 6,
+   "calc": 0,
+   "validations": 28
+  },
+  {
+   "form": "RP_TAG_IMAGE",
+   "gridCols": 23,
+   "sql": 26,
+   "keys": 2,
+   "calc": 3,
+   "validations": 13
+  },
+  {
+   "form": "TR_CASH",
+   "gridCols": 14,
+   "sql": 27,
+   "keys": 7,
+   "calc": 10,
+   "validations": 12
+  },
+  {
+   "form": "TR_LOCT_AMT",
+   "gridCols": 10,
+   "sql": 26,
+   "keys": 7,
+   "calc": 14,
+   "validations": 13
+  },
+  {
+   "form": "TR_LEDR_ADJ",
+   "gridCols": 10,
+   "sql": 24,
+   "keys": 7,
+   "calc": 13,
+   "validations": 14
+  },
+  {
+   "form": "DC_Main",
+   "gridCols": 0,
+   "sql": 44,
+   "keys": 0,
+   "calc": 11,
+   "validations": 5
+  },
+  {
+   "form": "MS_LOCT",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 6,
+   "calc": 0,
+   "validations": 10
+  },
+  {
+   "form": "MS_MFG_MAST",
+   "gridCols": 14,
+   "sql": 32,
+   "keys": 7,
+   "calc": 0,
+   "validations": 14
+  },
+  {
+   "form": "TR_VP_ADJ",
+   "gridCols": 14,
+   "sql": 24,
+   "keys": 7,
+   "calc": 10,
+   "validations": 11
+  },
+  {
+   "form": "UT_WHATSAPP",
+   "gridCols": 0,
+   "sql": 38,
+   "keys": 3,
+   "calc": 2,
+   "validations": 19
+  },
+  {
+   "form": "BtmSchm",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 1,
+   "calc": 3,
+   "validations": 5
+  },
+  {
+   "form": "RP_CASH_BANK",
+   "gridCols": 27,
+   "sql": 28,
+   "keys": 2,
+   "calc": 1,
+   "validations": 2
+  },
+  {
+   "form": "TR_CONTRA",
+   "gridCols": 9,
+   "sql": 24,
+   "keys": 7,
+   "calc": 12,
+   "validations": 13
+  },
+  {
+   "form": "MS_YEAR",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 2,
+   "calc": 0,
+   "validations": 7
+  },
+  {
+   "form": "UT_CUST_ENTRY",
+   "gridCols": 17,
+   "sql": 24,
+   "keys": 7,
+   "calc": 4,
+   "validations": 11
+  },
+  {
+   "form": "RP_EMP",
+   "gridCols": 23,
+   "sql": 17,
+   "keys": 2,
+   "calc": 10,
+   "validations": 4
+  },
+  {
+   "form": "Module_Schm",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 0,
+   "calc": 0,
+   "validations": 3
+  },
+  {
+   "form": "TR_CARD_REC",
+   "gridCols": 0,
+   "sql": 25,
+   "keys": 5,
+   "calc": 17,
+   "validations": 10
+  },
+  {
+   "form": "UT_VCH_RE_NUMBR",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 1,
+   "calc": 0,
+   "validations": 2
+  },
+  {
+   "form": "UT_WAPP_WITH_API",
+   "gridCols": 0,
+   "sql": 33,
+   "keys": 2,
+   "calc": 2,
+   "validations": 17
+  },
+  {
+   "form": "Ac_Image",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 0,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "Mfg_Module",
+   "gridCols": 0,
+   "sql": 50,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "TR_ITM_OPBL",
+   "gridCols": 18,
+   "sql": 9,
+   "keys": 6,
+   "calc": 16,
+   "validations": 7
+  },
+  {
+   "form": "MS_ITEM",
+   "gridCols": 0,
+   "sql": 30,
+   "keys": 5,
+   "calc": 1,
+   "validations": 17
+  },
+  {
+   "form": "RP_CUST_CRM",
+   "gridCols": 27,
+   "sql": 17,
+   "keys": 2,
+   "calc": 1,
+   "validations": 3
+  },
+  {
+   "form": "MS_STK_LIMIT",
+   "gridCols": 18,
+   "sql": 16,
+   "keys": 8,
+   "calc": 5,
+   "validations": 8
+  },
+  {
+   "form": "RP_ALL",
+   "gridCols": 0,
+   "sql": 39,
+   "keys": 2,
+   "calc": 0,
+   "validations": 8
+  },
+  {
+   "form": "RP_MFG_LEDR",
+   "gridCols": 35,
+   "sql": 11,
+   "keys": 2,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "MS_MEMB",
+   "gridCols": 0,
+   "sql": 32,
+   "keys": 5,
+   "calc": 4,
+   "validations": 9
+  },
+  {
+   "form": "RP_TRADING",
+   "gridCols": 19,
+   "sql": 12,
+   "keys": 4,
+   "calc": 10,
+   "validations": 4
+  },
+  {
+   "form": "RP_GST",
+   "gridCols": 19,
+   "sql": 17,
+   "keys": 2,
+   "calc": 2,
+   "validations": 3
+  },
+  {
+   "form": "RP_OS",
+   "gridCols": 0,
+   "sql": 29,
+   "keys": 2,
+   "calc": 5,
+   "validations": 7
+  },
+  {
+   "form": "UT_BANK",
+   "gridCols": 18,
+   "sql": 16,
+   "keys": 6,
+   "calc": 2,
+   "validations": 5
+  },
+  {
+   "form": "MS_RATE",
+   "gridCols": 10,
+   "sql": 17,
+   "keys": 6,
+   "calc": 9,
+   "validations": 4
+  },
+  {
+   "form": "RP_JDTR_ZOOM",
+   "gridCols": 28,
+   "sql": 11,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "UT_SMS",
+   "gridCols": 0,
+   "sql": 27,
+   "keys": 3,
+   "calc": 0,
+   "validations": 13
+  },
+  {
+   "form": "RP_BALANCE",
+   "gridCols": 13,
+   "sql": 15,
+   "keys": 2,
+   "calc": 8,
+   "validations": 3
+  },
+  {
+   "form": "RP_DAY_WORK",
+   "gridCols": 27,
+   "sql": 11,
+   "keys": 2,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "RP_LC_SALE",
+   "gridCols": 22,
+   "sql": 15,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "RP_STK_LEVEL",
+   "gridCols": 19,
+   "sql": 14,
+   "keys": 2,
+   "calc": 3,
+   "validations": 1
+  },
+  {
+   "form": "UT_AI_TRFR",
+   "gridCols": 11,
+   "sql": 20,
+   "keys": 2,
+   "calc": 0,
+   "validations": 6
+  },
+  {
+   "form": "MDI_FORM",
+   "gridCols": 0,
+   "sql": 25,
+   "keys": 27,
+   "calc": 1,
+   "validations": 10
+  },
+  {
+   "form": "MS_OPNCOMP",
+   "gridCols": 0,
+   "sql": 34,
+   "keys": 0,
+   "calc": 0,
+   "validations": 2
+  },
+  {
+   "form": "MS_POINT",
+   "gridCols": 16,
+   "sql": 13,
+   "keys": 4,
+   "calc": 2,
+   "validations": 5
+  },
+  {
+   "form": "RP_CONSI_APR",
+   "gridCols": 25,
+   "sql": 10,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "RP_REMINDER",
+   "gridCols": 0,
+   "sql": 31,
+   "keys": 2,
+   "calc": 2,
+   "validations": 3
+  },
+  {
+   "form": "MS_ADD_MAST",
+   "gridCols": 0,
+   "sql": 23,
+   "keys": 5,
+   "calc": 2,
+   "validations": 10
+  },
+  {
+   "form": "MS_BOOK",
+   "gridCols": 0,
+   "sql": 21,
+   "keys": 5,
+   "calc": 0,
+   "validations": 14
+  },
+  {
+   "form": "RP_LC_INOUT",
+   "gridCols": 22,
+   "sql": 11,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "UT_REMINDER",
+   "gridCols": 5,
+   "sql": 15,
+   "keys": 7,
+   "calc": 5,
+   "validations": 9
+  },
+  {
+   "form": "MS_LBR_TYPE",
+   "gridCols": 0,
+   "sql": 19,
+   "keys": 4,
+   "calc": 1,
+   "validations": 12
+  },
+  {
+   "form": "RP_PHY_STOCK",
+   "gridCols": 17,
+   "sql": 14,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "RP_ADDRESS",
+   "gridCols": 0,
+   "sql": 25,
+   "keys": 5,
+   "calc": 0,
+   "validations": 3
+  },
+  {
+   "form": "MS_TAX",
+   "gridCols": 5,
+   "sql": 12,
+   "keys": 4,
+   "calc": 0,
+   "validations": 9
+  },
+  {
+   "form": "MS_GROUP",
+   "gridCols": 0,
+   "sql": 15,
+   "keys": 4,
+   "calc": 0,
+   "validations": 10
+  },
+  {
+   "form": "MS_STYLE",
+   "gridCols": 0,
+   "sql": 11,
+   "keys": 5,
+   "calc": 0,
+   "validations": 14
+  },
+  {
+   "form": "UT_SET_ADMIN",
+   "gridCols": 0,
+   "sql": 13,
+   "keys": 1,
+   "calc": 0,
+   "validations": 11
+  },
+  {
+   "form": "MS_AC_GROUP",
+   "gridCols": 0,
+   "sql": 10,
+   "keys": 6,
+   "calc": 0,
+   "validations": 13
+  },
+  {
+   "form": "MS_TRADE",
+   "gridCols": 9,
+   "sql": 9,
+   "keys": 6,
+   "calc": 0,
+   "validations": 5
+  },
+  {
+   "form": "RP_DHRN_LOAN",
+   "gridCols": 0,
+   "sql": 22,
+   "keys": 2,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "RP_OTH_DETL",
+   "gridCols": 0,
+   "sql": 21,
+   "keys": 2,
+   "calc": 0,
+   "validations": 2
+  },
+  {
+   "form": "MS_DM",
+   "gridCols": 0,
+   "sql": 12,
+   "keys": 4,
+   "calc": 1,
+   "validations": 9
+  },
+  {
+   "form": "RP_GRAPH",
+   "gridCols": 0,
+   "sql": 19,
+   "keys": 2,
+   "calc": 0,
+   "validations": 2
+  },
+  {
+   "form": "RP_HUID",
+   "gridCols": 0,
+   "sql": 20,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "MS_EMP",
+   "gridCols": 0,
+   "sql": 11,
+   "keys": 6,
+   "calc": 0,
+   "validations": 9
+  },
+  {
+   "form": "MS_GOLD_MAST",
+   "gridCols": 0,
+   "sql": 12,
+   "keys": 2,
+   "calc": 0,
+   "validations": 8
+  },
+  {
+   "form": "TR_UPI_REC",
+   "gridCols": 6,
+   "sql": 11,
+   "keys": 6,
+   "calc": 0,
+   "validations": 3
+  },
+  {
+   "form": "Ac_Final",
+   "gridCols": 0,
+   "sql": 13,
+   "keys": 0,
+   "calc": 4,
+   "validations": 1
+  },
+  {
+   "form": "MS_WINDOW_SET",
+   "gridCols": 6,
+   "sql": 6,
+   "keys": 1,
+   "calc": 0,
+   "validations": 4
+  },
+  {
+   "form": "Ac_Stock",
+   "gridCols": 0,
+   "sql": 12,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "RP_TAX",
+   "gridCols": 0,
+   "sql": 12,
+   "keys": 2,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "MS_LOGIN",
+   "gridCols": 0,
+   "sql": 8,
+   "keys": 1,
+   "calc": 0,
+   "validations": 3
+  },
+  {
+   "form": "Module_Save",
+   "gridCols": 0,
+   "sql": 4,
+   "keys": 0,
+   "calc": 0,
+   "validations": 6
+  },
+  {
+   "form": "Ac_Tax",
+   "gridCols": 0,
+   "sql": 9,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "RP_MFG",
+   "gridCols": 0,
+   "sql": 8,
+   "keys": 2,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "UT_REPORT",
+   "gridCols": 0,
+   "sql": 2,
+   "keys": 1,
+   "calc": 0,
+   "validations": 6
+  },
+  {
+   "form": "UT_PWD_UPDATE",
+   "gridCols": 0,
+   "sql": 3,
+   "keys": 0,
+   "calc": 0,
+   "validations": 4
+  },
+  {
+   "form": "MS_HELP",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 7,
+   "calc": 6,
+   "validations": 0
+  },
+  {
+   "form": "RP_CUST",
+   "gridCols": 0,
+   "sql": 5,
+   "keys": 4,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "UT_BKP",
+   "gridCols": 0,
+   "sql": 2,
+   "keys": 1,
+   "calc": 0,
+   "validations": 4
+  },
+  {
+   "form": "Ac_Ledr",
+   "gridCols": 0,
+   "sql": 5,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "OlockerService",
+   "gridCols": 0,
+   "sql": 3,
+   "keys": 0,
+   "calc": 0,
+   "validations": 2
+  },
+  {
+   "form": "UT_USER_REQUEST",
+   "gridCols": 0,
+   "sql": 3,
+   "keys": 1,
+   "calc": 0,
+   "validations": 2
+  },
+  {
+   "form": "UT_WINDOW",
+   "gridCols": 0,
+   "sql": 2,
+   "keys": 1,
+   "calc": 0,
+   "validations": 3
+  },
+  {
+   "form": "UT_HDD",
+   "gridCols": 0,
+   "sql": 1,
+   "keys": 1,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "Ac_Rojmel",
+   "gridCols": 0,
+   "sql": 1,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "MS_BOOKLIST",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 7,
+   "calc": 0,
+   "validations": 1
+  },
+  {
+   "form": "Module_WhatsApp",
+   "gridCols": 0,
+   "sql": 1,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "AuthClass",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "AuthError",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClassTagList",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsAddlDocDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsAttribDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsBchDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsBuyerDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsContrDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsDispDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsDocDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsDocPerdDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsExpDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsItemList",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsPayDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsPrecDocDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsRefDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsSellerDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsShipDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsTranDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ClsValDtls",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "Data",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "DcClass",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "DcPrintClass",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "ErrorResp",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "IRNClass",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "IRNData",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "MS_PRINT",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 1,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "MS_TASTING",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "PolicyModels",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "TagOthDetail",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "Translator",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  },
+  {
+   "form": "UT_WEB_CAM",
+   "gridCols": 0,
+   "sql": 0,
+   "keys": 0,
+   "calc": 0,
+   "validations": 0
+  }
+ ]
+}

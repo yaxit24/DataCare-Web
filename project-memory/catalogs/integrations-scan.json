@@ -1,0 +1,33 @@
+{
+ "WhatsApp": {
+  "sizeMB": 5.2,
+  "signals": [
+   "ChromeDriver",
+   "Qr",
+   "Selenium",
+   "firebase",
+   "whatsapp"
+  ]
+ },
+ "Firebase": {
+  "sizeMB": 0.0,
+  "signals": [
+   "GetAsync",
+   "PushAsync",
+   "SetAsync",
+   "firebase",
+   "media"
+  ]
+ },
+ "DevNetExt": {
+  "sizeMB": 0.5,
+  "signals": [
+   "ChromeDriver",
+   "GetAsync",
+   "Qr",
+   "Selenium",
+   "firebase",
+   "whatsapp"
+  ]
+ }
+}

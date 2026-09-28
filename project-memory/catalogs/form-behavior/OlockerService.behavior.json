@@ -1,0 +1,22 @@
+{
+ "form": "OlockerService",
+ "loc": 217,
+ "gridColumns": {},
+ "inlineSql": [
+  "SELECT A.VCH_NO,A.VCH_DATE,A.TAG_NO,C.IT_NAME,A.SR_NO,A.ITM_GWT,A.ITM_NWT,A.ITM_AMT,B.AC_NAME,B.AC_MOBILE FROM (SL_DETL AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT A.ITM_GWT,A.ITM_NWT,B.IT_TYPE,B.GR_CODE FROM SL_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND A.SR_NO = ? ",
+  "SELECT B.IT_NAME,A.IT_GWT,B.IT_TYPE FROM SL_IDTL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND A.SR_NO = ? "
+ ],
+ "keyboard": {},
+ "calc": [],
+ "validations": [
+  {
+   "message": "No Data Found...",
+   "when": "dataTable.Rows.Count == 0"
+  },
+  {
+   "message": "Maximum 7 days old bill Valid....",
+   "when": "num > 7"
+  }
+ ]
+}

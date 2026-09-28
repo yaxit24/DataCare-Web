@@ -1,0 +1,138 @@
+{
+ "form": "MS_COMPANY",
+ "loc": 7616,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM CO_MAST ORDER BY CO_CODE",
+  "SELECT CO_CODE AS CoCode From CO_MAST ORDER BY CO_CODE DESC",
+  "select * from CO_MAST where CO_CODE = ' ? ' ORDER BY CO_CODE",
+  "SELECT A.*,B.AC_NAME FROM FAN_AC_MAST AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.FAN_AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.FAN_CO_CODE = ' ? '",
+  "SELECT * from CO_MAST",
+  "DELETE FROM CO_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM CO_MAST WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET SALES_WITH_HMTAX = 'Y' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET PURC_WITH_HMTAX = 'Y' WHERE CO_CODE = ' ? '",
+  "UPDATE MENU_DATA SET SM_NAME = 'Tax Report' WHERE MAIN_SRNO = '05' AND SM_MAIN_CODE = '09' AND SM_MAIN_NAME = 'Gst Report'",
+  "DELETE FROM FAN_AC_MAST WHERE CO_CODE = ' ? ' AND FAN_CO_CODE = ' ? '",
+  "INSERT INTO FAN_AC_MAST(CO_CODE,FAN_CO_CODE,FAN_AC_CODE,FAN_CO_NAME) VALUES (' ? ',' ? ',' ? ',' ? ')",
+  "UPDATE BOOK_DATA SET RESET_BOOK = 'N' WHERE CO_CODE = ' ? ' AND MAIN_BOOK IN ('000','015')",
+  "UPDATE BOOK_DATA SET RESET_BOOK = 'N' WHERE CO_CODE = ' ? ' AND BOOK_TYPE = 'T'",
+  "UPDATE BOOK_DATA SET TRFR_BOOK = 'Y' WHERE CO_CODE = ' ? '",
+  "UPDATE LOCT_MAST SET TRY_DATE = ' ? MM/dd/yyyy ? ' WHERE CO_CODE = '01' AND LC_CODE = '00'",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 150",
+  "INSERT INTO CO_MAST(CO_CODE,CO_NAME,LC_CODE,CO_SNAME,CO_ADD1,CO_ADD2,CO_ADD3, CO_COUNTRY,CO_STATE_CODE,CO_STATE,CO_CITY,CO_PIN,CO_PHONE,CO_PHONE2,CO_MOBILE,CO_MOBILE2,CO_MAIL, CO_JUD,CO_LSTNO,CO_CSTNO,CO_GST_NO,CO_PAN_NO,DHIRAN_NO,BANK_NAME,BANK_AREA,BANK_AC_NO, CO_TYPE,ALTER_YEAR,CO_MSG,REP_ADD_TYPE,MAIN_USER,WORK_TYPE,METAL_TYPE,URL_NAME,URL_ID,URL_PWD,HTTP_NAME,MAIL_API) VALUES(' ? ',' ? CO_NAME ? ',' ? LC_CODE ? ',' ? CO_SNAME ? ',' ? CO_ADD1 ? ',' ? CO_ADD2 ? ',' ? CO_ADD3 ? ', ? ' ? CO_COUNTRY ? ',' ? CO_STATE_CODE ? ',' ? CO_STATE ? ',' ? CO_CITY ? ',' ? CO_PIN ? ',' ? CO_PHONE ? ',' ? CO_PHONE2 ? ',' ? CO_MOBILE ? ',' ? CO_MOBILE2 ? ',' ? CO_MAIL ? ', ? ' ? CO_JUD ? ',' ? CO_LSTNO ? ',' ? CO_CSTNO ? ',' ? CO_GST_NO ? ',' ? CO_PAN_NO ? ',' ? DHIRAN_NO ? ',' ? BANK_NAME ? ',' ? BANK_AREA ? ',' ? BANK_AC_NO ? ', ? ' ? CO_TYPE ? ',' ? ALTER_YEAR ? ',' ? CO_MSG ? ',' ? REP_ADD_TYPE ? ',' ? MAIN_USER ? ',' ? WORK_TYPE ? ',' ? METAL_TYPE ? ',' ? URL_NAME ? ',' ? URL_ID ? ',' ? URL_PWD ? ',' ? HTTP_NAME ? ',' ? MAIL_API ? ')",
+  "Please Select Company Code For Delete.",
+  "DELETE FROM AC_MAST_SRNO WHERE CO_CODE = ' ? '",
+  "DELETE FROM LOCT_MAST WHERE CO_CODE = ' ? '",
+  "DELETE FROM YEAR_MAST WHERE CO_CODE = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM AC_GROUP WHERE CO_CODE = ' ? '",
+  "DELETE FROM AC_MAST WHERE CO_CODE = ' ? '",
+  "DELETE FROM AD_ADJ WHERE CO_CODE = ' ? '",
+  "DELETE FROM AD_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM AD_MAST WHERE CO_CODE = ' ? '",
+  "DELETE FROM AD_MEMB WHERE CO_CODE = ' ? '",
+  "DELETE FROM AD_OS WHERE CO_CODE = ' ? '",
+  "DELETE FROM ADD_MAST WHERE CO_CODE = ' ? '",
+  "DELETE FROM APR_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM APR_DETL WHERE CO_CODE = ' ? '",
+  "DELETE FROM APR_IDTL WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAL_GR WHERE CO_CODE = ' ? '",
+  "DELETE FROM BANK_RECONCILE WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_CAN_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_CAN_DETL WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_CAN_IDTL WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_DETL WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_IDTL WHERE CO_CODE = ' ? '",
+  "DELETE FROM BILL_OS_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM BOOK_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM BOOK_DETL WHERE CO_CODE = ' ? '",
+  "DELETE FROM BUL_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM CARD_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM CASH_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM CO_SET WHERE CO_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "F1": 2,
+  "Enter": 34,
+  "Backspace": 1,
+  "Esc": 1,
+  "Up": 1,
+  "Ctrl+Down": 1,
+  "Ctrl+O": 1,
+  "Ctrl+R": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "You Cant Creat New Company For DataCare Next Lite Version",
+   "when": "(Operators.CompareString(DC_Main.MsSoftType, \"L\", false) == 0) & (Operators.CompareString(tCoCode.Text, \"01\", false) != 0)"
+  },
+  {
+   "message": "You Cant Creat More Then 2 New Company For DataCare Next Basic Version...",
+   "when": "DC_Main.Tbl.Rows.Count >= 2"
+  },
+  {
+   "message": "Enter Company Detail",
+   "when": "(Operators.CompareString(tCoCode.Text, \"\", false) == 0) | (Operators.CompareString(tCoName.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "You cant Delete Defoult company...",
+   "when": "Operators.CompareString(tCoCode.Text, \"01\", false) == 0"
+  },
+  {
+   "message": "Please Select Company Code For Delete.",
+   "when": "Operators.CompareString(tCoCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "All Record From This Company Will Delete Permanently ?",
+   "when": "(int)Interaction.MsgBox((object)\"All Record From This Company Will Delete Permanently ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "Please Insert Co Code ...",
+   "when": "Operators.CompareString(tCoCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Co Name ...",
+   "when": "Operators.CompareString(tCoName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Data Is Reset ok....",
+   "when": ""
+  },
+  {
+   "message": "Lock Date Is Set...",
+   "when": "!DC_Main.RongDate"
+  },
+  {
+   "message": "Record will Update permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"Record will Update permantley ?\", (MsgBoxStyle)68, (object)null) == 6 && ((Operators.CompareString(tA.Text, \"\", false) != 0) & "
+  },
+  {
+   "message": "Data Type Is Updated....",
+   "when": "(int)Interaction.MsgBox((object)\"Record will Update permantley ?\", (MsgBoxStyle)68, (object)null) == 6 && ((Operators.CompareString(tA.Text, \"\", false) != 0) & "
+  },
+  {
+   "message": "Url Path is Set",
+   "when": ""
+  }
+ ]
+}

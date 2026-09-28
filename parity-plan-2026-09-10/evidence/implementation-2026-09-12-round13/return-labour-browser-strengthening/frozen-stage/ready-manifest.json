@@ -1,0 +1,52 @@
+{
+  "kind": "labour-browser-final-read-review-and-strengthening-v1",
+  "status": "staged only; no browser/DB/test/compiler execution",
+  "requiredChecks": 12,
+  "files": [
+    {
+      "path": "browser-required-checks.json",
+      "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+      "bytes": 1874
+    },
+    {
+      "path": "browser-strengthening.patch",
+      "sha256": "94ea0bbc6c845f474d7c02377ae22b8f4bc0a06f83d28705a64cdfd5c52b577b",
+      "bytes": 14172
+    },
+    {
+      "path": "fixture-amendment.json",
+      "sha256": "5ccf8c02454536784349d26a1a8408599d772c331c2fafe4ab15cd802aaef901",
+      "bytes": 1324
+    },
+    {
+      "path": "journey-before.mjs",
+      "sha256": "339fb86f08a95f123283c26b66875d3f4c3dcebbaeada52d7b5175cffeaa2148",
+      "bytes": 24737
+    },
+    {
+      "path": "prepare.py",
+      "sha256": "24ae5c53e460630474e9bedddb541eeb7b045fdc7fd6d42888c57b5be003ea8d",
+      "bytes": 8304
+    },
+    {
+      "path": "review-inputs.json",
+      "sha256": "06efced7518411d9291a5287ceff4b0085e5973ebbb6f7e88d64788f899cccc7",
+      "bytes": 2302
+    },
+    {
+      "path": "review.md",
+      "sha256": "12004c8a0559b0c0f7b1c8fd7aa952b3d8c8e72a625c3ba241729731132de67d",
+      "bytes": 5798
+    },
+    {
+      "path": "runner.patch",
+      "sha256": "c9a8807b9575cf336239bc80bd00786a3a4b190a8431017a4dd1c7cccce27344",
+      "bytes": 2684
+    },
+    {
+      "path": "staged/web/apps/web/test/sales-return-labour-replay.journey.mjs",
+      "sha256": "d902006a7ebee58a5143a9382c39c84c0dfafa32144350b19314804a8b1df04a",
+      "bytes": 29498
+    }
+  ]
+}

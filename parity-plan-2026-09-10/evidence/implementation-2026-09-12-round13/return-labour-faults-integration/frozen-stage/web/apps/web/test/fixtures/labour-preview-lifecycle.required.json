@@ -1,0 +1,129 @@
+{
+  "status": "prospective-not-executed",
+  "tenantId": "browser-labour-faults",
+  "database": "127.0.0.1:55433/datacare app_user",
+  "scope": {
+    "coCode": "01",
+    "lcCode": "01",
+    "coYear": "2024-2025",
+    "coBook": "RLP"
+  },
+  "voucherNo": "00017",
+  "sourceFixtureSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+  "requiredChecks": [
+    "pending BB lookup cannot replace edited AA draft or its newer checked candidate",
+    "close and reopen with a new accepted prefix rejects the prior lookup and preserves current focus",
+    "late lookup after actual client route departure cannot replace destination draft, focus or navigation",
+    "lost successful append response retains the old prefix and exact retry appends once locally",
+    "same-session scope ABA is detected by a later real request without replacing accepted preview or draft"
+  ],
+  "cases": [
+    {
+      "id": "U04",
+      "check": "pending BB lookup cannot replace edited AA draft or its newer checked candidate",
+      "fault": "hold actual successful BB lookup, deliver unchanged after AA lookup",
+      "expected": {
+        "afterOldReply": {
+          "editor": "AA",
+          "candidateCode": "AA",
+          "acceptedChanges": 0
+        },
+        "afterExplicitCommit": {
+          "codes": [
+            "AA"
+          ],
+          "acceptedChanges": 1
+        },
+        "automaticOldCommit": false
+      }
+    },
+    {
+      "id": "U05",
+      "check": "close and reopen with a new accepted prefix rejects the prior lookup and preserves current focus",
+      "fault": "hold actual successful BB lookup across close/reopen/AA commit",
+      "expected": {
+        "afterOldReply": {
+          "editor": "AA",
+          "candidate": null,
+          "codes": [
+            "AA"
+          ],
+          "acceptedChanges": 1
+        },
+        "newPrefixDiffersFromEmpty": true,
+        "focus": "unchanged current check button",
+        "metadataFrozen": true
+      }
+    },
+    {
+      "id": "U06",
+      "check": "late lookup after actual client route departure cannot replace destination draft, focus or navigation",
+      "fault": "hold actual successful BB lookup across a real Next Link to Products",
+      "expected": {
+        "path": "/masters/products",
+        "draft": "LABOUR DEPARTURE DRAFT",
+        "sameDocument": true,
+        "draftNodeRetained": true,
+        "focus": "destination search",
+        "lateNavigation": false
+      }
+    },
+    {
+      "id": "U12",
+      "check": "lost successful append response retains the old prefix and exact retry appends once locally",
+      "fault": "abort actual successful BB append response after upstream completion",
+      "expected": {
+        "beforeRetry": {
+          "editor": "BB",
+          "candidateCode": "BB",
+          "acceptedChanges": 0
+        },
+        "retryBody": "byte-equivalent JSON string and structurally equal to lost request",
+        "retryLookupCount": 0,
+        "afterRetry": {
+          "codes": [
+            "BB"
+          ],
+          "acceptedChanges": 1
+        },
+        "responsePrefix": "exactly equal to lost successful upstream prefix",
+        "previewPostAudits": 2
+      }
+    },
+    {
+      "id": "U_CONTEXT",
+      "check": "same-session scope ABA is detected by a later real request without replacing accepted preview or draft",
+      "fault": null,
+      "schedule": [
+        "accept BB on company01 epochE",
+        "edit uncommitted AA",
+        "second tab same-scope Open",
+        "second tab Open02 then Open01",
+        "old page Check AA with its original headers receives409",
+        "further preview controls disabled"
+      ],
+      "expected": {
+        "oldPageScope": "01",
+        "currentScope": "01",
+        "currentEpoch": "E+3",
+        "acceptedCodes": [
+          "BB"
+        ],
+        "draft": "AA",
+        "staleBanner": true,
+        "automaticRetry": false,
+        "detectionBoundary": "No claim that unobserved cross-tab changes are noticed before another actual request."
+      }
+    }
+  ],
+  "expectedTransportFaults": 4,
+  "expectedInterceptionRegistrations": 4,
+  "transportProfile": "Only route.fetch to actual upstream followed by unchanged route.fulfill or explicit abort-after-success; no canned status/body/header, no navigation interception. Requests/cookies/passwords stay memory-only; output stores safe context identities and hashes.",
+  "proofBoundaries": [
+    "Existing16 plus basic17th harness untouched. This is a separate optional runner and mandatory five-case suite when invoked.",
+    "Callback final-state snapshots compare all seeded business/config/master data; auth_session compared before context-selection actors then their changes asserted separately. Intentional POST audit is separately counted.",
+    "UI/editor modifications use normal locator fill/select/click/keyboard only; no forced DOM values or local arithmetic.",
+    "Actual client-side departure covers unmount in retained document, not an unexecuted cross-process full-navigation branch.",
+    "Fixtures and every case are required; missing owner/config/controls fail rather than skip."
+  ]
+}

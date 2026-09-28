@@ -1,0 +1,31 @@
+{
+  "kind": "pre-implementation-financial-effects-freeze-v1",
+  "frozenAtUtc": "2026-09-12T02:26:11.811230+00:00",
+  "implementationExists": false,
+  "files": [
+    {
+      "path": "implementation-contract.md",
+      "sha256": "6ee3a2b3d67da0959fe9c09b9ec7dd12cc0101f526198594a9a07502a32f224c"
+    },
+    {
+      "path": "author-fixtures.py",
+      "sha256": "c8a672481ee1c5c97c54d2fe17fda7d43c0b5624068d9f36448b5f8e9663e9d9"
+    },
+    {
+      "path": "fixture-authorship.json",
+      "sha256": "8a1047c16fd85d04763caeb2d2feb7c3c623f42dac7032dfe81e62b7c0ed300c"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "81bf33dd54f3a9fde36214e21429fd32c54c3d294d1e7d14c9300450d5ec2419"
+    },
+    {
+      "path": "target-storage-index.json",
+      "sha256": "7120a09451b96d88cc60470fcd83a058110089c53cee2b2cf224112baecb0a70"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnFinancialEffects.independent.json",
+      "sha256": "635e1e251837c0c5acc6acd39f2b7e2932ad19850b976d3a1f2d59cf5229a09b"
+    }
+  ]
+}

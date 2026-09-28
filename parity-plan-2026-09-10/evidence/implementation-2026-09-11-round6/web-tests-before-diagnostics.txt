@@ -1,0 +1,37 @@
+
+> @datacare/web@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> vitest run --passWithNoTests
+
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/formKeys.test.ts (7 tests) 11ms
+ ✓ test/salesReturnForm.test.ts (26 tests) 11ms
+ ✓ test/designBookCalculation.test.ts (5 tests) 12ms
+ ✓ test/imageEditorSession.test.ts (20 tests) 69ms
+ ✓ test/designBookRepeat.test.ts (12 tests) 13ms
+ ✓ test/tourOrderForm.test.ts (8 tests) 8ms
+ ✓ test/salesOrderForm.test.ts (15 tests) 18ms
+ ✓ test/parityContainment.test.ts (5 tests) 8ms
+ ✓ test/mfgLotView.test.ts (4 tests) 3ms
+ ✓ test/lineRecalc.test.ts (6 tests) 6ms
+ ✓ test/designBookPage.test.ts (5 tests) 15ms
+ ✓ test/rateCutSettlementPayload.test.ts (5 tests) 2ms
+ ✓ test/subDetailGrid.test.ts (7 tests) 5ms
+ ✓ test/derivedValueSources.test.ts (4 tests) 86ms
+ ✓ test/gridKeyboard.test.ts (5 tests) 2ms
+ ✓ test/reportSurfaceLinks.test.ts (1 test) 4ms
+ ✓ test/cameraRequestGuard.test.ts (3 tests) 3ms
+ ✓ test/masterSearch.test.ts (7 tests) 7ms
+ ✓ test/chequePrintPage.test.ts (2 tests) 4ms
+ ✓ test/wholesaleSalePayload.test.ts (2 tests) 2ms
+ ✓ test/textIdentifiers.test.ts (10 tests) 43ms
+ ✓ test/stockLimitPages.test.ts (1 test) 1ms
+ ✓ test/eInvoiceExcelPage.test.ts (2 tests) 1ms
+ ✓ test/schemeInstallmentUpi.test.ts (1 test) 1ms
+
+ Test Files  24 passed (24)
+      Tests  163 passed (163)
+   Start at  13:34:18
+   Duration  1.95s (transform 1.29s, setup 0ms, collect 2.51s, tests 335ms, environment 3ms, prepare 2.07s)
+

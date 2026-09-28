@@ -4,6 +4,7 @@ import { post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
 import { VoucherList } from '../../../../components/VoucherList';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /** Other / expense purchase (TR_OTH_PURC) — non-stock buying (freight, packing, repairs…) with GST
  *  input credit. Dr expense + Dr input-GST / Cr supplier → PAY_DATA + TAX_DATA + BILL_OS. No inventory. */
@@ -35,6 +36,17 @@ export default function OtherPurchasePage() {
     interState: false,
   });
   const [rows, setRows] = useState<Row[]>([blank()]);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: rows.length,
+    onAppendRow: () => setRows((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setRows((rows) => (rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row)));
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [tender, setTender] = useState<Tender>({});
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -160,7 +172,7 @@ export default function OtherPurchasePage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Expense Lines</h2>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Expense account</th>

@@ -1,0 +1,52 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/saleReturnSource.routes.db.test.ts" "test/routePolicy.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 26ms
+ ✓ test/saleReturnSource.routes.db.test.ts (7 tests) 4547ms
+   ✓ original Sales source read HTTP boundary > reads an explicit historical source without replacing the target Return scope 747ms
+   ✓ original Sales source read HTTP boundary > keeps same-number sources separate by configured original book and authenticated tenant 433ms
+
+ Test Files  2 passed (2)
+      Tests  61 passed (61)
+   Start at  08:53:09
+   Duration  8.46s (transform 2.04s, setup 0ms, collect 3.08s, tests 4.57s, environment 0ms, prepare 118ms)
+

@@ -1,0 +1,24 @@
+{
+  "command": [
+    "env",
+    "PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round13-session-command",
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "node",
+    "apps/web/test/parity.real-stack.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:57:07.893480+00:00",
+  "finishedAtUtc": "2026-09-11T21:57:10.606779+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-existing-journeys-session-command-isolated.txt",
+  "logSha256": "dfc35d4880c6b800d400a55593a9f1ab4d0352ecd33754f5e6b3f7344e864ae8",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-existing-journeys-session-command-isolated.inputs.json",
+  "inputManifestSha256": "e5e9e5cf40eade11266cfce77025c1b8076eab5c57cecfefcf2a68d1d7e36723",
+  "inputCount": 1801,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

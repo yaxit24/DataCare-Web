@@ -1,0 +1,100 @@
+{
+  "kind": "staged-labour-preview-lifecycle-browser-ready",
+  "capturedAtUtc": "2026-09-11T23:51:50.237501+00:00",
+  "status": "staged-unexecuted",
+  "requiredCases": 5,
+  "expectedTransportFaults": 4,
+  "expectedInterceptionRegistrations": 4,
+  "expectedSyntheticBusinessResponses": 0,
+  "expectedLookupRequests": 7,
+  "expectedAuditedLookups": 6,
+  "expectedAppendRequestsAndAudits": 4,
+  "newIntegrationFiles": [
+    "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+    "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+    "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json"
+  ],
+  "checksExecuted": [
+    {
+      "kind": "JavaScript syntax only",
+      "command": "node --check <each of the two staged .mjs files>",
+      "exitCode": 0
+    },
+    {
+      "kind": "Prettier formatting/parser only",
+      "exitCode": 0
+    }
+  ],
+  "browserExecuted": false,
+  "databaseExecuted": false,
+  "buildExecuted": false,
+  "activeFilesEdited": false,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "6f8bde4e5e09db18319baab4c865b4b189b8fe41f2e72a52e9de9caeff532c5c"
+    },
+    {
+      "path": "browser-required-checks.json",
+      "sha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795"
+    },
+    {
+      "path": "case-inputs.json",
+      "sha256": "4ff926ea9b74b5ba5e15204e24af25a9988d040a0f54e0e3db457abd8b0b9a5b"
+    },
+    {
+      "path": "case-inputs-qualified.json",
+      "sha256": "71c09e6a617441fce4986e260d2edd067ede5329e74dedd68e9661e1c3c284d4"
+    },
+    {
+      "path": "syntax-check.txt",
+      "sha256": "e621d6209e81bd54d5b24f9b1bc37123f2e4dab4989377747e40cf22adc5d029"
+    },
+    {
+      "path": "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+      "sha256": "1744ece8ab2ce1e9114a32b5ebd22d12be56fedcab92f93e607bd306e41db828"
+    },
+    {
+      "path": "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+      "sha256": "4b52fdec40647f4615c03fc3d880953f58eef15c1f3df93038565c60b37415b4"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+      "sha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795"
+    }
+  ],
+  "runtimeDependenciesObserved": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context.journey.mjs",
+      "sha256": "98edbb25e246dcf59aeae669d4551779048ed721a2a3e4cff4918d2d6f1b1539"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context-response-observation.mjs",
+      "sha256": "c0282d1be8d7e8f107c9dca7d222e9580d7fea5e144e5dd01c80168600cbaf29"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-labour-replay.journey.mjs",
+      "sha256": "f8d1f44307f66d6776cda304339cbf5be39d4640753a54f50de3766df0588670"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "sha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+      "sha256": "37bb3caadde0ede84be2f7f1a188131b69563dffca0c040bcc340c4b8892382e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnLabourReplay.ts",
+      "sha256": "c9775c999e07f5827a9196f975aea7315da0ae275ab492f64c411f1c510a4905"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/fixture-diff-proof.json",
+      "sha256": "8ed3216f911e6e2beecb5ce2202b610182acb924801e34e4f55356e7fef23900"
+    }
+  ]
+}

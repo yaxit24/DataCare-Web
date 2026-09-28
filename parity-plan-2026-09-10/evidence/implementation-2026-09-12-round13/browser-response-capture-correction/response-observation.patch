@@ -1,0 +1,143 @@
+--- a/web/apps/web/test/session-context.journey.mjs
++++ b/web/apps/web/test/session-context.journey.mjs
+@@ -1,3 +1,4 @@
++import { observeJsonResponse } from './session-context-response-observation.mjs';
+ import assert from 'node:assert/strict';
+ import { createHash } from 'node:crypto';
+ 
+@@ -290,7 +291,8 @@
+     });
+   };
+   const meOnNavigation = async (target, path) => {
+-    const result = target.waitForResponse(
++    const result = observeJsonResponse(
++      target,
+       (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+     );
+     await target.goto(path);
+@@ -320,7 +322,9 @@
+     const before = await readSession(me.context.sessionId);
+     await field(target, 'Company').selectOption(company);
+     const count = selectPosts(target).length;
+-    const responsePromise = target.waitForResponse((response) => selectRequest(response.request()));
++    const responsePromise = observeJsonResponse(target, (response) =>
++      selectRequest(response.request()),
++    );
+     await target.getByRole('button', { name: 'Open', exact: true }).click();
+     const response = await responsePromise;
+     assert.equal(response.status(), 200, await response.text());
+@@ -378,7 +382,8 @@
+     await field(page, 'Company Code').fill('01');
+     await field(page, 'User').fill(sessionContextFixture.loginName);
+     await field(page, 'Password').fill(password);
+-    const login = page.waitForResponse(
++    const login = observeJsonResponse(
++      page,
+       (response) => pathOf(response.request()) === '/api/auth/login',
+     );
+     await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+@@ -439,7 +444,7 @@
+     check(2);
+     const beforeShell = await readSession(sessionId);
+     const confirmed = confirmNext(page, true);
+-    const shellResponsePromise = page.waitForResponse((response) =>
++    const shellResponsePromise = observeJsonResponse(page, (response) =>
+       selectRequest(response.request()),
+     );
+     await field(page, 'Company').selectOption('02');
+@@ -468,7 +473,8 @@
+       ({ page: source, request }) =>
+         source === page && pathOf(request) === '/api/masters/design-book',
+     ).length;
+-    const staleResponse = page.waitForResponse(
++    const staleResponse = observeJsonResponse(
++      page,
+       (response) => pathOf(response.request()) === '/api/masters/design-book',
+     );
+     await page.getByRole('button', { name: 'Load', exact: true }).click();
+@@ -522,7 +528,8 @@
+     assert.equal(afterABA.lc_code, beforeABA.lc_code);
+     assert.equal(afterABA.co_year, beforeABA.co_year);
+     check(6);
+-    const abaRefusedPromise = page.waitForResponse(
++    const abaRefusedPromise = observeJsonResponse(
++      page,
+       (response) => pathOf(response.request()) === '/api/masters/design-book',
+     );
+     await page.getByRole('button', { name: 'Load', exact: true }).click();
+@@ -577,7 +584,8 @@
+     await checkpoint(page, 'session-context-uncertain-draft');
+     check(8);
+     const countBeforeRecovery = selectPosts(page).length;
+-    const freshMePromise = page.waitForResponse(
++    const freshMePromise = observeJsonResponse(
++      page,
+       (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+     );
+     const leave = confirmNext(page, true);
+@@ -604,7 +612,7 @@
+     assert.equal(await field(page, 'Company').isDisabled(), true);
+     check(9);
+     const beforeRetry = await readSession(sessionId);
+-    const retryResponsePromise = page.waitForResponse((response) =>
++    const retryResponsePromise = observeJsonResponse(page, (response) =>
+       selectRequest(response.request()),
+     );
+     await page.getByRole('button', { name: 'Retry saved company change', exact: true }).click();
+--- a/web/apps/web/test/session-context-lifecycle.journey.mjs
++++ b/web/apps/web/test/session-context-lifecycle.journey.mjs
+@@ -1,3 +1,4 @@
++import { observeJsonResponse } from './session-context-response-observation.mjs';
+ import assert from 'node:assert/strict';
+ import { createHash } from 'node:crypto';
+ import {
+@@ -168,7 +169,8 @@
+   try {
+     for (const mode of ['success', 'drop']) {
+       // New document and deliberate normal open restore company01; this is not recovery replay.
+-      const mePromise = page.waitForResponse(
++      const mePromise = observeJsonResponse(
++        page,
+         (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+       );
+       await page.goto('/select');
+@@ -176,7 +178,9 @@
+       await waitEnabled('Open');
+       assert.equal(await pending(), null);
+       await page.getByLabel('Company', { exact: true }).selectOption('01');
+-      const normalResponse = page.waitForResponse((response) => isSelection(response.request()));
++      const normalResponse = observeJsonResponse(page, (response) =>
++        isSelection(response.request()),
++      );
+       await page.getByRole('button', { name: 'Open', exact: true }).click();
+       const normal = await normalResponse;
+       assert.equal(normal.status(), 200);
+@@ -194,7 +198,8 @@
+       });
+       const documentNode = await page.locator('html').elementHandle();
+       const productReads = ['/api/masters/products', '/api/masters/products/meta'].map((path) =>
+-        page.waitForResponse(
++        observeJsonResponse(
++          page,
+           (response) => pathOf(response.request()) === path && response.status() === 200,
+         ),
+       );
+@@ -300,7 +305,8 @@
+       await checkpoint(page, `session-context-departed-${mode}-draft`);
+ 
+       // Deliberate recovery remains usable despite origin lease loss; exact current receipt only.
+-      const latestMe = page.waitForResponse(
++      const latestMe = observeJsonResponse(
++        page,
+         (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+       );
+       const leave = confirmNext();
+@@ -313,7 +319,7 @@
+       assert.deepEqual(await pending(), saved);
+       assert.equal(posts().length, countAfterDispatch);
+       const beforeRetry = await session(sessionId);
+-      const retryPromise = page.waitForResponse((response) => isSelection(response.request()));
++      const retryPromise = observeJsonResponse(page, (response) => isSelection(response.request()));
+       await page.getByRole('button', { name: 'Retry saved company change', exact: true }).click();
+       const retry = await retryPromise;
+       assert.equal(retry.status(), 200);

@@ -1,0 +1,101 @@
+{
+  "capturedAtUtc": "2026-09-11T05:55:33.526411+00:00",
+  "status": "passed",
+  "overallCombinedRun": "passed",
+  "observedDesktopExecution": false,
+  "mockedRequests": 0,
+  "startedAt": "2026-09-11T05:51:33.011Z",
+  "finishedAt": "2026-09-11T05:52:20.433Z",
+  "salesOrderDesign": {
+    "voucherNo": "1",
+    "blankVoucherNo": "2",
+    "checks": [
+      "F1 lists exact item-product/company sources with duplicate labels and full desktop display columns",
+      "Native modal contains keyboard focus; Escape cancels without changing the draft and restores Design focus",
+      "Search distinguishes duplicate design numbers by album and cancellation remains lossless",
+      "Selection preserves invalid unrelated draft and components while copying only source-defined new-row cells",
+      "Validated Design photo previews both inside picker and immediately on the unsaved order row",
+      "Zero source defaults retain manual numerics; source percentage zero permits rate copy and NULL source image clears the immediate preview",
+      "Actual POST replays selected saved sources and later manual edit; reopening preserves parent/components and linked image",
+      "Actual PUT treats loaded parent as E: source NULL image persists as empty string, old photo disappears, numeric caches and parent/component identities stay unchanged",
+      "Explicit clear resets only Design and image N while retaining size, karigar and numerics",
+      "Actual new-row POST replaces selected photo with explicit source blank, reopens as empty string without fallback, and preserves parent/component identities and entered weights",
+      "Complete picker/create/edit/clear workflow has no unhandled browser errors"
+    ]
+  },
+  "result": {
+    "path": "test-results/parity-real-stack-round4-blank-source/result.json",
+    "sha256": "39445f5f6d6aeaa00c479f624f5100a38f8cdc615a4f74da2d299c8b0355f467"
+  },
+  "log": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-blank-source.txt",
+    "sha256": "d4deac70a9fc58f530a00e55f7cb8c622a8ca70e70ea0995842e11a35ca956db"
+  },
+  "screenshots": [
+    {
+      "path": "test-results/parity-real-stack-round4-blank-source/sales-design-picker-round4.png",
+      "sha256": "8f0179b0820f4da12ce96ff7898f832c6286f56ff179dcc8aac68a28865e3613"
+    },
+    {
+      "path": "test-results/parity-real-stack-round4-blank-source/sales-design-blank-existing-round4.png",
+      "sha256": "696e888fa552be0d6fa7a85ec18f9a6cb564c8d816a4a70acda6c50bf96df051"
+    },
+    {
+      "path": "test-results/parity-real-stack-round4-blank-source/sales-design-loaded-round4.png",
+      "sha256": "7a09afad7838c9ac7a6ed2a90b0e79aa3f475df10c6401b7c273fd7ca8a3c878"
+    },
+    {
+      "path": "test-results/parity-real-stack-round4-blank-source/sales-design-blank-new-round4.png",
+      "sha256": "deae40deca870a72c0fe2d7e80ff659aa1a78f5f8d3f928efa614c334667ab5d"
+    }
+  ],
+  "visualReview": {
+    "passed": true,
+    "finding": "Modal eleven columns/actions and complete portrait are visible within its bounds. Saved controls and Design focus remain readable. No owned product change required.",
+    "limits": "Blank image panels lie below the captured viewport; source blank/no stale fallback is verified by actual DOM assertions and saved API values, not visual image absence in these screenshots."
+  },
+  "acceptanceQualification": "Web Escape/Close preserves the draft; native shared-help source suggests clearing Design/imageN. This remains a deliberate preservation difference pending executable/business acceptance.",
+  "priorRuns": [
+    {
+      "status": "failed",
+      "name": "first",
+      "reason": "Native Tab containment failed; fixed explicit Tab/ShiftTab cycling",
+      "result": {
+        "path": "test-results/parity-real-stack-round4-first/result.json",
+        "sha256": "f22008263d979c5e2fecda548af37917dac4478674ea64be5605628e538e539d"
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-first.txt",
+        "sha256": "530ec8094de4c3b6947b4e614cb87d2b0d81411270677209d294aee7d7d20ab2"
+      }
+    },
+    {
+      "status": "failed",
+      "name": "focus-cache",
+      "designChecks": 10,
+      "reason": "Later ordinary Sales unchanged version assertion conflicted with documented write-token rotation",
+      "result": {
+        "path": "test-results/parity-real-stack-round4-focus-cache/result.json",
+        "sha256": "df709697eb588b7f820ed42b06365396647f93f53156d60bb8507941f5e2fd86"
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-focus-cache.txt",
+        "sha256": "fb97967d72f2f64b12e9c11d144e5a0ea2180ad1ae6bfe15a8383b2b1e61b271"
+      }
+    },
+    {
+      "status": "failed",
+      "name": "version-contract",
+      "designChecks": 10,
+      "reason": "Later ordinary Sales print profile assertion expected OrdVchImg and received OrderBill",
+      "result": {
+        "path": "test-results/parity-real-stack-round4-version-contract/result.json",
+        "sha256": "302be3f83d7b463ba436cd56f519fefcf91b35fc5dab935bcd82a6b987048964"
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-version-contract.txt",
+        "sha256": "b8bb682f105d6ec8568fa4a997a91020ec5ea2aa6732da84f08a523e11f1ba36"
+      }
+    }
+  ]
+}

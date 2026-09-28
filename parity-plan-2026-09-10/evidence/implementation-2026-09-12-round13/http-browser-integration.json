@@ -1,0 +1,151 @@
+{
+  "atUtc": "2026-09-11T20:48:42.073531+00:00",
+  "status": "integrated-unverified",
+  "files": [
+    {
+      "path": "web/apps/api/src/app.ts",
+      "stage": "http-staged",
+      "beforeSha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a",
+      "afterSha256": "bc3d84ab0d2db1928271c2a7b13c1079836c01e19a79736ef17a98ece492d2fb"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/jwt.ts",
+      "stage": "http-staged",
+      "beforeSha256": "4bd2d709bcd6ec64d3734822972932aed4bcd1797422815caf4a8eaa90de3169",
+      "afterSha256": "baa2e644bcd9faeb8aebed0cfdea6afcce936752991fd73886921ee798d7fa75"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextAccess.ts",
+      "stage": "http-staged",
+      "beforeSha256": null,
+      "afterSha256": "4caa701a9c7fb82a43ddaf1c5da01ce04be6a7f1028add2049ef64231ab6ea28"
+    },
+    {
+      "path": "web/apps/api/test/app.security.db.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": "e372676ca0aec3ce4561e899efe2c8bbb62d398ef8c526590e4fef78d5c23155",
+      "afterSha256": "a7a26ecfeb6ccf1210a1fb90acb1f31b4773327f06a7149fc1667cdff23e9da4"
+    },
+    {
+      "path": "web/apps/api/test/auth.jwt.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": "4faaac45899ee026b439df8fa773400ff68bf4a45bfd408eec2f24795f805e5e",
+      "afterSha256": "c80c02f95776f4a01d935af773ccd4bc1d78755f00608f5239dc6db0d42d8860"
+    },
+    {
+      "path": "web/apps/api/test/dataRepairAuthority.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": "f387586b243e3252a6839dee023779f06fb8a5da0c4a18ff8c265ca030b29a6c",
+      "afterSha256": "07cef8c1b46389af209f1bee9f8d9f3cadccdbf33bb5c8cf554d003a10afa5d0"
+    },
+    {
+      "path": "web/apps/api/test/reportAuthorization.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": "7e774f9239781fa88ee9882434c041f4b5d3e931294ca010565f4cfa9399ee20",
+      "afterSha256": "e6e96320ffd2612ddf42544c0d6daa5c4b808ba1c3917c4b276ea28fd3bbe013"
+    },
+    {
+      "path": "web/apps/api/test/reportFilterGuard.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": "72945bc7be8085dbcf5d5303d8c3dc475495604c69625d3bc9a96241076fa541",
+      "afterSha256": "39ba1dcdf8ef15d87766fefa52c6dfdec47bb9d075306f657c29f2f2250e3107"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextAccess.db.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": null,
+      "afterSha256": "5c929a0f5746bfc6c217c76e9a0a78db8c204f9c91a188678fe28bfbdbe1343d"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextHttp.db.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": null,
+      "afterSha256": "d25a5df4bc4b9825a2715696328ce03707068c374abfb4eb37c41c3a1e0fc239"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextJwt.test.ts",
+      "stage": "http-staged",
+      "beforeSha256": null,
+      "afterSha256": "911b758f73a17f637804e11832c080ae542707b874f35dc67feb4095e10cd2c3"
+    },
+    {
+      "path": "web/apps/web/lib/api.ts",
+      "stage": "browser-staged",
+      "beforeSha256": "7b07a3387e30d3a685d2974ad63f172ae381d6cebe1de7b1e1ddd147dfc7b5dc",
+      "afterSha256": "406f2dca134cd85c3a0d23ccdb1f33232ceefa049ce54e220de34b42af3c3dc6"
+    },
+    {
+      "path": "web/apps/web/lib/pageContext.ts",
+      "stage": "browser-staged",
+      "beforeSha256": null,
+      "afterSha256": "c1c952e40328ef1518b169ba14273b088294a497cedf0f24d05898cfd40d1176"
+    },
+    {
+      "path": "web/apps/web/test/apiContext.test.ts",
+      "stage": "browser-staged",
+      "beforeSha256": null,
+      "afterSha256": "5cd54607c4e23bb25005dcd6169b7fa43e80d6a537606ada2f22ed6427e811e2"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/pageContext.bootstrap-qualification.json",
+      "stage": "browser-staged",
+      "beforeSha256": null,
+      "afterSha256": "fb377ea6aafd5df6effb49d2022fa26a28a53d1320f38c636dc3d768c043b23e"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/pageContext.independent.json",
+      "stage": "browser-staged",
+      "beforeSha256": null,
+      "afterSha256": "c4b96577f329ff64670b1b7124f0924dddf0c8c7c720bf62c8c31d4e5cec0515"
+    },
+    {
+      "path": "web/apps/web/test/pageContext.test.ts",
+      "stage": "browser-staged",
+      "beforeSha256": null,
+      "afterSha256": "d7369269237e5da7aedd31f05d95dc7f8ff7379fc2b7220335a7b75467566657"
+    },
+    {
+      "path": "web/apps/web/app/(app)/layout.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "2e652cbd457a1ca86eddd937d87ac7456937dc0ffa04d137f4ba4103e78631e1",
+      "afterSha256": "b345a9445216a39567b1d48b065bc8ca329e4ed464bf56f1653e4b35ac8f1ab3"
+    },
+    {
+      "path": "web/apps/web/app/login/page.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "30bca74c162d83e31f47aa1aa1ac7ff8b389172f68185c9e087c88de337a1178",
+      "afterSha256": "f03a7b78e7688f5b590b7e7c93789e756ccfbc8e89b7e6762211ac382b04f451"
+    },
+    {
+      "path": "web/apps/web/app/password-change/page.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "3ae27fdeef67ab3028936fc9b7890d2820268742e9a3a795f3d41bc21a635b9e",
+      "afterSha256": "a57980e2a00d8130c786f552b8bc9d26f98079762443541dab2253c5ffde57db"
+    },
+    {
+      "path": "web/apps/web/app/select/page.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "0364bca395bd87d0470df8c812f091a3f454316ec30d8a3f8431a42264e9a903",
+      "afterSha256": "b24d2465b835f10a81184e21985f3eb2395a463f25b4ea445e815a6e68f60c83"
+    },
+    {
+      "path": "web/apps/web/components/Shell.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "96565f34433a6e7f6c7378e0788e544e4126febc0a72bfdbcc9a33e8d1fa2960",
+      "afterSha256": "a92f33cb62ffed9678682b071d58cd80bba7885e3b91925a1560b1176188e66b"
+    },
+    {
+      "path": "web/apps/web/lib/contextSelection.ts",
+      "stage": "browser-root-staged",
+      "beforeSha256": null,
+      "afterSha256": "f1e11c5f96429a2a060c29f013e7f97ddbbc6390d5081a745fbc08242d1f909c"
+    },
+    {
+      "path": "web/apps/web/test/contextSelection.test.ts",
+      "stage": "browser-root-staged",
+      "beforeSha256": null,
+      "afterSha256": "b7f2e59b53717517d06e229a7a8ecff466935c79df5fb25b7268187c037d8023"
+    }
+  ],
+  "limit": "Runtime integrated for coherent local verification; no deployment or end-to-end acceptance inferred. Direct-fetch guard patches and actual browser qualification pending."
+}

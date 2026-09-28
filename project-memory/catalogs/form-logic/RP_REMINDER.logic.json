@@ -1,0 +1,80 @@
+{
+ "form": "RP_REMINDER",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MEMB",
+  "AD_OS",
+  "BILL_OS_DATA",
+  "BOOK_DATA",
+  "DHRN_DATA",
+  "PR_DATA",
+  "RATE_CUT_DATA",
+  "REM_DATA",
+  "REPORT_DATA",
+  "SL_DATA",
+  "SL_ORD_DATA",
+  "USER_REQUEST",
+  "USER_SET",
+  "WEB_DATA"
+ ],
+ "writes": {
+  "INSERT": {
+   "REPORT_DATA": [
+    "COL_1",
+    "COL_10",
+    "COL_11",
+    "COL_12",
+    "COL_13",
+    "COL_2",
+    "COL_3",
+    "COL_4",
+    "COL_5",
+    "COL_6",
+    "COL_7",
+    "COL_8",
+    "COL_9",
+    "CO_CODE",
+    "LC_CODE",
+    "SR_NO"
+   ]
+  },
+  "UPDATE": [
+   "PR_DATA",
+   "RATE_CUT_DATA",
+   "SL_DATA",
+   "USER_REQUEST"
+  ],
+  "DELETE": [
+   "REPORT_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MEMB",
+  "AD_OS",
+  "BILL_OS_DATA",
+  "BOOK_DATA",
+  "DHRN_DATA",
+  "PR_DATA",
+  "RATE_CUT_DATA",
+  "REM_DATA",
+  "REPORT_DATA",
+  "SL_ORD_DATA",
+  "USER_REQUEST",
+  "USER_SET",
+  "WEB_DATA"
+ ],
+ "fKeys": [],
+ "messageBoxes": 11,
+ "timers": 2,
+ "serialPort": false,
+ "handlers": 1,
+ "calcSample": [],
+ "loc": 4880
+}

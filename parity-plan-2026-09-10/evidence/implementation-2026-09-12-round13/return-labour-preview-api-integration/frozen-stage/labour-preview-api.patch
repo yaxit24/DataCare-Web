@@ -1,0 +1,5246 @@
+--- a/web/apps/api/src/modules/rbac/routePolicy.ts
++++ b/web/apps/api/src/modules/rbac/routePolicy.ts
+@@ -212,6 +212,9 @@
+   'POST /sales-returns/:vchNo/incoming-replay',
+   'GET /sales-returns/:vchNo/incoming-bill-replay-state',
+   'POST /sales-returns/:vchNo/incoming-bill-replay',
++  'GET /sales-returns/:vchNo/incoming-labour-replay-state',
++  'POST /sales-returns/:vchNo/incoming-labour-observation',
++  'POST /sales-returns/:vchNo/incoming-labour-replay',
+   'PUT /sales-returns/:vchNo/incoming-metadata',
+   'POST /sales-returns',
+   'GET /sales-returns/import',
+@@ -822,6 +825,8 @@
+ ]);
+ 
+ const READ_POST_ROUTES = new Set([
++  'POST /sales-returns/:vchNo/incoming-labour-observation',
++  'POST /sales-returns/:vchNo/incoming-labour-replay',
+   'POST /sales-returns/:vchNo/incoming-bill-replay',
+   'POST /sales-returns/:vchNo/incoming-replay',
+   'POST /year-end/preview',
+--- a/web/apps/api/src/modules/sales/saleReturnBillReplay.ts
++++ b/web/apps/api/src/modules/sales/saleReturnBillReplay.ts
+@@ -23,6 +23,7 @@
+   SavedSaleReturnError,
+   type SavedSaleReturnRaw,
+   type SavedSaleReturnScope,
++  type SavedSaleReturnObservation,
+   type SavedSaleReturnObservedRow,
+ } from './savedSaleReturn.js';
+ import {
+@@ -30,7 +31,10 @@
+   saleReturnIncomingReplayInput,
+   SaleReturnIncomingReplayError,
+ } from './saleReturnIncomingReplay.js';
+-import { SaleReturnIncomingConfigurationError } from './saleReturnIncomingConfiguration.js';
++import {
++  SaleReturnIncomingConfigurationError,
++  type SaleReturnIncomingConfiguration,
++} from './saleReturnIncomingConfiguration.js';
+ import { BookPolicyValidationError } from '../shared/bookPolicy.js';
+ import type {
+   SaleReturnIncomingReplayState,
+@@ -318,17 +322,23 @@
+     configurationVersion,
+   };
+ }
+-type Observed = {
++export type SaleReturnBillReplayObservation = {
+   dto: SaleReturnBillReplayState;
+   state: SaleReturnIncomingAggregateState | null;
+   context: SaleReturnIncomingAggregateContext | null;
+ };
+-async function observe(
++/** Internal same-Tx composition hook; omitted options preserve the existing v1 DTO/hash. */
++export async function observeSaleReturnBillReplayTx(
+   tx: any,
+   scope: SavedSaleReturnScope,
+   voucherNo: string,
+   expectedVersion?: string,
+-): Promise<Observed> {
++  beforeProjection?: (observation: {
++    billReplayVersion: string;
++    saved: SavedSaleReturnObservation;
++    configuration: SaleReturnIncomingConfiguration;
++  }) => Promise<void>,
++): Promise<SaleReturnBillReplayObservation> {
+   let extra!: ExtraObservation;
+   let replayVersion = '';
+   const rowObservation = await observeSaleReturnIncomingReplayTx(
+@@ -359,6 +369,11 @@
+           'version-conflict',
+           'The saved Return or bill calculation inputs changed. Reload before previewing again.',
+         );
++      await beforeProjection?.({
++        billReplayVersion: replayVersion,
++        saved: observed.saved,
++        configuration: observed.configuration,
++      });
+     },
+   );
+   const { dto: rowReplay, saved, states } = rowObservation;
+@@ -469,7 +484,7 @@
+     return await withTenant(
+       prisma,
+       scope.tenantId,
+-      async (tx) => (await observe(tx, scope, voucherNo)).dto,
++      async (tx) => (await observeSaleReturnBillReplayTx(tx, scope, voucherNo)).dto,
+       { isolationLevel: 'RepeatableRead' },
+     );
+   } catch (error) {
+@@ -489,7 +504,7 @@
+       prisma,
+       scope.tenantId,
+       async (tx) => {
+-        const observed = await observe(tx, scope, voucherNo, input.replayVersion);
++        const observed = await observeSaleReturnBillReplayTx(tx, scope, voucherNo, input.replayVersion);
+         const { dto, context } = observed;
+         const row = dto.rowReplay.rows.find((r) => r.rowIdentity === input.rowIdentity);
+         if (!row)
+--- /dev/null
++++ b/web/apps/api/src/modules/sales/saleReturnLabourReplay.ts
+@@ -0,0 +1,1000 @@
++import { createHash } from "node:crypto";
++import {
++  composeSaleReturnIncomingLabour,
++  copySaleReturnIncomingLabour,
++  projectSaleReturnIncomingEditorText,
++  reduceSaleReturnIncomingAggregate,
++  SALE_RETURN_INCOMING_MONEY_PREVIEW_COLUMNS,
++  SALE_RETURN_INCOMING_PROJECTION_VERSION,
++  SALE_RETURN_BILL_PROJECTION_VERSION,
++  SALE_RETURN_INCOMING_AGGREGATE_VERSION,
++  SALE_RETURN_BILL_TAX_POLICY_VERSION,
++  SALE_RETURN_INCOMING_LABOUR_OBSERVATION_VERSION,
++  SALE_RETURN_INCOMING_LABOUR_VERSION,
++  SALE_RETURN_INCOMING_LABOUR_COMPOSE_VERSION,
++  type SaleReturnIncomingAggregateState,
++  type SaleReturnIncomingLabourObservation,
++} from "@datacare/core";
++import type { Tx } from "@datacare/db";
++import { BookPolicyValidationError } from "../shared/bookPolicy.js";
++import {
++  withSessionContextReadSnapshot,
++  SESSION_CONTEXT_READ_SNAPSHOT_VERSION,
++} from "../auth/sessionContextReadSnapshot.js";
++import type { AuthenticatedSessionContext } from "../auth/sessionContextAccess.js";
++import {
++  SavedSaleReturnError,
++  type SavedSaleReturnScope,
++} from "./savedSaleReturn.js";
++import { SaleReturnIncomingConfigurationError } from "./saleReturnIncomingConfiguration.js";
++import {
++  SaleReturnIncomingReplayError,
++  type SaleReturnIncomingReplayCellSnapshot,
++} from "./saleReturnIncomingReplay.js";
++import {
++  observeSaleReturnBillReplayTx,
++  SaleReturnBillReplayError,
++  type SaleReturnBillReplayObservation,
++  type SaleReturnBillReplayState,
++  type SaleReturnBillReplayPhase,
++} from "./saleReturnBillReplay.js";
++import {
++  readSaleReturnIncomingLabourTx,
++  SaleReturnIncomingLabourReadError,
++} from "./saleReturnIncomingLabour.js";
++
++export const SALE_RETURN_LABOUR_REPLAY_CONTRACT =
++  "x13-saved-incoming-labour-bill-replay-v1" as const;
++export const SALE_RETURN_LABOUR_REPLAY_PROFILE =
++  "saved-primary-incoming-resolved-labour-bill-preview-v1" as const;
++const semanticVersions = Object.freeze({
++  adapter: "saved-labour-bill-server-adapter-v1",
++  rowProjection: SALE_RETURN_INCOMING_PROJECTION_VERSION,
++  billProjection: SALE_RETURN_BILL_PROJECTION_VERSION,
++  aggregate: SALE_RETURN_INCOMING_AGGREGATE_VERSION,
++  taxPolicy: SALE_RETURN_BILL_TAX_POLICY_VERSION,
++  labourObservation: SALE_RETURN_INCOMING_LABOUR_OBSERVATION_VERSION,
++  labourCopy: SALE_RETURN_INCOMING_LABOUR_VERSION,
++  labourCompose: SALE_RETURN_INCOMING_LABOUR_COMPOSE_VERSION,
++  sessionRead: SESSION_CONTEXT_READ_SNAPSHOT_VERSION,
++});
++export type SaleReturnLabourField =
++  "x13.primary-incoming.c13" | "x13.primary-incoming.c29";
++export type SaleReturnLabourReplayEvent =
++  | { kind: "moneyLeave"; fieldId: string; editorText: string }
++  | {
++      kind: "labourEnter";
++      fieldId: SaleReturnLabourField;
++      editorText: string;
++      observationVersion: string;
++    };
++export interface SaleReturnLabourPrefixInput {
++  baseVersion: string;
++  rowIdentity: string;
++  prefixVersion: string;
++  events: SaleReturnLabourReplayEvent[];
++}
++export type SaleReturnLabourObserveInput = SaleReturnLabourPrefixInput & {
++  fieldId: SaleReturnLabourField;
++  editorText: string;
++};
++export type SaleReturnLabourAppendInput = SaleReturnLabourPrefixInput & {
++  event: SaleReturnLabourReplayEvent;
++};
++export interface SaleReturnLabourDiagnostic {
++  code: string;
++  message: string;
++  fieldId?: string;
++  stage?: string;
++  column?: number;
++}
++export class SaleReturnLabourReplayError extends Error {
++  constructor(
++    readonly statusCode: 400 | 404 | 409 | 413 | 422 | 500,
++    readonly code: string,
++    message: string,
++    readonly details?: {
++      eventIndex?: number;
++      event?: SaleReturnLabourReplayEvent;
++      diagnostics?: readonly SaleReturnLabourDiagnostic[];
++      recovery?: SaleReturnLabourPrefix;
++    },
++  ) {
++    super(message);
++    this.name = "SaleReturnLabourReplayError";
++    // Bound the actual route envelope, including a recovered prefix, not merely
++    // its individual pieces. Never truncate a recovery into a different prefix.
++    if (
++      Buffer.byteLength(
++        JSON.stringify({
++          error: code,
++          message,
++          ...(details === undefined ? {} : { details }),
++        }),
++        "utf8",
++      ) > 2097152
++    ) {
++      this.statusCode = 422;
++      this.code = "unsupported-output";
++      this.message =
++        "The complete preview error exceeds the response bound. Retain the local prefix and reload.";
++      this.details = undefined;
++    }
++  }
++}
++interface Identity {
++  contractVersion: typeof SALE_RETURN_LABOUR_REPLAY_CONTRACT;
++  profile: typeof SALE_RETURN_LABOUR_REPLAY_PROFILE;
++  context: {
++    sessionId: string;
++    contextEpoch: string;
++    coCode: string;
++    lcCode: string;
++    coYear: string;
++  };
++  scope: Omit<SavedSaleReturnScope, "tenantId">;
++  voucherNo: string;
++  baseVersion: string;
++  documentVersion: string;
++  configurationVersion: string;
++}
++interface Field {
++  fieldId: SaleReturnLabourField;
++  allowed: boolean;
++  reason: string | null;
++  maxLength: 2;
++  commit: "resolved-enter";
++}
++const noAuthority = Object.freeze({
++  canPreviewClosing: false,
++  canSaveNumeric: false,
++  canApplySource: false,
++} as const);
++export interface SaleReturnLabourReplayState extends Identity {
++  billReplay: SaleReturnBillReplayState;
++  semanticVersions: typeof semanticVersions;
++  rows: Array<{
++    rowIdentity: string;
++    initialPrefixVersion: string;
++    labourFields: Field[];
++  }>;
++  capabilities: { canPreview: boolean } & typeof noAuthority;
++}
++export interface SaleReturnLabourPrefix {
++  prefixVersion: string;
++  events: SaleReturnLabourReplayEvent[];
++  preview: SaleReturnIncomingReplayCellSnapshot;
++  phase: SaleReturnBillReplayPhase;
++}
++export interface SaleReturnLabourObservationResult extends Identity {
++  rowIdentity: string;
++  prefixVersion: string;
++  fieldId: SaleReturnLabourField;
++  editorText: string;
++  observationVersion: string;
++  selection: {
++    CO_CODE: string;
++    LBR_CODE: string;
++    LBR_CATG: string;
++    LBR_VAL: string;
++  };
++}
++export interface SaleReturnLabourReplayResult extends Identity {
++  rowIdentity: string;
++  prefix: SaleReturnLabourPrefix;
++  acceptedEvent: {
++    event: SaleReturnLabourReplayEvent;
++    status: "applied" | "skipped";
++  };
++  effects: {
++    aggregateApplied: boolean;
++    billApplied: boolean;
++    taxRecalculated: boolean;
++  };
++  capabilities: typeof noAuthority;
++}
++const money = new Map<string, number>(
++  SALE_RETURN_INCOMING_MONEY_PREVIEW_COLUMNS.map(
++    (c) => [`x13.primary-incoming.c${c}`, c] as const,
++  ),
++);
++const labourFields: readonly SaleReturnLabourField[] = [
++  "x13.primary-incoming.c13",
++  "x13.primary-incoming.c29",
++];
++const prefixKeys = [
++  "baseVersion",
++  "rowIdentity",
++  "prefixVersion",
++  "events",
++] as const;
++const reject = (
++  code: string,
++  message: string,
++  status: 400 | 404 | 409 | 413 | 422 | 500 = 400,
++): never => {
++  throw new SaleReturnLabourReplayError(status, code, message);
++};
++function own(value: unknown, keys: readonly string[]): Record<string, unknown> {
++  if (!value || typeof value !== "object" || Array.isArray(value))
++    return reject(
++      "invalid-replay-request",
++      "Use an exact plain replay request.",
++    );
++  const proto = Object.getPrototypeOf(value);
++  const desc = Object.getOwnPropertyDescriptors(value),
++    found = Reflect.ownKeys(value);
++  if (
++    (proto !== Object.prototype && proto !== null) ||
++    found.length !== keys.length ||
++    found.some((k) => typeof k !== "string" || !keys.includes(k)) ||
++    keys.some((k) => !desc[k]?.enumerable || !("value" in desc[k]!))
++  )
++    return reject(
++      "invalid-replay-request",
++      "Unknown, missing or accessor request fields are unsupported.",
++    );
++  return Object.fromEntries(keys.map((k) => [k, desc[k]!.value]));
++}
++const hashText = (v: unknown): v is string =>
++  typeof v === "string" && v.length === 64 && !/[^a-f0-9]/.test(v);
++const ascii = (v: unknown, max: number): v is string =>
++  typeof v === "string" && v.length <= max && !/[^\x20-\x7e]/.test(v);
++const code = (v: unknown): v is string =>
++  ascii(v, 2) && v.length > 0 && v.trim() === v;
++function field(v: unknown): SaleReturnLabourField {
++  if (
++    typeof v !== "string" ||
++    !labourFields.includes(v as SaleReturnLabourField)
++  )
++    return reject("invalid-replay-request", "Use a supported labour field.");
++  return v as SaleReturnLabourField;
++}
++function event(value: unknown): SaleReturnLabourReplayEvent {
++  // Inspect kind only through an own data descriptor; never invoke a getter to choose the schema.
++  if (!value || typeof value !== "object")
++    return reject("invalid-replay-request", "A committed event is required.");
++  const d = Object.getOwnPropertyDescriptor(value, "kind");
++  if (!d || !("value" in d))
++    return reject("invalid-replay-request", "A plain event kind is required.");
++  if (d.value === "moneyLeave") {
++    const r = own(value, ["kind", "fieldId", "editorText"]);
++    if (
++      typeof r.fieldId !== "string" ||
++      !money.has(r.fieldId) ||
++      !ascii(r.editorText, 10)
++    )
++      return reject(
++        "invalid-replay-request",
++        "Use one supported money field and at most ten ASCII editor characters.",
++      );
++    return { kind: "moneyLeave", fieldId: r.fieldId, editorText: r.editorText };
++  }
++  if (d.value === "labourEnter") {
++    const r = own(value, [
++      "kind",
++      "fieldId",
++      "editorText",
++      "observationVersion",
++    ]);
++    if (!code(r.editorText) || !hashText(r.observationVersion))
++      return reject(
++        "invalid-replay-request",
++        "A qualified exact one/two-character code and observation version are required.",
++      );
++    return {
++      kind: "labourEnter",
++      fieldId: field(r.fieldId),
++      editorText: r.editorText,
++      observationVersion: r.observationVersion,
++    };
++  }
++  return reject("invalid-replay-request", "Unsupported committed event kind.");
++}
++function prefix(r: Record<string, unknown>): SaleReturnLabourPrefixInput {
++  if (
++    !hashText(r.baseVersion) ||
++    !hashText(r.rowIdentity) ||
++    !hashText(r.prefixVersion) ||
++    !Array.isArray(r.events) ||
++    Object.getPrototypeOf(r.events) !== Array.prototype ||
++    r.events.length > 100 ||
++    Object.keys(r.events).length !== r.events.length
++  )
++    return reject(
++      "invalid-replay-request",
++      "Exact versions, saved identity and a dense journal of at most100 events are required.",
++    );
++  const events: SaleReturnLabourReplayEvent[] = [];
++  for (let i = 0; i < r.events.length; i++) {
++    const d = Object.getOwnPropertyDescriptor(r.events, String(i));
++    if (!d || !d.enumerable || !("value" in d))
++      return reject(
++        "invalid-replay-request",
++        "Sparse or accessor events are unsupported.",
++      );
++    events.push(event(d.value));
++  }
++  if (Reflect.ownKeys(r.events).length !== r.events.length + 1)
++    return reject(
++      "invalid-replay-request",
++      "Extra event-array fields are unsupported.",
++    );
++  return {
++    baseVersion: r.baseVersion,
++    rowIdentity: r.rowIdentity,
++    prefixVersion: r.prefixVersion,
++    events,
++  };
++}
++function parsed<T>(fn: () => T): T {
++  try {
++    const r = fn();
++    if (Buffer.byteLength(JSON.stringify(r), "utf8") > 65536)
++      return reject(
++        "invalid-replay-request",
++        "Replay request exceeds the transport bound.",
++        413,
++      );
++    return r;
++  } catch (e) {
++    if (e instanceof SaleReturnLabourReplayError) throw e;
++    return reject(
++      "invalid-replay-request",
++      "A plain replay request is required.",
++    );
++  }
++}
++export const saleReturnLabourObserveInput = (
++  value: unknown,
++): SaleReturnLabourObserveInput =>
++  parsed(() => {
++    const r = own(value, [...prefixKeys, "fieldId", "editorText"]);
++    if (!code(r.editorText))
++      return reject(
++        "invalid-replay-request",
++        "Enter an exact one/two-character ASCII code.",
++      );
++    return {
++      ...prefix(r),
++      fieldId: field(r.fieldId),
++      editorText: r.editorText,
++    };
++  });
++export const saleReturnLabourAppendInput = (
++  value: unknown,
++): SaleReturnLabourAppendInput =>
++  parsed(() => {
++    const r = own(value, [...prefixKeys, "event"]);
++    const p = prefix(r);
++    if (p.events.length === 100)
++      return reject(
++        "invalid-replay-request",
++        "Discard/reopen the preview after100 committed events.",
++      );
++    return { ...p, event: event(r.event) };
++  });
++function copyScope(
++  value: SavedSaleReturnScope,
++  voucherNo: string,
++): SavedSaleReturnScope {
++  return parsed(() => {
++    const r = own(value, ["tenantId", "coCode", "lcCode", "coYear", "coBook"]);
++    for (const [key, max] of [
++      ["tenantId", 24],
++      ["coCode", 2],
++      ["lcCode", 2],
++      ["coYear", 9],
++      ["coBook", 4],
++    ] as const)
++      if (
++        !ascii(r[key], max) ||
++        !r[key] ||
++        (r[key] as string).trim() !== r[key]
++      )
++        return reject(
++          "invalid-replay-request",
++          "A complete canonical Return scope is required.",
++        );
++    if (
++      typeof voucherNo !== "string" ||
++      voucherNo.length !== 5 ||
++      !/^[0-9]{5}$/.test(voucherNo) ||
++      voucherNo === "00000"
++    )
++      return reject(
++        "invalid-replay-request",
++        "Use the exact saved positive five-digit voucher key.",
++      );
++    return r as unknown as SavedSaleReturnScope;
++  });
++}
++function canonical(v: unknown): string {
++  if (Array.isArray(v)) return "[" + v.map(canonical).join(",") + "]";
++  if (v && typeof v === "object")
++    return (
++      "{" +
++      Object.keys(v)
++        .sort()
++        .map(
++          (k) =>
++            JSON.stringify(k) +
++            ":" +
++            canonical((v as Record<string, unknown>)[k]),
++        )
++        .join(",") +
++      "}"
++    );
++  return JSON.stringify(v) ?? "null";
++}
++const digest = (v: unknown) =>
++  createHash("sha256").update(canonical(v)).digest("hex");
++function detached<T>(v: T): T {
++  const text = JSON.stringify(v);
++  if (Buffer.byteLength(text, "utf8") > 2097152)
++    return reject(
++      "unsupported-output",
++      "The preview exceeds the bounded response profile.",
++      422,
++    );
++  const out: T = JSON.parse(text);
++  const freeze = (x: unknown): void => {
++    if (x && typeof x === "object") {
++      Object.values(x).forEach(freeze);
++      Object.freeze(x);
++    }
++  };
++  freeze(out);
++  return out;
++}
++function prefixVersion(
++  baseVersion: string,
++  rowIdentity: string,
++  events: readonly SaleReturnLabourReplayEvent[],
++): string {
++  const dependencies = new Map<string, string>();
++  for (const e of events)
++    if (e.kind === "labourEnter")
++      dependencies.set(e.editorText, e.observationVersion);
++  return digest({
++    baseVersion,
++    rowIdentity,
++    events,
++    dependencies: [...dependencies]
++      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
++      .map(([enteredCode, observationVersion]) => ({
++        enteredCode,
++        observationVersion,
++      })),
++  });
++}
++function identity(dto: SaleReturnLabourReplayState): Identity {
++  const {
++    contractVersion,
++    profile,
++    context,
++    scope,
++    voucherNo,
++    baseVersion,
++    documentVersion,
++    configurationVersion,
++  } = dto;
++  return {
++    contractVersion,
++    profile,
++    context,
++    scope,
++    voucherNo,
++    baseVersion,
++    documentVersion,
++    configurationVersion,
++  };
++}
++function snapshot(
++  state: SaleReturnIncomingAggregateState,
++  index: number,
++): SaleReturnIncomingReplayCellSnapshot {
++  const row = state.rows[index]!.state,
++    editor = projectSaleReturnIncomingEditorText(row);
++  if (editor.status !== "ready")
++    throw new SaleReturnLabourReplayError(
++      422,
++      "unsupported-editor",
++      "The result cannot be represented in the supported editors.",
++      { diagnostics: editor.diagnostics },
++    );
++  return {
++    visible: Object.fromEntries(
++      Object.entries(row.visible).filter(
++        (p): p is [string, string] => typeof p[1] === "string",
++      ),
++    ),
++    caches: { ...row.caches },
++    editorTextByField: { ...editor.editorTextByField },
++  };
++}
++function currentPrefix(
++  dto: SaleReturnLabourReplayState,
++  state: SaleReturnIncomingAggregateState,
++  index: number,
++  events: SaleReturnLabourReplayEvent[],
++): SaleReturnLabourPrefix {
++  return {
++    prefixVersion: prefixVersion(
++      dto.baseVersion,
++      state.rows[index]!.state.rowIdentity,
++      events,
++    ),
++    events,
++    preview: snapshot(state, index),
++    phase: { incomingTotals: { ...state.totals.cells }, bill: state.bill },
++  };
++}
++interface Observed {
++  dto: SaleReturnLabourReplayState;
++  bill: SaleReturnBillReplayObservation;
++  masters: Map<string, SaleReturnIncomingLabourObservation>;
++}
++async function observe(
++  tx: Tx,
++  context: AuthenticatedSessionContext,
++  scope: SavedSaleReturnScope,
++  voucherNo: string,
++  input?: SaleReturnLabourPrefixInput,
++  candidate?: string,
++): Promise<Observed> {
++  let baseVersion = "";
++  const masters = new Map<string, SaleReturnIncomingLabourObservation>();
++  const bill = await observeSaleReturnBillReplayTx(
++    tx,
++    scope,
++    voucherNo,
++    undefined,
++    async (observed) => {
++      baseVersion = digest({
++        newContract: SALE_RETURN_LABOUR_REPLAY_CONTRACT,
++        newProfile: SALE_RETURN_LABOUR_REPLAY_PROFILE,
++        semanticVersions,
++        scope,
++        voucherNo,
++        sessionBinding: context,
++        billReplayVersion: observed.billReplayVersion,
++      });
++      if (input && baseVersion !== input.baseVersion)
++        return reject(
++          "version-conflict",
++          "Saved Return or calculation inputs changed. Reload before previewing.",
++          409,
++        );
++      const codes = new Set(
++        input?.events
++          .filter((e) => e.kind === "labourEnter")
++          .map((e) => e.editorText) ?? [],
++      );
++      if (candidate !== undefined) codes.add(candidate);
++      for (const enteredCode of [...codes].sort())
++        masters.set(
++          enteredCode,
++          await readSaleReturnIncomingLabourTx(tx, {
++            scope: { tenantId: scope.tenantId, coCode: scope.coCode },
++            enteredCode,
++          }),
++        );
++      for (const e of input?.events ?? [])
++        if (
++          e.kind === "labourEnter" &&
++          masters.get(e.editorText)!.observationVersion !== e.observationVersion
++        )
++          return reject(
++            "master-version-conflict",
++            "A previously selected labour master changed. Reload before another selection.",
++            409,
++          );
++      if (
++        input &&
++        input.prefixVersion !==
++          prefixVersion(baseVersion, input.rowIdentity, input.events)
++      )
++        return reject(
++          "prefix-conflict",
++          "The committed prefix does not match its version.",
++          409,
++        );
++    },
++  );
++  if (!context.coYear)
++    return reject("context-stale", "The selected year is unavailable.", 409);
++  const rows = bill.dto.rowReplay.rows.map((row) => ({
++    rowIdentity: row.rowIdentity,
++    initialPrefixVersion: prefixVersion(baseVersion, row.rowIdentity, []),
++    labourFields: labourFields.map((fieldId): Field => {
++      const col = bill.dto.rowReplay.configuration.columns.find(
++        (c) => c.id === fieldId,
++      );
++      const reason = !bill.dto.capabilities.canPreviewBill
++        ? "This saved Return is outside the supported whole-grid bill preview."
++        : col?.widthState !== "nonzero"
++          ? "The labour field is hidden or its configured width is unresolved."
++          : null;
++      return {
++        fieldId,
++        allowed: reason === null,
++        reason,
++        maxLength: 2,
++        commit: "resolved-enter",
++      };
++    }),
++  }));
++  return {
++    bill,
++    masters,
++    dto: {
++      contractVersion: SALE_RETURN_LABOUR_REPLAY_CONTRACT,
++      profile: SALE_RETURN_LABOUR_REPLAY_PROFILE,
++      context: {
++        sessionId: context.sessionId,
++        contextEpoch: context.contextEpoch,
++        coCode: context.coCode,
++        lcCode: context.lcCode,
++        coYear: context.coYear,
++      },
++      scope: { ...bill.dto.scope },
++      voucherNo,
++      baseVersion,
++      documentVersion: bill.dto.documentVersion,
++      configurationVersion: bill.dto.configurationVersion,
++      billReplay: bill.dto,
++      semanticVersions,
++      rows,
++      capabilities: {
++        canPreview: bill.dto.capabilities.canPreviewBill,
++        ...noAuthority,
++      },
++    },
++  };
++}
++function supported(observed: Observed, input: SaleReturnLabourPrefixInput) {
++  const { dto, bill } = observed;
++  const index =
++    bill.state?.rows.findIndex(
++      (r) => r.state.rowIdentity === input.rowIdentity,
++    ) ?? -1;
++  if (!dto.rows.some((r) => r.rowIdentity === input.rowIdentity))
++    return reject(
++      "identity-conflict",
++      "The saved row identity is missing.",
++      409,
++    );
++  if (
++    !bill.state ||
++    !bill.context ||
++    !bill.dto.rowReplay.configuration.policy ||
++    !dto.capabilities.canPreview
++  )
++    throw new SaleReturnLabourReplayError(
++      422,
++      "unsupported-state",
++      "This saved Return is available for inspection only.",
++      { diagnostics: bill.dto.diagnostics },
++    );
++  if (index < 0)
++    return reject(
++      "identity-conflict",
++      "The projected saved row identity is missing.",
++      409,
++    );
++  return {
++    state: bill.state,
++    context: bill.context,
++    policy: bill.dto.rowReplay.configuration.policy,
++    index,
++  };
++}
++function checkField(
++  observed: Observed,
++  rowIdentity: string,
++  e: SaleReturnLabourReplayEvent | { fieldId: SaleReturnLabourField },
++): void {
++  const row = observed.dto.billReplay.rowReplay.rows.find(
++    (r) => r.rowIdentity === rowIdentity,
++  )!;
++  const cap = labourFields.includes(e.fieldId as SaleReturnLabourField)
++    ? observed.dto.rows
++        .find((r) => r.rowIdentity === rowIdentity)!
++        .labourFields.find((f) => f.fieldId === e.fieldId)
++    : row.fieldCapabilities.find((f) => f.fieldId === e.fieldId);
++  if (!cap?.allowed)
++    return reject(
++      "unsupported-field",
++      cap?.reason ?? "This field has no supported preview action.",
++      422,
++    );
++}
++function apply(
++  observed: Observed,
++  state: SaleReturnIncomingAggregateState,
++  index: number,
++  e: SaleReturnLabourReplayEvent,
++) {
++  const rowIdentity = state.rows[index]!.state.rowIdentity;
++  checkField(observed, rowIdentity, e);
++  const context = observed.bill.context!,
++    policy = observed.bill.dto.rowReplay.configuration.policy!;
++  if (e.kind === "labourEnter") {
++    const observation = observed.masters.get(e.editorText)!;
++    if (observation.observationVersion !== e.observationVersion)
++      return reject(
++        "master-version-conflict",
++        "The checked labour code changed before commitment.",
++        409,
++      );
++    const result = composeSaleReturnIncomingLabour({
++      state,
++      scope: {
++        tenantId: observation.scope.tenantId,
++        coCode: observation.scope.coCode,
++      },
++      rowIdentity,
++      field: e.fieldId === "x13.primary-incoming.c13" ? 13 : 29,
++      editorText: e.editorText,
++      expectedObservationVersion: e.observationVersion,
++      observation,
++      rowPolicy: policy,
++      context,
++    });
++    if (result.status !== "applied")
++      throw new SaleReturnLabourReplayError(
++        422,
++        result.status === "lookup-required"
++          ? "lookup-required"
++          : result.diagnostics.some((d) => d.origin === "calculation")
++            ? "calculation-rejected"
++            : "unsupported-master",
++        result.diagnostics[0]?.message ??
++          "The labour selection is unsupported.",
++        { diagnostics: result.diagnostics },
++      );
++    return {
++      state: result.state,
++      status: "applied" as const,
++      effects: {
++        aggregateApplied: result.aggregateApplied,
++        billApplied: result.billApplied,
++        taxRecalculated: result.taxRecalculated,
++      },
++    };
++  }
++  const configured = observed.bill.dto.rowReplay.configuration.columns.find(
++    (c) => c.id === e.fieldId,
++  )!;
++  const result = reduceSaleReturnIncomingAggregate(
++    state,
++    {
++      kind: "leaveCell",
++      rowIdentity,
++      column: money.get(e.fieldId)!,
++      text: e.editorText,
++      context: {
++        currentRow: index + 1,
++        clearing: false,
++        editorVisible: true,
++        committedColumnWidth: configured.nominalWidth,
++      },
++    },
++    policy,
++    context,
++  );
++  if (result.status === "rejected")
++    throw new SaleReturnLabourReplayError(
++      422,
++      "calculation-rejected",
++      result.diagnostic.message,
++      { diagnostics: [result.diagnostic] },
++    );
++  return {
++    state: result.state,
++    status: result.status,
++    effects: {
++      aggregateApplied: result.status === "applied" && result.aggregateApplied,
++      billApplied: result.status === "applied" && result.billApplied,
++      taxRecalculated:
++        result.status === "applied" &&
++        (result.state.journal.at(-1)?.taxRecalculated ?? false),
++    },
++  };
++}
++function reconstruct(observed: Observed, input: SaleReturnLabourPrefixInput) {
++  const initial = supported(observed, input);
++  let state = initial.state;
++  try {
++    for (const e of input.events) {
++      const next = apply(observed, state, initial.index, e);
++      snapshot(next.state, initial.index);
++      state = next.state;
++    }
++    const recovered = detached(
++      currentPrefix(observed.dto, state, initial.index, input.events),
++    );
++    if (recovered.prefixVersion !== input.prefixVersion)
++      return reject(
++        "prefix-conflict",
++        "The committed prefix no longer matches.",
++        409,
++      );
++    return { state, index: initial.index, recovered };
++  } catch (error) {
++    if (
++      error instanceof SaleReturnLabourReplayError &&
++      error.statusCode === 422
++    )
++      return reject(
++        "prefix-conflict",
++        "A previously accepted operation cannot be reconstructed. Reload before previewing.",
++        409,
++      );
++    throw error;
++  }
++}
++async function boundary<T>(fn: () => Promise<T>): Promise<T> {
++  try {
++    return await fn();
++  } catch (e) {
++    if (
++      e instanceof SavedSaleReturnError ||
++      e instanceof SaleReturnIncomingReplayError ||
++      e instanceof SaleReturnIncomingConfigurationError ||
++      e instanceof SaleReturnBillReplayError
++    )
++      throw new SaleReturnLabourReplayError(e.statusCode, e.code, e.message);
++    if (e instanceof BookPolicyValidationError)
++      throw new SaleReturnLabourReplayError(422, "configuration", e.message);
++    if (e instanceof SaleReturnIncomingLabourReadError)
++      throw new SaleReturnLabourReplayError(500, e.code, e.message);
++    throw e;
++  }
++}
++export async function getSaleReturnLabourReplayState(
++  prisma: any,
++  identityValue: unknown,
++  suppliedScope: SavedSaleReturnScope,
++  voucherNo: string,
++): Promise<SaleReturnLabourReplayState> {
++  const scope = copyScope(suppliedScope, voucherNo);
++  return boundary(() =>
++    withSessionContextReadSnapshot(
++      prisma,
++      identityValue,
++      { form: "Sales/Sales Return", scope },
++      async (tx, admitted) =>
++        detached((await observe(tx, admitted.context, scope, voucherNo)).dto),
++    ),
++  );
++}
++export async function observeSaleReturnLabourReplayCode(
++  prisma: any,
++  identityValue: unknown,
++  suppliedScope: SavedSaleReturnScope,
++  voucherNo: string,
++  value: unknown,
++): Promise<SaleReturnLabourObservationResult> {
++  const scope = copyScope(suppliedScope, voucherNo),
++    input = saleReturnLabourObserveInput(value);
++  return boundary(() =>
++    withSessionContextReadSnapshot(
++      prisma,
++      identityValue,
++      { form: "Sales/Sales Return", scope },
++      async (tx, admitted) => {
++        const observed = await observe(
++          tx,
++          admitted.context,
++          scope,
++          voucherNo,
++          input,
++          input.editorText,
++        );
++        const prior = reconstruct(observed, input);
++        checkField(observed, input.rowIdentity, input);
++        const observation = observed.masters.get(input.editorText)!;
++        const copied = copySaleReturnIncomingLabour({
++          scope: { tenantId: scope.tenantId, coCode: scope.coCode },
++          rowIdentity: input.rowIdentity,
++          state: prior.state.rows[prior.index]!.state,
++          field: input.fieldId === "x13.primary-incoming.c13" ? 13 : 29,
++          editorText: input.editorText,
++          expectedObservationVersion: observation.observationVersion,
++          observation,
++        });
++        if (copied.status !== "ready")
++          throw new SaleReturnLabourReplayError(
++            422,
++            copied.status === "lookup-required"
++              ? "lookup-required"
++              : "unsupported-master",
++            copied.diagnostics[0]?.message ?? "The labour code is unsupported.",
++            { diagnostics: copied.diagnostics },
++          );
++        const raw = observation.masters[0]!.raw;
++        return detached({
++          ...identity(observed.dto),
++          rowIdentity: input.rowIdentity,
++          prefixVersion: input.prefixVersion,
++          fieldId: input.fieldId,
++          editorText: input.editorText,
++          observationVersion: observation.observationVersion,
++          selection: {
++            CO_CODE: raw.CO_CODE!,
++            LBR_CODE: raw.LBR_CODE!,
++            LBR_CATG: raw.LBR_CATG!,
++            LBR_VAL: raw.LBR_VAL!,
++          },
++        });
++      },
++    ),
++  );
++}
++export async function previewSaleReturnLabourReplay(
++  prisma: any,
++  identityValue: unknown,
++  suppliedScope: SavedSaleReturnScope,
++  voucherNo: string,
++  value: unknown,
++): Promise<SaleReturnLabourReplayResult> {
++  const scope = copyScope(suppliedScope, voucherNo),
++    input = saleReturnLabourAppendInput(value);
++  return boundary(async () => {
++    const outcome = await withSessionContextReadSnapshot(
++      prisma,
++      identityValue,
++      { form: "Sales/Sales Return", scope },
++      async (tx, admitted) => {
++        const observed = await observe(
++          tx,
++          admitted.context,
++          scope,
++          voucherNo,
++          input,
++          input.event.kind === "labourEnter"
++            ? input.event.editorText
++            : undefined,
++        );
++        const prior = reconstruct(observed, input);
++        try {
++          const next = apply(observed, prior.state, prior.index, input.event);
++          return detached({
++            ...identity(observed.dto),
++            rowIdentity: input.rowIdentity,
++            prefix: currentPrefix(observed.dto, next.state, prior.index, [
++              ...input.events,
++              input.event,
++            ]),
++            acceptedEvent: { event: input.event, status: next.status },
++            effects: next.effects,
++            capabilities: noAuthority,
++          });
++        } catch (e) {
++          if (e instanceof SaleReturnLabourReplayError && e.statusCode === 422)
++            return {
++              rejection: new SaleReturnLabourReplayError(
++                422,
++                e.code,
++                e.message,
++                {
++                  eventIndex: input.events.length,
++                  event: input.event,
++                  diagnostics: e.details?.diagnostics ?? [
++                    { code: e.code, message: e.message },
++                  ],
++                  recovery: prior.recovered,
++                },
++              ),
++            };
++          throw e;
++        }
++      },
++    );
++    // Recovery is published only after the read coordinator's final live/context check.
++    if ("rejection" in outcome) throw outcome.rejection;
++    return outcome;
++  });
++}
+--- a/web/apps/api/src/routes/txn.ts
++++ b/web/apps/api/src/routes/txn.ts
+@@ -1,3 +1,5 @@
++import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
++import { getSaleReturnLabourReplayState, observeSaleReturnLabourReplayCode, previewSaleReturnLabourReplay, SaleReturnLabourReplayError } from '../modules/sales/saleReturnLabourReplay.js';
+ import { SessionCommandError } from '../modules/auth/sessionContextCommand.js';
+ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+ import { withTenant } from '@datacare/db';
+@@ -682,7 +684,7 @@
+       return reply.code(okCode).send(out as any);
+     } catch (e: any) {
+       const n: string = e?.name ?? '';
+-      if (e instanceof SessionCommandError)
++      if (e instanceof SessionCommandError || e instanceof SessionReadSnapshotError)
+         return reply.code(e.statusCode).send({ error: e.code, message: e.message,
+           ...(e.form === undefined ? {} : { form: e.form, action: e.action }) });
+       if (e instanceof SavedSaleReturnError)
+@@ -691,7 +693,7 @@
+         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
+       if (e instanceof SaleReturnIncomingConfigurationError)
+         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
+-      if (e instanceof SaleReturnIncomingReplayError || e instanceof SaleReturnBillReplayError)
++      if (e instanceof SaleReturnIncomingReplayError || e instanceof SaleReturnBillReplayError || e instanceof SaleReturnLabourReplayError)
+         return reply.code(e.statusCode).send({
+           error: e.code,
+           message: e.message,
+@@ -1289,6 +1291,30 @@
+         req.body,
+       ),
+     );
++  });
++  // New profile requires an explicitly retained page pair, even though old bootstrap reads allow omission.
++  const labourReplayAuth = {...auth, onRequest: async (_req: FastifyRequest, reply: FastifyReply) => { reply.header('cache-control', 'no-store'); }};
++  const labourReplayIdentity = (req: FastifyRequest) => {
++    const s = sess(req);
++    if (req.headers['x-session-context-id'] !== s.sid || req.headers['x-session-context-epoch'] !== s.contextEpoch)
++      throw new SaleReturnLabourReplayError(409, 'context-stale', 'Reload the page context before previewing labour selections.');
++    return {tenantId:s.tenantId,sessionId:s.sid,loginName:s.sub,loginCoCode:s.loginCoCode,
++      coCode:s.coCode,lcCode:s.lcCode,coYear:s.coYear,contextEpoch:s.contextEpoch};
++  };
++  app.get('/sales-returns/:vchNo/incoming-labour-replay-state', labourReplayAuth, async (req, reply) => {
++    reply.header('cache-control', 'no-store');
++    if (!guard(req, reply, 'view')) return;
++    return run(reply, 200, () => getSaleReturnLabourReplayState(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo));
++  });
++  app.post('/sales-returns/:vchNo/incoming-labour-observation', {...labourReplayAuth,bodyLimit:65536}, async (req, reply) => {
++    reply.header('cache-control', 'no-store');
++    if (!guard(req, reply, 'view')) return;
++    return run(reply, 200, () => observeSaleReturnLabourReplayCode(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo, req.body));
++  });
++  app.post('/sales-returns/:vchNo/incoming-labour-replay', {...labourReplayAuth,bodyLimit:65536}, async (req, reply) => {
++    reply.header('cache-control', 'no-store');
++    if (!guard(req, reply, 'view')) return;
++    return run(reply, 200, () => previewSaleReturnLabourReplay(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo, req.body));
+   });
+   app.put('/sales-returns/:vchNo/incoming-metadata', auth, async (req, reply) => {
+     if (!guard(req, reply, 'update')) return;
+--- /dev/null
++++ b/web/apps/api/test/fixtures/saleReturnLabourReplay.fixture.ts
+@@ -0,0 +1,180 @@
++import { randomUUID } from "node:crypto";
++import type { PrismaClient } from "@prisma/client";
++import { expect } from "vitest";
++import golden from "./saleReturnLabourReplay.independent.json";
++import {
++  billInsert,
++  billKey,
++  billTables,
++  billSelected,
++  billVoucher,
++  seedBillFixture,
++  cleanBillFixture,
++  assertBillTestDatabase,
++} from "./saleReturnBillReplay.fixture.js";
++import type {
++  SaleReturnLabourReplayState,
++  SaleReturnLabourPrefixInput,
++  SaleReturnLabourPrefix,
++  SaleReturnLabourReplayEvent,
++} from "../../src/modules/sales/saleReturnLabourReplay.js";
++export {
++  golden,
++  billInsert,
++  assertBillTestDatabase,
++  billSelected,
++  billVoucher,
++};
++type Owner = Pick<PrismaClient, "$executeRawUnsafe" | "$queryRawUnsafe">;
++export const allLabourTables = [
++  ...billTables,
++  "LBR_MAST",
++  "auth_session",
++  "CO_MAST",
++  "LOCT_MAST",
++  "LOGIN_MAST",
++  "USER_SET",
++] as const;
++export const scopeFor = (tenantId: string) => ({ tenantId, ...billSelected });
++export async function cleanLabourFixture(owner: Owner, tenants: string[]) {
++  await owner.$executeRawUnsafe(
++    'DELETE FROM "LBR_MAST" WHERE tenant_id=ANY($1::text[])',
++    tenants,
++  );
++  await cleanBillFixture(owner, tenants, true);
++}
++export async function seedLabourFixture(
++  owner: Owner,
++  tenants: string[],
++  passwordHash = "not-used-by-direct-service",
++) {
++  await seedBillFixture(owner, tenants);
++  for (const tenantId of tenants) {
++    const key = billKey(tenantId);
++    await owner.$executeRawUnsafe(
++      'DELETE FROM "SL_DETL_RTN" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3',
++      tenantId,
++      billSelected.coBook,
++      billVoucher,
++    );
++    await owner.$executeRawUnsafe(
++      'DELETE FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3',
++      tenantId,
++      billSelected.coBook,
++      billVoucher,
++    );
++    await billInsert(owner, "SL_DATA", { ...golden.header, ...key });
++    for (const row of golden.rows)
++      await billInsert(owner, "SL_DETL_RTN", { ...row, ...key });
++    for (const master of golden.masters)
++      await billInsert(owner, "LBR_MAST", { tenant_id: tenantId, ...master });
++    await billInsert(owner, "CO_MAST", {
++      tenant_id: tenantId,
++      CO_CODE: "01",
++      LC_CODE: "01",
++      CO_NAME: "Labour preview fixture",
++    });
++    await billInsert(owner, "LOCT_MAST", {
++      tenant_id: tenantId,
++      CO_CODE: "01",
++      LC_CODE: "01",
++      LC_NAME: "Main",
++    });
++    for (const [user, form] of [
++      ["view", "Sales Return"],
++      ["otherform", "Sales"],
++    ] as const) {
++      await billInsert(owner, "LOGIN_MAST", {
++        tenant_id: tenantId,
++        CO_CODE: "01",
++        LOGIN_NAME: user,
++        LOGIN_PWD: passwordHash,
++        LOGIN_CATG: "USER",
++        USER_UPDATE: "N",
++        USER_DELETE: "N",
++        USER_PRINT: "N",
++        PASSWORD_RESET_REQUIRED: "N",
++      });
++      await billInsert(owner, "USER_SET", {
++        tenant_id: tenantId,
++        CO_CODE: "01",
++        LC_CODE: "01",
++        USER_NAME: user,
++        MAIN_MENU: "Sales",
++        SUB_MENU: form,
++        FRM_VIEW: "Y",
++        FRM_EDIT: "N",
++        FRM_DELETE: "N",
++        FRM_PRINT: "N",
++      });
++    }
++  }
++}
++export async function insertLabourSession(
++  owner: Owner,
++  tenantId: string,
++  loginName = "view",
++) {
++  const sessionId = randomUUID();
++  await owner.$executeRawUnsafe(
++    `INSERT INTO "auth_session" ("tenant_id","session_id","login_name","login_co_code","co_code","lc_code","co_year","refresh_jti_hash","expires_at") VALUES($1,$2,$3,'01','01','01',$4,$5,clock_timestamp()+interval '1 day')`,
++    tenantId,
++    sessionId,
++    loginName,
++    billSelected.coYear,
++    "a".repeat(64),
++  );
++  return {
++    tenantId,
++    sessionId,
++    loginName,
++    loginCoCode: "01",
++    coCode: "01",
++    lcCode: "01",
++    coYear: billSelected.coYear,
++    contextEpoch: "1",
++  };
++}
++export async function snapshotLabourFixture(owner: Owner, tenants: string[]) {
++  const result: Record<string, unknown> = {};
++  for (const table of allLabourTables)
++    result[table] = await owner.$queryRawUnsafe(
++      `SELECT to_jsonb(t)::text AS raw,t.xmin::text AS revision,t.ctid::text AS locator FROM "${table}" t WHERE tenant_id=ANY($1::text[]) ORDER BY to_jsonb(t)::text`,
++      tenants,
++    );
++  return result;
++}
++export function firstPrefix(
++  dto: SaleReturnLabourReplayState,
++): SaleReturnLabourPrefixInput {
++  const row = dto.rows[0]!;
++  return {
++    baseVersion: dto.baseVersion,
++    rowIdentity: row.rowIdentity,
++    prefixVersion: row.initialPrefixVersion,
++    events: [],
++  };
++}
++export const withPrefix = (
++  input: SaleReturnLabourPrefixInput,
++  prefix: SaleReturnLabourPrefix,
++): SaleReturnLabourPrefixInput => ({
++  ...input,
++  prefixVersion: prefix.prefixVersion,
++  events: prefix.events,
++});
++export const moneyEvent = (
++  column: number,
++  text: string,
++): SaleReturnLabourReplayEvent => ({
++  kind: "moneyLeave",
++  fieldId: `x13.primary-incoming.c${column}`,
++  editorText: text,
++});
++export function assertGolden(
++  actual: { preview: unknown; phase: unknown },
++  name: keyof typeof golden.expected.prefixes,
++) {
++  expect(actual.preview).toEqual(golden.expected.prefixes[name].preview);
++  expect(actual.phase).toEqual(golden.expected.prefixes[name].phase);
++}
+--- /dev/null
++++ b/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json
+@@ -0,0 +1,2619 @@
++{
++  "kind": "reachable-saved-labour-http-literals-v1",
++  "status": "frozen-before-new-api-code; not-executed",
++  "authorship": "Hand-entered arithmetic and source projection strings; only dictionary/shape copies. No new API or core calculator executed. Prior raw seed copied byte-values then documented overrides, not expected output generated by implementation.",
++  "sourcePins": [
++    {
++      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/fixtures/saleReturnBillReplay.independent.json",
++      "sha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410"
++    },
++    {
++      "path": "/tmp/datacare-return-labour-compose-contract/labour-compose-independent.v1.json",
++      "sha256": "fd55edb9173dbc40475d7dd04a63877226600d36c983f20b1421ab013ee73dd6"
++    }
++  ],
++  "sourceRanges": [
++    "TR_SALE_RTN.cs:4248-4380",
++    "TR_SALE_RTN.cs:10353-10438",
++    "TR_SALE_RTN.cs:10112-10169",
++    "TR_SALE_RTN.cs:5162-5202",
++    "TR_SALE_RTN.cs:16381-16458"
++  ],
++  "header": {
++    "VCH_DATE": "2024-07-10",
++    "VCH_TIME": "2024-07-10T12:34:56.123456",
++    "ENTRY_TIME": "2024-07-10",
++    "USER_UPDATE": "Y",
++    "EMP_CODE": "",
++    "AC_CODE": "CUST",
++    "AC_NAME": "Saved bill customer",
++    "NET_AMT": "0",
++    "TOT_AMT": "0",
++    "CHQ_AMT": "0",
++    "CARD_AMT": "0",
++    "CASH_AMT": "0",
++    "KASAR_AMT": null,
++    "BILL_OS": null,
++    "RTN_NET_AMT": "110",
++    "RTN_TOT_AMT": "117",
++    "RTN_CHQ_AMT": "0",
++    "RTN_CARD_AMT": "0",
++    "RTN_CASH_AMT": "0",
++    "RTN_KASAR_AMT": null,
++    "RTN_BILL_OS": null,
++    "TAX_CODE": "10",
++    "TAX_PRC": "10",
++    "TAX_AMT": "7",
++    "BANK_AC": "BANK",
++    "CARD_AC": "CARD",
++    "CHQ_NO": "CHK17",
++    "VCH_DESC": null,
++    "BILL_NO": "",
++    "HD_VCH_NO": "00017",
++    "DISC_AMT": "9999999999999999.99"
++  },
++  "rows": [
++    {
++      "ITM_PCS": "1",
++      "ITM_GWT": "10",
++      "ITM_OTH_WT": "0",
++      "ITM_NWT": "10",
++      "ITM_GHT_PRC": "0",
++      "ITM_GHT_WT": "0",
++      "ITM_TOUCH": "100",
++      "ITM_WEST_PRC": "0",
++      "ITM_FINE": "10",
++      "ITM_RATE": "10",
++      "ITM_AMT": "100",
++      "LBR_PRC": "0",
++      "LBR_RATE": "1",
++      "LBR_AMT": "10",
++      "DISC_PRC": "0",
++      "DISC_AMT": "0",
++      "OTH_AMT": "0",
++      "ITM_MRP": "0",
++      "TAG_LBR_PRC": "0",
++      "TAG_LBR_RATE": "0",
++      "TAG_LBR_AMT": "0",
++      "TAG_OTH_AMT": "0",
++      "TAG_COST": "0",
++      "TAG_MRP": "0",
++      "TOT_AMT": "110",
++      "TAX_PRC": "0",
++      "NET_AMT": "110",
++      "HM_ID_WT": "0",
++      "HM_ID2_WT": "0",
++      "HM_ID3_WT": "0",
++      "HM_ID4_WT": "0",
++      "SR_NO": "17",
++      "OLD_SRNO": "31",
++      "VCH_SRNO": "500001",
++      "TAG_SRNO": "123",
++      "VCH_DATE": "2024-07-10",
++      "VCH_TIME": "2024-07-10T12:34:56.123456",
++      "ENTRY_TYPE": "P",
++      "INOUT_TYPE": "I",
++      "IT_CODE": "GOLD",
++      "TAG_NO": "N",
++      "ITM_REMARK": null,
++      "TBL_CODE": "T01",
++      "DESIGN_NO": "D-SAVED",
++      "ITM_STYLE": "",
++      "ITM_SIZE": null,
++      "HM_ID": "H1",
++      "LBR_CODE": "AA",
++      "TAG_LBR_CODE": "TA",
++      "LBR_TYPE": "N",
++      "RATE_TYPE": "N",
++      "IT_TYPE": "G",
++      "PR_CODE": "01",
++      "TAG_TYPE": "G",
++      "HM_ID2": null,
++      "HM_ID3": "",
++      "HM_ID4": "H4",
++      "APR_ISU": "N",
++      "EMP_ISU": "N",
++      "KR_NAME": "",
++      "DESIGN_IMG_ID": null,
++      "DATA_TYPE": "A"
++    }
++  ],
++  "masters": [
++    {
++      "CO_CODE": "01",
++      "LBR_CODE": "AA",
++      "LBR_CATG": "01",
++      "LBR_VAL": "1"
++    },
++    {
++      "CO_CODE": "01",
++      "LBR_CODE": "BB",
++      "LBR_CATG": "01",
++      "LBR_VAL": "2"
++    },
++    {
++      "CO_CODE": "01",
++      "LBR_CODE": "TA",
++      "LBR_CATG": "04",
++      "LBR_VAL": "99"
++    },
++    {
++      "CO_CODE": "01",
++      "LBR_CODE": "C3",
++      "LBR_CATG": "03",
++      "LBR_VAL": "5"
++    },
++    {
++      "CO_CODE": "01",
++      "LBR_CODE": "ZZ",
++      "LBR_CATG": "01",
++      "LBR_VAL": "0"
++    }
++  ],
++  "expected": {
++    "initial": {
++      "visible": {
++        "0": "1",
++        "1": "GOLD",
++        "2": "N",
++        "3": "Source gold",
++        "4": "T01",
++        "5": "D-SAVED",
++        "6": "",
++        "7": "",
++        "8": "H1",
++        "9": "1",
++        "10": "10.000",
++        "11": "0.000",
++        "12": "10.000",
++        "13": "AA",
++        "14": "0.00",
++        "15": "0.000",
++        "16": "100.00",
++        "17": "0.00",
++        "18": "10.000",
++        "19": "10.00",
++        "20": "100.00",
++        "21": "0.00",
++        "22": "N",
++        "23": "1.00",
++        "24": "10.00",
++        "25": "0.00",
++        "26": "0.00",
++        "27": "0.00",
++        "28": "0.00",
++        "29": "TA",
++        "30": "0.00",
++        "31": "0.00",
++        "32": "0.00",
++        "33": "0.00",
++        "34": "0.00",
++        "35": "0.00",
++        "36": "110.00",
++        "37": "0.00",
++        "38": "110.00",
++        "39": "",
++        "40": "500001",
++        "41": "",
++        "42": "",
++        "43": "G",
++        "44": "N",
++        "50": "N",
++        "51": "31",
++        "52": "01",
++        "53": "01",
++        "54": "G",
++        "55": "G",
++        "56": "123",
++        "57": "E",
++        "59": "",
++        "60": "",
++        "61": "H4",
++        "62": "0.000",
++        "63": "0.000",
++        "64": "0.000",
++        "65": "0.000",
++        "68": "N",
++        "69": "",
++        "70": "A"
++      },
++      "caches": {
++        "45": "10.000",
++        "46": "10.000",
++        "47": "100.00",
++        "48": "0.00",
++        "49": "10.00",
++        "58": "1.00",
++        "66": "0.00",
++        "67": "0.00"
++      },
++      "editorTextByField": {
++        "x13.primary-incoming.c19": "10.00",
++        "x13.primary-incoming.c20": "100.00",
++        "x13.primary-incoming.c21": "0.00",
++        "x13.primary-incoming.c23": "1.00",
++        "x13.primary-incoming.c24": "10.00",
++        "x13.primary-incoming.c25": "0.00",
++        "x13.primary-incoming.c26": "0.00",
++        "x13.primary-incoming.c27": "0.00",
++        "x13.primary-incoming.c28": "0.00",
++        "x13.primary-incoming.c36": "110.00",
++        "x13.primary-incoming.c37": "0.00",
++        "x13.primary-incoming.c38": "110.00"
++      }
++    },
++    "loaded": {
++      "incomingTotals": {
++        "0": "",
++        "1": "",
++        "2": "",
++        "3": "",
++        "4": "",
++        "5": "",
++        "6": "",
++        "7": "",
++        "8": "",
++        "9": "",
++        "10": "",
++        "11": "",
++        "12": "",
++        "13": "",
++        "14": "",
++        "15": "",
++        "16": "",
++        "17": "",
++        "18": "",
++        "19": "",
++        "20": "",
++        "21": "",
++        "22": "",
++        "23": "",
++        "24": "",
++        "25": "",
++        "26": "",
++        "27": "",
++        "28": "",
++        "29": "",
++        "30": "",
++        "31": "",
++        "32": "",
++        "33": "",
++        "34": "",
++        "35": "",
++        "36": "",
++        "37": "",
++        "38": "",
++        "39": "",
++        "40": "",
++        "41": "",
++        "42": "",
++        "43": "",
++        "44": "",
++        "45": "",
++        "46": "",
++        "47": "",
++        "48": "",
++        "49": "",
++        "50": "",
++        "51": "",
++        "52": "",
++        "53": "",
++        "54": "",
++        "55": "",
++        "56": "",
++        "57": "",
++        "58": "",
++        "59": "",
++        "60": "",
++        "61": "",
++        "62": "",
++        "63": "",
++        "64": "",
++        "65": "",
++        "66": "",
++        "67": "",
++        "68": "",
++        "69": "",
++        "70": ""
++      },
++      "bill": {
++        "matrix": [
++          [
++            "",
++            "",
++            "",
++            "Payment    ",
++            "Received    ",
++            ""
++          ],
++          [
++            "Net Amt : ",
++            "",
++            "",
++            "",
++            "",
++            ""
++          ],
++          [
++            "Sale Tax : ",
++            "Current tax label",
++            "10.00",
++            "7.00",
++            "",
++            "10"
++          ],
++          [
++            "Total Amt : ",
++            "",
++            "",
++            "117.00",
++            "0.00",
++            ""
++          ],
++          [
++            "Cheque Amt : ",
++            "Current bank label",
++            "CHK17",
++            "0.00",
++            "0.00",
++            "BANK"
++          ],
++          [
++            "Card Amt : ",
++            "Current card label",
++            "",
++            "0.00",
++            "0.00",
++            "CARD"
++          ],
++          [
++            "Cash Amt : ",
++            "",
++            "",
++            "0.00",
++            "0.00",
++            ""
++          ],
++          [
++            "Kasar Amt : ",
++            "",
++            "",
++            "0.00",
++            "0.00",
++            ""
++          ],
++          [
++            "Os Amt : ",
++            "",
++            "",
++            "0.00",
++            "0.00",
++            ""
++          ]
++        ],
++        "oldNetAmt": "110",
++        "oldTaxPrc": "10",
++        "outgoingRounded": "0.00",
++        "incomingRounded": "110.00",
++        "closing": {
++          "status": "unavailable",
++          "amount": null,
++          "label": null,
++          "color": "unknown",
++          "reason": "Customer balance requires a resolved ledger mode."
++        }
++      }
++    },
++    "opened": {
++      "incomingTotals": {
++        "0": "",
++        "1": "",
++        "2": "",
++        "3": "",
++        "4": "",
++        "5": "Total :",
++        "6": "",
++        "7": "",
++        "8": "",
++        "9": "1",
++        "10": "10.000",
++        "11": "0.000",
++        "12": "10.000",
++        "13": "",
++        "14": "",
++        "15": "0.000",
++        "16": "",
++        "17": "",
++        "18": "10.000",
++        "19": "",
++        "20": "100.00",
++        "21": "",
++        "22": "",
++        "23": "",
++        "24": "10.00",
++        "25": "",
++        "26": "",
++        "27": "0.00",
++        "28": "0.00",
++        "29": "",
++        "30": "",
++        "31": "",
++        "32": "",
++        "33": "",
++        "34": "",
++        "35": "0.00",
++        "36": "110.00",
++        "37": "",
++        "38": "110.00",
++        "39": "",
++        "40": "",
++        "41": "",
++        "42": "0.000",
++        "43": "",
++        "44": "",
++        "45": "",
++        "46": "",
++        "47": "",
++        "48": "",
++        "49": "",
++        "50": "",
++        "51": "",
++        "52": "",
++        "53": "",
++        "54": "",
++        "55": "",
++        "56": "",
++        "57": "",
++        "58": "",
++        "59": "",
++        "60": "",
++        "61": "",
++        "62": "",
++        "63": "",
++        "64": "",
++        "65": "",
++        "66": "",
++        "67": "",
++        "68": "",
++        "69": "",
++        "70": ""
++      },
++      "bill": {
++        "matrix": [
++          [
++            "",
++            "",
++            "",
++            "Payment    ",
++            "Received    ",
++            ""
++          ],
++          [
++            "Net Amt : ",
++            "",
++            "",
++            "110.00",
++            "",
++            ""
++          ],
++          [
++            "Sale Tax : ",
++            "Current tax label",
++            "10.00",
++            "7.00",
++            "",
++            "10"
++          ],
++          [
++            "Total Amt : ",
++            "",
++            "",
++            "117.00",
++            "",
++            ""
++          ],
++          [
++            "Cheque Amt : ",
++            "Current bank label",
++            "CHK17",
++            "0.00",
++            "",
++            "BANK"
++          ],
++          [
++            "Card Amt : ",
++            "Current card label",
++            "",
++            "0.00",
++            "",
++            "CARD"
++          ],
++          [
++            "Cash Amt : ",
++            "",
++            "",
++            "0.00",
++            "",
++            ""
++          ],
++          [
++            "Kasar Amt : ",
++            "",
++            "",
++            "0.00",
++            "",
++            ""
++          ],
++          [
++            "Os Amt : ",
++            "",
++            "",
++            "117.00",
++            "",
++            ""
++          ]
++        ],
++        "oldNetAmt": "110",
++        "oldTaxPrc": "10",
++        "outgoingRounded": "0.00",
++        "incomingRounded": "110.00",
++        "closing": {
++          "status": "unavailable",
++          "amount": null,
++          "label": null,
++          "color": "unknown",
++          "reason": "Customer balance requires a resolved ledger mode."
++        }
++      }
++    },
++    "prefixes": {
++      "bb": {
++        "events": [
++          {
++            "kind": "labourEnter",
++            "fieldId": "x13.primary-incoming.c13",
++            "editorText": "BB"
++          }
++        ],
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "BB",
++            "14": "",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "",
++            "22": "N",
++            "23": "2.00",
++            "24": "20.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "0.00",
++            "28": "",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "120.00",
++            "37": "0.00",
++            "38": "120.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "2.00",
++            "66": "0.00",
++            "67": "0"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "2.00",
++            "x13.primary-incoming.c24": "20.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "0.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "120.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "120.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "20.00",
++            "25": "",
++            "26": "",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "120.00",
++            "37": "",
++            "38": "120.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "120.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "12.00",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "132.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "132.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "120",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "120.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      },
++      "bb-aa": {
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "AA",
++            "14": "",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "",
++            "22": "N",
++            "23": "1.00",
++            "24": "10.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "0.00",
++            "28": "",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "110.00",
++            "37": "0.00",
++            "38": "110.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "1.00",
++            "66": "0.00",
++            "67": "0"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "1.00",
++            "x13.primary-incoming.c24": "10.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "0.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "110.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "110.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "10.00",
++            "25": "",
++            "26": "",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "110.00",
++            "37": "",
++            "38": "110.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "110.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "11.00",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "121.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "121.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "110",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "110.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      },
++      "bb-other": {
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "BB",
++            "14": "",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "",
++            "22": "N",
++            "23": "2.00",
++            "24": "20.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "1.00",
++            "28": "",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "121.00",
++            "37": "0.00",
++            "38": "121.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "2.00",
++            "66": "0.00",
++            "67": "0"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "2.00",
++            "x13.primary-incoming.c24": "20.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "1.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "121.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "121.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "20.00",
++            "25": "",
++            "26": "",
++            "27": "1.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "121.00",
++            "37": "",
++            "38": "121.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "121.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "12.10",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "133.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "133.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "121",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "121.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      },
++      "bb-other-aa": {
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "AA",
++            "14": "",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "",
++            "22": "N",
++            "23": "1.00",
++            "24": "10.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "1.00",
++            "28": "",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "111.00",
++            "37": "0.00",
++            "38": "111.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "1.00",
++            "66": "0.00",
++            "67": "0"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "1.00",
++            "x13.primary-incoming.c24": "10.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "1.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "111.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "111.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "10.00",
++            "25": "",
++            "26": "",
++            "27": "1.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "111.00",
++            "37": "",
++            "38": "111.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "111.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "11.10",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "122.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "122.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "111",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "111.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      },
++      "same-aa": {
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "AA",
++            "14": "0.00",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "0.00",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "0.00",
++            "22": "N",
++            "23": "1.00",
++            "24": "10.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "110.00",
++            "37": "0.00",
++            "38": "110.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "1.00",
++            "66": "0.00",
++            "67": "0.00"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "1.00",
++            "x13.primary-incoming.c24": "10.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "0.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "110.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "110.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "10.00",
++            "25": "",
++            "26": "",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "110.00",
++            "37": "",
++            "38": "110.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "110.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "7.00",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "117.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "117.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "110",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "110.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      },
++      "same-ta": {
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "AA",
++            "14": "0.00",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "0.00",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "0.00",
++            "22": "N",
++            "23": "1.00",
++            "24": "10.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "110.00",
++            "37": "0.00",
++            "38": "110.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "1.00",
++            "66": "0.00",
++            "67": "0.00"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "1.00",
++            "x13.primary-incoming.c24": "10.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "0.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "110.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "110.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "10.00",
++            "25": "",
++            "26": "",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "110.00",
++            "37": "",
++            "38": "110.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "110.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "7.00",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "117.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "117.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "110",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "110.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      },
++      "fixed": {
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "C3",
++            "14": "",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "",
++            "22": "N",
++            "23": "",
++            "24": "0.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "0.00",
++            "28": "",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "100.00",
++            "37": "0.00",
++            "38": "100.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "0.00",
++            "66": "0.00",
++            "67": "0"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "0.00",
++            "x13.primary-incoming.c24": "0.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "0.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "100.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "100.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "0.00",
++            "25": "",
++            "26": "",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "100.00",
++            "37": "",
++            "38": "100.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "100.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "10.00",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "110.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "110.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "100",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "100.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      },
++      "zero": {
++        "preview": {
++          "visible": {
++            "0": "1",
++            "1": "GOLD",
++            "2": "N",
++            "3": "Source gold",
++            "4": "T01",
++            "5": "D-SAVED",
++            "6": "",
++            "7": "",
++            "8": "H1",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "ZZ",
++            "14": "",
++            "15": "0.000",
++            "16": "100.00",
++            "17": "",
++            "18": "10.000",
++            "19": "10.00",
++            "20": "100.00",
++            "21": "",
++            "22": "N",
++            "23": "0.00",
++            "24": "0.00",
++            "25": "0.00",
++            "26": "0.00",
++            "27": "0.00",
++            "28": "",
++            "29": "TA",
++            "30": "0.00",
++            "31": "0.00",
++            "32": "0.00",
++            "33": "0.00",
++            "34": "0.00",
++            "35": "0.00",
++            "36": "100.00",
++            "37": "0.00",
++            "38": "100.00",
++            "39": "",
++            "40": "500001",
++            "41": "",
++            "42": "",
++            "43": "G",
++            "44": "N",
++            "50": "N",
++            "51": "31",
++            "52": "01",
++            "53": "01",
++            "54": "G",
++            "55": "G",
++            "56": "123",
++            "57": "E",
++            "59": "",
++            "60": "",
++            "61": "H4",
++            "62": "0.000",
++            "63": "0.000",
++            "64": "0.000",
++            "65": "0.000",
++            "68": "N",
++            "69": "",
++            "70": "A"
++          },
++          "caches": {
++            "45": "10.000",
++            "46": "10.000",
++            "47": "100.00",
++            "48": "0.00",
++            "49": "10.00",
++            "58": "0.00",
++            "66": "0.00",
++            "67": "0"
++          },
++          "editorTextByField": {
++            "x13.primary-incoming.c19": "10.00",
++            "x13.primary-incoming.c20": "100.00",
++            "x13.primary-incoming.c21": "0.00",
++            "x13.primary-incoming.c23": "0.00",
++            "x13.primary-incoming.c24": "0.00",
++            "x13.primary-incoming.c25": "0.00",
++            "x13.primary-incoming.c26": "0.00",
++            "x13.primary-incoming.c27": "0.00",
++            "x13.primary-incoming.c28": "0.00",
++            "x13.primary-incoming.c36": "100.00",
++            "x13.primary-incoming.c37": "0.00",
++            "x13.primary-incoming.c38": "100.00"
++          }
++        },
++        "phase": {
++          "incomingTotals": {
++            "0": "",
++            "1": "",
++            "2": "",
++            "3": "",
++            "4": "",
++            "5": "Total :",
++            "6": "",
++            "7": "",
++            "8": "",
++            "9": "1",
++            "10": "10.000",
++            "11": "0.000",
++            "12": "10.000",
++            "13": "",
++            "14": "",
++            "15": "0.000",
++            "16": "",
++            "17": "",
++            "18": "10.000",
++            "19": "",
++            "20": "100.00",
++            "21": "",
++            "22": "",
++            "23": "",
++            "24": "0.00",
++            "25": "",
++            "26": "",
++            "27": "0.00",
++            "28": "0.00",
++            "29": "",
++            "30": "",
++            "31": "",
++            "32": "",
++            "33": "",
++            "34": "",
++            "35": "0.00",
++            "36": "100.00",
++            "37": "",
++            "38": "100.00",
++            "39": "",
++            "40": "",
++            "41": "",
++            "42": "0.000",
++            "43": "",
++            "44": "",
++            "45": "",
++            "46": "",
++            "47": "",
++            "48": "",
++            "49": "",
++            "50": "",
++            "51": "",
++            "52": "",
++            "53": "",
++            "54": "",
++            "55": "",
++            "56": "",
++            "57": "",
++            "58": "",
++            "59": "",
++            "60": "",
++            "61": "",
++            "62": "",
++            "63": "",
++            "64": "",
++            "65": "",
++            "66": "",
++            "67": "",
++            "68": "",
++            "69": "",
++            "70": ""
++          },
++          "bill": {
++            "matrix": [
++              [
++                "",
++                "",
++                "",
++                "Payment    ",
++                "Received    ",
++                ""
++              ],
++              [
++                "Net Amt : ",
++                "",
++                "",
++                "100.00",
++                "",
++                ""
++              ],
++              [
++                "Sale Tax : ",
++                "Current tax label",
++                "10.00",
++                "10.00",
++                "",
++                "10"
++              ],
++              [
++                "Total Amt : ",
++                "",
++                "",
++                "110.00",
++                "",
++                ""
++              ],
++              [
++                "Cheque Amt : ",
++                "Current bank label",
++                "CHK17",
++                "0.00",
++                "",
++                "BANK"
++              ],
++              [
++                "Card Amt : ",
++                "Current card label",
++                "",
++                "0.00",
++                "",
++                "CARD"
++              ],
++              [
++                "Cash Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Kasar Amt : ",
++                "",
++                "",
++                "0.00",
++                "",
++                ""
++              ],
++              [
++                "Os Amt : ",
++                "",
++                "",
++                "110.00",
++                "",
++                ""
++              ]
++            ],
++            "oldNetAmt": "100",
++            "oldTaxPrc": "10",
++            "outgoingRounded": "0.00",
++            "incomingRounded": "100.00",
++            "closing": {
++              "status": "unavailable",
++              "amount": null,
++              "label": null,
++              "color": "unknown",
++              "reason": "Customer balance requires a resolved ledger mode."
++            }
++          }
++        }
++      }
++    }
++  }
++}
+--- a/web/apps/api/test/routePolicy.test.ts
++++ b/web/apps/api/test/routePolicy.test.ts
+@@ -56,9 +56,9 @@
+   });
+   it('classifies every declared endpoint and preserves the current exact route universe', () => {
+     const routes = declaredRoutes();
+-    // Round 9 adds saved incoming Return observation and a nonpersisting journal preview.
+-    expect(routes).toHaveLength(553);
+-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(553);
++    // The labour preview adds exactly three read-only Sales Return routes.
++    expect(routes).toHaveLength(556);
++    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(556);
+ 
+     const policies = routes.map((route) => ({
+       ...route,
+@@ -89,6 +89,9 @@
+       ['POST', '/sales-returns/:vchNo/incoming-replay', 'read'],
+       ['GET', '/sales-returns/:vchNo/incoming-bill-replay-state', 'read'],
+       ['POST', '/sales-returns/:vchNo/incoming-bill-replay', 'read'],
++      ['GET', '/sales-returns/:vchNo/incoming-labour-replay-state', 'read'],
++      ['POST', '/sales-returns/:vchNo/incoming-labour-observation', 'read'],
++      ['POST', '/sales-returns/:vchNo/incoming-labour-replay', 'read'],
+       ['PUT', '/sales-returns/:vchNo/incoming-metadata', 'update'],
+     ] as const)
+       expect(routePolicyFor(method, path)).toMatchObject({
+--- /dev/null
++++ b/web/apps/api/test/saleReturnLabourReplay.db.test.ts
+@@ -0,0 +1,450 @@
++import { PrismaClient } from "@prisma/client";
++import { afterAll, beforeAll, beforeEach, describe, it, expect } from "vitest";
++import {
++  getSaleReturnLabourReplayState,
++  observeSaleReturnLabourReplayCode,
++  previewSaleReturnLabourReplay,
++  type SaleReturnLabourPrefixInput,
++  type SaleReturnLabourReplayEvent,
++} from "../src/modules/sales/saleReturnLabourReplay.js";
++import { getSaleReturnBillReplayState } from "../src/modules/sales/saleReturnBillReplay.js";
++import {
++  golden,
++  billInsert,
++  billSelected,
++  billVoucher,
++  scopeFor,
++  assertBillTestDatabase,
++  seedLabourFixture,
++  cleanLabourFixture,
++  insertLabourSession,
++  snapshotLabourFixture,
++  firstPrefix,
++  withPrefix,
++  moneyEvent,
++  assertGolden,
++} from "./fixtures/saleReturnLabourReplay.fixture.js";
++const run =
++  process.env.RUN_DB_INTEGRITY_TESTS === "1" ? describe : describe.skip;
++run("session-bound saved labour preview in PostgreSQL", () => {
++  const tenant = "r13-labour-api",
++    foreign = "r13-labour-foreign",
++    tenants = [tenant, foreign],
++    scope = scopeFor(tenant);
++  let owner: PrismaClient,
++    runtime: PrismaClient,
++    identity: Awaited<ReturnType<typeof insertLabourSession>>;
++  const sql = (q: string, ...args: unknown[]) =>
++    owner.$executeRawUnsafe(q, ...args);
++  const snapshot = () => snapshotLabourFixture(owner, tenants);
++  const get = () =>
++    getSaleReturnLabourReplayState(runtime, identity, scope, billVoucher);
++  const lookup = (p: SaleReturnLabourPrefixInput, code: string, field = 13) =>
++    observeSaleReturnLabourReplayCode(runtime, identity, scope, billVoucher, {
++      ...p,
++      fieldId: `x13.primary-incoming.c${field}`,
++      editorText: code,
++    });
++  const append = (
++    p: SaleReturnLabourPrefixInput,
++    event: SaleReturnLabourReplayEvent,
++  ) =>
++    previewSaleReturnLabourReplay(runtime, identity, scope, billVoucher, {
++      ...p,
++      event,
++    });
++  const select = async (
++    p: SaleReturnLabourPrefixInput,
++    code: string,
++    field = 13,
++  ) => {
++    const seen = await lookup(p, code, field);
++    return append(p, {
++      kind: "labourEnter",
++      fieldId: seen.fieldId,
++      editorText: seen.editorText,
++      observationVersion: seen.observationVersion,
++    });
++  };
++  beforeAll(() => {
++    assertBillTestDatabase();
++    owner = new PrismaClient({
++      datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } },
++    });
++    runtime = new PrismaClient();
++  });
++  beforeEach(async () => {
++    await cleanLabourFixture(owner, tenants);
++    await seedLabourFixture(owner, tenants);
++    identity = await insertLabourSession(owner, tenant);
++  });
++  afterAll(async () => {
++    if (owner) {
++      await cleanLabourFixture(owner, tenants);
++      await owner.$disconnect();
++    }
++    if (runtime) await runtime.$disconnect();
++  });
++  it("preserves old DTO/hash and complete literal loaded/opened states with no writes", async () => {
++    const before = await snapshot(),
++      old = await getSaleReturnBillReplayState(runtime, scope, billVoucher),
++      dto = await get();
++    expect(dto.billReplay).toEqual(old);
++    expect(dto.billReplay.rowReplay.rows[0]).toMatchObject(
++      golden.expected.initial,
++    );
++    expect(dto.billReplay.phases.loaded).toEqual(golden.expected.loaded);
++    expect(dto.billReplay.phases.opened).toEqual(golden.expected.opened);
++    expect(dto.capabilities).toEqual({
++      canPreview: true,
++      canPreviewClosing: false,
++      canSaveNumeric: false,
++      canApplySource: false,
++    });
++    expect(dto.context).toEqual({
++      sessionId: identity.sessionId,
++      contextEpoch: "1",
++      coCode: "01",
++      lcCode: "01",
++      coYear: billSelected.coYear,
++    });
++    expect(Object.isFrozen(dto.billReplay.savedHeader)).toBe(true);
++    expect(await snapshot()).toEqual(before);
++  });
++  it("lookup neither copies nor appends; BB then AA preserves exact bill tax history", async () => {
++    const dto = await get(),
++      p = firstPrefix(dto),
++      before = await snapshot();
++    const observed = await lookup(p, "BB");
++    expect(observed.selection).toEqual({
++      CO_CODE: "01",
++      LBR_CODE: "BB",
++      LBR_CATG: "01",
++      LBR_VAL: "2",
++    });
++    expect(observed.prefixVersion).toBe(p.prefixVersion);
++    expect(observed).not.toHaveProperty("prefix");
++    const bb = await select(p, "BB");
++    assertGolden(bb.prefix, "bb");
++    expect(bb.effects).toEqual({
++      aggregateApplied: true,
++      billApplied: true,
++      taxRecalculated: true,
++    });
++    const aa = await select(withPrefix(p, bb.prefix), "AA");
++    assertGolden(aa.prefix, "bb-aa");
++    expect(aa.prefix.events).toHaveLength(2);
++    expect(await snapshot()).toEqual(before);
++  });
++  it("interleaves money and labour at every bill prefix", async () => {
++    const p = firstPrefix(await get()),
++      bb = await select(p, "BB");
++    const other = await append(withPrefix(p, bb.prefix), moneyEvent(27, "1"));
++    assertGolden(other.prefix, "bb-other");
++    const aa = await select(withPrefix(p, other.prefix), "AA");
++    assertGolden(aa.prefix, "bb-other-aa");
++    expect(aa.prefix.events.map((e) => e.kind)).toEqual([
++      "labourEnter",
++      "moneyLeave",
++      "labourEnter",
++    ]);
++  });
++  for (const [code, field, expected] of [
++    ["AA", 13, "same-aa"],
++    ["TA", 29, "same-ta"],
++    ["C3", 13, "fixed"],
++    ["ZZ", 13, "zero"],
++  ] as const)
++    it(`qualifies ${code} c${field} and matches every independently expected cell`, async () => {
++      const p = firstPrefix(await get()),
++        before = await snapshot(),
++        result = await select(p, code, field);
++      assertGolden(result.prefix, expected);
++      expect(result.acceptedEvent.status).toBe("applied");
++      expect(result.effects.billApplied).toBe(true);
++      expect(result.prefix.events).toHaveLength(1);
++      expect(await snapshot()).toEqual(before);
++    });
++  it("retains repeated same-code events and deterministic retry without persistence", async () => {
++    const p = firstPrefix(await get()),
++      seen = await lookup(p, "AA"),
++      event = {
++        kind: "labourEnter" as const,
++        fieldId: seen.fieldId,
++        editorText: "AA",
++        observationVersion: seen.observationVersion,
++      };
++    const first = await append(p, event),
++      retry = await append(p, event);
++    expect(retry).toEqual(first);
++    const second = await append(withPrefix(p, first.prefix), event);
++    assertGolden(second.prefix, "same-aa");
++    expect(second.prefix.events).toHaveLength(2);
++  });
++  it("refuses missing, case alias, unsupported category and NULL value without falling back", async () => {
++    const p = firstPrefix(await get());
++    await expect(lookup(p, "NO")).rejects.toMatchObject({
++      statusCode: 422,
++      code: "lookup-required",
++    });
++    await billInsert(owner, "LBR_MAST", {
++      tenant_id: tenant,
++      CO_CODE: "01",
++      LBR_CODE: "bb",
++      LBR_CATG: "01",
++      LBR_VAL: "2",
++    });
++    await expect(lookup(p, "BB")).rejects.toMatchObject({
++      statusCode: 422,
++      code: "unsupported-master",
++    });
++    await sql(
++      'DELETE FROM "LBR_MAST" WHERE tenant_id=$1 AND "LBR_CODE"=\'bb\'',
++      tenant,
++    );
++    await sql(
++      'UPDATE "LBR_MAST" SET "LBR_CATG"=\'99\' WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    await expect(lookup(p, "BB")).rejects.toMatchObject({
++      statusCode: 422,
++      code: "unsupported-master",
++    });
++    await sql(
++      'UPDATE "LBR_MAST" SET "LBR_CATG"=\'01\',"LBR_VAL"=NULL WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    await expect(lookup(p, "BB")).rejects.toMatchObject({
++      statusCode: 422,
++      code: "unsupported-master",
++    });
++  });
++  it("refuses checked candidate change and historical master change before new lookup", async () => {
++    const p = firstPrefix(await get()),
++      seen = await lookup(p, "BB");
++    await sql(
++      'UPDATE "LBR_MAST" SET "LBR_VAL"=3 WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    await expect(
++      append(p, {
++        kind: "labourEnter",
++        fieldId: seen.fieldId,
++        editorText: "BB",
++        observationVersion: seen.observationVersion,
++      }),
++    ).rejects.toMatchObject({
++      statusCode: 409,
++      code: "master-version-conflict",
++    });
++    const accepted = await select(p, "BB"),
++      prior = withPrefix(p, accepted.prefix);
++    await sql(
++      'UPDATE "LBR_MAST" SET "LBR_VAL"=2 WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    await expect(lookup(prior, "AA")).rejects.toMatchObject({
++      statusCode: 409,
++      code: "master-version-conflict",
++    });
++  });
++  it("detects present-row ABA and delete/recreate while ignoring unrelated master changes", async () => {
++    const p = firstPrefix(await get()),
++      result = await select(p, "BB"),
++      prior = withPrefix(p, result.prefix);
++    await sql('UPDATE "LBR_MAST" SET "LBR_VAL"=99 WHERE tenant_id=$1', foreign);
++    expect((await lookup(prior, "AA")).selection.LBR_CODE).toBe("AA");
++    await sql(
++      'UPDATE "LBR_MAST" SET "LBR_VAL"=3 WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    await sql(
++      'UPDATE "LBR_MAST" SET "LBR_VAL"=2 WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    await expect(lookup(prior, "AA")).rejects.toMatchObject({
++      code: "master-version-conflict",
++    });
++    const fresh = await select(p, "BB");
++    await sql(
++      'DELETE FROM "LBR_MAST" WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    await billInsert(owner, "LBR_MAST", {
++      tenant_id: tenant,
++      CO_CODE: "01",
++      LBR_CODE: "BB",
++      LBR_CATG: "01",
++      LBR_VAL: "2",
++    });
++    await expect(
++      lookup(withPrefix(p, fresh.prefix), "AA"),
++    ).rejects.toMatchObject({ code: "master-version-conflict" });
++  });
++  it("checks the base token before now-malformed saved numeric projection", async () => {
++    const p = firstPrefix(await get());
++    await sql(
++      'UPDATE "SL_DETL_RTN" SET "ITM_RATE"=NULL WHERE tenant_id=$1 AND "CO_BOOK"=\'R11\'',
++      tenant,
++    );
++    await expect(lookup(p, "BB")).rejects.toMatchObject({
++      statusCode: 409,
++      code: "version-conflict",
++    });
++  });
++  it("refuses forged prefix, unknown identity and hidden configured labour field", async () => {
++    const dto = await get(),
++      p = firstPrefix(dto);
++    await expect(
++      lookup({ ...p, prefixVersion: "f".repeat(64) }, "BB"),
++    ).rejects.toMatchObject({ code: "prefix-conflict" });
++    await expect(
++      lookup({ ...p, rowIdentity: "e".repeat(64) }, "BB"),
++    ).rejects.toMatchObject({ statusCode: 409 });
++    await billInsert(owner, "COL_MAST", {
++      tenant_id: tenant,
++      CO_CODE: "01",
++      BOOK_NAME: "SALES RETURNE",
++      COL_NAME: "LCode",
++      COL_NEW_NAME: "Labour code",
++      YES_NO: "N",
++    });
++    const hidden = await get();
++    expect(hidden.rows[0]!.labourFields[0]!.allowed).toBe(false);
++    await expect(lookup(firstPrefix(hidden), "BB")).rejects.toMatchObject({
++      statusCode: 422,
++      code: "unsupported-field",
++    });
++  });
++  it("reads an empty saved header but offers no candidate capability", async () => {
++    await sql(
++      'DELETE FROM "SL_DETL_RTN" WHERE tenant_id=$1 AND "CO_BOOK"=\'R11\'',
++      tenant,
++    );
++    const dto = await get();
++    expect(dto.rows).toEqual([]);
++    expect(dto.capabilities.canPreview).toBe(false);
++  });
++  it("checks fresh read rights and context rather than reusing old request permission", async () => {
++    await sql(
++      'UPDATE "USER_SET" SET "FRM_VIEW"=\'N\' WHERE tenant_id=$1 AND "USER_NAME"=\'view\'',
++      tenant,
++    );
++    await expect(get()).rejects.toMatchObject({ statusCode: 403 });
++    await sql(
++      'UPDATE "USER_SET" SET "FRM_VIEW"=\'Y\' WHERE tenant_id=$1 AND "USER_NAME"=\'view\'',
++      tenant,
++    );
++    await sql(
++      'UPDATE "auth_session" SET context_epoch=2 WHERE tenant_id=$1',
++      tenant,
++    );
++    await expect(get()).rejects.toMatchObject({
++      statusCode: 409,
++      code: "context-stale",
++    });
++  });
++  it("preserves the exact accepted prefix after copy succeeds but the bill rejects", async () => {
++    // Prior independent bill boundary, adapted to a resolved category02 copy. No expected total is generated from the new service.
++    await sql(
++      'UPDATE "CO_SET" SET "SL_AMT_TYPE"=\'F\' WHERE tenant_id=$1',
++      tenant,
++    );
++    await sql(
++      'UPDATE "SL_DATA" SET "TAX_PRC"=99999 WHERE tenant_id=$1 AND "CO_BOOK"=\'R11\'',
++      tenant,
++    );
++    await sql(
++      `UPDATE "SL_DETL_RTN" SET "ITM_GWT"=10000000000,"ITM_NWT"=10000000000,"ITM_TOUCH"=1000000000,"ITM_RATE"=1000000000000000,"LBR_PRC"=0,"LBR_RATE"=0,"LBR_AMT"=0,"LBR_TYPE"='N' WHERE tenant_id=$1 AND "CO_BOOK"='R11'`,
++      tenant,
++    );
++    await billInsert(owner, "LBR_MAST", {
++      tenant_id: tenant,
++      CO_CODE: "01",
++      LBR_CODE: "P2",
++      LBR_CATG: "02",
++      LBR_VAL: "9999999999",
++    });
++    const p = firstPrefix(await get()),
++      first = await append(p, moneyEvent(21, "0")),
++      prior = withPrefix(p, first.prefix),
++      seen = await lookup(prior, "P2"),
++      before = await snapshot();
++    await expect(
++      append(prior, {
++        kind: "labourEnter",
++        fieldId: seen.fieldId,
++        editorText: "P2",
++        observationVersion: seen.observationVersion,
++      }),
++    ).rejects.toMatchObject({
++      statusCode: 422,
++      code: "calculation-rejected",
++      details: {
++        eventIndex: 1,
++        recovery: first.prefix,
++        diagnostics: [
++          expect.objectContaining({
++            code: "unsupported-precision",
++            stage: "bill matrix r2",
++          }),
++        ],
++      },
++    });
++    expect(await snapshot()).toEqual(before);
++  });
++  it("keeps scope detached and all reads in one RR snapshot during a concurrent master change", async () => {
++    const p = firstPrefix(await get()),
++      before = await lookup(p, "BB");
++    let changed = false,
++      transactions = 0;
++    const mutableScope = { ...scope };
++    const wrapped = {
++      $transaction: (fn: (tx: any) => Promise<unknown>, opts: any) => {
++        transactions++;
++        expect(opts.isolationLevel).toBe("RepeatableRead");
++        return runtime.$transaction(
++          async (tx) =>
++            fn(
++              new Proxy(tx, {
++                get(target, key) {
++                  if (key === "$queryRawUnsafe")
++                    return async (q: string, ...args: unknown[]) => {
++                      const result = await target.$queryRawUnsafe(q, ...args);
++                      if (!changed && q.includes('FROM "SL_DETL_RTN"')) {
++                        changed = true;
++                        mutableScope.coBook = "R12";
++                        await sql(
++                          'UPDATE "LBR_MAST" SET "LBR_VAL"=3 WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++                          tenant,
++                        );
++                      }
++                      return result;
++                    };
++                  const value = Reflect.get(target, key);
++                  return typeof value === "function"
++                    ? value.bind(target)
++                    : value;
++                },
++              }),
++            ),
++          opts,
++        );
++      },
++    };
++    const observed = await observeSaleReturnLabourReplayCode(
++      wrapped,
++      identity,
++      mutableScope,
++      billVoucher,
++      { ...p, fieldId: "x13.primary-incoming.c13", editorText: "BB" },
++    );
++    expect(changed).toBe(true);
++    expect(transactions).toBe(1);
++    expect(observed.observationVersion).toBe(before.observationVersion);
++    expect(observed.scope.coBook).toBe("R11");
++    expect((await lookup(p, "BB")).observationVersion).not.toBe(
++      before.observationVersion,
++    );
++  });
++});
+--- /dev/null
++++ b/web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts
+@@ -0,0 +1,463 @@
++import { randomUUID } from "node:crypto";
++import { PrismaClient } from "@prisma/client";
++import { SignJWT } from "jose";
++import type { FastifyInstance, LightMyRequestResponse } from "fastify";
++import { afterAll, beforeAll, beforeEach, describe, it, expect } from "vitest";
++import { buildApp } from "../src/app.js";
++import { hashPassword } from "../src/modules/auth/password.js";
++import { verifyAccessToken } from "../src/modules/auth/jwt.js";
++import type {
++  SaleReturnLabourReplayState,
++  SaleReturnLabourPrefixInput,
++  SaleReturnLabourObservationResult,
++  SaleReturnLabourReplayResult,
++  SaleReturnLabourReplayEvent,
++} from "../src/modules/sales/saleReturnLabourReplay.js";
++import {
++  golden,
++  billInsert,
++  billSelected,
++  billVoucher,
++  assertBillTestDatabase,
++  seedLabourFixture,
++  cleanLabourFixture,
++  snapshotLabourFixture,
++  firstPrefix,
++  withPrefix,
++  moneyEvent,
++  assertGolden,
++} from "./fixtures/saleReturnLabourReplay.fixture.js";
++const run =
++  process.env.RUN_DB_INTEGRITY_TESTS === "1" ? describe : describe.skip;
++run("real authenticated labour observation and append routes", () => {
++  const tenant = "r13-labour-http",
++    foreign = "r13-labour-h-foreign",
++    tenants = [tenant, foreign],
++    secret = "labour-preview-http-real-session-secret-over-thirty-two";
++  const password = "Labour-Preview-Test!2026";
++  type Context = {
++    sessionId: string;
++    contextEpoch: string;
++    coCode: string;
++    lcCode: string;
++    coYear: string;
++  };
++  type Login = { cookie: string; context: Context };
++  let owner: PrismaClient,
++    runtime: PrismaClient,
++    app: FastifyInstance,
++    passwordHash: string;
++  let signed: Login, unrelated: Login, other: Login;
++  const completed = new Map<string, () => void>();
++  const sql = (q: string, ...args: unknown[]) =>
++    owner.$executeRawUnsafe(q, ...args);
++  const snapshot = () => snapshotLabourFixture(owner, tenants);
++  const endpoint = (
++    action = "incoming-labour-replay-state",
++    selected: Record<string, string> = billSelected,
++  ) =>
++    `/sales-returns/${billVoucher}/${action}?${new URLSearchParams(selected)}`;
++  const cookie = (response: LightMyRequestResponse) => {
++    const c = response.headers["set-cookie"];
++    return (Array.isArray(c) ? c : c ? [c] : [])
++      .map((v) => v.split(";", 1)[0])
++      .join("; ");
++  };
++  async function inject(
++    method: "GET" | "POST",
++    url: string,
++    payload?: unknown,
++    login: Login | null = signed,
++    pair: Record<string, string> | null | undefined = undefined,
++  ) {
++    const id = randomUUID();
++    let resolve!: () => void;
++    const done = new Promise<void>((r) => {
++      resolve = r;
++    });
++    completed.set(id, resolve);
++    let timer: ReturnType<typeof setTimeout> | undefined;
++    try {
++      const response = await app.inject({
++        method,
++        url,
++        headers: {
++          "x-labour-test-id": id,
++          ...(login ? { cookie: login.cookie } : {}),
++          ...(pair === null
++            ? {}
++            : (pair ??
++              (login
++                ? {
++                    "x-session-context-id": login.context.sessionId,
++                    "x-session-context-epoch": login.context.contextEpoch,
++                  }
++                : {}))),
++        },
++        ...(payload === undefined ? {} : { payload: payload as object }),
++      });
++      await Promise.race([
++        done,
++        new Promise<never>((_, reject) => {
++          timer = setTimeout(
++            () =>
++              reject(new Error("onResponse/audit completion did not settle")),
++            10000,
++          );
++        }),
++      ]);
++      return response;
++    } finally {
++      if (timer) clearTimeout(timer);
++      completed.delete(id);
++    }
++  }
++  async function login(loginName = "view", tenantId = tenant): Promise<Login> {
++    // Use app.inject directly for login; no authenticated request audit is expected.
++    const response = await app.inject({
++      method: "POST",
++      url: "/auth/login",
++      headers: { "x-tenant-id": tenantId },
++      payload: {
++        loginName,
++        password,
++        coCode: "01",
++        lcCode: "01",
++        coYear: billSelected.coYear,
++      },
++    });
++    expect(response.statusCode, response.body).toBe(200);
++    return { cookie: cookie(response), context: response.json().context };
++  }
++  async function state() {
++    const r = await inject("GET", endpoint());
++    expect(r.statusCode, r.body).toBe(200);
++    expect(r.headers["cache-control"]).toBe("no-store");
++    return r.json<SaleReturnLabourReplayState>();
++  }
++  async function lookup(
++    p: SaleReturnLabourPrefixInput,
++    code: string,
++    field = 13,
++  ) {
++    const r = await inject("POST", endpoint("incoming-labour-observation"), {
++      ...p,
++      fieldId: `x13.primary-incoming.c${field}`,
++      editorText: code,
++    });
++    expect(r.statusCode, r.body).toBe(200);
++    return r.json<SaleReturnLabourObservationResult>();
++  }
++  async function append(
++    p: SaleReturnLabourPrefixInput,
++    e: SaleReturnLabourReplayEvent,
++  ) {
++    return inject("POST", endpoint("incoming-labour-replay"), {
++      ...p,
++      event: e,
++    });
++  }
++  async function select(p: SaleReturnLabourPrefixInput, code: string) {
++    const seen = await lookup(p, code);
++    const r = await append(p, {
++      kind: "labourEnter",
++      fieldId: seen.fieldId,
++      editorText: seen.editorText,
++      observationVersion: seen.observationVersion,
++    });
++    expect(r.statusCode, r.body).toBe(200);
++    return r.json<SaleReturnLabourReplayResult>();
++  }
++  const audit = () =>
++    owner.$queryRawUnsafe<
++      Array<{ action: string; path: string; status: number }>
++    >(
++      'SELECT action,path,status FROM "audit_log" WHERE tenant_id=$1 ORDER BY id',
++      tenant,
++    );
++  beforeAll(async () => {
++    assertBillTestDatabase();
++    owner = new PrismaClient({
++      datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } },
++    });
++    runtime = new PrismaClient();
++    passwordHash = await hashPassword(password);
++    app = await buildApp({ prisma: runtime, secret, secureCookies: false });
++    app.addHook("onResponse", async (req) => {
++      const id = req.headers["x-labour-test-id"];
++      if (typeof id === "string") completed.get(id)?.();
++    });
++  });
++  beforeEach(async () => {
++    await cleanLabourFixture(owner, tenants);
++    await seedLabourFixture(owner, tenants, passwordHash);
++    signed = await login();
++    unrelated = await login("otherform");
++    other = await login("view", foreign);
++  });
++  afterAll(async () => {
++    if (app) await app.close();
++    if (owner) {
++      await cleanLabourFixture(owner, tenants);
++      await owner.$disconnect();
++    }
++    if (runtime) await runtime.$disconnect();
++  });
++  it("loads complete literal phases with View-only rights and no business/session edits", async () => {
++    const before = await snapshot(),
++      dto = await state();
++    expect(dto.context).toEqual(signed.context);
++    expect(dto.billReplay.phases.loaded).toEqual(golden.expected.loaded);
++    expect(dto.billReplay.phases.opened).toEqual(golden.expected.opened);
++    expect(dto.capabilities).toEqual({
++      canPreview: true,
++      canPreviewClosing: false,
++      canSaveNumeric: false,
++      canApplySource: false,
++    });
++    expect(await snapshot()).toEqual(before);
++    expect(await audit()).toEqual([]);
++  });
++  it("runs lookup and two source code prefixes without numeric writes, and audits exact POST outcomes", async () => {
++    const p = firstPrefix(await state()),
++      before = await snapshot(),
++      bb = await select(p, "BB");
++    assertGolden(bb.prefix, "bb");
++    const aa = await select(withPrefix(p, bb.prefix), "AA");
++    assertGolden(aa.prefix, "bb-aa");
++    expect(aa.prefix.events).toHaveLength(2);
++    expect(await snapshot()).toEqual(before);
++    expect(await audit()).toEqual([
++      {
++        action: "POST",
++        path: "/sales-returns/:vchNo/incoming-labour-observation",
++        status: 200,
++      },
++      {
++        action: "POST",
++        path: "/sales-returns/:vchNo/incoming-labour-replay",
++        status: 200,
++      },
++      {
++        action: "POST",
++        path: "/sales-returns/:vchNo/incoming-labour-observation",
++        status: 200,
++      },
++      {
++        action: "POST",
++        path: "/sales-returns/:vchNo/incoming-labour-replay",
++        status: 200,
++      },
++    ]);
++  });
++  it("requires both retained page headers and never borrows another session descriptor", async () => {
++    const p = firstPrefix(await state()),
++      request = { ...p, fieldId: "x13.primary-incoming.c13", editorText: "BB" },
++      before = await snapshot();
++    for (const pair of [
++      null,
++      { "x-session-context-id": signed.context.sessionId },
++      {
++        "x-session-context-id": other.context.sessionId,
++        "x-session-context-epoch": other.context.contextEpoch,
++      },
++    ]) {
++      const r = await inject(
++        "POST",
++        endpoint("incoming-labour-observation"),
++        request,
++        signed,
++        pair,
++      );
++      expect(r.statusCode, r.body).toBe(409);
++      expect(r.json().error).toBe("context-stale");
++      expect(r.headers["cache-control"]).toBe("no-store");
++    }
++    expect(await snapshot()).toEqual(before);
++    // Missing both reaches route after authentication; partial/mismatch are denied before state.session exists.
++    expect(await audit()).toEqual([
++      {
++        action: "POST",
++        path: "/sales-returns/:vchNo/incoming-labour-observation",
++        status: 409,
++      },
++    ]);
++  });
++  it("denies anonymous, unrelated View and forced reset without accepting code events", async () => {
++    expect((await inject("GET", endpoint(), undefined, null)).statusCode).toBe(
++      401,
++    );
++    expect(
++      (await inject("GET", endpoint(), undefined, unrelated)).statusCode,
++    ).toBe(403);
++    await sql(
++      'UPDATE "LOGIN_MAST" SET "PASSWORD_RESET_REQUIRED"=\'Y\' WHERE tenant_id=$1 AND "LOGIN_NAME"=\'view\'',
++      tenant,
++    );
++    expect((await inject("GET", endpoint())).statusCode).toBe(403);
++  });
++  it("rejects a foreign base and malformed authority/policy fields while preserving business state", async () => {
++    const p = firstPrefix(await state()),
++      request = { ...p, fieldId: "x13.primary-incoming.c13", editorText: "BB" },
++      before = await snapshot();
++    const foreignResponse = await inject(
++      "POST",
++      endpoint("incoming-labour-observation"),
++      request,
++      other,
++    );
++    expect(foreignResponse.statusCode, foreignResponse.body).toBe(409);
++    for (const extra of [
++      { raw: { LBR_VAL: "2" } },
++      { rowPolicy: {} },
++      { sessionId: signed.context.sessionId },
++      { currentRow: 1 },
++    ]) {
++      const r = await inject("POST", endpoint("incoming-labour-observation"), {
++        ...request,
++        ...extra,
++      });
++      expect(r.statusCode, r.body).toBe(400);
++    }
++    expect(await snapshot()).toEqual(before);
++    expect((await audit()).map((r) => r.status)).toEqual([400, 400, 400, 400]);
++  });
++  it("fails an old bearer after actual same-scope selection and old page pair after fresh bearer adoption", async () => {
++    const old = signed;
++    const response = await inject("POST", "/context/select", {
++      coCode: "01",
++      lcCode: "01",
++      coYear: billSelected.coYear,
++      expectedContextEpoch: old.context.contextEpoch,
++      selectionId: randomUUID(),
++    });
++    expect(response.statusCode, response.body).toBe(200);
++    const fresh = {
++      cookie: cookie(response),
++      context: response.json().context as Context,
++    };
++    expect(fresh.context.contextEpoch).not.toBe(old.context.contextEpoch);
++    const afterSelect = await snapshot();
++    expect((await inject("GET", endpoint(), undefined, old)).statusCode).toBe(
++      401,
++    );
++    const stale = await inject("GET", endpoint(), undefined, fresh, {
++      "x-session-context-id": old.context.sessionId,
++      "x-session-context-epoch": old.context.contextEpoch,
++    });
++    expect(stale.statusCode, stale.body).toBe(409);
++    expect(stale.json().error).toBe("context-stale");
++    expect(await snapshot()).toEqual(afterSelect);
++  });
++  it("rejects real signed access claims lacking epoch rather than supplying a default", async () => {
++    const pair = signed.cookie
++      .split("; ")
++      .find((c) => c.startsWith("access="))!;
++    const claims = await verifyAccessToken(
++      decodeURIComponent(pair.slice(7)),
++      secret,
++    );
++    const legacy: Record<string, unknown> = { ...claims };
++    delete legacy.contextEpoch;
++    delete legacy.iat;
++    delete legacy.exp;
++    const jwt = await new SignJWT(legacy)
++      .setProtectedHeader({ alg: "HS256" })
++      .setIssuedAt()
++      .setExpirationTime("10m")
++      .sign(new TextEncoder().encode(secret));
++    const response = await inject("GET", endpoint(), undefined, {
++      ...signed,
++      cookie: `access=${jwt}`,
++    });
++    expect(response.statusCode, response.body).toBe(401);
++  });
++  it("maps changed historical master to409 without returning or accepting a replacement prefix", async () => {
++    const p = firstPrefix(await state()),
++      bb = await select(p, "BB");
++    await sql(
++      'UPDATE "LBR_MAST" SET "LBR_VAL"=3 WHERE tenant_id=$1 AND "LBR_CODE"=\'BB\'',
++      tenant,
++    );
++    const before = await snapshot();
++    const response = await inject(
++      "POST",
++      endpoint("incoming-labour-observation"),
++      {
++        ...withPrefix(p, bb.prefix),
++        fieldId: "x13.primary-incoming.c13",
++        editorText: "AA",
++      },
++    );
++    expect(response.statusCode, response.body).toBe(409);
++    expect(response.json()).toMatchObject({ error: "master-version-conflict" });
++    expect(response.json()).not.toHaveProperty("details.recovery");
++    expect(await snapshot()).toEqual(before);
++  });
++  it("returns the exact accepted prefix after a real post-copy bill rejection", async () => {
++    await sql(
++      'UPDATE "CO_SET" SET "SL_AMT_TYPE"=\'F\' WHERE tenant_id=$1',
++      tenant,
++    );
++    await sql(
++      'UPDATE "SL_DATA" SET "TAX_PRC"=99999 WHERE tenant_id=$1 AND "CO_BOOK"=\'R11\'',
++      tenant,
++    );
++    await sql(
++      `UPDATE "SL_DETL_RTN" SET "ITM_GWT"=10000000000,"ITM_NWT"=10000000000,"ITM_TOUCH"=1000000000,"ITM_RATE"=1000000000000000,"LBR_PRC"=0,"LBR_RATE"=0,"LBR_AMT"=0 WHERE tenant_id=$1 AND "CO_BOOK"='R11'`,
++      tenant,
++    );
++    await billInsert(owner, "LBR_MAST", {
++      tenant_id: tenant,
++      CO_CODE: "01",
++      LBR_CODE: "P2",
++      LBR_CATG: "02",
++      LBR_VAL: "9999999999",
++    });
++    const p = firstPrefix(await state()),
++      r = await append(p, moneyEvent(21, "0"));
++    expect(r.statusCode, r.body).toBe(200);
++    const prior = r.json<SaleReturnLabourReplayResult>().prefix,
++      input = withPrefix(p, prior),
++      seen = await lookup(input, "P2"),
++      before = await snapshot();
++    const failed = await append(input, {
++      kind: "labourEnter",
++      fieldId: seen.fieldId,
++      editorText: "P2",
++      observationVersion: seen.observationVersion,
++    });
++    expect(failed.statusCode, failed.body).toBe(422);
++    expect(failed.json()).toMatchObject({
++      error: "calculation-rejected",
++      details: {
++        eventIndex: 1,
++        recovery: prior,
++        diagnostics: [
++          expect.objectContaining({
++            code: "unsupported-precision",
++            stage: "bill matrix r2",
++          }),
++        ],
++      },
++    });
++    expect(await snapshot()).toEqual(before);
++    expect((await audit()).map((v) => v.status)).toEqual([200, 200, 422]);
++  });
++  it("keeps legacy preview responses/allowlists unchanged and never exposes labour in v1", async () => {
++    const dto = await state(),
++      old = await inject("GET", endpoint("incoming-bill-replay-state"));
++    expect(old.statusCode, old.body).toBe(200);
++    expect(old.json()).toEqual(dto.billReplay);
++    const row = await inject("GET", endpoint("incoming-replay-state"));
++    expect(row.statusCode, row.body).toBe(200);
++    expect(row.json()).toEqual(dto.billReplay.rowReplay);
++    expect(
++      row.json().rows[0].fieldCapabilities.map((v: any) => v.fieldId),
++    ).toEqual(
++      [19, 20, 21, 23, 24, 25, 26, 27, 28, 36, 37, 38].map(
++        (i) => `x13.primary-incoming.c${i}`,
++      ),
++    );
++  });
++});
+--- /dev/null
++++ b/web/apps/api/test/saleReturnLabourReplay.test.ts
+@@ -0,0 +1,334 @@
++import { createHash } from "node:crypto";
++import { readFileSync } from "node:fs";
++import { describe, it, expect, vi } from "vitest";
++import {
++  saleReturnLabourObserveInput,
++  saleReturnLabourAppendInput,
++  SaleReturnLabourReplayError,
++} from "../src/modules/sales/saleReturnLabourReplay.js";
++const hash = "a".repeat(64),
++  id = "b".repeat(64);
++const prefix = () => ({
++  baseVersion: hash,
++  rowIdentity: id,
++  prefixVersion: "c".repeat(64),
++  events: [] as unknown[],
++});
++const codeEvent = () => ({
++  kind: "labourEnter",
++  fieldId: "x13.primary-incoming.c13",
++  editorText: "BB",
++  observationVersion: "d".repeat(64),
++});
++const request = () => ({ ...prefix(), event: codeEvent() });
++describe("saved labour replay exact transport", () => {
++  it("pins independently authored complete reachable matrices before API code", () => {
++    const bytes = readFileSync(
++      new URL(
++        "./fixtures/saleReturnLabourReplay.independent.json",
++        import.meta.url,
++      ),
++    );
++    expect(createHash("sha256").update(bytes).digest("hex")).toBe(
++      "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
++    );
++    const x = JSON.parse(bytes.toString());
++    expect(Object.keys(x.expected.prefixes)).toHaveLength(8);
++    for (const p of Object.values(x.expected.prefixes) as any[]) {
++      expect(Object.keys(p.preview.visible)).toHaveLength(63);
++      expect(Object.keys(p.preview.caches)).toHaveLength(8);
++      expect(Object.keys(p.phase.incomingTotals)).toHaveLength(71);
++      expect(p.phase.bill.matrix).toHaveLength(9);
++      for (const row of p.phase.bill.matrix) expect(row).toHaveLength(6);
++    }
++  });
++  it("detaches a complete repeated mixed prefix without deduplicating exact text", () => {
++    const e = codeEvent();
++    const r = {
++      ...prefix(),
++      events: [
++        e,
++        e,
++        {
++          kind: "moneyLeave",
++          fieldId: "x13.primary-incoming.c27",
++          editorText: "01.00",
++        },
++      ],
++      event: e,
++    };
++    const result = saleReturnLabourAppendInput(r);
++    r.events[0]!.editorText = "AA";
++    expect(result.events).toHaveLength(3);
++    expect(result.events[0]!.editorText).toBe("BB");
++    expect(result.events[1]!.editorText).toBe("BB");
++    expect(result.events[2]!.editorText).toBe("01.00");
++    expect(result.event.editorText).toBe("BB");
++    expect(Object.isFrozen(r)).toBe(false);
++  });
++  it("keeps lookup outside the journal", () => {
++    const r = {
++      ...prefix(),
++      fieldId: "x13.primary-incoming.c29",
++      editorText: "TA",
++    };
++    expect(saleReturnLabourObserveInput(r)).toEqual(r);
++  });
++  for (const [name, mutate] of [
++    [
++      "extra raw",
++      (r: any) => {
++        r.raw = { LBR_VAL: "2" };
++      },
++    ],
++    [
++      "extra policy",
++      (r: any) => {
++        r.event.rowPolicy = {};
++      },
++    ],
++    [
++      "missing version",
++      (r: any) => {
++        delete r.event.observationVersion;
++      },
++    ],
++    [
++      "upper hash",
++      (r: any) => {
++        r.baseVersion = "A".repeat(64);
++      },
++    ],
++    [
++      "short hash",
++      (r: any) => {
++        r.rowIdentity = "a";
++      },
++    ],
++    [
++      "hash newline",
++      (r: any) => {
++        r.prefixVersion += "\n";
++      },
++    ],
++    [
++      "number code",
++      (r: any) => {
++        r.event.editorText = 2;
++      },
++    ],
++    [
++      "blank code",
++      (r: any) => {
++        r.event.editorText = "";
++      },
++    ],
++    [
++      "space code",
++      (r: any) => {
++        r.event.editorText = "B ";
++      },
++    ],
++    [
++      "wide code",
++      (r: any) => {
++        r.event.editorText = "BBB";
++      },
++    ],
++    [
++      "unicode code",
++      (r: any) => {
++        r.event.editorText = "β";
++      },
++    ],
++    [
++      "newline code",
++      (r: any) => {
++        r.event.editorText = "B\n";
++      },
++    ],
++    [
++      "wrong field",
++      (r: any) => {
++        r.event.fieldId = "x13.primary-incoming.c19";
++      },
++    ],
++    [
++      "kind coercion",
++      (r: any) => {
++        r.event.kind = "leaveCell";
++      },
++    ],
++    [
++      "money extra observation",
++      (r: any) => {
++        r.event = {
++          kind: "moneyLeave",
++          fieldId: "x13.primary-incoming.c19",
++          editorText: "1",
++          observationVersion: hash,
++        };
++      },
++    ],
++    [
++      "money unicode",
++      (r: any) => {
++        r.event = {
++          kind: "moneyLeave",
++          fieldId: "x13.primary-incoming.c19",
++          editorText: "1\u2028",
++        };
++      },
++    ],
++    [
++      "money oversized",
++      (r: any) => {
++        r.event = {
++          kind: "moneyLeave",
++          fieldId: "x13.primary-incoming.c19",
++          editorText: "12345678901",
++        };
++      },
++    ],
++    [
++      "unsupported numeric field",
++      (r: any) => {
++        r.event = {
++          kind: "moneyLeave",
++          fieldId: "x13.primary-incoming.c16",
++          editorText: "1",
++        };
++      },
++    ],
++    [
++      "old journal coercion",
++      (r: any) => {
++        r.events = "[]";
++      },
++    ],
++    [
++      "sparse journal",
++      (r: any) => {
++        r.events = new Array(1);
++      },
++    ],
++    [
++      "array property",
++      (r: any) => {
++        r.events.x = 1;
++      },
++    ],
++    [
++      "too many old events",
++      (r: any) => {
++        r.events = Array.from({ length: 101 }, codeEvent);
++      },
++    ],
++    [
++      "append at100",
++      (r: any) => {
++        r.events = Array.from({ length: 100 }, codeEvent);
++      },
++    ],
++  ] as const)
++    it(`rejects ${name}`, () => {
++      const r = request();
++      mutate(r);
++      expect(() => saleReturnLabourAppendInput(r)).toThrow(
++        SaleReturnLabourReplayError,
++      );
++    });
++  it("allows lookup at100 without accepting a101st event", () =>
++    expect(
++      saleReturnLabourObserveInput({
++        ...prefix(),
++        events: Array.from({ length: 100 }, codeEvent),
++        fieldId: "x13.primary-incoming.c13",
++        editorText: "BB",
++      }).events,
++    ).toHaveLength(100));
++  it("never invokes request, kind or array-index getters", () => {
++    const getter = vi.fn(() => {
++      throw new Error("must not invoke");
++    });
++    const values = [
++      Object.defineProperty(request(), "event", {
++        enumerable: true,
++        get: getter,
++      }),
++      {
++        ...request(),
++        event: Object.defineProperty({}, "kind", {
++          enumerable: true,
++          get: getter,
++        }),
++      },
++      {
++        ...request(),
++        events: Object.defineProperty([null], "0", {
++          enumerable: true,
++          get: getter,
++        }),
++      },
++    ];
++    for (const value of values)
++      expect(() => saleReturnLabourAppendInput(value)).toThrow(
++        SaleReturnLabourReplayError,
++      );
++    expect(getter).not.toHaveBeenCalled();
++  });
++  it("rejects symbol and custom-prototype envelopes without caller mutation", () => {
++    const symbolic = { ...request(), [Symbol("extra")]: true };
++    expect(() => saleReturnLabourAppendInput(symbolic)).toThrow();
++    const custom = Object.assign(Object.create({ inherited: true }), request());
++    expect(() => saleReturnLabourAppendInput(custom)).toThrow();
++    expect(Object.isFrozen(symbolic)).toBe(false);
++  });
++  it("bounds the complete public error envelope without truncating recovery/diagnostics", () => {
++    const envelope = (error: SaleReturnLabourReplayError) => ({
++      error: error.code,
++      message: error.message,
++      ...(error.details === undefined ? {} : { details: error.details }),
++    });
++    const plain = {
++      error: "calculation-rejected",
++      message: "failed",
++      details: {
++        diagnostics: [{ code: "unsupported-precision", message: "" }],
++      },
++    };
++    const room = 2097152 - Buffer.byteLength(JSON.stringify(plain), "utf8");
++    const at = new SaleReturnLabourReplayError(
++      422,
++      "calculation-rejected",
++      "failed",
++      {
++        diagnostics: [
++          { code: "unsupported-precision", message: "x".repeat(room) },
++        ],
++      },
++    );
++    expect(Buffer.byteLength(JSON.stringify(envelope(at)), "utf8")).toBe(
++      2097152,
++    );
++    expect(at.code).toBe("calculation-rejected");
++    const above = new SaleReturnLabourReplayError(
++      422,
++      "calculation-rejected",
++      "failed",
++      {
++        diagnostics: [
++          { code: "unsupported-precision", message: "x".repeat(room + 1) },
++        ],
++      },
++    );
++    expect(above).toMatchObject({
++      statusCode: 422,
++      code: "unsupported-output",
++    });
++    expect(above.details).toBeUndefined();
++    expect(
++      Buffer.byteLength(JSON.stringify(envelope(above)), "utf8"),
++    ).toBeLessThan(2097152);
++  });
++});

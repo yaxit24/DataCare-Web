@@ -1,0 +1,51 @@
+{
+  "runs": [
+    {
+      "label": "focused-final",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.config.ts"
+      ],
+      "cwd": "/tmp/datacare-return-save-map-staged/web/packages/core",
+      "startedAtUtc": "2026-09-12T00:27:06.347576+00:00",
+      "finishedAtUtc": "2026-09-12T00:27:07.038116+00:00",
+      "exitCode": 0,
+      "log": "focused-final.txt",
+      "logSha256": "87eaba6a5ffb618359a1f8da9d65c8460cd55265fc687a5de6f0f056e5d5bf69"
+    },
+    {
+      "label": "types-final",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.bin/tsc",
+        "--noEmit",
+        "--strict",
+        "--noUncheckedIndexedAccess",
+        "--isolatedModules",
+        "--skipLibCheck",
+        "--target",
+        "ES2022",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--types",
+        "node",
+        "src/saleReturnIncomingSaveProjection.ts",
+        "test/saleReturnIncomingSaveProjection.test.ts"
+      ],
+      "cwd": "/tmp/datacare-return-save-map-staged/web/packages/core",
+      "startedAtUtc": "2026-09-12T00:27:07.038283+00:00",
+      "finishedAtUtc": "2026-09-12T00:27:07.569662+00:00",
+      "exitCode": 0,
+      "log": "types-final.txt",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "inputManifest": "focused-final.inputs.json",
+  "inputManifestSha256": "7a4f53c7eff0a55c53f6c64552b87c3fc80cd108ba314b19414b5d3eadb01ef6",
+  "inputCount": 5,
+  "changedInputs": [],
+  "limits": "New staged pure module/test only. No API, database, active build or shared suite."
+}

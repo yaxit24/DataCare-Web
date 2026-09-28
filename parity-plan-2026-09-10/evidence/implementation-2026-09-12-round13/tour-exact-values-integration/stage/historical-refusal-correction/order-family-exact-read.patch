@@ -1,0 +1,31 @@
+--- a/apps/api/test/orderSessionCommands.db.test.ts
++++ b/apps/api/test/orderSessionCommands.db.test.ts
+@@ -441,7 +441,7 @@
+         });
+     },
+   );
+-  it('Tour rounded imported decimal refuses unchanged; exact input replaces25 with40 while retaining NULL, clock and children', async () => {
++  it('Tour exact loaded decimal replaces25 with40 while retaining NULL, clock and children', async () => {
+     await create('tour');
+     await sql(
+       `UPDATE "SL_ORD_DATA" SET "MOBILE"=NULL,"ENTRY_TIME"=NULL WHERE tenant_id=$1 AND "CO_BOOK"='N14'`,
+@@ -462,17 +462,11 @@
+       ({ row_id: _id, ...row }) => row,
+     );
+     const body = await tourEdit();
+-    const beforeRefusal = await physical();
+-    // Existing Tour read DTO converts MRP to Number; it does not claim Sales' exact decimal hydration.
+-    await expect(
+-      editTourOrderInSession(runtime, { identity, input: body, voucherNo: 1 }),
+-    ).rejects.toThrow('needs its exact decimal string');
+-    expect(await physical()).toEqual(beforeRefusal);
+-    // Service-only exact-input seam: this correction comes from the actual saved SQL text, not an invented rounded value.
++    // The Tour read projection now retains the exact saved input value directly.
+     for (const line of body.lines ?? []) {
+       const original = beforeParents.find((row) => row.SR_NO === String(line.srNo));
+       expect(original?.ITM_MRP).toBe('999999999999999.99');
+-      Object.assign(line, { mrp: original!.ITM_MRP });
++      expect(line.mrp).toBe(original!.ITM_MRP);
+     }
+     await editTourOrderInSession(runtime, { identity, input: body, voucherNo: 1 });
+     await assertFinance('tour', 40);

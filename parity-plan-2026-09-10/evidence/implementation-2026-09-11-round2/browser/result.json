@@ -1,0 +1,319 @@
+{
+  "startedAt": "2026-09-10T23:39:01.888Z",
+  "database": "disposable localhost:55433 / app_user",
+  "mockedRequests": 0,
+  "status": "passed",
+  "designBook": {
+    "checks": [
+      "browser create/reload",
+      "two components",
+      "style and text page number",
+      "unchanged edit",
+      "saved image upload/read/delete",
+      "changed component",
+      "stale edit409 retains form",
+      "browser deletion"
+    ]
+  },
+  "designCalculations": {
+    "checks": [
+      "new-book configured item defaults",
+      "ordered cell leaves",
+      "invalid numeric refresh retains draft with field validation and no page error",
+      "customer/karigar conversion and labour",
+      "component-only aggregate trigger",
+      "explicit parent refresh",
+      "whole-amount bankers rounding",
+      "transient margin and saved MRP",
+      "server replay save/reopen",
+      "unchanged snapshot without replay",
+      "zero-rate manual amount retention",
+      "IL P-basis 0.50/0.51 boundary",
+      "wide grids scroll inside their panels while heading and book controls stay visible",
+      "delete calculated design"
+    ]
+  },
+  "tourOrder": {
+    "voucherNo": "00001",
+    "scope": {
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "Z09",
+      "acCode": "TOURAC",
+      "itemCode": "GOLD",
+      "componentCode": "STONE"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "POST",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "DELETE",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      }
+    ],
+    "checks": [
+      "configured book",
+      "real offline configuration failure blocks editing and save",
+      "real delayed configuration retry blocks editing and save until ready",
+      "POST preserves rate-before-ghat journal and amount117",
+      "browser create/reopen",
+      "two component rows",
+      "legacy flattened update400 preserves children",
+      "unchanged edit",
+      "changed child",
+      "whole-rupee pieces and percentage labour",
+      "manual paise unchanged edit",
+      "rate-before-ghat ordered commits",
+      "voucher time preservation",
+      "stale edit409 retains form",
+      "scoped print",
+      "browser deletion"
+    ]
+  },
+  "creditNote": {
+    "checks": [
+      "scoped browse",
+      "persisted item and two components",
+      "saved registration state",
+      "same number in another credit book",
+      "scope change and failed lookup clear prior document"
+    ],
+    "boundary": "Read/browse imported fixture only; no create/edit/delete or live provider acceptance"
+  },
+  "finishedAt": "2026-09-10T23:39:10.249Z"
+}

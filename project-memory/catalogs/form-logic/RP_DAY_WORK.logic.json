@@ -1,0 +1,31 @@
+{
+ "form": "RP_DAY_WORK",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "LOGIN_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "LOGIN_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2950
+}

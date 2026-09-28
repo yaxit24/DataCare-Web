@@ -1,0 +1,71 @@
+{
+ "form": "MS_MFG_MAST",
+ "tables": [
+  "BOOK_DATA",
+  "LOCT_MAST",
+  "LOGIN_MAST",
+  "MENU_DATA",
+  "MFG_DATA",
+  "MFG_DETL",
+  "MFG_IDTL",
+  "MFG_ISU_REC",
+  "MFG_MAST",
+  "SL_ORD_DETL",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "USER_SET": [
+    "CO_CODE",
+    "FRM_DELETE",
+    "FRM_EDIT",
+    "FRM_PRINT",
+    "FRM_VIEW",
+    "LC_CODE",
+    "MAIN_MENU",
+    "MAIN_SRNO",
+    "SUB_MENU",
+    "SUB_SRNO",
+    "USER_NAME"
+   ]
+  },
+  "UPDATE": [
+   "BOOK_DATA",
+   "MENU_DATA",
+   "MFG_MAST",
+   "SL_ORD_DETL"
+  ],
+  "DELETE": [
+   "MENU_DATA",
+   "MFG_DATA",
+   "MFG_DETL",
+   "MFG_IDTL",
+   "MFG_ISU_REC",
+   "MFG_MAST",
+   "TEMP_BOOK_DATA",
+   "USER_SET"
+  ]
+ },
+ "selectTables": [
+  "BOOK_DATA",
+  "LOCT_MAST",
+  "LOGIN_MAST",
+  "MENU_DATA",
+  "MFG_DATA",
+  "MFG_DETL",
+  "MFG_IDTL",
+  "MFG_ISU_REC",
+  "MFG_MAST",
+  "SL_ORD_DETL",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 14,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 1886
+}

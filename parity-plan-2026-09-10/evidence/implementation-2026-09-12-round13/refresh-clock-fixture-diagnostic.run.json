@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "node",
+    "--input-type=module",
+    "-e",
+    "import {PrismaClient} from \"@prisma/client\"; const db = new PrismaClient(); try { await db.$queryRawUnsafe(\"SELECT pg_sleep(0.001)\"); } catch (error) { console.log(JSON.stringify({code:error.code,meta:error.meta})); } finally { await db.$disconnect(); }"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T20:21:54.706918+00:00",
+  "finishedAtUtc": "2026-09-11T20:21:57.670115+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/refresh-clock-fixture-diagnostic.txt",
+  "logSha256": "e168e4d6e5f062a1a8da04a646f472ca4d94e7186d01f6197983831031843931",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/refresh-clock-fixture-diagnostic.inputs.json",
+  "inputManifestSha256": "c375694b7f3d2a677f4e88f5ec608fbd212f6b8992657abfe820de1713544eb0",
+  "inputCount": 1768,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

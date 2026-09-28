@@ -1,0 +1,19 @@
+{
+ "form": "MS_HELP",
+ "tables": [],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 0,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2402
+}

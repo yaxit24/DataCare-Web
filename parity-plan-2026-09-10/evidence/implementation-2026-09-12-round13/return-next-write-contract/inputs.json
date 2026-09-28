@@ -1,0 +1,277 @@
+{
+  "kind": "next-saved-return-write-and-known-closing-contract",
+  "status": "prospective-for-parent-review-no-implementation",
+  "capturedAtUtc": "2026-09-11T23:45:13.657689+00:00",
+  "validation": "Read primary source/current code. Authored source index and literal candidates only. No compiler/tests/DB/browser; no active file changes.",
+  "counts": {
+    "sourceGridAssignments": 64,
+    "independentCandidates": 33,
+    "references": 44
+  },
+  "references": [
+    {
+      "path": "/tmp/datacare-return-next-write-contract/implementation-contract.md",
+      "kind": "new-prospective-evidence",
+      "bytes": 28211,
+      "sha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24"
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/README.md",
+      "kind": "new-prospective-evidence",
+      "bytes": 1598,
+      "sha256": "6dc19bcbc2ee7e3a7927413d920af99b359a81848d0c6c0f58f63154e0423d3b"
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/independent-candidates.json",
+      "kind": "new-prospective-evidence",
+      "bytes": 18578,
+      "sha256": "108e4c9f1145d7ae8a7b20d9b931e7657bd76d826beb20e8fc600e94adfc8c48"
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/source-save-grid-map.json",
+      "kind": "new-prospective-evidence",
+      "bytes": 12104,
+      "sha256": "a4d017691828aadfcecdc836ba057b829f7179456bffd310b8fc624a949e2f72"
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/primary-source-excerpts.txt",
+      "kind": "new-prospective-evidence",
+      "bytes": 148007,
+      "sha256": "9e45bf6185656b7a4133e6f04ea9b7be3e9e2a71e787bcaddbc4d87e7cca7257"
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/author-evidence.py",
+      "kind": "new-prospective-evidence",
+      "bytes": 16064,
+      "sha256": "494a06188ef10454bc755d944e5a0394048016e1cb402b7cd28177d81dc09438"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 579807,
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/DC_Main.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 85154,
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 575218,
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MDI_FORM.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 661677,
+      "sha256": "cb91085c50d07a07ae5c5a8e6982ef6f9a2c533e2b55d61fc8c35f093f5dfbbc"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 1431083,
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 664044,
+      "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 249435,
+      "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+      "kind": "desktop-primary-source",
+      "bytes": 218454,
+      "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/02-implementation-plan.md",
+      "kind": "current-open-plan-as-read",
+      "bytes": 101803,
+      "sha256": "7e1496ae32e51d79b470df5a9da414abf893a2e800473a2bc8495bd06827b3bd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/12-execution-addendum.md",
+      "kind": "current-open-plan-as-read",
+      "bytes": 102282,
+      "sha256": "9502c90502f62276e69d083b2ed77ab1986d8acb10fa567aae05cb13edc65f0a"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/13-execution-backlog.json",
+      "kind": "current-open-plan-as-read",
+      "bytes": 132872,
+      "sha256": "7fbdd96072dabc539260097a8c763c41c6192f566fb45e468af9fb80714c80bb"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x13-sale-return-33-next-contract.md",
+      "kind": "frozen-prior-contract",
+      "bytes": 22984,
+      "sha256": "a7a0ffb02944327fe1c9f64d8bc3ff48b92df76f332c35728d312e8deb06e34b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-source-addendum.md",
+      "kind": "frozen-prior-contract",
+      "bytes": 1822,
+      "sha256": "9f41889ef665c3a0934412c619921bf5788b853269967ea81e8ca267f09347ae"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-session-ledger-mode-next-contract.md",
+      "kind": "frozen-prior-contract",
+      "bytes": 24425,
+      "sha256": "180b315ae44c23c663a7d4a95ca1d5ddc98b4f460bb932db7735216f78ac93b0"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-round12-handoff-and-remaining-acceptance.md",
+      "kind": "frozen-prior-contract",
+      "bytes": 16855,
+      "sha256": "165b9ecedc421727a6f94014bae4b5bc5b6d00d29df2a1c3b82843f6ebb99e5e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/salesReturn.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 30772,
+      "sha256": "612ddcd8f3b0cb8f0368435495125c8b50ed2f8cd03adad11f1cef12cf1d2a70"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 25202,
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 21546,
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 22686,
+      "sha256": "bffe67a9bcec0d3686cd4b447efddab51a9932d66f7d1ec5a09f471635c4e232"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 31130,
+      "sha256": "caeca09dcbdff4990ce5ffbe00505605d498f92a63beaec640496398fb236626"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 21346,
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 12964,
+      "sha256": "375629060abeb7454079996c19f61dcc3f8dbdff095616358257e1fa9ce4a2bd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 4706,
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 14128,
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 13979,
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextLogin.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 7922,
+      "sha256": "6d32b25270c7a09bedcd6d876c95490368391936238de74f52c675b5c143c5d5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextSelection.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 18133,
+      "sha256": "9440e509fa5f0938edf9b0031c2bff9f5a4e2091cbe8770be2c0c8d403a53aa5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingProjection.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 11556,
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 24770,
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/sessionLedgerMode.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 23199,
+      "sha256": "651c63fcc715b995d924d79ddb756d8fca504fcee4ae8cf9c64b4ad883844493"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/savedSaleReturnClock.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 7998,
+      "sha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "kind": "existing-implementation-as-read",
+      "bytes": 262459,
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/migrations/20260912004500_session_context_epoch/migration.sql",
+      "kind": "existing-implementation-as-read",
+      "bytes": 13042,
+      "sha256": "b2ebec67672c219db30e547cb1b6b7346f49e94cc3c621a12610e1e54bf35b7d"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/salesFamilyLifecycle.db.test.ts",
+      "kind": "existing-implementation-as-read",
+      "bytes": 72005,
+      "sha256": "cf5df304bc87625f9e538ff7d6298341ac97d157f859e0a9f98f665020ae9592"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/implementation-contract.md",
+      "kind": "frozen-preview-and-qualified-fixture",
+      "bytes": 34045,
+      "sha256": "2bbfd5a65f6806f50daf3099a9204743be40024d89359861c52e558eee206ccc"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/ready-manifest.json",
+      "kind": "frozen-preview-and-qualified-fixture",
+      "bytes": 13020,
+      "sha256": "1f079021e6757104856a508093291a4534558851beda352c22d9bc62cf30c418"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/ready-manifest.json",
+      "kind": "frozen-preview-and-qualified-fixture",
+      "bytes": 5048,
+      "sha256": "0db8391e287d5fc0e4429140aaa88c59ad8ce64412983416cc74c785e296d979"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "kind": "frozen-preview-and-qualified-fixture",
+      "bytes": 62711,
+      "sha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b"
+    }
+  ]
+}

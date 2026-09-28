@@ -11,8 +11,10 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "test:browser": "pnpm --filter @datacare/web test:browser",
+    "test:parity:api": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test",
+    "test:parity:browser": "node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs",
     "typecheck": "turbo run typecheck",
-    "lint": "node scripts/lint-workspace.mjs && turbo run typecheck",
+    "lint": "node scripts/lint-workspace.mjs && eslint . && turbo run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "restore-drill": "pnpm --filter @datacare/db build && pnpm --filter @datacare/api build && node scripts/restore-drill.mjs",
@@ -25,14 +27,24 @@
     "fresh:provision": "node scripts/check-fresh-provision.mjs",
     "type:parity": "node scripts/check-type-parity.mjs",
     "register:check": "node scripts/check-completion-register.mjs",
+    "release:certify": "node scripts/release-certify.mjs",
     "docs:refs": "node scripts/check-doc-references.mjs",
-    "typecheck:tests": "cd apps/api && NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.test.json --noEmit"
+    "typecheck:tests": "cd apps/api && NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.test.json --noEmit",
+    "lint:eslint": "eslint .",
+    "parity:measure": "node scripts/parity-measure.mjs",
+    "depth:parity": "node scripts/check-depth.mjs",
+    "depth:audit": "node scripts/check-depth.mjs --audit",
+    "test:routes": "pnpm --filter @datacare/web test:routes",
+    "depth:deadcells": "node scripts/check-dead-cells.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.0",
+    "eslint": "10.8.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "prettier": "3.9.0",
     "turbo": "2.10.0",
     "typescript": "5.9.3",
+    "typescript-eslint": "8.65.0",
     "vitest": "2.1.9"
   },
   "dependencies": {

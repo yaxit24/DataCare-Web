@@ -1,0 +1,19 @@
+{
+  "command": [
+    "pnpm",
+    "register:check"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T22:29:06.926955+00:00",
+  "finishedAtUtc": "2026-09-11T22:29:07.436935+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/completion-register-current.txt",
+  "logSha256": "93e8343d7e6aacb77e8a6bb12ac1dc750ace458e4c357dbf9d611b02da077c90",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/completion-register-current.inputs.json",
+  "inputManifestSha256": "4bb7f2729deea68daa57347b30a864590dd0583f078c575bceefd6fa2704cb3f",
+  "inputCount": 1810,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

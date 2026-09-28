@@ -1,0 +1,42 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:11:21.434228+00:00",
+  "finishedAtUtc": "2026-09-12T01:11:22.466505+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final-build.txt",
+  "logSha256": "79da90d454c83eb7b7c76d1548b439a13925b548ccc7911efbe41f4e31f94aa5",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final-build.inputs.json",
+  "inputManifestSha256": "85f390ec7d4c595fa189ac445efc5582df347c5bfccfa53f07abf4b5a7f3b70b",
+  "inputCount": 1881,
+  "changedInputs": [
+    {
+      "path": "web/packages/core/dist/index.d.ts",
+      "beforeSha256": "fe752e07a451cd294c642716b4887707b534b71b91abb43a710412df8d8a6442",
+      "afterSha256": "9f4185f0b94ed7a2fcd91105af5aacee0ac26941559ffccaac5dad46502cca10"
+    },
+    {
+      "path": "web/packages/core/dist/index.js",
+      "beforeSha256": "be65786e22ea7654c0416c0c3cf2c9fbff61a358278febf05c4fd5e1918c6fcd",
+      "afterSha256": "b762cdde51b29baa218a373ff17d94116b0f81bcb8c1fd56dc7e4362ba6b5378"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnNBarCompanions.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "513555575dec6a7c2873a1bd1650bed5d30481a145eafc6f27412ccf28dc318c"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnNBarCompanions.js",
+      "beforeSha256": null,
+      "afterSha256": "9618b138213411b1d6ab9d2d9a9006928338eb810ad3e95fcbc46ab60e5f3ba5"
+    }
+  ],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

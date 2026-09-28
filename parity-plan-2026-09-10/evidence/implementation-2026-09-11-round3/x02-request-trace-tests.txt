@@ -1,0 +1,22 @@
+✔ conditional local aliases retain nested JSON path through actual route input helper and row column (56.180708ms)
+✔ interfaces, comments, unused aliases and uncalled functions do not count as consumed fields (1.528542ms)
+✔ an unused request mapping or a condition-only field is not a sent value (1.368416ms)
+✔ a later static assignment replacing a request value removes the old provenance (1.070042ms)
+✔ a route dropping lines, a wrong endpoint or a different imported writer cannot establish a trace (9.00225ms)
+✔ request helper body must forward the request, and imported writer aliases retain export identity (10.749459ms)
+✔ same leaf under another collection is not the requested nested input (6.1845ms)
+✔ changing the writer nested property breaks the trace even if an inert interface retains it (3.768ms)
+✔ an unrelated exported reader cannot satisfy the actual route writer consumption (3.5965ms)
+✔ dynamic nested output keys remain explicit unsupported evidence rather than successful mappings (1.592542ms)
+✔ dynamic endpoints are explicitly unsupported rather than guessed from the page writer map (0.600167ms)
+✔ dynamic writer input keys are unsupported, while static string keys remain traceable (1.363666ms)
+✔ lexically shadowed aliases do not borrow another function input mapping (4.195375ms)
+✔ four real wholesale aliases each reach the registered route and issued row column (1533.307542ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1972.882708

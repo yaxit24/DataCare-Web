@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import type { UserRights } from '@datacare/types';
+import { parseContextEpoch } from './sessionContextValue.js';
 
 const enc = (secret: string) => new TextEncoder().encode(secret);
 const ISSUER = 'datacare-api';
@@ -14,6 +15,8 @@ export interface SessionClaims extends JWTPayload {
   coCode: string;
   lcCode: string;
   coYear?: string;
+  /** Exact server-owned positive BIGINT generation; never default an old access claim to1. */
+  contextEpoch: string;
   sid: string;
   rights: UserRights;
   passwordResetRequired?: boolean;
@@ -36,6 +39,9 @@ export async function issueAccess(
   secret: string,
   ttl: string = '15m',
 ): Promise<string> {
+  if (parseContextEpoch(claims.contextEpoch).status !== 'ready') {
+    throw new Error('invalid-token-claim:contextEpoch');
+  }
   return new SignJWT({ ...claims, typ: 'access' })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setIssuer(ISSUER)
@@ -88,10 +94,14 @@ export async function verifyAccessToken(token: string, secret: string): Promise<
     coCode: requiredString(payload, 'coCode'),
     lcCode: requiredString(payload, 'lcCode'),
     sid: requiredString(payload, 'sid'),
+    contextEpoch: requiredString(payload, 'contextEpoch'),
     rights: payload.rights as UserRights,
   };
   if (!claims.rights || typeof claims.rights !== 'object')
     throw new Error('invalid-token-claim:rights');
+  if (parseContextEpoch(claims.contextEpoch).status !== 'ready') {
+    throw new Error('invalid-token-claim:contextEpoch');
+  }
   return claims;
 }
 

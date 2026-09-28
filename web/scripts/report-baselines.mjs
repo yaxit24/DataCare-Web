@@ -31,6 +31,12 @@ const { renderReportLayout } = await import(
     'compiled engine not found — run `pnpm --filter @datacare/api build` before generating baselines',
   );
 });
+const { resolveReportBinding } = await import(
+  join(HERE, '..', 'apps', 'api', 'dist', 'modules', 'reports', 'reportBindingContract.js')
+);
+const { completeOrderFields, orderFormulaValues, orderParentFormulaValues } = await import(
+  join(HERE, '..', 'apps', 'api', 'dist', 'modules', 'reports', 'orderReportValues.js')
+);
 
 /**
  * Every usable spec is baselined, not just the high-severity list: the plan's 22 high-severity
@@ -46,7 +52,8 @@ const REPORTS = readdirSync(SPECS)
 const FIELD = /\{([^}]+)\}/g;
 
 /** Deterministic binding: every database field resolves to a stable marker derived from its own name,
- * so the checksum exercises the binding path without inventing business data. */
+ * so the checksum exercises the binding path without inventing business data. Recovered order reports
+ * use their strict typed contract rather than bypassing it with the generic placeholder binding. */
 function bindingFor(spec) {
   const tokens = new Set();
   const text = JSON.stringify(spec);
@@ -55,14 +62,85 @@ function bindingFor(spec) {
     const key = m[1];
     if (key && !key.startsWith('@')) tokens.add(key);
   }
-  const header = {};
-  for (const token of [...tokens].sort()) header[token] = `V:${token}`;
-  // Two detail rows so repeating sections render more than once.
-  const detailRows = [
+  const genericHeader = {};
+  for (const token of [...tokens].sort()) genericHeader[token] = `V:${token}`;
+  if (spec.source?.kind !== 'order-xml-v1') {
+    return {
+      header: genericHeader,
+      detailRows: [
+        genericHeader,
+        Object.fromEntries(Object.entries(genericHeader).map(([k, v]) => [k, `${v}#2`])),
+      ],
+      company: 'BASELINE CO',
+    };
+  }
+
+  const contract = resolveReportBinding(spec);
+  const parents = contract.orderDocument.orderedItems
+    ? [1, 2].map((serial) =>
+        orderParentFormulaValues(spec, {
+          'SL_ORD_DETL.SR_NO': String(serial),
+          'SL_ORD_DETL.TAG_NO': serial === 1 ? 'TAG-BASELINE' : '',
+          'SL_ORD_DETL.DESIGN_NO': `DESIGN-${serial}`,
+          'ITEM_MAST.IT_NAME': `BASELINE ITEM ${serial}`,
+          'SL_ORD_DETL.ITM_GWT': String(serial),
+          'SL_ORD_DETL.NET_AMT': String(serial * 100),
+          'SL_ORD_DETL.ITM_REMARK': '',
+        }),
+      )
+    : [];
+  const received = [];
+  const header = orderFormulaValues(
+    spec,
+    completeOrderFields(spec, {
+      'SL_ORD_DATA.CO_YEAR': '2026-2027',
+      'SL_ORD_DATA.CO_BOOK': 'BASE',
+      'SL_ORD_DATA.VCH_NO': '00001',
+      'SL_ORD_DATA.AC_CODE': 'BASELINE',
+      'SL_ORD_DATA.AC_NAME': 'BASELINE CUSTOMER',
+      'SL_ORD_DATA.VCH_DATE': '2026-01-01',
+      'SL_ORD_DATA.DEL_DATE': '2026-01-02',
+      'SL_ORD_DATA.NET_AMT': '300',
+      'SL_ORD_DATA.TOT_AMT': '300',
+      'SL_ORD_DATA.ADV_AMT': '0',
+      'SL_ORD_DATA.TAX_PRC': '0',
+      'SL_ORD_DATA.TAX_AMT': '0',
+      'CO_MAST.CO_NAME': 'BASELINE CO',
+      'BOOK_DATA.BOOK_NAME': 'BASELINE ORDER',
+    }),
+    parents,
+    received,
+    { opening: '0', closing: '0' },
+    'O',
+  );
+  const ordRec = spec.subreports?.OrdRec;
+  if (!ordRec) throw new Error(`${spec.report}: strict order baseline requires OrdRec`);
+  const options = {
     header,
-    Object.fromEntries(Object.entries(header).map(([k, v]) => [k, `${v}#2`])),
-  ];
-  return { header, detailRows, company: 'BASELINE CO' };
+    detailRows: parents,
+    company: 'BASELINE CO',
+    subreports: {
+      OrdRec: { header: completeOrderFields(ordRec, {}), detailRows: received },
+    },
+  };
+  if (contract.child) {
+    options.parentChild = {
+      parentSections: contract.parentSections,
+      childSections: contract.childSections,
+      parentFooterSections: contract.parentFooterSections,
+      groups: parents.map((parent) => ({
+        key: parent['SL_ORD_DETL.SR_NO'],
+        parent,
+        children: [],
+      })),
+    };
+  }
+  if (contract.orderDocument.images) {
+    options.orderImages = Object.fromEntries(
+      parents.map((parent) => [parent['SL_ORD_DETL.SR_NO'], { state: 'absent' }]),
+    );
+  }
+  return options;
 }
 
 function measure(name) {

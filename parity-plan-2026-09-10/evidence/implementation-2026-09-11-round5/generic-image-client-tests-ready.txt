@@ -1,0 +1,15 @@
+
+> @datacare/web@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> vitest run --passWithNoTests "test/imageEditorSession.test.ts" "test/cameraRequestGuard.test.ts"
+
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/cameraRequestGuard.test.ts (3 tests) 4ms
+ ✓ test/imageEditorSession.test.ts (20 tests) 62ms
+
+ Test Files  2 passed (2)
+      Tests  23 passed (23)
+   Start at  12:42:24
+   Duration  743ms (transform 231ms, setup 0ms, collect 247ms, tests 66ms, environment 0ms, prepare 173ms)
+

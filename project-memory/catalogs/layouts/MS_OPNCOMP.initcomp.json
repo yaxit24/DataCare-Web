@@ -1,0 +1,87 @@
+{
+ "form": "MS_OPNCOMP",
+ "controlCount": 7,
+ "byKind": {
+  "label": 3,
+  "textbox": 4
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "this": [
+   "tMonth",
+   "lblLcName",
+   "tlcCode",
+   "tYearCode",
+   "lblCompany",
+   "tCoCode",
+   "LblExit"
+  ]
+ },
+ "controls": [
+  {
+   "name": "LblExit",
+   "type": "Label",
+   "location": "628,252",
+   "size": "44,25",
+   "tabIndex": "3",
+   "text": "Exit",
+   "kind": "label"
+  },
+  {
+   "name": "tCoCode",
+   "type": "TextBox",
+   "location": "619,78",
+   "size": "58,27",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tlcCode",
+   "type": "TextBox",
+   "location": "610,150",
+   "size": "75,27",
+   "tabIndex": "9",
+   "text": "01",
+   "kind": "textbox"
+  },
+  {
+   "name": "tYearCode",
+   "type": "TextBox",
+   "location": "592,219",
+   "size": "110,27",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblCompany",
+   "type": "Label",
+   "location": "420,113",
+   "size": "456,25",
+   "tabIndex": "11",
+   "text": "Company Name",
+   "kind": "label"
+  },
+  {
+   "name": "lblLcName",
+   "type": "Label",
+   "location": "421,184",
+   "size": "456,25",
+   "tabIndex": "12",
+   "text": "Location Name",
+   "kind": "label"
+  },
+  {
+   "name": "tMonth",
+   "type": "TextBox",
+   "location": "710,219",
+   "size": "36,27",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "textbox"
+  }
+ ]
+}

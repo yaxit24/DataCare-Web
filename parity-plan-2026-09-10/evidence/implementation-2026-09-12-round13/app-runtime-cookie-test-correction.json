@@ -1,0 +1,6 @@
+{
+  "path": "web/apps/api/test/app.runtime.test.ts",
+  "beforeSha256": "e2f7f04d54fabbaa031a1cf569ed1c2264dfe76f97b210a606372a211412aeab",
+  "afterSha256": "6a548e18256dc618c4a462a328ae8b1b06fe918a4df70370b2f5b9d11c29e0cc",
+  "reason": "Existing cookie serialization fixture lacked new SQL insert RETURNING and final session-live observations. Add bounded fake SQL results while retaining every cookie flag and default tenant assertion. No DB/expiry coverage claimed by this unit."
+}

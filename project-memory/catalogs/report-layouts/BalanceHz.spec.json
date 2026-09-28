@@ -1,0 +1,409 @@
+{
+ "report": "BalanceHz",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 230,
+     "objects": []
+    },
+    {
+     "name": "Section2",
+     "kind": "ReportHeader",
+     "height": 435,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 15,
+       "top": 120,
+       "width": 2617,
+       "height": 255,
+       "text": "LIABILITIES"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 15,
+       "top": 345,
+       "width": 5265,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "GroupHeader",
+     "height": 275,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 6720,
+       "top": 0,
+       "width": 720,
+       "height": 200,
+       "dataSource": "{@FirstGrCode}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 15,
+       "top": 75,
+       "width": 420,
+       "height": 200,
+       "dataSource": "{AC_GROUP.AC_GR}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 435,
+       "top": 75,
+       "width": 4620,
+       "height": 200,
+       "dataSource": "{AC_GROUP.AC_GR_NAME}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "GroupHeader",
+     "height": 211,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 435,
+       "top": 0,
+       "width": 3285,
+       "height": 210,
+       "dataSource": "{@AcName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 3545,
+       "top": 0,
+       "width": 1715,
+       "height": 211,
+       "dataSource": "Sum ({@AcAmt}, {LEDR_AC_DATA.AC_CODE})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "Detail",
+     "height": 230,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 3480,
+       "top": 0,
+       "width": 1800,
+       "height": 230,
+       "dataSource": "{@AcAmt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "GroupFooter",
+     "height": 230,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupFooter",
+     "height": 246,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 3960,
+       "top": 0,
+       "width": 1320,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 3438,
+       "top": 30,
+       "width": 1842,
+       "height": 216,
+       "dataSource": "Sum ({@AcAmt}, {@gr1})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "ReportFooter",
+     "height": 405,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 15,
+       "top": 30,
+       "width": 5265,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 3271,
+       "top": 105,
+       "width": 2009,
+       "height": 240,
+       "dataSource": "Sum ({@AcAmt})"
+      }
+     ]
+    },
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "ADD",
+   "ref": "{@ADD}",
+   "type": "UnknownField",
+   "text": "{COMP_PARM.CO_ADD1}+\" \"+{COMP_PARM.CO_ADD2}+\" \"+{COMP_PARM.CO_ADD3}+\" \"+{COMP_PARM.CO_CITY}"
+  },
+  {
+   "name": "CR_AMT",
+   "ref": "{@CR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DR_AMT",
+   "ref": "{@DR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "FirstGrCode",
+   "ref": "{@FirstGrCode}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; StringVar FirstGrCode := {AC_GROUP.AC_GR};"
+  },
+  {
+   "name": "gr1",
+   "ref": "{@gr1}",
+   "type": "StringField",
+   "text": "{AC_GROUP.AC_GR}"
+  },
+  {
+   "name": "SR_NO",
+   "ref": "{@SR_NO}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; numberVar srno := numberVar srno+1;"
+  },
+  {
+   "name": "TotalAmt",
+   "ref": "{@TotalAmt}",
+   "type": "NumberField",
+   "text": "Sum ({LEDR_AC_DATA.CR_AMT})-Sum ({LEDR_AC_DATA.DR_AMT})"
+  },
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": "{LEDR_AC_DATA.DR_AMT}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "ADD",
+   "ref": "{@ADD}",
+   "type": "UnknownField",
+   "text": "{COMP_PARM.CO_ADD1}+\" \"+{COMP_PARM.CO_ADD2}+\" \"+{COMP_PARM.CO_ADD3}+\" \"+{COMP_PARM.CO_CITY}"
+  },
+  {
+   "name": "CR_AMT",
+   "ref": "{@CR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DR_AMT",
+   "ref": "{@DR_AMT}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "FirstGrCode",
+   "ref": "{@FirstGrCode}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; StringVar FirstGrCode := {AC_GROUP.AC_GR};"
+  },
+  {
+   "name": "gr1",
+   "ref": "{@gr1}",
+   "type": "StringField",
+   "text": "left({AC_GROUP.AC_GR},2)"
+  },
+  {
+   "name": "SR_NO",
+   "ref": "{@SR_NO}",
+   "type": "NumberField",
+   "text": "whileprintingrecords; numberVar srno := numberVar srno+1;"
+  },
+  {
+   "name": "TotalAmt",
+   "ref": "{@TotalAmt}",
+   "type": "NumberField",
+   "text": "Sum ({LEDR_AC_DATA.DR_AMT})-Sum ({LEDR_AC_DATA.CR_AMT})"
+  },
+  {
+   "name": "1Amt",
+   "ref": "{@1Amt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "2Amt",
+   "ref": "{@2Amt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "AcAmt",
+   "ref": "{@AcAmt}",
+   "type": "NumberField",
+   "text": "Sum({LEDR_AC_DATA.DR_AMT},{LEDR_AC_DATA.AC_CODE}) - Sum({LEDR_AC_DATA.CR_AMT},{LEDR_AC_DATA.AC_CODE})"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+\" \"+{CO_MAST.CO_ADD2}+\" \"+{CO_MAST.CO_ADD3}+\" \"+{CO_MAST.CO_CITY}"
+  },
+  {
+   "name": "CoName",
+   "ref": "{@CoName}",
+   "type": "StringField",
+   "text": "''"
+  },
+  {
+   "name": "CrDiff",
+   "ref": "{@CrDiff}",
+   "type": "NumberField",
+   "text": "if ({@2Amt} - {@1Amt}) >= 0 then Abs({@2Amt} - {@1Amt})"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DrDiff",
+   "ref": "{@DrDiff}",
+   "type": "NumberField",
+   "text": "if ({@2Amt} - {@1Amt}) < 0 then Abs({@2Amt} - {@1Amt})"
+  },
+  {
+   "name": "Gr1",
+   "ref": "{@Gr1}",
+   "type": "UnknownField",
+   "text": "{AC_GROUP.GR_CODE}[1]='1' AND {AC_GROUP.GR_CODE}[1]='2'"
+  },
+  {
+   "name": "LblDiff",
+   "ref": "{@LblDiff}",
+   "type": "StringField",
+   "text": "WhilePrintingRecords; NUmberVar TotCrAmt; NUmberVar TotDrAmt; if (TotDrAmt - TotCrAmt) <> 0 then 'Difference :'"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "\"TRIAL BALANCE AS ON DATE\""
+  },
+  {
+   "name": "RunTotal",
+   "ref": "{@RunTotal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar TotCrAmt; NumberVar TotDrAmt; IF {@AcAmt} >= 0 and {@AcAmt} <> 0 then ( TotDrAmt := TotDrAmt + {@AcAmt}) else ( TotCrAmt := TotCrAmt + Abs({@AcAmt}))"
+  },
+  {
+   "name": "TotCrAmt",
+   "ref": "{@TotCrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NUmberVar TotCrAmt; TotCrAmt"
+  },
+  {
+   "name": "TotDrAmt",
+   "ref": "{@TotDrAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NUmberVar TotDrAmt; TotDrAmt"
+  }
+ ],
+ "sectionCount": 9,
+ "objectCount": 12,
+ "formulaCount": 32
+}

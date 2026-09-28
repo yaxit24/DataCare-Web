@@ -1,0 +1,10 @@
+
+> datacare-web-saas@0.0.0 docs:refs /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/check-doc-references.mjs
+
+doc references: 26 document(s), 162 file citation(s), 13 with a line number, 1 verifiable claim(s)
+DOC_REFS_RED 2 problem(s)
+    TECHNICAL-REFERENCE.md: claim is stale -> ls apps/api/test/*.test.ts | wc -l | tr -d ' '
+      expected 204, got 209
+    parity-evidence/X14-tour-order-lifecycle-2026-09-11.md: cited file does not exist -> tour-order/page.tsx
+ ELIFECYCLE  Command failed with exit code 1.

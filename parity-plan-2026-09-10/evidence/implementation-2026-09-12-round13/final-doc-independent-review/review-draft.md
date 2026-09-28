@@ -1,0 +1,15 @@
+# Round13 final document / checkpoint review — draft
+
+Read-only review. No active document, recipe, helper, source or test was edited, and no test/compiler/database/browser/validator command was run by this reviewer.
+
+The current pointers consistently target progress38/checkpoint39 while retaining prior37 and all older continuation records. The main plan, README, intro, generated X13 progress and top web-document pointers describe the labour preview as implemented under its bounded profile. They retain unavailable known ledger/closing and numeric Return persistence, identify the finite c27-only write path plus mandatory stock-identity review, and do not equate preview with financial-save authority. All34 execution cards and83 packages remain open; the backlog percentage is null and no whole-menu acceptance is promoted.
+
+Current counts agree with the recorded commands: API268/3050, web36/522 plus native6, core18/888, build7, lint10, baseline17, session14 and labour lifecycle5 with separately stated interception provenance. Older progress sections are expressly historical. The latest session14 link is the corrected browser-context-item-lookup-settled rather than the failed labour-current attempt. The docs preserve the initial API fixture, wire-shape, browser-capture and audit corrections instead of silently replacing them.
+
+Direct file inventory matches TECHNICAL-REFERENCE:263 top-level API test files,149 DB files,247 API source TS files,31 module directories,126 pages,36 web/18 core test files and170 Prisma models. Top-level inventory is separately labeled from broad-suite outcomes. Historical architecture narratives are explicitly superseded, not silently promoted into current full-parity claims.
+
+All five new final records have1856 captured inputs with changedInputs empty: scanner fixtures passed31; depth failed106 against96; register strict passed while198 remain implemented-unverified; docs refs passed; checkpoint-chain self-test passed its in-memory positive/negative controls. These are actual separate runs after adding21 measurement Python inputs. They do not retroactively qualify previous incomplete manifests, and the self-test does not mean checkpoint39 was created or product acceptance closed. Kernel127 and dead33 remain failed.
+
+The capture helper now checks exact status, exitCode, cwd and command, input stability, requested current prefixes and test membership. One narrow correction was requested: align membership with default Vitest test/spec JS/TS suffix discovery, rather than only .test.ts/.test.tsx/.test.mjs, so an added .spec.ts cannot evade a recipe that lists existing exact test paths. No existing test count or assertion changes. Final recipe and helper hashes will be pinned after the owner finishes this correction.
+
+Optional wording: README’s Round12 bullet can explicitly name pure mode/clock/internal-ledger prerequisites instead of saying “these bounded prerequisites” immediately after the Round13 bullet. This is clarity only, not a false acceptance finding.

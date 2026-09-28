@@ -1,0 +1,30 @@
+{
+ "form": "UT_PWD_UPDATE",
+ "loc": 749,
+ "gridColumns": {},
+ "inlineSql": [
+  "SELECT * FROM LOGIN_MAST WHERE CO_CODE = '01' ORDER BY LOGIN_NAME",
+  "UPDATE LOGIN_MAST SET LOGIN_PWD = ' ? ' WHERE LOGIN_NAME = ' ? '",
+  "Password Is Update...Please Re Open Software..."
+ ],
+ "keyboard": {},
+ "calc": [],
+ "validations": [
+  {
+   "message": "Password and Conform Password is Not Same",
+   "when": "Operators.CompareString(tPasword.Text, tConPasword.Text, false) != 0"
+  },
+  {
+   "message": "Password Is Update...Please Re Open Software...",
+   "when": ""
+  },
+  {
+   "message": "Please Insert Old Password",
+   "when": "Operators.CompareString(tOldPasword.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Old Password Doesn't Match",
+   "when": "Operators.ConditionalCompareObjectNotEqual(dataView[0][\"LOGIN_PWD\"], (object)tOldPasword.Text, false)"
+  }
+ ]
+}

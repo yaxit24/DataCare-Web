@@ -1,0 +1,31 @@
+{
+ "form": "MS_DM",
+ "tables": [
+  "BAR_IDTL",
+  "DM_MAST",
+  "GROUP_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "DM_MAST"
+  ]
+ },
+ "selectTables": [
+  "BAR_IDTL",
+  "DM_MAST",
+  "GROUP_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 13,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 1826
+}

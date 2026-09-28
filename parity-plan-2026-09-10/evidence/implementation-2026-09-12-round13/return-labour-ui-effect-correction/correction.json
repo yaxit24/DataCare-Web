@@ -1,0 +1,7 @@
+{
+  "reason": "ESLint exhaustive-deps requires effect lifetime capture. Lease instance is stable for this mount; subscription and cleanup now use the same captured instance. No generation or ticket semantics changed.",
+  "beforeSha256": "e495e93df528bd6e2808f14b152faaa737ce145b65e1411cc359f7d374e0e2a9",
+  "afterSha256": "37bb3caadde0ede84be2f7f1a188131b69563dffca0c040bcc340c4b8892382e",
+  "failedCheck": "return-labour-workspace-lint",
+  "capturedAtUtc": "2026-09-11T23:27:59.803577+00:00"
+}

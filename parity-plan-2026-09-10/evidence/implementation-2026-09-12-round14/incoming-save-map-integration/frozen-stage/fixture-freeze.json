@@ -1,0 +1,26 @@
+{
+  "kind": "pre-implementation-save-map-fixture-freeze",
+  "implementationExists": false,
+  "files": [
+    {
+      "path": "implementation-contract.md",
+      "sha256": "bfc72c2f37878033fa3627498705cf342f4d5672f1395e678c16d12d4e80f34f"
+    },
+    {
+      "path": "author-fixture.py",
+      "sha256": "615309a22a7aaa60a5730a01df578eafce259e2ccd9992d27cdc64d4ee1f25fc"
+    },
+    {
+      "path": "fixture-authorship.json",
+      "sha256": "c279534b390d8fb6cd7da323ca0e5756e9342fe41ae907cb167dc810751491ae"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "91e474f963660210cea252a32e90dde3e4945f64b03119a777640e8cd17928a6"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "sha256": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50"
+    }
+  ]
+}

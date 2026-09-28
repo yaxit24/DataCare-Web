@@ -1,0 +1,27 @@
+{
+  "atUtc": "2026-09-11T22:15:33.633744+00:00",
+  "allStageReferencesMatched": true,
+  "files": [
+    {
+      "path": "web/packages/core/test/saleReturnIncomingLabourCompose.test.ts",
+      "sha256": "9334a5b3f770a503c85a638949f71fb66f3493fae6d5a1a66fe6d7960f30c8fe",
+      "bytes": 13786
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingLabourCompose.ts",
+      "sha256": "62405dc4662d23978581f8a8b91708f659af681c014f75848d539c0386fd9865",
+      "bytes": 17505
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncomingLabourCompose.independent.json",
+      "sha256": "fd55edb9173dbc40475d7dd04a63877226600d36c983f20b1421ab013ee73dd6",
+      "bytes": 530087
+    },
+    {
+      "path": "web/packages/core/src/index.ts",
+      "sha256": "a13385d9951d1ca0a716dd95f0278520b6c9e1d02b24862f999ce9865504d247"
+    }
+  ],
+  "scope": "Pure atomic composition only, current previews/numeric writers unchanged",
+  "verification": "pending"
+}

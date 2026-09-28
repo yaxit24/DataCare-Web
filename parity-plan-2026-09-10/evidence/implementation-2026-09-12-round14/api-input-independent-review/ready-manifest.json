@@ -1,0 +1,40 @@
+{
+  "kind": "round14-api-input-review/v1",
+  "status": "frozen-read-only-review",
+  "capturedAtUtc": "2026-09-12T01:26:32.767742+00:00",
+  "files": [
+    {
+      "path": "audit.json",
+      "sha256": "560f0062672109dfe042e36aea3ce6dd7868216a420ee74bcc2946c92c514329",
+      "bytes": 85164
+    },
+    {
+      "path": "environment-input-observations.json",
+      "sha256": "5c398c4b1f3a2600d6d0a614600a1efde35528beea7d5fcd66be89f154b62cdd",
+      "bytes": 1994
+    },
+    {
+      "path": "prepare-audit.py",
+      "sha256": "19eca198b8e6872fb9faa425167152b98f48ae53b435a058649d5e6f318517dd",
+      "bytes": 11140
+    },
+    {
+      "path": "review-inputs.json",
+      "sha256": "2e4e29cc0beffee58e4cee717aa0a85651b40ce93c84ba2c526a86d50b986cd4",
+      "bytes": 88747
+    },
+    {
+      "path": "review.md",
+      "sha256": "17c062ddbc78e3cfcfabc7c1e2b5947b2de610e7ec8d93cf57ba14896515d92a",
+      "bytes": 6012
+    },
+    {
+      "path": "verification-only-inputs.json",
+      "sha256": "be923b7f9a4ca395e1b4ae54d975570af21d8f6e784a5400cb3b447db9cb23f7",
+      "bytes": 4132
+    }
+  ],
+  "noExecution": true,
+  "noActiveEdits": true,
+  "limits": "Static source review; root owns final API verification. Secret contents were neither emitted nor copied."
+}

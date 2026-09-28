@@ -1,0 +1,58 @@
+{
+ "form": "MS_EMP",
+ "controlCount": 2,
+ "byKind": {
+  "textbox": 2
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "nDayHour",
+   "Label5",
+   "cboUser",
+   "Label6",
+   "PnlBotam",
+   "tEmpAmt",
+   "Label4",
+   "tEmpAcName",
+   "tEmpAc",
+   "Label3",
+   "DGV",
+   "Text1",
+   "Label1",
+   "Label2",
+   "tEmpCode",
+   "tEmpName",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "001",
+   "kind": "textbox"
+  },
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  }
+ ]
+}

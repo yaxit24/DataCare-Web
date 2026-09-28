@@ -1,0 +1,382 @@
+{
+ "form": "RP_DHRN_OS",
+ "controlCount": 35,
+ "byKind": {
+  "panel": 3,
+  "masked": 2,
+  "textbox": 5,
+  "button": 7,
+  "combo": 4,
+  "label": 9,
+  "check": 3,
+  "other": 1,
+  "grid": 1
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "BtnJmaUdhar"
+  ],
+  "PnlAcSumm": [
+   "chkOverValue",
+   "pnlPacket",
+   "nSlRate",
+   "nGlRate",
+   "Label8",
+   "Label1",
+   "mToDt",
+   "mFromDt",
+   "cboLoanType",
+   "lblLoanType",
+   "chkInt",
+   "Label2",
+   "tAcCode",
+   "tAcName",
+   "DGV",
+   "btnOk",
+   "cboEmp",
+   "Label3",
+   "cboArea",
+   "Label17",
+   "cboCity",
+   "lblCity",
+   "chkIntType"
+  ],
+  "pnlPacket": [
+   "tPacketNo",
+   "Label4"
+  ],
+  "this": [
+   "PnlAcSumm",
+   "Cr",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "PnlAcSumm",
+   "type": "Panel",
+   "location": "0,33",
+   "size": "1196,530",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "82,11",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "01/01/2010",
+   "kind": "masked"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "164,11",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "82,43",
+   "size": "76,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "cboCity",
+   "type": "ComboBox",
+   "location": "295,11",
+   "size": "153,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "cboArea",
+   "type": "ComboBox",
+   "location": "522,10",
+   "size": "160,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "cboEmp",
+   "type": "ComboBox",
+   "location": "522,42",
+   "size": "160,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Dhran Intrest Report",
+   "kind": "label"
+  },
+  {
+   "name": "cboLoanType",
+   "type": "ComboBox",
+   "location": "776,10",
+   "size": "137,22",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "chkIntType",
+   "type": "CheckBox",
+   "location": "954,4",
+   "size": "141,20",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "chkInt",
+   "type": "CheckBox",
+   "location": "954,28",
+   "size": "141,19",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "btnOk",
+   "type": "QButton",
+   "location": "1101,25",
+   "size": "73,37",
+   "tabIndex": "9",
+   "text": "Ok",
+   "kind": "button"
+  },
+  {
+   "name": "BtnJmaUdhar",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "10",
+   "text": "&JmUdr",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "lblCity",
+   "type": "Label",
+   "location": "250,11",
+   "size": "37,19",
+   "tabIndex": "1138",
+   "text": "City",
+   "kind": "label"
+  },
+  {
+   "name": "Label17",
+   "type": "Label",
+   "location": "471,12",
+   "size": "46,19",
+   "tabIndex": "1140",
+   "text": "Area",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "452,43",
+   "size": "64,19",
+   "tabIndex": "1144",
+   "text": "Employ",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,76",
+   "size": "1161,443",
+   "tabIndex": "1145",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "164,43",
+   "size": "284,23",
+   "tabIndex": "1147",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "11,45",
+   "size": "65,20",
+   "tabIndex": "1148",
+   "text": "Ac Code",
+   "kind": "label"
+  },
+  {
+   "name": "lblLoanType",
+   "type": "Label",
+   "location": "690,11",
+   "size": "79,20",
+   "tabIndex": "1281",
+   "text": "Loan Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "32,10",
+   "size": "44,20",
+   "tabIndex": "1284",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "nGlRate",
+   "type": "TextBox",
+   "location": "769,42",
+   "size": "79,22",
+   "tabIndex": "1285",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "687,42",
+   "size": "75,20",
+   "tabIndex": "1286",
+   "text": "Rate G / S",
+   "kind": "label"
+  },
+  {
+   "name": "tPacketNo",
+   "type": "TextBox",
+   "location": "77,8",
+   "size": "79,22",
+   "tabIndex": "1287",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nSlRate",
+   "type": "TextBox",
+   "location": "854,42",
+   "size": "79,22",
+   "tabIndex": "1287",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "pnlPacket",
+   "type": "Panel",
+   "location": "692,0",
+   "size": "256,37",
+   "tabIndex": "1288",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "5,7",
+   "size": "68,20",
+   "tabIndex": "1288",
+   "text": "Packet No",
+   "kind": "label"
+  },
+  {
+   "name": "chkOverValue",
+   "type": "CheckBox",
+   "location": "954,52",
+   "size": "139,19",
+   "tabIndex": "1289",
+   "text": "",
+   "kind": "check"
+  }
+ ]
+}

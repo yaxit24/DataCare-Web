@@ -7,6 +7,13 @@ import { LookupPicker } from '../../../../components/LookupPicker';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
 import { VoucherList } from '../../../../components/VoucherList';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { fineFor, labourCharge } from '@datacare/core';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 interface Line {
   itCode: string;
@@ -17,7 +24,89 @@ interface Line {
   touch: string;
   rate: string;
   making: string;
+  tblCode: string;
+  designNo: string;
+  itDesc: string;
+  lotNo: string;
+  itmLot: string;
+  withStock: string;
+  bagWt: string;
+  lessWt: string;
+  lossWt: string;
+  ghtPct: string;
+  ghtWt: string;
+  westPct: string;
+  fineWt: string;
+  labourPct: string;
+  lessTouch: string;
+  lesTouch: string;
+  kunFine: string;
+  convRate: string;
+  convPct: string;
+  otherRate: string;
+  mrp: string;
+  metalAmount: string;
+  commissionPct: string;
+  commissionAmount: string;
+  fineCutPcs: string;
+  fineCutGrossWt: string;
+  fineCutNetWt: string;
+  fineCutFine: string;
+  prCode: string;
+  urdRateType: string;
 }
+const extendedLineFields: Array<[keyof Line, string]> = [
+  ['tblCode', 'Counter'],
+  ['designNo', 'Design'],
+  ['itDesc', 'Item Desc'],
+  ['lotNo', 'Lot No'],
+  ['itmLot', 'Item Lot'],
+  ['withStock', 'With Stock'],
+  ['bagWt', 'Bag Wt'],
+  ['lessWt', 'Less Wt'],
+  ['lossWt', 'Loss Wt'],
+  ['ghtPct', 'Ghat %'],
+  ['ghtWt', 'Ghat Wt'],
+  ['westPct', 'Wastage %'],
+  ['fineWt', 'Fine Wt'],
+  ['labourPct', 'Labour %'],
+  ['lessTouch', 'Less Touch'],
+  ['lesTouch', 'Old-gold Less Touch'],
+  ['kunFine', 'Kun Fine'],
+  ['convRate', 'Conv Rate'],
+  ['convPct', 'Conv %'],
+  ['otherRate', 'Other Rate'],
+  ['mrp', 'MRP'],
+  ['metalAmount', 'Metal Amt'],
+  ['commissionPct', 'Comm %'],
+  ['commissionAmount', 'Comm Amt'],
+  ['fineCutPcs', 'Fine-cut Pcs'],
+  ['fineCutGrossWt', 'Fine-cut Gross'],
+  ['fineCutNetWt', 'Fine-cut Net'],
+  ['fineCutFine', 'Fine-cut Fine'],
+  ['prCode', 'PR Code'],
+  ['urdRateType', 'URD Rate Type'],
+];
+
+const NUMERIC_EXTENDED = new Set<string>([
+  'bagWt',
+  'lessWt',
+  'lossWt',
+  'ghtPct',
+  'ghtWt',
+  'westPct',
+  'fineWt',
+  'labourPct',
+  'lessTouch',
+  'lesTouch',
+  'kunFine',
+  'convRate',
+  'convPct',
+  'otherRate',
+  'mrp',
+  'metalAmount',
+]);
+
 const blank = (): Line => ({
   itCode: 'GOLD',
   tagNo: '',
@@ -27,6 +116,36 @@ const blank = (): Line => ({
   touch: '',
   rate: '',
   making: '',
+  tblCode: '',
+  designNo: '',
+  itDesc: '',
+  lotNo: '',
+  itmLot: '',
+  withStock: '',
+  bagWt: '',
+  lessWt: '',
+  lossWt: '',
+  ghtPct: '',
+  ghtWt: '',
+  westPct: '',
+  fineWt: '',
+  labourPct: '',
+  lessTouch: '',
+  lesTouch: '',
+  kunFine: '',
+  convRate: '',
+  convPct: '',
+  otherRate: '',
+  mrp: '',
+  metalAmount: '',
+  commissionPct: '',
+  commissionAmount: '',
+  fineCutPcs: '',
+  fineCutGrossWt: '',
+  fineCutNetWt: '',
+  fineCutFine: '',
+  prCode: '',
+  urdRateType: '',
 });
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
@@ -41,6 +160,20 @@ export default function PurchaseReturnPage() {
   const [discountAmount, setDiscountAmount] = useState('');
   const [interState, setInterState] = useState(false);
   const [lines, setLines] = useState<Line[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   // The desktop's image buttons act on the CURRENT grid row, so the row that last held focus
   // owns the photograph. It persists after blur so clicking the panel does not clear it.
   const [imageRow, setImageRow] = useState(0);
@@ -54,9 +187,21 @@ export default function PurchaseReturnPage() {
 
   // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
   const calc = (l: Line) => {
-    const fine = r2((n(l.netWt) * n(l.touch)) / 100);
+    const fine = fineFor('purchaseItem', {
+      netWt: n(l.netWt),
+      touch: n(l.touch),
+      ghtWt: n(l.ghtWt),
+      westPct: n(l.westPct),
+    });
     const metal = r2(fine * n(l.rate));
-    const mk = r2(n(l.netWt) * n(l.making));
+    // P5/P7: the grid now carries ghat, so per-gram labour is (net + ghat) x rate unless the
+    // company switches ghat off (LBR_WITH_GHT, blank default 'Y').
+    const mk = labourCharge('per_gram', {
+      netWt: n(l.netWt),
+      ghatWt: n(l.ghtWt),
+      withGhat: true,
+      rate: n(l.making),
+    });
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
@@ -90,6 +235,17 @@ export default function PurchaseReturnPage() {
             touch: n(l.touch),
             rate: n(l.rate),
             ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
+            // P7: extended columns; a blank cell is OMITTED, never sent as 0 (an explicit zero is an
+            // override at the writer and would defeat the server's derivation).
+            ...Object.fromEntries(
+              extendedLineFields
+                .map(([key]) => [
+                  key,
+                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                ])
+                .filter(([, v]) => v !== '')
+                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+            ),
           })),
         cashAmt: n(String(tender.cashAmt ?? '')),
         chequeAmt: n(String(tender.chequeAmt ?? '')),
@@ -165,7 +321,13 @@ export default function PurchaseReturnPage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Returned Items</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="purchase-return-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -178,6 +340,7 @@ export default function PurchaseReturnPage() {
                 <th className="num">Making/g</th>
                 <th className="num">Fine</th>
                 <th className="num">Amount</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -263,6 +426,14 @@ export default function PurchaseReturnPage() {
                     </td>
                     <td className="num">{c.fine.toLocaleString('en-IN')}</td>
                     <td className="num">{c.net.toLocaleString('en-IN')}</td>
+                    <ExtendedBodyCells
+                      full={fullGrid}
+                      fields={extendedLineFields}
+                      line={l}
+                      row={i}
+                      baseColumns={9}
+                      setValue={(row, key, value) => setLine(row, key, value)}
+                    />
                     <td>
                       <button
                         type="button"

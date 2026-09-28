@@ -1,0 +1,8 @@
+{
+  "extends": "../../../web/apps/api/tsconfig.test.json",
+  "files": [],
+  "include": [
+    "../../../web/apps/api/test/desktopAccountBalance.db.test.ts"
+  ],
+  "exclude": []
+}

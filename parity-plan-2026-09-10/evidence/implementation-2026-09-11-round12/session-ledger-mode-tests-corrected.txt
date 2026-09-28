@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+
+ ✓ packages/core/test/sessionLedgerMode.test.ts (103 tests) 52ms
+
+ Test Files  1 passed (1)
+      Tests  103 passed (103)
+   Start at  21:48:42
+   Duration  1.36s (transform 269ms, setup 0ms, collect 268ms, tests 52ms, environment 0ms, prepare 142ms)
+

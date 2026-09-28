@@ -1,0 +1,27 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/web",
+    "exec",
+    "vitest",
+    "run",
+    "test/salesReturnLabourReplay.test.ts",
+    "test/salesReturnBillReplay.test.ts",
+    "test/salesReturnReplay.test.ts",
+    "test/salesReturnForm.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:24:36.375706+00:00",
+  "finishedAtUtc": "2026-09-11T23:24:37.518803+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-web-focused.txt",
+  "logSha256": "7110d3bc5874e5f42364f591a8c42e2519346dbbde1825c4b8bb0d61e332f68c",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-web-focused.inputs.json",
+  "inputManifestSha256": "61bb7d4a59a8b8ce6ebe359a96ee7b727ea365a01543f79139a18c42e434abde",
+  "inputCount": 1829,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

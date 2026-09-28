@@ -75,6 +75,34 @@ export const ROJMEL_ROW_TYPE = {
   ROUND_OFF: '22',
 } as const;
 
+/**
+ * Row types for an INWARD (purchase) day book, derived from the 51 captured purchase vouchers.
+ *
+ * These are a SEPARATE set from `ROJMEL_ROW_TYPE` above, which was derived from SALE data. The codes are not
+ * interchangeable: `14` is the advance row on a sale and the unpriced-metal row on a purchase. This file already
+ * records that `Ac_Rojmel.Sales_Rojmel` is a later version than the code which wrote this data — its sale item rows
+ * are `02` where the data's are `01` — so a type code only means something within the family it was measured in.
+ *
+ * Measured distribution across the purchases:
+ *
+ *   `01` 43 rows  the item's MONEY row, on the contra account, no fine
+ *   `14` 42 rows  the item's METAL row, on the PARTY, carrying `ITM_FINE`, no money
+ *   `08` 19 rows  the party money leg
+ *   `03`/`11`/`04`/`09`  settlement, cheque, tax and one further contra row
+ *
+ * The selector is the line's RATE, correlating 51/51: every voucher whose lines all carry `ITM_RATE = 0` has a
+ * `14` row per line, and every voucher with a rate has none. That is the business case — metal received before its
+ * price is fixed has a weight to record against the party but no value to book yet.
+ */
+export const ROJMEL_PURCHASE_ROW_TYPE = {
+  /** Item money row. Same code as the sale item row, and measured independently here. */
+  ITEM_MONEY: '01',
+  /** Item metal row for metal taken in at no fixed rate. */
+  UNPRICED_METAL: '14',
+  /** The party money leg. */
+  PARTY: '08',
+} as const;
+
 export type RojmelRowType = (typeof ROJMEL_ROW_TYPE)[keyof typeof ROJMEL_ROW_TYPE];
 
 /** Metal classification for IT_TYPE. */
@@ -120,8 +148,10 @@ export function rojmelLedrKey(
     | RojmelOrderRowType
     | RojmelSchemeAdjRowType
     | RojmelFineJvRowType
-    // Sixth widening of this union. Each family's row types are measured separately and none has yet reused
-    // another's, which is why the union grows rather than a shared enum being reached for.
+    // Seventh widening of this union. Each family's row types are measured separately, and the karigar books
+    // are why a shared enum still would not work: type `05` is a METAL row on book 050 and a MONEY row on
+    // book 052, so the same code means different things depending on the book.
+    | RojmelKarigarRowType
     | (typeof ROJMEL_CASH_ROW_TYPE)[keyof typeof ROJMEL_CASH_ROW_TYPE],
   lineNo?: number,
 ): string {
@@ -347,6 +377,60 @@ export function buildSaleRojmel(
 
   for (const l of lines) {
     if (!(l.amount || l.grossWt || l.pcs)) continue; // a wholly empty line is not a day-book event
+
+    /**
+     * An INWARD line taken in at no fixed rate gets a METAL row instead of a money row.
+     *
+     * Measured on all 51 captured purchases: a voucher whose lines carry `ITM_RATE = 0` has one type-`14` row per
+     * line — on the PARTY, carrying `ITM_FINE`, with no money — and no money row at all when the line's amount is
+     * zero as well. A voucher with a rate has money rows and no metal row. The correlation is 51/51.
+     *
+     * The web wrote only the money row, so every unpriced purchase was missing the weight side of its day book.
+     * In a jewellery business the Rojmel metal columns are how gold movement is read, so the omission is visible
+     * to the operator, not merely to a differ.
+     *
+     * Scoped to `!outward`: the sale day book uses `14` for the advance row, and these codes do not carry across
+     * families.
+     */
+    const unpriced = !outward && !(l.rate ?? 0);
+    if (unpriced) {
+      rows.push({
+        ...blank(
+          ctx,
+          rojmelLedrKey(
+            ctx.scope,
+            ctx.coBook,
+            ctx.vchNo,
+            ROJMEL_PURCHASE_ROW_TYPE.UNPRICED_METAL,
+            l.lineNo,
+          ),
+        ),
+        // The party holds the metal position; the contra account is the reference.
+        AC_CODE: ctx.partyCode,
+        LD_CODE: l.revenueAc,
+        CR_AMT: 0,
+        DR_AMT: 0,
+        IT_TYPE: l.metal,
+        SIGN: sign,
+        ITM_PCS: l.pcs ?? 0,
+        ITM_GWT: l.grossWt ?? 0,
+        ITM_NWT: l.netWt ?? 0,
+        ITM_TOUCH: l.touch ?? 0,
+        ITM_WEST: l.wastage ?? 0,
+        ITM_FINE: l.fine ?? 0,
+        ITM_RATE: 0,
+        ITM_AMT: 0,
+        LBR_RATE: 0,
+        LBR_AMT: 0,
+        OTH_AMT: 0,
+        NET_AMT: 0,
+        IT_CODE: l.itemCode ?? '',
+        IT_DESC: l.itemName ?? '',
+      } as RojmelRow);
+      // No money to book when the line has no amount either, which is the common unpriced case.
+      if (!l.amount) continue;
+    }
+
     rows.push({
       ...blank(
         ctx,
@@ -362,9 +446,19 @@ export function buildSaleRojmel(
       ITM_PCS: l.pcs ?? 0,
       ITM_GWT: l.grossWt ?? 0,
       ITM_NWT: l.netWt ?? 0,
-      ITM_TOUCH: l.touch ?? 0,
-      ITM_WEST: l.wastage ?? 0,
-      ITM_FINE: l.fine ?? 0,
+      ITM_TOUCH: outward ? (l.touch ?? 0) : 0,
+      ITM_WEST: outward ? (l.wastage ?? 0) : 0,
+      /**
+       * On an INWARD voucher the money row books no weight-purity at all.
+       *
+       * Measured across the captured purchase day book: the money row (type `01`) has `ITM_FINE`, `ITM_TOUCH` and
+       * `ITM_WEST` zero on every row, while the metal row (type `14`) is the one that carries them. Gross, net and
+       * pieces DO appear on both. Writing purity on both rows double-counted it — the fine weight would be read
+       * twice from one purchase.
+       *
+       * A sale has no separate metal row: its item row IS the metal row, so it keeps these.
+       */
+      ITM_FINE: outward ? (l.fine ?? 0) : 0,
       ITM_RATE: l.rate ?? 0,
       ITM_AMT: l.itemAmount ?? l.amount,
       LBR_RATE: l.labourRate ?? 0,
@@ -1190,6 +1284,105 @@ export function buildFineJvRojmel(ctx: RojmelContext, lines: FineJvRojmelLine[])
     }
   }
   return rows;
+}
+
+/**
+ * Karigar row types — plan item F3.1.
+ *
+ * Measured over all 29 real Rojmel rows on the karigar books (050 KARIGAR ISSUE, 052 KARIGAR RECEIPT):
+ *
+ *     book 052  type `11`  IT_TYPE G  SIGN '+'  len 33   21 rows   metal received, one per KR_DETL line
+ *     book 050  type `05`  IT_TYPE G  SIGN '-'  len 33    1 row    metal issued,  one per KR_DETL line
+ *     book 052  type `01`  IT_TYPE G  SIGN '+'  len 33    3 rows   NOT IMPLEMENTED — see below
+ *     book 052  type `02`  IT_TYPE A            len 23    2 rows   NOT IMPLEMENTED
+ *     book 052  type `05`  IT_TYPE A            len 23    2 rows   NOT IMPLEMENTED
+ *
+ * Note `05` means DIFFERENT things on the two books: a metal row on the issue book and a money row on the
+ * receipt book. The type code alone does not identify a row shape; the book does.
+ *
+ * **What is deliberately left out, and why.** The metal rows above cover 22 of 29 rows and appear on all 16
+ * real vouchers. The remaining 7 rows (types `01`, `02`, and the money `05`) occur on exactly TWO vouchers —
+ * 052/00005 and 052/00007, the only two carrying a money settlement. Two vouchers is not enough to separate a
+ * rule from a coincidence, and this file already records two readings that were wrong when taken from a
+ * handful of sampled rows. They are left unimplemented rather than guessed, and the gap is stated in the
+ * karigar day-book test so it cannot be mistaken for coverage.
+ */
+export const ROJMEL_KARIGAR_ROW_TYPE = {
+  /** Metal received from the karigar — book 052, `SIGN '+'`. 21 real rows. */
+  RECEIVE_METAL: '11',
+  /** Metal issued to the karigar — book 050, `SIGN '-'`. 1 real row. */
+  ISSUE_METAL: '05',
+} as const;
+
+export type RojmelKarigarRowType =
+  (typeof ROJMEL_KARIGAR_ROW_TYPE)[keyof typeof ROJMEL_KARIGAR_ROW_TYPE];
+
+/** One `KR_DETL` line contributing a metal row. */
+export interface KarigarRojmelLine {
+  /** `SR_NO` — becomes both the key's line suffix and, for the receipt book, the row ordinal. */
+  lineNo: number;
+  itCode: string;
+  metal: Exclude<RojmelMetal, 'A'>;
+  /**
+   * `LD_CODE` — the contra account. Verified as the ITEM GROUP's `PURC_AC` on **25 of 25** real metal rows:
+   * metal moving to or from a karigar is booked against purchase gold (account 00008 here, reached through
+   * `GROUP_MAST.PURC_AC`, which is the same route `purchase.ts` uses). Derived rather than hardcoded so a
+   * shop whose groups point elsewhere still gets its own account.
+   */
+  contraAc: string;
+  pcs?: number;
+  grossWt?: number;
+  netWt?: number;
+  touch?: number;
+  fine?: number;
+  description?: string;
+}
+
+/**
+ * Project a karigar issue or receipt into its Rojmel metal rows — plan item F3.1.
+ *
+ * This was the last implementable day-book gap recorded in `ROJMEL-HANDBOOK.md`: the metal moved but the
+ * evening day book did not show it.
+ *
+ * Shape verified line by line against the real data. For 052/00009, whose two `KR_DETL` lines are
+ * `RO916 1 pc 14.970 g touch 92 fine 14.324` and `RO916 1 pc 4.260 g touch 92 fine 3.919`, the two Rojmel
+ * rows carry exactly those values with suffixes 1 and 2. `AC_CODE` is the karigar from `KR_DATA.AC_CODE` —
+ * **21 of 21 rows match** — and the weights are copied, not recomputed, because the desktop copies them.
+ *
+ * A karigar voucher carries no money on its metal rows: `DR_AMT`, `CR_AMT` and `LBR_AMT` are zero on all 29
+ * real rows, so `blank()`'s zeros are correct and nothing is set here.
+ */
+export function buildKarigarRojmel(
+  ctx: RojmelContext,
+  direction: 'issue' | 'receive',
+  lines: KarigarRojmelLine[],
+): RojmelRow[] {
+  const rowType =
+    direction === 'receive'
+      ? ROJMEL_KARIGAR_ROW_TYPE.RECEIVE_METAL
+      : ROJMEL_KARIGAR_ROW_TYPE.ISSUE_METAL;
+  // '+' metal in on a receipt, '-' metal out on an issue — the same convention as every other family here.
+  const sign = direction === 'receive' ? '+' : '-';
+
+  return (
+    lines
+      // A line with no weight contributes no metal row: all 25 real metal rows carry a net weight.
+      .filter((l) => Number(l.netWt ?? 0) !== 0 || Number(l.grossWt ?? 0) !== 0)
+      .map((l) => ({
+        ...blank(ctx, rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, rowType, l.lineNo)),
+        AC_CODE: ctx.partyCode,
+        LD_CODE: l.contraAc,
+        IT_TYPE: l.metal,
+        SIGN: sign,
+        IT_CODE: l.itCode,
+        ITM_PCS: Number(l.pcs ?? 0),
+        ITM_GWT: Number(l.grossWt ?? 0),
+        ITM_NWT: Number(l.netWt ?? 0),
+        ITM_TOUCH: Number(l.touch ?? 0),
+        ITM_FINE: Number(l.fine ?? 0),
+        IT_DESC: l.description ?? '',
+      }))
+  );
 }
 
 /**

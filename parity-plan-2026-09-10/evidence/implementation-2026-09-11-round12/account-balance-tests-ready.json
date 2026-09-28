@@ -1,0 +1,26 @@
+{
+  "kind": "x13-internal-account-balance-tests-ready-before-run-v1",
+  "status": "written-not-executed",
+  "databaseOrBrowserRun": false,
+  "sourceReaderNotInspected": true,
+  "expectedTestCount": 54,
+  "independentVectorCount": 12,
+  "inputs": [
+    {
+      "path": "web/apps/api/test/desktopAccountBalance.db.test.ts",
+      "sha256": "da57beda30df821c8178f423a2b2f6142381348e1033ca386a56617322ca017c"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/desktopAccountBalance.independent.json",
+      "sha256": "32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-independent-vectors.json",
+      "sha256": "32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-observation-contract.md",
+      "sha256": "faa7e216765256d0d67cced66cdabb2dac1cedd72accb85370586f3f0d0c3c21"
+    }
+  ]
+}

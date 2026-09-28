@@ -3,7 +3,7 @@
 **What this is.** The architecture, conventions and hard-won schema facts of the web application. Read this
 to understand _how the system is built_. For _how to verify it_, see `VERIFICATION-REFERENCE.md`.
 
-**Last verified against the tree:** 2026-08-01.
+**Architecture narrative last reviewed:** 2026-08-01. The inventory below has current12 September source/test counts where stated; inventory is separate from execution. Use [Round15 in-progress status and all remaining gaps](../../parity-plan-2026-09-10/42-implementation-progress-round15.md); [sealed Round14 progress](../../parity-plan-2026-09-10/40-implementation-progress-round14.md) and [latest sealed checkpoint41](../../parity-plan-2026-09-10/41-implementation-checkpoint-round14.json). Round 15 adds pure saved Other-amount replay, strict effect-storage context qualification, a seven-row financial effect planner and an ordered Save-guard evaluator, plus six shared composition cases. They preserve the prior Save map, exact header Float qualifier, N BAR matcher and internal Serializable coordinator. No new API route, UI Save flow or writer is enabled; numeric Return saves and known closing remain disabled. Implementation is paused for this status review. Round 15 is an in-progress snapshot: the recorded core run passed 26 files / 1,613 tests and strict compilation of the five new core test files passed; the remaining 16 checks in the 18-check recipe have not run. Checkpoint 43 is not sealed. Checkpoint 41 remains the latest sealed verification record and applies to the earlier Round 14 inputs. Complete trusted hydration, all effects/guards/audit, fresh admission, atomic write/recovery and desktop/business/production acceptance remain required.
 
 ---
 
@@ -14,28 +14,31 @@ the stack changes, the behaviour must not.
 
 ```
 web/
-  apps/api/          Fastify + Prisma. 31 module directories, ~434 TS files
-  apps/web/          Next.js app router. 101 pages
+  apps/api/          Fastify + Prisma. 31 module directories, 248 source TS files
+  apps/web/          Next.js app router. 126 page.tsx files
   packages/core/     pure calculation (billTotals, rounding, labour) — BUILT separately
   packages/db/       Prisma client + withTenant
-  scripts/           9 gate scripts
+  scripts/           static checks, parity measurement and verification helpers
   docs/              this and its siblings
 ```
 
-| Measure                  | Value             | Command                                                     |
-| ------------------------ | ----------------- | ----------------------------------------------------------- |
-| API tests                | 1054 in 124 files | `(cd apps/api && npx vitest run)`                           |
-| DB-backed tests          | 47                | `ls apps/api/test/*.db.test.ts \| wc -l`                    |
-| Lint surface             | 502 source files  | `pnpm lint`                                                 |
-| Policed route strings    | 383               | pinned twice in `apps/api/test/routePolicy.test.ts`         |
-| `route()` policy entries | 140               | `grep -c "route(" apps/api/src/modules/rbac/routePolicy.ts` |
-| Report slugs             | 48                | `REPORT_BUILDERS` in `routes/txn.ts`                        |
-| Build targets            | 7                 | `pnpm build`                                                |
+| Inventory measure | Value on 2026-09-12 | Evidence |
+| --- | --- | --- |
+| API top-level TypeScript test files | 266 | `apps/api/test/*.test.ts` |
+| DB test files | 151 | `apps/api/test/*.db.test.ts` |
+| Declared API routes | 556 | `apps/api/test/routePolicy.test.ts` |
+| Route policy bindings | 196 | `route()` calls in `routePolicy.ts` |
+| Prisma models | 170 | `packages/db/prisma/schema.prisma`; not a database table count |
+| Migrated tenant tables with forced RLS | 174 | Isolated DB wrapper, 29 migrations |
+| Web / core TypeScript test files | 36 / 26 | `apps/web/test/*.test.ts`, `packages/core/test/*.test.ts` |
+| Web native Node test files | 1 | `apps/web/test/*.test.mjs`;6 cases, separate from Vitest |
+| Build targets | 7 | `pnpm build` |
+| Desktop menu identities | 198 | Completion register |
+| Verified menu acceptance | 0 | All 198 remain implemented-unverified |
 
-<!-- verify: ls apps/api/test/*.test.ts | wc -l | tr -d ' ' == 133 -->
+<!-- verify: ls apps/api/test/*.test.ts | wc -l | tr -d ' ' == 266 -->
 
-| Desktop menu items to reproduce | 198 | `NextMain.MENU_DATA`, 13 tabs — the authoritative surface |
-| Classified in the register | 0 of 198 | `pnpm register:check` |
+These are inventory counts, not functionality completion percentages. Test outcomes belong to the dated implementation evidence; historical test totals are not current verification.
 
 **`packages/core` is built separately.** Vitest transpiles `apps/api/src` on the fly but **not** that
 package. A change there needs `pnpm --filter @datacare/core build` or tests silently run against the old
@@ -45,9 +48,9 @@ output. A control once "passed" twice against deliberately broken code for this 
 
 ## 2. Multi-tenancy and row-level security
 
-Every business table carries `tenant_id varchar(24)`. **172 tenant-scoped tables have RLS enabled _and_
-forced, each with a policy**, asserted on a freshly provisioned database rather than the working one
-(`pnpm fresh:provision`).
+Every business table carries `tenant_id varchar(24)`. **174 tenant-scoped tables have RLS enabled _and_
+forced** in the isolated migrated database, checked by `scripts/parity-test-env.mjs`.
+Fresh-install/release certification remains a separate requirement (`pnpm fresh:provision`).
 
 ```ts
 await withTenant(prisma, tenantId, async (tx) => {

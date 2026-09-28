@@ -1,6 +1,7 @@
 import { withTenant } from '@datacare/db';
 import { DEFAULT_CASH_LIMIT, resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
-import { buildCashRojmel } from '../shared/rojmel.js';
+import { buildCashRojmel, buildJournalRojmel } from '../shared/rojmel.js';
+import { requirePostingAccount, resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -206,9 +207,24 @@ export function buildTransferLedger(
   ];
 }
 
-/** The cash/bank ledger code for a payment mode (cash→CASH; everything else routes to bank/clearing). */
-export function settlementAc(mode: PayMode, bankAc?: string): string {
-  return mode === 'cash' ? 'CASH' : (bankAc ?? 'BANK');
+/**
+ * The cash/bank ledger code for a payment mode.
+ *
+ * P0-04: this used to return the literals `'CASH'` and `'BANK'`. Neither is an account — the real leg-02 rows
+ * on book 001 all name `00001`, that book's `BOOK_DETL` slot 1 — so every caller that wrote the result to
+ * `AC_CODE`/`LD_CODE` was posting to a placeholder that only resolves on a seeded demo company. Callers now
+ * pass the account they resolved (explicit bank, or the book's configured slot) and this function only
+ * chooses BETWEEN them by mode, refusing when the needed one is absent.
+ */
+export function settlementAc(
+  mode: PayMode,
+  bankAc?: string,
+  cashAc?: string,
+  context = 'settlement',
+): string {
+  return mode === 'cash'
+    ? requirePostingAccount('cash-settlement', cashAc, `${context} settles in cash`)
+    : requirePostingAccount('bank-settlement', bankAc, `${context} settles by ${mode}`);
 }
 
 const numv = (v: unknown): number => Number(v ?? 0);
@@ -256,39 +272,31 @@ export async function postReceipt(
   if (!(input.amount > 0)) throw new FinanceValidationError('amount must be positive');
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
 
-  const recAc = settlementAc(mode, input.bankAc);
   completeFinanceScope(input.scope);
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
+    // The cash/bank account is the book's BOOK_DETL slot 1 unless the caller names one.
+    //
+    // P0-04: this used to end in the literal `'CASH'` returned by `settlementAc`, which is a placeholder
+    // rather than an account — the real leg-02 rows on book 001 all name 00001, that book's slot 1. The
+    // placeholder is now gone in both directions: an explicit account still wins, a configured slot answers
+    // otherwise, and a book with neither refuses the receipt before numbering instead of posting to a code
+    // that only exists in the demo seed.
+    const recAcResolved = await resolveBookSlotAccountTx(
+      tx,
+      input.scope,
+      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
+      1,
+      input.bankAc,
+    );
     // Cash-receipt ceiling (desktop TR_CASH): block when this + the party's prior cash exceeds the
     // CO_SET.CASH_LIMIT — no PAN escape (R7). Non-cash modes are exempt.
     if (mode === 'cash') {
       const limit = await cashLimitTx(tx, tenantId, input.scope.coCode);
-      const prior = await partyCashReceivedTx(tx, input.scope, input.partyAc, recAc);
+      const prior = await partyCashReceivedTx(tx, input.scope, input.partyAc, recAcResolved);
       assertCashReceiptCeiling(input.amount, prior, limit, input.partyName);
     }
-    // The cash/bank account comes from BOOK_DETL slot 1 when the caller names no bank.
-    //
-    // `settlementAc` returns the literal 'CASH', which is a placeholder rather than an account: the real leg-02
-    // rows on book 001 all name 00001, which is that book's slot 1. The same defect was found in the scheme
-    // family, so the placeholder is systemic across the finance paths rather than local to one.
-    //
-    // An explicit bankAc still wins, and the literal stays as a last resort so a book without the slot behaves
-    // as before rather than failing.
-    const slot = (await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE" FROM "BOOK_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
-          AND coalesce("SR_NO",0)::numeric=1
-        LIMIT 1`,
-      tenantId,
-      input.scope.coCode,
-      input.scope.lcCode,
-      input.scope.coBook,
-    )) as Array<{ AC_CODE: unknown }>;
-    const recAcResolved =
-      (input.bankAc ?? '').trim() || String(slot[0]?.AC_CODE ?? '').trim() || recAc;
-
     const vchNo = identity.vchNo;
     const key = keyOf(input.scope, vchNo, 'RCT');
     const configuredBook = await configuredBookTx(tx, input.scope);
@@ -335,7 +343,11 @@ export async function postReceipt(
       },
     ];
     if (kasar > 0) {
-      const kasarAc = input.kasarAc ?? 'KASAR';
+      const kasarAc = requirePostingAccount(
+        'kasar',
+        input.kasarAc,
+        `book ${input.scope.coBook} writes off ${kasar}`,
+      );
       ledger.push(
         {
           ...lbase,
@@ -390,7 +402,10 @@ export async function postReceipt(
       cashAmount: input.amount,
       direction: 'receipt',
       kasar,
-      kasarAc: input.kasarAc ?? 'KASAR',
+      // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
+      // when BOTH the amount and the account are present, and the amount path above already refused a
+      // non-zero write-off without a configured account.
+      kasarAc: (input.kasarAc ?? '').trim(),
     });
     const writes: VoucherWrite[] = [
       {
@@ -440,7 +455,7 @@ export async function postReceipt(
             CARD_COM_PRC: comPct,
             CARD_COM_AMT: comAmt,
             CARD_REC_AMT: net,
-            BANK_ACCD: recAc,
+            BANK_ACCD: recAcResolved,
             BANK_NAME: input.bankName ?? null,
             BANK_NET_AMT: net,
             // TR_SALE.cs:18936 opens CARD ADJUST when CARD_COM_ADJ=Y; persist the workflow marker.
@@ -463,7 +478,7 @@ export async function postReceipt(
             VCH_DATE: vchDate,
             VCH_TIME: vchDate,
             AC_CODE: input.partyAc,
-            UPI_AC_CODE: recAc,
+            UPI_AC_CODE: recAcResolved,
             UPI_AC_NAME: input.bankName ?? null,
             UPI_AMT: input.amount,
             UPI_ID: input.upiId ?? input.chqNo ?? null,
@@ -515,7 +530,6 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
   if (!(input.amount > 0)) throw new FinanceValidationError('amount must be positive');
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
 
-  const payAc = settlementAc(mode, input.bankAc);
   const tenantId = input.scope.tenantId;
   return withTenant(prisma, tenantId, async (tx: any) => {
     const vchNo = await nextVoucherNoTx(tx, input.scope);
@@ -536,20 +550,16 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
     //
     // This previously netted the party DEBIT at amount + kasar into one leg, writing three where the desktop
     // writes four. It balanced, so only a leg-count assertion can catch it.
-    // Slot 1 of BOOK_DETL, for the same reason as the receipt: `settlementAc` returns the literal 'CASH', and
-    // book 002's leg-06 rows all name 00001.
-    const paySlot = (await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE" FROM "BOOK_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
-          AND coalesce("SR_NO",0)::numeric=1
-        LIMIT 1`,
-      tenantId,
-      input.scope.coCode,
-      input.scope.lcCode,
-      input.scope.coBook,
-    )) as Array<{ AC_CODE: unknown }>;
-    const payAcResolved =
-      (input.bankAc ?? '').trim() || String(paySlot[0]?.AC_CODE ?? '').trim() || payAc;
+    // Slot 1 of BOOK_DETL, for the same reason as the receipt: book 002's leg-06 rows all name 00001. P0-04
+    // removed the `'CASH'` placeholder that used to sit behind this, so an unconfigured book now refuses the
+    // payment instead of posting to a code that only exists in the demo seed.
+    const payAcResolved = await resolveBookSlotAccountTx(
+      tx,
+      input.scope,
+      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
+      1,
+      input.bankAc,
+    );
 
     const lineNo = Number(input.lineNo ?? 1);
     const suffix = (leg: number): string =>
@@ -575,7 +585,11 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
       },
     ];
     if (kasar > 0) {
-      const kasarAc = input.kasarAc ?? 'KASAR';
+      const kasarAc = requirePostingAccount(
+        'kasar',
+        input.kasarAc,
+        `book ${input.scope.coBook} writes off ${kasar}`,
+      );
       ledger.push(
         {
           ...lbase,
@@ -626,11 +640,14 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
       partyCode: input.partyAc,
     };
     const rojmelRows = buildCashRojmel(rojmelCtx, {
-      cashAc: payAc,
+      cashAc: payAcResolved,
       cashAmount: input.amount,
       direction: 'payment',
       kasar,
-      kasarAc: input.kasarAc ?? 'KASAR',
+      // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
+      // when BOTH the amount and the account are present, and the amount path above already refused a
+      // non-zero write-off without a configured account.
+      kasarAc: (input.kasarAc ?? '').trim(),
     });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
@@ -647,7 +664,7 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
               KASAR_AMT: kasar,
               AC_CODE: input.partyAc,
               AC_NAME: input.partyName ?? null,
-              BANK_AC: mode === 'cash' ? null : payAc,
+              BANK_AC: mode === 'cash' ? null : payAcResolved,
               CASH_AMT: mode === 'cash' ? input.amount : 0,
               CHQ_AMT: mode === 'cheque' ? input.amount : 0,
               CARD_AMT: mode === 'card' ? input.amount : 0,
@@ -714,15 +731,23 @@ export async function postReceiptLines(
   if (!lines.length)
     throw new FinanceValidationError('at least one receipt line (party + amount) is required');
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
-  const recAc = settlementAc(mode, input.bankAc);
   const tenantId = input.scope.tenantId;
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
   return withTenant(prisma, tenantId, async (tx: any) => {
+    // Resolved before the ceiling check and before numbering: the ceiling counts prior cash against THIS
+    // account, so a placeholder would have measured the wrong ledger as well as posting to it.
+    const recAcLines = await resolveBookSlotAccountTx(
+      tx,
+      input.scope,
+      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
+      1,
+      input.bankAc,
+    );
     if (mode === 'cash') {
       const limit = await cashLimitTx(tx, tenantId, input.scope.coCode);
       for (const line of lines) {
-        const prior = await partyCashReceivedTx(tx, input.scope, line.partyAc, recAc);
+        const prior = await partyCashReceivedTx(tx, input.scope, line.partyAc, recAcLines);
         assertCashReceiptCeiling(Number(line.amount), prior, limit, line.partyName);
       }
     }
@@ -746,22 +771,9 @@ export async function postReceiptLines(
     // rows at all, so a multi-line receipt produced an EMPTY DAY BOOK - certainly wrong. A shape that is
     // probably right beats one that is definitely wrong, and this note is what lets a later measurement
     // correct it.
-    // Slot 1 of BOOK_DETL. FIFTH occurrence of the same defect: settlementAc returns the literal 'CASH', and
-    // every leg-02 row on book 001 names 00001. The others were postReceipt, postPayment, postPaymentLines and
-    // the scheme instalment - so the placeholder is systemic across every finance entry point, not a slip in
-    // one of them.
-    const recSlot = (await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE" FROM "BOOK_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
-          AND coalesce("SR_NO",0)::numeric=1
-        LIMIT 1`,
-      tenantId,
-      input.scope.coCode,
-      input.scope.lcCode,
-      input.scope.coBook,
-    )) as Array<{ AC_CODE: unknown }>;
-    const recAcLines =
-      (input.bankAc ?? '').trim() || String(recSlot[0]?.AC_CODE ?? '').trim() || recAc;
+    // Slot 1 of BOOK_DETL. Every leg-02 row on book 001 names 00001. This was the FIFTH occurrence of the
+    // `'CASH'` placeholder — the others were postReceipt, postPayment, postPaymentLines and the scheme
+    // instalment — so P0-04 removed it from all of them rather than from one.
     const recLineSuffix = (line: number, leg: number): string =>
       `${line}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
     const ledger: LedgerLine[] = [];
@@ -790,7 +802,11 @@ export async function postReceiptLines(
         },
       );
       if (lineKasar > 0) {
-        const kasarAc = input.kasarAc ?? 'KASAR';
+        const kasarAc = requirePostingAccount(
+          'kasar',
+          input.kasarAc,
+          `book ${input.scope.coBook} writes off ${lineKasar}`,
+        );
         ledger.push(
           {
             ...lbase,
@@ -835,7 +851,10 @@ export async function postReceiptLines(
           cashAmount: round2(Number(l.amount)),
           direction: 'receipt',
           kasar: round2(Number(l.kasar ?? 0)),
-          kasarAc: input.kasarAc ?? 'KASAR',
+          // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
+          // when BOTH the amount and the account are present, and the amount path above already refused a
+          // non-zero write-off without a configured account.
+          kasarAc: (input.kasarAc ?? '').trim(),
           lineNo: idx + 1,
         },
       ),
@@ -857,7 +876,7 @@ export async function postReceiptLines(
               REC_AMT: totalAmt,
               KASAR_AMT: totalKasar,
               AC_CODE: lines[0]!.partyAc,
-              REC_AC_CODE: recAc,
+              REC_AC_CODE: recAcLines,
               CHQ_NO: input.chqNo ?? null,
               EMP_CODE: input.empCode ?? null,
               VCH_DATE: vchDate,
@@ -883,7 +902,6 @@ export async function postPaymentLines(
   if (!lines.length)
     throw new FinanceValidationError('at least one payment line (party + amount) is required');
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
-  const payAc = settlementAc(mode, input.bankAc);
   const tenantId = input.scope.tenantId;
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
@@ -901,18 +919,13 @@ export async function postPaymentLines(
     //
     // It balanced, which is why it survived. What it cannot do is reproduce a per-account ledger: the desktop
     // shows nine cash movements and the aggregate form shows one.
-    const linesSlot = (await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE" FROM "BOOK_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
-          AND coalesce("SR_NO",0)::numeric=1
-        LIMIT 1`,
-      tenantId,
-      input.scope.coCode,
-      input.scope.lcCode,
-      input.scope.coBook,
-    )) as Array<{ AC_CODE: unknown }>;
-    const payAcLinesResolved =
-      (input.bankAc ?? '').trim() || String(linesSlot[0]?.AC_CODE ?? '').trim() || payAc;
+    const payAcLinesResolved = await resolveBookSlotAccountTx(
+      tx,
+      input.scope,
+      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
+      1,
+      input.bankAc,
+    );
 
     const lineSuffix = (line: number, leg: number): string =>
       `${line}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
@@ -942,7 +955,11 @@ export async function postPaymentLines(
         },
       );
       if (lineKasar > 0) {
-        const kasarAc = input.kasarAc ?? 'KASAR';
+        const kasarAc = requirePostingAccount(
+          'kasar',
+          input.kasarAc,
+          `book ${input.scope.coBook} writes off ${lineKasar}`,
+        );
         ledger.push(
           {
             ...lbase,
@@ -992,7 +1009,10 @@ export async function postPaymentLines(
           cashAmount: round2(Number(l.amount)),
           direction: 'payment',
           kasar: round2(Number(l.kasar ?? 0)),
-          kasarAc: input.kasarAc ?? 'KASAR',
+          // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
+          // when BOTH the amount and the account are present, and the amount path above already refused a
+          // non-zero write-off without a configured account.
+          kasarAc: (input.kasarAc ?? '').trim(),
           lineNo: idx + 1,
         },
       ),
@@ -1014,7 +1034,7 @@ export async function postPaymentLines(
               TOT_AMT: round2(totalAmt + totalKasar),
               KASAR_AMT: totalKasar,
               AC_CODE: lines[0]!.partyAc,
-              BANK_AC: mode === 'cash' ? null : payAc,
+              BANK_AC: mode === 'cash' ? null : payAcLinesResolved,
               CASH_AMT: mode === 'cash' ? totalAmt : 0,
               CHQ_NO: input.chqNo ?? null,
               EMP_CODE: input.empCode ?? null,
@@ -1105,6 +1125,52 @@ export async function postContra(
     const ledger = buildTransferLedger(key, book.shortName, input.toAc, input.fromAc, input.amount);
     for (const line of ledger) line.VCH_DATE = vchDate;
     assertBalanced(ledger);
+    /**
+     * THE DAY BOOK — plan item F3.3.
+     *
+     * A contra wrote NO `ROJ_MEL_DATA` rows, so a bank↔cash transfer was invisible in the Rojmel: the
+     * combined metal-and-money day book bound to F11, and the report the shop opens every morning. The
+     * desktop writes **74 rows across its 37 contra vouchers — exactly two per voucher**.
+     *
+     * Measured shape (book 017, all 74 rows):
+     *     type `01`  IT_TYPE 'A'  SIGN blank   Cr leg   37 of 37 rows carry only CR_AMT
+     *     type `02`  IT_TYPE 'A'  SIGN blank   Dr leg   37 of 37 rows carry only DR_AMT
+     *     LEDR_KEY 33 chars — head(21) + type(2) + SR_NO right-aligned in 10
+     *     AC_CODE / LD_CODE mirror the AC_DATA legs, each row naming the other side in LD_CODE
+     * Example key pair: `01002024-20250170000101         1` / `…0000102         2`.
+     *
+     * `buildJournalRojmel` already encodes exactly this rule and was already verified against these same
+     * 74 rows (100% DR/CR agreement with each row's own ledger leg) — it was simply never called from here,
+     * only from `postJournal`. The lines are derived from `ledger` rather than rebuilt, so the day book and
+     * the general ledger cannot drift apart.
+     *
+     * This gap was found by adding a vacuity guard to the F1.1 contra-delete test: its assertion that no
+     * day-book rows survive a deletion was passing because there had never been any.
+     */
+    const rojmelRows = buildJournalRojmel(
+      {
+        scope: {
+          coCode: input.scope.coCode,
+          lcCode: input.scope.lcCode,
+          coYear: input.scope.coYear!,
+        },
+        key,
+        coBook: key.CO_BOOK,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: book.shortName,
+        bookName: book.name,
+        // A contra moves money between the shop's own accounts, so there is no party to denormalise.
+        partyName: '',
+        partyCode: '',
+      },
+      // SR_NO 1 is the Cr side and 2 the Dr side, matching the desktop's own CONTRA_DATA ordering
+      // (real voucher 017/00001: srno=1 cr=11957, srno=2 dr=11957).
+      [
+        { lineNo: 1, acCode: input.fromAc, drAmt: 0, crAmt: input.amount },
+        { lineNo: 2, acCode: input.toAc, drAmt: input.amount, crAmt: 0 },
+      ],
+    );
     await insertHiddenIdentityTx(tx, input.scope, identity, book.name);
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
@@ -1144,6 +1210,7 @@ export async function postContra(
             },
           ],
         },
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return { vchNo };
@@ -1345,7 +1412,88 @@ export async function deleteReceipt(
   });
 }
 
-const CONTRA_WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA'] as const;
+/**
+ * The contra write set, and therefore its reversal set.
+ *
+ * `ROJ_MEL_DATA` was added with the day-book projection in `postContra` (plan item F3.3). The two must move
+ * together: a write without a matching reversal leaves orphan day-book rows that no delete can reach, and
+ * because `LEDR_KEY` is unique the next voucher reusing that number then fails to post. The contra-delete
+ * test asserts the day book is cleared, which is what caught this.
+ */
+const CONTRA_WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
+
+/**
+ * Read a saved payment — plan item F2.1.
+ *
+ * WHY THIS COULD NOT REUSE `getReceipt`
+ * ====================================
+ * A payment's header is **`PAY_DATA`**, not the `CASH_DATA` a receipt writes (`postPayment` at the
+ * `table: 'PAY_DATA'` write; `postReceipt` writes `CASH_DATA`). Pointing the receipt reader at a payment
+ * would find nothing and report the voucher missing, so the two are genuinely separate readers rather than
+ * one parameterised by table. The column names differ as well: a receipt carries `REC_AMT` and `REC_AC_CODE`,
+ * a payment carries `NET_AMT`/`TOT_AMT` and `BANK_AC`.
+ *
+ * This mattered because payments are the SECOND most-used family in the business — 133 vouchers in the
+ * reference year, behind only the 841 scheme instalments — and a saved payment could not be reopened or
+ * reprinted at all.
+ *
+ * The returned shape is keyed the way `PaymentInput` is keyed (`partyAc`, `amount`, `mode`, `kasar`, …) so
+ * that post-then-get is symmetric and a round-trip test can assert on the caller's own field names.
+ *
+ * `mode` is RECONSTRUCTED rather than stored: `postPayment` records the tender in which amount column carries
+ * the value — `CASH_AMT`, `CHQ_AMT` or `CARD_AMT` — so the reader reads it back the same way. `BANK_AC` is
+ * null on a cash payment, which is the tie-breaker when every amount column is zero.
+ */
+export async function getPayment(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<Record<string, unknown>> {
+  completeFinanceScope(scope);
+  const voucherNo = formatVoucherNo(requestedVoucherNo);
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","AC_CODE","AC_NAME",
+              "NET_AMT","TOT_AMT","KASAR_AMT","BANK_AC","CASH_AMT","CHQ_AMT","CARD_AMT","CHQ_NO",
+              "VCH_DESC","BOOK_NAME"
+         FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      voucherNo,
+    );
+    // Throw rather than return a blank record: an empty shape reads as "this voucher has no lines", which is
+    // the same trap as an empty query result read as a finding. Every sibling reader here does the same.
+    if (!rows.length) throw new FinanceValidationError(`payment voucher not found: ${voucherNo}`);
+    const h = rows[0]!;
+    const mode = numv(h.CHQ_AMT)
+      ? 'cheque'
+      : numv(h.CARD_AMT)
+        ? 'card'
+        : numv(h.CASH_AMT) || !text(h.BANK_AC)
+          ? 'cash'
+          : 'bank';
+    return {
+      voucherNo: text(h.VCH_NO),
+      hiddenVoucherNo: text(h.HD_VCH_NO),
+      mainUser: text(h.MAIN_USER),
+      vchDate: text(h.VCH_DATE).slice(0, 10),
+      partyAc: text(h.AC_CODE),
+      partyName: text(h.AC_NAME),
+      amount: numv(h.NET_AMT) || numv(h.TOT_AMT),
+      kasar: numv(h.KASAR_AMT),
+      bankAc: text(h.BANK_AC),
+      chqNo: text(h.CHQ_NO),
+      mode,
+      // PAY_DATA's narration column is VCH_DESC; CASH_DATA's is IT_DESC.
+      description: text(h.VCH_DESC),
+      bookName: text(h.BOOK_NAME),
+    };
+  });
+}
 
 export async function getContra(
   prisma: any,

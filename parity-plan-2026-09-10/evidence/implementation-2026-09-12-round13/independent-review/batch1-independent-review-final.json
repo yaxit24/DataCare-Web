@@ -1,0 +1,58 @@
+{
+  "recordedAtUtc": "2026-09-11T18:43:29.768090+00:00",
+  "scope": "Independent read-only current-behavior review of staged Batch1 Tx extraction",
+  "disposition": "No confirmed semantic mismatch found in the staged extraction; runtime/compiler/DB verification pending.",
+  "independentCaseCount": 31,
+  "stagedExecutableCases": 72,
+  "stagedExecutableCasesComposition": "31 independent literals through direct and wrapper paths plus9 boundary cases and1 fixture provenance assertion",
+  "sourceComparisons": [
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "originalSha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e",
+      "stagedSha256": "c864e5e3aaa7319537ef31fab2861d0a776b9347efa0eb958af2373b8764c3f3",
+      "templateLiteralCount": 8,
+      "allTemplateLiteralsByteIdenticalInOrder": true
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "originalSha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34",
+      "stagedSha256": "ee079f09d0076f2339dd1307a3912c249624786566d216b1f17466af134b3acd",
+      "templateLiteralCount": 6,
+      "allTemplateLiteralsByteIdenticalInOrder": true
+    }
+  ],
+  "references": [
+    {
+      "path": "/tmp/datacare-session-context-next/independent-review/batch1-independent-decisions.json",
+      "sha256": "5fb741ce33c4615e1c1f905aef9dabf86ef97a58ca1514a56fe44bb46827c8d7"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/independent-review/batch1-vector-authorship.json",
+      "sha256": "e14820d1f173ab2ca1d9b8a4f289cbf13c6b99954f8ac646909c298f3c67fd71"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/staged/web/apps/api/test/sessionContext.extraction.test.ts",
+      "sha256": "292deccae00b08541747782e9c5fd1722942e984185cd3c95d93a746d008c9ed"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/staged/web/apps/api/test/fixtures/sessionContext.extraction.independent.json",
+      "sha256": "5fb741ce33c4615e1c1f905aef9dabf86ef97a58ca1514a56fe44bb46827c8d7"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/implementation-contract.md",
+      "sha256": "e6852f3a05b8dd93198566ebbb0b67d074ecfca607843574c9da51ff078f64fc"
+    }
+  ],
+  "originalFixtureSha256": "5fb741ce33c4615e1c1f905aef9dabf86ef97a58ca1514a56fe44bb46827c8d7",
+  "portableFixtureByteIdentical": true,
+  "sourceContractLimits": [
+    "Exact original query template bytes and statement bindings retained.",
+    "New Tx functions rely on caller-owned tenant binding and isolation, not on input.tenantId as authenticated authority.",
+    "One default withTenant transaction is not RepeatableRead and does not make separate scope/session/last-lock calls atomic.",
+    "No schema/JWT/session/epoch/clock/ledger/UI or last-day-lock trigger changes.",
+    "No runtime SQL/permissions/isolation/concurrency/rollback acceptance is claimed from a query-queue double."
+  ],
+  "testsCompilerDbExecuted": false,
+  "workspaceMutations": false,
+  "revisionNote": "The owner confirmed a fixture SHA/count assertion in addition to62 decisions and9 boundary cases. The test SHA is unchanged from the initial review capture:71 was a metadata undercount, corrected here to72. Earlier batch1-independent-review.json is retained transparently. No runtime/compiler checks have run."
+}

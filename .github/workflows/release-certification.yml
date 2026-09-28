@@ -1,0 +1,177 @@
+# Release certification (P0-07 / WP-03).
+#
+# SEPARATE FROM ci.yml ON PURPOSE.
+#
+# `ci.yml` answers "did this change break anything visible" and is built to stay actionable: it runs the
+# desktop comparison under `continue-on-error` because the retained capture is known red, and several of its
+# gates print `*_SKIP` and exit 0 when their inputs are absent. That is the right trade for a pull request and
+# the wrong one for a release, so the two questions get two workflows rather than one job with a flag.
+#
+# NOTHING HERE MAY TOLERATE A FAILURE. There is no `continue-on-error`, no `|| true`, and no step condition
+# that converts an absent input into a pass. `scripts/release-certify.mjs` owns the verdict, and the rules it
+# applies are unit tested for every refusal reason in apps/api/test/releaseCertification.test.ts.
+#
+# The owner inputs are deliberately unset by default:
+#
+#   release_sha                    the exact commit being certified
+#   evidence_max_age_hours         the freshness window — an OWNER decision (plan §8.1 item 11)
+#   requirement_set_sha256         the reviewed gate/member universe printed by `--plan`
+#
+# Expected result today: RED. The retained desktop comparison reports `matched: false`, no report-comparison
+# artefact exists, and no evidence carries a release commit. That is the intended state — WP-03's exit
+# criterion is "the protected release workflow remains red until every downstream evidence gate is complete
+# and fresh", not "the workflow passes".
+name: Release certification
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: 'Owner-reviewed exact 40-character commit to certify'
+        required: true
+        type: string
+      evidence_max_age_hours:
+        description: 'Owner-approved evidence freshness window, in hours'
+        required: true
+        type: string
+      requirement_set_sha256:
+        description: 'Owner-reviewed requirement-set SHA-256 printed by release:certify --plan'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# One certification per commit at a time; a second run would race on the retained record.
+concurrency:
+  group: release-certification-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  certify:
+    name: Certify release
+    runs-on: ubuntu-latest
+    # A GitHub environment supplies required reviewers for the real release inputs, so certification must not
+    # be runnable from a fork or an unreviewed branch.
+    environment: release-certification
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: datacare
+          POSTGRES_PASSWORD: datacare
+          POSTGRES_DB: datacare_release
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U datacare -d datacare_release"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      MIGRATE_DATABASE_DSN: postgresql://datacare:datacare@localhost:5432/datacare_release
+      MIGRATE_DATABASE_URL: postgresql://datacare:datacare@localhost:5432/datacare_release?schema=public
+      # These credentials protect only the disposable runner-local database/session. They are intentionally
+      # non-secret so dependency installation and marketplace actions receive no release credentials.
+      DATABASE_DSN: postgresql://app_user:release-local-app-password-2026@localhost:5432/datacare_release
+      DATABASE_URL: postgresql://app_user:release-local-app-password-2026@localhost:5432/datacare_release?schema=public
+      APP_DB_PASSWORD: release-local-app-password-2026
+      JWT_SECRET: release-certification-local-signing-key-2026-at-least-32-characters
+      RELEASE_EVIDENCE_MAX_AGE_HOURS: ${{ inputs.evidence_max_age_hours }}
+      RELEASE_REQUIREMENT_SET_SHA256: ${{ inputs.requirement_set_sha256 }}
+      RELEASE_WORKFLOW_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.15.4 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Resolve the commit under certification
+        id: commit
+        env:
+          REQUESTED_RELEASE_SHA: ${{ inputs.release_sha }}
+          CHECKED_OUT_SHA: ${{ github.sha }}
+        run: |
+          sha="$REQUESTED_RELEASE_SHA"
+          if [ -z "$sha" ]; then sha="$CHECKED_OUT_SHA"; fi
+          sha="${sha,,}"
+          case "$sha" in
+            *[!0-9a-f]* | "" ) echo "release_sha is not a 40-character hex commit: $sha" >&2; exit 1 ;;
+          esac
+          if [ "${#sha}" -ne 40 ]; then
+            echo "release_sha must be 40 characters, got ${#sha}" >&2
+            exit 1
+          fi
+          # The certified commit must be the one checked out, or the evidence describes other code.
+          if [ "$sha" != "$CHECKED_OUT_SHA" ]; then
+            echo "release_sha $sha is not the checked-out commit $CHECKED_OUT_SHA" >&2
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve immutable candidate input identities
+        id: candidate-inputs
+        working-directory: web
+        env:
+          RELEASE_SHA: ${{ steps.commit.outputs.sha }}
+        # Expected digests come from committed Git objects. The certifier later hashes live checkout bytes
+        # independently, after install/build setup, and refuses either mismatch before running any gate.
+        run: node scripts/release-candidate-expected-identity.mjs "$RELEASE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Install exact dependency graph
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+
+      - name: Install production PDF renderer
+        working-directory: web
+        run: pnpm --filter @datacare/api exec playwright install --with-deps chromium
+
+      - name: Deploy migration-owned schema, RLS and runtime role
+        working-directory: web
+        env:
+          DATABASE_URL: ${{ env.MIGRATE_DATABASE_URL }}
+        run: |
+          pnpm --filter @datacare/db db:validate
+          pnpm --filter @datacare/db db:generate
+          pnpm --filter @datacare/db exec prisma migrate deploy --schema prisma/schema.prisma
+          pnpm --filter @datacare/db exec prisma migrate diff \
+            --from-url "$MIGRATE_DATABASE_URL" \
+            --to-schema-datamodel prisma/schema.prisma \
+            --exit-code
+          psql "$MIGRATE_DATABASE_DSN" -v ON_ERROR_STOP=1 -f packages/db/prisma/rls.sql
+          psql "$MIGRATE_DATABASE_DSN" -v ON_ERROR_STOP=1 \
+            -v app_password="$APP_DB_PASSWORD" -f packages/db/setup_roles.sql
+
+      - name: Certify
+        working-directory: web
+        env:
+          # Use the SHA validated against github.sha. The helper output binds inputs but cannot replace it.
+          RELEASE_SHA: ${{ steps.commit.outputs.sha }}
+          RELEASE_LOCK_SHA256: ${{ steps.candidate-inputs.outputs.lock_sha256 }}
+          RELEASE_SCHEMA_SHA256: ${{ steps.candidate-inputs.outputs.schema_sha256 }}
+          RELEASE_TEMPLATE_SHA256: ${{ steps.candidate-inputs.outputs.template_sha256 }}
+          # This is the only step allowed to see the real SQL Server type-dump location.
+          MSSQL_TYPES: ${{ secrets.RELEASE_MSSQL_TYPE_DUMP_PATH }}
+          RUN_DB_INTEGRITY_TESTS: '1'
+          RUN_DB_SECURITY_TESTS: '1'
+        run: pnpm release:certify
+
+      - name: Ensure an early workflow failure has a refusal record
+        if: failure()
+        working-directory: web
+        env:
+          RELEASE_SHA: ${{ steps.commit.outputs.sha }}
+        run: node scripts/release-certification-workflow-refusal.mjs
+
+      - name: Upload the certification record
+        if: always()
+        # `always()` uploads the record for a refusal too: a refusal names the gate that was not satisfied and
+        # is itself the evidence for a no-go decision. It does not repair the failed step.
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-certification-${{ steps.commit.outputs.sha }}
+          path: project-memory/parity/release
+          if-no-files-found: error

@@ -1,0 +1,56 @@
+{
+ "form": "RP_STK_LEVEL",
+ "loc": 2446,
+ "gridColumns": {
+  "cSrNo": 0,
+  "c2SrNo": 0,
+  "cItName": 1,
+  "c2MembCode": 1,
+  "cDesign": 2,
+  "c2MembName": 2,
+  "cFromWt": 3,
+  "c2MembMobile": 3,
+  "cToWt": 4,
+  "c2MembAmt": 4,
+  "cClQty": 5,
+  "cClPcs": 6,
+  "cClGrwt": 7,
+  "cClWt": 8,
+  "cMinStk": 9,
+  "cDifStk": 10,
+  "cExStk": 11,
+  "cItCode": 12,
+  "cItType": 13
+ },
+ "inlineSql": [
+  "SELECT YEAR(A.SCHM_DATE) as YrCode,MONTH(A.SCHM_DATE) AS MnCode FROM AD_DATA AS A WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.SCHM_CODE = ' ? ' AND A.SCHM_DATE <= ' ? MM/dd/yyyy ? ' ? GROUP BY YEAR(A.SCHM_DATE),MONTH(A.SCHM_DATE) ORDER BY YEAR(A.SCHM_DATE),MONth(A.SCHM_DATE)",
+  "SELECT A.MEMB_CODE,B.MEMB_NAME,B.AC_MOBILE,YEAR(A.SCHM_DATE) as YrCode,MONTH(A.SCHM_DATE) AS MnCode,SUM(A.MEMB_AMT) AS MembAmt FROM AD_DATA AS A LEFT JOIN AD_MEMB AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.SCHM_CODE = B.SCHM_CODE AND A.MEMB_CODE = B.MEMB_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.SCHM_CODE = ' ? ' AND A.SCHM_DATE <= ' ? MM/dd/yyyy ? ' ? GROUP BY A.MEMB_CODE,B.MEMB_NAME,B.AC_MOBILE,YEAR(A.SCHM_DATE),MONTH(A.SCHM_DATE) ORDER BY A.MEMB_CODE,YEAR(A.SCHM_DATE),MONth(A.SCHM_DATE)",
+  "Select A.MEMB_CODE FROM AD_OS AS A LEFT JOIN AD_MEMB AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.MEMB_CODE = B.MEMB_CODE AND A.SCHM_CODE = B.SCHM_CODE WHERE A.CO_CODE = ' ? ' AND A.SCHM_CODE = ' ? ' and VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND B.MEMB_CODE = ' ? ' GROUP BY A.MEMB_CODE ? HAVING SUM(CASE WHEN A.OS_TYPE = 'A' THEN (CASE WHEN A.SIGN = '+' THEN A.ADJ_AMT ELSE 0 END) ELSE 0 END) - SUM(CASE WHEN A.OS_TYPE = 'D' THEN (CASE WHEN A.SIGN = '-' THEN A.ADJ_AMT ELSE 0 END) ELSE 0 END) <= 0 ORDER BY A.MEMB_CODE",
+  "SELECT IT_DESIGN FROM ITM_WT_MAST WHERE CO_CODE = ' ? ' AND IT_DESIGN <> 'N'",
+  "SELECT A.*,B.IT_NAME,B.IT_TYPE FROM ITM_WT_MAST AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND B.IT_TYPE = ' ? ' ? AND A.IT_CODE = ' ? ' ? ORDER BY IT_CODE,IT_DESIGN,SR_NO",
+  "SELECT A.IT_CODE AS Code, SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN ITM_PCS ELSE -ITM_PCS END) ELSE 0 END) AS ClPcs,SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN 1 ELSE -1 END)ELSE 0 END) AS ClQty,SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN ITM_NWT ELSE - ITM_NWT END) ELSE 0 END) AS ClWt, SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN ITM_GWT ELSE -ITM_GWT END)ELSE 0 END) AS ClGrWt FROM MAIN_STOCK AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.IT_CODE = ' ? ' ? AND A.ITM_NWT >= ? AND A.ITM_NWT <= ? ",
+  "SELECT A.IT_CODE AS Code,A.DESIGN_NO As Design, SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN ITM_PCS ELSE -ITM_PCS END) ELSE 0 END) AS ClPcs,SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN 1 ELSE -1 END)ELSE 0 END) AS ClQty,SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN ITM_NWT ELSE - ITM_NWT END) ELSE 0 END) AS ClWt, SUM(CASE WHEN VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN ITM_GWT ELSE -ITM_GWT END)ELSE 0 END) AS ClGrWt FROM MAIN_STOCK AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.IT_CODE = ' ? ' ? AND A.ITM_NWT >= ? AND A.ITM_NWT <= ? AND A.DESIGN_NO = ' ? IT_DESIGN ? '",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "Select * From AD_MAST WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "SELECT SCHM_CODE As CodeL,SCHM_NAME as SchemeNameL, SCHM_AMT AS AmountR,SCHM_TYPE As SchmTypeM FROM AD_MAST WHERE CO_CODE = ' ? ' ORDER BY SCHM_CODE",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItNameL,A.IT_CODE As ItCodeL FROM ITEM_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_CODE",
+  "Select * From LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "Select LC_CODE As CodeL,LC_NAME As NameL,LC_ADD1 As AddressL,LC_CITY As CityL FROM LOCT_MAST WHERE CO_CODE = ' ? ' ORDER BY LC_CODE"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 2
+ },
+ "calc": [
+  "num5 = (int)Math.Round((double)num5 + Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)DGV_DETL)[DC_Main.M, DC_Main.X].Value)));",
+  "((DataGridView)dGV_DETL)[10, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[9, DC_Main.R].Value)) - Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[5, DC_Main.R].Value))), \"0\");",
+  "((DataGridView)dGV_DETL)[11, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[5, DC_Main.R].Value)) - Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[9, DC_Main.R].Value))), \"0\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": ""
+  }
+ ]
+}

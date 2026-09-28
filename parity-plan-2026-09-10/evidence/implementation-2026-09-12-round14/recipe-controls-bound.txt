@@ -1,0 +1,36 @@
+test_absent_to_present_and_absence_identity_omission (__main__.RecipeControls.test_absent_to_present_and_absence_identity_omission) ... ok
+test_browser_runtime_mandatory_membership_during_run_and_current_hash (__main__.RecipeControls.test_browser_runtime_mandatory_membership_during_run_and_current_hash) ... ERROR
+test_derived_runtime_difference_array_cannot_hide_stale_inputs (__main__.RecipeControls.test_derived_runtime_difference_array_cannot_hide_stale_inputs) ... ok
+test_each_external_api_domain_is_mandatory (__main__.RecipeControls.test_each_external_api_domain_is_mandatory) ... ok
+test_echo_command_is_rejected_even_if_retained_record_agrees (__main__.RecipeControls.test_echo_command_is_rejected_even_if_retained_record_agrees) ... ok
+test_lowered_success_count_and_false_green_red_gate_are_rejected (__main__.RecipeControls.test_lowered_success_count_and_false_green_red_gate_are_rejected) ... ok
+test_missing_and_duplicate_required_runs (__main__.RecipeControls.test_missing_and_duplicate_required_runs) ... ok
+test_new_public_file_is_observed_without_changing_existing_hashes (__main__.RecipeControls.test_new_public_file_is_observed_without_changing_existing_hashes) ... ok
+test_nonwrapper_does_not_need_private_or_runtime_run_map (__main__.RecipeControls.test_nonwrapper_does_not_need_private_or_runtime_run_map) ... ok
+test_positive_complete_recipe_and_records (__main__.RecipeControls.test_positive_complete_recipe_and_records) ... ok
+test_post_run_public_hash_or_membership_change (__main__.RecipeControls.test_post_run_public_hash_or_membership_change) ... ok
+test_private_cannot_enter_public_source_map (__main__.RecipeControls.test_private_cannot_enter_public_source_map) ... ok
+test_private_change_and_during_run_change (__main__.RecipeControls.test_private_change_and_during_run_change) ... ok
+test_private_membership_cannot_omit_a_null_identity (__main__.RecipeControls.test_private_membership_cannot_omit_a_null_identity) ... ok
+test_public_during_run_drift_even_with_empty_derived_difference (__main__.RecipeControls.test_public_during_run_drift_even_with_empty_derived_difference) ... ok
+test_retained_input_hash_tampering (__main__.RecipeControls.test_retained_input_hash_tampering) ... ok
+test_retained_record_command_mismatch (__main__.RecipeControls.test_retained_record_command_mismatch) ... ok
+test_schema_omissions_duplicates_and_wrong_prior (__main__.RecipeControls.test_schema_omissions_duplicates_and_wrong_prior) ... ok
+test_unrelated_historical_failure_is_retained_without_new_schema (__main__.RecipeControls.test_unrelated_historical_failure_is_retained_without_new_schema) ... ok
+test_web_test_membership_and_hash_even_when_prefix_is_selective (__main__.RecipeControls.test_web_test_membership_and_hash_even_when_prefix_is_selective) ... ok
+
+======================================================================
+ERROR: test_browser_runtime_mandatory_membership_during_run_and_current_hash (__main__.RecipeControls.test_browser_runtime_mandatory_membership_during_run_and_current_hash)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/../parity-plan-2026-09-10/test_checkpoint_recipe_round14.py", line 183, in test_browser_runtime_mandatory_membership_during_run_and_current_hash
+    self.mutate_run(label, input_mutation=lambda x: x.update(runtimeInputFiles={}))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/../parity-plan-2026-09-10/test_checkpoint_recipe_round14.py", line 73, in mutate_run
+    index = next(i for i, r in enumerate(self.runs) if r['label'] == label)
+StopIteration
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.244s
+
+FAILED (errors=1)

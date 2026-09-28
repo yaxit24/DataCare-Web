@@ -9,7 +9,7 @@ export const DESKTOP_OUNCE_CONVERSION = 31.1035;
 
 export type InterestDayMode = '1' | '2';
 export type LoanInterestType = 'M' | 'D';
-export type FineStockType = '' | 'A' | 'N' | 'G';
+export type FineStockType = '' | 'A' | 'N' | 'G' | 'F';
 export type LineAmountType = '' | 'N' | 'G' | 'F' | 'P';
 export type StockWeightSource = '' | 'OLD' | 'NEW';
 export type ExportDatabaseTarget = '' | 'A' | 'B';
@@ -64,6 +64,99 @@ export interface SettingsBehavior {
   fxCode: string | null;
   adminSms: boolean | null;
   customerSms: boolean | null;
+  /**
+   * `CO_SET_NEW` business switches (parity plan P4).
+   *
+   * WHY THESE WERE ALL INERT
+   * `resolveSettingsBehaviorTx` read `CO_SET` only. Every one of these lives in `CO_SET_NEW`, which
+   * the loader never touched — so 74 of the 130 persisted settings were editable in the UI, stored
+   * on save, and read by nothing. That single omission, not 74 separate ones, is why the settings
+   * surface looked complete and behaved as if it did not exist.
+   *
+   * Each is measured: the desktop reads it in the number of forms recorded in
+   * `project-memory/parity/SETTINGS-EFFECT.json`, so none of these is a speculative switch.
+   */
+  /** `NEGATIVE_STK_SALE` — allow a sale to take stock below zero. Desktop refuses when 'N' (TR_SALE.cs:10398 "Negative Stock is Not Allow", TR_SALE_HM.cs:7381). */
+  negativeStockSale: boolean;
+  /** `PURC_WITH_HMTAX` — apply GST to the hallmark charge on a purchase (31 desktop forms). */
+  purchaseWithHallmarkTax: boolean;
+  /** `SALES_WITH_HMTAX` — the same on a sale (28 desktop forms). */
+  salesWithHallmarkTax: boolean;
+  /** `SL_NWT_LOCK` — lock the sale line's net weight against operator retyping (11 desktop forms). */
+  saleNetWeightLocked: boolean;
+  /** `ITM_FINE_LOCK` — lock the computed fine weight. */
+  itemFineLocked: boolean;
+  /** `LBR_WITH_GHT` — include ghat weight in the labour base (23 desktop forms). */
+  labourIncludesGhat: boolean;
+  /**
+   * `CUR_DAY_POSTING` — the STOCK-REBUILD scope, not a posting-date restriction.
+   *
+   * The column name invites the wrong reading and this comment previously carried it ("restrict
+   * posting to the current day"). The desktop disagrees: the flag is bound to a combo labelled
+   * "Stock Refresh" (`UT_SETTING_MAIN.cs:9456`, `cboStkRefresh`) and is read in exactly two places,
+   * both about rebuilding `MAIN_STOCK`:
+   *
+   *   `MS_UPDATE.cs:2852-2868` StockRefresh() — when 'Y', delete and rebuild `MAIN_STOCK` only from a
+   *     chosen date forward, clamped to the year's opening date; when 'N'/blank, delete EVERY
+   *     `MAIN_STOCK` row for the company and rebuild from scratch.
+   *   `Ac_Stock.cs:13` Itm_Opbl_Stk() — when 'Y' and no stock voucher is named, skip the
+   *     opening-stock inserts entirely, because the windowed rebuild will not reach them.
+   *
+   * It is therefore a utility setting, and it is NOT wired to a consumer here: the web has no
+   * equivalent full stock-rebuild utility for it to govern. Loaded and named honestly rather than
+   * attached to an invented posting guard, which is what the old comment would have produced.
+   */
+  stockRefreshFromDateOnly: boolean;
+  /** `ESTMATE_BANK_LOCK` — lock the bank account on an estimate (23 desktop forms). */
+  estimateBankLocked: boolean;
+  /**
+   * `ESTMATE_TAX` — whether tax is charged on a non-tax (estimate) book.
+   *
+   * `TR_SALE.cs:14168` loads the tax master when the book type is 'T' OR this flag is 'Y'. So a tax
+   * book always taxes; an estimate book taxes only when the company switches it on. Verified rather
+   * than inferred, because the name alone would equally support "tax an estimate differently".
+   */
+  estimateTax: boolean;
+  /** `PR_TDS_TAX` — expose and post purchase TDS; desktop writes blank/zero when off (TR_PURC.cs:12160-12172). */
+  purchaseTdsEnabled: boolean;
+  /** `OLD_PURC_TOUCH` — generate the old-gold purchase touch rather than taking it as typed. */
+  oldPurchaseTouchGenerated: boolean;
+  /** `SILVER_THREE_DIGIT` — silver weights carry three decimals (11 desktop forms). */
+  silverThreeDigit: boolean;
+  /** `OTH_ITM_WT_REMOVE` — exclude other-item weight from the line total. */
+  otherItemWeightRemoved: boolean;
+  /** `ORD_TAG_STK_LESS` — an order may reduce tag stock. */
+  orderReducesTagStock: boolean;
+  /**
+   * `SL_TAG_WT_DIFF` — writes the tag-versus-line weight difference back to stock. NOT a permission.
+   *
+   * The name reads like a validation switch and this comment previously claimed it was one ("permit a
+   * sale when the tag's weight differs"). The desktop does something else entirely: when 'Y',
+   * `Ac_Stock.cs:125-130` writes TWO extra `MAIN_STOCK` rows per sale to reconcile the difference
+   * between the tag's recorded weight and the weight actually sold —
+   *
+   *   ISR_NO 7, `VCH_SRNO` 111, sign '-', `TAG_GWT - ITM_GWT` / `TAG_NWT - ITM_NWT`
+   *     where `(ITM_GWT+ITM_NWT) - (TAG_GWT+TAG_NWT) < 0`
+   *   ISR_NO 8, `VCH_SRNO` 222, sign '+', `ITM_GWT - TAG_GWT` / `ITM_NWT - TAG_NWT`
+   *     where that difference is `> 0`
+   *
+   * both gated on `TAG_GWT <> 0`. The 111/222 serials are sentinels marking a reconciliation row
+   * rather than a real tag instance. Implementing it is a stock-writer change, so it is loaded and
+   * NOT yet consumed; the semantics are recorded here so it cannot be built from the name.
+   */
+  saleTagWeightDiffReconciled: boolean;
+  /** `PURC_LOT` — lot entry on purchase. */
+  purchaseLot: boolean;
+  /** `ITM_WITH_LOT_STK` — track stock lot-wise (10 desktop forms). */
+  itemWithLotStock: boolean;
+  /** `TOT_FINE_STK_TYPE` — the basis the total fine-stock figure aggregates on. */
+  totalFineStockType: string;
+  /** `BRANCH_ALL_AC_SHOW` — widen account lookups company-wide (68 desktop forms; TR_SALE.cs:17296-17320). */
+  branchAllAccountShow: boolean;
+  /** `DUP_PRINT` — offer duplicate/triplicate print copies (23 desktop forms; MS_PRINT.cs:389-424). */
+  duplicatePrint: boolean;
+  /** `QR_CODE_GEN` — emit a QR code on documents. */
+  qrCodeGeneration: boolean;
 }
 
 export class SettingsBehaviorValidationError extends Error {
@@ -89,7 +182,7 @@ function finiteNumber(
   value: unknown,
   key: string,
   defaultValue: number,
-  options: { zeroUsesDefault?: boolean; negativeToZero?: boolean } = {},
+  options: { zeroUsesDefault?: boolean; negativeToZero?: boolean; zeroDisables?: boolean } = {},
 ): number {
   const configured = raw(value);
   if (!configured) return defaultValue;
@@ -99,6 +192,19 @@ function finiteNumber(
   }
   if (options.zeroUsesDefault && parsed === 0) return defaultValue;
   if (options.negativeToZero && parsed < 0) return 0;
+  /**
+   * `zeroDisables`: an explicitly configured 0 means "no ceiling", and is NOT an error.
+   *
+   * This exists because `CASH_LIMIT` is 0 in EVERY real installation examined — Live24, Next23, Next24 and
+   * Next25, on every CO_SET row — while those same shops post cash vouchers freely (Live24 alone has 133
+   * CASH PAY and 56 CASH REC vouchers). So the desktop treats 0 as "ceiling disabled", and the previous
+   * `parsed <= 0` throw made `resolveSettingsBehavior` fail for every real customer database.
+   *
+   * The existing unit test 'CASH_LIMIT zero disables only the cash ceiling' did not catch this because it
+   * passes `cashLimit: 0` straight into `tenderThresholdDecision`, bypassing this loader. It proved the
+   * consumer handles 0; nothing proved the loader could ever produce it.
+   */
+  if (options.zeroDisables && parsed === 0) return 0;
   if (parsed <= 0) {
     throw new SettingsBehaviorValidationError(`CO_SET.${key} must be positive`);
   }
@@ -179,6 +285,8 @@ export function resolveSettingsBehavior(values: Record<string, unknown>): Settin
   return {
     cashLimit: finiteNumber(values.CASH_LIMIT, 'CASH_LIMIT', DEFAULT_CASH_LIMIT, {
       negativeToZero: true,
+      // 0 = no cash ceiling. Every real installation ships 0; see finiteNumber for the evidence.
+      zeroDisables: true,
     }),
     panCardVal: finiteNumber(values.PAN_CARD_VAL, 'PAN_CARD_VAL', DEFAULT_PAN_CARD_VAL, {
       zeroUsesDefault: true,
@@ -192,7 +300,19 @@ export function resolveSettingsBehavior(values: Record<string, unknown>): Settin
     // MS_OPNCOMP.cs:679 loads DHRN_INT_TYPE; :775 defaults a blank value to "M".
     dhrnIntType: enumValue(values.DHRN_INT_TYPE, 'DHRN_INT_TYPE', ['M', 'D'], 'M'),
     dhrnCompound: enumValue(values.DHIRN_COMPOUND, 'DHIRN_COMPOUND', ['Y', 'N'], 'Y') === 'Y',
-    fineStockType: enumValue(values.FINE_STK_TYPE, 'FINE_STK_TYPE', ['A', 'N', 'G'], ''),
+    /**
+     * 'F' is accepted because it is what the desktop actually STORES and defaults to.
+     *
+     * MS_OPNCOMP.cs:765-767 maps a blank FINE_STK_TYPE to 'F'. The enum previously listed only A/N/G,
+     * following RP_STOCK_FINE.cs:2963-2977 — but that is one REPORT's accepted filter values, not the set of
+     * values the column can hold. The result was that `resolveSettingsBehavior` threw
+     * "CO_SET.FINE_STK_TYPE is invalid: F" for every real installation examined: Live24 (F,F),
+     * Next23 (F,A), Next24 (F,F) and Next25 (F,A,A).
+     *
+     * Accepting it is behaviour-neutral downstream: `fineStockValue` special-cases only 'A' and 'G' and
+     * returns the persisted fine for everything else, so 'F' and blank already computed identically.
+     */
+    fineStockType: enumValue(values.FINE_STK_TYPE, 'FINE_STK_TYPE', ['A', 'N', 'G', 'F'], ''),
     saleAmountType: enumValue(values.SL_AMT_TYPE, 'SL_AMT_TYPE', ['N', 'G', 'F', 'P'], ''),
     purchaseAmountType: enumValue(values.PR_AMT_TYPE, 'PR_AMT_TYPE', ['N', 'G', 'F', 'P'], ''),
     purchaseWithLabour: enumValue(values.PURC_WITH_LBR, 'PURC_WITH_LBR', ['Y', 'N'], 'Y') === 'Y',
@@ -249,7 +369,90 @@ export function resolveSettingsBehavior(values: Record<string, unknown>): Settin
     fxCode: optionalCode(values.FX_CODE, 'FX_CODE', /^[A-Z]{3}$/),
     adminSms: optionalFlag(values.ADMIN_SMS, 'ADMIN_SMS'),
     customerSms: optionalFlag(values.CUST_SMS, 'CUST_SMS'),
+    // ---- CO_SET_NEW business switches (P4) ------------------------------------------------------
+    // Defaults follow the desktop's own blank handling: a flag the installer never set behaves as
+    // the desktop behaves with a blank column, which for these is the permissive/off value. Where a
+    // desktop default is known to differ it is cited on the field in the interface above.
+    negativeStockSale: flagOf(values.NEGATIVE_STK_SALE, 'NEGATIVE_STK_SALE'),
+    purchaseWithHallmarkTax: flagOf(values.PURC_WITH_HMTAX, 'PURC_WITH_HMTAX'),
+    salesWithHallmarkTax: flagOf(values.SALES_WITH_HMTAX, 'SALES_WITH_HMTAX'),
+    saleNetWeightLocked: flagOf(values.SL_NWT_LOCK, 'SL_NWT_LOCK'),
+    itemFineLocked: flagOf(values.ITM_FINE_LOCK, 'ITM_FINE_LOCK'),
+    labourIncludesGhat: flagOf(values.LBR_WITH_GHT, 'LBR_WITH_GHT'),
+    stockRefreshFromDateOnly: flagOf(values.CUR_DAY_POSTING, 'CUR_DAY_POSTING'),
+    estimateBankLocked: flagOf(values.ESTMATE_BANK_LOCK, 'ESTMATE_BANK_LOCK'),
+    estimateTax: flagOf(values.ESTMATE_TAX, 'ESTMATE_TAX'),
+    purchaseTdsEnabled: flagOf(values.PR_TDS_TAX, 'PR_TDS_TAX'),
+    oldPurchaseTouchGenerated: flagOf(values.OLD_PURC_TOUCH, 'OLD_PURC_TOUCH'),
+    silverThreeDigit: flagOf(values.SILVER_THREE_DIGIT, 'SILVER_THREE_DIGIT'),
+    otherItemWeightRemoved: flagOf(values.OTH_ITM_WT_REMOVE, 'OTH_ITM_WT_REMOVE'),
+    orderReducesTagStock: flagOf(values.ORD_TAG_STK_LESS, 'ORD_TAG_STK_LESS'),
+    saleTagWeightDiffReconciled: flagOf(values.SL_TAG_WT_DIFF, 'SL_TAG_WT_DIFF'),
+    purchaseLot: flagOf(values.PURC_LOT, 'PURC_LOT'),
+    itemWithLotStock: flagOf(values.ITM_WITH_LOT_STK, 'ITM_WITH_LOT_STK'),
+    // MsTotFineStkType defaults a blank column to 'I' (MS_OPNCOMP.cs), not to empty.
+    totalFineStockType:
+      String(values.TOT_FINE_STK_TYPE ?? '')
+        .trim()
+        .charAt(0)
+        .toUpperCase() || 'I',
+    branchAllAccountShow: flagOf(values.BRANCH_ALL_AC_SHOW, 'BRANCH_ALL_AC_SHOW'),
+    duplicatePrint: flagOf(values.DUP_PRINT, 'DUP_PRINT'),
+    qrCodeGeneration: flagOf(values.QR_CODE_GEN, 'QR_CODE_GEN'),
   };
+}
+
+/**
+ * Blank-column defaults, transcribed from `MS_OPNCOMP.cs` where the desktop fills a blank setting
+ * before use (the `if (MsX == "") MsX = "V"` block around `:1036`).
+ *
+ * These are NOT guesses and could not be: the default differs per setting and two of them are the
+ * permissive value. `NEGATIVE_STK_SALE` defaults to **'Y'** (`MS_OPNCOMP.cs:1036-1038`) and
+ * `LBR_WITH_GHT` to **'Y'** — so a company that never opened the setting ALLOWS negative stock and
+ * DOES include ghat in the labour base. Defaulting those to 'N', as a uniform false would, inverts
+ * live behaviour: it would start refusing sales that the desktop accepts.
+ *
+ * Found the hard way — a uniform blank-is-false default failed 20 existing sale tests, which were
+ * right and the default was wrong.
+ */
+const BLANK_FLAG_DEFAULT: Record<string, 'Y' | 'N'> = {
+  NEGATIVE_STK_SALE: 'Y', // MS_OPNCOMP.cs:1036-1038
+  LBR_WITH_GHT: 'Y', // MsLbrWithGht
+  PURC_WITH_HMTAX: 'N', // MsPurcWithHmTax
+  SALES_WITH_HMTAX: 'N', // MsSalesWithHmTax
+  PR_TDS_TAX: 'N', // MsPrTdsTax
+  SL_NWT_LOCK: 'N', // MsSlNwtLock
+  ITM_FINE_LOCK: 'N', // MsItmFineLock
+  CUR_DAY_POSTING: 'N', // MsCurDayPosting
+  ESTMATE_BANK_LOCK: 'N', // MsEstmateBankLock
+  ESTMATE_TAX: 'N', // MsTaxWithEstmate
+  OLD_PURC_TOUCH: 'N', // MsOldPurcTchGen
+  SILVER_THREE_DIGIT: 'N', // MsSilverWt3Digit
+  OTH_ITM_WT_REMOVE: 'N', // MsOthItmWtRemove
+  ORD_TAG_STK_LESS: 'N',
+  SL_TAG_WT_DIFF: 'N', // MsSlAndTagWtDiff
+  PURC_LOT: 'N', // MsPurcLot
+  ITM_WITH_LOT_STK: 'N', // MsItmWitLotStk
+  BRANCH_ALL_AC_SHOW: 'N',
+  DUP_PRINT: 'N', // MsSlDupPrint
+  QR_CODE_GEN: 'N', // MsQrCodeGen
+};
+
+/**
+ * A `CO_SET_NEW` Y/N flag, with the desktop's own blank default.
+ *
+ * Deliberately tolerant of blank, which is what an installation that never opened the setting
+ * stores, and deliberately NOT tolerant of an unexpected value — a column holding 'X' means the
+ * migration or the desktop wrote something this code does not understand, and silently reading it
+ * as false would hide that.
+ */
+function flagOf(value: unknown, column: string): boolean {
+  const text = String(value ?? '')
+    .trim()
+    .toUpperCase();
+  if (text === '') return (BLANK_FLAG_DEFAULT[column] ?? 'N') === 'Y';
+  if (text === 'Y' || text === 'N') return text === 'Y';
+  throw new SettingsBehaviorValidationError(`CO_SET_NEW.${column} is invalid: ${text}`);
 }
 
 interface SettingsRow extends Record<string, unknown> {
@@ -272,7 +475,8 @@ export async function resolveSettingsBehaviorTx(
               "LBR_RATE_GEN", "OP_DHRN", "WEIGHT_PORT", "LDR_SUMM", "SMS_LINK", "OP_LOAN",
               "STK_RPT_TYPE", "TOUCH_AUTO_SAVE", "DHRN_PRC", "IP_WITH_PC",
               "CO_STK_MERGE", "CARD_COM_ADJ", "CASH_PURC_AC", "STOCK_RPT_TYPE",
-              "DHRN_WAPP", "SCHM_WAPP", "FX_RATE", "FX_CODE", "ADMIN_SMS", "CUST_SMS"
+              "DHRN_WAPP", "SCHM_WAPP", "FX_RATE", "FX_CODE", "ADMIN_SMS", "CUST_SMS",
+              "DUP_PRINT"
          FROM "CO_SET"
         WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text
         ORDER BY row_id`,
@@ -289,7 +493,39 @@ export async function resolveSettingsBehaviorTx(
       `company ${String(scope.coCode)} must have exactly one CO_SET behavior row`,
     );
   }
-  return resolveSettingsBehavior(rows[0] as SettingsRow);
+  /**
+   * `CO_SET_NEW` — the second configuration surface, read here for the first time (P4).
+   *
+   * This loader read `CO_SET` only, so every setting stored in `CO_SET_NEW` was editable in the UI,
+   * persisted on save, and consumed by nothing: 74 of the 130 settings were inert for this one
+   * reason. Among them are switches that change money — hallmark tax on purchase and sale, whether a
+   * sale may drive stock negative, whether purchase TDS is posted at all.
+   *
+   * A MISSING ROW IS NOT AN ERROR, unlike `CO_SET`. `provisionCompanySettingsTx` creates
+   * `CO_SET_NEW` by cloning a template, and a company provisioned before that existed legitimately
+   * has no row. Treating absence as "every flag blank" keeps those companies working exactly as they
+   * do today, whereas failing closed would take a live company down to honour a setting it never had.
+   */
+  let newRows: SettingsRow[] = [];
+  try {
+    newRows = await tx.$queryRawUnsafe(
+      `SELECT "NEGATIVE_STK_SALE", "PURC_WITH_HMTAX", "SALES_WITH_HMTAX", "SL_NWT_LOCK",
+              "ITM_FINE_LOCK", "LBR_WITH_GHT", "CUR_DAY_POSTING", "ESTMATE_BANK_LOCK",
+              "ESTMATE_TAX", "PR_TDS_TAX", "OLD_PURC_TOUCH", "SILVER_THREE_DIGIT",
+              "OTH_ITM_WT_REMOVE", "ORD_TAG_STK_LESS", "SL_TAG_WT_DIFF", "PURC_LOT",
+              "ITM_WITH_LOT_STK", "TOT_FINE_STK_TYPE", "BRANCH_ALL_AC_SHOW", "QR_CODE_GEN"
+         FROM "CO_SET_NEW"
+        WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text
+        LIMIT 1`,
+      scope.tenantId,
+      String(scope.coCode),
+    );
+  } catch (error) {
+    throw new SettingsBehaviorValidationError(
+      `unable to read CO_SET_NEW behavior settings for company ${String(scope.coCode)}`,
+    );
+  }
+  return resolveSettingsBehavior({ ...(rows[0] as SettingsRow), ...(newRows[0] ?? {}) });
 }
 
 /** TR_CASH.cs:2913-2922: enabled only above zero; cumulative cash strictly > limit blocks save. */

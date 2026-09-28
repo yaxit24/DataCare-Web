@@ -1,0 +1,227 @@
+{
+  "round": 3,
+  "capturedAtUtc": "2026-09-11T04:13:51.216637+00:00",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "sourceState": "shared dirty development tree; hashes identify the bounded slice, not a release candidate",
+  "observedDesktopExecution": false,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "id": "X11-repeat-keyboard-round3-2026-09-11",
+  "status": "implemented-source-vectors-database-browser-visual-and-integration-passed",
+  "x11Verified": false,
+  "source": [
+    {
+      "path": "../unified/src/csharp/DataCareNext/MS_DESIGN_BOOK.cs",
+      "sha256": "abde981d2825b4fc621a21c92305d36aea99aa3248d8f02f6d5e8644486cf9e3"
+    },
+    {
+      "path": "../unified/src/csharp_nextdm/DataCareNext/MS_DESIGN_BOOK.cs",
+      "sha256": "bbc05e84afec56728d43cc84d1638e2e2653e63943d6ec82b0f1b491b51bf288"
+    },
+    {
+      "path": "../DataCareNext.exe",
+      "sha256": "c85f93fd336853a2a639c6452b47748290a1dddb214e2fdf3fc78f47bc0ca6c8"
+    }
+  ],
+  "files": [
+    {
+      "path": "packages/core/src/designCalc.ts",
+      "sha256": "78f207dd2b8796f7f4ea9445c8baa971721f0d78ab82b50168bd67772a391116"
+    },
+    {
+      "path": "packages/core/test/designRepeat.test.ts",
+      "sha256": "b66b2087a5e9e3d8165f3f1f6b2c673890f767242284608a8ba357ffde213943"
+    },
+    {
+      "path": "apps/api/src/modules/masters/designBook.ts",
+      "sha256": "9ad5c8f700d97d2749dccc6c145181f697cbe099128b0267b086ba3adca54e40"
+    },
+    {
+      "path": "apps/api/test/designRepeat.db.test.ts",
+      "sha256": "e033a90766095fc0855c8adf35a6a0792239c5aa679b5a4513553d1fd4f6397f"
+    },
+    {
+      "path": "apps/web/lib/designBookDraft.ts",
+      "sha256": "79603788c7257a861ad01f62c29c423a10308faab5966308b1954732bb01d558"
+    },
+    {
+      "path": "apps/web/lib/designBookKeyboard.ts",
+      "sha256": "94d336f7b7edd0b63d86eeb24af7b7b859a4700d9603567ee63594f2c1a94725"
+    },
+    {
+      "path": "apps/web/app/(app)/masters/design-book/page.tsx",
+      "sha256": "6c961fb30edf4ec0179194a24f38607dd11b95e48a3e4852fd497a39a7ec736f"
+    },
+    {
+      "path": "apps/web/test/designBookRepeat.test.ts",
+      "sha256": "3cd44a82eccbc18dac555583e71895d7c3e4bac2e99f0a420ce8328d96260608"
+    },
+    {
+      "path": "apps/web/test/design-repeat.journey.mjs",
+      "sha256": "8355980b0dfbf259e1c02befd307bc2c2e13663ca2b2b8bf4d442b0307d293f4"
+    },
+    {
+      "path": "docs/parity-evidence/X11-repeat-keyboard-round3-contract-2026-09-11.md",
+      "sha256": "0decaa53d82fdca3f65d8e88b88b4bbbc6f0dfdef4ac5609f0fb1f1ec8df7b23"
+    }
+  ],
+  "verification": {
+    "focusedCoreTests": 47,
+    "focusedFrontendTests": 22,
+    "focusedDatabaseTests": 27,
+    "coreSuite": {
+      "files": 6,
+      "tests": 87,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/core-tests.txt",
+        "sha256": "d7e2f6974ca394b9e5d155a8406502852fece3d3d220acfc8881bb266e27cde3"
+      }
+    },
+    "webSuite": {
+      "files": 20,
+      "tests": 99,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/web-tests-toolbar-fixed.txt",
+        "sha256": "b726eb4df15e137d4575f2e867c6e096ce6b42879e1b8da5728140c94ec6b869"
+      }
+    },
+    "database": {
+      "passed": true,
+      "port": 55433,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-focused-db.txt",
+        "sha256": "5e5955f02ad8f33357b7afaac176e17889e5198333e75e0d8b013b35ee0ca597"
+      }
+    },
+    "combinedBrowser": {
+      "status": "passed",
+      "startedAt": "2026-09-11T04:09:46.509Z",
+      "finishedAt": "2026-09-11T04:09:57.421Z",
+      "mockedRequests": 0,
+      "designRepeatChecks": [
+        "configured parent and component repeat without calculation",
+        "hidden repeated cost and independent parent image identity",
+        "Gross Enter focuses the active parent last component",
+        "Net Amount Enter appends with stable noncontiguous IDs",
+        "Ctrl+D confirm/cancel and no deleted ID reuse",
+        "invalid Enter retains focus/draft and blocks child allocation",
+        "blank Item Enter returns to the invoking parent and discards only an untouched placeholder",
+        "parent focus updates component context without mutating saved data",
+        "complete unchanged save after focus preserves the saved snapshot",
+        "item Enter waits for scoped defaults before moving focus",
+        "Weight Enter uses prior zero weight and current scoped fixed amount",
+        "cleared rate persists as source Conversion.Val zero",
+        "real save/reopen/delete and no unhandled page errors",
+        "parent and component context/actions remain visible when their grids scroll"
+      ],
+      "designRepeatCount": 14,
+      "designLifecycleCount": 8,
+      "designCalculationCount": 14,
+      "result": {
+        "path": "test-results/parity-real-stack-round3-verified/result.json",
+        "sha256": "e05791a3ee60cc45223fbb6175585b7eaf9e5e048ad528ec8bdf28aba7b37e93"
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-verified.txt",
+        "sha256": "3b0ae394757b19f263230e447a3cf8272b9564eb6115130d5f628ad889fd3d0e"
+      },
+      "screenshots": [
+        {
+          "path": "test-results/parity-real-stack-round3-verified/design-repeat-identities-round3.png",
+          "sha256": "e53df4015a8808ab080b7b3017cb77947256a7525d4ffe31f2cd9877c3c3578d"
+        },
+        {
+          "path": "test-results/parity-real-stack-round3-verified/design-weight-enter-round3.png",
+          "sha256": "c91e4d89bb32bc3a890ec00a8e53efd7336c241448a84d2d1c6ae65ab1b50277"
+        }
+      ],
+      "visualReview": {
+        "passed": true,
+        "reviewedAtUtc": "2026-09-11T04:13:51.216637+00:00",
+        "finding": "Parent/component context and action controls remain visible within their panels; only tables scroll, including at far-right Net Amount focus.",
+        "productChangesRequired": false
+      },
+      "reviewArtifact": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-browser-verified-review.json",
+        "sha256": "16fba2bf454c13984c7489ddf34ffca0f320f3d23cb00565f0004be9df6feeee"
+      },
+      "priorRuns": [
+        {
+          "status": "failed",
+          "designRepeatChecks": 13,
+          "reason": "Later image fixture VARCHAR(15) insert; Design visual review then found toolbar scrolling defect",
+          "record": {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-browser-provisional.json",
+            "sha256": "51c6c61de51847861f313ee12efe65f13b4048255b517bd92125a69d353bca6c"
+          }
+        },
+        {
+          "status": "failed",
+          "designRepeatChecks": 14,
+          "reason": "Later image journey expected400 versus defined422; Design toolbar visual review passed",
+          "record": {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-browser-toolbar-fixed-review.json",
+            "sha256": "cc28f8057cf39e9cc54defce0730086784971ee3412b46c20f74405c826e0d18"
+          }
+        }
+      ]
+    },
+    "workspaceIntegration": "root final round 3 checkpoint is authoritative",
+    "apiSuite": {
+      "files": 216,
+      "tests": 1674,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/api-full.txt",
+        "sha256": "f9e0acea258cbfc1d91c0dc7cd73830e783e9f16f06638100844feb15fb18583"
+      }
+    },
+    "workspaceLintAndTypes": {
+      "tasks": 10,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/lint-and-types-final.txt",
+        "sha256": "2a9eb7a5c2f191a74691cdf8799b84a2dca27c2daa3b9b79c3fb0cde5dc7c446"
+      }
+    },
+    "strictApiTestTypes": {
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/test-types.txt",
+        "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9"
+      }
+    },
+    "workspaceBuild": {
+      "tasks": 7,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/build-toolbar-fixed.txt",
+        "sha256": "2fec727edea2c0845f35acec11deeab650e521dfa16585eb556d74e95046e4d2"
+      }
+    }
+  },
+  "preservationDifferencesPendingAcceptance": [
+    "Hidden EnterCell values preserved instead of source clearing",
+    "Weight Enter resolves current scoped item instead of mutable global desktop table context",
+    "Identities and image ownership excluded from repeat",
+    "Caret-aware left/right and unchanged navigation preservation",
+    "Untouched temporary blank child can exit without persistence"
+  ],
+  "remaining": [
+    "Diamond/descriptive and registration-specific master selectors",
+    "Book F1/global Escape equivalents",
+    "Source-specific Sales Order Design Book selection and separate tag-adoption/image transfer; no inferred Design child copy",
+    "Desktop-observed registration/configuration replay and business acceptance"
+  ],
+  "frozenAtUtc": "2026-09-11T04:13:51.216637+00:00",
+  "nextImplementationContract": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-design-to-order-next-contract.md",
+    "sha256": "d5062f884b90f86b276e2d81272268be8c344762695e3dfaf70582072467646d"
+  },
+  "nextImplementationSource": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-design-to-order-next-source.json",
+    "sha256": "cd38b2c06f375f501db45514fdc0440489de147c461aeb8ffef6ad7ee50cea23"
+  }
+}

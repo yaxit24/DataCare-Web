@@ -88,8 +88,8 @@ export function stoneSubDetailColumns(
     IT_CON_WT: n(input.conWt),
     IT_RATE_TYPE: t(input.rateType, WIDTHS.RATE_TYPE),
     IT_RATE: n(input.rate),
-    IT_LBR_RATE: n(input.labourRate),
-    IT_LBR_AMT: n(input.labourAmount),
+    IT_LBR_RATE: n(input.labourRate ?? (input as Record<string, unknown>).lbrRate),
+    IT_LBR_AMT: n(input.labourAmount ?? (input as Record<string, unknown>).lbrAmount),
 
     KR_WT: n(input.karigarWt),
     KR_LESS_PRC: n(input.karigarLessPct),
@@ -108,3 +108,66 @@ export function stoneSubDetailColumns(
 
 /** The column names this helper produces, for tests and the depth audit. */
 export const STONE_SUB_DETAIL_COLUMNS = Object.keys(stoneSubDetailColumns({}));
+
+/**
+ * Inverse of `stoneSubDetailColumns`: turn a persisted `*_IDTL` row back into the input shape.
+ *
+ * Exists because writing these rows without reading them back is a data-loss trap, not a cosmetic
+ * omission. Every `*_IDTL` table sits in its voucher's write set, so an edit deletes and rebuilds
+ * it from the request — and a request built from a reader that omitted the rows deletes them. That
+ * defect was live on `PR_IDTL` (purchase) and `KR_IDTL` (karigar issue/receive and job-work
+ * issue/receive, four screens), and is prevented from recurring by keeping the read and the write
+ * adjacent and sharing one column list.
+ *
+ * Columns outside the shared block (`ISR_NO`, `IT_CODE`, `IT_PCS`, `IT_GWT`, `IT_AMT`,
+ * `IT_NET_AMT`, `IT_TYPE`) are included because every consumer needs them, even though the writer
+ * emits them per module rather than from the shared helper.
+ */
+export function readStoneSubDetail(row: Record<string, unknown>): Record<string, unknown> {
+  const n = (value: unknown): number => Number(value ?? 0) || 0;
+  const t = (value: unknown): string => String(value ?? '').trim();
+  return {
+    isrNo: n(row.ISR_NO),
+    itCode: t(row.IT_CODE),
+    itType: t(row.IT_TYPE),
+    dmCode: t(row.DM_CODE),
+    dmName: t(row.DM_NAME),
+    dmSize: t(row.DM_SIZE),
+    dmSfNo: t(row.DM_SFNO),
+    dmColor: t(row.DM_COLOR),
+    dmOrigin: t(row.DM_ORIGIN),
+    dmRemark: t(row.DM_REMARK),
+    dmLeb: t(row.DM_LEB),
+    pcs: n(row.IT_PCS),
+    grossWt: n(row.IT_GWT),
+    pcsWt: n(row.IT_PCS_WT),
+    conPct: n(row.IT_CON_PRC),
+    conWt: n(row.IT_CON_WT),
+    rateType: t(row.IT_RATE_TYPE),
+    rate: n(row.IT_RATE),
+    amount: n(row.IT_AMT),
+    /**
+     * `lbrRate` / `lbrAmount`, NOT `labourRate` / `labourAmount`.
+     *
+     * One column has two names in this codebase: the shared `StoneSubDetailInput` calls them
+     * `labourRate`/`labourAmount`, while every module that writes an `*_IDTL` row explicitly reads
+     * `stone.lbrRate`/`stone.lbrAmount` — purchase (`purchase.ts:977`), karigar, tour
+     * (`tour.ts:317`) and tagOps (`tagOps.ts:223`) all agree on the short form. A reader emitting
+     * the long form produced a payload the writers ignored, so replaying a read-back voucher
+     * silently zeroed both columns. Emitting the form the writers consume is what closes the round
+     * trip; `stoneSubDetailColumns` below now accepts either so neither name is a trap.
+     */
+    lbrRate: n(row.IT_LBR_RATE),
+    lbrAmount: n(row.IT_LBR_AMT),
+    netAmount: n(row.IT_NET_AMT),
+    karigarWt: n(row.KR_WT),
+    karigarLessPct: n(row.KR_LESS_PRC),
+    karigarConPct: n(row.KR_CON_PRC),
+    karigarConWt: n(row.KR_CON_WT),
+    karigarRate: n(row.KR_RATE),
+    karigarAmount: n(row.KR_AMT),
+    karigarLabourRate: n(row.KR_LBR_RATE),
+    karigarLabourAmount: n(row.KR_LBR_AMT),
+    karigarNetAmount: n(row.KR_NET_AMT),
+  };
+}

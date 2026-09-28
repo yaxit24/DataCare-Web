@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/sessionContextCommand.test.ts",
+    "test/sessionContextCommand.db.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:45:03.154592+00:00",
+  "finishedAtUtc": "2026-09-11T21:45:07.724956+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/session-command-focused-first.txt",
+  "logSha256": "aaceb033f89415b012f6b3717d4abc30c048f315129f85337e3726e1a53eb38d",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/session-command-focused-first.inputs.json",
+  "inputManifestSha256": "b046de50784f252ee099f3b1f2cda05ca8ce32484ff2d5f0e4cc163f38dd6a6d",
+  "inputCount": 1800,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

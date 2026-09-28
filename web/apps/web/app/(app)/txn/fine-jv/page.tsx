@@ -13,6 +13,8 @@ export default function FineJvPage() {
   const [vchDate, setVchDate] = useState('');
   const [fromAc, setFromAc] = useState('');
   const [fromName, setFromName] = useState('');
+  // P3: receiving account name, as the desktop denormalises it onto the voucher.
+  const [toAcName, setToAcName] = useState('');
   const [toAc, setToAc] = useState('');
   const [toName, setToName] = useState('');
   const [fineWt, setFineWt] = useState('');
@@ -32,6 +34,7 @@ export default function FineJvPage() {
     setBusy(true);
     try {
       const body = {
+        toAcName: toAcName.trim() || undefined,
         coBook,
         coYear,
         lcCode,
@@ -55,6 +58,10 @@ export default function FineJvPage() {
       <form onSubmit={submit}>
         <div className="panel">
           <div className="row">
+            <div className="field">
+              <label>To A/c Name</label>
+              <input value={toAcName} onChange={(e) => setToAcName(e.target.value)} />
+            </div>
             <div className="field">
               <label>Book</label>
               <BookSelect value={coBook} onChange={setCoBook} preferred="FJV" />

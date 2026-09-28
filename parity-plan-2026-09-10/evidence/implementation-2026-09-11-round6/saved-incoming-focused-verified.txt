@@ -1,0 +1,60 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/savedSaleReturn.db.test.ts" "test/savedSaleReturn.routes.db.test.ts" "test/routePolicy.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 34ms
+ ✓ test/savedSaleReturn.db.test.ts (26 tests) 5339ms
+   ✓ saved incoming Sales Return metadata preservation > hydrates complete exact decimals, nulls, timestamps, source refs and stable saved identities 690ms
+   ✓ saved incoming Sales Return metadata preservation > keeps tagged incoming rows readable but refuses metadata writes atomically 370ms
+   ✓ saved incoming Sales Return metadata preservation > protects saved period locks and the header update restriction without repairing raw data 393ms
+   ✓ saved incoming Sales Return metadata preservation > uses CAS so exactly one concurrent editor succeeds and stale retry cannot lose the winner 372ms
+   ✓ saved incoming Sales Return metadata preservation > preserves both child datasets during allowed metadata edits and invalidates on outgoing changes 308ms
+ ✓ test/savedSaleReturn.routes.db.test.ts (9 tests) 2868ms
+   ✓ saved incoming Sale Return HTTP lifecycle > returns exact saved identities, decimals, nulls, source year and microseconds 313ms
+   ✓ saved incoming Sale Return HTTP lifecycle > separates identical vouchers by return book and tenant in browse and reader 425ms
+   ✓ saved incoming Sale Return HTTP lifecycle > rejects stale and cross-book or cross-tenant versions without losing the winning edit 347ms
+   ✓ saved incoming Sale Return HTTP lifecycle > rejects missing tokens, unknown/financial/hidden patches, explicit null and forged identity 349ms
+
+ Test Files  3 passed (3)
+      Tests  89 passed (89)
+   Start at  08:16:09
+   Duration  12.49s (transform 1.77s, setup 0ms, collect 2.74s, tests 8.24s, environment 1ms, prepare 233ms)
+

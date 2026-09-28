@@ -1,0 +1,31 @@
+
+> @datacare/core@0.0.0 test /private/tmp/datacare-round12-verification/web/packages/core
+> vitest run
+
+
+ RUN  v2.1.9 /private/tmp/datacare-round12-verification/web/packages/core
+
+ ✓ test/designCalc.test.ts (36 tests) 134ms
+ ✓ test/saleReturnIncoming.review.test.ts (33 tests) 400ms
+ ✓ test/saleReturnBillProjection.test.ts (84 tests) 605ms
+ ✓ test/saleReturnIncoming.test.ts (72 tests) 906ms
+ ✓ test/saleReturnIncomingProjection.test.ts (53 tests) 790ms
+ ✓ test/saleReturnIncomingAggregate.test.ts (62 tests) 1007ms
+ ✓ test/designRepeat.test.ts (11 tests) 47ms
+ ✓ test/salesOrderDesign.test.ts (8 tests) 158ms
+ ✓ test/saleReturnBillTaxPolicy.test.ts (89 tests) 745ms
+ ✓ test/orderLabour.test.ts (23 tests) 328ms
+ ✓ test/orderLabourWithCache.test.ts (11 tests) 184ms
+ ✓ test/savedSaleReturnClock.test.ts (159 tests) 1316ms
+   ✓ saved Return clock independent canonical JSONB profile > 'D12': 'February30' 317ms
+ ✓ test/money.test.ts (3 tests) 14ms
+ ✓ test/calc.test.ts (10 tests) 35ms
+ ✓ test/containment.test.ts (4 tests) 163ms
+ ✓ test/sessionLedgerMode.test.ts (104 tests) 11064ms
+   ✓ ledger-mode plain-data envelope containment > refuses an accepted-input boundary whose appended proof would exceed reread limits 9974ms
+
+ Test Files  16 passed (16)
+      Tests  762 passed (762)
+   Start at  23:28:01
+   Duration  14.94s (transform 12.56s, setup 0ms, collect 19.04s, tests 17.90s, environment 10ms, prepare 13.99s)
+

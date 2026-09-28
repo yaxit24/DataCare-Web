@@ -1,0 +1,13 @@
+{
+  "sourceUnits": 204,
+  "positiveSurfaceUnits": 153,
+  "namedGridRequirements": 3508,
+  "inputControlRequirements": 1599,
+  "eventHandlerRequirements": 5838,
+  "menuUnits": 198,
+  "reportReferences": 275,
+  "tableUnits": 146,
+  "actualReportRegistryEntries": 53,
+  "settingsRows": 130,
+  "aliasConsumerCandidatesAmongRawInert": 8
+}

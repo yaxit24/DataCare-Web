@@ -13,6 +13,7 @@ const expected = {
   F3: 'stock-report',
   F4: 'sales-order',
   F5: 'sales-bill',
+  F6: 'wholesale-sales',
   F7: 'purchase-bill',
   F8: 'cash-received',
   F9: 'cash-payment',
@@ -28,6 +29,18 @@ const expected = {
   'Ctrl+F11': 'cash-bank-report',
   'Ctrl+F12': 'tag-estimate',
 } as const satisfies Partial<Record<FormKey, string>>;
+
+/**
+ * The desktop's bound virtual-key codes, transcribed from the handler chain at
+ * MDI_FORM.cs:12462-12525: VK 113-120 then 122-123. Deriving the expected key set from these
+ * rather than restating it means a key the desktop binds cannot be dropped from the web without
+ * this test failing, and a key it does NOT bind cannot be added without failing either.
+ *
+ * VK 121 (F10) is absent from the desktop handler despite the "F10 Reminder" menu caption, so it
+ * must stay unbound here too.
+ */
+const DESKTOP_BOUND_VK = [113, 114, 115, 116, 117, 118, 119, 120, 122, 123] as const;
+const vkToKey = (vk: number): string => `F${vk - 111}`;
 
 /**
  * Chords whose destination report is not built. Now empty: RP_ORDER and RP_TAG_ESTMATE were the last two
@@ -85,9 +98,23 @@ describe('desktop global function-key decision table', () => {
     ).toEqual({ type: 'none' });
   });
 
+  it('binds exactly the plain keys the desktop binds, no more and no fewer', () => {
+    const actions = desktopGlobalFormKeyActions(vi.fn());
+    const desktopKeys = DESKTOP_BOUND_VK.map(vkToKey).sort();
+    expect([...FORM_KEYS].sort()).toEqual(desktopKeys);
+    // F6 is bound by the desktop (VK 117 -> ShoF6WhSales_Click -> TR_WH_SALE) and must resolve.
+    expect(resolveFormKey({ key: 'F6', registeredKeys: FORM_KEYS })).toEqual({
+      type: 'invoke',
+      key: 'F6',
+    });
+    expect(actions.F6?.id).toBe('wholesale-sales');
+    // F10 is NOT bound by the desktop: VK 121 has no branch. It must stay inert.
+    expect(DESKTOP_BOUND_VK).not.toContain(121);
+    expect(resolveFormKey({ key: 'F10', registeredKeys: FORM_KEYS })).toEqual({ type: 'none' });
+  });
+
   it('leaves unregistered and unsupported keys inert', () => {
     expect(resolveFormKey({ key: 'F2', registeredKeys: [] })).toEqual({ type: 'none' });
-    expect(resolveFormKey({ key: 'F6', registeredKeys: FORM_KEYS })).toEqual({ type: 'none' });
     expect(resolveFormKey({ key: 'F10', registeredKeys: FORM_KEYS })).toEqual({ type: 'none' });
     expect(resolveFormKey({ key: 'Enter', registeredKeys: FORM_KEYS })).toEqual({ type: 'none' });
   });

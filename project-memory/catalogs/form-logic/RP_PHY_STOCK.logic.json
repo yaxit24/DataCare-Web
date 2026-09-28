@@ -1,0 +1,61 @@
+{
+ "form": "RP_PHY_STOCK",
+ "tables": [
+  "BAR_CAN_DETL",
+  "BAR_DETL",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "PRODUCT_MAST",
+  "TABLE_MAST",
+  "TAG_STOCK_PRINT"
+ ],
+ "writes": {
+  "INSERT": {
+   "TAG_STOCK_PRINT": [
+    "BOOK_NAME",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "DATA_TYPE",
+    "DESIGN_NO",
+    "INOUT_TYPE",
+    "ITM_FINE",
+    "ITM_GWT",
+    "ITM_NWT",
+    "ITM_PCS",
+    "ITM_QTY",
+    "ITM_SIGN",
+    "ITM_SIZE",
+    "IT_CODE",
+    "LC_CODE",
+    "SR_NO",
+    "TAG_NO",
+    "TBL_CODE",
+    "VCH_DATE",
+    "VCH_NO",
+    "VCH_SRNO",
+    "VCH_TYPE"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "TAG_STOCK_PRINT"
+  ]
+ },
+ "selectTables": [
+  "BAR_CAN_DETL",
+  "BAR_DETL",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "PRODUCT_MAST",
+  "TABLE_MAST",
+  "TAG_STOCK_PRINT"
+ ],
+ "fKeys": [],
+ "messageBoxes": 2,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 3101
+}

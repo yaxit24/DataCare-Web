@@ -1,0 +1,18 @@
+{
+ "form": "UT_HDD",
+ "loc": 769,
+ "gridColumns": {},
+ "inlineSql": [
+  "INSERT INTO HDD_MAST (REF_NO) VALUES (' ? ')"
+ ],
+ "keyboard": {
+  "Enter": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Hdd Is Update...",
+   "when": ""
+  }
+ ]
+}

@@ -1,0 +1,72 @@
+{
+ "form": "MS_RATE",
+ "loc": 2516,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cGrCode": 1,
+  "cGrName": 2,
+  "cTouch": 3,
+  "cTaxPrc": 4,
+  "cIncTaxRate": 5,
+  "cTaxRate": 6,
+  "cPrTouch": 7,
+  "cPrRate": 8,
+  "cGrType": 9
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "SELECT EMP_NAME FROM EMP_MAST WHERE CO_CODE =' ? ' AND EMP_CODE = ' ? '",
+  "SELECT * FROM GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_TOUCH <> 0 ORDER BY GR_TYPE,GR_NAME",
+  "DELETE FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "UPDATE GROUP_MAST SET GR_RATE = ? WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT LC_CODE FROM LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE <> '00' ORDER BY LC_CODE",
+  "DELETE FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? LC_CODE ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE, GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE, FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE) SELECT CO_CODE,' ? LC_CODE ? ',CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE, ? GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE, ? FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE ? FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = '00' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "SELECT A.GR_CODE,A.GR_RATE,B.GR_NAME FROM RATE_MAST AS A INNER JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.VCH_DATE = ' ? MM/dd/yyyy ? ' AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO",
+  "SELECT CO_CODE,LC_CODE,VCH_DATE,SR_NO,GR_CODE,GR_RATE,GR_TOUCH,GR_TAX_RATE FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 150",
+  "DELETE FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "SELECT * FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "SELECT GR_NAME FROM GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? GR_CODE ? '",
+  "INSERT INTO RATE_MAST(CO_CODE,LC_CODE,VCH_DATE,SR_NO,GR_CODE,GR_NAME,FINE_GL_RATE,FINE_SL_RATE,GR_RATE) VALUES(' ? ',' ? LC_CODE ? ',' ? VCH_DATE ? MM/dd/yyyy ? ', ? SR_NO ? ,' ? GR_CODE ? ',' ? ', ? FINE_GL_RATE ? , ? FINE_SL_RATE ? , ? GR_RATE ? )",
+  "SELECT replace(convert(NVARCHAR,VCH_DATE, 103), ' ', '/') AS VchDateL,MAIN_USER As UserL,FINE_GL_RATE As GoldRate10gR,FINE_SL_RATE As SilverRate1KgR FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' GROUP BY VCH_DATE,MAIN_USER,FINE_GL_RATE,FINE_SL_RATE ORDER BY VCH_DATE DESC"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Right": 1,
+  "Left": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 6
+ },
+ "calc": [
+  "mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nGoldRate.Text) / 100.0), \"0.00\");",
+  "mSG[DC_Main.M, 6] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nGoldRate.Text) / 100.0), \"0.00\");",
+  "mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), \"0.00\");",
+  "mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nGoldRate.Text) / 100.0), \"0.00\");",
+  "mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nSilverRate.Text) / 10000.0), \"0.00\");",
+  "mSG[DC_Main.M, 6] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nSilverRate.Text) / 10000.0), \"0.00\");",
+  "mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nSilverRate.Text) / 10000.0), \"0.00\");",
+  "mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrGoldRate.Text) / 100.0), \"0.00\");",
+  "mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrSilverRate.Text) / 10000.0), \"0.00\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Day Rate?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Day Rate?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  }
+ ]
+}

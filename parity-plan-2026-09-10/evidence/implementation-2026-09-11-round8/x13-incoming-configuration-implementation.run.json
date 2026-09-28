@@ -1,0 +1,123 @@
+{
+  "schema": "datacare-x13-incoming-configuration-read-v1",
+  "pathBase": "imodule-extracted",
+  "status": "focused-engineering-passed",
+  "desktopAcceptance": false,
+  "numericSavingEnabled": false,
+  "databaseLease": "released",
+  "tests": {
+    "first": {
+      "files": 2,
+      "passed": 61,
+      "failed": 0,
+      "skipped": 0
+    },
+    "combinedBeforeHttpExpectationCorrection": {
+      "files": 5,
+      "passed": 193,
+      "failed": 1,
+      "skipped": 0
+    },
+    "correctedHttp": {
+      "files": 1,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalOwnedPureCases": 37,
+    "ownedDatabaseCases": 26,
+    "independentReviewCases": 69,
+    "finalRegression": {
+      "files": 7,
+      "passed": 253,
+      "failed": 0,
+      "skipped": 0,
+      "includesFinalConditionalStyleCaptionFix": true,
+      "configurationPure": 37,
+      "configurationDatabase": 26,
+      "independentReview": 69,
+      "configurationHttp": 9,
+      "routePolicy": 54,
+      "columnSettingsPure": 37,
+      "columnSettingsDatabase": 21
+    },
+    "database": "disposable localhost:55433 / app_user",
+    "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test test/saleReturnIncomingConfiguration.test.ts test/saleReturnIncomingConfiguration.db.test.ts test/saleReturnIncomingConfiguration.review.test.ts test/saleReturnIncomingConfiguration.routes.db.test.ts test/columnSettings.test.ts test/columnSettings.db.test.ts test/routePolicy.test.ts"
+  },
+  "limits": [
+    "No numeric writer or admission authority.",
+    "Runtime Style edition is unresolved.",
+    "Absent override insert/delete history can repeat the original empty snapshot token.",
+    "No durable token guarantee across restore/rewrite or desktop executable acceptance."
+  ],
+  "sources": [
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "f7161a49c156621f048f7105f9648018f5726c017938f9e2bb356d74905f9308",
+      "bytes": 21054
+    },
+    {
+      "path": "web/apps/api/test/saleReturnIncomingConfiguration.test.ts",
+      "sha256": "dfb4d965f4cdb6106fccfddb3587d4c19a743dc465d728e2b544df6c11cc3461",
+      "bytes": 8780
+    },
+    {
+      "path": "web/apps/api/test/saleReturnIncomingConfiguration.db.test.ts",
+      "sha256": "cddffa4076d2aa6ddde48480c29bda82ebb908fabd2b953d5b8fd4a29d27c07f",
+      "bytes": 16089
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "bytes": 575218
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+      "bytes": 85154
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/x13-next-configuration-contract.md",
+      "sha256": "e1cb24964b8d1e9ab5dc2fa687f520a5084d08ef9fbe510e9eaad85265171a46",
+      "bytes": 33300
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/configuration-service-first.txt",
+      "sha256": "c29227336a0e115394bf88370a9dbd7ae672896d8fd6fb2c7f025a470778490e",
+      "bytes": 1426
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/configuration-focused-complete.txt",
+      "sha256": "a583c7ab5d8550586a2ccaf279d9676e4b8d493c238c01ac20a08c74f8dc57c6",
+      "bytes": 3574
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/configuration-http-corrected.txt",
+      "sha256": "7633c5ffa929f66d614361c2aca9ebd624f77774a887bc75107822dc5942400f",
+      "bytes": 1324
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/configuration-service-types.txt",
+      "sha256": "ae4312816db8d079b10641c1e7ff04b2228073e41f9d8d6f6af902d17944057c",
+      "bytes": 741
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/x13-incoming-configuration-implementation.md",
+      "sha256": "526b9aca0450003b558d9ef295f8099a10e9e0261c070283692ec250f07007cd",
+      "bytes": 12216
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/focused-complete.txt",
+      "sha256": "098b62e2c8a9d856c7cf01cee26486d6e5394c2d235354127eff71c8b69be04f",
+      "bytes": 3417
+    }
+  ],
+  "additionalScopedEvidence": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-settings-db-verification.run.json"
+}

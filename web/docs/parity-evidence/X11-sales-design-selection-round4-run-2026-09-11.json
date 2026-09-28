@@ -1,0 +1,355 @@
+{
+  "id": "X11-sales-design-selection-round4-2026-09-11",
+  "round": 4,
+  "capturedAtUtc": "2026-09-11T06:04:12.732926+00:00",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "sourceState": "shared dirty development tree; hashes identify the bounded slice, not a release candidate",
+  "status": "implemented-source-vectors-database-browser-visual-and-integration-passed",
+  "x11Verified": false,
+  "observedDesktopExecution": false,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "source": [
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3"
+    },
+    {
+      "path": "../unified/src/csharp_nextdm/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "577a9f2769d5ff22105ac09da13cc18b5bb7381ed6c580270d25a03c465110f6"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/MS_HELP.cs",
+      "sha256": "350899da0ffc4d237602f22ed23ef5054374d2f2073558c5fb060a0e583022cf"
+    },
+    {
+      "path": "../unified/src/csharp_nextdm/DataCareNext/MS_HELP.cs",
+      "sha256": "56331370ef42a9b9a4c0b6126898cf4d6c6286fa6041b9819fd2be4dd2ce9f9e"
+    },
+    {
+      "path": "../DataCareNext.exe",
+      "sha256": "c85f93fd336853a2a639c6452b47748290a1dddb214e2fdf3fc78f47bc0ca6c8"
+    }
+  ],
+  "files": [
+    {
+      "path": "packages/core/src/salesOrderDesign.ts",
+      "sha256": "e6b5b1a4e79a9d93d6fab540565d0159ccde9475714d4f56276c64ce101173af"
+    },
+    {
+      "path": "packages/core/test/salesOrderDesign.test.ts",
+      "sha256": "738c30cd6635858baa4d0f23e6a68b53921455be3c4b8a481eedc9daa878f61b"
+    },
+    {
+      "path": "packages/core/src/orderLabourWithCache.ts",
+      "sha256": "dd9f429992b33918e97b382d5ead1852219aece381ec7c9bb6a1cc21719f3e4f"
+    },
+    {
+      "path": "packages/core/test/orderLabourWithCache.test.ts",
+      "sha256": "85dab66d15d2b29ea53c82902bd2b0a451fb0ccb1f5f72bd9f3224276bdd6a66"
+    },
+    {
+      "path": "apps/api/src/modules/sales/orderDesignSelection.ts",
+      "sha256": "c4d7ee655c8ebd26193dac07411bde9ee95ebd0cbc40bc160a2223f2450caa82"
+    },
+    {
+      "path": "apps/api/test/orderDesignSelection.db.test.ts",
+      "sha256": "394cda09db84d007013d7386068c22823166daf2843e78e3c227e370a9115904"
+    },
+    {
+      "path": "apps/web/components/SalesOrderDesignPicker.tsx",
+      "sha256": "51993834d3348e640c827bce850c4ebcbac04355b25c043473005b92cf76b07d"
+    },
+    {
+      "path": "apps/web/test/sales-design.journey.mjs",
+      "sha256": "f228073f8a201013b3756ba13d43be224eec0659adf170ce4a1f6bc0cc8750f9"
+    },
+    {
+      "path": "docs/parity-evidence/X11-sales-design-selection-round4-contract-2026-09-11.md",
+      "sha256": "5403fe0a308c76079717dce2bc9c58388a23fd2dcdb123a44577f6b0e9c2d637"
+    }
+  ],
+  "integrationFiles": [
+    {
+      "path": "packages/core/src/index.ts",
+      "sha256": "7867c57f0a57c122d4aa5f6596798365c37205254e719fef8b12e974b680496c"
+    },
+    {
+      "path": "packages/core/src/orderLabour.ts",
+      "sha256": "5981b6198035c845b447caf0d92fe84e3c25d1412e6b61b0eee0483f0224230d"
+    },
+    {
+      "path": "apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "556d87d9eb73974f4a06eec64a0f6a6fe0096b90e59b14522176021ea10fc8d9"
+    },
+    {
+      "path": "apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+      "sha256": "a226087e96f0bbb3c4de2d75b3634b0a0b8d39f33f8d5630b98e775de1f05251"
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "1e69517cf28d4af88e45f2b7bc8d271eb6e515cc2d8c4906bea0dbf8d4c050ae"
+    },
+    {
+      "path": "apps/api/test/salesOrderRound4.db.test.ts",
+      "sha256": "500f26578dbcb36434fd84415e11815008cc5de159285f2d46c0a7ee4138e0e6"
+    },
+    {
+      "path": "apps/api/test/salesOrderLifecycle.routes.db.test.ts",
+      "sha256": "3031006e1e6e54c69848b50d25564b2cfbff97cfab65592a1d4e57e719a54e63"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/sales-order/page.tsx",
+      "sha256": "a2544854db3892240646758b9a4151b0fbfc1364f4e286dd4b32a9efd3595d38"
+    },
+    {
+      "path": "apps/web/lib/salesOrderForm.ts",
+      "sha256": "fad6b74bfe41be5de895922f2f20ae17547dc31f816b16973632723c05319be7"
+    },
+    {
+      "path": "apps/web/test/salesOrderForm.test.ts",
+      "sha256": "dafbed5295c06adf3377da51e53c923535c923e02d052a0548405853a2872db1"
+    },
+    {
+      "path": "apps/web/test/parity.real-stack.mjs",
+      "sha256": "9adb6bee51532af82bd7e91c2451a5c4d00b957f384e92b65d7793518a38f5e1"
+    }
+  ],
+  "verification": {
+    "focusedCore": {
+      "files": 2,
+      "tests": 19,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-selection-core-tested.txt",
+        "sha256": "8646a3d548980a57b4dc1aa31a021365e44ed72202b722578ba5ae0bc1c8c710"
+      }
+    },
+    "focusedSelectorDatabase": {
+      "tests": 12,
+      "passed": true,
+      "port": 55433,
+      "role": "non-owner runtime role with forced RLS",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-selection-api-first.txt",
+        "sha256": "d6934a06139f9c63f6927640981c269e810bf199210ab54288ac5a83003b7b02"
+      }
+    },
+    "sourceBlankIntegration": {
+      "files": 3,
+      "tests": 37,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-source-blank-verified.txt",
+        "sha256": "c1cc00401c57ade9f560e472289d25bb205533ec01ccfb1ceedc6c893da734f8"
+      }
+    },
+    "coreSuite": {
+      "files": 8,
+      "tests": 106,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/core-tests-ready.txt",
+        "sha256": "b47ca20a3fda1ccfe455c217c1d954448b502f86904824d42f861d593298a362"
+      }
+    },
+    "webSuite": {
+      "files": 21,
+      "tests": 114,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/web-tests-blank-source.txt",
+        "sha256": "4709268190ddc276a8f2ee91c6d8386edb9082a1f1405556231a6ac72ad06d75"
+      }
+    },
+    "apiSuite": {
+      "files": 219,
+      "tests": 1713,
+      "skipped": 0,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-full-complete.txt",
+        "sha256": "4e3032426927e215927c199307d6a39ac8b787716185d9a1371cd70ad2c39719"
+      },
+      "sourceSnapshot": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-snapshot-complete.json",
+        "sha256": "16e1a9723fd48031f8c52fb2df2cefee76d7d5ac2afed0c7f777d783b8d5e3c3"
+      },
+      "sourceVerification": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-verification-complete.json",
+        "sha256": "e94f263930c2bcdfbbab56481f0d28e7a04538986c5c1b3324ff19dae29eeebe"
+      }
+    },
+    "workspaceBuild": {
+      "tasks": 7,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/build-blank-source.txt",
+        "sha256": "c18379856a3521cedc03ce93c7b5be47bf05d6842771a1b3900199ddd8900b4e"
+      }
+    },
+    "workspaceLintAndTypes": {
+      "tasks": 10,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/lint-blank-source.txt",
+        "sha256": "34142d48f19878739a1dfd0fdf6b3d9c065dc5c73fd98f1a4e63d6878c3d6ae9"
+      }
+    },
+    "strictApiTestTypes": {
+      "status": "passed",
+      "passed": true,
+      "exitCode": 0,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/test-types-serial.txt",
+        "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9"
+      },
+      "priorStoppedRun": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/test-types-complete.txt",
+        "sha256": "33219fb69c82d8a84f5accb1627eccf9de8a1079c4e5bb9d2b43ba8fb9d62360"
+      },
+      "priorStoppedExitCode": 143
+    },
+    "combinedBrowser": {
+      "status": "passed",
+      "startedAt": "2026-09-11T05:51:33.011Z",
+      "finishedAt": "2026-09-11T05:52:20.433Z",
+      "mockedRequests": 0,
+      "designSelectionCount": 11,
+      "designSelection": {
+        "voucherNo": "1",
+        "blankVoucherNo": "2",
+        "checks": [
+          "F1 lists exact item-product/company sources with duplicate labels and full desktop display columns",
+          "Native modal contains keyboard focus; Escape cancels without changing the draft and restores Design focus",
+          "Search distinguishes duplicate design numbers by album and cancellation remains lossless",
+          "Selection preserves invalid unrelated draft and components while copying only source-defined new-row cells",
+          "Validated Design photo previews both inside picker and immediately on the unsaved order row",
+          "Zero source defaults retain manual numerics; source percentage zero permits rate copy and NULL source image clears the immediate preview",
+          "Actual POST replays selected saved sources and later manual edit; reopening preserves parent/components and linked image",
+          "Actual PUT treats loaded parent as E: source NULL image persists as empty string, old photo disappears, numeric caches and parent/component identities stay unchanged",
+          "Explicit clear resets only Design and image N while retaining size, karigar and numerics",
+          "Actual new-row POST replaces selected photo with explicit source blank, reopens as empty string without fallback, and preserves parent/component identities and entered weights",
+          "Complete picker/create/edit/clear workflow has no unhandled browser errors"
+        ]
+      },
+      "result": {
+        "path": "test-results/parity-real-stack-round4-blank-source/result.json",
+        "sha256": "39445f5f6d6aeaa00c479f624f5100a38f8cdc615a4f74da2d299c8b0355f467"
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-blank-source.txt",
+        "sha256": "d4deac70a9fc58f530a00e55f7cb8c622a8ca70e70ea0995842e11a35ca956db"
+      },
+      "review": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-browser-blank-source-review.json",
+        "sha256": "787fc3a51696781170b488bac482b76e0ae2a6e92124216e054e5de9dfe731ef"
+      },
+      "screenshots": [
+        {
+          "path": "test-results/parity-real-stack-round4-blank-source/sales-design-picker-round4.png",
+          "sha256": "8f0179b0820f4da12ce96ff7898f832c6286f56ff179dcc8aac68a28865e3613"
+        },
+        {
+          "path": "test-results/parity-real-stack-round4-blank-source/sales-design-blank-existing-round4.png",
+          "sha256": "696e888fa552be0d6fa7a85ec18f9a6cb564c8d816a4a70acda6c50bf96df051"
+        },
+        {
+          "path": "test-results/parity-real-stack-round4-blank-source/sales-design-loaded-round4.png",
+          "sha256": "7a09afad7838c9ac7a6ed2a90b0e79aa3f475df10c6401b7c273fd7ca8a3c878"
+        },
+        {
+          "path": "test-results/parity-real-stack-round4-blank-source/sales-design-blank-new-round4.png",
+          "sha256": "deae40deca870a72c0fe2d7e80ff659aa1a78f5f8d3f928efa614c334667ab5d"
+        }
+      ],
+      "visualReview": {
+        "passed": true,
+        "productChangesRequired": false,
+        "finding": "Readable modal source columns/actions and complete portrait; readable saved fields and restored Design focus. Blank-image absence proved by real DOM/API checks, because image panels fall below captured viewport."
+      }
+    },
+    "priorFailures": {
+      "firstApiTypecheck": {
+        "log": {
+          "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-selection-api-types-first-failed.txt",
+          "sha256": "47725c62ad7217412126a5f99fdeb892c8afd589f43dc79fb1eb6c5266c89317"
+        },
+        "reason": "Concurrent Sales policy module initially imported unavailable decimal.js; API owner corrected before final successful workspace checks."
+      },
+      "browserRuns": [
+        {
+          "status": "failed",
+          "name": "first",
+          "reason": "Native Tab containment failed; fixed explicit Tab/ShiftTab cycling",
+          "result": {
+            "path": "test-results/parity-real-stack-round4-first/result.json",
+            "sha256": "f22008263d979c5e2fecda548af37917dac4478674ea64be5605628e538e539d"
+          },
+          "log": {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-first.txt",
+            "sha256": "530ec8094de4c3b6947b4e614cb87d2b0d81411270677209d294aee7d7d20ab2"
+          }
+        },
+        {
+          "status": "failed",
+          "name": "focus-cache",
+          "designChecks": 10,
+          "reason": "Later ordinary Sales unchanged version assertion conflicted with documented write-token rotation",
+          "result": {
+            "path": "test-results/parity-real-stack-round4-focus-cache/result.json",
+            "sha256": "df709697eb588b7f820ed42b06365396647f93f53156d60bb8507941f5e2fd86"
+          },
+          "log": {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-focus-cache.txt",
+            "sha256": "fb97967d72f2f64b12e9c11d144e5a0ea2180ad1ae6bfe15a8383b2b1e61b271"
+          }
+        },
+        {
+          "status": "failed",
+          "name": "version-contract",
+          "designChecks": 10,
+          "reason": "Later ordinary Sales print profile assertion expected OrdVchImg and received OrderBill",
+          "result": {
+            "path": "test-results/parity-real-stack-round4-version-contract/result.json",
+            "sha256": "302be3f83d7b463ba436cd56f519fefcf91b35fc5dab935bcd82a6b987048964"
+          },
+          "log": {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-version-contract.txt",
+            "sha256": "b8bb682f105d6ec8568fa4a997a91020ec5ea2aa6732da84f08a523e11f1ba36"
+          }
+        }
+      ]
+    },
+    "workspaceIntegration": "root round4 checkpoint is authoritative for whole-product gates; this bounded manifest does not certify complete X11 or Sales parity"
+  },
+  "integrationReview": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-sales-integration-review.md",
+    "sha256": "3b237a0fac9bc82e670d2ce73efe05b34e4136c5a086f20ba910f76b0eed0ba4"
+  },
+  "cancelSourceTrace": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-help-cancel-source-trace.json",
+    "sha256": "d3b639c2cdcd0e6634160e8fdeabaff2d06e02515a45239f8cf5d3ba12596015"
+  },
+  "preservationDifferencesPendingAcceptance": [
+    "Escape/Close preserves the web draft; shared-help source appears to enter the empty-selection Design/imageN clear branch. No native execution or business signoff was available.",
+    "Immutable source versions, SHARE locks, explicit ambiguous-master/config failures and source-owned image preview are web concurrency/data preservation protections."
+  ],
+  "remaining": [
+    "Company HELP_SERCH S/M/W/A semantics and full grid commands, as specified by the next shared-help contract",
+    "Executable/locale/binary-double Format midpoint and kilogram reverse calculation observations",
+    "Nested help F1/create activation and no-match/hidden-column behavior require caller-specific IL/runtime proof",
+    "Other Design Book selectors, registration variants and separate Tour/tag adoption workflows remain outside this ordinary Sales selection slice",
+    "Migration of desktop filesystem photos and complete later total/MRP/tax behavior",
+    "Production-scale desktop-versus-web workflow replay and business acceptance"
+  ],
+  "nextImplementationContract": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-shared-help-next-contract.md",
+    "sha256": "02f8251e2a5b444558482dd99dcf7e10517f187e831e9d57d83342fb7d6500c0"
+  },
+  "nextImplementationSource": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x11-shared-help-next-source.json",
+    "sha256": "3b229575af7f2aa51368c1ea1401f284c07c98840b88d226519275c2eebadb05"
+  },
+  "frozenAtUtc": "2026-09-11T06:09:58.882166+00:00"
+}

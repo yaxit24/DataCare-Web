@@ -1,0 +1,27 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/saleReturnHeaderFloat.db.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T00:34:10.424039+00:00",
+  "finishedAtUtc": "2026-09-12T00:34:13.611715+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/header-float-postgres.txt",
+  "logSha256": "0cac68483726c19aa46e9971d8486563de603e07e44ddc2d85eaf2ba1fd7ae81",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/header-float-postgres.inputs.json",
+  "inputManifestSha256": "5785e70f86d6f6e79ef8cfa85708ff2ed6fa09fbc83051aacdb4527165e1e7d6",
+  "inputCount": 1872,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

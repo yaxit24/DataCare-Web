@@ -1,0 +1,228 @@
+{
+  "capturedAt": "2026-09-11T03:21:44.197Z",
+  "runtimeFiles": [
+    {
+      "path": "apps/api/dist/modules/reports/reportEngine.js",
+      "sha256": "db39534c6c3f1090079870224c80ae151b33526efe86c45582b79106b50e76ca"
+    },
+    {
+      "path": "apps/api/dist/modules/reports/reportBindingContract.js",
+      "sha256": "de5281bf0987e70a3e77f83ebd772a63df075fb09f4c867921a2fbf79091cb78"
+    },
+    {
+      "path": "apps/api/dist/modules/reports/orderReportValues.js",
+      "sha256": "c0773bdc88caa46c0d52452446fa0d5ed0836fd1cb77ec8bc7048c21e98e13cf"
+    },
+    {
+      "path": "apps/api/dist/modules/reports/orderReportLayout.js",
+      "sha256": "b7abbc02d976e882ecc512a55f664a8fb410004a6fb44a83683488a617f10a04"
+    },
+    {
+      "path": "apps/api/dist/modules/reports/orderReportImages.js",
+      "sha256": "e8d67bc9e2fafbeb093f0fef47f65b72960e6208b94785f3e368e96303a85cfe"
+    }
+  ],
+  "results": [
+    {
+      "report": "OrdVchImg",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "2",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdImg",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "2",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdImg-missing",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdImg-long",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 6,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "2",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "3",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "4",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "5",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "6",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "7",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "8",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "9",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "10",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "11",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "12",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "13",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "14",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "15",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "16",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "17",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "18",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/entityImageConcurrency.routes.db.test.ts" "test/repairImageConcurrency.routes.db.test.ts" "test/entityImage.db.test.ts" "test/designBook.routes.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/entityImageConcurrency.routes.db.test.ts (15 tests) 1832ms
+ ❯ test/repairImageConcurrency.routes.db.test.ts (8 tests | 5 failed) 1345ms
+   × repair image HTTP compare-and-swap and source identity > allows one simultaneous writer and rejects stale deletion without losing the winner 57ms
+     → {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+   × repair image HTTP compare-and-swap and source identity > keeps deleted revisions so identical recreation cannot revive a prior token 110ms
+     → {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+   × repair image HTTP compare-and-swap and source identity > fully decodes modern uploads while keeping malformed historical bytes recoverable 87ms
+     → {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+   × repair image HTTP compare-and-swap and source identity > refuses a changed source parent even if a prior image token was valid 86ms
+     → {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+   × repair image HTTP compare-and-swap and source identity > does not reuse a repair token after the source row is deleted and recreated with identical values 259ms
+     → {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+ ✓ test/designBook.routes.db.test.ts (5 tests) 503ms
+ ✓ test/entityImage.db.test.ts (18 tests) 186ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/repairImageConcurrency.routes.db.test.ts > repair image HTTP compare-and-swap and source identity > allows one simultaneous writer and rejects stale deletion without losing the winner
+AssertionError: {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ assertBytes test/repairImageConcurrency.routes.db.test.ts:68:48
+     66|   async function assertBytes(expected: Buffer, key: Key = source) {
+     67|     const response = await request('GET', path('/line', key));
+     68|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+     69|     expect(response.rawPayload.equals(expected)).toBe(true);
+     70|   }
+ ❯ test/repairImageConcurrency.routes.db.test.ts:203:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  test/repairImageConcurrency.routes.db.test.ts > repair image HTTP compare-and-swap and source identity > keeps deleted revisions so identical recreation cannot revive a prior token
+AssertionError: {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ assertBytes test/repairImageConcurrency.routes.db.test.ts:68:48
+     66|   async function assertBytes(expected: Buffer, key: Key = source) {
+     67|     const response = await request('GET', path('/line', key));
+     68|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+     69|     expect(response.rawPayload.equals(expected)).toBe(true);
+     70|   }
+ ❯ test/repairImageConcurrency.routes.db.test.ts:223:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  test/repairImageConcurrency.routes.db.test.ts > repair image HTTP compare-and-swap and source identity > fully decodes modern uploads while keeping malformed historical bytes recoverable
+AssertionError: {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ assertBytes test/repairImageConcurrency.routes.db.test.ts:68:48
+     66|   async function assertBytes(expected: Buffer, key: Key = source) {
+     67|     const response = await request('GET', path('/line', key));
+     68|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+     69|     expect(response.rawPayload.equals(expected)).toBe(true);
+     70|   }
+ ❯ test/repairImageConcurrency.routes.db.test.ts:337:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  test/repairImageConcurrency.routes.db.test.ts > repair image HTTP compare-and-swap and source identity > refuses a changed source parent even if a prior image token was valid
+AssertionError: {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ assertBytes test/repairImageConcurrency.routes.db.test.ts:68:48
+     66|   async function assertBytes(expected: Buffer, key: Key = source) {
+     67|     const response = await request('GET', path('/line', key));
+     68|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+     69|     expect(response.rawPayload.equals(expected)).toBe(true);
+     70|   }
+ ❯ test/repairImageConcurrency.routes.db.test.ts:354:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  test/repairImageConcurrency.routes.db.test.ts > repair image HTTP compare-and-swap and source identity > does not reuse a repair token after the source row is deleted and recreated with identical values
+AssertionError: {"error":"repair-image-not-found"}: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ assertBytes test/repairImageConcurrency.routes.db.test.ts:68:48
+     66|   async function assertBytes(expected: Buffer, key: Key = source) {
+     67|     const response = await request('GET', path('/line', key));
+     68|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+     69|     expect(response.rawPayload.equals(expected)).toBe(true);
+     70|   }
+ ❯ test/repairImageConcurrency.routes.db.test.ts:393:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  5 failed | 41 passed (46)
+   Start at  06:44:31
+   Duration  7.01s (transform 932ms, setup 0ms, collect 2.26s, tests 3.87s, environment 0ms, prepare 144ms)
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 test: `vitest run "test/entityImageConcurrency.routes.db.test.ts" "test/repairImageConcurrency.routes.db.test.ts" "test/entityImage.db.test.ts" "test/designBook.routes.db.test.ts"`
+Exit status 1
+PARITY_TEST_FAILED pnpm exited 1

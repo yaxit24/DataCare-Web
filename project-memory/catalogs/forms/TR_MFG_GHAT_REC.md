@@ -1,0 +1,42 @@
+# TR_MFG_GHAT_REC
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_MFG_GHAT_REC.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** DELETE_DATA
+- **UPDATE:** APR_DETL, MFG_DETL
+
+## Tables deleted / reversed
+- **DELETE:** AC_DATA, MAIN_STOCK, MFG_DATA, MFG_DETL, MFG_ISU_REC, REMARK_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- MFG_DETL, AC_MAST, MFG_DATA, TEMP_BOOK_DATA, APR_DETL, EMP_MAST, ITEM_MAST, AC_DATA, MFG_ISU_REC, MAIN_STOCK, USER_SET, MFG_MAST, REMARK_DATA, KR_DATA
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L3285: UPDATE APR_DETL
+- L3290: UPDATE MFG_DETL
+- L3298: DELETE MFG_DETL
+- L4572: UPDATE APR_DETL
+- L4575: DELETE MFG_DATA
+- L4576: DELETE MFG_DETL
+- L4579: DELETE TEMP_BOOK_DATA
+- L4750: UPDATE APR_DETL
+- L4755: UPDATE MFG_DETL
+- L4765: DELETE AC_DATA
+- L4778: DELETE MFG_ISU_REC
+- L4795: DELETE MAIN_STOCK
+- L4888: INSERT DELETE_DATA
+- L4892: UPDATE APR_DETL
+- L4897: UPDATE MFG_DETL
+- L4905: DELETE REMARK_DATA
+- L4906: DELETE TEMP_BOOK_DATA
+- L4908: DELETE AC_DATA
+- L4910: DELETE MAIN_STOCK
+- L4912: DELETE MFG_ISU_REC
+- L4913: DELETE MFG_DATA
+- L4914: DELETE MFG_DETL
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

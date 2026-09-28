@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /** Stock Adjust (TR_STK_ADJ) — manual ±-sign stock correction → signed MAIN_STOCK movement (no ledger).
  *  Rich fields: Counter/Design/Size/LsWt/West%/Mrp/Karigar. Tag pick autofills item + weights. */
@@ -44,6 +45,17 @@ const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
 
 export default function StockAdjustPage() {
   const [rows, setRows] = useState<Row[]>([blank()]);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: rows.length,
+    onAppendRow: () => setRows((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setRows((rows) => (rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row)));
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [vchDate, setVchDate] = useState('');
   const [res, setRes] = useState<{ vchNo: number; lines: number } | null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -124,7 +136,7 @@ export default function StockAdjustPage() {
           </div>
         </div>
         <div className="panel" style={{ overflow: 'auto' }}>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>

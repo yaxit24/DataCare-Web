@@ -1,0 +1,44 @@
+{
+  "kind": "independent-staged-browser-source-review",
+  "capturedAtUtc": "2026-09-11T22:59:33.342958+00:00",
+  "status": "no-confirmed-blocker-with-coverage-qualification",
+  "runtimeExecuted": false,
+  "files": [
+    {
+      "path": "/tmp/datacare-return-labour-preview-browser/web/apps/web/test/sales-return-labour-replay.journey.mjs",
+      "sha256": "ed943952362109eded66f91742759bf861c11c4bdac44dbf062bfb12fca649bd"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-browser/browser-required-checks.json",
+      "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-browser/saleReturnLabourReplay.independent.json",
+      "sha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/implementation-contract.md",
+      "sha256": "2bbfd5a65f6806f50daf3099a9204743be40024d89359861c52e558eee206ccc"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "243bb2595ee503037d34a0bd0d0fd2097c075f4d0b92931b3a52b1abdb8263fb"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-bill-replay.journey.mjs",
+      "sha256": "f60ee9fe584c483f134615255cfaac876c5816e31efde0e61b1a761d2cbb7b3c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-browser-review/independent-read-review.md",
+      "sha256": "84a341461452530034adfbd40892540c354f25bc35669716c66823cbf3fa2361"
+    }
+  ]
+}

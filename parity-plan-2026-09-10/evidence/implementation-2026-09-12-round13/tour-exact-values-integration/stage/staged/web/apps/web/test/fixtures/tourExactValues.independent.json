@@ -1,0 +1,258 @@
+{
+  "version": "tour-exact-values-independent-v1",
+  "status": "prospective literals frozen before code; no runtime claim",
+  "original": {
+    "voucherNo": "00017",
+    "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "coCode": "01",
+    "lcCode": "01",
+    "coYear": "2024-2025",
+    "coBook": "E13",
+    "mainUser": "saved-creator",
+    "acCode": "PARTY",
+    "acName": "Customer",
+    "vchDate": "2024-07-10",
+    "vchTime": "09:10:11.123456",
+    "taxRatePct": 0,
+    "advanceAmount": 25,
+    "cashAc": "CASH",
+    "mobile": null,
+    "address1": "",
+    "schemeAmount": 0,
+    "lines": [
+      {
+        "srNo": 7,
+        "itCode": "GOLD",
+        "tagNo": "",
+        "pcs": 1,
+        "grossWt": 10,
+        "netWt": 10,
+        "touch": 100,
+        "rate": 20,
+        "making": 0,
+        "labourRate": 0,
+        "labourPct": 0,
+        "labourAmount": 0,
+        "itemAmount": 200,
+        "lineNetAmount": 200,
+        "lineTotalAmount": 200,
+        "mrp": "999999999999999.99",
+        "bagWt": null,
+        "otherAmount": 0,
+        "designImageId": "N",
+        "components": [
+          {
+            "isrNo": 3,
+            "itCode": "STN1",
+            "dmCode": "00012",
+            "dmName": null,
+            "pcs": 0,
+            "grossWt": 0.125,
+            "rate": null,
+            "amount": 11,
+            "lbrRate": 0,
+            "netAmount": 11,
+            "karigarRate": "999999999999998.99"
+          },
+          {
+            "isrNo": 13,
+            "itCode": "STN2",
+            "dmCode": "00013",
+            "dmName": "",
+            "pcs": 2,
+            "grossWt": 0.25,
+            "rate": 0,
+            "amount": 13,
+            "lbrRate": null,
+            "netAmount": 13,
+            "karigarRate": "999999999999997.99"
+          }
+        ]
+      },
+      {
+        "srNo": 19,
+        "itCode": "SILVR",
+        "pcs": 1,
+        "grossWt": 2,
+        "netWt": 2,
+        "touch": 100,
+        "rate": 30,
+        "making": 0,
+        "labourRate": 0,
+        "labourPct": 0,
+        "labourAmount": 0,
+        "itemAmount": 60,
+        "lineNetAmount": 60,
+        "lineTotalAmount": 60,
+        "mrp": 0,
+        "bagWt": 0,
+        "components": []
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "E01",
+      "action": "hydrate",
+      "visible": {
+        "header.mobile": "",
+        "header.address1": "",
+        "header.schemeAmount": "0",
+        "rows.7.mrp": "999999999999999.99",
+        "rows.7.bagWt": "",
+        "rows.19.mrp": "0",
+        "rows.19.bagWt": "0",
+        "children.7.3.karigarRate": "999999999999998.99",
+        "children.7.3.rate": "",
+        "children.7.13.rate": "0",
+        "children.7.3.dmCode": "00012"
+      }
+    },
+    {
+      "id": "E02",
+      "action": "unchanged saved payload",
+      "expected": {
+        "mobile": null,
+        "address1": "",
+        "schemeAmount": 0,
+        "advanceAmount": 25,
+        "lines": [
+          {
+            "srNo": 7,
+            "mrp": "999999999999999.99",
+            "bagWt": null,
+            "otherAmount": 0,
+            "components": [
+              {
+                "isrNo": 3,
+                "dmCode": "00012",
+                "dmName": null,
+                "pcs": 0,
+                "rate": null,
+                "lbrRate": 0,
+                "karigarRate": "999999999999998.99"
+              },
+              {
+                "isrNo": 13,
+                "dmName": "",
+                "rate": 0,
+                "lbrRate": null,
+                "karigarRate": "999999999999997.99"
+              }
+            ]
+          },
+          {
+            "srNo": 19,
+            "mrp": 0,
+            "bagWt": 0,
+            "components": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "E03",
+      "action": "advance editor25\u219240",
+      "wire": {
+        "advanceAmount": "40"
+      },
+      "database": {
+        "ADV_AMT": "40",
+        "ledgerCashDebit": "40.00",
+        "ledgerPartyCredit": "40.00",
+        "rojmelCredit": "40.00",
+        "allParentChildrenRaw": "unchanged"
+      }
+    },
+    {
+      "id": "E04",
+      "action": "MRP editor huge\u2192999999999999998.99",
+      "wire": {
+        "mrp": "999999999999998.99"
+      },
+      "database": "existing exact calculation refusal; complete raw+physical snapshot unchanged"
+    },
+    {
+      "id": "E05",
+      "action": "MRP editor huge\u219225.50",
+      "wire": {
+        "mrp": "25.50"
+      },
+      "database": {
+        "ITM_MRP": "25.50",
+        "otherBusinessValues": "unchanged"
+      }
+    },
+    {
+      "id": "E06",
+      "action": "child7/3 karigarRate huge\u2192999999999999996.99",
+      "wire": {
+        "karigarRate": "999999999999996.99"
+      },
+      "database": "existing exact calculation refusal; complete raw+physical snapshot unchanged"
+    },
+    {
+      "id": "E07",
+      "action": "reorder parents and reverse children",
+      "expectedOwnership": [
+        "19/none",
+        "7/13=999999999999997.99",
+        "7/3=999999999999998.99"
+      ]
+    },
+    {
+      "id": "E08",
+      "action": "remove child7/3 explicitly",
+      "expectedOwnership": [
+        "7/13=999999999999997.99",
+        "19/none"
+      ]
+    },
+    {
+      "id": "E09",
+      "action": "unknown original.raw/original.ledger/original.lines[0].row_id",
+      "wire": "no raw, ledger, row_id, scope authority or readonly calculated fields copied"
+    },
+    {
+      "id": "E10",
+      "action": "original version differs expectedVersion",
+      "expected": "serializer refuses; no new baseline adopted"
+    },
+    {
+      "id": "E11",
+      "action": "saved editor NaN or Infinity",
+      "expected": "existing finite number validation refuses before HTTP"
+    },
+    {
+      "id": "E12",
+      "action": "four-argument serializer without original",
+      "expected": "existing Sales/new-Tour compatibility path unchanged; no exact saved profile claimed"
+    },
+    {
+      "id": "E13",
+      "action": "edit ordinary nonnumeric remark",
+      "expected": "remark changes; exact untouched MRP/child scalars remain unchanged"
+    },
+    {
+      "id": "E14",
+      "action": "unchanged saved NULL versus explicit numeric zero",
+      "expected": "NULL remains NULL and zero remains numeric zero; no new dirty event from loading"
+    },
+    {
+      "id": "E15",
+      "action": "new row with no source identity",
+      "expected": "not associated with a removed/same-position old row or its children"
+    },
+    {
+      "id": "E16",
+      "action": "selected loaded DTO object subsequently mutated externally",
+      "expected": "page retained original was detached at load; stored-value preservation uses that copy"
+    }
+  ],
+  "limits": [
+    "Only input-shaped owned fields, not raw table writes.",
+    "No new Tour labour/math/dirty triggers or new-create precision profile.",
+    "Mapped exact decimal string transport remains subject to existing writer refusal.",
+    "Actual browser required separately."
+  ]
+}

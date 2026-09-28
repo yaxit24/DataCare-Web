@@ -1,0 +1,1719 @@
+{
+  "checked": 712,
+  "pages": 21,
+  "mappedPages": 23,
+  "dead": 4,
+  "unmapped": 0,
+  "nested": [
+    {
+      "page": "wholesale-sale",
+      "field": "issueYear",
+      "traces": [
+        {
+          "field": "issueYear",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "yrcd"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "yrcd"
+            ],
+            "line": 6655
+          },
+          "read": {
+            "field": "yrcd",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "yrcd"
+            ],
+            "column": "ISU_YRCD",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 826
+          }
+        }
+      ]
+    },
+    {
+      "page": "wholesale-sale",
+      "field": "issueBook",
+      "traces": [
+        {
+          "field": "issueBook",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "dbcd"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "dbcd"
+            ],
+            "line": 6655
+          },
+          "read": {
+            "field": "dbcd",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "dbcd"
+            ],
+            "column": "ISU_DBCD",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 827
+          }
+        }
+      ]
+    },
+    {
+      "page": "wholesale-sale",
+      "field": "issueNo",
+      "traces": [
+        {
+          "field": "issueNo",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "no"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "no"
+            ],
+            "line": 6655
+          },
+          "read": {
+            "field": "no",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "no"
+            ],
+            "column": "ISU_NO",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 828
+          }
+        }
+      ]
+    },
+    {
+      "page": "wholesale-sale",
+      "field": "issueSrno",
+      "traces": [
+        {
+          "field": "issueSrno",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "srno"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "srno"
+            ],
+            "line": 6655
+          },
+          "read": {
+            "field": "srno",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "srno"
+            ],
+            "column": "ISU_SRNO",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 829
+          }
+        }
+      ]
+    }
+  ],
+  "unsupported": [
+    {
+      "page": "sales",
+      "field": "oldSrNo",
+      "diagnostics": [
+        {
+          "file": "page.tsx",
+          "line": 774,
+          "reason": "Dynamic request endpoint cannot establish a literal route"
+        },
+        {
+          "file": "page.tsx",
+          "line": 198,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "routes.ts",
+          "line": 609,
+          "reason": "Opaque call cannot establish an object mapping: scopeOfRequest"
+        },
+        {
+          "file": "routes.ts",
+          "line": 909,
+          "reason": "Opaque call cannot establish an object mapping: sess"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 529,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 596,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 613,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 699,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 713,
+          "reason": "Opaque call cannot establish an object mapping: resolveTaxPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 683,
+          "reason": "Opaque call cannot establish an object mapping: resolveRoundingPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 697,
+          "reason": "Opaque call cannot establish an object mapping: resolveSettingsBehaviorTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 732,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 241,
+          "reason": "Opaque call cannot establish an object mapping: fineWt"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 262,
+          "reason": "Opaque call cannot establish an object mapping: saleAmountBase"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 259,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 267,
+          "reason": "Opaque call cannot establish an object mapping: metalAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 302,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 270,
+          "reason": "Opaque call cannot establish an object mapping: labourCharge"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 741,
+          "reason": "Opaque call cannot establish an object mapping: generatedLabourRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 760,
+          "reason": "Opaque call cannot establish an object mapping: Array.from"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 790,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 791,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 792,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 794,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 798,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 804,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 814,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 748,
+          "reason": "Opaque call cannot establish an object mapping: billTotals"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 236,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 835,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundTaxAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 839,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 847,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 853,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 866,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 911,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 548,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1004,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1045,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 678,
+          "reason": "Opaque call cannot establish an object mapping: resolveBookPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1080,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1082,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: computed.indexOf"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1240,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1252,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1238,
+          "reason": "Opaque call cannot establish an object mapping: stockMovementWeights"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1278,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1281,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1484,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1485,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1503,
+          "reason": "Opaque call cannot establish an object mapping: orderAdvanceAvailableTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1520,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1292,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1028,
+          "reason": "Opaque call cannot establish an object mapping: voucherTimestamp"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1324,
+          "reason": "Opaque call cannot establish an object mapping: computed.reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1284,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 235,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1287,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1586,
+          "reason": "Opaque call cannot establish an object mapping: resolveOldGoldValuation"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1656,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1672,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1679,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1823,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1835,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1836,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1845,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1846,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1847,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1848,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Opaque call cannot establish an object mapping: rojmelMetalFor"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1807,
+          "reason": "Opaque call cannot establish an object mapping: buildSaleRojmel"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1970,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1956,
+          "reason": "Opaque call cannot establish an object mapping: lineTotalDesktop"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1946,
+          "reason": "Opaque call cannot establish an object mapping: todaySaleRateTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1973,
+          "reason": "Opaque call cannot establish an object mapping: billProfit"
+        }
+      ]
+    },
+    {
+      "page": "sales",
+      "field": "itType",
+      "diagnostics": [
+        {
+          "file": "page.tsx",
+          "line": 774,
+          "reason": "Dynamic request endpoint cannot establish a literal route"
+        },
+        {
+          "file": "page.tsx",
+          "line": 198,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "routes.ts",
+          "line": 609,
+          "reason": "Opaque call cannot establish an object mapping: scopeOfRequest"
+        },
+        {
+          "file": "routes.ts",
+          "line": 909,
+          "reason": "Opaque call cannot establish an object mapping: sess"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 529,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 596,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 613,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 699,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 713,
+          "reason": "Opaque call cannot establish an object mapping: resolveTaxPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 683,
+          "reason": "Opaque call cannot establish an object mapping: resolveRoundingPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 697,
+          "reason": "Opaque call cannot establish an object mapping: resolveSettingsBehaviorTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 732,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 241,
+          "reason": "Opaque call cannot establish an object mapping: fineWt"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 262,
+          "reason": "Opaque call cannot establish an object mapping: saleAmountBase"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 259,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 267,
+          "reason": "Opaque call cannot establish an object mapping: metalAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 302,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 270,
+          "reason": "Opaque call cannot establish an object mapping: labourCharge"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 741,
+          "reason": "Opaque call cannot establish an object mapping: generatedLabourRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 760,
+          "reason": "Opaque call cannot establish an object mapping: Array.from"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 790,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 791,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 792,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 794,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 798,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 804,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 814,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 748,
+          "reason": "Opaque call cannot establish an object mapping: billTotals"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 236,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 835,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundTaxAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 839,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 847,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 853,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 866,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 911,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 548,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1004,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1045,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 678,
+          "reason": "Opaque call cannot establish an object mapping: resolveBookPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1080,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1082,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: computed.indexOf"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1240,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1252,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1238,
+          "reason": "Opaque call cannot establish an object mapping: stockMovementWeights"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1278,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1281,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1484,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1485,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1503,
+          "reason": "Opaque call cannot establish an object mapping: orderAdvanceAvailableTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1520,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1292,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1028,
+          "reason": "Opaque call cannot establish an object mapping: voucherTimestamp"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1324,
+          "reason": "Opaque call cannot establish an object mapping: computed.reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1284,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 235,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1287,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1586,
+          "reason": "Opaque call cannot establish an object mapping: resolveOldGoldValuation"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1656,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1672,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1679,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1823,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1835,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1836,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1845,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1846,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1847,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1848,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Opaque call cannot establish an object mapping: rojmelMetalFor"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1807,
+          "reason": "Opaque call cannot establish an object mapping: buildSaleRojmel"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1970,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1956,
+          "reason": "Opaque call cannot establish an object mapping: lineTotalDesktop"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1946,
+          "reason": "Opaque call cannot establish an object mapping: todaySaleRateTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1973,
+          "reason": "Opaque call cannot establish an object mapping: billProfit"
+        }
+      ]
+    },
+    {
+      "page": "sales-quotation",
+      "field": "oldSrNo",
+      "diagnostics": [
+        {
+          "file": "page.tsx",
+          "line": 774,
+          "reason": "Dynamic request endpoint cannot establish a literal route"
+        },
+        {
+          "file": "page.tsx",
+          "line": 198,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "routes.ts",
+          "line": 609,
+          "reason": "Opaque call cannot establish an object mapping: scopeOfRequest"
+        },
+        {
+          "file": "routes.ts",
+          "line": 909,
+          "reason": "Opaque call cannot establish an object mapping: sess"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 529,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 596,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 613,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 699,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 713,
+          "reason": "Opaque call cannot establish an object mapping: resolveTaxPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 683,
+          "reason": "Opaque call cannot establish an object mapping: resolveRoundingPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 697,
+          "reason": "Opaque call cannot establish an object mapping: resolveSettingsBehaviorTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 732,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 241,
+          "reason": "Opaque call cannot establish an object mapping: fineWt"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 262,
+          "reason": "Opaque call cannot establish an object mapping: saleAmountBase"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 259,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 267,
+          "reason": "Opaque call cannot establish an object mapping: metalAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 302,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 270,
+          "reason": "Opaque call cannot establish an object mapping: labourCharge"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 741,
+          "reason": "Opaque call cannot establish an object mapping: generatedLabourRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 760,
+          "reason": "Opaque call cannot establish an object mapping: Array.from"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 790,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 791,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 792,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 794,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 798,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 804,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 814,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 748,
+          "reason": "Opaque call cannot establish an object mapping: billTotals"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 236,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 835,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundTaxAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 839,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 847,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 853,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 866,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 911,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 548,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1004,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1045,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 678,
+          "reason": "Opaque call cannot establish an object mapping: resolveBookPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1080,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1082,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: computed.indexOf"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1240,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1252,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1238,
+          "reason": "Opaque call cannot establish an object mapping: stockMovementWeights"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1278,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1281,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1484,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1485,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1503,
+          "reason": "Opaque call cannot establish an object mapping: orderAdvanceAvailableTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1520,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1292,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1028,
+          "reason": "Opaque call cannot establish an object mapping: voucherTimestamp"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1324,
+          "reason": "Opaque call cannot establish an object mapping: computed.reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1284,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 235,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1287,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1586,
+          "reason": "Opaque call cannot establish an object mapping: resolveOldGoldValuation"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1656,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1672,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1679,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1823,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1835,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1836,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1845,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1846,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1847,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1848,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Opaque call cannot establish an object mapping: rojmelMetalFor"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1807,
+          "reason": "Opaque call cannot establish an object mapping: buildSaleRojmel"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1970,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1956,
+          "reason": "Opaque call cannot establish an object mapping: lineTotalDesktop"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1946,
+          "reason": "Opaque call cannot establish an object mapping: todaySaleRateTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1973,
+          "reason": "Opaque call cannot establish an object mapping: billProfit"
+        }
+      ]
+    },
+    {
+      "page": "sales-quotation",
+      "field": "itType",
+      "diagnostics": [
+        {
+          "file": "page.tsx",
+          "line": 774,
+          "reason": "Dynamic request endpoint cannot establish a literal route"
+        },
+        {
+          "file": "page.tsx",
+          "line": 198,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "routes.ts",
+          "line": 609,
+          "reason": "Opaque call cannot establish an object mapping: scopeOfRequest"
+        },
+        {
+          "file": "routes.ts",
+          "line": 909,
+          "reason": "Opaque call cannot establish an object mapping: sess"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 529,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 596,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 613,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 699,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 713,
+          "reason": "Opaque call cannot establish an object mapping: resolveTaxPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 683,
+          "reason": "Opaque call cannot establish an object mapping: resolveRoundingPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 697,
+          "reason": "Opaque call cannot establish an object mapping: resolveSettingsBehaviorTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 732,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 241,
+          "reason": "Opaque call cannot establish an object mapping: fineWt"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 262,
+          "reason": "Opaque call cannot establish an object mapping: saleAmountBase"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 259,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundItemRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 267,
+          "reason": "Opaque call cannot establish an object mapping: metalAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 302,
+          "reason": "Opaque call cannot establish an object mapping: policy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 270,
+          "reason": "Opaque call cannot establish an object mapping: labourCharge"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 741,
+          "reason": "Opaque call cannot establish an object mapping: generatedLabourRate"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 760,
+          "reason": "Opaque call cannot establish an object mapping: Array.from"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 790,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 791,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 792,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 794,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 798,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 804,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 814,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 748,
+          "reason": "Opaque call cannot establish an object mapping: billTotals"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 236,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 835,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundTaxAmount"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 839,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 847,
+          "reason": "Opaque call cannot establish an object mapping: roundingPolicy.roundBillTotal"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 853,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 866,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 911,
+          "reason": "Opaque call cannot establish an object mapping: tenderThresholdDecision"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 548,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1004,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1045,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 678,
+          "reason": "Opaque call cannot establish an object mapping: resolveBookPolicyTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1080,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1082,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: computed.indexOf"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1226,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1240,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1252,
+          "reason": "Opaque call cannot establish an object mapping: issuedTags.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1238,
+          "reason": "Opaque call cannot establish an object mapping: stockMovementWeights"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1278,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1281,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1484,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1485,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1503,
+          "reason": "Opaque call cannot establish an object mapping: orderAdvanceAvailableTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1520,
+          "reason": "Opaque call cannot establish an object mapping: tx.$queryRawUnsafe"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1292,
+          "reason": "Opaque call cannot establish an object mapping: formatVoucherNo"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1028,
+          "reason": "Opaque call cannot establish an object mapping: voucherTimestamp"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1324,
+          "reason": "Opaque call cannot establish an object mapping: computed.reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1284,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 235,
+          "reason": "Opaque call cannot establish an object mapping: Math.round"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1287,
+          "reason": "Opaque call cannot establish an object mapping: oldMetalRows.filter((g) => g.metal === 'S').reduce"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1586,
+          "reason": "Opaque call cannot establish an object mapping: resolveOldGoldValuation"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1656,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1672,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1679,
+          "reason": "Opaque call cannot establish an object mapping: taxPolicy.components.get"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1823,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1835,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1836,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1845,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1846,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1847,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1848,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1825,
+          "reason": "Opaque call cannot establish an object mapping: rojmelMetalFor"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1807,
+          "reason": "Opaque call cannot establish an object mapping: buildSaleRojmel"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1970,
+          "reason": "Dynamic property key cannot be traced statically"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1956,
+          "reason": "Opaque call cannot establish an object mapping: lineTotalDesktop"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1946,
+          "reason": "Opaque call cannot establish an object mapping: todaySaleRateTx"
+        },
+        {
+          "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/sales.ts",
+          "line": 1973,
+          "reason": "Opaque call cannot establish an object mapping: billProfit"
+        }
+      ]
+    }
+  ],
+  "report": [
+    "  x sales: 2 dead of 42 -> oldSrNo, itType",
+    "  x sales-quotation: 2 dead of 42 -> oldSrNo, itType"
+  ]
+}

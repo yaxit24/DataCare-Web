@@ -1,0 +1,306 @@
+{
+ "form": "MS_AUTO_ITEM",
+ "controlCount": 28,
+ "byKind": {
+  "textbox": 10,
+  "grid": 1,
+  "button": 5,
+  "label": 8,
+  "panel": 1,
+  "masked": 2,
+  "combo": 1
+ },
+ "grids": [
+  "MSG"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "nMrpMargin",
+   "Label1",
+   "cboUPdateType",
+   "Label6",
+   "tMembAcName",
+   "tMembAcCode",
+   "lblMembAc",
+   "tPrCode",
+   "lblPrCode",
+   "lblTodt",
+   "lblFromDt",
+   "mToDt",
+   "mFromDt",
+   "tTradType",
+   "tHsnCode",
+   "PnlBotam",
+   "tGrType",
+   "tGrName",
+   "tGrCode",
+   "Label3",
+   "TEXT_ENTRY",
+   "MSG",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "305,209",
+   "size": "100,18",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "155,86",
+   "size": "590,462",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "101",
+   "text": "Auto Item",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "51,49",
+   "size": "95,20",
+   "tabIndex": "1129",
+   "text": "Group Code",
+   "kind": "label"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "155,47",
+   "size": "83,22",
+   "tabIndex": "1130",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tGrName",
+   "type": "TextBox",
+   "location": "243,47",
+   "size": "270,22",
+   "tabIndex": "1131",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tGrType",
+   "type": "TextBox",
+   "location": "525,47",
+   "size": "26,22",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tHsnCode",
+   "type": "TextBox",
+   "location": "603,47",
+   "size": "104,22",
+   "tabIndex": "1134",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tTradType",
+   "type": "TextBox",
+   "location": "557,47",
+   "size": "40,22",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "360,515",
+   "size": "76,23",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "524,515",
+   "size": "76,23",
+   "tabIndex": "1137",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "lblFromDt",
+   "type": "Label",
+   "location": "271,516",
+   "size": "84,20",
+   "tabIndex": "1138",
+   "text": "From Date",
+   "kind": "label"
+  },
+  {
+   "name": "lblTodt",
+   "type": "Label",
+   "location": "447,517",
+   "size": "66,20",
+   "tabIndex": "1139",
+   "text": "To Date",
+   "kind": "label"
+  },
+  {
+   "name": "lblPrCode",
+   "type": "Label",
+   "location": "713,48",
+   "size": "64,20",
+   "tabIndex": "1140",
+   "text": "Pr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "784,48",
+   "size": "53,22",
+   "tabIndex": "1164",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblMembAc",
+   "type": "Label",
+   "location": "756,86",
+   "size": "127,20",
+   "tabIndex": "1165",
+   "text": "Memb Com% Sem",
+   "kind": "label"
+  },
+  {
+   "name": "tMembAcCode",
+   "type": "TextBox",
+   "location": "889,86",
+   "size": "75,22",
+   "tabIndex": "1166",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tMembAcName",
+   "type": "TextBox",
+   "location": "970,86",
+   "size": "198,22",
+   "tabIndex": "1167",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboUPdateType",
+   "type": "ComboBox",
+   "location": "946,49",
+   "size": "95,22",
+   "tabIndex": "1169",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "843,49",
+   "size": "97,20",
+   "tabIndex": "1170",
+   "text": "Update Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "1045,49",
+   "size": "52,20",
+   "tabIndex": "1171",
+   "text": "Mrp%",
+   "kind": "label"
+  },
+  {
+   "name": "nMrpMargin",
+   "type": "TextBox",
+   "location": "1104,49",
+   "size": "46,22",
+   "tabIndex": "1172",
+   "text": "",
+   "kind": "textbox"
+  }
+ ]
+}

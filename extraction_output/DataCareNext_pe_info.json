@@ -1,0 +1,37 @@
+{
+  "machine": "0x14c",
+  "num_sections": 3,
+  "timestamp": 2991180578,
+  "characteristics": "0x22",
+  "pe_type": "PE32",
+  "clr_header_rva": "0x2008",
+  "clr_header_size": 72,
+  "is_dotnet": true,
+  "sections": [
+    {
+      "name": ".text",
+      "virtual_size": 23969892,
+      "virtual_addr": "0x2000",
+      "raw_size": 23970304,
+      "raw_offset": "0x200"
+    },
+    {
+      "name": ".rsrc",
+      "virtual_size": 86764,
+      "virtual_addr": "0x16e0000",
+      "raw_size": 87040,
+      "raw_offset": "0x16dc400"
+    },
+    {
+      "name": ".reloc",
+      "virtual_size": 12,
+      "virtual_addr": "0x16f6000",
+      "raw_size": 512,
+      "raw_offset": "0x16f1800"
+    }
+  ],
+  "dotnet_versions": [
+    "v4.7.2",
+    "v4.0.30319"
+  ]
+}

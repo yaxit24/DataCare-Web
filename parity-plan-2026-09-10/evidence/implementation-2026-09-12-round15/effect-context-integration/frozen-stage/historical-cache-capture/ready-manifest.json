@@ -1,0 +1,108 @@
+{
+  "stage": "round15-saved-return-effect-context",
+  "frozenAtUtc": "2026-09-12T02:30:38.858530+00:00",
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "75232dab91fae4ab465e16e81ec748ac934de68ffed940c7548cd9fd905a36ca"
+    },
+    {
+      "path": "author-fixtures.py",
+      "sha256": "5fa398ab92636bf8c236aac90ed6487a0bebcc244b6a664fc4fa93f8fd68d0eb"
+    },
+    {
+      "path": "exports.txt",
+      "sha256": "c172080f0eeeae25b904cc5f0313e8520070f2ff8c290112295f341b4f36da28"
+    },
+    {
+      "path": "fixture-freeze.json",
+      "sha256": "7841d88271ee78da0dbfeb1c8219f25c08bbfd45e327f676ab6991ce106ceb57"
+    },
+    {
+      "path": "focused-final.inputs.json",
+      "sha256": "8b081850480f8bea09f78c08935c1a314e592632b43b1114584db8791f3fcf18"
+    },
+    {
+      "path": "focused-final.run.json",
+      "sha256": "cb62adfc4c26be0936711b3548b5d09eeca107848d454451bd59c7a207f74b21"
+    },
+    {
+      "path": "focused-final.txt",
+      "sha256": "f887e0e85591638f4ca035341fa5b6651ee59609fdc18b14b29fb22f327af7c9"
+    },
+    {
+      "path": "focused-first.inputs.json",
+      "sha256": "4ca2386b56dabd9e54c0d48263bd68b09ab0f0081f9e670fffce18952e09b023"
+    },
+    {
+      "path": "focused-first.run.json",
+      "sha256": "05ce174170cc9641dd9695b750db22968ad27dcbc23cd236ba71f05056f8ee00"
+    },
+    {
+      "path": "focused-first.txt",
+      "sha256": "630194cfce4f996d58df535c5bbdec2b95bc65b5767677eaf169622937121b51"
+    },
+    {
+      "path": "historical-first/saleReturnEffectContext.test.ts",
+      "sha256": "bc3679730550f973d2607a6838e24493b6c1c87b39f14a85073661d59728403b"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "4b818454a856a816d5d44fda123e096101fd77817f6f1106007fb9071f81625e"
+    },
+    {
+      "path": "run-focused-final.py",
+      "sha256": "b2377ebf7dd7c330590f1e367f6636d533f9acd866f35c4100dee75b95fa2296"
+    },
+    {
+      "path": "run-focused.py",
+      "sha256": "d291ad12fb1ac53e4eae8edeb8ca32a01e0a853fbd16994be56a28860faabc61"
+    },
+    {
+      "path": "source-citations-addendum.json",
+      "sha256": "05ae733a0081230fa64ab26b1b55d3ea921466c1d1d824d5da71e40adc6878eb"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "d23429910bf87b5be74d1c1531ab5b813f2958bc4add6e5cbe661f554ebdc86b"
+    },
+    {
+      "path": "types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "types-first.txt",
+      "sha256": "9d0c8afc2f9320afa703c9eec3f60fbb909ff3403dc08f03d795e7736b202cc5"
+    },
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "a90fc33418afa2b9cbf4768524b021135b965ecdf993457505bfae3ac44a8428"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnEffectContext.ts",
+      "sha256": "6b1aa627f58ba1b458ea3bb6d0c378d0b95c57e881d8c85ec510be1efcb71c9b"
+    },
+    {
+      "path": "web/packages/core/src/savedSaleReturnClock.ts",
+      "sha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnEffectContext.independent.json",
+      "sha256": "1c3285b2a7d4f9d75c2e442cc560a1e0960784cf8095fd640f89149614a8fe1c"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnEffectContext.test.ts",
+      "sha256": "2858274fbafc58be6b23e69978946577be6faec5c77442556abd4a558237af0f"
+    },
+    {
+      "path": "web/packages/core/vitest.config.ts",
+      "sha256": "eaba02610ce8aae0654be5cef3be9114870534572c98a9dff633418469885b05"
+    }
+  ],
+  "fixtureCases": 60,
+  "executedTests": 89,
+  "finalStrictExitCode": 0,
+  "changedSourceReferences": [],
+  "copiedClockByteIdentical": true,
+  "limits": "Only staged pure unit/strict checks executed. No active source, index, API, database, browser, R14 evidence or checkpoint mutation; current-PG text equality adaptation has no Windows parity or database execution credit."
+}

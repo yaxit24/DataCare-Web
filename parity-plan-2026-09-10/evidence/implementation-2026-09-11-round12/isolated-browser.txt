@@ -1,0 +1,67 @@
+
+> datacare-web-saas@0.0.0 test:parity:browser /private/tmp/datacare-round12-verification/web
+> node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.19.3 -> 8.0.0-rc.13                 │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+node:fs:556
+  return binding.open(
+                 ^
+
+Error: ENOENT: no such file or directory, open '/private/tmp/datacare-round12-verification/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json'
+    at Object.openSync (node:fs:556:18)
+    at readFileSync (node:fs:440:35)
+    at file:///private/tmp/datacare-round12-verification/web/apps/web/test/sales-return-bill-replay.journey.mjs:12:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:639:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/private/tmp/datacare-round12-verification/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json'
+}
+
+Node.js v25.8.0
+PARITY_TEST_FAILED node exited 1
+ ELIFECYCLE  Command failed with exit code 1.

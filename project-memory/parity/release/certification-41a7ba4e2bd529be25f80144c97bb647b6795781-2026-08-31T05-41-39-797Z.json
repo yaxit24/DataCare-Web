@@ -1,0 +1,116 @@
+{
+  "kind": "datacare.release-certification/1.0",
+  "verdict": "failed",
+  "evaluatedAt": "2026-08-31T05:41:39.797Z",
+  "releaseSha": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "freshnessWindowHours": 24,
+  "gates": [
+    {
+      "id": "lint",
+      "title": "Workspace lint and typecheck",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "test",
+      "title": "Full test suite",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "build",
+      "title": "Production build",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "format",
+      "title": "Formatting",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "completion-register",
+      "title": "Completion register, strict and release-grade",
+      "outcome": "failed",
+      "reason": "exited 1"
+    },
+    {
+      "id": "contract-integrity",
+      "title": "Behaviour contracts are checkable and honestly cited",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "kernel-conformance",
+      "title": "Posting families use the shared compatibility kernel",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "schema-readiness",
+      "title": "Desktop-declared schema present, against a live database",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "type-parity",
+      "title": "Column type parity from a real SQL Server dump",
+      "outcome": "skipped",
+      "reason": "exited 0 but reported TYPE_PARITY_SKIP: a gate that measured nothing cannot certify a release"
+    },
+    {
+      "id": "fresh-provision",
+      "title": "Fresh provision is tenant-isolated",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "settings-parity",
+      "title": "Configuration coverage",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "report-baselines",
+      "title": "Report layouts unchanged",
+      "outcome": "passed",
+      "reason": "command exited 0 with no skip result"
+    },
+    {
+      "id": "g5-desktop-comparison",
+      "title": "Desktop-versus-web voucher comparison",
+      "outcome": "failed",
+      "reason": "exited 1"
+    },
+    {
+      "id": "report-comparison",
+      "title": "Desktop-versus-web report data comparison",
+      "outcome": "missing",
+      "reason": "required evidence artefact is absent: project-memory/parity/reports/report-comparison-latest.json"
+    },
+    {
+      "id": "restore-drill",
+      "title": "Backup/restore drill",
+      "outcome": "failed",
+      "reason": "exited 1"
+    },
+    {
+      "id": "parity-ratchet",
+      "title": "Measured parity numbers did not worsen",
+      "outcome": "passed",
+      "reason": "evidence is present, positive, attributable and within the freshness window"
+    }
+  ],
+  "totals": {
+    "passed": 11,
+    "failed": 3,
+    "skipped": 1,
+    "missing": 1,
+    "red": 0,
+    "stale": 0,
+    "synthetic": 0,
+    "self-approved": 0,
+    "unconfigured": 0
+  }
+}

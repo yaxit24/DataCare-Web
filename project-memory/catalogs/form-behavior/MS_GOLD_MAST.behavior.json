@@ -1,0 +1,58 @@
+{
+ "form": "MS_GOLD_MAST",
+ "loc": 1627,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM DG_GOLD_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM AC_MAST WHERE AC_CODE = ' ? '",
+  "DELETE FROM DG_GOLD_MAST WHERE CO_CODE = ' ? ' AND CO_CODE = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 150",
+  "DELETE FROM DG_GOLD_MAST WHERE CO_CODE = ' ? '",
+  "INSERT INTO DG_GOLD_MAST(CO_CODE,COUNTRY_CODE,SHOW_DG_GOLD,API_KEY,CURRENCY_RATE,OUNCES_CONV,GOLD_CONV,SILVER_CONV, CUST_BUY_RATE_ADD,CUST_SALE_RATE_LESS,BOOK_WITH_LIVE_RATE,GOLD_FIX_RATE,SILVER_FIX_RATE,MAIN_USER,BANK_AC_CODE) VALUES(' ? ',' ? COUNTRY_CODE ? ',' ? SHOW_DG_GOLD ? ',' ? API_KEY ? ', ? CURRENCY_RATE ? , ? OUNCES_CONV ? , ? GOLD_CONV ? , ? SILVER_CONV ? , ? CUST_BUY_RATE_ADD ? , ? CUST_SALE_RATE_LESS ? ,' ? BOOK_WITH_LIVE_RATE ? ', ? GOLD_FIX_RATE ? , ? SILVER_FIX_RATE ? ,' ? MAIN_USER ? ',' ? BANK_AC_CODE ? ')",
+  "Please Select Group For Delete.",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "DELETE FROM DG_GOLD_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR AS GroupL FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR IN ('02','03','19','22','23') ORDER BY AC_NAME"
+ ],
+ "keyboard": {
+  "Enter": 12,
+  "Esc": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Enter Detail And Try",
+   "when": "(Operators.CompareString(tContryCode.Text, \"\", false) == 0) | (Operators.CompareString(tBankCode.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Group For Delete.",
+   "when": "Operators.CompareString(tContryCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Cant Delete Record This Group Code Use in Item Master....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Group now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Group now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Group now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  }
+ ]
+}

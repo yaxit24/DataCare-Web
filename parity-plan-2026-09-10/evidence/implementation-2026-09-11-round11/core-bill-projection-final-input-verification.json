@@ -1,0 +1,67 @@
+{
+  "verifiedAt": "2026-09-11T14:27:59.402509+00:00",
+  "allMatch": true,
+  "count": 10,
+  "inputs": [
+    {
+      "path": "packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9",
+      "actualSha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9",
+      "matches": true
+    },
+    {
+      "path": "packages/core/test/saleReturnBillProjection.test.ts",
+      "sha256": "fd2f21128607f588fe4bc4b9698345facac60196d43b6458bf0135c87832fe87",
+      "actualSha256": "fd2f21128607f588fe4bc4b9698345facac60196d43b6458bf0135c87832fe87",
+      "matches": true
+    },
+    {
+      "path": "packages/core/test/fixtures/sale-return-bill-projection.v1.json",
+      "sha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c",
+      "actualSha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c",
+      "matches": true
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "actualSha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "matches": true
+    },
+    {
+      "path": "packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "actualSha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "matches": true
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131",
+      "actualSha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131",
+      "matches": true
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608",
+      "actualSha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608",
+      "matches": true
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59",
+      "actualSha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59",
+      "matches": true
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336",
+      "actualSha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336",
+      "matches": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9",
+      "actualSha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9",
+      "matches": true
+    }
+  ]
+}

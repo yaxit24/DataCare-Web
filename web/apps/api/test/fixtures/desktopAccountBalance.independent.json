@@ -1,0 +1,1130 @@
+{
+  "version": "round12-independent-msacbal-observation-v1",
+  "status": "frozen-before-reader-implementation",
+  "authorship": "Literal source-derived expected outputs authored without reading or executing the new internal reader. Row constructor only supplies explicit raw identity defaults; no calculator generated expectations.",
+  "source": {
+    "DC_Main.cs": {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+      "lines": [
+        "1463–1487 MsAcBal",
+        "1471 opening strictbefore",
+        "1479 helperclosing inclusive",
+        "1475–1477/1483–1485 Format and ToDouble; no Val/Fnv"
+      ]
+    },
+    "TR_SALE_RTN.cs": {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "lines": [
+        "10104–10106 saveddateandsecondclock",
+        "10197 call",
+        "10198–10227 displays/copiedamountopening"
+      ]
+    }
+  },
+  "profile": "trusted internal mode A/B/C; canonical PostgreSQLfixeddecimal monetary/metals mathematical formatting; no originalDouble/SQLServercollation/runtime/clockimport/sessionauthority acceptance",
+  "rowSets": {
+    "scope-mode-and-cutoff": [
+      {
+        "id": "a-main",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:59:59.900000",
+          "DATA_TYPE": "A",
+          "CR_AMT": "10.00",
+          "DR_AMT": "2.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "1.250",
+          "IT_DESC": null,
+          "LEDR_KEY": "a-main"
+        }
+      },
+      {
+        "id": "a-other-book",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "Z09",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:00:00",
+          "DATA_TYPE": "A",
+          "CR_AMT": "7.00",
+          "DR_AMT": "1.00",
+          "IT_TYPE": "G",
+          "SIGN": "-",
+          "FINE_WT": "0.250",
+          "IT_DESC": null,
+          "LEDR_KEY": "a-other-book"
+        }
+      },
+      {
+        "id": "b-silver",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:30:00",
+          "DATA_TYPE": "B",
+          "CR_AMT": "20.00",
+          "DR_AMT": "5.00",
+          "IT_TYPE": "S",
+          "SIGN": "+",
+          "FINE_WT": "2.500",
+          "IT_DESC": null,
+          "LEDR_KEY": "b-silver"
+        }
+      },
+      {
+        "id": "null-mode",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:40:00",
+          "DATA_TYPE": null,
+          "CR_AMT": "3.00",
+          "DR_AMT": "1.00",
+          "IT_TYPE": "G",
+          "SIGN": "-",
+          "FINE_WT": "0.125",
+          "IT_DESC": null,
+          "LEDR_KEY": "null-mode"
+        }
+      },
+      {
+        "id": "other-mode",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:45:00",
+          "DATA_TYPE": "X",
+          "CR_AMT": "4.00",
+          "DR_AMT": "1.00",
+          "IT_TYPE": "S",
+          "SIGN": null,
+          "FINE_WT": "0.500",
+          "IT_DESC": null,
+          "LEDR_KEY": "other-mode"
+        }
+      },
+      {
+        "id": "future-document-date",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2030-01-01",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:50:00",
+          "DATA_TYPE": "B",
+          "CR_AMT": "6.00",
+          "DR_AMT": "1.00",
+          "IT_TYPE": "X",
+          "SIGN": null,
+          "FINE_WT": null,
+          "IT_DESC": null,
+          "LEDR_KEY": "future-document-date"
+        }
+      },
+      {
+        "id": "at-second",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 12:00:00",
+          "DATA_TYPE": "A",
+          "CR_AMT": "30.00",
+          "DR_AMT": "2.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "1.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "at-second"
+        }
+      },
+      {
+        "id": "after-microsecond",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 12:00:00.000001",
+          "DATA_TYPE": "A",
+          "CR_AMT": "500.00",
+          "DR_AMT": "0.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "100.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "after-microsecond"
+        }
+      },
+      {
+        "id": "null-time",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": null,
+          "DATA_TYPE": "A",
+          "CR_AMT": "600.00",
+          "DR_AMT": "0.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "100.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "null-time"
+        }
+      },
+      {
+        "id": "foreign-tenant",
+        "raw": {
+          "tenant_id": "r12-other-tenant",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:00:00",
+          "DATA_TYPE": "A",
+          "CR_AMT": "999.00",
+          "DR_AMT": "0.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "999.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "foreign-tenant"
+        }
+      },
+      {
+        "id": "foreign-company",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "02",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:00:00",
+          "DATA_TYPE": "A",
+          "CR_AMT": "999.00",
+          "DR_AMT": "0.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "999.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "foreign-company"
+        }
+      },
+      {
+        "id": "foreign-location",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "02",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:00:00",
+          "DATA_TYPE": "A",
+          "CR_AMT": "999.00",
+          "DR_AMT": "0.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "999.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "foreign-location"
+        }
+      },
+      {
+        "id": "foreign-year",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2023-2024",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "CUST",
+          "ENTRY_TIME": "2024-07-10 11:00:00",
+          "DATA_TYPE": "A",
+          "CR_AMT": "999.00",
+          "DR_AMT": "0.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "999.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "foreign-year"
+        }
+      },
+      {
+        "id": "foreign-account",
+        "raw": {
+          "tenant_id": "r12-ledger-fixture",
+          "CO_CODE": "01",
+          "LC_CODE": "01",
+          "CO_YEAR": "2024-2025",
+          "CO_BOOK": "R11",
+          "VCH_NO": "00017",
+          "VCH_DATE": "2024-07-10",
+          "AC_CODE": "OTHER",
+          "ENTRY_TIME": "2024-07-10 11:00:00",
+          "DATA_TYPE": "A",
+          "CR_AMT": "999.00",
+          "DR_AMT": "0.00",
+          "IT_TYPE": "G",
+          "SIGN": "+",
+          "FINE_WT": "999.000",
+          "IT_DESC": null,
+          "LEDR_KEY": "foreign-account"
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "cross-book-A-before-and-at",
+      "rowSet": "scope-mode-and-cutoff",
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "A"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "14.00",
+          "gold": "1.000",
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "3",
+          "amount": "42.00",
+          "gold": "2.000",
+          "silver": "0.000"
+        },
+        "openingIds": [
+          "a-main",
+          "a-other-book"
+        ],
+        "closingIds": [
+          "a-main",
+          "a-other-book",
+          "at-second"
+        ]
+      }
+    },
+    {
+      "id": "cross-book-B-ignores-document-date",
+      "rowSet": "scope-mode-and-cutoff",
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "B"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "20.00",
+          "gold": "0.000",
+          "silver": "2.500"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "20.00",
+          "gold": "0.000",
+          "silver": "2.500"
+        },
+        "openingIds": [
+          "b-silver",
+          "future-document-date"
+        ],
+        "closingIds": [
+          "b-silver",
+          "future-document-date"
+        ]
+      }
+    },
+    {
+      "id": "mode-C-combines-null-other-modes",
+      "rowSet": "scope-mode-and-cutoff",
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "6",
+          "amount": "39.00",
+          "gold": "0.875",
+          "silver": "2.000"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "7",
+          "amount": "67.00",
+          "gold": "1.875",
+          "silver": "2.000"
+        },
+        "openingIds": [
+          "a-main",
+          "a-other-book",
+          "b-silver",
+          "null-mode",
+          "other-mode",
+          "future-document-date"
+        ],
+        "closingIds": [
+          "a-main",
+          "a-other-book",
+          "b-silver",
+          "null-mode",
+          "other-mode",
+          "future-document-date",
+          "at-second"
+        ]
+      }
+    },
+    {
+      "id": "no-group-initial-zero",
+      "rows": [],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": false,
+          "eligibleRows": "0",
+          "amount": "0.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": false,
+          "eligibleRows": "0",
+          "amount": "0.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        }
+      },
+      "distinction": "Source1465–1470 initializes six balances before either query; no grouped row means zero remains."
+    },
+    {
+      "id": "only-null-entry-time-no-group",
+      "rows": [
+        {
+          "id": "null-clock-only",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": null,
+            "DATA_TYPE": "A",
+            "CR_AMT": "999.00",
+            "DR_AMT": "0.00",
+            "IT_TYPE": "X",
+            "SIGN": "",
+            "FINE_WT": "0.000",
+            "IT_DESC": null,
+            "LEDR_KEY": "null-clock-only"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": false,
+          "eligibleRows": "0",
+          "amount": "0.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": false,
+          "eligibleRows": "0",
+          "amount": "0.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        }
+      },
+      "distinction": "SQLNULL timestamp does not satisfy either predicate; do not substitute VCH_DATE or zero time."
+    },
+    {
+      "id": "all-null-difference-does-not-coalesce",
+      "rows": [
+        {
+          "id": "null-credit",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": null,
+            "DR_AMT": "5.00",
+            "IT_TYPE": "X",
+            "SIGN": "",
+            "FINE_WT": "0.000",
+            "IT_DESC": null,
+            "LEDR_KEY": "null-credit"
+          }
+        },
+        {
+          "id": "null-debit",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "12.00",
+            "DR_AMT": null,
+            "IT_TYPE": "X",
+            "SIGN": "",
+            "FINE_WT": "0.000",
+            "IT_DESC": null,
+            "LEDR_KEY": "null-debit"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "unsupported",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": null,
+          "gold": "0.000",
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": null,
+          "gold": "0.000",
+          "silver": "0.000"
+        }
+      },
+      "distinction": "Subtract before SUM. Both differences are NULL; no known Amount, despite numeric opposite operands."
+    },
+    {
+      "id": "mixed-null-money-and-metal-zero-case",
+      "rows": [
+        {
+          "id": "g-null",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": null,
+            "DR_AMT": "5.00",
+            "IT_TYPE": "G",
+            "SIGN": "+",
+            "FINE_WT": null,
+            "IT_DESC": null,
+            "LEDR_KEY": "g-null"
+          }
+        },
+        {
+          "id": "other-known",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "12.00",
+            "DR_AMT": "2.00",
+            "IT_TYPE": "X",
+            "SIGN": null,
+            "FINE_WT": null,
+            "IT_DESC": null,
+            "LEDR_KEY": "other-known"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "10.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "10.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        }
+      },
+      "distinction": "One known money difference survives; other-type CASE zero means Gold is0, notNULL. Per-legCOALESCE would wrongly produce5."
+    },
+    {
+      "id": "finite-money-gold-helper-unavailable",
+      "rows": [
+        {
+          "id": "g-null-only",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "12.00",
+            "DR_AMT": "2.00",
+            "IT_TYPE": "G",
+            "SIGN": "+",
+            "FINE_WT": null,
+            "IT_DESC": null,
+            "LEDR_KEY": "g-null-only"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "unsupported",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "1",
+          "amount": "10.00",
+          "gold": null,
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "1",
+          "amount": "10.00",
+          "gold": null,
+          "silver": "0.000"
+        }
+      },
+      "distinction": "Amount-only subtotal10 is known but complete source helper requires unresolved GoldWt conversion."
+    },
+    {
+      "id": "finite-money-silver-helper-unavailable",
+      "rows": [
+        {
+          "id": "s-null-only",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "12.00",
+            "DR_AMT": "2.00",
+            "IT_TYPE": "S",
+            "SIGN": "-",
+            "FINE_WT": null,
+            "IT_DESC": null,
+            "LEDR_KEY": "s-null-only"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "unsupported",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "1",
+          "amount": "10.00",
+          "gold": "0.000",
+          "silver": null
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "1",
+          "amount": "10.00",
+          "gold": "0.000",
+          "silver": null
+        }
+      },
+      "distinction": "Amount-only subtotal10 is known but complete source helper requires unresolved SilverWt conversion."
+    },
+    {
+      "id": "two-null-metals-cross-else-zero",
+      "rows": [
+        {
+          "id": "g-null-pair",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "1.00",
+            "DR_AMT": "0.00",
+            "IT_TYPE": "G",
+            "SIGN": "+",
+            "FINE_WT": null,
+            "IT_DESC": null,
+            "LEDR_KEY": "g-null-pair"
+          }
+        },
+        {
+          "id": "s-null-pair",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "1.00",
+            "DR_AMT": "0.00",
+            "IT_TYPE": "S",
+            "SIGN": "+",
+            "FINE_WT": null,
+            "IT_DESC": null,
+            "LEDR_KEY": "s-null-pair"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "2.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "2.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        }
+      },
+      "distinction": "Each opposite metal contributes a literalCASEzero; both sums are known0 despite both FINE_WTNULL."
+    },
+    {
+      "id": "nonplus-sign-is-negation",
+      "rows": [
+        {
+          "id": "null-sign",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "1.00",
+            "DR_AMT": "0.00",
+            "IT_TYPE": "G",
+            "SIGN": null,
+            "FINE_WT": "1.250",
+            "IT_DESC": null,
+            "LEDR_KEY": "null-sign"
+          }
+        },
+        {
+          "id": "blank-sign",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "1.00",
+            "DR_AMT": "0.00",
+            "IT_TYPE": "G",
+            "SIGN": "",
+            "FINE_WT": "0.250",
+            "IT_DESC": null,
+            "LEDR_KEY": "blank-sign"
+          }
+        },
+        {
+          "id": "negative-fine",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "1.00",
+            "DR_AMT": "0.00",
+            "IT_TYPE": "S",
+            "SIGN": "-",
+            "FINE_WT": "-0.500",
+            "IT_DESC": null,
+            "LEDR_KEY": "negative-fine"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "3",
+          "amount": "3.00",
+          "gold": "-1.500",
+          "silver": "0.500"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "3",
+          "amount": "3.00",
+          "gold": "-1.500",
+          "silver": "0.500"
+        }
+      },
+      "distinction": "NULL or blank SIGN takes ELSE -FINE_WT; negating negative fine gives positive. Never infer plus."
+    },
+    {
+      "id": "signed-fixed-storage-cancellation",
+      "rows": [
+        {
+          "id": "credit-cents",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "0.10",
+            "DR_AMT": "0.20",
+            "IT_TYPE": "G",
+            "SIGN": "+",
+            "FINE_WT": "0.001",
+            "IT_DESC": null,
+            "LEDR_KEY": "credit-cents"
+          }
+        },
+        {
+          "id": "debit-cents",
+          "raw": {
+            "tenant_id": "r12-ledger-fixture",
+            "CO_CODE": "01",
+            "LC_CODE": "01",
+            "CO_YEAR": "2024-2025",
+            "CO_BOOK": "R11",
+            "VCH_NO": "00017",
+            "VCH_DATE": "2024-07-10",
+            "AC_CODE": "CUST",
+            "ENTRY_TIME": "2024-07-10 11:00:00",
+            "DATA_TYPE": "A",
+            "CR_AMT": "0.20",
+            "DR_AMT": "0.10",
+            "IT_TYPE": "G",
+            "SIGN": "-",
+            "FINE_WT": "0.001",
+            "IT_DESC": null,
+            "LEDR_KEY": "debit-cents"
+          }
+        }
+      ],
+      "input": {
+        "scope": {
+          "tenantId": "r12-ledger-fixture",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "accountCode": "CUST",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "mode": "C"
+      },
+      "expected": {
+        "status": "ready",
+        "opening": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "0.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        },
+        "helperClosing": {
+          "groupPresent": true,
+          "eligibleRows": "2",
+          "amount": "0.00",
+          "gold": "0.000",
+          "silver": "0.000"
+        }
+      },
+      "distinction": "Current SQLfixeddecimal sum is exact; no binaryDouble arithmetic or per-row formatting is required."
+    }
+  ],
+  "inputRefusals": [
+    {
+      "field": "mode",
+      "values": [
+        null,
+        "",
+        "a",
+        "D",
+        "C ",
+        "A\n"
+      ]
+    },
+    {
+      "field": "cutoffLocalSecond",
+      "values": [
+        "2024-02-30 12:00:00",
+        "2024-07-10 24:00:00",
+        "2024-07-10 12:00:60",
+        "2024-07-10T12:00:00",
+        "2024-07-10 12:00:00.900000",
+        "2024-07-10 12:00:00Z",
+        "2024-07-10 12:00:00+05:30"
+      ]
+    }
+  ],
+  "aliasRefusals": [
+    "canonical CUST plus case-equivalent cust account candidate",
+    "canonical A mode plus lowercase a DATA_TYPE candidate under modeA",
+    "canonical G/S IT_TYPE plus lowercase g/s in eligible candidate",
+    "normalized scope-key match whose exact bytes differ",
+    "non-ASCII sign comparison requiring unverified sourcecollation equivalence"
+  ],
+  "clockAdapterNotImplemented": {
+    "rawVoucherDate": "2024-07-10",
+    "rawVoucherTimestamp": "2024-07-09 12:00:00.900000",
+    "sourceCutoff": "2024-07-10 12:00:00",
+    "reason": "DatecomesVCH_DATE; clockHH:mm:sscomesVCH_TIME. Internalreaderacceptsonlyalreadywhole-secondlocalcutoff and doesnotown thisadapter."
+  },
+  "versionTests": [
+    "same-value eligible row UPDATE changes physical observation token",
+    "eligible other-book INSERT invalidates",
+    "present row delete/recreate invalidates",
+    "after-cutoff or foreign-scope row does not enter narrowly scoped token",
+    "initial absence→insert→delete may return same empty-set token; no universalABA claim",
+    "RepeatableRead/coherent same-statement rawandgroupoutputs; no businesswrites"
+  ]
+}

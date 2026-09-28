@@ -1,0 +1,13 @@
+{
+  "restoredAtUtc": "2026-09-11T17:06:21.617769+00:00",
+  "container": "datacare-parity-test-postgres-1",
+  "originalConfiguredCpuShares": 0,
+  "originalEffectiveCpuShares": 1024,
+  "restoredConfiguredCpuShares": 1024,
+  "matchesOriginalEffectiveWeight": true,
+  "matchesOriginalRawConfiguration": false,
+  "zeroResetAttempt": "docker update --cpu-shares0 returned success but left2048 unchanged; restored explicit default weight1024 and verified it.",
+  "normalContainersChangedByAdjustment": false,
+  "apiRun": "api-full-complete.run.json",
+  "browserRun": "browser-real-final.run.json"
+}

@@ -67,6 +67,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
 
   const cleanup = async () => {
     for (const table of [
+      'SL_IDTL',
       'SL_DETL',
       'SL_DATA',
       'LOT_DETL',
@@ -109,6 +110,42 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
     await owner.$executeRawUnsafe(
       `INSERT INTO "SL_DATA"(
          tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_NAME")
+       VALUES ($1,$2,'02',$3,'S91',$4,'2026-04-01','WRONG-SCOPE-BRANCH')`,
+      TENANT,
+      CO,
+      YEAR,
+      VCH_NO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DETL"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","IT_CODE","ITM_PCS","ITM_GWT","NET_AMT")
+       VALUES ($1,$2,'02',$3,'S91',$4,1,'WRONG-SCOPE-BRANCH',9,99.999,99999.99)`,
+      TENANT,
+      CO,
+      YEAR,
+      VCH_NO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DATA"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_NAME")
+       VALUES ($1,$2,$3,'2027-2028','S91',$4,'2026-04-01','WRONG-SCOPE-YEAR')`,
+      TENANT,
+      CO,
+      LC,
+      VCH_NO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DETL"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","IT_CODE","ITM_PCS","ITM_GWT","NET_AMT")
+       VALUES ($1,$2,$3,'2027-2028','S91',$4,1,'WRONG-SCOPE-YEAR',8,88.888,88888.88)`,
+      TENANT,
+      CO,
+      LC,
+      VCH_NO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_DATA"(
+         tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_NAME")
        VALUES ($1,$2,$3,$4,'S91',$5,'2026-04-01',$6)`,
       TENANT,
       CO,
@@ -137,6 +174,16 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       YEAR,
       VCH_NO,
       CRITICAL_REPORTS[1]!.value,
+    );
+    // SalesBillHz's Detail section reads actual components under SL_DETL, not parent aliases.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "SL_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","IT_PCS","IT_GWT","IT_RATE","IT_NET_AMT")
+       VALUES ($1,$2,$3,$4,'S91',$5,1,1,1,0.125,123.45,456.78)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      VCH_NO,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "PR_DETL"(
@@ -201,6 +248,8 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       const bound = await bindReport(runtime, spec, {
         tenantId: TENANT,
         coCode: CO,
+        lcCode: LC,
+        coYear: YEAR,
         coBook: book,
         vchNo: VCH_NO,
       });
@@ -211,6 +260,7 @@ databaseDescribe('database-backed critical Crystal report rendering', () => {
       expect((html.match(/class="ro /g) ?? []).length).toBeGreaterThan(0);
       expect(html).toMatch(/left:-?\d+px;top:-?\d+px;width:\d+px;/);
       expect(html).toContain(value);
+      expect(html).not.toContain('WRONG-SCOPE');
       expect(html).not.toContain(`[${value}]`);
     },
     30_000,

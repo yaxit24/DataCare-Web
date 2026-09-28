@@ -1,0 +1,135 @@
+{
+  "kind": "x13-saved-incoming-replay-service-focused-evidence",
+  "status": "focused-engineering-passed",
+  "capturedAtUtc": "2026-09-11T12:28:08.895488+00:00",
+  "workspace": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web",
+  "priorCheckpoint": {
+    "path": "29-implementation-checkpoint-round8.json",
+    "sha256": "12c69feee320f35e691667d31b37f7ef5e438d56a255e242eaa365e427fc3249"
+  },
+  "result": {
+    "files": 6,
+    "tests": 192,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "newServiceDb": 43,
+    "newTransportPure": 31,
+    "rootHttp": 12,
+    "routePolicy": 54,
+    "savedRegression": 26,
+    "configurationRegression": 26,
+    "databasePort": 55433,
+    "httpMocks": 0
+  },
+  "sources": [
+    {
+      "path": "apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "69a8e90c32258e756e8294dd3c8ebb5aeb185d64fb567e1fcf03b74f7e8f4190"
+    },
+    {
+      "path": "apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "8096ac9629eb45e1b56e599d3e06d2adb2b93e731bcb88c1574156aaa2e8c285"
+    },
+    {
+      "path": "apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingReplay.test.ts",
+      "sha256": "3387a2a20898ed1cfebac66e5ec0f534525fb6b9106aba1fd05280ecca8ac90c"
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingReplay.db.test.ts",
+      "sha256": "b3438681084ed99e11b2ec06db38d766e53799db439800fca76de7065ba1251a"
+    },
+    {
+      "path": "apps/api/test/fixtures/saleReturnIncomingReplay.independent.json",
+      "sha256": "68c3744d2e2cdbf741723effeef853dc05c97222f47bd740ecdd126127f7d83d"
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingReplay.routes.db.test.ts",
+      "sha256": "22295cc1b5905795b49a4c0b7253750f8c2050a817189c0efdae312e84f6cb19"
+    },
+    {
+      "path": "apps/api/test/routePolicy.test.ts",
+      "sha256": "7bba72ffae4b5c29399b05a294268f7cbc0c21f6559968df4190f67258d11b14"
+    },
+    {
+      "path": "apps/api/test/savedSaleReturn.db.test.ts",
+      "sha256": "4a89b531ea665426669660547b7ab3df941f1e246958fc233aa1c05876724ac7"
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingConfiguration.db.test.ts",
+      "sha256": "cddffa4076d2aa6ddde48480c29bda82ebb908fabd2b953d5b8fd4a29d27c07f"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "../unified/database/schema/01_Schema.sql",
+      "sha256": "1eb684c7e2bec72a330a9038a2da72ffea669b3ae7ef50b85b34e0e3126efa0d"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-saved-replay-service-implementation.md",
+      "sha256": "c191eb07da03fa77ad02af7e59ead4e43c27117fdb646e80cbf7d81cf6a25468"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-replay-validation-matrix.md",
+      "sha256": "c0a5ee987b82a526815924f56434121b253dc35360107f604d8979e48e503a00"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-next-server-replay-contract.md",
+      "sha256": "c01e0a6d59dfaa6bd634a945148d3cb97e8e97486668bfafc503e1fbe9c17dcd"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-replay-independent-journal-vectors.json",
+      "sha256": "68c3744d2e2cdbf741723effeef853dc05c97222f47bd740ecdd126127f7d83d"
+    }
+  ],
+  "verificationLogs": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-api-types-first.txt",
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-service-focused-first.txt",
+      "sha256": "019de88ed91d1b323d62ca32c8299dff52bab981c6a190b07da48b6c6e7e1468"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-service-db-fixture-corrected.txt",
+      "sha256": "3c060c615bf93248b89af05891f104b3e419354af33dc1131ae42bae61528703"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-service-focused-verified.txt",
+      "sha256": "b5b3e7ead0d8aa61936504e72563154d9d3e3cd1ee0f4d449958371364c26979"
+    }
+  ],
+  "independentFixtureByteIdentical": true,
+  "limits": [
+    "Read-only saved-row money preview only; canSaveNumeric is always false.",
+    "Declared exact-decimal profile, not executable desktop Double/Format/DBNull/culture acceptance.",
+    "Source admission, tags, components, aggregates, financial/stock writes and complete X13 parity remain open.",
+    "Initially absent insert-delete recurrence can return the same token; no durable tombstone.",
+    "Final whole-application regression and browser evidence are root-owned and not retrocredited here."
+  ]
+}

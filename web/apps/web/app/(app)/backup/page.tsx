@@ -1,13 +1,16 @@
 'use client';
 import { useState } from 'react';
+import { getBlob } from '../../../lib/api';
+import { ParityContainmentNotice } from '../../../components/ParityContainmentNotice';
 
 export default function BackupPage() {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   async function download() {
     setBusy(true);
+    setError('');
     try {
-      const res = await fetch('/api/backup', { credentials: 'include' });
-      const blob = await res.blob();
+      const blob = await getBlob('/backup');
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -16,6 +19,8 @@ export default function BackupPage() {
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Could not download the company backup.');
     } finally {
       setBusy(false);
     }
@@ -23,10 +28,11 @@ export default function BackupPage() {
   return (
     <div>
       <h1>Backup</h1>
+      <ParityContainmentNotice operation="logical-restore" />
       <div className="panel">
         <p>
-          Download a logical backup of this company&apos;s masters + transactions (accounts, items,
-          sales, purchases, ledger, loyalty, manufacturing) as a JSON file.
+          Download the current logical JSON export for inspection or parity evidence. It covers an
+          allowlisted subset and is not a production disaster-recovery backup.
         </p>
         <p className="muted">
           For full physical database backups, the server cron uses <code>deploy/backup.sh</code>{' '}
@@ -35,6 +41,11 @@ export default function BackupPage() {
         <button className="primary" onClick={download} disabled={busy}>
           {busy ? 'Preparing…' : 'Download Company Backup (JSON)'}
         </button>
+        {error && (
+          <p className="msg err" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

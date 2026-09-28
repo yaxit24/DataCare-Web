@@ -1,0 +1,39 @@
+✔ conditional local aliases retain nested JSON path through actual route input helper and row column (76.099458ms)
+✔ interfaces, comments, unused aliases and uncalled functions do not count as consumed fields (2.732334ms)
+✔ an unused request mapping or a condition-only field is not a sent value (2.117625ms)
+✔ a later static assignment replacing a request value removes the old provenance (2.354625ms)
+✔ a route dropping lines, a wrong endpoint or a different imported writer cannot establish a trace (15.4685ms)
+✔ request helper body must forward the request, and imported writer aliases retain export identity (14.890875ms)
+✔ same leaf under another collection is not the requested nested input (7.52275ms)
+✔ changing the writer nested property breaks the trace even if an inert interface retains it (5.498791ms)
+✔ an unrelated exported reader cannot satisfy the actual route writer consumption (5.155708ms)
+✔ called named imports retain export identity without credit from unrelated sibling writers (2.180708ms)
+✔ imported callees obey entry point and lexical scope, without guessing opaque dispatch (2.965416ms)
+✔ ordinary Sales advance imports cannot borrow Sales Order parent identity reads (243.959333ms)
+✔ dynamic nested output keys remain explicit unsupported evidence rather than successful mappings (2.459959ms)
+✔ dynamic endpoints are explicitly unsupported rather than guessed from the page writer map (1.30925ms)
+✔ dynamic writer input keys are unsupported, while static string keys remain traceable (1.700167ms)
+✔ lexically shadowed aliases do not borrow another function input mapping (3.839125ms)
+✔ four real wholesale aliases each reach the registered route and issued row column (1628.399959ms)
+✔ imported typed .ts tuple alias contributes only descriptors used in returned JSX (16.884292ms)
+✔ unused imports, type-only imports and uncalled helper JSX do not become surface (1.847375ms)
+✔ removing only the rendered map removes the imported candidates (1.325ms)
+✔ object descriptors recognize labels after key/column and classify identities (3.17325ms)
+✔ factory literal selector and conditional flatMap retain provenance, not current visibility claims (3.306542ms)
+✔ unknown selector reports both conditional branches; unconditional empty filter counts none (2.565375ms)
+✔ false JSX condition is excluded and unknown runtime condition is recorded (1.741708ms)
+✔ unsupported dynamic factories remain explicit and do not invent fields (0.94375ms)
+✔ a flatMap that rewrites field identity is unsupported, not credited as original inputs (1.633541ms)
+✔ read-only mapped controls remain display-only and a type-only binding stays unresolved (1.859792ms)
+✔ same-named unused descriptor on another file cannot satisfy the rendered unknown binding (1.257917ms)
+✔ real Design/Tour imported fields are traced without changing wholesale nested mapping (70.727875ms)
+✔ sales exposes supported values without editable server-owned identity columns (28.676459ms)
+✔ sales-quotation exposes supported values without editable server-owned identity columns (15.753958ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2421.966625

@@ -1,0 +1,5 @@
+{
+  "stageArtifactsReadBack": 31,
+  "rootSourceReview": "Full qualifier read: fixedSR1/SQLSTR spacing, exactsegmented scope, unchanged savedclock reuse, zero fractions/coherent whole-second/header+line, ISO/text0 currentPG preserve witnesses; all results read-only. DB storage verification pending.",
+  "checkpoint41Sha256": "643bf89ad0ac50729c7feff06c28dfa6bf8cca7d6318e498397cd5c57bf9ebea"
+}

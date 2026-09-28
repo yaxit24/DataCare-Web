@@ -1,0 +1,24 @@
+{
+  "integratedAtUtc": "2026-09-11T22:57:32.715154+00:00",
+  "manifestSha256": "4c8c15bfb9425032c9bf8c9cc71430922632055dd680366e4bbc89e7efe8130c",
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextReadSnapshot.db.test.ts",
+      "sha256": "fb6192e427ab5a85878f6df4261225603b94ffd7075ce6c4a25945ef17244614"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextReadSnapshot.test.ts",
+      "sha256": "717ce22141eff365fea9f5fbb0fbd923b3c167b1133bc1c60dca00d923b854fe"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionReadSnapshot.independent.json",
+      "sha256": "45c0faa998fc1463cd08f9218487fc5c84ac3ba93b2c641f1fb45ead9aa71bad"
+    }
+  ],
+  "status": "integrated-awaiting-runtime-verification",
+  "review": "Root read complete helper/contract and reviewed DB case inventory. Existing command coordinator and shared runtime dependencies unchanged. Fixed read action, RR-only session-first SHARE, final live/context and explicit as-of-snapshot authority restrictions retained."
+}

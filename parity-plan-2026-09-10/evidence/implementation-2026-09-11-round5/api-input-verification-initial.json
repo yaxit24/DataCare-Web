@@ -1,0 +1,8 @@
+{
+  "checkedAtUtc": "2026-09-11T06:56:23.288612+00:00",
+  "inputIdentityStatus": "passed",
+  "matchedInputs": 1001,
+  "beforeRunSnapshotSha256": "d427e2d6d2d654522c70834d3f92727801623142b01d5e5a9867344876d4749c",
+  "testOutcome": "failed: exact declared route count expected540 vs actual543;220 files/1735tests passed and1routecounttest failed",
+  "limits": "Source-identical initial API run; final changes and regression require a new snapshot."
+}

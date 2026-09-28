@@ -1,0 +1,219 @@
+{
+  "status": "passed",
+  "startedAt": "2026-09-12T01:56:07.236Z",
+  "requiredChecks": [
+    "real login bootstraps an exact string epoch and immutable login company",
+    "same-scope Open persists one original selection ID and expected epoch before dispatch and bumps once",
+    "cancelled Shell company confirmation preserves the mounted draft and performs no selection",
+    "confirmed Shell company change uses one exact operation and deliberately navigates",
+    "a second tab shares the same session and changes its context through the actual selection UI",
+    "old-page business action receives context-stale without automatic retry or draft DOM replacement",
+    "A to B to A advances epoch while retaining the original page scope values",
+    "an actual late component-default response cannot overwrite the stale page draft",
+    "an uncertain committed Shell selection retains the exact recovery request and draft",
+    "deliberate recovery navigation loads fresh me before retrying the original operation",
+    "exact current receipt retry preserves the epoch and database session row without another open",
+    "business configuration and design rows remain byte-observation unchanged throughout",
+    "late successful selection after client-side Back pauses the document without navigation, draft replacement or recovery erasure",
+    "late dropped selection after client-side Back pauses the document and preserves the draft and exact receipt recovery"
+  ],
+  "provenance": "Real Chromium -> production Next -> Fastify -> PostgreSQL app_user/RLS; explicitly injected upstream response transport faults",
+  "releaseSha": null,
+  "database": "disposable localhost:55433 / app_user",
+  "sessionContext": {
+    "status": "passed",
+    "checks": [
+      "real login bootstraps an exact string epoch and immutable login company",
+      "same-scope Open persists one original selection ID and expected epoch before dispatch and bumps once",
+      "cancelled Shell company confirmation preserves the mounted draft and performs no selection",
+      "confirmed Shell company change uses one exact operation and deliberately navigates",
+      "a second tab shares the same session and changes its context through the actual selection UI",
+      "old-page business action receives context-stale without automatic retry or draft DOM replacement",
+      "A to B to A advances epoch while retaining the original page scope values",
+      "an actual late component-default response cannot overwrite the stale page draft",
+      "an uncertain committed Shell selection retains the exact recovery request and draft",
+      "deliberate recovery navigation loads fresh me before retrying the original operation",
+      "exact current receipt retry preserves the epoch and database session row without another open",
+      "business configuration and design rows remain byte-observation unchanged throughout"
+    ],
+    "transitions": [
+      {
+        "name": "select-ui",
+        "before": "2",
+        "after": "3",
+        "company": "01",
+        "selectionId": "1b6b8e37-f431-42b3-b727-d3cee0d96ff5"
+      },
+      {
+        "name": "select-ui",
+        "before": "4",
+        "after": "5",
+        "company": "01",
+        "selectionId": "05ee04c1-bbe7-4f81-9957-d8afaef88a7a"
+      },
+      {
+        "name": "select-ui",
+        "before": "5",
+        "after": "6",
+        "company": "02",
+        "selectionId": "50bf66c3-c181-45d2-9999-e2bbfd0bef56"
+      },
+      {
+        "name": "select-ui",
+        "before": "6",
+        "after": "7",
+        "company": "01",
+        "selectionId": "e474e005-d7d9-491f-850e-0eb08717489b"
+      },
+      {
+        "name": "select-ui",
+        "before": "7",
+        "after": "8",
+        "company": "02",
+        "selectionId": "06e727b8-1c0d-40da-9ed2-c8f0a6f471af"
+      },
+      {
+        "name": "select-ui",
+        "before": "8",
+        "after": "9",
+        "company": "01",
+        "selectionId": "7bb12be5-cee6-4f0c-8ff2-bf15afa45e45"
+      }
+    ],
+    "transportFaultInjections": [
+      {
+        "name": "same-scope-open",
+        "kind": "real-upstream-response-hold",
+        "method": "POST",
+        "path": "/api/context/select",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "5571096d201ef4de2a19ec10be4399e8cfa5fd5a225f44ff0f6659fc61f62b05",
+        "resolution": "deliver-unchanged"
+      },
+      {
+        "name": "late-component-defaults-after-ABA",
+        "kind": "real-upstream-response-hold",
+        "method": "GET",
+        "path": "/api/masters/design-book/component-defaults",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "67c4a9bc653e28249222b0863123c4a2596966b9b970d144ea70faa0b73d7be3",
+        "resolution": "deliver-unchanged"
+      },
+      {
+        "name": "committed-selection-response-lost",
+        "kind": "real-upstream-response-hold",
+        "method": "POST",
+        "path": "/api/context/select",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "fab448dafc32c5286bacaa19ddd30fc6cfef1ae6ec152fbab82360d8c22ea213",
+        "resolution": "abort-after-commit"
+      }
+    ],
+    "syntheticBusinessResponses": 0,
+    "interceptionRegistrations": 3,
+    "cleanupErrors": [],
+    "businessSnapshot": {
+      "DESIGN_IDTL": {
+        "rows": 2,
+        "sha256": "9a88e2fd9e32cbe6c5a48ed5c7a59d06b3ec6857f1699c5ad5a2817485085cee"
+      },
+      "DESIGN_DETL": {
+        "rows": 2,
+        "sha256": "557a5e1f70a9d9b4a47f9ec8ee00459a0242f05f75625fcb5eb337858fbb9f36"
+      },
+      "COL_MAST": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "CO_SET_NEW": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "PRODUCT_MAST": {
+        "rows": 2,
+        "sha256": "8c90ec0a8bb9e21ed670cd2141fad1d2727c85d7dc263de39b836406f0e4d58f"
+      },
+      "ITEM_MAST": {
+        "rows": 4,
+        "sha256": "d9d2a844f5b2a53af5da163f66d6b76659ee40b66b4619f568b99d7c2ad45c23"
+      },
+      "USER_SET": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "LOGIN_MAST": {
+        "rows": 2,
+        "sha256": "7ef3aed21277d2ed6f3f37750f68dd126043e12a0029694ca74765c87fc59a67"
+      },
+      "CO_SET": {
+        "rows": 2,
+        "sha256": "a0dbc0ebe1e2f47f72d1fb5795273cc37671eb714fabfdb2f1fc9e5911827c70"
+      },
+      "YEAR_MAST": {
+        "rows": 2,
+        "sha256": "6af04d9be314c83e4cb888406cbbd1499279c2bd6e498386a4cb317d9a296117"
+      },
+      "LOCT_MAST": {
+        "rows": 2,
+        "sha256": "1687e25145f453686df2d06fbd00077fc6369600f7545a4865500e8a09ec5c05"
+      },
+      "CO_MAST": {
+        "rows": 2,
+        "sha256": "db5fa9d6b85298bfcbb82c99b137eb4f5a7bdc12748bfb3f4b8999630e183b28"
+      }
+    },
+    "limits": [
+      "Explicit real-response hold/abort faults; not a zero-interception journey.",
+      "No general in-flight business transaction cancellation guarantee.",
+      "Cross-tab refresh reuse, browser crash recovery and hardware failures are not claimed."
+    ]
+  },
+  "sessionContextLifecycle": {
+    "status": "passed",
+    "checks": [
+      "late successful selection after client-side Back pauses the document without navigation, draft replacement or recovery erasure",
+      "late dropped selection after client-side Back pauses the document and preserves the draft and exact receipt recovery"
+    ],
+    "observations": [
+      {
+        "mode": "success",
+        "originalEpoch": "11",
+        "observedEpoch": "12",
+        "originalSelectionId": "44e6d2de-d2fe-4733-b759-046b333c69ae",
+        "sameDocumentDeparture": true,
+        "destinationDraftPreserved": true,
+        "exactRecovery": true
+      },
+      {
+        "mode": "drop",
+        "originalEpoch": "13",
+        "observedEpoch": "14",
+        "originalSelectionId": "8f594e87-3e7c-4886-95b8-c614ae4c7976",
+        "sameDocumentDeparture": true,
+        "destinationDraftPreserved": true,
+        "exactRecovery": true
+      }
+    ],
+    "transportFaultInjections": [
+      {
+        "name": "selection-departure-success",
+        "kind": "real-upstream-response-hold",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "a8692976753bbba6b85487f7b0bd2e527b46abb5fda6233033d6c2c0188d64b5",
+        "resolution": "deliver-unchanged"
+      },
+      {
+        "name": "selection-departure-drop",
+        "kind": "real-upstream-response-hold",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "549e3c82de024c8b6e21bbb30dfd4eb16962d296acb580057f1adfff89e8bfce",
+        "resolution": "abort-after-commit"
+      }
+    ],
+    "syntheticBusinessResponses": 0,
+    "interceptionRegistrations": 2,
+    "cleanupErrors": []
+  },
+  "actualInterceptionRegistrations": 5,
+  "finishedAt": "2026-09-12T01:56:12.372Z"
+}

@@ -1,0 +1,58 @@
+{
+  "schema": "datacare-x13-original-sale-source-read-v1",
+  "pathBase": "imodule-extracted",
+  "status": "focused-engineering-passed",
+  "desktopAcceptance": false,
+  "sourceApplicationEnabled": false,
+  "tests": {
+    "files": 1,
+    "passed": 41,
+    "skipped": 0,
+    "database": "disposable localhost:55433 / app_user",
+    "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api exec vitest run test/saleReturnSource.db.test.ts"
+  },
+  "sources": [
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnSource.ts",
+      "sha256": "07f5116677cf88e8c0f879e40f29f811ada866af13f2462cce11f5762fcc7395",
+      "bytes": 24686
+    },
+    {
+      "path": "web/apps/api/test/saleReturnSource.db.test.ts",
+      "sha256": "49d15aee9f72c775f26316e018dd4f723417a4b3e8830e51462b84f31819de8e",
+      "bytes": 23267
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/source-service-first.txt",
+      "sha256": "51ba5a893c76658d4a89a813732e4b58898c338e1e7d264747ee033a5e9f86fb",
+      "bytes": 4532
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/source-service-verified.txt",
+      "sha256": "708a55ed41c3ce17628875810033992f77ab8c389ec4ccfe24bad6e3cf11876c",
+      "bytes": 1143
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/source-service-complete.txt",
+      "sha256": "010671a0c373a3648e514b793930079dcb9e45235a91c76c02df42debe44f5a0",
+      "bytes": 2088
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/source-service-types.txt",
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889",
+      "bytes": 128
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/x13-original-sale-selection-contract.md",
+      "sha256": "c4ea6eb670a475217b960d1368482060cfa3f0a658d62eb299ba0f4987ea471e",
+      "bytes": 21014
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round7/x13-original-sale-source-implementation.md",
+      "sha256": "96e33ca0952cccfb79724417e03a5f66a2e4c016de6eb6966e3215b59093b38e",
+      "bytes": 6690
+    }
+  ]
+}

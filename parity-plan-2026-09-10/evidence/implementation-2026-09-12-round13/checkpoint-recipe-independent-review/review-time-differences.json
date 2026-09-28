@@ -1,0 +1,260 @@
+{
+  "qualification": "Read-only SHA comparison against this observation; root owns final authoritative complete universe after docs. Does not execute checks.",
+  "runs": [
+    {
+      "label": "api-return-labour-full",
+      "differences": [
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs"
+      ]
+    },
+    {
+      "label": "web-return-labour-wire-current",
+      "differences": [
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs"
+      ]
+    },
+    {
+      "label": "core-after-atomic-labour-compose",
+      "differences": [
+        "parity-plan-2026-09-10/build_execution_addendum.py",
+        "web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+        "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/test/fixtures/saleReturnLabourReplay.fixture.ts",
+        "web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/api/test/fixtures/sessionReadSnapshot.independent.json",
+        "web/apps/api/test/fixtures/tourExactValues.independent.json",
+        "web/apps/api/test/orderSessionCommands.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.db.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.test.ts",
+        "web/apps/api/test/sessionContextReadSnapshot.db.test.ts",
+        "web/apps/api/test/sessionContextReadSnapshot.test.ts",
+        "web/apps/api/test/tourOrderExactValues.db.test.ts",
+        "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+        "web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+        "web/apps/web/components/SaleReturnSavedPanel.tsx",
+        "web/apps/web/lib/salesReturnBillReplay.ts",
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/lib/tourOrderForm.ts",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/returnLabourUiTransitions.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/fixtures/tourExactValues.independent.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.test.ts",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs",
+        "web/apps/web/test/tour-order.journey.mjs",
+        "web/apps/web/test/tourOrderExactValues.test.ts",
+        "web/docs/HANDOFF.md",
+        "web/docs/STATE-OF-PARITY.md",
+        "web/docs/TECHNICAL-REFERENCE.md"
+      ]
+    },
+    {
+      "label": "return-labour-complete-test-types-corrected",
+      "differences": [
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs"
+      ]
+    },
+    {
+      "label": "workspace-lint-labour-final",
+      "differences": []
+    },
+    {
+      "label": "build-return-labour-wire-browser",
+      "differences": [
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs"
+      ]
+    },
+    {
+      "label": "browser-return-labour-complete",
+      "differences": []
+    },
+    {
+      "label": "browser-return-labour-lifecycle",
+      "differences": []
+    },
+    {
+      "label": "legacy-browser-labour-final",
+      "differences": []
+    },
+    {
+      "label": "kernel-gate-labour-current",
+      "differences": [
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs"
+      ]
+    },
+    {
+      "label": "dead-cell-gate-labour-current",
+      "differences": [
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs"
+      ]
+    },
+    {
+      "label": "depth-gate-labour-current",
+      "differences": [
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs"
+      ]
+    },
+    {
+      "label": "scanner-fixtures-current",
+      "differences": [
+        "parity-plan-2026-09-10/build_execution_addendum.py",
+        "parity-plan-2026-09-10/validate_current_review.py",
+        "web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+        "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/test/fixtures/orderCommand.independent.json",
+        "web/apps/api/test/fixtures/saleReturnLabourReplay.fixture.ts",
+        "web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/api/test/fixtures/sessionReadSnapshot.independent.json",
+        "web/apps/api/test/fixtures/tourExactValues.independent.json",
+        "web/apps/api/test/orderSessionCommands.db.test.ts",
+        "web/apps/api/test/orderSessionCommands.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.db.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.test.ts",
+        "web/apps/api/test/sessionContextReadSnapshot.db.test.ts",
+        "web/apps/api/test/sessionContextReadSnapshot.test.ts",
+        "web/apps/api/test/tourOrderExactValues.db.test.ts",
+        "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+        "web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+        "web/apps/web/components/SaleReturnSavedPanel.tsx",
+        "web/apps/web/lib/salesReturnBillReplay.ts",
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/lib/tourOrderForm.ts",
+        "web/apps/web/test/browser.smoke.mjs",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/returnLabourUiTransitions.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/fixtures/tourExactValues.independent.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.test.ts",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs",
+        "web/apps/web/test/tour-order.journey.mjs",
+        "web/apps/web/test/tourOrderExactValues.test.ts",
+        "web/docs/HANDOFF.md",
+        "web/docs/STATE-OF-PARITY.md",
+        "web/docs/TECHNICAL-REFERENCE.md",
+        "web/packages/core/dist/index.d.ts",
+        "web/packages/core/dist/index.js",
+        "web/packages/core/dist/saleReturnIncomingLabourCompose.d.ts",
+        "web/packages/core/dist/saleReturnIncomingLabourCompose.js",
+        "web/packages/core/src/index.ts",
+        "web/packages/core/src/saleReturnIncomingLabourCompose.ts",
+        "web/packages/core/test/fixtures/saleReturnIncomingLabourCompose.independent.json",
+        "web/packages/core/test/saleReturnIncomingLabourCompose.test.ts"
+      ]
+    },
+    {
+      "label": "completion-register-current",
+      "differences": [
+        "parity-plan-2026-09-10/build_execution_addendum.py",
+        "web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+        "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/test/fixtures/saleReturnLabourReplay.fixture.ts",
+        "web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/api/test/fixtures/sessionReadSnapshot.independent.json",
+        "web/apps/api/test/fixtures/tourExactValues.independent.json",
+        "web/apps/api/test/orderSessionCommands.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.db.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts",
+        "web/apps/api/test/saleReturnLabourReplay.test.ts",
+        "web/apps/api/test/sessionContextReadSnapshot.db.test.ts",
+        "web/apps/api/test/sessionContextReadSnapshot.test.ts",
+        "web/apps/api/test/tourOrderExactValues.db.test.ts",
+        "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+        "web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+        "web/apps/web/components/SaleReturnSavedPanel.tsx",
+        "web/apps/web/lib/salesReturnBillReplay.ts",
+        "web/apps/web/lib/salesReturnLabourReplay.ts",
+        "web/apps/web/lib/tourOrderForm.ts",
+        "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+        "web/apps/web/test/fixtures/returnLabourUiTransitions.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/fixtures/tourExactValues.independent.json",
+        "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+        "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+        "web/apps/web/test/parity.real-stack.mjs",
+        "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+        "web/apps/web/test/salesReturnLabourReplay.test.ts",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/session-context.journey.mjs",
+        "web/apps/web/test/tour-order.journey.mjs",
+        "web/apps/web/test/tourOrderExactValues.test.ts",
+        "web/docs/TECHNICAL-REFERENCE.md"
+      ]
+    }
+  ]
+}

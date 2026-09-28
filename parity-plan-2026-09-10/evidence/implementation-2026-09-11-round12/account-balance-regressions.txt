@@ -1,0 +1,121 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 67ms
+ ✓ test/savedSaleReturn.db.test.ts (26 tests) 9216ms
+   ✓ saved incoming Sales Return metadata preservation > hydrates complete exact decimals, nulls, timestamps, source refs and stable saved identities 1982ms
+   ✓ saved incoming Sales Return metadata preservation > lists and reads only the configured complete tenant/book scope 456ms
+   ✓ saved incoming Sales Return metadata preservation > updates only explicitly selected metadata and preserves every other row including physical IDs 797ms
+   ✓ saved incoming Sales Return metadata preservation > no-op commits do not rewrite rows or turn a display fallback into a stored description 346ms
+   ✓ saved incoming Sales Return metadata preservation > stamps one validated header employee across only proven existing employee-bearing rows 310ms
+   ✓ saved incoming Sales Return metadata preservation > keeps unknown kind incoming rows readable but refuses metadata writes atomically 405ms
+   ✓ saved incoming Sales Return metadata preservation > denies unresolved tag companions even when their SR differs, without changing the original owner 469ms
+   ✓ saved incoming Sales Return metadata preservation > denies employee when outgoing child effects cannot be proved 407ms
+   ✓ saved incoming Sales Return metadata preservation > protects saved period locks and the header update restriction without repairing raw data 330ms
+   ✓ saved incoming Sales Return metadata preservation > uses CAS so exactly one concurrent editor succeeds and stale retry cannot lose the winner 545ms
+   ✓ saved incoming Sales Return metadata preservation > preserves both child datasets during allowed metadata edits and invalidates on outgoing changes 312ms
+ ✓ test/saleReturnIncomingReplay.db.test.ts (43 tests) 12460ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > hydrates exact raw identities, rawNULL/blank/decimals/microseconds, eight caches and an empty journal without recalculation or business writes 1934ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column19 without persisting it 344ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column20 without persisting it 433ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column21 without persisting it 380ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column23 without persisting it 306ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column38 without persisting it 324ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > contains hidden, known unsupported and malformed events without widening the twelve-field profile 550ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"TAG_NO":null} 418ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"INOUT_TYPE":"O"} 400ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > invalidates the full observation after master same-value change 591ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > versions master inputs independently of the metadata/configuration tokens and detects extant-row ABA 641ms
+ ✓ test/saleReturnBillReplay.db.test.ts (34 tests) 7912ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > pins source-authored numerical expectations independently of the new service 343ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > distinguishes raw saved, loaded and opened values without changing v1 or any business rows 426ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > interleaves every genuine event in the source prefix [ { …(2) } ] 432ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > interleaves every genuine event in the source prefix [ { …(2) }, { …(2) } ] 345ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > contains direct-Val NULL TAX_AMT while raw saved values remain inspectable 341ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > represents duplicate-tax as an unavailable label without inventing rates 340ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > keeps duplicate voucher numbers isolated by configured book and tenant 413ms
+   ✓ trusted saved incoming bill phases in PostgreSQL > observes header, row settings and display masters within one real RepeatableRead snapshot 480ms
+ ✓ test/saleReturnIncomingReplay.routes.db.test.ts (12 tests) 9119ms
+   ✓ saved Incoming Return journal HTTP authority > allows owning View to load and simulate while preserving raw, caches and every business row 811ms
+   ✓ saved Incoming Return journal HTTP authority > returns the unchanged loaded baseline for an empty journal and retains repeated committed events 519ms
+   ✓ saved Incoming Return journal HTTP authority > requires explicit scope and rejects query overrides or another active business scope 405ms
+   ✓ saved Incoming Return journal HTTP authority > refuses noncanonical voucher keys without silently selecting a different saved document 345ms
+   ✓ saved Incoming Return journal HTTP authority > rejects caller policy, raw cells, comparison caches, source actions and malformed journals 918ms
+   ✓ saved Incoming Return journal HTTP authority > does not admit source, hidden, labour-code or unimplemented commits through the preview route 737ms
+   ✓ saved Incoming Return journal HTTP authority > rejects stale configuration and then explicitly refuses its newly hidden field 680ms
+   ✓ saved Incoming Return journal HTTP authority > contains unsupported imported numeric state while preserving the saved raw read 664ms
+ ✓ test/saleReturnIncomingConfiguration.review.test.ts (69 tests) 104ms
+ ✓ test/desktopAccountBalance.db.test.ts (54 tests) 7908ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > pins the independent fixture authored before reading the new reader 311ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > 'cross-book-B-ignores-document-date' 372ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > observes raw exact scale, NULL, both books, physical revisions and microsecond predicate evidence 402ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > binds other-book eligible inserts but excludes future, null-time and foreign rows from its narrow token 309ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > records the empty-set absence cycle limitation without claiming universal ABA detection 504ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > rejects 'missing-mode' without business writes or guessed defaults 397ms
+ ✓ test/saleReturnBillReplay.routes.db.test.ts (10 tests) 8798ms
+   ✓ authenticated read-only saved incoming bill replay > allows fresh own View without Edit to inspect and interleave a real bill journal 666ms
+   ✓ authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text 1219ms
+   ✓ authenticated read-only saved incoming bill replay > uses the outer bill token, never a v1 row token or another stored identity 517ms
+   ✓ authenticated read-only saved incoming bill replay > rejects anonymous/unrelated/revoked rights despite a previously obtained token 307ms
+   ✓ authenticated read-only saved incoming bill replay > requires exact explicit scope, rejects aliases/arrays, and isolates another tenant 930ms
+   ✓ authenticated read-only saved incoming bill replay > contains client policy, phase, hidden/source-copy and context authority fields 1823ms
+   ✓ authenticated read-only saved incoming bill replay > stales physical tax/name edits, then exposes authoritative reloaded labels and raw policy 1285ms
+   ✓ authenticated read-only saved incoming bill replay > returns recoverable complete prefix state after a failed second event with no writes 351ms
+   ✓ authenticated read-only saved incoming bill replay > retains read-only empty and tagged saved documents without allowing partial aggregate replay 459ms
+ ✓ test/saleReturnIncomingConfiguration.db.test.ts (26 tests) 3068ms
+   ✓ incoming Return configuration from exact scoped database observations > returns configured source policy and stable fields without changing raw saved data or provisioning columns 1212ms
+ ✓ test/saleReturnIncomingConfiguration.routes.db.test.ts (9 tests) 2310ms
+   ✓ incoming Return calculation configuration HTTP boundary > requires all four scalar identity fields and rejects client calculation overrides 331ms
+   ✓ incoming Return calculation configuration HTTP boundary > does not write settings, vouchers, stock, numbering or ledger companions during reads 415ms
+ ✓ test/savedSaleReturn.routes.db.test.ts (9 tests) 3876ms
+   ✓ saved incoming Sale Return HTTP lifecycle > separates identical vouchers by return book and tenant in browse and reader 411ms
+   ✓ saved incoming Sale Return HTTP lifecycle > patches only explicitly dirty metadata and leaves every other business scalar intact 475ms
+   ✓ saved incoming Sale Return HTTP lifecycle > rejects stale and cross-book or cross-tenant versions without losing the winning edit 712ms
+   ✓ saved incoming Sale Return HTTP lifecycle > allows only one winner for two actual equal-token concurrent updates 547ms
+ ✓ test/savedSaleReturnEmpty.db.test.ts (6 tests) 2981ms
+   ✓ empty saved Return header inspection preserves metadata and replay refusal > reads an exact empty header with no domain edit authority and unchanged nonempty sibling version 394ms
+   ✓ empty saved Return header inspection preserves metadata and replay refusal > serves both actual authenticated GETs with empty rows, no-store and no numeric or metadata domain authority 475ms
+   ✓ empty saved Return header inspection preserves metadata and replay refusal > refuses actual employee PUT with fresh version despite Edit rights and rejects empty replay POST without writes 401ms
+ ✓ test/saleReturnIncomingConfiguration.test.ts (37 tests) 38ms
+ ✓ test/saleReturnIncomingReplay.test.ts (31 tests) 8ms
+
+ Test Files  14 passed (14)
+      Tests  420 passed (420)
+   Start at  16:17:49
+   Duration  90.79s (transform 6.06s, setup 0ms, collect 14.92s, tests 67.86s, environment 3ms, prepare 1.74s)
+

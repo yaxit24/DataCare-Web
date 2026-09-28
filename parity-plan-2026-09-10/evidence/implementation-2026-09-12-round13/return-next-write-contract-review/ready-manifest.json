@@ -1,0 +1,143 @@
+{
+  "kind": "independent-source-only-next-saved-return-write-review",
+  "status": "ready with mandatory stock erratum and explicit post-replay profile admission; no DML acceptance",
+  "capturedAtUtc": "2026-09-11T23:58:07.406924+00:00",
+  "counts": {
+    "originalCandidatesReviewed": 33,
+    "exactSourceAssignmentsCompared": 64,
+    "stockSourceColumnPairs": 49,
+    "additionalProspectiveCases": 7,
+    "originalReferenceHashesMatched": 44
+  },
+  "noExecution": true,
+  "activeFilesChanged": false,
+  "artifacts": [
+    {
+      "path": "additive-review-candidates.json",
+      "sha256": "0232648af06cfb5c59edff23749897336aaef6e2c1cf156a00eb23890dd4508f",
+      "bytes": 4206
+    },
+    {
+      "path": "assignment-comparison.json",
+      "sha256": "956921467dd4c3a814f7e7e95d47379f185c66ed4202295612baf3bbcfb01ad9",
+      "bytes": 6691
+    },
+    {
+      "path": "frozen-reference-comparison.json",
+      "sha256": "33d58afa1e3af3fdad36a631afac01d0f4e159cff587df0b82e357b55b783aae",
+      "bytes": 14783
+    },
+    {
+      "path": "mandatory-stock-identity-erratum.json",
+      "sha256": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7",
+      "bytes": 4613
+    },
+    {
+      "path": "review.md",
+      "sha256": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8",
+      "bytes": 10168
+    }
+  ],
+  "sourceRefs": [
+    {
+      "path": "/tmp/datacare-return-next-write-contract/implementation-contract.md",
+      "sha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+      "bytes": 28211
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/independent-candidates.json",
+      "sha256": "108e4c9f1145d7ae8a7b20d9b931e7657bd76d826beb20e8fc600e94adfc8c48",
+      "bytes": 18578
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/source-save-grid-map.json",
+      "sha256": "a4d017691828aadfcecdc836ba057b829f7179456bffd310b8fc624a949e2f72",
+      "bytes": 12104
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract/inputs.json",
+      "sha256": "f6e5368e78ec7c9998d6b7e23c2bada11df321effb50f513f938b41255c97a20",
+      "bytes": 12766
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+      "bytes": 85154
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "bytes": 575218
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MDI_FORM.cs",
+      "sha256": "cb91085c50d07a07ae5c5a8e6982ef6f9a2c533e2b55d61fc8c35f093f5dfbbc",
+      "bytes": 661677
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+      "bytes": 1431083
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+      "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+      "bytes": 249435
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+      "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+      "bytes": 218454
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+      "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+      "bytes": 664044
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/salesReturn.ts",
+      "sha256": "612ddcd8f3b0cb8f0368435495125c8b50ed2f8cd03adad11f1cef12cf1d2a70",
+      "bytes": 30772
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec",
+      "bytes": 25202
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac",
+      "bytes": 21546
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "bffe67a9bcec0d3686cd4b447efddab51a9932d66f7d1ec5a09f471635c4e232",
+      "bytes": 22686
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "sha256": "caeca09dcbdff4990ce5ffbe00505605d498f92a63beaec640496398fb236626",
+      "bytes": 31130
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8",
+      "bytes": 14128
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b",
+      "bytes": 13979
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "bytes": 262459
+    }
+  ]
+}

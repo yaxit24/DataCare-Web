@@ -1,0 +1,7 @@
+{
+  "integratedAtUtc": "2026-09-11T23:40:22.482809+00:00",
+  "runnerSha256": "fa51a775930b7c3c9c21c393961ff2dc651210b7c65f79c624739c5f999b3019",
+  "journeySha256": "70a1f89707581ea7df40b2a1975349d6c8a913248fd2c04d82909ffac1b6a4eb",
+  "qualification": "Initial frozen12-case browser before subsequent independent assertion strengthening; corrected full fixture8c2e by source-qualified9-path storage text adjustment only. No runtime success inferred.",
+  "frozenRequiredChecksSha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237"
+}

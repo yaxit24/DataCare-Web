@@ -1,0 +1,93 @@
+--- a/web/apps/web/test/session-context.journey.mjs
++++ b/web/apps/web/test/session-context.journey.mjs
+@@ -354,7 +354,17 @@
+   const loadDesign = async (target, company = '01') => {
+     await target.goto('/masters/design-book');
+     await field(target, 'Book Name').fill(sessionContextFixture.bookName);
++    // LookupPicker schedules an actual request180ms after editing. Complete this setup lookup
++    // before another tab changes context; otherwise that background request can freeze the page
++    // before the deliberately tested Load action, which would correctly send no request at all.
++    const productLookup = observeJsonResponse(target, (response) => {
++      const requestUrl = new URL(response.request().url());
++      return (
++        requestUrl.pathname === '/api/lookup/products' && requestUrl.searchParams.get('q') === '01'
++      );
++    });
+     await target.getByPlaceholder('search products… (F1)', { exact: true }).fill('01');
++    assert.equal((await productLookup).status(), 200, 'Complete the real setup product lookup');
+     await target.getByRole('button', { name: 'Load', exact: true }).click();
+     await target.getByRole('status').filter({ hasText: 'Loaded 1 designs.' }).waitFor();
+     await expectValue(field(target, 'Design No design 1'), `CONTEXT-${company}`);
+--- a/web/apps/web/test/session-context-response-observation.mjs
++++ b/web/apps/web/test/session-context-response-observation.mjs
+@@ -18,7 +18,8 @@
+   if (observers.has(page)) return observers.get(page).ready;
+   const requests = new Map();
+   const waiters = new Set();
+-  const state = { ready: null, waiters };
++  const counts = { requests: 0, responses: 0, finished: 0, failed: 0 };
++  const state = { ready: null, waiters, counts };
+   observers.set(page, state);
+   state.ready = (async () => {
+     const session = await page.context().newCDPSession(page);
+@@ -28,6 +29,7 @@
+     };
+     session.on('Network.requestWillBeSent', (event) => {
+       if (!new URL(event.request.url).pathname.startsWith('/api/')) return;
++      counts.requests++;
+       if (requests.size >= 256 && !requests.has(event.requestId)) {
+         failAll('Durable JSON observation exceeded its bounded request inventory');
+         return;
+@@ -50,6 +52,7 @@
+     session.on('Network.responseReceived', (event) => {
+       const entry = requests.get(event.requestId);
+       if (!entry) return;
++      counts.responses++;
+       const source = event.response;
+       entry.response = Object.freeze({
+         status: () => source.status,
+@@ -71,6 +74,7 @@
+     session.on('Network.loadingFinished', (event) => {
+       const entry = requests.get(event.requestId);
+       requests.delete(event.requestId);
++      if (entry) counts.finished++;
+       if (!entry?.matched.length) return;
+       // Chromium retains this resource outside the renderer. Read from the SAME session that
+       // configured durable messages, after loadingFinished establishes body completion.
+@@ -103,6 +107,7 @@
+     session.on('Network.loadingFailed', (event) => {
+       const entry = requests.get(event.requestId);
+       requests.delete(event.requestId);
++      if (entry) counts.failed++;
+       for (const waiter of entry?.matched ?? [])
+         waiter.fail(new Error('Actual observed JSON request failed before its body completed'));
+     });
+@@ -121,6 +126,7 @@
+ export function observeJsonResponse(page, predicate, { timeout = 20_000 } = {}) {
+   const state = observers.get(page);
+   if (!state) throw new Error('Prepare durable JSON observation before issuing page requests');
++  const initialCounts = { ...state.counts };
+   let timer;
+   const observation = new Promise((resolve, reject) => {
+     let settled = false;
+@@ -137,10 +143,16 @@
+       succeed: (value) => finish(resolve, value),
+       fail: (error) => finish(reject, error),
+     };
+-    timer = setTimeout(
+-      () => waiter.fail(new Error('Timed out observing the actual durable JSON response')),
+-      timeout,
+-    );
++    timer = setTimeout(() => {
++      const observed = Object.fromEntries(
++        Object.entries(state.counts).map(([key, count]) => [key, count - initialCounts[key]]),
++      );
++      waiter.fail(
++        new Error(
++          `Timed out observing the actual durable JSON response (matched=${waiter.matched}; API event counts=${JSON.stringify(observed)})`,
++        ),
++      );
++    }, timeout);
+     state.waiters.add(waiter);
+   });
+   void observation.catch(() => {});

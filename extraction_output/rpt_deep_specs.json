@@ -1,0 +1,3869 @@
+[
+ {
+  "report": "AcCrList",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 36598
+ },
+ {
+  "report": "AcDrList",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 42033
+ },
+ {
+  "report": "AcFineGold",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 48684
+ },
+ {
+  "report": "AcFineSilver",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 48650
+ },
+ {
+  "report": "AcGroupRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 64270
+ },
+ {
+  "report": "AcLastVisit",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 23189
+ },
+ {
+  "report": "AcLedger",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 57143
+ },
+ {
+  "report": "AcLedgerSelected",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 70604
+ },
+ {
+  "report": "AcOsArea",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 67965
+ },
+ {
+  "report": "AcOsWithAdd",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 59456
+ },
+ {
+  "report": "AcPurcRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 101540
+ },
+ {
+  "report": "AcPurcSummRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 101540
+ },
+ {
+  "report": "AcPurcWhRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 84339
+ },
+ {
+  "report": "AcSaleWhRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 84339
+ },
+ {
+  "report": "AcSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 76897
+ },
+ {
+  "report": "AcSummLdr",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54730
+ },
+ {
+  "report": "AcWithWt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 62778
+ },
+ {
+  "report": "AcWithWtGold",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 123361
+ },
+ {
+  "report": "AcWithWtSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 121975
+ },
+ {
+  "report": "AngdiyaIsuRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 513l",
+   "ConstantRecordsStream 510l",
+   "Contents",
+   "DataSourceManager 509l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 512l",
+   "TotallerStream 511l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 38670
+ },
+ {
+  "report": "AprBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 85247
+ },
+ {
+  "report": "AprInOut",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 90177
+ },
+ {
+  "report": "AprPan",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 80721
+ },
+ {
+  "report": "AprPartyWise",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 63504
+ },
+ {
+  "report": "B2BPurcBillA4Tax",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 155065
+ },
+ {
+  "report": "B2BPurcImgVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 98610
+ },
+ {
+  "report": "B2BSaleBillA4Tax",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 155065
+ },
+ {
+  "report": "B2BSaleImgVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 98619
+ },
+ {
+  "report": "BalanceHz",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 29864
+ },
+ {
+  "report": "BarPrint10",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 20152
+ },
+ {
+  "report": "BarPrint13",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 22237
+ },
+ {
+  "report": "BillRecVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 55010
+ },
+ {
+  "report": "BillWiseOrderAdjust",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 620l",
+   "ConstantRecordsStream 616l",
+   "Contents",
+   "DataSourceManager 615l",
+   "Database (TLV)",
+   "FormulaRecordsStream 619l",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 618l",
+   "TotallerStream 617l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 37145
+ },
+ {
+  "report": "BulCustAdjust",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 563l",
+   "ConstantRecordsStream 559l",
+   "Contents",
+   "DataSourceManager 558l",
+   "Database (TLV)",
+   "FormulaRecordsStream 562l",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 561l",
+   "TotallerStream 560l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 52346
+ },
+ {
+  "report": "BulCustBooking",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 626l",
+   "ConstantRecordsStream 624l",
+   "Contents",
+   "DataSourceManager 623l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "TotallerStream 625l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 62830
+ },
+ {
+  "report": "BullBookBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 51420
+ },
+ {
+  "report": "CashBankBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 53532
+ },
+ {
+  "report": "CashBankBillAc",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 53537
+ },
+ {
+  "report": "ChqPrint010",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 16781
+ },
+ {
+  "report": "ChqPrint011",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 16845
+ },
+ {
+  "report": "ChqPrint012",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 16884
+ },
+ {
+  "report": "ChqPrint013",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 16741
+ },
+ {
+  "report": "ChqPrint014",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 16856
+ },
+ {
+  "report": "ChqPrint135",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 16730
+ },
+ {
+  "report": "CntrTagStkRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 66525
+ },
+ {
+  "report": "CntrTagSumRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 64501
+ },
+ {
+  "report": "Company",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 9l",
+   "Contents",
+   "DataSourceManager 6l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 8l",
+   "TotallerStream 7l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 19358
+ },
+ {
+  "report": "ConsiBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 87794
+ },
+ {
+  "report": "ContraBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 39705
+ },
+ {
+  "report": "CounterSale",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 86289
+ },
+ {
+  "report": "CounterTrfr",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 42643
+ },
+ {
+  "report": "CustRepIsu",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 61065
+ },
+ {
+  "report": "CustRepRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 47047
+ },
+ {
+  "report": "CustRepRecBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 84213
+ },
+ {
+  "report": "DharnDue",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 60932
+ },
+ {
+  "report": "DhiranIssuRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 42124
+ },
+ {
+  "report": "DhiranReg",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 37178
+ },
+ {
+  "report": "DhiranStock",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 36523
+ },
+ {
+  "report": "DhiranitemRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 59508
+ },
+ {
+  "report": "DhrnIntRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 71758
+ },
+ {
+  "report": "DhrnIssue",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 58673
+ },
+ {
+  "report": "DhrnIssueImg",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 66641
+ },
+ {
+  "report": "DhrnKhataVahi",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 90697
+ },
+ {
+  "report": "DhrnKhataVahiSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 83380
+ },
+ {
+  "report": "DhrnOsLetter",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 42924
+ },
+ {
+  "report": "DhrnReceivedSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 45686
+ },
+ {
+  "report": "DiamondSf",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "Embedding 14/\u0001CompObj",
+   "Embedding 14/\u0001Ole",
+   "Embedding 14/CONTENTS",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 18298
+ },
+ {
+  "report": "EInvOthIncom",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 159349
+ },
+ {
+  "report": "EInvoice",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 159349
+ },
+ {
+  "report": "EmpIsuRecVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 80377
+ },
+ {
+  "report": "EmpSaleReport",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 64642
+ },
+ {
+  "report": "FineJvBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 39924
+ },
+ {
+  "report": "FineSalesGstBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 140651
+ },
+ {
+  "report": "Form12",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 76762
+ },
+ {
+  "report": "Form8",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 52579
+ },
+ {
+  "report": "GhatDesignIsu",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 88034
+ },
+ {
+  "report": "GhatTagPrnt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 20523
+ },
+ {
+  "report": "GoldInterest",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 73390
+ },
+ {
+  "report": "GroupStkRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 103876
+ },
+ {
+  "report": "Gstr_1",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 96957
+ },
+ {
+  "report": "Gstr_2",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 92438
+ },
+ {
+  "report": "Gstr_3",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 89105
+ },
+ {
+  "report": "HedgingFixVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 92154
+ },
+ {
+  "report": "InTax_PurcRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 81215
+ },
+ {
+  "report": "ItemInOut",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 70771
+ },
+ {
+  "report": "ItemInOutSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 69296
+ },
+ {
+  "report": "ItemInword",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 86253
+ },
+ {
+  "report": "ItemLedger",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 63790
+ },
+ {
+  "report": "ItemOutword",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 86914
+ },
+ {
+  "report": "ItemPurcVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 127413
+ },
+ {
+  "report": "ItemSalesVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 144331
+ },
+ {
+  "report": "ItemSalesVchWithQr",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 144598
+ },
+ {
+  "report": "ItemStkRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 118870
+ },
+ {
+  "report": "ItmLotPrint",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 20831
+ },
+ {
+  "report": "ItmStkBalance",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 56700
+ },
+ {
+  "report": "ItmStkWithGrid",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 56812
+ },
+ {
+  "report": "ItmStkWithOthWt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 92277
+ },
+ {
+  "report": "JadtarInOut",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 98652
+ },
+ {
+  "report": "JadtarIssue",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 61006
+ },
+ {
+  "report": "JadtarRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 71296
+ },
+ {
+  "report": "JdtProcessRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75562
+ },
+ {
+  "report": "JmUdAmt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 35824
+ },
+ {
+  "report": "JmUdFine",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 122007
+ },
+ {
+  "report": "JmUdFineHz",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 66959
+ },
+ {
+  "report": "JmUdFineHzSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 67105
+ },
+ {
+  "report": "JmUdFineHzSummVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 65038
+ },
+ {
+  "report": "JmUdFineSl",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 121873
+ },
+ {
+  "report": "JmUdFineSlHz",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 66959
+ },
+ {
+  "report": "JmUdFineSlSum",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 100209
+ },
+ {
+  "report": "KrDesignIsuImg",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 88034
+ },
+ {
+  "report": "KrDesignIsuVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 83759
+ },
+ {
+  "report": "KrDmIsuRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 41364
+ },
+ {
+  "report": "KrDmWtInOut",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 56309
+ },
+ {
+  "report": "KrIsuBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108902
+ },
+ {
+  "report": "KrIsuBillGst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108902
+ },
+ {
+  "report": "KrRecVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108210
+ },
+ {
+  "report": "KrRecVchGst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 155065
+ },
+ {
+  "report": "KrRepRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 61449
+ },
+ {
+  "report": "LabourBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 128116
+ },
+ {
+  "report": "LabourBillGst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 180279
+ },
+ {
+  "report": "LabourWorkVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 129847
+ },
+ {
+  "report": "LbrWorkRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 77577
+ },
+ {
+  "report": "LedrAdjVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 59203
+ },
+ {
+  "report": "LedrInOut",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 67241
+ },
+ {
+  "report": "LedrInOutWh",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 67109
+ },
+ {
+  "report": "LoanStock",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 37858
+ },
+ {
+  "report": "LoanWisePacket",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 71777
+ },
+ {
+  "report": "MembBonus",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 52631
+ },
+ {
+  "report": "MembCommRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 40375
+ },
+ {
+  "report": "MembDailyRecRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 39378
+ },
+ {
+  "report": "MembGoldRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 53574
+ },
+ {
+  "report": "MembOpenNew",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 33967
+ },
+ {
+  "report": "MembQr",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 17940
+ },
+ {
+  "report": "MembRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 51011
+ },
+ {
+  "report": "MembRptAdd",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54142
+ },
+ {
+  "report": "MembSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 52556
+ },
+ {
+  "report": "MembVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 33441
+ },
+ {
+  "report": "MfgGhatIsu",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 101135
+ },
+ {
+  "report": "MfgGhatRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 109342
+ },
+ {
+  "report": "MfgLedger",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 114277
+ },
+ {
+  "report": "MfgMinoIsuRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 109342
+ },
+ {
+  "report": "MfgVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108929
+ },
+ {
+  "report": "MtlIsu",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108902
+ },
+ {
+  "report": "OldItmSaleVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108210
+ },
+ {
+  "report": "OrdAdjBillWise",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 494l",
+   "ConstantRecordsStream 490l",
+   "Contents",
+   "DataSourceManager 489l",
+   "Database (TLV)",
+   "FormulaRecordsStream 493l",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 492l",
+   "TotallerStream 491l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 37969
+ },
+ {
+  "report": "OrdAdvAdj",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 464l",
+   "ConstantRecordsStream 462l",
+   "Contents",
+   "DataSourceManager 461l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "TotallerStream 463l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 36781
+ },
+ {
+  "report": "OrdAdvRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 353l",
+   "ConstantRecordsStream 350l",
+   "Contents",
+   "DataSourceManager 349l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 352l",
+   "TotallerStream 351l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 34366
+ },
+ {
+  "report": "OrdDesignSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 500l",
+   "ConstantRecordsStream 496l",
+   "Contents",
+   "DataSourceManager 495l",
+   "Database (TLV)",
+   "FormulaRecordsStream 499l",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 498l",
+   "TotallerStream 497l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 41691
+ },
+ {
+  "report": "OrdDetlPanding",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 458l",
+   "ConstantRecordsStream 454l",
+   "Contents",
+   "DataSourceManager 453l",
+   "Database (TLV)",
+   "FormulaRecordsStream 457l",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 456l",
+   "TotallerStream 455l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 41766
+ },
+ {
+  "report": "OrdDetlRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 287l",
+   "ConstantRecordsStream 284l",
+   "Contents",
+   "DataSourceManager 283l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 286l",
+   "TotallerStream 285l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 55269
+ },
+ {
+  "report": "OrdVchImg",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 106788
+ },
+ {
+  "report": "OrderBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 106788
+ },
+ {
+  "report": "OrderCancelVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 52059
+ },
+ {
+  "report": "OrderVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 69278
+ },
+ {
+  "report": "OthCommVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 123189
+ },
+ {
+  "report": "OthExpUae",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 101511
+ },
+ {
+  "report": "OthItmLoose",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54720
+ },
+ {
+  "report": "OthItmStud",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54720
+ },
+ {
+  "report": "OutTax_SaleRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 81212
+ },
+ {
+  "report": "PartyIntSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 71561
+ },
+ {
+  "report": "PartyInterest",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 73135
+ },
+ {
+  "report": "PaymentVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 116177
+ },
+ {
+  "report": "PrRtnBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108210
+ },
+ {
+  "report": "PrRtnBillGst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 166515
+ },
+ {
+  "report": "PrTaxRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 68009
+ },
+ {
+  "report": "ProdStkRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 103749
+ },
+ {
+  "report": "ProfitLossHz",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 3/Contents",
+   "Subdocument 3/Database (TLV)",
+   "Subdocument 4/Contents",
+   "Subdocument 4/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 80540
+ },
+ {
+  "report": "PurcBillA4",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 108210
+ },
+ {
+  "report": "PurcBillA4Gst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 155065
+ },
+ {
+  "report": "PurcBillHalfGst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 155065
+ },
+ {
+  "report": "PurcGroupWise",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 76373
+ },
+ {
+  "report": "PurcItem",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 62464
+ },
+ {
+  "report": "PurcReport",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75407
+ },
+ {
+  "report": "PurcSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 48751
+ },
+ {
+  "report": "PurcToSalesFixingVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 129905
+ },
+ {
+  "report": "QrPrint10",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 1l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 20812
+ },
+ {
+  "report": "RateCutBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 105663
+ },
+ {
+  "report": "RateCutItmBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 149589
+ },
+ {
+  "report": "RateRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 17526
+ },
+ {
+  "report": "ReminderAll",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 49318
+ },
+ {
+  "report": "ReparingCustIsu",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 95916
+ },
+ {
+  "report": "ReparingKrRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 109091
+ },
+ {
+  "report": "ReparingRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 107102
+ },
+ {
+  "report": "RojMel",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 3/Contents",
+   "Subdocument 3/Database (TLV)",
+   "Subdocument 4/Contents",
+   "Subdocument 4/Database (TLV)",
+   "Subdocument 5/Contents",
+   "Subdocument 5/Database (TLV)",
+   "Subdocument 6/Contents",
+   "Subdocument 6/Database (TLV)",
+   "Subdocument 7/Contents",
+   "Subdocument 7/Database (TLV)",
+   "Subdocument 8/Contents",
+   "Subdocument 8/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54074
+ },
+ {
+  "report": "RojMelCash",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 10/Contents",
+   "Subdocument 10/Database (TLV)",
+   "Subdocument 11/Contents",
+   "Subdocument 11/Database (TLV)",
+   "Subdocument 12/Contents",
+   "Subdocument 12/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 5/Contents",
+   "Subdocument 5/Database (TLV)",
+   "Subdocument 6/Contents",
+   "Subdocument 6/Database (TLV)",
+   "Subdocument 7/Contents",
+   "Subdocument 7/Database (TLV)",
+   "Subdocument 8/Contents",
+   "Subdocument 8/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 37522
+ },
+ {
+  "report": "RojMelCrDr",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 55793
+ },
+ {
+  "report": "RojMelEstmat",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 3/Contents",
+   "Subdocument 3/Database (TLV)",
+   "Subdocument 4/Contents",
+   "Subdocument 4/Database (TLV)",
+   "Subdocument 5/Contents",
+   "Subdocument 5/Database (TLV)",
+   "Subdocument 6/Contents",
+   "Subdocument 6/Database (TLV)",
+   "Subdocument 7/Contents",
+   "Subdocument 7/Database (TLV)",
+   "Subdocument 8/Contents",
+   "Subdocument 8/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54074
+ },
+ {
+  "report": "RojMelGr",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 3/Contents",
+   "Subdocument 3/Database (TLV)",
+   "Subdocument 4/Contents",
+   "Subdocument 4/Database (TLV)",
+   "Subdocument 5/Contents",
+   "Subdocument 5/Database (TLV)",
+   "Subdocument 6/Contents",
+   "Subdocument 6/Database (TLV)",
+   "Subdocument 7/Contents",
+   "Subdocument 7/Database (TLV)",
+   "Subdocument 8/Contents",
+   "Subdocument 8/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54067
+ },
+ {
+  "report": "RojMelItem",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 3/Contents",
+   "Subdocument 3/Database (TLV)",
+   "Subdocument 6/Contents",
+   "Subdocument 6/Database (TLV)",
+   "Subdocument 7/Contents",
+   "Subdocument 7/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 47982
+ },
+ {
+  "report": "RojMelJmaUdhar",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 80857
+ },
+ {
+  "report": "RtlHuidPrint",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 70395
+ },
+ {
+  "report": "SafeStkSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75511
+ },
+ {
+  "report": "SalarySlip",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 56063
+ },
+ {
+  "report": "SaleOrnaIsu",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75739
+ },
+ {
+  "report": "SaleReport",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75401
+ },
+ {
+  "report": "SaleRtnReport",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 71499
+ },
+ {
+  "report": "SalesBillA4",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 170446
+ },
+ {
+  "report": "SalesBillA4Gst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 170231
+ },
+ {
+  "report": "SalesBillA4_WithImage",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 170965
+ },
+ {
+  "report": "SalesBillHz",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 125897
+ },
+ {
+  "report": "SalesBillHzGst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 170195
+ },
+ {
+  "report": "SalesBillOrgDup",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 589l",
+   "ConstantRecordsStream 585l",
+   "Contents",
+   "DataSourceManager 584l",
+   "Database (TLV)",
+   "FormulaRecordsStream 588l",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 587l",
+   "Subdocument 2/AnalysisGridsStream 583l",
+   "Subdocument 2/ConstantRecordsStream 579l",
+   "Subdocument 2/Contents",
+   "Subdocument 2/DataSourceManager 578l",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 2/FormulaRecordsStream 582l",
+   "Subdocument 2/SavedRecordsStream 581l",
+   "Subdocument 2/TotallerStream 580l",
+   "TotallerStream 586l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 124512
+ },
+ {
+  "report": "SalesBillOs",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 171380
+ },
+ {
+  "report": "SalesBillVr",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 122011
+ },
+ {
+  "report": "SalesGroupWise",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 76494
+ },
+ {
+  "report": "SalesItem",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 76317
+ },
+ {
+  "report": "SalesQuotation",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 188884
+ },
+ {
+  "report": "SalesRtnA4",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 115167
+ },
+ {
+  "report": "SalesRtnA4Gst",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 157889
+ },
+ {
+  "report": "SalesRtnBillUae",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 148126
+ },
+ {
+  "report": "SalesRtnItem",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 76466
+ },
+ {
+  "report": "SalesRtnSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 54239
+ },
+ {
+  "report": "SalesSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 96611
+ },
+ {
+  "report": "SalesToPurcFixingVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 129905
+ },
+ {
+  "report": "SalesWithOrder",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 48586
+ },
+ {
+  "report": "SchmAdj",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 50027
+ },
+ {
+  "report": "SchmMonthRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 157l",
+   "ConstantRecordsStream 154l",
+   "Contents",
+   "DataSourceManager 153l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 156l",
+   "TotallerStream 155l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 22854
+ },
+ {
+  "report": "SchmPassBook",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 24570
+ },
+ {
+  "report": "SchmRecVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 50492
+ },
+ {
+  "report": "SlBillWapp",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 170084
+ },
+ {
+  "report": "SlTaxRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 70725
+ },
+ {
+  "report": "StkInOutVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 82404
+ },
+ {
+  "report": "StngIsuRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 114653
+ },
+ {
+  "report": "TRialBalHz",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)",
+   "Subdocument 3/Contents",
+   "Subdocument 3/Database (TLV)",
+   "Subdocument 4/Contents",
+   "Subdocument 4/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 43599
+ },
+ {
+  "report": "TableStkGwtRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 129952
+ },
+ {
+  "report": "TagCanBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 82507
+ },
+ {
+  "report": "TagHuIdRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 78842
+ },
+ {
+  "report": "TagItmSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 43929
+ },
+ {
+  "report": "TagReNumberVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 46361
+ },
+ {
+  "report": "TagSplitVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 123778
+ },
+ {
+  "report": "TagStkIdtlRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 76259
+ },
+ {
+  "report": "TagStkItemSumRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 60224
+ },
+ {
+  "report": "TagStkRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 57619
+ },
+ {
+  "report": "TagStkRptDmSum",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 91576
+ },
+ {
+  "report": "TagStkSummRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 69370
+ },
+ {
+  "report": "TagWtChangSplit",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75712
+ },
+ {
+  "report": "TagWtChangeVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 139774
+ },
+ {
+  "report": "TaxInOutRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 81977
+ },
+ {
+  "report": "TaxSummUae",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 82003
+ },
+ {
+  "report": "TempAdd2",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 18604
+ },
+ {
+  "report": "TempAdd3",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 19038
+ },
+ {
+  "report": "TempPhone",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 26853
+ },
+ {
+  "report": "TourOrdImg",
+  "streams": [
+   "\u0005SummaryInformation",
+   "BLOB 16l",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 106788
+ },
+ {
+  "report": "TourOrdVch",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 106416
+ },
+ {
+  "report": "UserDtlRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75551
+ },
+ {
+  "report": "VpAdjustBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 53657
+ },
+ {
+  "report": "VpIsuRpt",
+  "streams": [
+   "\u0005SummaryInformation",
+   "AnalysisGridsStream 489l",
+   "ConstantRecordsStream 486l",
+   "Contents",
+   "DataSourceManager 485l",
+   "Database (TLV)",
+   "ReportInfo",
+   "ReportParametersStream 0l",
+   "SavedRecordsStream 488l",
+   "TotallerStream 487l",
+   "ViewInformationStream 0l"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 37147
+ },
+ {
+  "report": "WhHuidPrint",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 70711
+ },
+ {
+  "report": "WhSalesBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 151060
+ },
+ {
+  "report": "WhSalesBillSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 77577
+ },
+ {
+  "report": "WhSalesEmp",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 66973
+ },
+ {
+  "report": "WhSalesImage",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo",
+   "Subdocument 1/BLOB 2l",
+   "Subdocument 1/Contents",
+   "Subdocument 1/Database (TLV)",
+   "Subdocument 2/Contents",
+   "Subdocument 2/Database (TLV)"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 75970
+ },
+ {
+  "report": "WhSalesIsuRec",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 77572
+ },
+ {
+  "report": "WhSalesRtnBill",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 148412
+ },
+ {
+  "report": "WhSalesSumm",
+  "streams": [
+   "\u0005SummaryInformation",
+   "Contents",
+   "Database (TLV)",
+   "ReportInfo"
+  ],
+  "formulas": [],
+  "parameters": [],
+  "sqlHints": [],
+  "objects": 0,
+  "contentsBytes": 77577
+ }
+]

@@ -1,0 +1,535 @@
+{
+  "status": "proposal-only-not-the-active-recipe",
+  "priorCheckpoint": "37-implementation-checkpoint-round12.json",
+  "priorCheckpointSha256": "6ed9623310507f1a563bc98c4f9f130401e058543797d15745b7812b71a64098",
+  "checks": [
+    {
+      "label": "api-return-labour-full",
+      "status": "passed",
+      "command": [
+        "node",
+        "scripts/parity-test-env.mjs",
+        "--",
+        "pnpm",
+        "--filter",
+        "@datacare/api",
+        "test"
+      ],
+      "requiredText": [
+        "Test Files  268 passed (268)",
+        "Tests  3050 passed (3050)"
+      ],
+      "requireCurrentPrefixes": [
+        "project-memory/contracts/",
+        "project-memory/parity/PARITY-RATCHET.json",
+        "unified/src/csharp/DataCareNext/",
+        "web/apps/api/",
+        "web/deploy/.env.example",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1829,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "return-labour-complete-test-types-corrected",
+      "status": "passed",
+      "command": [
+        "env",
+        "NODE_OPTIONS=--max-old-space-size=4096",
+        "pnpm",
+        "--filter",
+        "@datacare/api",
+        "exec",
+        "tsc",
+        "-p",
+        "tsconfig.test.json",
+        "--noEmit"
+      ],
+      "requiredText": [],
+      "requireCurrentPrefixes": [
+        "project-memory/contracts/",
+        "project-memory/parity/PARITY-RATCHET.json",
+        "unified/src/csharp/DataCareNext/",
+        "web/apps/api/",
+        "web/deploy/.env.example",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1829,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "core-after-atomic-labour-compose",
+      "status": "passed",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@datacare/core",
+        "test"
+      ],
+      "requiredText": [
+        "Test Files  18 passed (18)",
+        "Tests  888 passed (888)"
+      ],
+      "requireCurrentPrefixes": [
+        "web/package.json",
+        "web/packages/core/",
+        "web/pnpm-lock.yaml",
+        "web/tsconfig"
+      ],
+      "observedInputCount": 1810,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "web-return-labour-wire-current",
+      "status": "passed",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@datacare/web",
+        "test"
+      ],
+      "requiredText": [
+        "Test Files  36 passed (36)",
+        "Tests  522 passed (522)",
+        "tests 6",
+        "pass 6",
+        "fail 0",
+        "skipped 0"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/package.json",
+        "web/apps/api/src/",
+        "web/apps/api/tsconfig",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/",
+        "web/apps/web/next.config",
+        "web/apps/web/package.json",
+        "web/apps/web/test/apiContext.test.ts",
+        "web/apps/web/test/cameraRequestGuard.test.ts",
+        "web/apps/web/test/chequePrintPage.test.ts",
+        "web/apps/web/test/columnSettings.test.ts",
+        "web/apps/web/test/contextSelection.test.ts",
+        "web/apps/web/test/derivedValueSources.test.ts",
+        "web/apps/web/test/designBookCalculation.test.ts",
+        "web/apps/web/test/designBookPage.test.ts",
+        "web/apps/web/test/designBookRepeat.test.ts",
+        "web/apps/web/test/directFetchContext.test.ts",
+        "web/apps/web/test/eInvoiceExcelPage.test.ts",
+        "web/apps/web/test/fixtures/pageContext.bootstrap-qualification.json",
+        "web/apps/web/test/fixtures/pageContext.independent.json",
+        "web/apps/web/test/fixtures/returnLabourUiTransitions.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/fixtures/tourExactValues.independent.json",
+        "web/apps/web/test/formKeys.test.ts",
+        "web/apps/web/test/gridKeyboard.test.ts",
+        "web/apps/web/test/imageEditorSession.test.ts",
+        "web/apps/web/test/lineRecalc.test.ts",
+        "web/apps/web/test/masterSearch.test.ts",
+        "web/apps/web/test/mfgLotView.test.ts",
+        "web/apps/web/test/pageContext.test.ts",
+        "web/apps/web/test/pageContextSelectionPause.test.ts",
+        "web/apps/web/test/parity-real-stack-evidence.test.mjs",
+        "web/apps/web/test/parityContainment.test.ts",
+        "web/apps/web/test/rateCutSettlementPayload.test.ts",
+        "web/apps/web/test/reportSurfaceLinks.test.ts",
+        "web/apps/web/test/run-unit-tests.mjs",
+        "web/apps/web/test/salesOrderForm.test.ts",
+        "web/apps/web/test/salesReturnBillReplay.test.ts",
+        "web/apps/web/test/salesReturnForm.test.ts",
+        "web/apps/web/test/salesReturnLabourReplay.test.ts",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/salesReturnReplay.test.ts",
+        "web/apps/web/test/scaleCaptureContext.test.ts",
+        "web/apps/web/test/schemeInstallmentUpi.test.ts",
+        "web/apps/web/test/stockLimitPages.test.ts",
+        "web/apps/web/test/subDetailGrid.test.ts",
+        "web/apps/web/test/textIdentifiers.test.ts",
+        "web/apps/web/test/tourOrderExactValues.test.ts",
+        "web/apps/web/test/tourOrderForm.test.ts",
+        "web/apps/web/test/wholesaleSalePayload.test.ts",
+        "web/apps/web/tsconfig",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1832,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "build-return-labour-wire-browser",
+      "status": "passed",
+      "command": [
+        "env",
+        "API_ORIGIN=http://127.0.0.1:4410",
+        "pnpm",
+        "build"
+      ],
+      "requiredText": [
+        "7 successful, 7 total"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/package.json",
+        "web/apps/api/src/",
+        "web/apps/api/tsconfig",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/",
+        "web/apps/web/next.config",
+        "web/apps/web/package.json",
+        "web/apps/web/tsconfig",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1832,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "workspace-lint-labour-final",
+      "status": "passed",
+      "command": [
+        "pnpm",
+        "lint"
+      ],
+      "requiredText": [
+        "10 successful, 10 total"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/package.json",
+        "web/apps/api/src/",
+        "web/apps/api/tsconfig",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/",
+        "web/apps/web/next.config",
+        "web/apps/web/package.json",
+        "web/apps/web/test/apiContext.test.ts",
+        "web/apps/web/test/cameraRequestGuard.test.ts",
+        "web/apps/web/test/chequePrintPage.test.ts",
+        "web/apps/web/test/columnSettings.test.ts",
+        "web/apps/web/test/contextSelection.test.ts",
+        "web/apps/web/test/derivedValueSources.test.ts",
+        "web/apps/web/test/designBookCalculation.test.ts",
+        "web/apps/web/test/designBookPage.test.ts",
+        "web/apps/web/test/designBookRepeat.test.ts",
+        "web/apps/web/test/directFetchContext.test.ts",
+        "web/apps/web/test/eInvoiceExcelPage.test.ts",
+        "web/apps/web/test/fixtures/pageContext.bootstrap-qualification.json",
+        "web/apps/web/test/fixtures/pageContext.independent.json",
+        "web/apps/web/test/fixtures/returnLabourUiTransitions.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+        "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+        "web/apps/web/test/fixtures/tourExactValues.independent.json",
+        "web/apps/web/test/formKeys.test.ts",
+        "web/apps/web/test/gridKeyboard.test.ts",
+        "web/apps/web/test/imageEditorSession.test.ts",
+        "web/apps/web/test/lineRecalc.test.ts",
+        "web/apps/web/test/masterSearch.test.ts",
+        "web/apps/web/test/mfgLotView.test.ts",
+        "web/apps/web/test/pageContext.test.ts",
+        "web/apps/web/test/pageContextSelectionPause.test.ts",
+        "web/apps/web/test/parity-real-stack-evidence.test.mjs",
+        "web/apps/web/test/parityContainment.test.ts",
+        "web/apps/web/test/rateCutSettlementPayload.test.ts",
+        "web/apps/web/test/reportSurfaceLinks.test.ts",
+        "web/apps/web/test/run-unit-tests.mjs",
+        "web/apps/web/test/salesOrderForm.test.ts",
+        "web/apps/web/test/salesReturnBillReplay.test.ts",
+        "web/apps/web/test/salesReturnForm.test.ts",
+        "web/apps/web/test/salesReturnLabourReplay.test.ts",
+        "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+        "web/apps/web/test/salesReturnReplay.test.ts",
+        "web/apps/web/test/scaleCaptureContext.test.ts",
+        "web/apps/web/test/schemeInstallmentUpi.test.ts",
+        "web/apps/web/test/stockLimitPages.test.ts",
+        "web/apps/web/test/subDetailGrid.test.ts",
+        "web/apps/web/test/textIdentifiers.test.ts",
+        "web/apps/web/test/tourOrderExactValues.test.ts",
+        "web/apps/web/test/tourOrderForm.test.ts",
+        "web/apps/web/test/wholesaleSalePayload.test.ts",
+        "web/apps/web/tsconfig",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1835,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "browser-return-labour-complete",
+      "status": "passed",
+      "command": [
+        "env",
+        "PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round13-labour-complete",
+        "node",
+        "scripts/parity-test-env.mjs",
+        "--",
+        "node",
+        "apps/web/test/parity.real-stack.mjs"
+      ],
+      "requiredText": [
+        "PARITY_REAL_STACK_PASSED:",
+        "resolved labour preview; zero mocked requests"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/package.json",
+        "web/apps/api/src/",
+        "web/apps/api/test/fixtures/",
+        "web/apps/api/tsconfig",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/",
+        "web/apps/web/next.config",
+        "web/apps/web/package.json",
+        "web/apps/web/test/",
+        "web/apps/web/tsconfig",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1835,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "browser-return-labour-lifecycle",
+      "status": "passed",
+      "command": [
+        "env",
+        "LABOUR_PREVIEW_ARTIFACT_DIR=test-results/return-labour-preview-lifecycle-round13",
+        "node",
+        "scripts/parity-test-env.mjs",
+        "--",
+        "node",
+        "apps/web/test/labour-preview-lifecycle.real-stack.mjs"
+      ],
+      "requiredText": [
+        "LABOUR_PREVIEW_LIFECYCLE_PASSED: 5/5 checks; 4/4 explicit actual-response faults; zero synthetic business responses"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/package.json",
+        "web/apps/api/src/",
+        "web/apps/api/test/fixtures/",
+        "web/apps/api/tsconfig",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/",
+        "web/apps/web/next.config",
+        "web/apps/web/package.json",
+        "web/apps/web/test/",
+        "web/apps/web/tsconfig",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1835,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "legacy-browser-labour-final",
+      "status": "passed",
+      "command": [
+        "pnpm",
+        "test:browser"
+      ],
+      "requiredText": [
+        "Browser smoke passed:"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/package.json",
+        "web/apps/api/src/",
+        "web/apps/api/tsconfig",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/",
+        "web/apps/web/next.config",
+        "web/apps/web/package.json",
+        "web/apps/web/test/browser.smoke.mjs",
+        "web/apps/web/tsconfig",
+        "web/package.json",
+        "web/packages/",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/scripts/",
+        "web/tsconfig",
+        "web/turbo.json"
+      ],
+      "observedInputCount": 1835,
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "kernel-gate-labour-current",
+      "status": "failed",
+      "command": [
+        "node",
+        "scripts/check-kernel-conformance.mjs"
+      ],
+      "requiredText": [
+        "127 bypass(es)",
+        "KERNEL_CONFORMANCE_RED",
+        "rounding: 127 bypasses"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/src/",
+        "web/scripts/check-kernel-conformance.mjs",
+        "web/scripts/lib/"
+      ],
+      "observedInputCount": 1829,
+      "requiredExitCode": 1,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "dead-cell-gate-labour-current",
+      "status": "failed",
+      "command": [
+        "node",
+        "scripts/check-dead-cells.mjs"
+      ],
+      "requiredText": [
+        "sale-return: 33 dead of 48",
+        "DEAD CELLS: 33."
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/src/",
+        "web/apps/web/app/",
+        "web/scripts/check-dead-cells.mjs",
+        "web/scripts/lib/"
+      ],
+      "observedInputCount": 1829,
+      "requiredExitCode": 1,
+      "requiredCwd": "web"
+    },
+    {
+      "label": "browser-context-item-lookup-settled",
+      "status": "passed",
+      "command": [
+        "env",
+        "SESSION_CONTEXT_ARTIFACT_DIR=test-results/session-context-real-stack-item-settled",
+        "node",
+        "scripts/parity-test-env.mjs",
+        "--",
+        "node",
+        "apps/web/test/session-context.real-stack.additive.mjs"
+      ],
+      "requiredText": [
+        "SESSION_CONTEXT_REAL_STACK_PASSED: 14 checks (original12 + additive2), real responses with 5 declared transport injections; no synthetic business response"
+      ],
+      "requireCurrentPrefixes": [
+        "web/packages/",
+        "web/package.json",
+        "web/pnpm-lock.yaml",
+        "web/pnpm-workspace.yaml",
+        "web/turbo.json",
+        "web/tsconfig",
+        "web/scripts/",
+        "web/apps/api/",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/api.ts",
+        "web/apps/web/lib/pageContext.ts",
+        "web/apps/web/lib/contextSelection.ts",
+        "web/apps/web/lib/BusinessScope",
+        "web/apps/web/test/session-context",
+        "web/apps/web/test/fixtures/session"
+      ],
+      "scopeQualification": "This latest corrected session-specific execution predates unrelated Return wire/fault additions. Parent must compare all differences and pin exact transitive session journey inputs; this is not full final workspace coverage.",
+      "requiredExitCode": 0,
+      "requiredCwd": "web"
+    }
+  ],
+  "pendingRootChecks": [
+    {
+      "purpose": "Fresh depth with complete Python measurement input membership",
+      "status": "failed",
+      "command": [
+        "node",
+        "scripts/check-depth.mjs"
+      ],
+      "requiredText": [
+        "unreachable API fields 106",
+        "DEPTH GATE FAILED",
+        "96 -> 106 (regression)"
+      ],
+      "requireCurrentPrefixes": [
+        "web/apps/api/src/",
+        "web/apps/web/app/",
+        "web/apps/web/components/",
+        "web/apps/web/lib/",
+        "web/packages/core/containment.mjs",
+        "web/scripts/",
+        "web/parity/",
+        "project-memory/parity/",
+        "unified/src/csharp/DataCareNext/"
+      ],
+      "label": "Use the new actual recorded label; do not relabel depth-gate-labour-current."
+    },
+    {
+      "purpose": "Fresh scanner31/register/doc-reference/self-validation after measurement-universe and document edits",
+      "status": "Use actual exit/status and records only",
+      "note": "Do not invent pending labels or zero-error text. Keep final document validation outside self-referential immutable capture if designed that way."
+    }
+  ],
+  "supplementalValidation": [
+    "Require exitCode consistent with status and cwd web; current helper checks status/command but not these explicitly.",
+    "Require exact whole successful summary counts and no nonzero failed/skipped/todo counts; strict tsc has deliberately empty successful stdout.",
+    "Require exact browser result schema/check sets, not only successful log phrase; preserve and hash actual result JSON/screenshots under Round13.",
+    "Require web test-file membership unchanged for *.test.ts/tsx/mjs; prefixes name current runnable tests and fixtures, and intentionally exclude later browser-only journey/required additions. A new runnable test requires fresh run, not silent omission.",
+    "All current-prefix differences must be empty for the relevant inputs. Keep other historical differences visible; never use empty prefix lists as a universal waiver.",
+    "Final input universe must include project-memory/parity/*.py membership and all previous37 source names; new captures cannot retroactively add missing inputs to old records."
+  ],
+  "implementedSlices": [
+    "Atomic authenticated context lifecycle and retained-page epoch/recovery controls",
+    "Transaction-owned session admission for six modern Sales/Tour Order write routes",
+    "Exact saved Tour scalar round trip within existing numeric profile",
+    "Pure and internal Return labour copy/composition plus session-bound read snapshot",
+    "Separate saved incoming labour-and-bill preview with unchanged numeric-save/known-closing prohibitions"
+  ],
+  "requiredOpenAcceptance": [
+    "All34 original execution cards,83 packages and198 whole-menu acceptances remain open; accepted arrays empty and product percentage null.",
+    "Kernel127 rounding bypasses above108, dead33 fields, depth106 above96 remain failed measured gates.",
+    "Known ledger-mode authority/closing, full incoming/source/outgoing admission, numeric Return persistence and broader writer ownership remain open.",
+    "No full desktop Windows/culture/device/business variant or production acceptance follows from these overlapping test counts."
+  ]
+}

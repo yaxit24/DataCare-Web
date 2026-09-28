@@ -1,0 +1,342 @@
+{
+  "cards": [
+    "X13"
+  ],
+  "round": 6,
+  "slice": "saved-primary-incoming-return-exact-read-and-metadata-CAS",
+  "state": "frozen: final scoped and coordinated API/type/build/browser checks passed; bounded metadata slice only",
+  "desktopAcceptance": null,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "capturedAtUtc": "2026-09-11T08:37:52.944659+00:00",
+  "pathBase": "web workspace root",
+  "captureTiming": "Scoped identities frozen after verification. Root captured1028 complete API inputs before the full run and verified unchanged/no additions afterward; this manifest refresh independently rechecked all1028 hashes. Historical focused logs retain their earlier source stages and are not retroactively credited.",
+  "inputs": [
+    {
+      "path": "apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "05c2218ad69b0c0cd8cf1a4e542816a9fcae5c48057ed8c1b27dc1596ba94a06",
+      "bytes": 24233
+    },
+    {
+      "path": "apps/api/test/savedSaleReturn.db.test.ts",
+      "sha256": "4a89b531ea665426669660547b7ab3df941f1e246958fc233aa1c05876724ac7",
+      "bytes": 30055
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "3a769dd9fd4a8cc0280b9ba158f454b583632453702e99f0ad8f521bc358daa1",
+      "bytes": 277717
+    },
+    {
+      "path": "apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "8a88e5f0cbf642a11e6053c870284aaaabfbe6641d97418975535c97e0c062a9",
+      "bytes": 34512
+    },
+    {
+      "path": "apps/api/test/savedSaleReturn.routes.db.test.ts",
+      "sha256": "a1262b7bac71f9dc91e49c7aa9564bfa5ce4c155bf4f5c76257eea6137f12bdc",
+      "bytes": 14598
+    },
+    {
+      "path": "apps/api/test/routePolicy.test.ts",
+      "sha256": "4054a0f42a7330b42b584fb9ae51c26396b9661040c8bed036bc2f7656098b30",
+      "bytes": 32809
+    },
+    {
+      "path": "apps/api/src/modules/shared/bookPolicy.ts",
+      "sha256": "e5a9a6c75f2c4ccb66f7c2504253876ca9b9b3687e5003de8bf4c9362c03ed74",
+      "bytes": 5243
+    },
+    {
+      "path": "apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e",
+      "bytes": 32830
+    },
+    {
+      "path": "apps/api/src/modules/vouchers/numbering.ts",
+      "sha256": "ccf924ae90087c682e8ea915dcaa018cc59e250e9c1825b68600dc20fb2f09db",
+      "bytes": 7987
+    },
+    {
+      "path": "packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32",
+      "bytes": 1381
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754",
+      "bytes": 261920
+    },
+    {
+      "path": "packages/db/prisma/migrations/20260911070000_sale_return_tag_labour_code/migration.sql",
+      "sha256": "585051aaa5d30794ff5248f3c370050cada7edfc2632cbd107dacac8353a9218",
+      "bytes": 260
+    },
+    {
+      "path": "scripts/parity-test-env.mjs",
+      "sha256": "e0f11c41a5f0971aebece64d4cc341825e9986b40ae46baa4303cc293c341ac2",
+      "bytes": 4196
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "bytes": 575218
+    },
+    {
+      "path": "../unified/database/schema/01_Schema.sql",
+      "sha256": "1eb684c7e2bec72a330a9038a2da72ffea669b3ae7ef50b85b34e0e3126efa0d",
+      "bytes": 304194
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/x13-saved-incoming-contract.md",
+      "sha256": "98ed7cc7ddce5e26b4fc52a15024d0d19cf281a57d044ac82a6795a3b2357fce",
+      "bytes": 21837
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/tag-labour-schema-evidence.json",
+      "sha256": "27e233e7f967ba6f4b5c33e891d48015afbb7c4b09ae00a99a218fb2bb5c0a89",
+      "bytes": 1063
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-service-first.txt",
+      "sha256": "a6b410f62ae4ad292640096787b8385b2ed66f0dae5294b4c5c912a6f817a925",
+      "bytes": 3677
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-focused.txt",
+      "sha256": "fbbbeae045d0344568ca33aa4f98c220b59ee0b0575d447ab06cc661da19d924",
+      "bytes": 1456
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-focused-diagnostics.txt",
+      "sha256": "48bf93c77f92306dc6e1d6fdfea22ff631dd15aa708551178b1cd326936d2442",
+      "bytes": 3732
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-focused-verified.txt",
+      "sha256": "a6781b9e994403da8c5cf114fa7788340bacf9ba2d50f15adb788af18b272cfa",
+      "bytes": 2786
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/http-focused-first.txt",
+      "sha256": "e0a6f0f81c99f89c4f88a3bd2d05ddc1447f89ea29efa01025ee233ea6ecaf95",
+      "bytes": 5665
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/http-focused-configured.txt",
+      "sha256": "d40a2136eb498309e669b4cfde4fcee7f63190f044a21f02a6d4293e9758752e",
+      "bytes": 1195
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/api-build-initial.txt",
+      "sha256": "e350485430679169c9e7f63185d2b2fe282d831a2e3c458b4dfd1225f32318f3",
+      "bytes": 1704
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/test-types-before-diagnostics.txt",
+      "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9",
+      "bytes": 188
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/api-full-complete.txt",
+      "sha256": "19edad767b2fbcbea6124b99c98de22850bb843f4f56657a50748d70ce02d685",
+      "bytes": 22303
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/api-input-snapshot-complete.json",
+      "sha256": "f431d79293573072501298408076a393a6604dcac20f5f71ae1c37eef987c8b0",
+      "bytes": 164838
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/api-input-verification-complete.json",
+      "sha256": "7ab62af4f27732d17683263d98b77ba1a1853cad6fd91bc9971816aeb53d8463",
+      "bytes": 353
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/test-types.txt",
+      "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9",
+      "bytes": 188
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/build.txt",
+      "sha256": "2e25d6ec828213c79b6386d13899a8ea088b358ed3cb940e8deba651ea60b000",
+      "bytes": 15018
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/lint.txt",
+      "sha256": "f434677f7d4569cf20d55eb9078f7279d19416b320702724bdcd02a8c0738cf2",
+      "bytes": 3504
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/web-tests.txt",
+      "sha256": "42499ab0a55273b71d7c6194a8bad4adfb9518ab487c80602645c744fcc0ec30",
+      "bytes": 1566
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/core-tests.txt",
+      "sha256": "e93a1ebbba2613dbdc0f8a80f5e492ec671d7b4ee5a4bef169f77d7b3868805c",
+      "bytes": 737
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-complete.txt",
+      "sha256": "7930ac9f5d3c78422e1cd04d4c312fb8402af0f03dd4d6ba134e57383ad0beda",
+      "bytes": 1214
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-smoke-complete.txt",
+      "sha256": "ffba51d0f9678cd63378c0d3f780157e7a06c31ca46f8098682b8be403b2b9b6",
+      "bytes": 520
+    }
+  ],
+  "checks": [
+    {
+      "name": "first service fixtures",
+      "state": "historical failed",
+      "files": 1,
+      "passed": 20,
+      "failed": 1,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-service-first.txt",
+      "explanation": "DM_DATA fixture omitted required MAIN_SRNO/ISR_NO and failed before intended capability assertion. Fixture repaired; product restriction retained."
+    },
+    {
+      "name": "prior focused source stage",
+      "state": "historical passed",
+      "files": 3,
+      "tests": 84,
+      "skipped": 0,
+      "exitCode": 0,
+      "seconds": 4.43,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-focused.txt",
+      "composition": {
+        "service": 21,
+        "http": 9,
+        "routePolicy": 54
+      },
+      "limits": "Predates saved-date/master-diagnostic review corrections."
+    },
+    {
+      "name": "diagnostic review first fixtures",
+      "state": "historical failed",
+      "files": 3,
+      "passed": 88,
+      "failed": 1,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-focused-diagnostics.txt",
+      "explanation": "ITEM_MAST duplicate exact primary-key fixture failed before diagnostic assertion. Corrected to distinct legal VARCHAR keys GOLD and GOLD-space that collide in the existing trimmed lookup; no constraint relaxed."
+    },
+    {
+      "name": "final focused current source",
+      "state": "passed",
+      "files": 3,
+      "tests": 89,
+      "skipped": 0,
+      "exitCode": 0,
+      "seconds": 12.49,
+      "composition": {
+        "service": 26,
+        "http": 9,
+        "routePolicy": 54
+      },
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- test/savedSaleReturn.db.test.ts test/savedSaleReturn.routes.db.test.ts test/routePolicy.test.ts",
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/saved-incoming-focused-verified.txt"
+    },
+    {
+      "name": "strict API test types before diagnostics",
+      "state": "historical passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/test-types-before-diagnostics.txt",
+      "limits": "Parent confirmed exit0; predates five added service cases. Final rerun pending."
+    },
+    {
+      "name": "final strict API test types",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/test-types.txt"
+    },
+    {
+      "name": "coordinated full API",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/api-full-complete.txt",
+      "files": 223,
+      "tests": 1776,
+      "skipped": 0,
+      "seconds": 204.41
+    },
+    {
+      "name": "complete before/after API input verification",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/api-input-verification-complete.json",
+      "inputs": 1028,
+      "changedInputs": 0,
+      "addedInputs": 0,
+      "independentlyRehashedAtFreeze": true
+    },
+    {
+      "name": "production build",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/build.txt",
+      "tasks": 7
+    },
+    {
+      "name": "lint and application types",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/lint.txt",
+      "tasks": 10
+    },
+    {
+      "name": "web unit tests",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/web-tests.txt",
+      "files": 24,
+      "tests": 168
+    },
+    {
+      "name": "core unit tests",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/core-tests.txt",
+      "files": 8,
+      "tests": 106
+    },
+    {
+      "name": "actual browser",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-complete.txt",
+      "journeys": 13,
+      "mockedRequests": 0
+    },
+    {
+      "name": "legacy mocked browser compatibility",
+      "state": "passed",
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round6/browser-smoke-complete.txt",
+      "limits": "Mocked compatibility evidence; not actual-stack or desktop acceptance."
+    }
+  ],
+  "implementedBoundary": [
+    "Complete SQL-text saved SL_DATA/SL_DETL_RTN and read-only related datasets; exact decimal/null/blank/identity/microsecond values retained.",
+    "Dedicated configured-scope list/read/metadata routes. Existing destructive editSaleReturn path is not invoked.",
+    "Eligible untagged incoming HUID/item-description patches; header employee only across supported existing employee-bearing rows and exact source-consistent BAR_DATA.",
+    "Serializable metadata update with full snapshot/hash plus xmin/ctid fingerprints; stale, ABA, recreated-parent and concurrent conflicts reject atomically.",
+    "Standard saved calendar validation even with blank lock date; independent explicit missing/ambiguous master-name diagnostics.",
+    "No finance, stock, numbering, source identity, hidden image/HUID extras, time or MAIN_USER recalculation/replacement. Tagged/issued/unsupported companion states remain read-only."
+  ],
+  "limits": [
+    "No complete33-field closure or full X13 acceptance. Existing import/create/generic numeric writer, original source selection, ghat/discount/calculation order, full tag admission/reversal, outgoing exchange, UAE and exact report parity remain open.",
+    "TAG_LBR_CODE migration default cannot recover historical omitted values; source reimport remains required.",
+    "Complete before-run1028-input snapshot and unchanged-after verification support the final full API result. Historical focused stages remain separately identified; no prior run is relabeled.",
+    "No runtime desktop observation, business sign-off or production deployment is credited."
+  ]
+}

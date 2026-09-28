@@ -1,0 +1,14 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T17:53:35.406683+00:00",
+  "finishedAtUtc": "2026-09-11T17:53:36.909502+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-core-build.txt"
+}

@@ -1,0 +1,10 @@
+{
+  "status": "staged-source-uncompiled",
+  "source": "/tmp/datacare-return-clock-round13/savedSaleReturnClock.ts",
+  "sourceSha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec",
+  "independentFixture": "/tmp/datacare-return-clock-round13-vectors/saved-sale-return-clock.v1.json",
+  "fixtureSha256": "d360162bc731cb383e33146c29265586358413821fca0cf5d94c4bdf753cdd78",
+  "repositoryModified": false,
+  "testsRun": false,
+  "compilerRun": false
+}

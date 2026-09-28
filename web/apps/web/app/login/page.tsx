@@ -1,18 +1,23 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRef, useState } from 'react';
 import { post, ApiError } from '../../lib/api';
+import { useOperationLease } from '../../components/useOperationLease';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [coCode, setCoCode] = useState('01');
   const [loginName, setLoginName] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const { beginOperation } = useOperationLease();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (busyRef.current) return;
+    const isCurrent = beginOperation();
+    if (!isCurrent()) return;
+    busyRef.current = true;
     setErr('');
     setBusy(true);
     try {
@@ -21,12 +26,17 @@ export default function LoginPage() {
         loginName,
         password,
       });
-      router.push(result.forcedReset ? '/password-change' : '/select');
+      if (!isCurrent()) return;
+      window.location.assign(result.forcedReset ? '/password-change' : '/select');
     } catch (e) {
+      if (!isCurrent()) return;
       const m = e instanceof ApiError ? e.body?.error || e.message : 'login failed';
       setErr(m === 'invalid-credentials' ? 'Invalid company / user / password' : m);
     } finally {
-      setBusy(false);
+      if (isCurrent()) {
+        busyRef.current = false;
+        setBusy(false);
+      }
     }
   }
 

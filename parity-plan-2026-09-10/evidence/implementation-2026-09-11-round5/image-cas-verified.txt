@@ -1,0 +1,52 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/entityImageConcurrency.routes.db.test.ts" "test/repairImageConcurrency.routes.db.test.ts" "test/entityImage.db.test.ts" "test/designBook.routes.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/entityImageConcurrency.routes.db.test.ts (15 tests) 1792ms
+ ✓ test/repairImageConcurrency.routes.db.test.ts (8 tests) 1130ms
+ ✓ test/designBook.routes.db.test.ts (5 tests) 520ms
+ ✓ test/entityImage.db.test.ts (18 tests) 282ms
+
+ Test Files  4 passed (4)
+      Tests  46 passed (46)
+   Start at  06:47:48
+   Duration  6.62s (transform 1.03s, setup 0ms, collect 2.08s, tests 3.73s, environment 0ms, prepare 126ms)
+

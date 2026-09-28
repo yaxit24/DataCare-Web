@@ -1,0 +1,73 @@
+{
+ "form": "MS_ITEM",
+ "tables": [
+  "BAR_DETL",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "PRODUCT_MAST": [
+    "CO_CODE",
+    "DATA_TRFR",
+    "MAIN_USER",
+    "PR_CODE",
+    "PR_NAME"
+   ],
+   "GROUP_MAST": [
+    "AVG_FINE",
+    "AVG_NWT",
+    "AVG_TOUCH",
+    "CO_CODE",
+    "DATA_TRFR",
+    "DAY_CL_PCS",
+    "DAY_CL_WT",
+    "DAY_OP_PCS",
+    "DAY_OP_WT",
+    "GR_CODE",
+    "GR_NAME",
+    "GR_PURC_TOUCH",
+    "GR_RATE",
+    "GR_TOUCH",
+    "GR_TYPE",
+    "HSN_CODE",
+    "MAIN_USER",
+    "MELTING_PRC",
+    "OP_FINE",
+    "OP_TOUCH",
+    "PURC_AC",
+    "RATE_DISPLAY",
+    "SALE_AC",
+    "TAX_PRC",
+    "TRAD_TYPE",
+    "WEST_PRC"
+   ]
+  },
+  "UPDATE": [
+   "BAR_DETL"
+  ],
+  "DELETE": [
+   "ITEM_MAST"
+  ]
+ },
+ "selectTables": [
+  "BAR_DETL",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 23,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4029
+}

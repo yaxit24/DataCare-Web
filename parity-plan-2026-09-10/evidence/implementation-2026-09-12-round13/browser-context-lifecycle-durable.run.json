@@ -1,0 +1,24 @@
+{
+  "command": [
+    "env",
+    "SESSION_CONTEXT_ARTIFACT_DIR=test-results/session-context-real-stack-durable",
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "node",
+    "apps/web/test/session-context.real-stack.additive.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:34:29.088422+00:00",
+  "finishedAtUtc": "2026-09-11T21:34:54.812866+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-context-lifecycle-durable.txt",
+  "logSha256": "aea3a8f3043ebd816eadcedd83e47409b05e10db5f6b3f4832902ef3bd30cfa4",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-context-lifecycle-durable.inputs.json",
+  "inputManifestSha256": "e5fc795ca7c599e1045e00c1355caf8dc71a41d18cac9dc54d6de23c71ea9336",
+  "inputCount": 1788,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

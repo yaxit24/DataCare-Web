@@ -1,0 +1,67 @@
+{
+ "form": "MS_LOGIN",
+ "controlCount": 5,
+ "byKind": {
+  "textbox": 2,
+  "label": 3
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "this": [
+   "LblExit",
+   "tPasward",
+   "Label2",
+   "tUserName",
+   "Label1"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tUserName",
+   "type": "TextBox",
+   "location": "146,56",
+   "size": "126,26",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tPasward",
+   "type": "TextBox",
+   "location": "146,100",
+   "size": "127,26",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "44,59",
+   "size": "96,18",
+   "tabIndex": "8",
+   "text": "User Name :",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "57,101",
+   "size": "83,18",
+   "tabIndex": "10",
+   "text": "Password :",
+   "kind": "label"
+  },
+  {
+   "name": "LblExit",
+   "type": "Label",
+   "location": "326,18",
+   "size": "24,25",
+   "tabIndex": "11",
+   "text": "X",
+   "kind": "label"
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-09-10T06:42:30.580160+00:00",
+  "scripts": [
+    {
+      "path": "project-memory/parity/richness_desktop.py",
+      "sha256": "862afb98bf91b3d7c93c02289de34bb7821a7d8515df5e328bbdb7a2679f6b78"
+    },
+    {
+      "path": "project-memory/parity/richness_web.py",
+      "sha256": "254b92b15376e8bd7c90d7f8bbdcc7caa49eda273994185fe7532a17188c8558"
+    },
+    {
+      "path": "project-memory/parity/settings_parity.py",
+      "sha256": "4877590bbe61478c13b95f2dc94487d50a3732d2563e1b7c019a72a93e4010e0"
+    },
+    {
+      "path": "project-memory/parity/gap_manifest.py",
+      "sha256": "0404f2b930215b1c90dbdce0e3f4ab1fc0b0328dd28554aeeb8dbcb5150c5a35"
+    },
+    {
+      "path": "project-memory/parity/settings_effect.py",
+      "sha256": "6a00e17e9a39a6342cbda2f03c37e220af10c421f36db13ca41641603eb7bebe"
+    },
+    {
+      "path": "project-memory/parity/triage_unreachable.py",
+      "sha256": "09f3eb52a9942070c4db11b20236432adf3624705a2843826b50a4d54163f2b4"
+    },
+    {
+      "path": "project-memory/parity/richness_join.py",
+      "sha256": "9232c2403adeafea27da9cd9bd7a91372588ce6fdb980eb8db0627b81401d9eb"
+    }
+  ]
+}

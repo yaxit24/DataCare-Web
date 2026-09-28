@@ -1,0 +1,14 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "scripts/test/ui-descriptors.test.mjs",
+    "scripts/test/request-field-trace.test.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T14:59:23.943625+00:00",
+  "finishedAtUtc": "2026-09-11T14:59:30.860670+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/scanner-tests.txt"
+}

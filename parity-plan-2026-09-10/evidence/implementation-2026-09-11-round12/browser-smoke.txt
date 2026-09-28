@@ -1,0 +1,36 @@
+
+> datacare-web-saas@0.0.0 test:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> pnpm --filter @datacare/web test:browser
+
+
+> @datacare/web@0.0.0 test:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> node test/browser.smoke.mjs
+
+Browser smoke failure diagnostics: /var/folders/qp/2x_ztvln36v5xfrz6_8ks2j40000gn/T/datacare-browser-smoke-failure-NzluAL
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Ctrl+F2 must open /reports/order-lot-zoom
++ actual - expected
+
++ '/dashboard'
+- '/reports/order-lot-zoom'
+
+    at ctrlChord (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:1321:12)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:472:9)
+    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:1332:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '/dashboard',
+  expected: '/reports/order-lot-zoom',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.8.0
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/web@0.0.0 test:browser: `node test/browser.smoke.mjs`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.

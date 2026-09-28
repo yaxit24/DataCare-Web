@@ -80,6 +80,13 @@ export interface PurchaseLineInput {
   labourRate?: number;
   labourPct?: number;
   labourFixed?: number;
+  /**
+   * Labour charge stated outright, which wins over any computed one — the mirror of `metalAmount`.
+   *
+   * Required for a lossless reopen: `LBR_TYPE` cannot hold the web's `percentage` or `fixed` modes, so a
+   * reopened line has no recoverable labour type and would otherwise recompute its labour as zero.
+   */
+  labourAmount?: number;
   otherAmount?: number;
   /** Metal type for the AC_DATA fine-weight sub-ledger leg (desktop parity); default 'G' (gold). */
   metal?: 'G' | 'S';
@@ -101,6 +108,14 @@ export interface PurchaseLineInput {
   lessTouch?: number; // mSG_PR[i,23] :13121
   convRate?: number; // mSG_PR[i,27] :13131
   convPct?: number; // mSG_PR[i,28] :13132
+  /**
+   * The line's rate basis, persisted to `PR_DETL.RATE_TYPE`.
+   *
+   * `'G'` on all 78 captured purchase lines, including silver ones, so it is not the metal — `IT_TYPE` carries
+   * that. The same union is already modelled on `RateCutLine.rateType`. Defaults to `'G'` because that is what
+   * every captured line holds; an explicit value wins.
+   */
+  rateType?: 'P' | '1' | 'K' | 'G';
   urdRateType?: string; // mSG_PR[i,30] :13137
   otherRate?: number; // mSG_PR[i,37] :13129
   mrp?: number; // mSG_PR[i,39] :13139
@@ -111,6 +126,11 @@ export interface PurchaseLineInput {
   fineCutNetWt?: number; // mSG_PR[i,62] :13191
   fineCutFine?: number; // mSG_PR[i,63] :13192
   prCode?: string; // mSG_PR[i,64] :13147
+  /** Consignment receipt source columns for TR_PR_SL_UAE `CON PUR` mode. */
+  consiNo?: string; // mSG_PR[i,36] → PR_DETL.CONSI_NO
+  consiYrcd?: string; // mSG_PR[i,37] → PR_DETL.CONSI_YRCD
+  consiDbcd?: string; // mSG_PR[i,38] → PR_DETL.CONSI_DBCD
+  consiSrno?: number; // mSG_PR[i,39] → PR_DETL.CONSI_SRNO
   /**
    * Stone/diamond sub-detail rows for this line (desktop `DtIdtlPr` grid → PR_IDTL,
    * TR_PURC.cs:13211-13243). An empty grid writes no PR_IDTL rows, so omitting this writes none.
@@ -170,7 +190,14 @@ export interface PurchaseInput {
   tdsAmount?: number;
   /** Purchase booked against a sale bill (TR_PURC.cs:13169-13172 tSlBill / tSlBill_DbCd). */
   saleBillNo?: string;
+  saleBillLc?: string;
+  saleBillYear?: string;
   saleBillBook?: string;
+  /** TR_PR_SL_UAE `CON PUR` header source receipt, persisted in PR_DATA/PR_DETL SL_BILL_* columns. */
+  consiNo?: string;
+  consiLcCode?: string;
+  consiYrcd?: string;
+  consiDbcd?: string;
   discountAmount?: number;
   taxRatePct: number;
   taxCode?: string;
@@ -221,6 +248,8 @@ export function computeLine(
   line: PurchaseLineInput,
   policy?: RoundingPolicy,
   amountType: LineAmountType = '',
+  /** CO_SET_NEW.LBR_WITH_GHT; defaults to the desktop's blank default of true. */
+  labourWithGhat: boolean = true,
 ): {
   fine: number;
   metal: number;
@@ -243,20 +272,37 @@ export function computeLine(
       : rate != null
         ? metalAmount(amountBase, rate)
         : 0;
-  const labour = line.labourType
-    ? labourCharge(
-        line.labourType,
-        {
-          netWt: line.netWt,
-          pcs: line.pcs,
-          rate: line.labourRate,
-          pct: line.labourPct,
-          metalAmount: metal,
-          fixed: line.labourFixed,
-        },
-        policy,
-      )
-    : 0;
+  const labour =
+    // An explicitly stated labour amount wins, exactly as `metalAmount` does for metal above.
+    //
+    // WP-08: without this, reopening a purchase and saving it unchanged SILENTLY ZEROED the labour charge and
+    // reduced the voucher total by that amount. `LBR_TYPE` cannot represent the web's `percentage` and `fixed`
+    // modes — `desktopLabourTypeFor` collapses both to the company default code — so the reader cannot recover
+    // the mode, `line.labourType` comes back undefined, and this expression used to fall through to 0. The
+    // amount, however, IS persisted in `LBR_AMT`, and the reader returns it; honouring it keeps the money
+    // while inventing no labour mode that the desktop column cannot hold.
+    line.labourAmount != null
+      ? Number(line.labourAmount)
+      : line.labourType
+        ? labourCharge(
+            line.labourType,
+            {
+              netWt: line.netWt,
+              pcs: line.pcs,
+              rate: line.labourRate,
+              pct: line.labourPct,
+              metalAmount: metal,
+              fixed: line.labourFixed,
+              // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
+              // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
+              // default 'Y' at MS_OPNCOMP.cs:1224-1226). This was omitted entirely, so labour was
+              // understated by ghat x rate on every line carrying ghat weight.
+              ghatWt: line.ghtWt,
+              withGhat: labourWithGhat,
+            },
+            policy,
+          )
+        : 0;
   const net = calcLineNet({ metal, labour, other: line.otherAmount });
   return { fine, metal, labour, net };
 }
@@ -482,6 +528,17 @@ interface WritePurchaseContext {
   persistedHeader?: Record<string, unknown>;
   /** User performing the edit (desktop NEW_USER). */
   editingUser?: string | null;
+  /** TR_PURC `PR QUOT` mode: persist PR_DATA/PR_DETL/PR_IDTL only; posting routines intentionally match no rows. */
+  quoteMode?: boolean;
+  /**
+   * Tag serials already persisted by THIS voucher, keyed by tag number, read before the rewrite.
+   *
+   * WP-08: an edit deletes and rebuilds the write set, and without this the writer allocated a fresh
+   * `VCH_SRNO` for every tagged line — so reopening a purchase and saving it unchanged changed the tag
+   * IDENTITY (measured 1 → 2), violating plan §7.1 invariants 1 and 2. Tag opening solves the same problem
+   * with the same field name, and this mirrors it.
+   */
+  persistedTagSrnos?: Map<string, number>;
 }
 
 function completePurchaseScope(
@@ -492,6 +549,30 @@ function completePurchaseScope(
       'purchase requires tenant, company, location, fiscal year, and configured book',
     );
   }
+}
+
+/**
+ * Reject a non-numeric header value with a message that names the field.
+ *
+ * WHY THIS EXISTS: `PurchaseInput.taxRatePct` is declared as a required `number`, but the HTTP route
+ * copies `body.taxRatePct` through untouched, so a request that simply omits it passed `undefined`
+ * into the money pipeline and surfaced as an unhandled `[DecimalError] Invalid argument: undefined`
+ * — HTTP 500, no field named. Found by posting a real voucher against the running stack; every test
+ * supplies a complete fixture, so the suite could not see it.
+ *
+ * It deliberately does NOT default the value to 0. A silent 0 would post a tax-free bill for a
+ * company that charges tax, which is worse than a refusal: the voucher would look successful and the
+ * GST return would be wrong. A missing required field is the caller's error and is reported as one.
+ */
+function requirePurchaseNumber(value: unknown, field: string): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  // Accept a numeric string, since HTML form fields arrive as strings.
+  if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) {
+    return Number(value);
+  }
+  throw new PurchaseValidationError(
+    `purchase requires a numeric ${field}; received ${value === undefined ? 'nothing' : JSON.stringify(value)}`,
+  );
 }
 
 async function configuredPurchaseBookNameTx(
@@ -568,7 +649,31 @@ async function writePurchaseTx(
   const tenantId = input.scope.tenantId;
   const vchNo = ctx.vchNo;
   const key = keyOf(input.scope, vchNo);
-  const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'PURCHASE');
+  const linkedSource = purchaseLinkFromInput(input);
+  const actualMainBook = await purchaseMainBookTx(
+    tx,
+    input.scope as VoucherScope & { coYear: string; coBook: string },
+  );
+  const isPurchaseQuotation = actualMainBook === 'PR QUOT';
+  if (ctx.quoteMode && !isPurchaseQuotation) {
+    throw new PurchaseValidationError(
+      `purchase quotation requires BOOK_DATA.MAIN_BOOK='PR QUOT' for book ${input.scope.coBook}`,
+    );
+  }
+  if (isPurchaseQuotation && !ctx.quoteMode) {
+    throw new PurchaseValidationError(
+      `book ${input.scope.coBook} is PR QUOT; use the purchase quotation workflow`,
+    );
+  }
+  const bookPolicy = await resolveBookPolicyTx(
+    tx,
+    input.scope,
+    isPurchaseQuotation
+      ? 'PURCHASE QUOTATION'
+      : actualMainBook === 'CON PUR'
+        ? 'CONSIGNMENT PURCHASE'
+        : 'PURCHASE',
+  );
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
 
   // TR_PURC.cs refuses a voucher whose footer totals are ALL zero — labour amount, pieces, gross weight
@@ -618,7 +723,12 @@ async function writePurchaseTx(
   const computed = lines.map((line) => {
     const rounded =
       line.rate == null ? line : { ...line, rate: roundingPolicy.roundPurchaseRate(line.rate) };
-    const calc = computeLine(rounded, roundingPolicy, behavior.purchaseAmountType);
+    const calc = computeLine(
+      rounded,
+      roundingPolicy,
+      behavior.purchaseAmountType,
+      behavior.labourIncludesGhat,
+    );
     const basis = rounded.labourType === 'per_piece' ? num(rounded.pcs) : num(rounded.netWt);
     const generated = generatedLabourRate(calc.labour, basis, behavior.labourRateGeneration);
     return {
@@ -640,7 +750,18 @@ async function writePurchaseTx(
   // Hallmark purchase (TR_PURC_HM): a hallmarking charge + its own input GST. 0 ⇒ a normal purchase
   // (identical output). Mirror of the sale-HM: here Dr hallmark-expense + Dr input-GST / Cr supplier.
   const hmAmt = round2(num(input.hmAmount));
-  const hmTaxPct = input.hmTaxPct ?? taxPct;
+  /**
+   * `PURC_WITH_HMTAX` — whether GST applies to the hallmark charge (P4).
+   *
+   * The desktop makes this a company switch and gives HM tax its own total row
+   * (TR_PURC_HM.cs:7262-7264, :9394). The web computed it whenever an `hmAmount` was supplied, so a shop
+   * configured not to charge GST on hallmarking was charging it anyway — a wrong tax figure on every
+   * hallmark bill, invisible because the setting appeared to exist.
+   *
+   * The CHARGE itself still posts; only its tax is gated, which is what the desktop does.
+   */
+  const hmTaxApplies = behavior.purchaseWithHallmarkTax;
+  const hmTaxPct = hmTaxApplies ? (input.hmTaxPct ?? taxPct) : 0;
   const hmTax = roundingPolicy.roundTaxAmount((hmAmt * hmTaxPct) / 100);
   const hmCgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax / 2);
   const hmSgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax - hmCgst);
@@ -657,9 +778,11 @@ async function writePurchaseTx(
     return configured;
   };
   const controlAc =
-    totals.total === 0 ? purchaseAc : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
+    isPurchaseQuotation || totals.total === 0
+      ? purchaseAc
+      : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
   let cashAc = input.cashAc ?? 'CASH';
-  if (round2(num(input.cashAmt)) !== 0) {
+  if (!isPurchaseQuotation && round2(num(input.cashAmt)) !== 0) {
     cashAc = validateConfiguredAccount(
       'cash account',
       input.cashAc,
@@ -668,7 +791,7 @@ async function writePurchaseTx(
   }
   let roundAc = requestedRoundAc ?? 'ROUNDOFF';
   let kasarAc = input.kasarAc ?? 'KASAR';
-  if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
+  if (!isPurchaseQuotation && (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
@@ -681,9 +804,10 @@ async function writePurchaseTx(
   );
   const purcAcByItem: Record<string, string> = {};
   const itemTypeByItem: Record<string, 'G' | 'S'> = {};
+  const itemNameByItem: Record<string, string> = {};
   if (itCodes.length) {
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT i."IT_CODE" ic,i."IT_TYPE" typ,g."PURC_AC" pac FROM "ITEM_MAST" i
+      `SELECT i."IT_CODE" ic,i."IT_TYPE" typ,i."IT_NAME" nm,g."PURC_AC" pac FROM "ITEM_MAST" i
          LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
           AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
          WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text = ANY($3::text[])`,
@@ -697,16 +821,24 @@ async function writePurchaseTx(
       const itemType = String(r.typ ?? '')
         .trim()
         .toUpperCase();
-      if (!item || !account)
+      if (!item)
+        throw new PurchaseValidationError(`item not found or invalid: ${item || '?'}`);
+      if (!isPurchaseQuotation && !account)
         throw new PurchaseValidationError(`missing GROUP_MAST.PURC_AC for item ${item || '?'}`);
       if (itemType !== 'G' && itemType !== 'S') {
         throw new PurchaseValidationError(`invalid ITEM_MAST.IT_TYPE for item ${item || '?'}`);
       }
-      purcAcByItem[item] = account;
+      if (account) purcAcByItem[item] = account;
       itemTypeByItem[item] = itemType;
+      // IT_DESC on a metal Rojmel row: the real rows carry the item's name ('FINE GOLD' for 999).
+      itemNameByItem[item] = String(r.nm ?? '').trim();
+    }
+    const missingItems = itCodes.filter((item) => !itemTypeByItem[item]);
+    if (missingItems.length) {
+      throw new PurchaseValidationError(`item configuration missing: ${missingItems.join(', ')}`);
     }
     const missing = itCodes.filter((item) => !purcAcByItem[item]);
-    if (missing.length)
+    if (!isPurchaseQuotation && missing.length)
       throw new PurchaseValidationError(
         `item/group posting configuration missing: ${missing.join(', ')}`,
       );
@@ -732,7 +864,7 @@ async function writePurchaseTx(
     round2(totals.taxable - labourOtherTotal),
     primaryTotal,
   );
-  if (labourOtherTotal !== 0) {
+  if (!isPurchaseQuotation && labourOtherTotal !== 0) {
     expenseLegs.push({
       ac: await resolveBookAccountTx(tx, input.scope, bookPolicy, 4),
       amount: labourOtherTotal,
@@ -740,9 +872,25 @@ async function writePurchaseTx(
   }
 
   // Each purchased tag receives the desktop VCH_SRNO identity even when TAG_NO is manual.
+  //
+  // On an EDIT the identity must not move: a tag already carrying a serial from this voucher keeps it, so
+  // reopening and saving leaves the ornament identifiable. Only a tag this voucher has not seen takes a new
+  // serial, which is what happens on create and when the operator types a different tag number.
+  //
+  // The map is CONSUMED as it is read. Two input lines naming the same tag number must not both claim the
+  // persisted serial — that would mint a duplicate identity, a strictly worse failure than the field loss this
+  // fixes — so the second such line falls through to a fresh allocation exactly as it does today.
+  const persistedTagSrnos = new Map(ctx.persistedTagSrnos ?? []);
   const tagSrnos = new Map<number, number>();
   for (const [index, c] of computed.entries()) {
+    if (isPurchaseQuotation) continue;
     if (!c.in.tagNo) continue;
+    const reused = persistedTagSrnos.get(String(c.in.tagNo).trim());
+    if (reused != null && reused > 0) {
+      persistedTagSrnos.delete(String(c.in.tagNo).trim());
+      tagSrnos.set(index, reused);
+      continue;
+    }
     const allocated = await nextTagNoTx(tx, input.scope, {
       prefix: String(c.in.itCode ?? '').slice(0, 3),
       pad: tagSerialWidth(behavior),
@@ -758,16 +906,30 @@ async function writePurchaseTx(
     VCH_DATE: vchDate,
     VCH_TIME: sharedVoucherTime,
     VCH_TYPE: bookPolicy.vchType,
-    INOUT_TYPE: 'I',
+    INOUT_TYPE: bookPolicy.inout,
     ENTRY_TYPE: 'P',
     BOOK_NAME: bookPolicy.bookName,
     AC_CODE: input.acCode,
     MAIN_USER: ctx.mainUser || null,
     HD_VCH_NO: ctx.hdVchNo,
     SR_NO: idx + 1,
+    // OLD_SRNO carries the line's own serial on original entry — measured equal to SR_NO on all 103 real
+    // PR_DETL rows (0 zero, 0 null). The web wrote 0, breaking any back-reference that joins on it.
+    OLD_SRNO: idx + 1,
     IT_CODE: c.in.itCode,
     IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
-    TAG_NO: c.in.tagNo ?? 'N',
+    /**
+     * `''` on an untagged purchase LINE, not `'N'`.
+     *
+     * The `'N'` sentinel is a `MAIN_STOCK` convention, verified from `Ac_Stock.cs:54` where the desktop writes
+     * `CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END` — the SOURCE rows hold `''` and only the stock row is
+     * converted. `PR_DETL` holds `''` on 78/78 captured rows, and the derived column-default spec agrees.
+     *
+     * So the sentinel is per TABLE, not global. That also puts the WP-08e change to `KR_DETL` in doubt: it was
+     * justified from `TR_KR_ISU.cs:5109`, the karigar form's own save routine, so it is probably right — but it
+     * should be confirmed against captured `KR_DETL` rows rather than assumed from this table.
+     */
+    TAG_NO: c.in.tagNo ?? '',
     VCH_SRNO: tagSrnos.get(idx) ?? 0,
     ITM_PCS: num(c.in.pcs),
     ITM_GWT: num(c.in.grossWt),
@@ -826,7 +988,26 @@ async function writePurchaseTx(
     ITM_LESS_TCH: num(c.in.lessTouch ?? c.in.lesTouch), // mSG_PR[i,23] :13121
     CONV_RATE: num(c.in.convRate), // mSG_PR[i,27] :13131
     CONV_PRC: num(c.in.convPct), // mSG_PR[i,28] :13132
+    /**
+     * The line's rate basis, `'G'` on 78/78 captured rows.
+     *
+     * `PurchaseLineInput.rateType` existed and was accepted, but no `PR_DETL.RATE_TYPE` was ever written — so a
+     * value the caller supplied was silently dropped. Distinct from `URD_RATE_TYPE` below (the unregistered-dealer
+     * basis) and from `IT_RATE_TYPE` on the stone sub-detail.
+     */
+    RATE_TYPE: c.in.rateType ?? 'G',
     URD_RATE_TYPE: text(c.in.urdRateType).slice(0, 1) || null, // mSG_PR[i,30] :13137
+    /**
+     * Three flags the desktop writes as 'N' on every purchase line, and the builder wrote not at all.
+     *
+     * 78/78 in the retained capture. They are not inputs — no `designImgId` / `aprIsu` / `empIsu` exists on
+     * `PurchaseLineInput` — so the form sets them, which means the builder must. The derived column-default spec
+     * carries `''` for all three, which is its GLOBAL default across every PR_DETL row in the database; it cannot
+     * express "a purchase line writes 'N'", so the value belongs here rather than in the spec.
+     */
+    DESIGN_IMG_ID: 'N',
+    APR_ISU: 'N',
+    EMP_ISU: 'N',
     ITM_OTH_RATE: num(c.in.otherRate), // mSG_PR[i,37] :13129
     ITM_MRP: num(c.in.mrp), // mSG_PR[i,39] :13139
     COMM_PRC: num(c.in.commissionPct), // mSG_PR[i,41] :13140
@@ -836,11 +1017,15 @@ async function writePurchaseTx(
     FINE_CUT_NWT: num(c.in.fineCutNetWt), // mSG_PR[i,62] :13191
     FINE_CUT_FINE: num(c.in.fineCutFine), // mSG_PR[i,63] :13192
     PR_CODE: text(c.in.prCode).slice(0, 2) || null, // mSG_PR[i,64] :13147
-    // Sale-bill linkage for a purchase against a sale (tSlBill / tSlBill_DbCd header fields).
-    SL_BILL_NO: text(input.saleBillNo).slice(0, 10) || null, // tSlBill.Text      :13169
-    SL_BILL_LC: input.scope.lcCode, // MLc_code          :13170
-    SL_BILL_YRCD: input.scope.coYear ?? '', // MCo_year          :13171
-    SL_BILL_DBCD: text(input.saleBillBook).slice(0, 3) || null, // tSlBill_DbCd.Text :13172
+    // Sale/consignment source linkage for TR_PURC and TR_PR_SL_UAE.
+    SL_BILL_NO: linkedSource.vchNo || null, // tSlBill/tConsiNo.Text
+    SL_BILL_LC: linkedSource.lcCode, // MLc_code
+    SL_BILL_YRCD: linkedSource.coYear, // source fiscal year
+    SL_BILL_DBCD: linkedSource.coBook || null, // tSlBill_DbCd/tConsiDbCd.Text
+    CONSI_NO: text(c.in.consiNo ?? input.consiNo).slice(0, 10) || null, // mSG_PR[i,36] :8278
+    CONSI_YRCD: text(c.in.consiYrcd ?? input.consiYrcd).slice(0, 9) || null, // mSG_PR[i,37]
+    CONSI_DBCD: text(c.in.consiDbcd ?? input.consiDbcd).slice(0, 3) || null, // mSG_PR[i,38]
+    CONSI_SRNO: num(c.in.consiSrno), // mSG_PR[i,39]
     // Desktop writes these as literal blanks/zeros on the purchase book.
     ITM_SIZE: '', // literal :13106
     KR_NAME: '', // literal :13186
@@ -868,7 +1053,7 @@ async function writePurchaseTx(
       ...key,
       VCH_DATE: vchDate,
       VCH_TYPE: bookPolicy.vchType, // FormBookSname :13217
-      INOUT_TYPE: 'I', // FormBookInOut :13218
+      INOUT_TYPE: bookPolicy.inout, // FormBookInOut :13218
       ENTRY_TYPE: 'P', // literal       :13219
       BOOK_NAME: bookPolicy.bookName, // FormMainBook  :13220
       AC_CODE: input.acCode, // tAcCode.Text  :13221
@@ -910,7 +1095,7 @@ async function writePurchaseTx(
     })),
   );
 
-  const barDetl = computed.flatMap((c, idx) => {
+  const barDetl = isPurchaseQuotation ? [] : computed.flatMap((c, idx) => {
     if (!c.in.tagNo) return [];
     return [
       {
@@ -945,7 +1130,7 @@ async function writePurchaseTx(
       },
     ];
   });
-  const barIdtl = computed.flatMap((c, idx) => {
+  const barIdtl = isPurchaseQuotation ? [] : computed.flatMap((c, idx) => {
     if (!c.in.tagNo) return [];
     return [
       {
@@ -974,7 +1159,26 @@ async function writePurchaseTx(
 
   const header = {
     ...key,
-    BILL_NO: input.billNo ?? formatVoucherNo(vchNo),
+    /**
+     * `''` when the operator supplied no bill number — NOT the voucher number.
+     *
+     * `BILL_NO` is `''` on all 51 captured purchase headers. Defaulting it to the voucher number invented a
+     * supplier's bill reference that the supplier never issued, which is worse than a blank: a blank is honestly
+     * unknown, whereas `00001` looks like a real document number in any report or reconciliation that reads it.
+     */
+    BILL_NO: input.billNo ?? '',
+    /**
+     * The sale-bill back-reference scope and the audit flags, all constant across the captured headers:
+     * `SL_BILL_LC` = the company's location (`'00'`, 51/51), `SL_BILL_YRCD` = its year (`'2024-2025'`, 51/51),
+     * and `USER_UPDATE` / `USER_DELETE` = `'N'` (51/51 each). The detail builder already writes the first two
+     * (`:13170`, `:13171`); the header was omitting them.
+     */
+    SL_BILL_NO: linkedSource.vchNo || null,
+    SL_BILL_LC: linkedSource.lcCode,
+    SL_BILL_YRCD: linkedSource.coYear,
+    SL_BILL_DBCD: linkedSource.coBook || null,
+    USER_UPDATE: 'N',
+    USER_DELETE: 'N',
     AC_CODE: input.acCode,
     AC_NAME: supplierName || null,
     VCH_DATE: vchDate,
@@ -983,7 +1187,20 @@ async function writePurchaseTx(
     HD_VCH_NO: ctx.hdVchNo,
     MAIN_USER: ctx.mainUser || null,
     IT_TYPE: itemTypeByItem[String(computed[0]?.in.itCode ?? '').trim()] ?? 'G',
-    PARTY_FINE: round3(computed.reduce((sum, row) => sum + row.calc.fine, 0)),
+    /**
+     * The party's metal position moves only when the metal came in UNPRICED.
+     *
+     * Measured 51/51 on the captured headers: `PARTY_FINE` is non-zero exactly when every line carries
+     * `ITM_RATE = 0`, and zero whenever a rate was fixed. The same selector produces the metal day-book row, and
+     * for the same reason — metal bought at an agreed price is settled in money, so nothing is owed in metal.
+     *
+     * The web summed the fine unconditionally, so every priced purchase also credited the supplier a metal
+     * balance. That is not a display difference: it is a metal liability the shop does not owe, and it would show
+     * in the party's gold position.
+     */
+    PARTY_FINE: computed.every((row) => !num(row.in.rate))
+      ? round3(computed.reduce((sum, row) => sum + row.calc.fine, 0))
+      : 0,
     LBR_AMT: round2(computed.reduce((sum, row) => sum + row.calc.labour, 0)),
     OTH_AMT: round2(computed.reduce((sum, row) => sum + num(row.in.otherAmount), 0)),
     NET_AMT: totals.net,
@@ -1014,9 +1231,17 @@ async function writePurchaseTx(
     TCS_CODE: text(input.tcsCode).slice(0, 10) || null, // MSG2_TOTAL[3,4]:12987
     TCS_PRC: num(input.tcsPct), // MSG2_TOTAL[3,2]:12988
     TCS_AMT: round2(num(input.tcsAmount)), // MSG2_TOTAL[3,3]:12989
-    TDS_CODE: text(input.tdsCode).slice(0, 10) || null, // MSG2_TOTAL[4,4]:12993
-    TDS_PRC: num(input.tdsPct), // MSG2_TOTAL[4,2]:12994
-    TDS_AMT: round2(num(input.tdsAmount)), // MSG2_TOTAL[4,3]:12995
+    /**
+     * `PR_TDS_TAX` — purchase TDS is persisted only when the company charges it (P4).
+     *
+     * The desktop exposes and writes these three columns only when `MsPrTdsTax = 'Y'` and otherwise
+     * writes blank/zero explicitly (TR_PURC.cs:12160-12172, :12990-13003). The web wrote whatever the
+     * request carried, and the screen always sent the fields, so a company with TDS switched off
+     * still had TDS on its purchase vouchers.
+     */
+    TDS_CODE: behavior.purchaseTdsEnabled ? text(input.tdsCode).slice(0, 10) || null : null,
+    TDS_PRC: behavior.purchaseTdsEnabled ? num(input.tdsPct) : 0,
+    TDS_AMT: behavior.purchaseTdsEnabled ? round2(num(input.tdsAmount)) : 0,
     OZ_RATE: 0, // literal            :13052
     OZ_CONV: 0, // literal            :13053
     FX_RATE: 0, // literal            :13054
@@ -1068,44 +1293,53 @@ async function writePurchaseTx(
 
   // Settlement/tender (F2 payoutLegs): pay the supplier now → Dr supplier / Cr cash|bank + kasar (discount received).
   // No tender ⇒ no legs ⇒ full payable (unchanged). Self-balanced pairs keep the ledger balanced.
-  const tender = payoutLegs(
-    { ...key, VCH_TYPE: bookPolicy.vchType },
-    {
-      partyAc: input.acCode,
-      cashAmt: input.cashAmt,
-      chequeAmt: input.chequeAmt,
-      cardAmt: input.cardAmt,
-      upiAmt: input.upiAmt,
-      kasar: input.kasar,
-      cashAc,
-      bankAc: input.bankAc,
-      kasarAc,
-      // Measured on books 035/036: the settlement pair is 16 party Dr / 17 cash Cr on 5 real vouchers. The
-      // bank and kasar pairs are NOT passed - book 036's kasar pair is 18/19, but no bank settlement appears
-      // in this dataset, so those stay on the reserved-band fallback until measured.
-      legs: { cashParty: PURC_LEG.settleParty, cash: PURC_LEG.settleCash },
-    },
-  );
-  ledger.push(...tender.legs);
+  const tender = isPurchaseQuotation
+    ? {
+        cashAmt: round2(num(input.cashAmt)),
+        paidNow: round2(num(input.cashAmt) + num(input.chequeAmt) + num(input.cardAmt) + num(input.upiAmt)),
+        kasar: round2(num(input.kasar)),
+        legs: [] as LedgerLine[],
+      }
+    : payoutLegs(
+        { ...key, VCH_TYPE: bookPolicy.vchType },
+        {
+          partyAc: input.acCode,
+          cashAmt: input.cashAmt,
+          chequeAmt: input.chequeAmt,
+          cardAmt: input.cardAmt,
+          upiAmt: input.upiAmt,
+          kasar: input.kasar,
+          cashAc,
+          bankAc: input.bankAc,
+          kasarAc,
+          // Measured on books 035/036: the settlement pair is 16 party Dr / 17 cash Cr on 5 real vouchers. The
+          // bank and kasar pairs are NOT passed - book 036's kasar pair is 18/19, but no bank settlement appears
+          // in this dataset, so those stay on the reserved-band fallback until measured.
+          legs: { cashParty: PURC_LEG.settleParty, cash: PURC_LEG.settleCash },
+        },
+      );
+  if (!isPurchaseQuotation) ledger.push(...tender.legs);
 
-  ledger.push(
-    ...buildPurchaseFineLedger({
-      key,
-      acCode: input.acCode,
-      purchaseAc,
-      vchType: bookPolicy.vchType,
-      rateUnfix: input.rateUnfix,
-      purcAcByItem,
-      lines: computed.map((c) => ({
-        itCode: c.in.itCode,
-        metal: itemTypeByItem[String(c.in.itCode ?? '').trim()],
-        fine: c.calc.fine,
-        metalAmount: c.calc.metal,
-        otherFineWt: c.in.otherFineWt,
-        silverFineWt: c.in.silverFineWt,
-      })),
-    }),
-  );
+  if (!isPurchaseQuotation) {
+    ledger.push(
+      ...buildPurchaseFineLedger({
+        key,
+        acCode: input.acCode,
+        purchaseAc,
+        vchType: bookPolicy.vchType,
+        rateUnfix: input.rateUnfix,
+        purcAcByItem,
+        lines: computed.map((c) => ({
+          itCode: c.in.itCode,
+          metal: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+          fine: c.calc.fine,
+          metalAmount: c.calc.metal,
+          otherFineWt: c.in.otherFineWt,
+          silverFineWt: c.in.silverFineWt,
+        })),
+      }),
+    );
+  }
 
   // Satellite tables the desktop TR_PURC also writes: tax register (input) + bill outstanding (payable).
   const r2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
@@ -1197,12 +1431,56 @@ async function writePurchaseTx(
     REC_AMT: tender.paidNow,
     KASAR_AMT: tender.kasar,
   };
+  // What the supplier is still owed after this voucher's own tender and write-off.
+  const outstanding = round2(grandTotal - tender.paidNow - tender.kasar);
 
   // Every purchase detail moves stock; loose inventory uses TAG_NO=N/VCH_SRNO=0.
   const mainStock = computed.map((c, idx) => ({
     ...key,
-    SR_NO: idx + 1,
+    /**
+     * MAIN_STOCK.SR_NO is 1 on a goods-received voucher, NOT a running line number. Measured over every
+     * purchase-book row in the real database: 77 rows, all SR_NO=1, exactly one distinct value — including
+     * multi-line vouchers, where a 3-line purchase writes 1,1,1 and a 4-line writes 1,1,1,1.
+     *
+     * The web wrote `idx + 1`, so every line after the first carried a serial the desktop never uses (27
+     * field differences). This is the same shape as the ITM_QTY defect fixed in F4.1: a column the web
+     * treats as a line ordinal that the desktop uses as a constant on transaction vouchers.
+     *
+     * Deliberately NOT generalised. The bulk stock books DO use SR_NO as a sequence — OPSTK reaches 108 and
+     * TAG GEN 35 — and no single rule fits them: TAG GEN matches rank-within-voucher on 0 of 190 rows while
+     * OPSTK matches on 1189 of 1241. Those paths are left alone because this dataset cannot settle them.
+     */
+    SR_NO: 1,
     VCH_DATE: header.VCH_DATE,
+    /**
+     * The desktop's own purchase stock rows, measured across all 77 in the retained capture, fix these eight
+     * columns exactly. The web wrote none of them, which the 70-case comparison counted as 635 of its 3,813
+     * field differences — the single largest block, and all of it one omission repeated per row.
+     *
+     *   ISR_NO      the LINE ORDINAL within the voucher: 1 row -> 1; 2 rows -> 1,2; 3 -> 1,2,3; 4 -> 1,2,3,4.
+     *               77/77. This is the counterpart to the SR_NO finding recorded below: the desktop holds SR_NO
+     *               constant at 1 on a goods-received voucher and uses ISR_NO for the ordinal, so the web had
+     *               the two exactly the wrong way round.
+     *   STK_DATE    equals VCH_DATE, 77/77.
+     *   KR_NWT      equals ITM_NWT, 77/77.   KR_FINE equals ITM_FINE, 77/77.
+     *   KR_TOUCH    equals ITM_TOUCH, 77/77. KR_WEST equals ITM_WEST, 77/77.
+     *   EMP_CODE    '' on 77/77.             ITM_SIZE '' on 77/77.
+     *
+     * The KR_* group is not a coincidence: on a purchase the karigar-valuation columns carry the same weights as
+     * the item itself, because the metal came in at that purity. Derived from the data rather than reasoned from
+     * the C#, because the data is what the comparison is against.
+     */
+    ISR_NO: idx + 1,
+    /**
+     * A 10-character date STRING, not a Date.
+     *
+     * `MAIN_STOCK.STK_DATE` is `character varying` in this schema while the desktop's is `date` — the only such
+     * divergence in 1,127 compared columns, so it is an isolated schema quirk rather than a systematic one. Every
+     * other writer already accommodates it the same way (`vpParcel.ts:989`, `wholesaleSaleReturn.ts:979` and
+     * `:1036`, `meltingPro.ts:347`, `stockVoucherLifecycle.ts:603`), and passing a Date instead stored a full
+     * timestamp that differed from the desktop on all 79 rows.
+     */
+    STK_DATE: new Date(header.VCH_DATE as Date).toISOString().slice(0, 10),
     VCH_TYPE: bookPolicy.vchType,
     BOOK_NAME: bookPolicy.bookName,
     AC_CODE: input.acCode,
@@ -1211,16 +1489,27 @@ async function writePurchaseTx(
     VCH_SRNO: tagSrnos.get(idx) ?? 0,
     TR_TYPE: 'P',
     ITM_SIGN: '+',
-    ITM_QTY: num(c.in.netWt) || num(c.in.pcs) || 1,
+    ITM_QTY: 1,
     ITM_PCS: num(c.in.pcs) || 1,
     ITM_GWT: num(c.in.grossWt),
     ITM_NWT: num(c.in.netWt),
     ITM_TOUCH: num(c.in.touch),
+    ITM_WEST: num(c.in.westPct),
     ITM_FINE: c.calc.fine,
     ITM_RATE: num(c.in.rate),
     ITM_AMT: c.calc.metal,
     LBR_AMT: c.calc.labour,
+    // Also carried on the desktop's stock row: 13 of 77 rows have a non-zero OTH_AMT and 5 a non-zero LBR_RATE,
+    // so both are line values the builder simply was not passing on.
+    LBR_RATE: num(c.in.labourRate),
+    OTH_AMT: num(c.in.otherAmount),
     NET_AMT: c.calc.net,
+    KR_NWT: num(c.in.netWt),
+    KR_TOUCH: num(c.in.touch),
+    KR_WEST: num(c.in.westPct),
+    KR_FINE: c.calc.fine,
+    EMP_CODE: '',
+    ITM_SIZE: '',
   }));
 
   // TR_PURC.cs:12100,12108,12923,12927: hidden voucher evidence uses configured BOOK_DATA name.
@@ -1252,6 +1541,17 @@ async function writePurchaseTx(
     });
   }
 
+  if (isPurchaseQuotation) {
+    await assertPeriodOpen(tx, tenantId, {
+      ledger: { table: 'AC_DATA', lines: [] },
+      writes: [{ table: 'PR_DATA', rows: [header] }],
+    });
+    await insertRowTx(tx, 'PR_DATA', tenantId, header);
+    for (const row of detl) await insertRowTx(tx, 'PR_DETL', tenantId, row);
+    for (const row of prIdtl) await insertRowTx(tx, 'PR_IDTL', tenantId, row);
+    return { vchNo, totals };
+  }
+
   // The Rojmel, inward. A purchase is the mirror of a sale: metal comes IN (SIGN '+'), the expense
   // account is debited and the party credited. Confirmed against the real desktop database — books 035
   // and 037 (gold purchase) write IT_TYPE 'G' with SIGN '+', 036 and 038 (silver) write 'S' with '+',
@@ -1274,20 +1574,59 @@ async function writePurchaseTx(
         lineNo: idx + 1,
         revenueAc: purcAcByItem[item] ?? purchaseAc,
         amount: c.calc.net,
+        // A METAL ROJMEL ROW CARRIES ITS ITEM; A MONEY ROW NEVER DOES.
+        //
+        // Measured on the real Rojmel across the sale and purchase books: every IT_TYPE 'G'/'S' row has
+        // IT_CODE set (240 rows, 0 blank) and every IT_TYPE 'A' money row has it blank (466 rows, 0 set). The
+        // real purchase line rows carry '999' and 'ORG'; the web was writing them blank because this mapping
+        // never passed the field - the sale caller does, so the builder itself was correct.
+        itemCode: item,
+        // The builder's field is `itemName` (it writes IT_DESC from it); `itemDesc` silently did nothing,
+        // since the line type's optional fields make a typo a no-op rather than an error.
+        itemName: itemNameByItem[item] ?? '',
         metal: rojmelMetalFor(itemTypeByItem[item]),
         pcs: num(c.in.pcs),
         grossWt: num(c.in.grossWt),
         netWt: num(c.in.netWt),
+        /**
+         * Touch, wastage and fine, which the metal day-book row exists to carry.
+         *
+         * The mapping stopped at gross and net, so the unpriced-metal row was written with `ITM_TOUCH`,
+         * `ITM_WEST` and `ITM_FINE` all zero — the row's whole purpose is the fine weight it books against the
+         * party, and it was booking nothing. Measured on the captured rows: `ITM_FINE` 7.917, `ITM_TOUCH` 92.000,
+         * `ITM_WEST` 3.500 where the web wrote 0.
+         */
+        touch: num(c.in.touch),
+        wastage: num(c.in.westPct),
+        fine: c.calc.fine,
         rate: num(c.in.rate),
       };
     }),
-    { taxAc, taxAmount: totals.tax, partyAmount: totals.total },
+    {
+      taxAc,
+      taxAmount: totals.tax,
+      // THE PARTY ROJMEL ROW IS CONDITIONAL ON THE BILL BEING OUTSTANDING, and this argument is that
+      // OUTSTANDING amount - buildSaleRojmel names its local `outstanding` - not the bill total.
+      //
+      // Family 1 measured the rule on the sale books: of 47 sales with BILL_OS = 0, ZERO carry a party row;
+      // of 42 with BILL_OS <> 0, all 42 do. A settled bill leaves no receivable for a day book to show.
+      // Passing `totals.total` made the condition always true, so every purchase got a party row.
+      //
+      // It reproduces on the real purchase books. Voucher 035/00001 pays 6780.00 cash against a 6780.00 bill
+      // - BILL_OS 0 - and has ONE Rojmel row, the line row. Voucher 035/00003 leaves a balance and has three.
+      // I first recorded that pair as a DESKTOP INCONSISTENCY, having compared them on line count and tender
+      // without checking BILL_OS - the discriminator already measured and written into rojmel.ts in family 1.
+      // Retracted here because "the desktop is inconsistent" ends investigation and invites an invented rule.
+      partyAmount: round2(grandTotal - tender.paidNow - tender.kasar),
+    },
     false, // inward: metal in, party credited
   );
 
   await postVoucherTx(tx, tenantId, {
     ledger: { table: 'AC_DATA', lines: ledger },
     bookName: bookPolicy.bookName,
+    // Lets the poster stamp PARTY_AC_CODE on the supplier's own leg only, which is the desktop's rule.
+    partyAc: input.acCode,
     writes: [
       { table: 'PR_DATA', rows: [header] },
       { table: 'PR_DETL', rows: detl },
@@ -1296,7 +1635,15 @@ async function writePurchaseTx(
       ...(barIdtl.length ? [{ table: 'BAR_IDTL', rows: barIdtl }] : []),
       ...(mainStock.length ? [{ table: 'MAIN_STOCK', rows: mainStock }] : []),
       ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
-      { table: 'BILL_OS_DATA', rows: [osRow] },
+      /**
+       * The payable register row is written only when something is actually OUTSTANDING.
+       *
+       * The desktop writes no `BILL_OS_DATA` at all for any of the 51 captured purchases — every one is settled
+       * in full at entry — yet the web wrote one unconditionally. A payable row for a bill that was paid on the
+       * spot is not a cosmetic difference: it is a liability the business does not owe, and it appears in
+       * outstanding and ageing reports as though it were real.
+       */
+      ...(outstanding > 0.005 ? [{ table: 'BILL_OS_DATA', rows: [osRow] }] : []),
       ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
     ],
   });
@@ -1304,6 +1651,21 @@ async function writePurchaseTx(
   // Lot register (LOT_DETL): desktop Ac_Stock.PrKr_Lot runs after the voucher rows exist and copies
   // them through the same joins (Ac_Stock.cs:624). Narrowed to this voucher so a save never rebuilds
   // the whole company register. LOT_DETL is in PURCHASE_WRITE_TABLES, so edit/delete reverse it.
+  /**
+   * Staged unconditionally, DELIBERATELY, despite the comparison reporting 78 lot rows the desktop did not have.
+   *
+   * A guard on "does any line name a lot" was written and then reverted, because it contradicts the desktop's own
+   * source: `Ac_Stock.cs`'s `LOT_DETL` insert filters only on `MAIN_BOOK IN ('PURCHASE','B2B PURC')` and
+   * `BOOK_INOUT = 'I'` — there is NO lot-number condition, so the desktop stages every purchase line.
+   *
+   * The captured data disagrees: none of the 51 purchase vouchers has a `LOT_DETL` row. The likely reconciliation
+   * is that `PrKr_Lot` is a separate stock-posting pass rather than part of the voucher save — this module's own
+   * comment says it "runs after the voucher rows exist" — so the capture may simply predate the pass for these
+   * vouchers.
+   *
+   * Two readings, opposite conclusions, and no evidence here to settle which. Guessing would either invent lot
+   * rows or suppress real ones, so the source is followed and the discrepancy is recorded instead.
+   */
   await stagePurchaseLotDetailTx(
     tx,
     tenantId,
@@ -1349,11 +1711,49 @@ export async function createPurchase(
   lines: PurchaseLineInput[],
 ): Promise<PurchaseResult> {
   completePurchaseScope(input.scope);
+  // Fail with the field name rather than a DecimalError 500 (see requirePurchaseNumber).
+  input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
+    let writeInput = input;
+    let writeLines = lines;
+    if (isConsignmentPurchase) {
+      const normalized = normalizeConsignmentPurchaseInput(input, lines);
+      await assertConsignmentPurchaseSourceOpenTx(tx, normalized.input, normalized.lines);
+      writeInput = normalized.input;
+      writeLines = normalized.lines;
+    }
     // TR_PURC.cs:12911 allocates the main number from PR_DATA with year in scope.
     const vchNo = await nextVoucherNoTx(tx, scope);
     // TR_PURC.cs:12100,12108,12923,12927 allocate hidden numbering without fiscal year.
+    const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
+    const result = await writePurchaseTx(tx, writeInput, writeLines, {
+      vchNo,
+      hdVchNo,
+      mainUser: String(writeInput.mainUser ?? '').trim(),
+      persistedClock: undefined,
+      isEdit: false,
+    });
+    if (isConsignmentPurchase) {
+      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, formatVoucherNo(result.vchNo), 1);
+    }
+    return result;
+  });
+}
+
+/** Create a persisted TR_PURC `PR QUOT` voucher without ledger, tax, stock, rojmel, bill-OS or lot postings. */
+export async function createPurchaseQuotation(
+  prisma: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+): Promise<PurchaseResult> {
+  completePurchaseScope(input.scope);
+  input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
+  const scope = input.scope;
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
+    const vchNo = await nextVoucherNoTx(tx, scope);
     const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
     return writePurchaseTx(tx, input, lines, {
       vchNo,
@@ -1361,6 +1761,68 @@ export async function createPurchase(
       mainUser: String(input.mainUser ?? '').trim(),
       persistedClock: undefined,
       isEdit: false,
+      quoteMode: true,
+    });
+  });
+}
+
+export async function getPurchaseQuotation(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<Record<string, unknown>> {
+  completePurchaseScope(scope);
+  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
+  });
+  return getPurchase(prisma, scope, requestedVoucherNo);
+}
+
+/** Replace a purchase quotation in-place, preserving the desktop hidden voucher identity. */
+export async function editPurchaseQuotation(
+  prisma: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+  requestedVoucherNo: number | string,
+): Promise<PurchaseResult> {
+  completePurchaseScope(input.scope);
+  input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
+  const scope = input.scope;
+  const voucherNo = formatVoucherNo(requestedVoucherNo);
+  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
+    const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo);
+    const priorHeaderRow: Record<string, unknown> | undefined = (
+      await tx.$queryRawUnsafe(
+        `SELECT * FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+           AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+        ...purchaseParams(scope, voucherNo),
+      )
+    )[0];
+    await assertPeriodOpen(tx, scope.tenantId, {
+      ledger: {
+        table: 'AC_DATA',
+        lines: [{ CO_CODE: scope.coCode, VCH_DATE: persisted.VCH_DATE }],
+      },
+    });
+    await assertPeriodOpen(tx, scope.tenantId, {
+      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: requestedDate }] },
+    });
+    await deleteVoucherWriteSetTx(tx, {
+      tables: PURCHASE_QUOTATION_WRITE_TABLES,
+      key: { scope, voucherNo },
+      tempBook: { voucherNo: formatVoucherNo(text(persisted.HD_VCH_NO)) },
+    });
+    return writePurchaseTx(tx, input, lines, {
+      vchNo: Number(voucherNo),
+      hdVchNo: formatVoucherNo(text(persisted.HD_VCH_NO)),
+      mainUser: text(persisted.MAIN_USER),
+      persistedClock: persisted.VCH_CLOCK,
+      isEdit: true,
+      persistedHeader: priorHeaderRow,
+      editingUser: input.mainUser ?? null,
+      quoteMode: true,
     });
   });
 }
@@ -1370,6 +1832,8 @@ export interface DeletePurchaseInput {
   vchNo: number | string;
   deleteUser?: string;
 }
+
+const PURCHASE_QUOTATION_WRITE_TABLES = ['PR_DATA', 'PR_DETL', 'PR_IDTL'] as const;
 
 const PURCHASE_WRITE_TABLES = [
   'PR_DATA',
@@ -1401,6 +1865,166 @@ const purchaseParams = (scope: CompletePurchaseScope, voucherNo: string): unknow
   voucherNo,
 ];
 
+type PurchaseSourceLink = {
+  vchNo: string;
+  lcCode: string;
+  coYear: string;
+  coBook: string;
+};
+
+function purchaseLinkFromInput(input: PurchaseInput): PurchaseSourceLink {
+  return {
+    vchNo: text(input.consiNo || input.saleBillNo).slice(0, 10),
+    lcCode: text(input.consiLcCode || input.saleBillLc || input.scope.lcCode).slice(0, 2),
+    coYear: text(input.consiYrcd || input.saleBillYear || input.scope.coYear).slice(0, 10),
+    coBook: text(input.consiDbcd || input.saleBillBook).slice(0, 3),
+  };
+}
+
+async function purchaseMainBookTx(tx: any, scope: CompletePurchaseScope): Promise<string> {
+  const rows: Array<{ MAIN_BOOK: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "MAIN_BOOK" FROM "BOOK_DATA"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+        AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
+      ORDER BY row_id`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+  );
+  if (rows.length !== 1) {
+    throw new PurchaseValidationError(`purchase book configuration is ambiguous: ${scope.coBook}`);
+  }
+  return text(rows[0]?.MAIN_BOOK).toUpperCase();
+}
+
+async function assertPurchaseMainBookTx(
+  tx: any,
+  scope: CompletePurchaseScope,
+  expectedMainBook: string,
+  label: string,
+): Promise<void> {
+  const mainBook = await purchaseMainBookTx(tx, scope);
+  if (mainBook !== expectedMainBook.toUpperCase()) {
+    throw new PurchaseValidationError(
+      `${label} requires BOOK_DATA.MAIN_BOOK='${expectedMainBook}' for book ${scope.coBook}`,
+    );
+  }
+}
+
+function normalizeConsignmentPurchaseInput(
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+): { input: PurchaseInput; lines: PurchaseLineInput[]; source: PurchaseSourceLink } {
+  const source = purchaseLinkFromInput(input);
+  if (!source.vchNo || !source.coYear || !source.coBook) {
+    throw new PurchaseValidationError(
+      'consignment purchase requires source consignment receipt no, year, and book',
+    );
+  }
+  const normalizedLines = lines.map((line) => ({
+    ...line,
+    consiNo: text(line.consiNo || source.vchNo).slice(0, 10),
+    consiYrcd: text(line.consiYrcd || source.coYear).slice(0, 9),
+    consiDbcd: text(line.consiDbcd || source.coBook).slice(0, 3),
+    consiSrno: num(line.consiSrno),
+  }));
+  const missingLine = normalizedLines.find((line) => !line.consiNo || !line.consiYrcd || !line.consiDbcd || !line.consiSrno);
+  if (missingLine) {
+    throw new PurchaseValidationError('each consignment purchase line requires a source line serial');
+  }
+  return {
+    input: {
+      ...input,
+      consiNo: source.vchNo,
+      consiLcCode: source.lcCode,
+      consiYrcd: source.coYear,
+      consiDbcd: source.coBook,
+    },
+    lines: normalizedLines,
+    source,
+  };
+}
+
+async function assertConsignmentPurchaseSourceOpenTx(
+  tx: any,
+  input: PurchaseInput,
+  lines: PurchaseLineInput[],
+): Promise<void> {
+  const normalized = normalizeConsignmentPurchaseInput(input, lines);
+  const source = normalized.source;
+  const srnos = [...new Set(normalized.lines.map((line) => num(line.consiSrno)).filter((n) => n > 0))];
+  const rows: Array<{ OLD_SRNO: unknown; CON_ISU_REC: unknown; MAIN_BOOK: unknown }> =
+    await tx.$queryRawUnsafe(
+      `SELECT a."OLD_SRNO",a."CON_ISU_REC",d."MAIN_BOOK"
+         FROM "APR_DETL" a
+         JOIN "BOOK_DATA" d ON d.tenant_id=a.tenant_id AND d."CO_CODE"=a."CO_CODE"
+          AND d."LC_CODE"=a."LC_CODE" AND d."CO_BOOK"=a."CO_BOOK"
+        WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3
+          AND a."CO_YEAR"=$4 AND a."CO_BOOK"=$5 AND a."VCH_NO"=$6
+          AND coalesce(a."OLD_SRNO",0)::numeric = ANY($7::numeric[])
+          AND d."MAIN_BOOK"='CON REC'
+        ORDER BY a."OLD_SRNO" FOR UPDATE OF a`,
+      input.scope.tenantId,
+      input.scope.coCode,
+      source.lcCode,
+      source.coYear,
+      source.coBook,
+      source.vchNo,
+      srnos,
+    );
+  const found = new Set(rows.map((row) => num(row.OLD_SRNO)));
+  const missing = srnos.filter((srno) => !found.has(srno));
+  if (missing.length) {
+    throw new PurchaseValidationError(
+      `consignment receipt line not found or not a CON REC source: ${missing.join(', ')}`,
+    );
+  }
+  const closed = rows.filter((row) => text(row.CON_ISU_REC).toUpperCase() === 'Y');
+  if (closed.length) {
+    throw new PurchaseValidationError(
+      `consignment receipt line already purchased: ${closed.map((row) => num(row.OLD_SRNO)).join(', ')}`,
+    );
+  }
+}
+
+async function applyConsignmentPurchaseAdjustmentsTx(
+  tx: any,
+  scope: CompletePurchaseScope,
+  voucherNo: string,
+  direction: 1 | -1,
+): Promise<void> {
+  const flag = direction > 0 ? 'Y' : 'N';
+  await tx.$executeRawUnsafe(
+    `WITH refs AS (
+       SELECT "CONSI_YRCD","CONSI_DBCD","CONSI_NO","CONSI_SRNO",
+              sum(coalesce("ITM_GWT",0))::double precision AS gwt,
+              sum(coalesce("ITM_NWT",0))::double precision AS nwt
+         FROM "PR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+          AND nullif(btrim(coalesce("CONSI_NO"::text,'')),'') IS NOT NULL
+        GROUP BY "CONSI_YRCD","CONSI_DBCD","CONSI_NO","CONSI_SRNO"
+     )
+     UPDATE "APR_DETL" a
+        SET "ADJ_GWT"=coalesce(a."ADJ_GWT",0)::double precision + ($7::double precision * refs.gwt),
+            "ADJ_NWT"=coalesce(a."ADJ_NWT",0)::double precision + ($7::double precision * refs.nwt),
+            "CON_ISU_REC"=$8
+       FROM refs
+      WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3
+        AND a."CO_YEAR"=refs."CONSI_YRCD" AND a."CO_BOOK"=refs."CONSI_DBCD"
+        AND a."VCH_NO"=refs."CONSI_NO" AND coalesce(a."OLD_SRNO",0)=coalesce(refs."CONSI_SRNO",0)`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear,
+    scope.coBook,
+    voucherNo,
+    direction,
+    flag,
+  );
+}
+
 async function persistedPurchaseHeaderTx(
   tx: any,
   scope: CompletePurchaseScope,
@@ -1425,13 +2049,19 @@ async function persistedPurchaseHeaderTx(
   }
 }
 
-/** Reject removal/rewrite when a tag created by this purchase was consumed by another voucher. */
+/**
+ * Reject removal/rewrite when a tag created by this purchase was consumed by another voucher.
+ *
+ * Also RETURNS the persisted tag serials it read, keyed by tag number. It already reads and locks exactly the
+ * rows the writer needs in order to keep each tag's identity across an edit; returning them costs nothing and
+ * discarding them was the cause of the identity moving on an unchanged save (WP-08).
+ */
 async function assertPurchaseTagsUnconsumedTx(
   tx: any,
   scope: CompletePurchaseScope,
   voucherNo: string,
   action: 'edited' | 'deleted',
-): Promise<void> {
+): Promise<Map<string, number>> {
   const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "TAG_NO","VCH_SRNO","IT_CODE" FROM "BAR_DETL"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
@@ -1471,6 +2101,16 @@ async function assertPurchaseTagsUnconsumedTx(
       );
     }
   }
+  // Keyed by tag number for the writer. A tag number appearing twice in the persisted set would make the
+  // identity ambiguous, so the FIRST is kept and the caller allocates a fresh serial for any further line —
+  // never two lines sharing one serial.
+  const persistedTagSrnos = new Map<string, number>();
+  for (const tag of tags) {
+    const tagNo = text(tag.TAG_NO);
+    if (!tagNo || persistedTagSrnos.has(tagNo)) continue;
+    persistedTagSrnos.set(tagNo, Number(tag.VCH_SRNO ?? 0));
+  }
+  return persistedTagSrnos;
 }
 
 /** Restore desktop approval/order source flags before BAR_DETL is removed. */
@@ -1512,11 +2152,12 @@ export async function getPurchase(
     const params = purchaseParams(scope, voucherNo);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
-              "AC_CODE","AC_NAME","NET_AMT","DISC_AMT","TAX_CODE","TAX_PRC","TAX_AMT",
-              "AC_GST_TYPE","CGST_TAX","SGST_TAX","IGST_TAX","ROF_AMT","TOT_AMT",
-              "RATE_UNFIX","CASH_AMT","CARD_AMT","CHQ_AMT","KASAR_AMT","BILL_OS",
-              "BANK_AC","HM_AMT","HM_TAX_PRC","HM_TAX_AMT","IT_TYPE","PARTY_FINE","VCH_DESC"
-         FROM "PR_DATA"
+               "AC_CODE","AC_NAME","NET_AMT","DISC_AMT","TAX_CODE","TAX_PRC","TAX_AMT",
+               "AC_GST_TYPE","CGST_TAX","SGST_TAX","IGST_TAX","ROF_AMT","TOT_AMT",
+               "RATE_UNFIX","CASH_AMT","CARD_AMT","CHQ_AMT","KASAR_AMT","BILL_OS",
+               "BANK_AC","HM_AMT","HM_TAX_PRC","HM_TAX_AMT","IT_TYPE","PARTY_FINE","VCH_DESC",
+               "SL_BILL_NO","SL_BILL_LC","SL_BILL_YRCD","SL_BILL_DBCD"
+          FROM "PR_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
           AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
       ...params,
@@ -1532,8 +2173,13 @@ export async function getPurchase(
       `SELECT "SR_NO","IT_CODE","IT_TYPE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT",
               "ITM_NWT","ITM_TOUCH","ITM_GHT_WT","ITM_WEST_PRC","ITM_FINE",
               "ITM_OTH_FINE","SILVER_FINE","ITM_RATE","ITM_AMT","LBR_TYPE","LBR_PRC",
-              "LBR_RATE","LBR_AMT","OTH_AMT","NET_AMT","HM_ID"
-         FROM "PR_DETL"
+               "LBR_RATE","LBR_AMT","OTH_AMT","NET_AMT","HM_ID",
+               -- WP-08: selecting a column is half the job; the mapping below must read it. Both halves
+               -- were missing for these, so an unchanged save wiped them.
+               "DESIGN_NO","TBL_CODE","IT_DESC","BAG_WT","ITM_MRP","ITM_OTH_RATE","COMM_PRC","ITM_OTH_WT",
+               "SL_BILL_NO","SL_BILL_LC","SL_BILL_YRCD","SL_BILL_DBCD",
+               "CONSI_NO","CONSI_YRCD","CONSI_DBCD","CONSI_SRNO"
+          FROM "PR_DETL"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
           AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       ...params,
@@ -1547,6 +2193,63 @@ export async function getPurchase(
           AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       ...params,
     );
+    /**
+     * Stone sub-detail (`PR_IDTL`). Selected AND mapped, because the writer persists these rows
+     * (`:953`) and `PR_IDTL` is in `PURCHASE_WRITE_TABLES`, so an edit deletes and rebuilds them
+     * from its input. A reader that omitted them meant a reopen-and-save silently destroyed every
+     * stone on the voucher — the same defect class WP-08 found on `BAR_DETL`, where an unchanged
+     * save wiped 43 of 109 columns. Asserted by the sub-detail case in
+     * `test/operatorDepth.roundtrip.db.test.ts`.
+     */
+    const stoneRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","ISR_NO","IT_CODE","DM_CODE","DM_NAME","DM_COLOR","DM_SIZE","DM_ORIGIN",
+              "DM_REMARK","DM_SFNO","IT_PCS","IT_GWT","IT_PCS_WT","IT_CON_PRC","IT_CON_WT",
+              "IT_RATE_TYPE","IT_RATE","IT_AMT","IT_LBR_RATE","IT_LBR_AMT","IT_NET_AMT","IT_TYPE",
+              "KR_WT","KR_LESS_PRC","KR_CON_PRC","KR_CON_WT","KR_RATE","KR_AMT","KR_LBR_RATE",
+              "KR_LBR_AMT","KR_NET_AMT"
+         FROM "PR_IDTL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO","ISR_NO"`,
+      ...params,
+    );
+    const stonesBySrNo = new Map<number, Array<Record<string, unknown>>>();
+    for (const row of stoneRows) {
+      const srNo = num(row.SR_NO);
+      const list = stonesBySrNo.get(srNo) ?? [];
+      list.push({
+        isrNo: num(row.ISR_NO),
+        itCode: text(row.IT_CODE),
+        dmCode: text(row.DM_CODE),
+        dmName: text(row.DM_NAME),
+        dmColor: text(row.DM_COLOR),
+        dmSize: text(row.DM_SIZE),
+        dmOrigin: text(row.DM_ORIGIN),
+        dmRemark: text(row.DM_REMARK),
+        dmSfNo: text(row.DM_SFNO),
+        pcs: num(row.IT_PCS),
+        grossWt: num(row.IT_GWT),
+        pcsWt: num(row.IT_PCS_WT),
+        conPct: num(row.IT_CON_PRC),
+        conWt: num(row.IT_CON_WT),
+        rateType: text(row.IT_RATE_TYPE),
+        rate: num(row.IT_RATE),
+        amount: num(row.IT_AMT),
+        lbrRate: num(row.IT_LBR_RATE),
+        lbrAmount: num(row.IT_LBR_AMT),
+        netAmount: num(row.IT_NET_AMT),
+        itType: text(row.IT_TYPE),
+        karigarWt: num(row.KR_WT),
+        karigarLessPct: num(row.KR_LESS_PRC),
+        karigarConPct: num(row.KR_CON_PRC),
+        karigarConWt: num(row.KR_CON_WT),
+        karigarRate: num(row.KR_RATE),
+        karigarAmount: num(row.KR_AMT),
+        karigarLabourRate: num(row.KR_LBR_RATE),
+        karigarLabourAmount: num(row.KR_LBR_AMT),
+        karigarNetAmount: num(row.KR_NET_AMT),
+      });
+      stonesBySrNo.set(srNo, list);
+    }
     const h = headers[0]!;
     const labourType = (value: unknown): LabourType | undefined =>
       legacyLabourModeFor(value) as LabourType | undefined;
@@ -1556,6 +2259,14 @@ export async function getPurchase(
       mainUser: text(h.MAIN_USER),
       vchDate: text(h.VCH_DATE).slice(0, 10),
       billNo: text(h.BILL_NO),
+      saleBillNo: text(h.SL_BILL_NO),
+      saleBillLc: text(h.SL_BILL_LC),
+      saleBillYear: text(h.SL_BILL_YRCD),
+      saleBillBook: text(h.SL_BILL_DBCD),
+      consiNo: text(h.SL_BILL_NO),
+      consiLcCode: text(h.SL_BILL_LC),
+      consiYrcd: text(h.SL_BILL_YRCD),
+      consiDbcd: text(h.SL_BILL_DBCD),
       acCode: text(h.AC_CODE),
       acName: text(h.AC_NAME),
       taxCode: text(h.TAX_CODE),
@@ -1613,6 +2324,28 @@ export async function getPurchase(
         otherAmount: num(row.OTH_AMT),
         netAmount: num(row.NET_AMT),
         huid: text(row.HM_ID),
+        // WP-08: descriptive and rate fields the writer persists and the reader used to drop. Because
+        // `editPurchase` rebuilds PR_DETL from its input, an unchanged save wiped each of these — measured as
+        // DESIGN_NO, TBL_CODE, IT_DESC and COMM_PRC to null/0, and BAG_WT, ITM_OTH_WT, ITM_MRP, ITM_OTH_RATE
+        // to 0. Asserted by the round-trip test in purchase.lifecycle.db.test.ts.
+        designNo: text(row.DESIGN_NO),
+        tblCode: text(row.TBL_CODE),
+        itDesc: text(row.IT_DESC),
+        bagWt: num(row.BAG_WT),
+        lessWt: num(row.ITM_OTH_WT),
+        mrp: num(row.ITM_MRP),
+        otherRate: num(row.ITM_OTH_RATE),
+        commissionPct: num(row.COMM_PRC),
+        saleBillNo: text(row.SL_BILL_NO),
+        saleBillLc: text(row.SL_BILL_LC),
+        saleBillYear: text(row.SL_BILL_YRCD),
+        saleBillBook: text(row.SL_BILL_DBCD),
+        consiNo: text(row.CONSI_NO),
+        consiYrcd: text(row.CONSI_YRCD),
+        consiDbcd: text(row.CONSI_DBCD),
+        consiSrno: num(row.CONSI_SRNO),
+        // Stone rows for this line, keyed by the parent SR_NO the writer used.
+        stones: stonesBySrNo.get(num(row.SR_NO)) ?? [],
       })),
       tags: tags.map((row) => ({
         srNo: num(row.SR_NO),
@@ -1635,6 +2368,198 @@ export async function getPurchase(
   });
 }
 
+export interface ConsignmentReceiptFilter {
+  sourceVchNo?: number | string;
+  sourceCoYear?: string;
+  sourceCoBook?: string;
+}
+
+export async function listOpenConsignmentPurchaseReceipts(
+  prisma: any,
+  scope: VoucherScope,
+  filter: ConsignmentReceiptFilter = {},
+): Promise<Record<string, unknown>> {
+  completePurchaseScope(scope);
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await assertPurchaseMainBookTx(tx, scope, 'CON PUR', 'consignment purchase');
+    const sourceYear = text(filter.sourceCoYear || scope.coYear);
+    const sourceBook = text(filter.sourceCoBook);
+    const sourceVchNo = filter.sourceVchNo == null ? '' : formatVoucherNo(filter.sourceVchNo);
+
+    const summaryParams: unknown[] = [scope.tenantId, scope.coCode, scope.lcCode, sourceYear];
+    const summaryBookSql = sourceBook ? 'AND a."CO_BOOK"=$5' : '';
+    if (sourceBook) summaryParams.push(sourceBook);
+    const summaryRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT a."VCH_NO" AS "voucherNo",
+              min(a."VCH_DATE"::text) AS "vchDate",
+              min(a."AC_CODE"::text) AS "acCode",
+              min(c."AC_NAME"::text) AS "acName",
+              a."CO_YEAR" AS "coYear",
+              a."CO_BOOK" AS "coBook",
+              sum(coalesce(a."ITM_GWT",0))::float AS "grossWt",
+              sum(coalesce(a."ADJ_GWT",0))::float AS "adjustGrossWt",
+              sum(coalesce(a."ITM_GWT",0)-coalesce(a."ADJ_GWT",0))::float AS "balanceGrossWt",
+              sum(coalesce(a."ITM_NWT",0))::float AS "netWt",
+              sum(coalesce(a."ADJ_NWT",0))::float AS "adjustNetWt",
+              sum(coalesce(a."ITM_NWT",0)-coalesce(a."ADJ_NWT",0))::float AS "balanceNetWt"
+         FROM "APR_DETL" a
+         JOIN "BOOK_DATA" d ON d.tenant_id=a.tenant_id AND d."CO_CODE"=a."CO_CODE"
+          AND d."LC_CODE"=a."LC_CODE" AND d."CO_BOOK"=a."CO_BOOK"
+         LEFT JOIN "AC_MAST" c ON c.tenant_id=a.tenant_id AND c."CO_CODE"=a."CO_CODE"
+          AND c."LC_CODE"=a."LC_CODE" AND c."AC_CODE"=a."AC_CODE"
+        WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3
+          AND a."CO_YEAR"=$4 ${summaryBookSql} AND d."MAIN_BOOK"='CON REC'
+        GROUP BY a."VCH_NO",a."CO_YEAR",a."CO_BOOK"
+       HAVING sum(coalesce(a."ITM_NWT",0)-coalesce(a."ADJ_NWT",0)) > 0
+        ORDER BY a."VCH_NO"`,
+      ...summaryParams,
+    );
+    const receipts = summaryRows.map((row) => ({
+      voucherNo: text(row.voucherNo),
+      vchDate: text(row.vchDate).slice(0, 10),
+      acCode: text(row.acCode),
+      acName: text(row.acName),
+      coYear: text(row.coYear),
+      coBook: text(row.coBook),
+      grossWt: num(row.grossWt),
+      adjustGrossWt: num(row.adjustGrossWt),
+      balanceGrossWt: num(row.balanceGrossWt),
+      netWt: num(row.netWt),
+      adjustNetWt: num(row.adjustNetWt),
+      balanceNetWt: num(row.balanceNetWt),
+    }));
+    if (!sourceVchNo) return { receipts };
+
+    const detailParams: unknown[] = [
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      sourceYear,
+      sourceVchNo,
+    ];
+    const detailBookSql = sourceBook ? 'AND a."CO_BOOK"=$6' : '';
+    if (sourceBook) detailParams.push(sourceBook);
+    const sourceLines: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT a.*,i."IT_NAME"
+         FROM "APR_DETL" a
+         JOIN "BOOK_DATA" d ON d.tenant_id=a.tenant_id AND d."CO_CODE"=a."CO_CODE"
+          AND d."LC_CODE"=a."LC_CODE" AND d."CO_BOOK"=a."CO_BOOK"
+         LEFT JOIN "ITEM_MAST" i ON i.tenant_id=a.tenant_id AND i."CO_CODE"=a."CO_CODE"
+          AND i."IT_CODE"=a."IT_CODE"
+        WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3 AND a."CO_YEAR"=$4
+          AND a."VCH_NO"=$5 ${detailBookSql} AND d."MAIN_BOOK"='CON REC'
+          AND coalesce(a."CON_ISU_REC",'N')='N'
+        ORDER BY a."OLD_SRNO",a."SR_NO"`,
+      ...detailParams,
+    );
+    if (!sourceLines.length) {
+      throw new PurchaseValidationError(`no open consignment receipt lines found: ${sourceVchNo}`);
+    }
+    const actualSourceBook = text(sourceLines[0]?.CO_BOOK);
+    const stoneRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","ISR_NO","IT_CODE","DM_CODE","DM_NAME","DM_COLOR","DM_SIZE","DM_ORIGIN",
+              "DM_REMARK","DM_SFNO","IT_PCS","IT_GWT","IT_PCS_WT","IT_CON_PRC","IT_CON_WT",
+              "IT_RATE_TYPE","IT_RATE","IT_AMT","IT_LBR_RATE","IT_LBR_AMT","IT_NET_AMT","IT_TYPE",
+              "KR_WT","KR_LESS_PRC","KR_CON_PRC","KR_CON_WT","KR_RATE","KR_AMT","KR_LBR_RATE",
+              "KR_LBR_AMT","KR_NET_AMT"
+         FROM "APR_IDTL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO","ISR_NO"`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      sourceYear,
+      actualSourceBook,
+      sourceVchNo,
+    );
+    const stonesBySrNo = new Map<number, Array<Record<string, unknown>>>();
+    for (const row of stoneRows) {
+      const srNo = num(row.SR_NO);
+      const list = stonesBySrNo.get(srNo) ?? [];
+      list.push({
+        isrNo: num(row.ISR_NO),
+        itCode: text(row.IT_CODE),
+        dmCode: text(row.DM_CODE),
+        dmName: text(row.DM_NAME),
+        dmColor: text(row.DM_COLOR),
+        dmSize: text(row.DM_SIZE),
+        dmOrigin: text(row.DM_ORIGIN),
+        dmRemark: text(row.DM_REMARK),
+        dmSfNo: text(row.DM_SFNO),
+        pcs: num(row.IT_PCS),
+        grossWt: num(row.IT_GWT),
+        pcsWt: num(row.IT_PCS_WT),
+        conPct: num(row.IT_CON_PRC),
+        conWt: num(row.IT_CON_WT),
+        rateType: text(row.IT_RATE_TYPE),
+        rate: num(row.IT_RATE),
+        amount: num(row.IT_AMT),
+        lbrRate: num(row.IT_LBR_RATE),
+        lbrAmount: num(row.IT_LBR_AMT),
+        netAmount: num(row.IT_NET_AMT),
+        itType: text(row.IT_TYPE),
+        karigarWt: num(row.KR_WT),
+        karigarLessPct: num(row.KR_LESS_PRC),
+        karigarConPct: num(row.KR_CON_PRC),
+        karigarConWt: num(row.KR_CON_WT),
+        karigarRate: num(row.KR_RATE),
+        karigarAmount: num(row.KR_AMT),
+        karigarLabourRate: num(row.KR_LBR_RATE),
+        karigarLabourAmount: num(row.KR_LBR_AMT),
+        karigarNetAmount: num(row.KR_NET_AMT),
+      });
+      stonesBySrNo.set(srNo, list);
+    }
+    const first = sourceLines[0]!;
+    const source = {
+      voucherNo: sourceVchNo,
+      coYear: sourceYear,
+      coBook: actualSourceBook,
+      acCode: text(first.AC_CODE),
+      acName: receipts.find((r) => r.voucherNo === sourceVchNo && r.coBook === actualSourceBook)?.acName ?? '',
+    };
+    return {
+      source,
+      lines: sourceLines.map((row) => {
+        const sourceSrNo = num(row.OLD_SRNO) || num(row.SR_NO);
+        return {
+          itCode: text(row.IT_CODE),
+          itDesc: text(row.IT_NAME),
+          tagNo: text(row.TAG_NO) === 'N' ? '' : text(row.TAG_NO),
+          pcs: num(row.ITM_PCS),
+          grossWt: num(row.ITM_GWT),
+          netWt: num(row.ITM_NWT),
+          touch: num(row.ITM_TOUCH),
+          ghtWt: num(row.ITM_GHT_WT),
+          westPct: num(row.ITM_WEST_PRC),
+          fineWt: num(row.ITM_FINE),
+          rate: num(row.ITM_RATE),
+          metalAmount: num(row.ITM_AMT),
+          labourPct: num(row.LBR_PRC),
+          labourRate: num(row.LBR_RATE),
+          labourAmount: num(row.LBR_AMT),
+          otherAmount: num(row.OTH_AMT),
+          tblCode: text(row.TBL_CODE),
+          designNo: text(row.DESIGN_NO),
+          lotNo: text(row.LOT_NO),
+          bagWt: num(row.BAG_WT),
+          lessWt: num(row.ITM_OTH_WT),
+          lossWt: num(row.ITM_LOSS_WT),
+          mrp: num(row.ITM_MRP),
+          rateType: text(row.RATE_TYPE) || 'G',
+          metal: text(row.IT_TYPE) === 'S' ? 'S' : 'G',
+          prCode: text(row.PR_CODE),
+          consiNo: sourceVchNo,
+          consiYrcd: sourceYear,
+          consiDbcd: actualSourceBook,
+          consiSrno: sourceSrNo,
+          stones: stonesBySrNo.get(num(row.SR_NO)) ?? [],
+        };
+      }),
+    };
+  });
+}
+
 /** Replace a purchase in-place, preserving desktop header identity and audit-free edit semantics. */
 export async function editPurchase(
   prisma: any,
@@ -1643,10 +2568,13 @@ export async function editPurchase(
   requestedVoucherNo: number | string,
 ): Promise<PurchaseResult> {
   completePurchaseScope(input.scope);
+  // Fail with the field name rather than a DecimalError 500 (see requirePurchaseNumber).
+  input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
     const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo, ['SL_BILL_NO']);
     // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
     const priorHeaderRow: Record<string, unknown> | undefined = (
@@ -1696,13 +2624,22 @@ export async function editPurchase(
     await assertPeriodOpen(tx, scope.tenantId, {
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: requestedDate }] },
     });
-    if (text(persisted.SL_BILL_NO)) {
+    if (text(persisted.SL_BILL_NO) && !isConsignmentPurchase) {
       throw new PurchaseValidationError('purchase is linked to a sale bill and cannot be edited');
     }
 
-    await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'edited');
+    const persistedTagSrnos = await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'edited');
     const hiddenVoucherNo = formatVoucherNo(text(persisted.HD_VCH_NO));
     await releasePurchaseReferencesTx(tx, scope, voucherNo);
+    let writeInput = input;
+    let writeLines = lines;
+    if (isConsignmentPurchase) {
+      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, -1);
+      const normalized = normalizeConsignmentPurchaseInput(input, lines);
+      await assertConsignmentPurchaseSourceOpenTx(tx, normalized.input, normalized.lines);
+      writeInput = normalized.input;
+      writeLines = normalized.lines;
+    }
     // TR_PURC.cs:12939-12944,13252,13297-13299,13548 replaces the full write set and temp row.
     // Desktop edit never writes DELETE_DATA.
     await deleteVoucherWriteSetTx(tx, {
@@ -1711,7 +2648,7 @@ export async function editPurchase(
       tempBook: { voucherNo: hiddenVoucherNo },
     });
     // TR_PURC.cs:12134-12135,12234,13051,13066,13148,13173 preserve no/user/clock.
-    return writePurchaseTx(tx, input, lines, {
+    const result = await writePurchaseTx(tx, writeInput, writeLines, {
       vchNo: Number(voucherNo),
       hdVchNo: hiddenVoucherNo,
       mainUser: text(persisted.MAIN_USER),
@@ -1721,7 +2658,13 @@ export async function editPurchase(
       // identity is too narrow to diff against.
       persistedHeader: priorHeaderRow,
       editingUser: input.mainUser ?? null,
+      // Keeps each tag's identity across the rewrite; see WritePurchaseContext.persistedTagSrnos.
+      persistedTagSrnos,
     });
+    if (isConsignmentPurchase) {
+      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, 1);
+    }
+    return result;
   });
 }
 
@@ -1736,7 +2679,12 @@ export async function deletePurchase(
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
   return withTenant(prisma, tenantId, async (tx: any) => {
-    const bookPolicy = await resolveBookPolicyTx(tx, scope, 'PURCHASE');
+    const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
+    const bookPolicy = await resolveBookPolicyTx(
+      tx,
+      scope,
+      isConsignmentPurchase ? 'CONSIGNMENT PURCHASE' : 'PURCHASE',
+    );
     const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);
     const header = await persistedPurchaseHeaderTx(tx, scope, voucherNo, [
       'AC_CODE',
@@ -1753,7 +2701,7 @@ export async function deletePurchase(
     await assertPeriodOpen(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
     });
-    if (text(header.SL_BILL_NO)) {
+    if (text(header.SL_BILL_NO) && !isConsignmentPurchase) {
       throw new PurchaseValidationError('purchase is linked to a sale bill and cannot be deleted');
     }
     const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
@@ -1765,6 +2713,9 @@ export async function deletePurchase(
     );
     await assertPurchaseTagsUnconsumedTx(tx, scope, voucherNo, 'deleted');
     await releasePurchaseReferencesTx(tx, scope, voucherNo);
+    if (isConsignmentPurchase) {
+      await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, -1);
+    }
     await reverseVoucherTx(tx, tenantId, { tables: [...PURCHASE_WRITE_TABLES], key });
     await tx.$executeRawUnsafe(
       `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -1802,6 +2753,92 @@ export async function deletePurchase(
       VCH_DESC: text(header.VCH_DESC).slice(0, 149),
     });
     // TR_PURC.cs:13863: one credit/fine audit row per PR_DETL line.
+    for (const detail of details) {
+      await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+        ...common,
+        SR_NO: num(detail.SR_NO),
+        VCH_VAL_DR: 0,
+        VCH_VAL_CR: num(detail.NET_AMT),
+        FINE_TYPE: text(detail.IT_TYPE),
+        VCH_FINE_DR: 0,
+        VCH_FINE_CR: num(detail.ITM_FINE),
+        VCH_DESC: `ItCode/${text(detail.IT_CODE)}`.slice(0, 150),
+      });
+    }
+    return { reversed: true };
+  });
+}
+
+/** Delete a TR_PURC `PR QUOT` voucher and preserve the desktop delete audit trail. */
+export async function deletePurchaseQuotation(
+  prisma: any,
+  input: DeletePurchaseInput,
+): Promise<{ reversed: true }> {
+  completePurchaseScope(input.scope);
+  const scope = input.scope;
+  const tenantId = scope.tenantId;
+  const voucherNo = formatVoucherNo(input.vchNo);
+  const key = keyOf(scope, voucherNo);
+  return withTenant(prisma, tenantId, async (tx: any) => {
+    await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
+    const bookPolicy = await resolveBookPolicyTx(tx, scope, 'PURCHASE QUOTATION');
+    const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);
+    const header = await persistedPurchaseHeaderTx(tx, scope, voucherNo, [
+      'AC_CODE',
+      'AC_NAME',
+      'TOT_AMT',
+      'CASH_AMT',
+      'CARD_AMT',
+      'CHQ_AMT',
+      'IT_TYPE',
+      'PARTY_FINE',
+      'VCH_DESC',
+    ]);
+    const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","IT_CODE","NET_AMT","IT_TYPE","ITM_FINE"
+         FROM "PR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
+      ...purchaseParams(scope, voucherNo),
+    );
+    await reverseVoucherTx(tx, tenantId, {
+      tables: [...PURCHASE_QUOTATION_WRITE_TABLES],
+      key,
+    });
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+        AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coBook,
+      text(header.HD_VCH_NO),
+    );
+    const deletedAt = new Date();
+    const common = {
+      ...key,
+      VCH_DATE: header.VCH_DATE,
+      VCH_TIME: header.VCH_TIME,
+      DELETE_DATE: deletedAt,
+      DELETE_TIME: deletedAt,
+      VCH_TYPE: bookPolicy.vchType,
+      BOOK_NAME: configuredBookName,
+      AC_CODE: header.AC_CODE,
+      AC_NAME: header.AC_NAME,
+      HD_VCH_NO: header.HD_VCH_NO,
+      MAIN_USER: header.MAIN_USER,
+      DELETE_USER: input.deleteUser ?? 'system',
+    };
+    await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+      ...common,
+      SR_NO: 0,
+      VCH_VAL_DR: round2(num(header.CASH_AMT) + num(header.CARD_AMT) + num(header.CHQ_AMT)),
+      VCH_VAL_CR: num(header.TOT_AMT),
+      FINE_TYPE: text(header.IT_TYPE),
+      VCH_FINE_DR: 0,
+      VCH_FINE_CR: num(header.PARTY_FINE),
+      VCH_DESC: text(header.VCH_DESC).slice(0, 149),
+    });
     for (const detail of details) {
       await insertRowTx(tx, 'DELETE_DATA', tenantId, {
         ...common,

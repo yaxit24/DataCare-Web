@@ -1,0 +1,33 @@
+{
+ "form": "RP_MFG_ZOOM",
+ "tables": [
+  "AC_MAST",
+  "MFG_DETL",
+  "MFG_ISU_REC",
+  "MFG_MAST",
+  "PR_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "MFG_MAST"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_MAST",
+  "MFG_DETL",
+  "MFG_ISU_REC",
+  "MFG_MAST",
+  "PR_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4165
+}

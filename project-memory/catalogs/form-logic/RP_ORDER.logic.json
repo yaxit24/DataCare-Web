@@ -1,0 +1,31 @@
+{
+ "form": "RP_ORDER",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "DELETE_DATA",
+  "LOT_DETL",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "DELETE_DATA",
+  "LOT_DETL",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 5057
+}

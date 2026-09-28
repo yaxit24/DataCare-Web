@@ -1,0 +1,26 @@
+{
+  "status": "isolated-prospective-clock-staging",
+  "repositoryModified": false,
+  "references": [
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-round12-handoff-and-remaining-acceptance.md",
+      "sha256": "165b9ecedc421727a6f94014bae4b5bc5b6d00d29df2a1c3b82843f6ebb99e5e"
+    }
+  ]
+}

@@ -1,0 +1,413 @@
+{
+  "id": "X14-tour-order-editor-lifecycle-2026-09-11",
+  "parents": [
+    "P05-04",
+    "P05-06",
+    "X14"
+  ],
+  "status": "partial-engineering-verified",
+  "capturedAtUtc": "2026-09-10T21:58:09.335742+00:00",
+  "displayTimezone": "Asia/Kolkata",
+  "gitHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "workingTree": "dirty development tree; scoped hashes only, not a release certificate",
+  "contract": "docs/parity-evidence/X14-tour-order-lifecycle-2026-09-11.md",
+  "scopedFilesSha256": {
+    "apps/api/src/modules/sales/salesOrder.ts": "d87ac2cd4269f60d83604d63240cb575dbcff93ce08226a85b91668c680e119b",
+    "apps/api/src/modules/sales/orderDoc.ts": "804924d2788cd41540c8b335336ba1df39f7358f3a9f487e6d60f273151dc655",
+    "apps/api/src/modules/shared/bookPolicy.ts": "e5a9a6c75f2c4ccb66f7c2504253876ca9b9b3687e5003de8bf4c9362c03ed74",
+    "apps/api/src/modules/shared/stoneSubDetail.ts": "e97982d8b1a88c96971de52095773dc4269448bb488881058f8ea58d20cce7a5",
+    "apps/api/src/routes/txn.ts": "b3e19fceb2d7f0847cbbaac2b87c62621f123f519a958a41b3fd60e2d0b274f5",
+    "apps/api/src/modules/rbac/routePolicy.ts": "30d2ff383cfef7e8ab531ef39fbd97effa6aff013e1a5a5c676ab831dbe243ef",
+    "apps/api/src/modules/rbac/formCatalog.ts": "b586bcb55d442c2bb06a7b722a64a2304fe8419f4817fd57eb22bd0a7e86337c",
+    "apps/api/test/tourOrderHydration.db.test.ts": "d8bbdea44de7d4dc8eaa5a29d587328c659209bd170d00f6fc861df75f40a7f0",
+    "apps/api/test/tourOrder.db.test.ts": "63a652b175f402e2d2bced2ec12df8f253f7175f5889bee12de8e2929e236d38",
+    "apps/api/test/salesFamilyLifecycle.db.test.ts": "fcf53eb53bfbeefd38f0ec7e8ea01ab77ad9f83bab7ef1c9890d251c017e98c6",
+    "apps/api/test/tourOrderPrint.routes.db.test.ts": "e6b6409ffc897c372206cd4812938a25ffda34d2531b36bc8526514f6d426593",
+    "apps/api/test/orderDocumentScope.db.test.ts": "2db7d3bebf8dfe2f9987d5504100535545fdd9f88c54fb9d1fa7735010544891",
+    "apps/web/app/(app)/txn/tour-order/page.tsx": "392cc323152cf8a805a9a1d42f9117c1afda97c57235e2578198f6679a7131a2",
+    "apps/web/lib/tourOrderForm.ts": "12d96263ebd555b7775a4b5b9f82e94f9f355225f0145dd1598b6aff0aa6b100",
+    "apps/web/components/BookSelect.tsx": "e20ea55a2817a0d0fe15253d99e228a410991c343ebb7eab1fc34ffb776cf1b3",
+    "apps/web/components/SubDetailGrid.tsx": "0e8b088a003f86cb184d23aebb565281c413d3190d7a48bd4ddd58f377711135",
+    "apps/web/test/tourOrderForm.test.ts": "33aa96e52dc266ba5314b6e10ca2e53abeff09fd3bb4433ed3a7aa28b70971ba",
+    "apps/web/test/derivedValueSources.test.ts": "48b9375d8b776350eedce1469dcd50806dfeb2915044a105c7d43b9b84bee9cd",
+    "apps/web/test/tour-order.journey.mjs": "f5ef37bae919f54a04850de6a308ab8b84bfc00eb3f12b55d357bce30889983f",
+    "apps/web/test/parity.real-stack.mjs": "e0204f992cbf62b1506ab9da2ebc7432ca5e133a722d20bd36d7d2c289423dde",
+    "packages/core/src/calc.ts": "e0c46c2f17ec6e871309e96539bf2cd00782db9e6db667271421a539d16da291",
+    "packages/db/prisma/schema.prisma": "c6124e738f5a982896a42253eb414c3b7e7b25cf41b9e40fff1f7931c3aded90",
+    "packages/db/prisma/rls.sql": "6a7245cfad70861341f734386bbd1eb83f2c0fbc60e06055dc55f7deb57df54e",
+    "packages/db/setup_roles.sql": "b0736b67fb5e71ef51c1f59a9fa8a3a00dda2b851d3a178c408dbfb89df83bb3",
+    "packages/db/src/tenant.ts": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32",
+    "scripts/parity-test-env.mjs": "e0f11c41a5f0971aebece64d4cc341825e9986b40ae46baa4303cc293c341ac2",
+    "docker-compose.parity-test.yml": "e4bb245ae8365ea982b6c4541e99581bf34961e8cc21d5532a9f2da66b673b4d",
+    "apps/web/next.config.mjs": "e92f4f42f66a6bc9b856a17a5c73560947161de36742d39ea0da694562e77354",
+    "pnpm-lock.yaml": "879301e14ee6f08fab429b1e54952ab118dabc371c5ce2dc7677bfde20337c1b",
+    "turbo.json": "47588c1c1bd844ee24983850abc0b829d5811f4eb75e9d80ae44c870b9442238",
+    "docs/parity-evidence/X14-tour-order-lifecycle-2026-09-11.md": "279a23d5d5c47e03f932f7f5f10e18e3a352a9a55fdf70cd772983f444f74ec3"
+  },
+  "scopedDigestAlgorithm": "SHA256 of sorted compact JSON scopedFilesSha256 mapping",
+  "scopedDigest": "17f16854da4954b16f3678ecaba81883bf54aca9d3085e0ff9edc377b9646830",
+  "sourceSha256": {
+    "unified/src/csharp/DataCareNext/TR_SALE_ORD.cs": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3",
+    "unified/src/csharp/DataCareNext/MS_UPDATE.cs": "943525d918df85170ee3a4733bdf81cdc1d5b7e61b5efed27add7bc2883d8cb7",
+    "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+  },
+  "compiledArtifactsSha256": {
+    "apps/api/dist/modules/sales/salesOrder.js": "0b61b3c984bfcf84866c435357233008a11fdd73009ae2facef147caf679102f",
+    "apps/api/dist/modules/sales/orderDoc.js": "ffa1297ce7a696a068e52ea7421ce82cab72a8ee6411ad3997fcb43e69cf4aa8",
+    "apps/api/dist/routes/txn.js": "a17704e22897438fa49228daf58b77cc9b4b3058e3b22455b35b22ed2df9788d",
+    "apps/api/dist/modules/rbac/routePolicy.js": "f6d7a09be4b3b627ca9b4fa027b4421303997b500a84578a1db328baec4c146a",
+    "apps/api/dist/modules/rbac/formCatalog.js": "fe53ec525d6196e3551345c4733fcbd1e419f6b8508d1df7fa6af8b931cf9119",
+    "apps/web/.next/BUILD_ID": "905c9494bac45aa2cfd02dcd0f7b2f19dfbf7d89aa25dfab65f3b384ab9e2edb",
+    "apps/web/.next/routes-manifest.json": "b62f07239a9fbc30bf0be7b9e40eaa43144d37ca3fe578febe0537705c12e806",
+    "apps/web/.next/server/app/(app)/txn/tour-order/page.js": "26fd7e3fee11adfaefa337a83bde02b310bb8becf02be83b739b47ad9dd16990"
+  },
+  "nextBuildId": "y1xCHqzAI6EsjGJiD4U_T",
+  "buildApiOrigin": "http://127.0.0.1:4410",
+  "schemaMigrationsSha256": {
+    "packages/db/prisma/migrations/20260627200423_init/migration.sql": "c390ab923703889a96e87d08adb5e020cce8b210cf7cc2437969fa3e94ea3097",
+    "packages/db/prisma/migrations/20260714010000_schema_parity/migration.sql": "41f0641b86606851f2a48870c98136f6604fae850b7feff7447e15e5d2a6b1f4",
+    "packages/db/prisma/migrations/20260715010000_runtime_schema_security/migration.sql": "82a7fd3af8ac3259c3df66de4a1e9a154ed65957d3fcecbd3d3d46e2b99923e6",
+    "packages/db/prisma/migrations/20260715020000_schema_model_convergence/migration.sql": "776c66fee6407799fa2393fd9e4aee81461dca9dfefba4e1f56b479a1842901a",
+    "packages/db/prisma/migrations/20260715030000_authoritative_scope_rbac_sessions/migration.sql": "4d011ad562511873982957325ffc47b62ca5d824a25b312495c531c185ae873c",
+    "packages/db/prisma/migrations/20260715040000_transaction_integrity/migration.sql": "91f95a7af1ee8fa41b56cc4ed068e0107b91965d9db45912bc5ea2f4eb364545",
+    "packages/db/prisma/migrations/20260727010000_repair_image/migration.sql": "273493f985ce821a128ee6d2b10f91129ae78242cdf8873e8148eee168a39ef8",
+    "packages/db/prisma/migrations/20260727020000_melting_detail_parity/migration.sql": "ea6d2267d2cf202f63445b33f9afa2b8cd8e42c9fd44031391b66524f529493e",
+    "packages/db/prisma/migrations/20260727030000_melting_mfg_linkage/migration.sql": "0557c5f869957e2edffaf09b014551613e7e63d99c170d520bfca8e1c7031428",
+    "packages/db/prisma/migrations/20260728010000_message_attempt_log/migration.sql": "6ace8aeaa4d29640e9e33c0505ea4dc95a2d153159143ebfcb258af59d1d2512",
+    "packages/db/prisma/migrations/20260730010000_data_repair_console/migration.sql": "6c5a23844987a9909a9ff0de90c6f3b9b4bc9d402ef2ef56c52c37e8c66bc06a",
+    "packages/db/prisma/migrations/20260730020000_tag_image_store/migration.sql": "1d33bffff5724307457d685bf6e7f7a6db7b0c07060f655cc4095aaa74a225bc",
+    "packages/db/prisma/migrations/20260730030000_entity_image_store/migration.sql": "772f68dec65312887af32c511b6f4278e1a81f1779788fcbc989cc44dca31ec3",
+    "packages/db/prisma/migrations/20260730040000_gold_mast_bank_account/migration.sql": "014e9928425e3b6d4f535022524f15abcdf4b77942c327e8a5c70b862ce142a5",
+    "packages/db/prisma/migrations/20260730050000_message_log_rls/migration.sql": "298e2dd8f3b511ae27c2302e8d3d546b06baf13346b6dabbe84a261bdf3449c6",
+    "packages/db/prisma/migrations/20260801120000_column_type_parity/migration.sql": "d90f7313519b2cd7a158a6ce55728e1d181807bfe2d8dc41506efffe55373413",
+    "packages/db/prisma/migrations/20260801160000_ledger_key_uniqueness/migration.sql": "a5233b5115ef855e2bec6999e37fd4a59c58b563dacc27a69f75c0c7a6c7612b",
+    "packages/db/prisma/migrations/20260829010000_company_restore_sequence_guard/migration.sql": "84afef22c62860d9227f6643e537aa5bd393ac93374f69a3b45d23374e609512",
+    "packages/db/prisma/migrations/20260830000000_data_repair_authority/migration.sql": "ede47cc4821cf4c0aaf28f948788df8b900ecf2e753bb483c9b79d9878650ced",
+    "packages/db/prisma/migrations/20260910010000_upi_data_split_key/migration.sql": "27a70022e5f51673fa2f1f086d1fd90723254f49ce74e3fdec31166cb4c18e7a",
+    "packages/db/prisma/migrations/20260910020000_mfg_isu_rec_item_lot/migration.sql": "27f5ee541cd03769e2e1c4de4ba80f936414f9ea964e05dc0ea0eafb4ae788d4",
+    "packages/db/prisma/migrations/20260911010000_design_detail_style/migration.sql": "be9000ba6025d5623759473d1218e9e168eacc1229a46ef618c9bbed0682e2cb"
+  },
+  "fixtureType": "synthetic deterministic isolated test tenants; no independently captured desktop data",
+  "database": "disposable localhost:55433 / datacare; migrated; forced RLS app_user runtime, owner-only fixture setup and cleanup",
+  "fixtureTenants": [
+    "tour-order-db",
+    "tour-hydration-db",
+    "browser-parity"
+  ],
+  "engineeringEvidence": [
+    {
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test",
+      "passed": true,
+      "files": 204,
+      "tests": 1577,
+      "log": "/tmp/datacare-parity-api-final.log",
+      "appliesAfter": "final legacy-client loss guard",
+      "scopedResults": {
+        "tourOrder.db.test.ts": 2,
+        "tourOrderHydration.db.test.ts": 6,
+        "salesFamilyLifecycle.db.test.ts": 29,
+        "tourOrderPrint.routes.db.test.ts": 3
+      }
+    },
+    {
+      "command": "pnpm --filter @datacare/web test",
+      "passed": true,
+      "files": 17,
+      "tests": 75,
+      "log": "/tmp/datacare-parity-web-tests.log",
+      "scopedResults": {
+        "tourOrderForm.test.ts": 5,
+        "derivedValueSources.test.ts": 4
+      },
+      "subsequentChanges": "API-only loss guard and real HTTP browser assertion; frontend product code unchanged"
+    },
+    {
+      "command": "pnpm --filter @datacare/api typecheck",
+      "passed": true,
+      "scope": "Tour slice, including final loss guard"
+    },
+    {
+      "command": "pnpm --filter @datacare/web typecheck",
+      "passed": true,
+      "scope": "Tour slice"
+    },
+    {
+      "command": "API_ORIGIN=http://127.0.0.1:4410 pnpm build",
+      "passed": true,
+      "tasks": 7,
+      "log": "/tmp/datacare-parity-build.log",
+      "subsequentChanges": "API-only legacy-client guard compiled again below"
+    },
+    {
+      "command": "pnpm --filter @datacare/api build",
+      "passed": true,
+      "log": "/tmp/datacare-parity-api-rebuild.log",
+      "appliesAfter": "final legacy-client loss guard"
+    },
+    {
+      "command": "node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs",
+      "passed": true,
+      "log": "/tmp/datacare-parity-browser-final.log",
+      "appliesAfter": "final legacy-client loss guard and API rebuild",
+      "mockedRequests": 0
+    }
+  ],
+  "realBrowserEvidence": {
+    "artifact": "test-results/parity-real-stack/result.json",
+    "artifactsSha256": {
+      "test-results/parity-real-stack/result.json": "2ef804fe3c0b28cd2f1cb1e3ec500443ce1f574d70e4cbaedccb5ccc270f7b86",
+      "test-results/parity-real-stack/tour-order-loaded.png": "d8232ff794255d8c7fb4da80acb0bd6c510e41aba3e870f1bde0cec06f35fba9",
+      "test-results/parity-real-stack/tour-order-components.png": "41a6c5219ce493405a411956bce63ca292ed0bd70c39edafe2715e5f4dc9af19"
+    },
+    "screenshotsVisuallyInspected": true,
+    "result": {
+      "startedAt": "2026-09-10T21:53:33.922Z",
+      "database": "disposable localhost:55433 / app_user",
+      "mockedRequests": 0,
+      "status": "passed",
+      "designBook": {
+        "checks": [
+          "browser create/reload",
+          "two components",
+          "style and text page number",
+          "unchanged edit",
+          "saved image upload/read/delete",
+          "changed component",
+          "stale edit409 retains form",
+          "browser deletion"
+        ]
+      },
+      "tourOrder": {
+        "voucherNo": "00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09",
+          "acCode": "TOURAC",
+          "itemCode": "GOLD",
+          "componentCode": "STONE"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "POST",
+            "pathname": "/api/tour-orders",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "PUT",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "PUT",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "PUT",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "DELETE",
+            "pathname": "/api/tour-orders/00001",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          },
+          {
+            "method": "GET",
+            "pathname": "/api/tour-orders",
+            "scope": {
+              "coCode": "01",
+              "lcCode": "01",
+              "coYear": "2024-2025",
+              "coBook": "Z09"
+            }
+          }
+        ],
+        "checks": [
+          "configured book",
+          "browser create/reopen",
+          "two component rows",
+          "legacy flattened update400 preserves children",
+          "unchanged edit",
+          "changed child",
+          "stale edit409 retains form",
+          "scoped print",
+          "browser deletion"
+        ]
+      },
+      "finishedAt": "2026-09-10T21:53:41.769Z"
+    }
+  },
+  "caseOutcomes": {
+    "X14-EDITOR-01": "passed-engineering",
+    "X14-IDENTITY-02": "passed-engineering",
+    "X14-UNCHANGED-03": "passed-engineering",
+    "X14-CHILD-04": "passed-engineering",
+    "X14-SCOPE-05": "passed-engineering",
+    "X14-CONFLICT-06": "passed-engineering",
+    "X14-GHAT-07": "passed-engineering",
+    "X14-DRAFT-08": "passed-engineering",
+    "X14-PRINT-09": "passed-engineering",
+    "X14-CONTAINMENT-10": "passed-engineering",
+    "X14-LEGACY-11": "passed-engineering",
+    "X14-FULFIL-12": "open",
+    "X14-CONVERT-13": "open",
+    "X14-PRODUCTION-14": "open",
+    "X14-RESILIENCE-15": "open"
+  },
+  "logs": {
+    "/tmp/datacare-parity-api-final.log": {
+      "sha256": "567fb18cade8fb80cb0a3f981ec32e6d65b35f9ae21b1b2a2282e1f9795bd77a",
+      "retention": "ephemeral local log; outcomes captured below"
+    },
+    "/tmp/datacare-parity-api-rebuild.log": {
+      "sha256": "1b3c6b51e7a2857ae9a82742c6aabb8621b297775605d4aad7888c0e5308b043",
+      "retention": "ephemeral local log; outcomes captured below"
+    },
+    "/tmp/datacare-parity-browser-final.log": {
+      "sha256": "9304a0965b03ed11924ffb92a42d2ef874ba6b77eab5e3abf6547dfab32bc4a7",
+      "retention": "ephemeral local log; outcomes captured below"
+    },
+    "/tmp/datacare-parity-web-tests.log": {
+      "sha256": "8c5c87f2791f4c6786461a80e467f55d2daafac10f155785035ec017ea8e6573",
+      "retention": "ephemeral local log; outcomes captured below"
+    },
+    "/tmp/datacare-parity-build.log": {
+      "sha256": "6a23f9e4753c267b38440a77830631884a3756140a89f2e1dd91677a1faa046a",
+      "retention": "ephemeral local log; outcomes captured below"
+    },
+    "/tmp/datacare-parity-browser-smoke.log": {
+      "sha256": "85ea8f9a7744c8fefaa0d48e336266b77443d8dce71d65c545774d52e6dcc08b",
+      "retention": "ephemeral local log; outcomes captured below"
+    }
+  },
+  "otherSuiteLimitations": [
+    {
+      "runner": "apps/web/test/browser.smoke.mjs",
+      "passed": false,
+      "failure": "existing F2 Ledger report selector at line571",
+      "log": "/tmp/datacare-parity-browser-smoke.log",
+      "impact": "separate generic mocked browser suite remains unverified; dedicated real Tour journey passed"
+    }
+  ],
+  "desktopEvidence": [],
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "remaining": [
+    "Additional desktop labour bases, source-triggered manual/rate/percentage transitions and zero-decimal labour rounding; current making/g kernel uses two decimals.",
+    "Separate tender, UPI, old-metal, scheme, rate-cut, fine advance and adjustment write sets with independent accounting/reversal comparison.",
+    "Quotation conversion, partial fulfilment, manufacturing, delivery, reservations, source lineage and dependency protection.",
+    "Full Design Book parent/child/photo adoption, historical and branch image migration, downstream consumers.",
+    "Complete cross-book transfer reference graph and independent imported-column/manual-value fixtures.",
+    "Retry/idempotency, lost responses, session/offline recovery, complete role/period matrix and workload acceptance.",
+    "Independent desktop documents/reports/devices/providers and business acceptance.",
+    "All-client mandatory concurrency policy; legacy single-child callers still may omit expectedVersion."
+  ]
+}

@@ -1,0 +1,17 @@
+# Batch1 independent extraction review
+
+Disposition: no confirmed semantic mismatch in the two staged source files. This is a read-only source/test review with independent decision fixtures; no compiler, tests, database or repository mutation was performed.
+
+The frozen31-case fixture precedes staged implementation inspection. It is copied byte-identically into the staged test package. The harness contains72 planned cases:31 decisions through direct and wrapper calls, nine boundary checks, and one fixture SHA/count guard. The original71 metadata count omitted that last guard; `batch1-independent-review-final.json` records the correction against the same test bytes. No runtime pass is claimed.
+
+All eight original businessScope template literals and six authorization template literals remain byte-identical and ordered. Queries retain exact company membership/admin parameters; location request/default ordering; year requested/default behavior; selected-company-before-login-company lookup; and existing rights/reset normalization. The wrappers call one withTenant each. Tx forms perform only their existing reads and do not create/bind another transaction, introduce locks, or invoke session/token/last-day-lock logic.
+
+The decision fixture explicitly preserves the subtle existing outcomes: a missing location master may use the trimmed company default; requested branch/year text is not silently trimmed; no-year login returns an own coYear property whose value is undefined while selection refuses; Principal.loginCoCode describes the selected credential owner row, separately from immutable auth_session.loginCoCode; global flags accept exact Y/1/lowercase true while password-reset flags uppercase without trimming. These are current web decisions, not newly proved desktop policies.
+
+The scripted database is a call/binding-order double, not a SQL emulator. Its principal P01 has a synthetic second queued result to distinguish first-row consumption; actual LIMIT1 SQL produces at most one row. The selection precedence is separately established by unchanged ORDER BY/LIMIT source, not by claiming that synthetic result is a real PostgreSQL observation. Likewise unusual raw role/flag shapes test existing helper behavior without proving every value is admitted by a production table.
+
+Tx callers must already bind the intended tenant and select isolation. input.tenantId does not independently prove the transaction identity. A single default withTenant is not a RepeatableRead guarantee, and it does not combine later independent last-lock/session operations. Existing duplicate/default/master ambiguities remain unchanged. No new context epoch, authenticated mode, known closing, migration, route or UI behavior is part of Batch1.
+
+The broader implementation-contract is prospective. Its next coordinators must preserve session/login-company identity, refresh-reuse revocation and response-loss semantics, use the agreed session lock order, and deliberately reconcile last-day-lock. The current select-only trigger and forward-only web lock rule remain distinct from the desktop's unconditional yesterday assignment. These future lifecycle concerns are not implemented or verified by the extraction tests.
+
+Exact original/staged hashes, fixture authorship and final test identity are in `batch1-independent-review-final.json` (SHA256 dbb894f95d7f8f74ab611231f991a299196606a7909c89c0b3d198d098b13036). Original acceptance remains open.

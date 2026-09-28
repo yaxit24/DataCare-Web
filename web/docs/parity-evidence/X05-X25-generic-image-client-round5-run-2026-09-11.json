@@ -1,0 +1,220 @@
+{
+  "id": "X05-X25-generic-image-client-round5-2026-09-11",
+  "round": 5,
+  "capturedAtUtc": "2026-09-11T07:22:24.104500+00:00",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "sourceState": "shared dirty development tree; immutable hashes identify this bounded client slice, not a release candidate",
+  "status": "implemented-focused-client-tests-types-and-lint-passed",
+  "x05Verified": false,
+  "x25Verified": false,
+  "observedDesktopExecution": false,
+  "physicalCameraAcceptance": false,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "boundary": {
+    "owned": "generic EntityImagePanel and RepairImagePanel clients, shared observation/session/scope/camera guards and focused tests",
+    "excluded": "API CAS/schema/rights, caller identity migration, root-owned caller fixes, combined browser/full-suite evidence and global plan",
+    "mountSites": {
+      "entity": 21,
+      "repair": 2,
+      "expandedRoutes": 32
+    },
+    "inventoryInterpretation": "before-change JSX/source hashes; caller fixes after capture are recorded separately by root",
+    "inventory": {
+      "path": "docs/parity-evidence/X05-X25-generic-image-client-round5-inventory-2026-09-11.json",
+      "sha256": "4a8f1599140552b1429dee9ae7232a987b13d4afe3dab5fe6cae7c55af36169a"
+    }
+  },
+  "files": [
+    {
+      "path": "apps/web/lib/imageEditorSession.ts",
+      "sha256": "52ec0b7cb0d068e62f705f3c58de4b9e8a09a84a367e4b9bf8dcc02c9d675482"
+    },
+    {
+      "path": "apps/web/lib/useImageEditor.ts",
+      "sha256": "4f34ab41ac1f3d5e66cf9df23684593e887e9c62a95e51d02dab49873b442d3e"
+    },
+    {
+      "path": "apps/web/lib/imageScopeBarrier.ts",
+      "sha256": "64b523496946c4b8fe82916c7bcd84f0cf444fb54a0c92f29ad998c032be9841"
+    },
+    {
+      "path": "apps/web/lib/cameraRequestGuard.ts",
+      "sha256": "b266b4e7470da7fe778808e0976965ea7b39ed4a60013ee7593100b1f79f8995"
+    },
+    {
+      "path": "apps/web/components/EntityImagePanel.tsx",
+      "sha256": "bf9719fc986c9c9bbc5c5e7781a4a32e91768e768dbfdf609ba565c5d6a33efd"
+    },
+    {
+      "path": "apps/web/components/RepairImagePanel.tsx",
+      "sha256": "1b2ad1142541ca9b6a0fc75298d4bafcf9fe8fe14809ed6a9884341611128b41"
+    },
+    {
+      "path": "apps/web/components/CameraCapture.tsx",
+      "sha256": "4d7c112cf1d79ed1cef2d6ca4c6c94279c10eb485038797f74a36ef50c637752"
+    },
+    {
+      "path": "apps/web/test/imageEditorSession.test.ts",
+      "sha256": "8483d0f2ac7cc512f16e95a26b0e7e04e8f191ec771d794e09c2c4f8e692ed03"
+    },
+    {
+      "path": "apps/web/test/cameraRequestGuard.test.ts",
+      "sha256": "16b635f0b92350a511329def7855f5e5cf58c637862f54e71ca69c43cbef6f3c"
+    },
+    {
+      "path": "docs/parity-evidence/X05-X25-generic-image-client-round5-contract-2026-09-11.md",
+      "sha256": "7210acd7fd7fa5a9afc4d447980cc8efcb6e8341eb6bd4cd434e2b1fc611deb8"
+    }
+  ],
+  "verification": {
+    "focusedClient": {
+      "passed": true,
+      "exitCode": 0,
+      "files": 2,
+      "tests": 23,
+      "skipped": 0,
+      "command": "pnpm --filter @datacare/web test -- test/imageEditorSession.test.ts test/cameraRequestGuard.test.ts",
+      "cases": {
+        "asynchronousSession": 17,
+        "scopeBarrier": 3,
+        "cameraOwnership": 3
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-tests-ready.txt",
+        "sha256": "03a00eccba3e005f18935a293414ece186b6b2954bdaa9b9077e079ae0b96fbe"
+      }
+    },
+    "webTypecheck": {
+      "passed": true,
+      "exitCode": 0,
+      "command": "pnpm --filter @datacare/web typecheck",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-types-ready.txt",
+        "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+      }
+    },
+    "focusedLint": {
+      "passed": true,
+      "exitCode": 0,
+      "scope": [
+        "apps/web/lib/imageEditorSession.ts",
+        "apps/web/lib/useImageEditor.ts",
+        "apps/web/lib/imageScopeBarrier.ts",
+        "apps/web/lib/cameraRequestGuard.ts",
+        "apps/web/components/EntityImagePanel.tsx",
+        "apps/web/components/RepairImagePanel.tsx",
+        "apps/web/components/CameraCapture.tsx",
+        "apps/web/test/imageEditorSession.test.ts",
+        "apps/web/test/cameraRequestGuard.test.ts"
+      ],
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-lint-ready.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "note": "ESLint emitted no output on success; process exit code was observed as zero."
+    },
+    "priorFocusedIterations": [
+      {
+        "status": "passed",
+        "tests": 20,
+        "name": "first",
+        "logs": [
+          {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-tests-first.txt",
+            "sha256": "8431d24bc9d627f8513a3f515f78f32734755343e86bd23c68d31c5708a2df48"
+          },
+          {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-types-first.txt",
+            "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+          },
+          {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-lint-first.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      },
+      {
+        "status": "passed",
+        "tests": 23,
+        "name": "scope-before-captured-acknowledgment-tightening",
+        "logs": [
+          {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-tests-scope.txt",
+            "sha256": "abaf886b0846f8b6ebfac8eafbff924b95667ac04a5a8928dde6d7c6545a14a9"
+          },
+          {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-types-scope.txt",
+            "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+          },
+          {
+            "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/generic-image-client-lint-scope.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      }
+    ],
+    "databaseRunsByThisTask": 0,
+    "combinedBrowser": {
+      "status": "not-certified-by-this-focused-manifest",
+      "authority": "root round5 final checkpoint",
+      "mockedResponsesRequired": 0,
+      "hardwareLimit": "Chromium synthetic camera exercises real media/canvas/HTTP/PG integration but is not physical camera acceptance"
+    },
+    "fullWorkspace": "root round5 final checkpoint is authoritative; no full-suite or module-parity claim is inferred from these focused client checks"
+  },
+  "integrationObservations": [
+    {
+      "owner": "root",
+      "area": "Design Book caller refresh",
+      "finding": "An unchanged Design Book PUT can preserve the business hash while replacing the physical parent bound into the image version. savedImageGeneration increments for every hydrate and keys the image panel with the saved image ID."
+    },
+    {
+      "owner": "root",
+      "area": "Repair Receipt saved identity",
+      "finding": "Root preserves saved noncontiguous serials, reloads exact serials after save and gates images by loaded scope and load/cancel generation."
+    }
+  ],
+  "retainedBrowserIterations": [
+    {
+      "name": "first",
+      "status": "failed",
+      "reason": "Design Book unchanged-save parent replacement left its previous image observation stale; new generic/Repair conflict journeys had not run.",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/browser-first.txt",
+        "sha256": "e767506ac2b875c2fe198e91202ef64ea3aac0c40224c118ed03d3a4ab7891df"
+      },
+      "result": {
+        "path": "test-results/parity-real-stack-round5-first/result.json",
+        "sha256": "865daadbbaae88793cb6bed5f316de491df73b3068ba8e3846a9c2890d948845"
+      }
+    },
+    {
+      "name": "parent-refresh",
+      "status": "failed",
+      "reason": "Upload committed, but readback classified the legacy tiny PNG unavailable; expected zoom never appeared. Root is investigating fixture/decoder behavior; new conflict/camera journeys had not run.",
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/browser-parent-refresh.txt",
+        "sha256": "8a4f88c931c6fba90951d7f10afb61a07f54040894b76bd3f784bf8b7800cd89"
+      },
+      "result": {
+        "path": "test-results/parity-real-stack-round5-parent-refresh/result.json",
+        "sha256": "d3deb5ba10c7fc8848a7ed43a52d689965982b97994827b457c15831a0228961"
+      },
+      "screenshot": {
+        "path": "test-results/parity-real-stack-round5-parent-refresh/failure.png",
+        "sha256": "796dad2a525e0516e6237051e788626774c19483c9a79fbc04295c358f66c3cd"
+      },
+      "visualObservation": "Explicit unavailable message was readable, with Select/Camera/Delete/Reload controls visible. No successful-photo or final-browser claim."
+    }
+  ],
+  "remaining": [
+    "Root combined production-stack browser and screenshot verification after resolving recorded integration failures.",
+    "Caller-by-caller proof that existing entity/image type/instance mappings match saved desktop identity, including row-index TAG callers and inherited dynamic-master mappings.",
+    "Form-specific rights/configuration coverage beyond the inherited generic authority mappings.",
+    "Desktop filesystem-photo migration, corrupt/missing image inventory and business-approved replacement/deletion procedures.",
+    "Physical camera devices, permission dialogs, supported browser/platform behavior and desktop-versus-web operator acceptance.",
+    "Production-scale cross-scope/concurrent operator replay and complete X05/X25 business acceptance."
+  ],
+  "frozenAtUtc": "2026-09-11T07:22:24.202726+00:00"
+}

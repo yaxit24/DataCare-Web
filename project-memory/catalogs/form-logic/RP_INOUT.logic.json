@@ -1,0 +1,57 @@
+{
+ "form": "RP_INOUT",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "REMARK_DATA",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "REPORT_DATA": [
+    "COL_1",
+    "COL_10",
+    "COL_11",
+    "COL_12",
+    "COL_2",
+    "COL_3",
+    "COL_4",
+    "COL_5",
+    "COL_6",
+    "COL_7",
+    "COL_8",
+    "COL_9",
+    "CO_CODE",
+    "LC_CODE",
+    "SR_NO"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "REPORT_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "PRODUCT_MAST",
+  "REMARK_DATA",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4450
+}

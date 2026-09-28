@@ -1,0 +1,76 @@
+{
+  "files": [
+    {
+      "path": "/tmp/datacare-round14-plan-review/proposed-draft.md",
+      "sha256": "1a696e7b3c8b443e4304e08e91e904850cdf6e99011cf76c29f767c835df883c"
+    },
+    {
+      "path": "/tmp/datacare-round14-plan-review/semantic-replacements.json",
+      "sha256": "fc8b127fb2179447e66b91b466b1719b51593779c7f915fea09c400740743a04"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/bar-companion-integration/integration.json",
+      "sha256": "a8588370ae16f416c6c39acde96c26b1a65179e9fee63fbcad9ff8a390cb8e3c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/bar-companion-integration/frozen-stage/focused-final.run.json",
+      "sha256": "d0eef7378275e3939e15ada2cf22a9569677a945880e6b07f17f8550992904b1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/bar-companion-independent-review/ready-manifest.json",
+      "sha256": "615a0c94bdbcd3282adaa249315676991ae7d83468824643c30048104b332fab"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final.run.json",
+      "sha256": "29a803ae86f36416405fecb43cff3c20af99259591900af2ef3bc91aa7d70bcf"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final.txt",
+      "sha256": "a48b8f60ea7f4a187c125a0821a8bf02daad15b07bc0fd61570821da5ebe1646"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final-test-types.run.json",
+      "sha256": "575f52ff257433fc6c50ed624d8265948953d238430442ed3e7aa7bcc8b64439"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/02-implementation-plan.md",
+      "sha256": "8030ca400af3c7de2282e310cf429ba7e5de23a83eaf5a160eeb6f42716ce1cc"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/README.md",
+      "sha256": "6c72ba5904fac9a6070f84d8cdc7ff238e610a4dec97d264c9a6a9ee2a1f6f37"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/execution-addendum-intro.md",
+      "sha256": "d41e244d972dd3b2c96c420696a7cc32884f7c0d652c6f631c78979773a72a2b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/build_execution_addendum.py",
+      "sha256": "10939e22d79a30610e3e68bd279748386b083eb8f7849c464c72531ee69daa4d"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/docs/TECHNICAL-REFERENCE.md",
+      "sha256": "7025ddd74164176f4cc3c3cf0f906a0f368f562c949afcd4d887a2a1b7b85423"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/docs/STATE-OF-PARITY.md",
+      "sha256": "9e474c34e3cfa40dd12d6d4f62a81448e557a134b131bba3ba7298b234381fb3"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/docs/HANDOFF.md",
+      "sha256": "6a5f073d304d1fe1aef65b0370979d114ef4d4bf83957eef8d5990be01b9e541"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnNBarCompanions.ts",
+      "sha256": "1ec25c5579ec58bd06db0f2ec5cd0161bd29bfe532af2e2e64e7f6e0940ff826"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/saleReturnNBarCompanions.test.ts",
+      "sha256": "f2c78357a27b456b20b7fa58031f51e5c27ee6ffb29c3cd1e8e722120377f393"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/fixtures/saleReturnNBarCompanions.independent.json",
+      "sha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a"
+    }
+  ]
+}

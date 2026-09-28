@@ -1,0 +1,80 @@
+{
+  "kind": "static-desktop-schema-source-contract",
+  "operationalDesktopMetadata": false,
+  "fields": [
+    {
+      "field": "MFG_IDTL.ITM_LOT",
+      "sql": "ALTER TABLE MFG_IDTL ADD ITM_LOT VARCHAR(10)Not NULL DEFAULT ''",
+      "primarySource": "unified/src/csharp/DataCareNext/Ac_Image.cs",
+      "line": 8213,
+      "binary": "DataCareNext.exe",
+      "encoding": "UTF-16LE",
+      "byteOffset": 14422565,
+      "byteOffsetHex": "0xdc1225",
+      "staticContract": {
+        "type": "VARCHAR",
+        "length": 10,
+        "nullable": false,
+        "default": ""
+      }
+    },
+    {
+      "field": "MFG_ISU_REC.ITM_LOT",
+      "sql": "ALTER TABLE MFG_ISU_REC ADD ITM_LOT VARCHAR(10)Not NULL DEFAULT ''",
+      "primarySource": "unified/src/csharp/DataCareNext/Ac_Image.cs",
+      "line": 8326,
+      "binary": "DataCareNext.exe",
+      "encoding": "UTF-16LE",
+      "byteOffset": 14424199,
+      "byteOffsetHex": "0xdc1887",
+      "staticContract": {
+        "type": "VARCHAR",
+        "length": 10,
+        "nullable": false,
+        "default": ""
+      }
+    },
+    {
+      "field": "MFG_IDTL.ITM_LOT_AC_CODE",
+      "sql": "ALTER TABLE MFG_IDTL ADD ITM_LOT_AC_CODE VARCHAR(10)Not NULL DEFAULT ''",
+      "primarySource": "unified/src/csharp/DataCareNext/Ac_Image.cs",
+      "line": 8590,
+      "binary": "DataCareNext.exe",
+      "encoding": "UTF-16LE",
+      "byteOffset": 14427580,
+      "byteOffsetHex": "0xdc25bc",
+      "staticContract": {
+        "type": "VARCHAR",
+        "length": 10,
+        "nullable": false,
+        "default": ""
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "unified/src/csharp/DataCareNext/Ac_Image.cs",
+      "sha256": "fa653d152ad95f8a2243115df394f0478f8ce5283d9c1f21455878c584a072bc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MFG_WITH_LOT.cs",
+      "sha256": "ae8a5ee8f2821a388d0389a35de0951f372a5753162a42ba1f89787ca934d5e4"
+    },
+    {
+      "path": "unified/src/csharp_nextdm/DataCareNext/Ac_Image.cs",
+      "sha256": "da1d7350debb40163255ee5a77238baad54fff9467f8184f9a42d4c0eb956102"
+    },
+    {
+      "path": "unified/database/schema/01_Schema.sql",
+      "sha256": "1eb684c7e2bec72a330a9038a2da72ffea669b3ae7ef50b85b34e0e3126efa0d"
+    },
+    {
+      "path": "DataCareNext.exe",
+      "sha256": "c85f93fd336853a2a639c6452b47748290a1dddb214e2fdf3fc78f47bc0ca6c8"
+    }
+  ]
+}

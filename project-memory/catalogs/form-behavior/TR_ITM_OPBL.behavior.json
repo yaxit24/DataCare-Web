@@ -1,0 +1,91 @@
+{
+ "form": "TR_ITM_OPBL",
+ "loc": 1717,
+ "gridColumns": {
+  "cSr": 0,
+  "cItCode": 1,
+  "cItName": 2,
+  "cRateType": 3,
+  "cPcs": 4,
+  "cGrWt": 5,
+  "cNetWt": 6,
+  "cTouch": 7,
+  "cWestPrc": 8,
+  "cFine": 9,
+  "cRate": 10,
+  "cItmAmt": 11,
+  "clbrType": 12,
+  "cLbrRate": 13,
+  "cLbrAmt": 14,
+  "cOthAmt": 15,
+  "cNetAmt": 16,
+  "cItType": 17
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_TYPE =' ? ' ORDER BY IT_TYPE,GR_CODE,IT_NAME",
+  "SELECT * FROM ITM_OPBL WHERE CO_CODE = ' ? ' AND LC_CODE =' ? ' AND IT_CODE = ' ? IT_CODE ? ' AND DATA_TYPE = ' ? '",
+  "Please Select Metaltype....",
+  "DELETE FROM ITM_OPBL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND VCH_NO = ' ? ' AND DATA_TYPE = ' ? '",
+  "SELECT * FROM ITM_OPBL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND VCH_NO = ' ? ' AND DATA_TYPE = ' ? '",
+  "DELETE FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND VCH_NO = ' ? '",
+  "DELETE FROM DM_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND VCH_NO = ' ? '",
+  "Please Select Item For Delete."
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 2,
+  "Right": 1,
+  "Left": 1,
+  "Up": 1,
+  "Down": 1
+ },
+ "calc": [
+  "mSG[mSG.Row, 9] = Strings.Format((object)(Conversion.Val(mSG[mSG.Row, 6]) * (Conversion.Val(mSG[mSG.Row, 7]) + Conversion.Val(mSG[mSG.Row, 8])) / 100.0), \"0.000\");",
+  "mSG[mSG.Row, 11] = Strings.Format((object)(Conversion.Val(mSG[mSG.Row, 4]) * Conversion.Val(mSG[mSG.Row, 10])), \"0.00\");",
+  "mSG[mSG.Row, 11] = Strings.Format((object)(Conversion.Val(mSG[mSG.Row, 9]) * Conversion.Val(mSG[mSG.Row, 10])), \"0.00\");",
+  "mSG[mSG.Row, 14] = Strings.Format((object)Math.Round(Conversion.Val(mSG[mSG.Row, 4]) * Conversion.Val(mSG[mSG.Row, 13]), 0), \"0.00\");",
+  "mSG[mSG.Row, 14] = Strings.Format((object)Math.Round(Conversion.Val(mSG[mSG.Row, 6]) * Conversion.Val(mSG[mSG.Row, 13]), 0), \"0.00\");",
+  "mSG[mSG.Row, 14] = Strings.Format((object)Math.Round(Conversion.Val(mSG[mSG.Row, 6]) * (Conversion.Val(mSG[mSG.Row, 13]) / 1000.0), 0), \"0.00\");",
+  "mSG[mSG.Row, 14] = Strings.Format((object)Math.Round(Conversion.Val(mSG[mSG.Row, 5]) * Conversion.Val(mSG[mSG.Row, 13]), 0), \"0.00\");",
+  "mSG[mSG.Row, 16] = Strings.Format((object)(Conversion.Val(mSG[mSG.Row, 11]) + Conversion.Val(mSG[mSG.Row, 14]) + Conversion.Val(mSG[mSG.Row, 15])), \"0.00\");",
+  "mSG_TOT[0, 4] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 4]) + Conversion.Val(MSG[DC_Main.M, 4]))), \"0\");",
+  "mSG_TOT[0, 5] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 5]) + Conversion.Val(MSG[DC_Main.M, 5]))), \"0.000\");",
+  "mSG_TOT[0, 6] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 6]) + Conversion.Val(MSG[DC_Main.M, 6]))), \"0.000\");",
+  "mSG_TOT[0, 9] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 9]) + Conversion.Val(MSG[DC_Main.M, 9]))), \"0.000\");",
+  "mSG_TOT[0, 11] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 11]) + Conversion.Val(MSG[DC_Main.M, 11]))), \"0.00\");",
+  "mSG_TOT[0, 16] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 16]) + Conversion.Val(MSG[DC_Main.M, 16]))), \"0.00\");",
+  "NewValTot = Conversion.Val(MSG_TOT[0, 5]) + Conversion.Val(MSG_TOT[0, 6]) + Conversion.Val(MSG_TOT[0, 15]) + Conversion.Val(MSG_TOT[0, 14]);",
+  "OldValTot = Conversion.Val(MSG_TOT[0, 5]) + Conversion.Val(MSG_TOT[0, 6]) + Conversion.Val(MSG_TOT[0, 15]) + Conversion.Val(MSG_TOT[0, 14]);"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Please Select Metaltype....",
+   "when": "Operators.CompareString(Strings.Mid(cboItemTyp.Text, 1, 1), \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Item For Delete.",
+   "when": "Operators.CompareString(cboItemTyp.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete All Item Opening From This Record now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete All Item Opening From This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  }
+ ]
+}

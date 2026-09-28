@@ -1,0 +1,8171 @@
+{
+  "generatedBy": "feature_gap_audit.py",
+  "denominator": "desktop-declared interactive controls (labels excluded)",
+  "caveat": "Presence of a same-named or same-captioned control in web source is evidence of SURFACE presence only. It is not behavioural parity and must never be reported as such.",
+  "formsAudited": 163,
+  "controlsTotal": 4555,
+  "controlsPresent": 3333,
+  "overallPresencePct": 73.2,
+  "byCategory": {
+    "entry": {
+      "total": 2512,
+      "present": 1786,
+      "pct": 71.1
+    },
+    "command": {
+      "total": 1669,
+      "present": 1204,
+      "pct": 72.1
+    },
+    "grid": {
+      "total": 251,
+      "present": 239,
+      "pct": 95.2
+    },
+    "other": {
+      "total": 123,
+      "present": 104,
+      "pct": 84.6
+    }
+  },
+  "forms": [
+    {
+      "form": "MS_BOOKLIST",
+      "classification": "generic-scaffold",
+      "frontendRoutes": [
+        "/masters/books"
+      ],
+      "controlsTotal": 1,
+      "controlsPresent": 0,
+      "presencePct": 0.0,
+      "categories": {
+        "entry": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_tSearchText"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_HELP",
+      "classification": "waived-documented",
+      "frontendRoutes": [],
+      "controlsTotal": 1,
+      "controlsPresent": 0,
+      "presencePct": 0.0,
+      "categories": {
+        "entry": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_tSearchText"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_ALL",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 91,
+      "controlsPresent": 23,
+      "presencePct": 25.3,
+      "categories": {
+        "entry": {
+          "total": 19,
+          "found": 17,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 72,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BrnItmInWord",
+            "_BtnAprPanding",
+            "_BtnCntrTrfr",
+            "_BtnInOutSumm",
+            "_BtnItmInOut",
+            "_BtnItmOutWord",
+            "_BtnSalesItem",
+            "_BtnSalesReg",
+            "_BtnSlRpt",
+            "_brnBulPrAdj",
+            "_brnBulPrPanding",
+            "_brnBulSlAdj",
+            "_btnAcPurc",
+            "_btnAngAdj",
+            "_btnAngIsu",
+            "_btnAngPan",
+            "_btnAprInOut",
+            "_btnAprRpt",
+            "_btnBusSlPanding",
+            "_btnCashBank",
+            "_btnCounterSale",
+            "_btnCustRepIsuPan",
+            "_btnCustRepPan",
+            "_btnDesignSumm",
+            "_btnEmpRpt",
+            "_btnGroupPurc",
+            "_btnItCancel",
+            "_btnItmSl",
+            "_btnKrIsu",
+            "_btnKrRepIsu",
+            "_btnKrRepPan",
+            "_btnKrRepRec",
+            "_btnLabourRpt",
+            "_btnOk",
+            "_btnOrdAdj",
+            "_btnOrdAdvance",
+            "_btnOrdMakePan",
+            "_btnOrdRpt",
+            "_btnOrdWithBill",
+            "_btnParyPurcSumm"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_IMPORT",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/backup",
+        "/masters/accounts"
+      ],
+      "controlsTotal": 42,
+      "controlsPresent": 13,
+      "presencePct": 31.0,
+      "categories": {
+        "entry": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 41,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnLite",
+            "_SimpleButton1",
+            "_SimpleButton2",
+            "_SimpleButton3",
+            "_SimpleButton4",
+            "_btnAbAcOpbl",
+            "_btnAcMastReImport",
+            "_btnBillWise",
+            "_btnCudhiSql",
+            "_btnDhrnAcUPdate",
+            "_btnJPTag",
+            "_btnLastSrNo",
+            "_btnNexHuid",
+            "_btnPlusAcOp",
+            "_btnPlusAcRef",
+            "_btnPlusBarIdtl",
+            "_btnPlusLoan",
+            "_btnPlusMast",
+            "_btnPlusReparing",
+            "_btnPlusSchm",
+            "_btnPlusTagDataType",
+            "_btnPlustagcost",
+            "_btnRtLImoirt",
+            "_btnRtlAreaImport",
+            "_btnRtlDhrn",
+            "_btnRtlJdt",
+            "_btnWhApr",
+            "_btnWhImport",
+            "_btnWhSql"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_TRADING",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 16,
+      "controlsPresent": 6,
+      "presencePct": 37.5,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 1,
+          "weakColumnOnly": [
+            "_tPrAcName",
+            "_tSlAcName"
+          ],
+          "missingNames": [
+            "_CboTradingType",
+            "_mFromDt",
+            "_mToDt",
+            "_tPrAcCode",
+            "_tPrAcName",
+            "_tSlAcCode",
+            "_tSlAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BrnGrSelect",
+            "_btnItCancel",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_SET_ADMIN",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/settings",
+        "/admin/users"
+      ],
+      "controlsTotal": 27,
+      "controlsPresent": 12,
+      "presencePct": 44.4,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboEstmatBank",
+            "_cboGlYearSale",
+            "_cboKrTouchHide",
+            "_cboNegativeStk",
+            "_cboOldPurcTch",
+            "_cboSlYearSale",
+            "_cboStklimitWithDesign"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 16,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnStkLimitWithDesign",
+            "_QButton1",
+            "_btnEstmateBank",
+            "_btnGlYearSale",
+            "_btnKrTouchHide",
+            "_btnNegativeStk",
+            "_btnOldPurcTch",
+            "_btnSlYearSale"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_AI_TRFR",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/tag-transfer",
+        "/txn/counter-transfer"
+      ],
+      "controlsTotal": 20,
+      "controlsPresent": 9,
+      "presencePct": 45.0,
+      "categories": {
+        "entry": {
+          "total": 7,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt",
+            "_tFtpId",
+            "_tFtpPath",
+            "_tftpPwd"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnExitUae",
+            "_btnBrouser",
+            "_btnSaveUae",
+            "_btnServerData",
+            "_btnTagTrfr"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_GridControl1"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_CUST_CRM",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/customer-crm"
+      ],
+      "controlsTotal": 33,
+      "controlsPresent": 15,
+      "presencePct": 45.5,
+      "categories": {
+        "entry": {
+          "total": 23,
+          "found": 9,
+          "weakColumnOnly": [
+            "_nSrNo",
+            "_tUpdateEmpCode"
+          ],
+          "missingNames": [
+            "_cboValType",
+            "_chkItmSale",
+            "_chkReminderClose",
+            "_mFromDt",
+            "_mToDt",
+            "_mUpdDate",
+            "_mUpdTime",
+            "_nSrNo",
+            "_tCustCode",
+            "_tMainRemark",
+            "_tNewRemark",
+            "_tRemCustName",
+            "_tUpdateEmpCode",
+            "_tUpdateEmpName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar",
+            "_btnOk",
+            "_btnRemClose",
+            "_btnRemUpdate"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_TAG_ESTMATE",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 34,
+      "controlsPresent": 16,
+      "presencePct": 47.1,
+      "categories": {
+        "entry": {
+          "total": 13,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt",
+            "_nLbrPrc",
+            "_nLbrRate",
+            "_nNetAmt",
+            "_nTaxAmt",
+            "_nTotAmt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 17,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnImgCapture",
+            "_BtnImgDel",
+            "_BtnImgSelect",
+            "_BtnImprt",
+            "_BtnIn",
+            "_BtnOldSoftImagImport",
+            "_BtnSLImageDelete",
+            "_BtnSumm",
+            "_btnImgUpload",
+            "_btnSvrImgConvert"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_DGV"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_SETTING_MAIN",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/settings",
+        "/admin/users"
+      ],
+      "controlsTotal": 113,
+      "controlsPresent": 55,
+      "presencePct": 48.7,
+      "categories": {
+        "entry": {
+          "total": 54,
+          "found": 28,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboAllBrancAcShow",
+            "_cboAprlImg",
+            "_cboBalSheetType",
+            "_cboCrystalViewType",
+            "_cboCustOsSms",
+            "_cboDesignGen",
+            "_cboEmpMandatory",
+            "_cboEstmateWithTax",
+            "_cboImgWithWt",
+            "_cboLbrWitGht",
+            "_cboMobileSearch",
+            "_cboOrdImage",
+            "_cboPreviousLock",
+            "_cboPrintFormSet",
+            "_cboPurRateWith",
+            "_cboReminderType",
+            "_cboSalesImagPrint",
+            "_cboScorlbar",
+            "_cboSilverLedr3digit",
+            "_cboSlRateWith",
+            "_cboStkRefresh",
+            "_cboTagRowPrint",
+            "_cboTagRowSave",
+            "_cboTagSaleWtDiff",
+            "_cboWhSaleImg",
+            "_tDcPwd"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 59,
+          "found": 27,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_brnImgWithWt",
+            "_brnRefresh",
+            "_brnReminderType",
+            "_btnAllBranchAcShow",
+            "_btnAprlImg",
+            "_btnBalSheetType",
+            "_btnBillTitRof",
+            "_btnCrystalRptType",
+            "_btnCustOsSms",
+            "_btnDcMemb",
+            "_btnDesignGen",
+            "_btnEmpMandotry",
+            "_btnEstmatTax",
+            "_btnFontChang",
+            "_btnFontStyle",
+            "_btnGridRowHeightSet",
+            "_btnHelpLent",
+            "_btnItmLotStk",
+            "_btnLoanIntDay",
+            "_btnMobileSearch",
+            "_btnOrdImage",
+            "_btnPreviousLock",
+            "_btnPrintFormSet",
+            "_btnPurRateWith",
+            "_btnScrolbar",
+            "_btnSilverWt3digit",
+            "_btnSlImgPrint",
+            "_btnSlRateWith",
+            "_btnTagRowPrint",
+            "_btnTagRowSave",
+            "_btnTagSlWtDiff",
+            "_btnWhSaleImg"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_WHATSAPP",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/integrations"
+      ],
+      "controlsTotal": 45,
+      "controlsPresent": 22,
+      "presencePct": 48.9,
+      "categories": {
+        "entry": {
+          "total": 21,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_CboSmsType",
+            "_ChkOnlyMoNo",
+            "__comboFrom",
+            "__comboTo",
+            "_cboBarth",
+            "_chkAllRow",
+            "_chkBoxHeadLess",
+            "_nFromOs",
+            "_nToOs",
+            "_numDelay",
+            "_tBoxAttach",
+            "_tsmstype"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 22,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnSmsSend",
+            "_BtnTanslat",
+            "_btnAcOs",
+            "_btnBrowse",
+            "_btnDelyTime",
+            "_btnExlImport",
+            "_btnOk",
+            "_btnQuit",
+            "_btnTextMsg",
+            "_btnWappInstall"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_pBoxAuthQR"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_LOGIN",
+      "classification": "conceptual-engine",
+      "frontendRoutes": [
+        "/login",
+        "/admin/users"
+      ],
+      "controlsTotal": 2,
+      "controlsPresent": 1,
+      "presencePct": 50.0,
+      "categories": {
+        "entry": {
+          "total": 2,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_tPasward"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_REPORT",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 2,
+      "controlsPresent": 1,
+      "presencePct": 50.0,
+      "categories": {
+        "entry": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 2,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnSendWapp"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_OS",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/outstanding",
+        "/reports/bill-outstanding"
+      ],
+      "controlsTotal": 43,
+      "controlsPresent": 22,
+      "presencePct": 51.2,
+      "categories": {
+        "entry": {
+          "total": 24,
+          "found": 14,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboRptType",
+            "_chkAcSelect",
+            "_chkGoldInt",
+            "_mFromDt",
+            "_mToDt",
+            "_nAmount",
+            "_nBigAmt",
+            "_nPayIntPrc",
+            "_nRecIntPrc",
+            "_tRefAc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 19,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnCrList",
+            "_BtnDrList",
+            "_BtnGroupWise",
+            "_btnAreaWise",
+            "_btnIntRpt",
+            "_btnLdrDetl",
+            "_btnLdrWeight",
+            "_btnLedrSum",
+            "_btnMainAc",
+            "_btnOk",
+            "_btnWithRef"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_SMS",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/integrations"
+      ],
+      "controlsTotal": 29,
+      "controlsPresent": 15,
+      "presencePct": 51.7,
+      "categories": {
+        "entry": {
+          "total": 15,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_CboSmsType",
+            "_ChkOnlyMoNo",
+            "__comboFrom",
+            "__comboTo",
+            "_cboBarth",
+            "_chkAllRow",
+            "_chkRetSend",
+            "_nFromOs",
+            "_nToOs",
+            "_tsmstype"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 14,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnSmsSend",
+            "_BtnTanslat",
+            "_btnExlImport",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "BtmSchm",
+      "classification": "conceptual-engine",
+      "frontendRoutes": [
+        "/txn/scheme"
+      ],
+      "controlsTotal": 25,
+      "controlsPresent": 13,
+      "presencePct": 52.0,
+      "categories": {
+        "entry": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [
+            "_tYearCode"
+          ],
+          "missingNames": [
+            "_tYearCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 24,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnAcBalence",
+            "_BtnItmStk",
+            "_SimpleButton1",
+            "_brnOrdTraking",
+            "_btnBillOrnaIsu",
+            "_btnBulTrfr",
+            "_btnLotTrfr",
+            "_btnMfgTrfr",
+            "_btnTimeLdr",
+            "_btnVptrfr",
+            "_lblJadtarTrfr"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_MFG",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 21,
+      "controlsPresent": 11,
+      "presencePct": 52.4,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboPorcessType",
+            "_chkPorcessPanding",
+            "_mFromDt",
+            "_mToDt",
+            "_tRefAc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnDrList",
+            "_BtnGroupWise",
+            "_btnAreaWise",
+            "_btnLdrWeight",
+            "_btnWithRef"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_EMP",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/employee-sales"
+      ],
+      "controlsTotal": 24,
+      "controlsPresent": 13,
+      "presencePct": 54.2,
+      "categories": {
+        "entry": {
+          "total": 14,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboCommType",
+            "_chkItGroup",
+            "_chkItSelect",
+            "_chkItemComm",
+            "_chkVchSum",
+            "_mFromDt",
+            "_mToDt",
+            "_nComVal"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar",
+            "_btnItCancel",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_REMINDER",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/utilities/reminders"
+      ],
+      "controlsTotal": 22,
+      "controlsPresent": 12,
+      "presencePct": 54.5,
+      "categories": {
+        "entry": {
+          "total": 3,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkKrOrdRec",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 19,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Button1",
+            "_SimpleButton1",
+            "_btnItmInOut",
+            "_btnTodaySale",
+            "_btnUserReqest",
+            "_btnWebData",
+            "_btnWhSales"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_BALANCE",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/balance-sheet",
+        "/reports/account-balances"
+      ],
+      "controlsTotal": 20,
+      "controlsPresent": 11,
+      "presencePct": 55.0,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkTodayBal",
+            "_mFromDt",
+            "_mToDt",
+            "_nGoldAmt",
+            "_nSilverAmt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnBalanceZoom",
+            "_BtnPandL",
+            "_BtnPandLZoom",
+            "_Btnbalsheet"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_TAG_IMAGE",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 36,
+      "controlsPresent": 20,
+      "presencePct": 55.6,
+      "categories": {
+        "entry": {
+          "total": 16,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkItSelect",
+            "_mFromDt",
+            "_mToDt",
+            "_nFromWt",
+            "_nLbrPrc",
+            "_nToWt",
+            "_nTotAmt",
+            "_numDelay"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 17,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnImgCapture",
+            "_BtnImgDel",
+            "_BtnImgSelect",
+            "_BtnIn",
+            "_BtnSumm",
+            "_btnItCancel",
+            "_btnOk",
+            "_btnWapp"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_BAL_ZOOM",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/account-balances"
+      ],
+      "controlsTotal": 16,
+      "controlsPresent": 9,
+      "presencePct": 56.2,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkLedrFine",
+            "_chkTodayBal",
+            "_mFromDt",
+            "_mToDt",
+            "_nGoldAmt",
+            "_nSilverAmt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_INOUT",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/item-stock-ledger"
+      ],
+      "controlsTotal": 14,
+      "controlsPresent": 8,
+      "presencePct": 57.1,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboValType",
+            "_chkProcuctWise",
+            "_mFromDt",
+            "_mToDt",
+            "_tLdrCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_E_INVOICE",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/utilities/e-invoice"
+      ],
+      "controlsTotal": 7,
+      "controlsPresent": 4,
+      "presencePct": 57.1,
+      "categories": {
+        "entry": {
+          "total": 2,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MDI_FORM",
+      "classification": "conceptual-engine",
+      "frontendRoutes": [
+        "/dashboard"
+      ],
+      "controlsTotal": 19,
+      "controlsPresent": 11,
+      "presencePct": 57.9,
+      "categories": {
+        "entry": {
+          "total": 6,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkLiveRate",
+            "_chkNextAi",
+            "_chkWappId",
+            "_nCurrncyRate",
+            "_tSoftDemoType"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 13,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnComp",
+            "_BtnKrgr",
+            "_BtnTran2"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_JDTR_ZOOM",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/karigar-ledger"
+      ],
+      "controlsTotal": 12,
+      "controlsPresent": 7,
+      "presencePct": 58.3,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboProcessName",
+            "_mFromDt",
+            "_mToDt",
+            "_tDesgnNo",
+            "_tMainDesign"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_AC_GROUP",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/ac-groups"
+      ],
+      "controlsTotal": 15,
+      "controlsPresent": 9,
+      "presencePct": 60.0,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 4,
+          "weakColumnOnly": [
+            "_tMasterData",
+            "_tServerIp"
+          ],
+          "missingNames": [
+            "_Text1",
+            "_cboMainGr",
+            "_cboUserShow",
+            "_tMasterData",
+            "_tServerIp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnIp"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_TAG",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/tag-stock"
+      ],
+      "controlsTotal": 43,
+      "controlsPresent": 26,
+      "presencePct": 60.5,
+      "categories": {
+        "entry": {
+          "total": 25,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboRptType",
+            "_chkDoubelTag",
+            "_chkDuplicatTag",
+            "_chkEmpIsuLess",
+            "_chkItDiff",
+            "_chkStkTagDbl",
+            "_chkTagLessNotStk",
+            "_chkTagNotInBarDetl",
+            "_chkTagPcsDiff",
+            "_chkZeroId",
+            "_chkslandStk",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 15,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnIn",
+            "_BtnSumm",
+            "_btnTagWtChange"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_DGV"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_LEDR",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/account-ledger"
+      ],
+      "controlsTotal": 33,
+      "controlsPresent": 20,
+      "presencePct": 60.6,
+      "categories": {
+        "entry": {
+          "total": 21,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboCrDr",
+            "_chkGoldCol",
+            "_chkHalfMonth",
+            "_chkVchSum",
+            "_mFromDt",
+            "_mToDt",
+            "_tAcGrCode",
+            "_tRefAc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_BtnJmaUdhar",
+            "_BtnTimeWise",
+            "_brnOsDay",
+            "_btnPurcRpt"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_TAX",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/hsn-summary",
+        "/reports/gst-input-register"
+      ],
+      "controlsTotal": 23,
+      "controlsPresent": 14,
+      "presencePct": 60.9,
+      "categories": {
+        "entry": {
+          "total": 12,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt",
+            "_tRefAc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnDrList",
+            "_BtnGroupWise",
+            "_btnAreaWise",
+            "_btnLdrWeight",
+            "_btnTaxSumm",
+            "_btnWithRef"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_WAPP_WITH_API",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/integrations"
+      ],
+      "controlsTotal": 31,
+      "controlsPresent": 19,
+      "presencePct": 61.3,
+      "categories": {
+        "entry": {
+          "total": 15,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_CboSmsType",
+            "_ChkOnlyMoNo",
+            "_cboBarth",
+            "_chkAllRow",
+            "_nFromOs",
+            "_nToOs"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 15,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnSmsSend",
+            "_btnAcOs",
+            "_btnExlImport",
+            "_btnOk",
+            "_btnTextMsg"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_txtFinalPreview"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_BILL_PROFIT",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 21,
+      "controlsPresent": 13,
+      "presencePct": 61.9,
+      "categories": {
+        "entry": {
+          "total": 12,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboRptType",
+            "_mFromDt",
+            "_mToDt",
+            "_tCounterCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnBillWise",
+            "_BtnTagWise",
+            "_btnItCancel",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_DHRN_OS",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/dhrn-outstanding"
+      ],
+      "controlsTotal": 21,
+      "controlsPresent": 13,
+      "presencePct": 61.9,
+      "categories": {
+        "entry": {
+          "total": 14,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkIntType",
+            "_chkOverValue",
+            "_mFromDt",
+            "_mToDt",
+            "_nGlRate",
+            "_nSlRate"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_GST",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/gstr1",
+        "/reports/gstr2",
+        "/reports/gstr3b"
+      ],
+      "controlsTotal": 21,
+      "controlsPresent": 13,
+      "presencePct": 61.9,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboSectionType",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnCsvFile",
+            "_BtnGst1Zoom",
+            "_BtnGst2Zoom",
+            "_BtnGst3Zoom",
+            "_btnGstrCsv"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_DHRN_LOAN",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/dhrn-outstanding"
+      ],
+      "controlsTotal": 29,
+      "controlsPresent": 18,
+      "presencePct": 62.1,
+      "categories": {
+        "entry": {
+          "total": 14,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt",
+            "_tRefAc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 15,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnCrList",
+            "_BtnDrList",
+            "_BtnGroupWise",
+            "_btnAreaWise",
+            "_btnLdrDetl",
+            "_btnLdrWeight",
+            "_btnLedrSum",
+            "_btnWithRef"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_ORD_TRACK",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 24,
+      "controlsPresent": 15,
+      "presencePct": 62.5,
+      "categories": {
+        "entry": {
+          "total": 15,
+          "found": 8,
+          "weakColumnOnly": [
+            "_tKrAcName"
+          ],
+          "missingNames": [
+            "_cboOrderType",
+            "_chkOrdTagStk",
+            "_mFromDt",
+            "_mFromOrdDt",
+            "_mToDt",
+            "_mToOrdDt",
+            "_tKrAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_TAX",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/taxes"
+      ],
+      "controlsTotal": 16,
+      "controlsPresent": 10,
+      "presencePct": 62.5,
+      "categories": {
+        "entry": {
+          "total": 10,
+          "found": 4,
+          "weakColumnOnly": [
+            "_nTaxPrc",
+            "_tTaxAcName"
+          ],
+          "missingNames": [
+            "_LblInputTaxName",
+            "_TEXT_ENTRY",
+            "_Text1",
+            "_nTaxPrc",
+            "_tInputTax",
+            "_tTaxAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_SETTING",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/settings",
+        "/admin/users"
+      ],
+      "controlsTotal": 59,
+      "controlsPresent": 37,
+      "presencePct": 62.7,
+      "categories": {
+        "entry": {
+          "total": 27,
+          "found": 18,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_cboDhrnIntPrc",
+            "_cboDhrnType",
+            "_cboHelpSearch",
+            "_cboOzCon",
+            "_cboPrintZoom",
+            "_cboPurcLbr",
+            "_cboSlRateRof",
+            "_cboWhTch"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 31,
+          "found": 18,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnColumnSet",
+            "_BtnLbrGen",
+            "_BtnRateOpn",
+            "_BtnRptType",
+            "_BtnTagRowChange",
+            "_btnDhrnIntPrc",
+            "_btnDhrnType",
+            "_btnHelpSearch",
+            "_btnLoanSet",
+            "_btnPrintZoom",
+            "_btnPurcLbr",
+            "_btnSlRateRof",
+            "_btnWhTch"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_AUTO_ITEM",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/masters/auto-item"
+      ],
+      "controlsTotal": 19,
+      "controlsPresent": 12,
+      "presencePct": 63.2,
+      "categories": {
+        "entry": {
+          "total": 13,
+          "found": 6,
+          "weakColumnOnly": [
+            "_tMembAcName"
+          ],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_cboUPdateType",
+            "_mFromDt",
+            "_mToDt",
+            "_nMrpMargin",
+            "_tMembAcCode",
+            "_tMembAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_HDD",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/utilities/hdd-registry"
+      ],
+      "controlsTotal": 11,
+      "controlsPresent": 7,
+      "presencePct": 63.6,
+      "categories": {
+        "entry": {
+          "total": 3,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_tSrNo1",
+            "_tSrNo2"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1",
+            "_PictureBox2"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_PWD_UPDATE",
+      "classification": "conceptual-engine",
+      "frontendRoutes": [
+        "/login"
+      ],
+      "controlsTotal": 11,
+      "controlsPresent": 7,
+      "presencePct": 63.6,
+      "categories": {
+        "entry": {
+          "total": 6,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_tConPasword",
+            "_tPasword",
+            "_tSrNo1",
+            "_tSrNo2"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_OTH_DETL",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 36,
+      "controlsPresent": 23,
+      "presencePct": 63.9,
+      "categories": {
+        "entry": {
+          "total": 20,
+          "found": 18,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 16,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BrnItmInWord",
+            "_BtnItmInOut",
+            "_BtnItmOutWord",
+            "_btnItCancel",
+            "_btnKrInout",
+            "_btnKrIsu",
+            "_btnKrin",
+            "_btnOk",
+            "_btnlosItmIn",
+            "_btnlosItmInout",
+            "_btnlosItmOut"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_USER",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/admin/users"
+      ],
+      "controlsTotal": 14,
+      "controlsPresent": 9,
+      "presencePct": 64.3,
+      "categories": {
+        "entry": {
+          "total": 7,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboUserTyp",
+            "_tConPasword",
+            "_tPasword",
+            "_tResetPwd"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnMenuUpdate"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_MFG_ZOOM",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 17,
+      "controlsPresent": 11,
+      "presencePct": 64.7,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboProcessName",
+            "_mFromDt",
+            "_mToDt",
+            "_tDesgnNo",
+            "_tOrdDesgn"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_ADDRESS",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 33,
+      "controlsPresent": 22,
+      "presencePct": 66.7,
+      "categories": {
+        "entry": {
+          "total": 24,
+          "found": 17,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_CboAddType",
+            "_cboCustGroup",
+            "_chkAcSelect",
+            "_mBhDate",
+            "_mToBDate",
+            "_nSkipLbl",
+            "_tSearchText"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Btn2Add",
+            "_Btn3Add",
+            "_BtnPhBook",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_GRAPH",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/daily-sales",
+        "/reports/top-items"
+      ],
+      "controlsTotal": 21,
+      "controlsPresent": 14,
+      "presencePct": 66.7,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboTrntype",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnEmpSl",
+            "_BtnExpType",
+            "_BtnKrSl",
+            "_BtnMothSl"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_USER",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 18,
+      "controlsPresent": 12,
+      "presencePct": 66.7,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkItmlist",
+            "_chkPandingEntry",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnItCancel",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_MFG_MAST",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/mfg"
+      ],
+      "controlsTotal": 9,
+      "controlsPresent": 6,
+      "presencePct": 66.7,
+      "categories": {
+        "entry": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnEntryDelete",
+            "_btnMenuReset"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_WINDOW_SET",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/settings",
+        "/masters/styles"
+      ],
+      "controlsTotal": 9,
+      "controlsPresent": 6,
+      "presencePct": 66.7,
+      "categories": {
+        "entry": {
+          "total": 2,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_cboWindowMenu"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnWindowMenu"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_CUST",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/customer-crm"
+      ],
+      "controlsTotal": 9,
+      "controlsPresent": 6,
+      "presencePct": 66.7,
+      "categories": {
+        "entry": {
+          "total": 3,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_DGV"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SALE",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/sales"
+      ],
+      "controlsTotal": 80,
+      "controlsPresent": 54,
+      "presencePct": 67.5,
+      "categories": {
+        "entry": {
+          "total": 55,
+          "found": 33,
+          "weakColumnOnly": [
+            "_nPointBillVal",
+            "_nUseVal",
+            "_tAcMembName"
+          ],
+          "missingNames": [
+            "_TEXT_CRNT",
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_ORD",
+            "_TEXT_UPI",
+            "_chkBillOrnaIsu",
+            "_chkHuIdPrint",
+            "_chkWapp",
+            "_chkWhoutcommBill",
+            "_nPointBal",
+            "_nPointBillVal",
+            "_nPointSlVal",
+            "_nTotPoint",
+            "_nUseVal",
+            "_tAcMembCode",
+            "_tAcMembName",
+            "_tNewPrint",
+            "_tRefAc",
+            "_tTrfrDbCd",
+            "_tTrfrNo",
+            "_tTrfrYrCd"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 14,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnOlocar"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_MSG_CRNT"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_picAc"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_CASH_BANK",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/cash-book"
+      ],
+      "controlsTotal": 22,
+      "controlsPresent": 15,
+      "presencePct": 68.2,
+      "categories": {
+        "entry": {
+          "total": 15,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkSchmPanding",
+            "_mFromDt",
+            "_mToDt",
+            "_nLineSkip",
+            "_nMembAmt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_TOUR_ZOOM",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 19,
+      "controlsPresent": 13,
+      "presencePct": 68.4,
+      "categories": {
+        "entry": {
+          "total": 14,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_chkItmStk",
+            "_chkOnlyTagStk",
+            "_mFromDt",
+            "_mToDt",
+            "_tDesgnNo"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_UPDATE",
+      "classification": "conceptual-engine",
+      "frontendRoutes": [
+        "/utilities/data-refresh",
+        "/masters/labour-update"
+      ],
+      "controlsTotal": 26,
+      "controlsPresent": 18,
+      "presencePct": 69.2,
+      "categories": {
+        "entry": {
+          "total": 2,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 24,
+          "found": 18,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnCrmData",
+            "_btnFildUpdate",
+            "_btnFildUpdate2",
+            "_btnImgData",
+            "_btnSchmData",
+            "_btnTagStkDelete"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_WT_DIFF",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/tag-weight-diff"
+      ],
+      "controlsTotal": 49,
+      "controlsPresent": 34,
+      "presencePct": 69.4,
+      "categories": {
+        "entry": {
+          "total": 29,
+          "found": 18,
+          "weakColumnOnly": [
+            "_nCrAmt",
+            "_nDrAmt"
+          ],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_PR",
+            "_nCrAmt",
+            "_nCrLbrAmt",
+            "_nCrRate",
+            "_nCrTouch",
+            "_nDrAmt",
+            "_nDrRate",
+            "_nDrTouch"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnTagUpdate",
+            "_btnVchPrint"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_CONSI_APR",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 10,
+      "controlsPresent": 7,
+      "presencePct": 70.0,
+      "categories": {
+        "entry": {
+          "total": 4,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_BKP",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/backup"
+      ],
+      "controlsTotal": 10,
+      "controlsPresent": 7,
+      "presencePct": 70.0,
+      "categories": {
+        "entry": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_tSavePath"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnBkp"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_EXPORT",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/backup",
+        "/masters/accounts"
+      ],
+      "controlsTotal": 10,
+      "controlsPresent": 7,
+      "presencePct": 70.0,
+      "categories": {
+        "entry": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnReSetData",
+            "_btnRtLImoirt",
+            "_btnTrfrUpdate"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_SPLIT",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/tag-split"
+      ],
+      "controlsTotal": 54,
+      "controlsPresent": 38,
+      "presencePct": 70.4,
+      "categories": {
+        "entry": {
+          "total": 33,
+          "found": 22,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_PR",
+            "_TEXT_RTN_IDTL",
+            "_chkSameTag",
+            "_nCrLbrAmt",
+            "_nCrTouch",
+            "_nDrTouch",
+            "_nHmWt3",
+            "_nHmWt4"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnVchPrint"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 7,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_MSG_RTN_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 4,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1",
+            "_PictureBox2"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_MOVEMENT",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/item-stock-ledger"
+      ],
+      "controlsTotal": 27,
+      "controlsPresent": 19,
+      "presencePct": 70.4,
+      "categories": {
+        "entry": {
+          "total": 12,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboMoveType",
+            "_cboSalesType",
+            "_chkItmSelect",
+            "_chkWtType",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 15,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnItCancel",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_SLPR_ZOOM",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/sales-register",
+        "/reports/purchase-register"
+      ],
+      "controlsTotal": 27,
+      "controlsPresent": 19,
+      "presencePct": 70.4,
+      "categories": {
+        "entry": {
+          "total": 13,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboSalesType",
+            "_chkItmSelect",
+            "_chkOnlyTag",
+            "_chkSalesRtn",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 14,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnItCancel",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_BOOK",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/books"
+      ],
+      "controlsTotal": 24,
+      "controlsPresent": 17,
+      "presencePct": 70.8,
+      "categories": {
+        "entry": {
+          "total": 17,
+          "found": 10,
+          "weakColumnOnly": [
+            "_cboTranInOut",
+            "_cboTrnsNm",
+            "_tBkCode",
+            "_tBkName",
+            "_tBkShort"
+          ],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_Text1",
+            "_cboTranInOut",
+            "_cboTrnsNm",
+            "_tBkCode",
+            "_tBkName",
+            "_tBkShort"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_BILL_TO",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/bill-to-bill"
+      ],
+      "controlsTotal": 31,
+      "controlsPresent": 22,
+      "presencePct": 71.0,
+      "categories": {
+        "entry": {
+          "total": 15,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL",
+            "_chkWapp",
+            "_nTotRec"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnBillOrna",
+            "_btnBillPrint",
+            "_btnOrnaOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 5,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_MSG_BILL_TOT"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MLT_PRO",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/melting"
+      ],
+      "controlsTotal": 31,
+      "controlsPresent": 22,
+      "presencePct": 71.0,
+      "categories": {
+        "entry": {
+          "total": 18,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL",
+            "_nAvgTouch",
+            "_nItNwt",
+            "_nPcs",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnOrdHelp"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_MSG_BILL_TOT"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SL_EBILL",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/utilities/e-invoice"
+      ],
+      "controlsTotal": 45,
+      "controlsPresent": 32,
+      "presencePct": 71.1,
+      "categories": {
+        "entry": {
+          "total": 24,
+          "found": 18,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TxtBoxError",
+            "_tTokan",
+            "_tldrCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 13,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnEExit",
+            "_btnIrnGen",
+            "_btnTokanGen",
+            "_btnePrint"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 4,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PicEQr",
+            "_tBoxResponce"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_OPBL",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/tag-opening"
+      ],
+      "controlsTotal": 56,
+      "controlsPresent": 40,
+      "presencePct": 71.4,
+      "categories": {
+        "entry": {
+          "total": 30,
+          "found": 23,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL",
+            "_nHmWt3",
+            "_nHmWt4",
+            "_nItNwt",
+            "_nPcs",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 20,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnJesonGen",
+            "_btnLastYearIdtl",
+            "_btnMainStkToBarDetl",
+            "_btnNewTagImg",
+            "_btnOldNewtag",
+            "_btnRfid",
+            "_btnTagReNumber"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_STK_LEVEL",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/item-group-stock"
+      ],
+      "controlsTotal": 14,
+      "controlsPresent": 10,
+      "presencePct": 71.4,
+      "categories": {
+        "entry": {
+          "total": 7,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboStockType",
+            "_chkWithAdjSchm",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_STYLE",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/styles",
+        "/masters/designs",
+        "/masters/models"
+      ],
+      "controlsTotal": 7,
+      "controlsPresent": 5,
+      "presencePct": 71.4,
+      "categories": {
+        "entry": {
+          "total": 2,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Text1",
+            "_tStyleName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_COMPANY",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/companies",
+        "/admin/provision",
+        "/select"
+      ],
+      "controlsTotal": 62,
+      "controlsPresent": 45,
+      "presencePct": 72.6,
+      "categories": {
+        "entry": {
+          "total": 51,
+          "found": 39,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Text1",
+            "_cboWithOldCoMast",
+            "_chkResetData",
+            "_tA",
+            "_tB",
+            "_tC",
+            "_tClientSecret",
+            "_tTerminalCode",
+            "_tUaeClientId",
+            "_teGstNo",
+            "_tePortalId",
+            "_tePortalPwd"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnExitUae",
+            "_btnSaveUae",
+            "_btnUrlSet",
+            "_btneExit",
+            "_btneSave"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_GROUP",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/groups"
+      ],
+      "controlsTotal": 22,
+      "controlsPresent": 16,
+      "presencePct": 72.7,
+      "categories": {
+        "entry": {
+          "total": 17,
+          "found": 11,
+          "weakColumnOnly": [
+            "_nTaxPrc",
+            "_nWest",
+            "_tPurcAcName",
+            "_tSaleAcName"
+          ],
+          "missingNames": [
+            "_Text1",
+            "_nTaxPrc",
+            "_nTochAdd",
+            "_nWest",
+            "_tPurcAcName",
+            "_tSaleAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_ROJMEL",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/day-book"
+      ],
+      "controlsTotal": 22,
+      "controlsPresent": 16,
+      "presencePct": 72.7,
+      "categories": {
+        "entry": {
+          "total": 5,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_mToDt",
+            "_nClBal"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 16,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnGrPrint",
+            "_btnBalSave",
+            "_btnDailyWork"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_ADD_MAST",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/addresses"
+      ],
+      "controlsTotal": 41,
+      "controlsPresent": 30,
+      "presencePct": 73.2,
+      "categories": {
+        "entry": {
+          "total": 34,
+          "found": 25,
+          "weakColumnOnly": [
+            "_tRefAcName"
+          ],
+          "missingNames": [
+            "_Text1",
+            "_mBhDate",
+            "_mBhlDate",
+            "_nCrDay",
+            "_nDpcPrc",
+            "_tCustDetl",
+            "_tRefAc",
+            "_tRefAcName",
+            "_tRtgsNo"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnAcImport"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_VCH_RE_NUMBR",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/utilities/voucher-renumber"
+      ],
+      "controlsTotal": 15,
+      "controlsPresent": 11,
+      "presencePct": 73.3,
+      "categories": {
+        "entry": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 13,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnBankPay",
+            "_btnCashPay",
+            "_btnSlWithAc",
+            "_btnWhSale"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_PURC_HM",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/purchase-hm"
+      ],
+      "controlsTotal": 49,
+      "controlsPresent": 36,
+      "presencePct": 73.5,
+      "categories": {
+        "entry": {
+          "total": 32,
+          "found": 23,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_PR",
+            "_TEXT_PR_IDTL",
+            "_chkBillImage",
+            "_chkHalfPrint",
+            "_chkWapp",
+            "_nItNwt",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnBillDel",
+            "_btnBillSelect",
+            "_btnbillCap"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_KR_ISU_REC",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/karigar-issue",
+        "/txn/karigar-receive",
+        "/txn/mfg-issue",
+        "/txn/mfg-receive"
+      ],
+      "controlsTotal": 42,
+      "controlsPresent": 31,
+      "presencePct": 73.8,
+      "categories": {
+        "entry": {
+          "total": 21,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ADJ",
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_chklotAsemble",
+            "_nItNwt",
+            "_nPcs",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 14,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnItCancel",
+            "_btnOk"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_STOCK",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/stock-valuation"
+      ],
+      "controlsTotal": 31,
+      "controlsPresent": 23,
+      "presencePct": 74.2,
+      "categories": {
+        "entry": {
+          "total": 14,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboStockType",
+            "_chkWtType",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 17,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnSiz",
+            "_btnItCancel",
+            "_btnOk",
+            "_btnWithOth"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_OPNCOMP",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/companies",
+        "/admin/provision",
+        "/select"
+      ],
+      "controlsTotal": 4,
+      "controlsPresent": 3,
+      "presencePct": 75.0,
+      "categories": {
+        "entry": {
+          "total": 4,
+          "found": 3,
+          "weakColumnOnly": [
+            "_tYearCode"
+          ],
+          "missingNames": [
+            "_tYearCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_PURC",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/purchase",
+        "/txn/purchase-return"
+      ],
+      "controlsTotal": 65,
+      "controlsPresent": 49,
+      "presencePct": 75.4,
+      "categories": {
+        "entry": {
+          "total": 38,
+          "found": 27,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_PR",
+            "_TEXT_PR_IDTL",
+            "_chkBillImage",
+            "_chkWapp",
+            "_nHmWt3",
+            "_nHmWt4",
+            "_nItNwt",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 16,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnBillDel",
+            "_btnBillSelect",
+            "_btnbillCap"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 7,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 4,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_picAc"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_LBR",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/labour-sale"
+      ],
+      "controlsTotal": 49,
+      "controlsPresent": 37,
+      "presencePct": 75.5,
+      "categories": {
+        "entry": {
+          "total": 31,
+          "found": 20,
+          "weakColumnOnly": [
+            "_nCrAmt",
+            "_nDrAmt"
+          ],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_ORD",
+            "_TEXT_PR",
+            "_TEXT_UPI",
+            "_chkWapp",
+            "_nCrAmt",
+            "_nDrAmt",
+            "_nDrRate",
+            "_nItmRate"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 8,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_HUID",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/tag-stock"
+      ],
+      "controlsTotal": 17,
+      "controlsPresent": 13,
+      "presencePct": 76.5,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnIn"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_DGV"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_MFG_LEDR",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/karigar-ledger"
+      ],
+      "controlsTotal": 17,
+      "controlsPresent": 13,
+      "presencePct": 76.5,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt",
+            "_tAcGrCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnJmaUdhar"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_PHY_STOCK",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/txn/physical-stock"
+      ],
+      "controlsTotal": 17,
+      "controlsPresent": 13,
+      "presencePct": 76.5,
+      "categories": {
+        "entry": {
+          "total": 10,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboStockType",
+            "_mFromDt",
+            "_mToDt",
+            "_tCounterCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_PR_SL_UAE",
+      "classification": "waived-documented",
+      "frontendRoutes": [],
+      "controlsTotal": 60,
+      "controlsPresent": 46,
+      "presencePct": 76.7,
+      "categories": {
+        "entry": {
+          "total": 37,
+          "found": 28,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY_2",
+            "_TEXT_PR",
+            "_TEXT_PR_IDTL",
+            "_cboRateFixType",
+            "_chkBillImage",
+            "_chkHalfPrint",
+            "_nItNwt",
+            "_nItPcs",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 16,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnBillDel",
+            "_btnBillSelect",
+            "_btnConsiNo",
+            "_btnbillCap"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_PRODUCT",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/products"
+      ],
+      "controlsTotal": 30,
+      "controlsPresent": 23,
+      "presencePct": 76.7,
+      "categories": {
+        "entry": {
+          "total": 18,
+          "found": 14,
+          "weakColumnOnly": [
+            "_tServerIp"
+          ],
+          "missingNames": [
+            "_Text1",
+            "_cboImgType",
+            "_cboforapp",
+            "_tServerIp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnIp",
+            "_btnResetSchm",
+            "_btnStkUpdate"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_UPI_REC",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/receipt",
+        "/txn/payment",
+        "/txn/batch-receipt"
+      ],
+      "controlsTotal": 13,
+      "controlsPresent": 10,
+      "presencePct": 76.9,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_nUpiTotAmt",
+            "_nbillOsAmt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_BANK",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/bank-recon"
+      ],
+      "controlsTotal": 13,
+      "controlsPresent": 10,
+      "presencePct": 76.9,
+      "categories": {
+        "entry": {
+          "total": 5,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_TOUR_SALE",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/tour",
+        "/txn/tour-return",
+        "/txn/sales-order"
+      ],
+      "controlsTotal": 64,
+      "controlsPresent": 50,
+      "presencePct": 78.1,
+      "categories": {
+        "entry": {
+          "total": 48,
+          "found": 35,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_PR",
+            "_chkHuIdPrint",
+            "_chkItmImage",
+            "_chkSilverCut",
+            "_chkWapp",
+            "_nDiffFine",
+            "_nSlvrFinOs",
+            "_nTotSilverCr",
+            "_nTotSilverDr",
+            "_nWestPrc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MEMB_ENT",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/membership",
+        "/txn/scheme"
+      ],
+      "controlsTotal": 32,
+      "controlsPresent": 25,
+      "presencePct": 78.1,
+      "categories": {
+        "entry": {
+          "total": 20,
+          "found": 14,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_UPI",
+            "_chkWapp",
+            "_nLineSkip",
+            "_nMembAmt",
+            "_tQrCane"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_FN_INOUT",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/fine-inout"
+      ],
+      "controlsTotal": 37,
+      "controlsPresent": 29,
+      "presencePct": 78.4,
+      "categories": {
+        "entry": {
+          "total": 21,
+          "found": 16,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_tFrmLc",
+            "_tTagVch"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnRateRemove",
+            "_btnTagVchHelp"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_POINT",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/points"
+      ],
+      "controlsTotal": 14,
+      "controlsPresent": 11,
+      "presencePct": 78.6,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_AC",
+            "_TEXT_ENTRY",
+            "_Text1"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_STOCK_FINE",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/stock-valuation"
+      ],
+      "controlsTotal": 14,
+      "controlsPresent": 11,
+      "presencePct": 78.6,
+      "categories": {
+        "entry": {
+          "total": 6,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboStockType",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_STOCK_VALUE",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/stock-valuation"
+      ],
+      "controlsTotal": 14,
+      "controlsPresent": 11,
+      "presencePct": 78.6,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_cboStockType",
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_HM",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/hallmark-sale"
+      ],
+      "controlsTotal": 57,
+      "controlsPresent": 45,
+      "presencePct": 78.9,
+      "categories": {
+        "entry": {
+          "total": 37,
+          "found": 26,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_ORD",
+            "_TEXT_UPI",
+            "_chkHuIdPrint",
+            "_chkWapp",
+            "_tNewPrint",
+            "_tTrfrDbCd",
+            "_tTrfrNo",
+            "_tTrfrYrCd"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 7,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_WH_SALE",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/wholesale-sale"
+      ],
+      "controlsTotal": 77,
+      "controlsPresent": 61,
+      "presencePct": 79.2,
+      "categories": {
+        "entry": {
+          "total": 57,
+          "found": 43,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_PR",
+            "_chkHuIdPrint",
+            "_chkItmImage",
+            "_chkSilverCut",
+            "_chkWapp",
+            "_nDiffFine",
+            "_nSlvrFinOs",
+            "_nTotSilverCr",
+            "_nTotSilverDr",
+            "_nWestPrc",
+            "_tNewPrint"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnQtion"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_TAG_PRINT",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/tag-print"
+      ],
+      "controlsTotal": 24,
+      "controlsPresent": 19,
+      "presencePct": 79.2,
+      "categories": {
+        "entry": {
+          "total": 14,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_chkHmIdUpdate"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnRfid"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_CARD_REC",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/receipt",
+        "/txn/payment",
+        "/txn/batch-receipt"
+      ],
+      "controlsTotal": 40,
+      "controlsPresent": 32,
+      "presencePct": 80.0,
+      "categories": {
+        "entry": {
+          "total": 31,
+          "found": 24,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_nBankCom1",
+            "_nBankCom2",
+            "_nBankComAmt",
+            "_nBankComPrc",
+            "_nBillAdjAmt",
+            "_nBillOs",
+            "_nSchPrc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_USER_REQUEST",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/utilities/user-request"
+      ],
+      "controlsTotal": 5,
+      "controlsPresent": 4,
+      "presencePct": 80.0,
+      "categories": {
+        "entry": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_RadioDelete"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SL_PR_ITEM",
+      "classification": "conceptual-engine",
+      "frontendRoutes": [
+        "/txn/rate-cut"
+      ],
+      "controlsTotal": 36,
+      "controlsPresent": 29,
+      "presencePct": 80.6,
+      "categories": {
+        "entry": {
+          "total": 18,
+          "found": 14,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_chkWapp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnPlanat"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ITEM",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/mfg-issue",
+        "/txn/mfg-receive"
+      ],
+      "controlsTotal": 37,
+      "controlsPresent": 30,
+      "presencePct": 81.1,
+      "categories": {
+        "entry": {
+          "total": 19,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_nItNwt",
+            "_nPcs",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_WITH_LOT",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/mfg-receive"
+      ],
+      "controlsTotal": 37,
+      "controlsPresent": 30,
+      "presencePct": 81.1,
+      "categories": {
+        "entry": {
+          "total": 19,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_nItNwt",
+            "_nPcs",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_ACCT",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/accounts",
+        "/masters/customers",
+        "/masters/party"
+      ],
+      "controlsTotal": 85,
+      "controlsPresent": 69,
+      "presencePct": 81.2,
+      "categories": {
+        "entry": {
+          "total": 66,
+          "found": 54,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Text1",
+            "_chkAcMemb",
+            "_chkHoAcct",
+            "_chkShareHolder",
+            "_mBhDate",
+            "_mBhlDate",
+            "_mCustIdDt",
+            "_mLdrDate",
+            "_mtrnIdDt",
+            "_tCustDetl",
+            "_tLcsNo",
+            "_tPartyGroup"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 17,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnAcimp",
+            "_btnAdminSet",
+            "_btnOldYearAcImprt"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_ITM_LOT",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/item-lot"
+      ],
+      "controlsTotal": 32,
+      "controlsPresent": 26,
+      "presencePct": 81.2,
+      "categories": {
+        "entry": {
+          "total": 16,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_nItNwt",
+            "_nPcs",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_MEMB",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/membership",
+        "/txn/scheme"
+      ],
+      "controlsTotal": 54,
+      "controlsPresent": 44,
+      "presencePct": 81.5,
+      "categories": {
+        "entry": {
+          "total": 38,
+          "found": 32,
+          "weakColumnOnly": [
+            "_nGoldFine",
+            "_tRefAcName"
+          ],
+          "missingNames": [
+            "_Text1",
+            "_mBhDate",
+            "_mBhlDate",
+            "_nGoldFine",
+            "_tCustDetl",
+            "_tRefAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 13,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnAcimp",
+            "_BtnF1",
+            "_btnQr"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_DESIGN_BOOK",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/styles",
+        "/masters/designs",
+        "/masters/models"
+      ],
+      "controlsTotal": 27,
+      "controlsPresent": 22,
+      "presencePct": 81.5,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 13,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnExelImport"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_RTN",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/sale-return"
+      ],
+      "controlsTotal": 38,
+      "controlsPresent": 31,
+      "presencePct": 81.6,
+      "categories": {
+        "entry": {
+          "total": 20,
+          "found": 15,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_PR",
+            "_TEXT_RTN_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 7,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_MSG_RTN_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_STK_LIMIT",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/item-weights"
+      ],
+      "controlsTotal": 11,
+      "controlsPresent": 9,
+      "presencePct": 81.8,
+      "categories": {
+        "entry": {
+          "total": 5,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_Text1"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_FINE_SL_PR",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/fine-sale"
+      ],
+      "controlsTotal": 28,
+      "controlsPresent": 23,
+      "presencePct": 82.1,
+      "categories": {
+        "entry": {
+          "total": 15,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 5,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_MSG_BILL_TOT"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_ITEM",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/items"
+      ],
+      "controlsTotal": 42,
+      "controlsPresent": 35,
+      "presencePct": 83.3,
+      "categories": {
+        "entry": {
+          "total": 35,
+          "found": 29,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Text1",
+            "_chkAppItem",
+            "_chktaxfreeItem",
+            "_nTagKrTch",
+            "_nTagKrWestPrc",
+            "_nTagLbrPrc"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnTagValUpdate"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_WH_SALE_RTN",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/wholesale-sale-return"
+      ],
+      "controlsTotal": 42,
+      "controlsPresent": 35,
+      "presencePct": 83.3,
+      "categories": {
+        "entry": {
+          "total": 26,
+          "found": 21,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY_2",
+            "_TEXT_PR",
+            "_TEXT_PR_IDTL",
+            "_nItNwt",
+            "_nitGwt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_LC_INOUT",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/stock-by-location"
+      ],
+      "controlsTotal": 12,
+      "controlsPresent": 10,
+      "presencePct": 83.3,
+      "categories": {
+        "entry": {
+          "total": 5,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_ORDER",
+      "classification": "generic-report-scaffold",
+      "frontendRoutes": [
+        "/reports/report-layouts"
+      ],
+      "controlsTotal": 12,
+      "controlsPresent": 10,
+      "presencePct": 83.3,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_OTH_PURC",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/other-purchase"
+      ],
+      "controlsTotal": 31,
+      "controlsPresent": 26,
+      "presencePct": 83.9,
+      "categories": {
+        "entry": {
+          "total": 18,
+          "found": 14,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_tledrAc",
+            "_tledrName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_BUL_SALE",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/bullion",
+        "/txn/rate-cut"
+      ],
+      "controlsTotal": 50,
+      "controlsPresent": 42,
+      "presencePct": 84.0,
+      "categories": {
+        "entry": {
+          "total": 37,
+          "found": 30,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_PR",
+            "_chkHuIdPrint",
+            "_chkItmImage",
+            "_chkWapp",
+            "_nDiffFine"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_EMP",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/employees"
+      ],
+      "controlsTotal": 13,
+      "controlsPresent": 11,
+      "presencePct": 84.6,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 6,
+          "weakColumnOnly": [
+            "_tEmpAcName"
+          ],
+          "missingNames": [
+            "_Text1",
+            "_tEmpAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_LBR_TYPE",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/labour",
+        "/masters/labour-update"
+      ],
+      "controlsTotal": 13,
+      "controlsPresent": 11,
+      "presencePct": 84.6,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Text1",
+            "_nlbrValue"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_DAY_WORK",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/day-book"
+      ],
+      "controlsTotal": 13,
+      "controlsPresent": 11,
+      "presencePct": 84.6,
+      "categories": {
+        "entry": {
+          "total": 6,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_INOUT",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/fine-inout"
+      ],
+      "controlsTotal": 33,
+      "controlsPresent": 28,
+      "presencePct": 84.8,
+      "categories": {
+        "entry": {
+          "total": 19,
+          "found": 16,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL",
+            "_tTagVch"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnTagVchHelp"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ORD_ISU",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/mfg-order-issue"
+      ],
+      "controlsTotal": 33,
+      "controlsPresent": 28,
+      "presencePct": 84.8,
+      "categories": {
+        "entry": {
+          "total": 14,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL",
+            "_chkWapp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 5,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_MSG_DM"
+          ],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_EMP_JV",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/employee-jv"
+      ],
+      "controlsTotal": 20,
+      "controlsPresent": 17,
+      "presencePct": 85.0,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnChqPrint"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SL_ORD_ADJ",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/sales-order",
+        "/txn/order-cancel"
+      ],
+      "controlsTotal": 20,
+      "controlsPresent": 17,
+      "presencePct": 85.0,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_TAG"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_VP",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/vp-parcel"
+      ],
+      "controlsTotal": 35,
+      "controlsPresent": 30,
+      "presencePct": 85.7,
+      "categories": {
+        "entry": {
+          "total": 21,
+          "found": 17,
+          "weakColumnOnly": [
+            "_tAngdiyaAcName"
+          ],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_tAngdiyaAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_AC_OPBL",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/ac-opbl",
+        "/masters/opening-balance"
+      ],
+      "controlsTotal": 21,
+      "controlsPresent": 18,
+      "presencePct": 85.7,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_cboBalType"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_btnAbTypeMerg"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_LC_SALE",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/location-wise-sales"
+      ],
+      "controlsTotal": 14,
+      "controlsPresent": 12,
+      "presencePct": 85.7,
+      "categories": {
+        "entry": {
+          "total": 7,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_TRADE",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/trade"
+      ],
+      "controlsTotal": 7,
+      "controlsPresent": 6,
+      "presencePct": 85.7,
+      "categories": {
+        "entry": {
+          "total": 1,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_GHAT_REC",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/mfg-receive"
+      ],
+      "controlsTotal": 29,
+      "controlsPresent": 25,
+      "presencePct": 86.2,
+      "categories": {
+        "entry": {
+          "total": 16,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_chkWapp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_CASH",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/receipt",
+        "/txn/payment",
+        "/txn/batch-receipt"
+      ],
+      "controlsTotal": 22,
+      "controlsPresent": 19,
+      "presencePct": 86.4,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnChqPrint"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_LEDR_ADJ",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/ledger-adjust",
+        "/txn/fine-jv"
+      ],
+      "controlsTotal": 22,
+      "controlsPresent": 19,
+      "presencePct": 86.4,
+      "categories": {
+        "entry": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnChqPrint"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_KR_ISU",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/karigar-issue"
+      ],
+      "controlsTotal": 37,
+      "controlsPresent": 32,
+      "presencePct": 86.5,
+      "categories": {
+        "entry": {
+          "total": 23,
+          "found": 20,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_chkWapp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnConsiNo"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_RTN_UAE",
+      "classification": "waived-documented",
+      "frontendRoutes": [],
+      "controlsTotal": 45,
+      "controlsPresent": 39,
+      "presencePct": 86.7,
+      "categories": {
+        "entry": {
+          "total": 29,
+          "found": 24,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_chkWapp",
+            "_tNewPrint"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_ORD",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/sales-order",
+        "/txn/order-cancel"
+      ],
+      "controlsTotal": 46,
+      "controlsPresent": 40,
+      "presencePct": 87.0,
+      "categories": {
+        "entry": {
+          "total": 26,
+          "found": 21,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_TEXT_UPI",
+            "_chkWapp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 6,
+          "found": 6,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_DHRN_REC",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/dhrn-receipt"
+      ],
+      "controlsTotal": 62,
+      "controlsPresent": 54,
+      "presencePct": 87.1,
+      "categories": {
+        "entry": {
+          "total": 47,
+          "found": 41,
+          "weakColumnOnly": [
+            "_tRecAcName"
+          ],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_nIntYear",
+            "_nMonthlyInt",
+            "_nOrnaAginestDhrn",
+            "_nTotRec",
+            "_tRecAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 10,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnMultyTimeIsu"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "RP_STK_MOVE",
+      "classification": "conceptual-report-engine",
+      "frontendRoutes": [
+        "/reports/item-stock-ledger"
+      ],
+      "controlsTotal": 16,
+      "controlsPresent": 14,
+      "presencePct": 87.5,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_mFromDt",
+            "_mToDt"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 7,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_DHRN_ISU",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/dhrn-issue"
+      ],
+      "controlsTotal": 50,
+      "controlsPresent": 44,
+      "presencePct": 88.0,
+      "categories": {
+        "entry": {
+          "total": 33,
+          "found": 28,
+          "weakColumnOnly": [
+            "_nOtherCharges",
+            "_tRecAcName"
+          ],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_chkWapp",
+            "_mDueDate",
+            "_nOtherCharges",
+            "_tRecAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_CAN",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/tag-cancel"
+      ],
+      "controlsTotal": 25,
+      "controlsPresent": 22,
+      "presencePct": 88.0,
+      "categories": {
+        "entry": {
+          "total": 12,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_DHRN_INTREC",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/dhrn-interest"
+      ],
+      "controlsTotal": 51,
+      "controlsPresent": 45,
+      "presencePct": 88.2,
+      "categories": {
+        "entry": {
+          "total": 42,
+          "found": 37,
+          "weakColumnOnly": [
+            "_nIntrestKasar",
+            "_tRecAcName"
+          ],
+          "missingNames": [
+            "_nIntYear",
+            "_nIntrestKasar",
+            "_nMonthlyInt",
+            "_nPandingDays",
+            "_tRecAcName"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_JDT_REC",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/jobwork-issue",
+        "/txn/jobwork-receive"
+      ],
+      "controlsTotal": 34,
+      "controlsPresent": 30,
+      "presencePct": 88.2,
+      "categories": {
+        "entry": {
+          "total": 16,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_RATE",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/rates",
+        "/txn/daily-rate"
+      ],
+      "controlsTotal": 17,
+      "controlsPresent": 15,
+      "presencePct": 88.2,
+      "categories": {
+        "entry": {
+          "total": 10,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 6,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_PR_SL_HEDG",
+      "classification": "conceptual-engine",
+      "frontendRoutes": [
+        "/txn/rate-cut"
+      ],
+      "controlsTotal": 26,
+      "controlsPresent": 23,
+      "presencePct": 88.5,
+      "categories": {
+        "entry": {
+          "total": 15,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_APR_ISU",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/tour",
+        "/txn/tour-return",
+        "/txn/sales-order"
+      ],
+      "controlsTotal": 35,
+      "controlsPresent": 31,
+      "presencePct": 88.6,
+      "categories": {
+        "entry": {
+          "total": 17,
+          "found": 14,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL",
+            "_chkWapp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 13,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ISU_REC",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/mfg-issue",
+        "/txn/mfg-receive"
+      ],
+      "controlsTotal": 36,
+      "controlsPresent": 32,
+      "presencePct": 88.9,
+      "categories": {
+        "entry": {
+          "total": 18,
+          "found": 15,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 4,
+          "found": 4,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ORD_REC",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/mfg-receive"
+      ],
+      "controlsTotal": 36,
+      "controlsPresent": 32,
+      "presencePct": 88.9,
+      "categories": {
+        "entry": {
+          "total": 17,
+          "found": 14,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 12,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_TOUR",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/tour"
+      ],
+      "controlsTotal": 27,
+      "controlsPresent": 24,
+      "presencePct": 88.9,
+      "categories": {
+        "entry": {
+          "total": 13,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_IDTL"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_MEMB_ADJ",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/membership",
+        "/txn/scheme",
+        "/reports/scheme-adjustments"
+      ],
+      "controlsTotal": 18,
+      "controlsPresent": 16,
+      "presencePct": 88.9,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_REMINDER",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/utilities/reminders",
+        "/utilities/reminder-entry",
+        "/txn/reminders"
+      ],
+      "controlsTotal": 18,
+      "controlsPresent": 16,
+      "presencePct": 88.9,
+      "categories": {
+        "entry": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_YEAR",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/years",
+        "/masters/year-create",
+        "/utilities/year-end"
+      ],
+      "controlsTotal": 9,
+      "controlsPresent": 8,
+      "presencePct": 88.9,
+      "categories": {
+        "entry": {
+          "total": 4,
+          "found": 3,
+          "weakColumnOnly": [
+            "_tYearCode"
+          ],
+          "missingNames": [
+            "_tYearCode"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_ITM_OPBL",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/item-opening"
+      ],
+      "controlsTotal": 9,
+      "controlsPresent": 8,
+      "presencePct": 88.9,
+      "categories": {
+        "entry": {
+          "total": 2,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_LOCT_AMT",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/location-amount"
+      ],
+      "controlsTotal": 28,
+      "controlsPresent": 25,
+      "presencePct": 89.3,
+      "categories": {
+        "entry": {
+          "total": 17,
+          "found": 16,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 9,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1",
+            "_btnChqPrint"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_CONTRA",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/contra",
+        "/txn/journal"
+      ],
+      "controlsTotal": 19,
+      "controlsPresent": 17,
+      "presencePct": 89.5,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_GOLD_BOOK",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/gold-book"
+      ],
+      "controlsTotal": 19,
+      "controlsPresent": 17,
+      "presencePct": 89.5,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_VP_ADJ",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/vp-adjustment"
+      ],
+      "controlsTotal": 19,
+      "controlsPresent": 17,
+      "presencePct": 89.5,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_CUST_ENTRY",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/masters/party"
+      ],
+      "controlsTotal": 19,
+      "controlsPresent": 17,
+      "presencePct": 89.5,
+      "categories": {
+        "entry": {
+          "total": 9,
+          "found": 8,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_OTH_COMM",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/other-commission"
+      ],
+      "controlsTotal": 29,
+      "controlsPresent": 26,
+      "presencePct": 89.7,
+      "categories": {
+        "entry": {
+          "total": 16,
+          "found": 14,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_PHYSTK",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/physical-stock"
+      ],
+      "controlsTotal": 30,
+      "controlsPresent": 27,
+      "presencePct": 90.0,
+      "categories": {
+        "entry": {
+          "total": 11,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 14,
+          "found": 13,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 3,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_PictureBox1"
+          ],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_TOUR_ORD",
+      "classification": "variant-shared",
+      "frontendRoutes": [
+        "/txn/tour",
+        "/txn/tour-return",
+        "/txn/sales-order"
+      ],
+      "controlsTotal": 42,
+      "controlsPresent": 38,
+      "presencePct": 90.5,
+      "categories": {
+        "entry": {
+          "total": 24,
+          "found": 20,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2",
+            "_TEXT_IDTL",
+            "_chkWapp"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 11,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_LOCT",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/locations"
+      ],
+      "controlsTotal": 33,
+      "controlsPresent": 30,
+      "presencePct": 90.9,
+      "categories": {
+        "entry": {
+          "total": 28,
+          "found": 25,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Text1",
+            "_cboRptHader",
+            "_tRtgsNo"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_BUL_BOOKING",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/bullion"
+      ],
+      "controlsTotal": 23,
+      "controlsPresent": 21,
+      "presencePct": 91.3,
+      "categories": {
+        "entry": {
+          "total": 13,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 8,
+          "found": 7,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "TR_REP_REC",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/txn/repair-receipt",
+        "/txn/repair-karigar-issue",
+        "/txn/repair-karigar-receipt",
+        "/txn/repair-customer-issue"
+      ],
+      "controlsTotal": 35,
+      "controlsPresent": 32,
+      "presencePct": 91.4,
+      "categories": {
+        "entry": {
+          "total": 19,
+          "found": 17,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_TEXT_ENTRY",
+            "_TEXT_ENTRY_2"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 11,
+          "found": 10,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_BtnF1"
+          ],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_DM",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/diamonds"
+      ],
+      "controlsTotal": 15,
+      "controlsPresent": 14,
+      "presencePct": 93.3,
+      "categories": {
+        "entry": {
+          "total": 10,
+          "found": 9,
+          "weakColumnOnly": [],
+          "missingNames": [
+            "_Text1"
+          ],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_GOLD_MAST",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/gold-rate"
+      ],
+      "controlsTotal": 17,
+      "controlsPresent": 17,
+      "presencePct": 100.0,
+      "categories": {
+        "entry": {
+          "total": 12,
+          "found": 12,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_PRINT",
+      "classification": "generic-crud-scaffold",
+      "frontendRoutes": [
+        "/masters/print-formats"
+      ],
+      "controlsTotal": 6,
+      "controlsPresent": 6,
+      "presencePct": 100.0,
+      "categories": {
+        "entry": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 3,
+          "found": 3,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "MS_TASTING",
+      "classification": "waived-documented",
+      "frontendRoutes": [],
+      "controlsTotal": 5,
+      "controlsPresent": 5,
+      "presencePct": 100.0,
+      "categories": {
+        "entry": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 5,
+          "found": 5,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_WEB_CAM",
+      "classification": "waived-documented",
+      "frontendRoutes": [],
+      "controlsTotal": 2,
+      "controlsPresent": 2,
+      "presencePct": 100.0,
+      "categories": {
+        "entry": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 2,
+          "found": 2,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    },
+    {
+      "form": "UT_WINDOW",
+      "classification": "dedicated-current-surface",
+      "frontendRoutes": [
+        "/utilities/window-tiles"
+      ],
+      "controlsTotal": 1,
+      "controlsPresent": 1,
+      "presencePct": 100.0,
+      "categories": {
+        "entry": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "command": {
+          "total": 1,
+          "found": 1,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "grid": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        },
+        "other": {
+          "total": 0,
+          "found": 0,
+          "weakColumnOnly": [],
+          "missingNames": [],
+          "missingCaptions": []
+        }
+      }
+    }
+  ]
+}

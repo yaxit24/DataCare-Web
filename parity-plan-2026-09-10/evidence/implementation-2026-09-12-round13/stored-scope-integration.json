@@ -1,0 +1,21 @@
+{
+  "status": "integrated-not-yet-executed",
+  "atUtc": "2026-09-11T20:02:10.684536+00:00",
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "beforeSha256": "c864e5e3aaa7319537ef31fab2861d0a776b9347efa0eb958af2373b8764c3f3",
+      "afterSha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c"
+    },
+    {
+      "path": "web/apps/api/test/storedScope.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "734c4a5950bdcd085f9992ca4ba6c1fc386963d771d9dd5018379cc715079935"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/storedScope.independent.json",
+      "beforeSha256": null,
+      "afterSha256": "93c5dbdefd8d14cfef0718ca314e0c7cd7a84f961c587ce2298d752703711979"
+    }
+  ]
+}

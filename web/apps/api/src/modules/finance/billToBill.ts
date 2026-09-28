@@ -325,3 +325,138 @@ export async function settleBills(prisma: any, input: BillSettleInput): Promise<
     return { settled, totalRec, totalKasar, vchNo: willApply ? Number(no) : 0 };
   });
 }
+
+export interface DeleteBillSettlementInput {
+  scope: BillScope & { coYear?: string; coBook?: string };
+  vchNo: number | string;
+  /** CO_BOOK the settlement was posted under; defaults to the scope's book. */
+  book?: string;
+  deleteUser?: string;
+}
+
+/**
+ * Reverse a bill-to-bill settlement — plan item F1.4.
+ *
+ * WHY THIS WAS BLOCKED, AND WHY IT NO LONGER IS
+ * =============================================
+ * This was recorded as decision D-4 on the grounds that a settlement could not be reversed: `settleBills`
+ * INCREMENTS each targeted bill's `REC_AMT`/`KASAR_AMT` in place and records no per-bill allocation, so
+ * subtracting the right amount back is impossible once two vouchers have touched the same bill.
+ *
+ * Measuring the desktop dissolved the problem rather than solving it. **`UPDATE BILL_OS_DATA` appears ZERO
+ * times in `TR_BILL_TO.cs`'s delete path.** The desktop deletes rows keyed to the SETTLING voucher's own
+ * `VCH_NO` (`TR_BILL_TO.cs:4746`) alongside `CASH_DATA`, `AC_DATA`, `ROJ_MEL_DATA`, `TEMP_BOOK_DATA`,
+ * `REMARK_DATA` and `SL_PR_DETL`, and writes a `DELETE_DATA` audit row — and it leaves the increments it
+ * applied to the original bills exactly where they are.
+ *
+ * The models agree, which is what made the blocker dissolve: `BILL_OS_DATA` rows belong to the voucher that
+ * CREATED the outstanding, not to the settlement. Measured on the real database, 363 of 365 rows sit on sales
+ * books, 1 on labour work, and just 1 on book 210 `BILL REC` — the bill-to-bill book itself, for the case
+ * where a settlement leaves its own balance. `REC_AMT` is non-zero on 222 of 365 and `KASAR_AMT` on 121, so
+ * in-place accumulation is the desktop's convention too.
+ *
+ * ## A CONSEQUENCE WORTH STATING PLAINLY
+ * Deleting a settlement does NOT restore the bills it paid: they stay showing as partly paid. That is the
+ * desktop's behaviour, and it is arguably a defect in the desktop. It is replicated deliberately, because the
+ * point of this migration is that the web agrees with the system the business is reconciling against —
+ * inventing a more correct reversal here would make the web's outstanding balances differ from the desktop's,
+ * which is worse than sharing its flaw. If the owner wants the increments restored, that is a change to BOTH
+ * systems and needs the per-bill allocation persisted first (option (b) of D-4).
+ */
+export async function deleteBillSettlement(
+  prisma: any,
+  input: DeleteBillSettlementInput,
+): Promise<{ reversed: true; billOsRowsRemoved: number }> {
+  const { scope } = input;
+  const voucherNo = formatVoucherNo(input.vchNo);
+  const book = String(input.book ?? scope.coBook ?? '').trim();
+  if (!book) throw new BillToBillValidationError('the settlement book is required to reverse it');
+  const coYear = String(scope.coYear ?? '').trim();
+  const lcCode = scope.lcCode ?? '01';
+
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const header: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "AC_CODE","AC_NAME",COALESCE("REC_AMT",0)::float8 AS rec,
+              COALESCE("KASAR_AMT",0)::float8 AS kasar,"HD_VCH_NO","MAIN_USER","VCH_DATE","VCH_TYPE"
+         FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 FOR UPDATE`,
+      scope.tenantId,
+      scope.coCode,
+      lcCode,
+      coYear,
+      book,
+      voucherNo,
+    );
+    // Throw rather than report success on nothing, as every sibling reversal does.
+    if (!header.length) {
+      throw new BillToBillValidationError(`bill-to-bill voucher not found: ${voucherNo}`);
+    }
+    const h = header[0]!;
+
+    // The desktop's DELETE_DATA insert (TR_BILL_TO.cs:5027) classifies by the book's BOOK_SNAME and uses
+    // FINE_TYPE 'A' for a cash voucher, with the receipt amount on the side matching INOUT_TYPE.
+    const bookRow: Array<{ sname: string | null; name: string | null }> = await tx.$queryRawUnsafe(
+      `SELECT "BOOK_SNAME" AS sname,"BOOK_NAME" AS name FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4`,
+      scope.tenantId,
+      scope.coCode,
+      lcCode,
+      book,
+    );
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "DELETE_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+          "VCH_DATE","VCH_TYPE","BOOK_NAME","AC_CODE","AC_NAME","VCH_VAL_DR","VCH_VAL_CR",
+          "FINE_TYPE","VCH_FINE_DR","VCH_FINE_CR","HD_VCH_NO","MAIN_USER","DELETE_USER")
+       VALUES ($1,$2,$3,$4,$5,$6,1,$7,$8,$9,$10,$11,0,$12,'A',0,0,$13,$14,$15)`,
+      scope.tenantId,
+      scope.coCode,
+      lcCode,
+      coYear,
+      book,
+      voucherNo,
+      h.VCH_DATE ?? null,
+      String(bookRow[0]?.sname ?? h.VCH_TYPE ?? '').trim(),
+      String(bookRow[0]?.name ?? '').trim(),
+      String(h.AC_CODE ?? '').trim(),
+      String(h.AC_NAME ?? '').trim(),
+      Number(h.rec ?? 0),
+      String(h.HD_VCH_NO ?? '').trim(),
+      String(h.MAIN_USER ?? '').trim(),
+      input.deleteUser ?? 'system',
+    );
+
+    /**
+     * Remove the voucher's OWN rows, table by table, exactly as the desktop's delete does. `BILL_OS_DATA` is
+     * matched on this voucher's VCH_NO — a settlement that left its own balance owns a row here (real book
+     * 210 has one). Other bills' REC_AMT is deliberately untouched; see the note above.
+     */
+    let billOsRowsRemoved = 0;
+    for (const table of ['BILL_OS_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'REMARK_DATA', 'CASH_DATA']) {
+      const removed = await tx.$executeRawUnsafe(
+        `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+        scope.tenantId,
+        scope.coCode,
+        lcCode,
+        coYear,
+        book,
+        voucherNo,
+      );
+      if (table === 'BILL_OS_DATA') billOsRowsRemoved = Number(removed ?? 0);
+    }
+    // TEMP_BOOK_DATA is keyed by the HIDDEN voucher number and carries no CO_YEAR.
+    const hidden = String(h.HD_VCH_NO ?? '').trim();
+    if (hidden) {
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+        scope.tenantId,
+        scope.coCode,
+        lcCode,
+        book,
+        hidden,
+      );
+    }
+    return { reversed: true, billOsRowsRemoved };
+  });
+}

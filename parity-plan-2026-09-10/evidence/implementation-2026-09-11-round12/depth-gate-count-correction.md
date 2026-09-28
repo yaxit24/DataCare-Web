@@ -1,0 +1,11 @@
+# Round12 depth summary correction
+
+The measured current result is **104 unreachable API fields against the unchanged ceiling of96**. Both `depth-gate.txt` (finished16:28:01 UTC) and `combined-depth.txt` (finished18:44:12 UTC) already contain `96 -> 104` and have the identical SHA256 `d30748be21132666c5a4d8c053df1c52d46b1c30be77ccf7e7d1e635c3b8d6ef`. Neither log was changed. The gate remains failed; rounding127 and Return dead-cell33 remain unchanged.
+
+Earlier Round12 summaries copied the prior102 value incorrectly. This note corrects the current staged document36 and qualifies the frozen Round12 handoff's127/102/33 sentence without rewriting that handoff. Round11's actual102 result and checkpoints33/35 remain historical and unchanged. No threshold is increased and no finding is suppressed. The retained current/previous gate logs provide counts, not an exact field-level delta; this review does not guess which two fields caused the increase.
+
+The unsealed isolated capture helper now asserts104 and records required-open gates127/104/33. Its pre-correction SHA256 was `63628fe33281aeba8a6205a1fd6206f129119974459e523d15824a7f4107ae50`; immediately after this depth-only correction it was `e9b8073d37e0c77f5cdb81f3f3a04425a01745133d879d7272b05742b104dcfd`. A separately authorized browser-fixture binding was then added; the current helper SHA256 is `df513d5538f6ca0594b9c6f352fa7008ac7985dcebb0be8f89b482aa51b1207a`. These helper bytes were read back but the helper was not executed or used to seal37 by this agent. The original superseded Round12 capture helper remains unchanged.
+
+Mutable02,12,README and current web/docs were searched for this erroneous Round12 depth claim; no additional matching current claim was found. `web/docs/VALIDATION-PLAN.md`'s102 refers to a different schema-readiness metric and was not changed. The staged36 patch is under `/tmp/datacare-round12-progress-final`; the main progress document is left to root to apply and validate.
+
+Exact log, invocation and helper hashes are in [the correction references](depth-gate-count-correction.refs.json). No scanner, application check, compiler, browser, DB or checkpoint capture was run for this documentation correction.

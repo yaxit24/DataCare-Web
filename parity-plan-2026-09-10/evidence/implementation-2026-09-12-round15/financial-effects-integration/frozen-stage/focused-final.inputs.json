@@ -1,0 +1,11 @@
+{
+  "capturedAtUtc": "2026-09-12T02:41:51.411026+00:00",
+  "files": {
+    "web/packages/core/src/saleReturnFinancialEffects.ts": "6d90fce3d2484910fbd367acd38b7c497de08cf8afe3d32aaa7072ff06575a03",
+    "web/packages/core/test/saleReturnFinancialEffects.test.ts": "2d68511bb30073f839d606de5da386d5373472deaebf2648df9e4445f93fd804",
+    "web/packages/core/test/fixtures/saleReturnFinancialEffects.independent.json": "635e1e251837c0c5acc6acd39f2b7e2932ad19850b976d3a1f2d59cf5229a09b",
+    "web/packages/core/test/fixtures/saleReturnFinancialEffects.joint.independent.json": "d1d96417de35b406d8b50d47b8547dc0e788f323f953e3d26d71a9b77323390f",
+    "web/packages/core/vitest.config.ts": "b7f1cf497f93e6d250cfaecc987bf3d4e804422bb61b3c38387c35a458a3566c",
+    "web/packages/core/package.json": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+  }
+}

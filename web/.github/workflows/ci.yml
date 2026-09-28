@@ -1,7 +1,20 @@
 name: CI
+# Developer CI. Answers "did this change break anything visible", and is built to stay ACTIONABLE.
+#
+# It is deliberately not a release gate: the desktop comparison below runs under `continue-on-error` because
+# the retained capture is known red, and `schema:readiness` / `fresh:provision` exit 0 with a `*_SKIP` result
+# when their inputs are absent. Green here means "nothing objected", not "this commit is releasable".
+#
+# The gate that refuses RED, SKIP, stale, synthetic and missing evidence is a separate workflow:
+# `.github/workflows/release-certification.yml`, which runs `pnpm release:certify`. P0-07 requires the two to
+# be separate, so do not "fix" this file by removing the tolerance below — that would make ordinary pull
+# requests unmergeable while proving nothing extra about a release.
 on:
   push: { branches: [main] }
   pull_request: {}
+
+permissions:
+  contents: read
 
 env:
   MIGRATE_DATABASE_DSN: postgresql://datacare:datacare@localhost:5432/datacare_test
@@ -30,6 +43,8 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with: { version: 9.15.4 }
       - uses: actions/setup-node@v4
@@ -95,6 +110,13 @@ jobs:
         working-directory: web
         run: pnpm test:browser
 
+      # Breadth to the smoke's depth: the smoke drives 39 routes through real interactions, this loads all 99 and
+      # fails if any renders the app's error boundary. The route list comes from the filesystem, so a new page is
+      # covered when it is added rather than when someone remembers to list it.
+      - name: Route reachability (all pages render)
+        working-directory: web
+        run: pnpm test:routes
+
       # ----------------------------------------------------------------------------------------------
       # Parity gates.
       #
@@ -136,6 +158,31 @@ jobs:
         continue-on-error: true
         run: pnpm g5:parity
 
+      # Unlike g5:parity this one is ENFORCED, because it is answerable today. It does not claim parity — it
+      # claims no measured parity number got worse. The distinction is why the two are separate gates.
+      #
+      # It is enforced because the failure it guards against already happened: the comparison went unrun for a
+      # month, 1,354 of 3,787 field differences were fixed without anyone knowing, and a regression in the same
+      # window would have been just as invisible.
+      - name: 'Gate: parity numbers did not worsen'
+        working-directory: web
+        run: pnpm parity:measure --reuse
+
+      # Measures the dimension the two gates above cannot see: whether an operator can REACH
+      # the desktop's fields. Column-write coverage read 98.9% and settings exposure read
+      # complete while operator depth was 33.9%, so neither could detect a shallow screen.
+      # Floors may only rise and ceilings may only fall; the baseline lives in
+      # web/parity/depth-parity-baseline.json and a loosened floor shows up as a baseline diff.
+      - name: 'Gate: operator-reachable field depth did not worsen'
+        working-directory: web
+        run: pnpm depth:parity
+
+      # A grid column the writer never reads silently discards operator input, and the depth gate above
+      # counts it as parity. 29 such columns shipped on purchase-return and 9 on sales before this ran.
+      - name: 'Gate: no grid column discards operator input'
+        working-directory: web
+        run: pnpm depth:deadcells
+
       - name: Smoke production readiness
         working-directory: web
         env:
@@ -161,6 +208,9 @@ jobs:
 
   g5-desktop-comparison:
     name: G5 desktop comparison harness
+    # Desktop credentials must never reach candidate-controlled pull-request code. Main is the only push ref
+    # admitted by this workflow; its branch protection is the trust boundary for the extraction scripts.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -175,6 +225,8 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with: { version: 9.15.4 }
       - uses: actions/setup-node@v4
@@ -233,8 +285,10 @@ jobs:
       # ------------------------------------------------------------------------------------------------
       - name: Detect desktop credentials
         id: desktop
+        env:
+          DESKTOP_SOURCE_DATABASE: ${{ secrets.DESKTOP_SOURCE_DATABASE }}
         run: |
-          if [ -n "${{ secrets.DESKTOP_SOURCE_DATABASE }}" ]; then
+          if [ -n "$DESKTOP_SOURCE_DATABASE" ]; then
             echo 'available=true' >> "$GITHUB_OUTPUT"
           else
             echo 'available=false' >> "$GITHUB_OUTPUT"
@@ -253,9 +307,9 @@ jobs:
           PARITY_MSSQL_ENCRYPT: ${{ vars.DESKTOP_SOURCE_ENCRYPT }}
           PARITY_COMPANY: ${{ vars.DESKTOP_G5_COMPANY }}
           PARITY_CASES: ${{ secrets.DESKTOP_PARITY_CASES }}
-        run: |
-          pnpm add -w -D mssql
-          node apps/api/integration/parity-extract-mssql.mjs
+        # mssql is pinned in package.json/pnpm-lock.yaml and was installed with --frozen-lockfile above.
+        # Mutating the dependency graph here would mean CI compared a different tree from the candidate.
+        run: node apps/api/integration/parity-extract-mssql.mjs
 
       - name: Extract the web bundle
         if: steps.desktop.outputs.available == 'true'
@@ -267,12 +321,22 @@ jobs:
         run: node apps/api/integration/parity-extract-pg.mjs
 
       - name: Compare the two bundles
+        id: g5_comparison
         if: steps.desktop.outputs.available == 'true'
         working-directory: web
         run: |
+          set +e
           node apps/api/integration/parity-compare.mjs \
             ../project-memory/parity/bundles/desktop-latest.json \
             ../project-memory/parity/bundles/web-latest.json
+          status=$?
+          set -e
+          if [ -f ../project-memory/parity/g5/parity-diff-latest.json ]; then
+            echo 'produced=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'produced=false' >> "$GITHUB_OUTPUT"
+          fi
+          exit "$status"
 
       - name: 'Gate: desktop comparison certifies parity'
         if: steps.desktop.outputs.available == 'true'
@@ -282,9 +346,11 @@ jobs:
         run: pnpm g5:parity
 
       - name: Upload G5 comparison artifacts
-        if: always()
+        # A RED comparison is still useful evidence, but an extraction/compare crash must not publish the
+        # checkout's placeholder directory as though this run produced it.
+        if: always() && steps.g5_comparison.outputs.produced == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: g5-desktop-comparison
+          name: g5-desktop-comparison-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: project-memory/parity/g5
           if-no-files-found: error

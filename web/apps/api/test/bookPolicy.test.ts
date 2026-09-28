@@ -24,7 +24,9 @@ const row = (MAIN_BOOK: string, BOOK_INOUT: string) => ({
 describe('book policy', () => {
   it.each([
     ['SALES', 'SALES', 'O'],
+    ['SALES QUOTATION', 'SL QUOT', 'O'],
     ['PURCHASE', 'PURCHASE', 'I'],
+    ['PURCHASE QUOTATION', 'PR QUOT', 'O'],
     ['SALES RETURN', 'SALES RETURNE', 'I'],
     ['WHOLESALE SALE RETURN', 'WH RTN', 'I'],
     ['PURCHASE RETURN', 'PURC RETURN', 'O'],

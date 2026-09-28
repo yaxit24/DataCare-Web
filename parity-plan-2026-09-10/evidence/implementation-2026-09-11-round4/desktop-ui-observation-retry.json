@@ -1,0 +1,12 @@
+{
+  "attemptedAtUtc": "2026-09-11T06:16:59.766506+00:00",
+  "actions": [
+    "cua.getState()",
+    "cua.getApp(com.utmapp.UTM): ambiguous installed/mounted copies",
+    "cua.getApp(/Applications/UTM.app)"
+  ],
+  "status": "native-tool-recovered-no-reference-vm-listed",
+  "relevantObservation": "Installed UTM displays its welcome page and an empty VM sidebar. No VM was created or started.",
+  "observedDesktopApplication": false,
+  "limits": "Native discovery recovered after the initial pipe failure. This observation establishes only the installed manager state, not absence of every possible desktop environment. No desktop business behavior or acceptance is credited."
+}

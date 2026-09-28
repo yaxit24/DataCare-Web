@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-return-bar-companion-staged/web/packages/core
+
+ ✓ test/saleReturnNBarCompanions.test.ts (61 tests) 36ms
+
+ Test Files  1 passed (1)
+      Tests  61 passed (61)
+   Start at  06:33:07
+   Duration  220ms (transform 32ms, setup 0ms, collect 33ms, tests 36ms, environment 0ms, prepare 36ms)
+

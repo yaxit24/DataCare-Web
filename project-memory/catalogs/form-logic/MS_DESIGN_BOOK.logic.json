@@ -1,0 +1,86 @@
+{
+ "form": "MS_DESIGN_BOOK",
+ "tables": [
+  "AC_MAST",
+  "DESIGN_DETL",
+  "DESIGN_IDTL",
+  "DM_MAST",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "MODEL_MAST",
+  "PRODUCT_MAST",
+  "TAG_IMAGE_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DESIGN_DETL": [
+    "BOOK_NAME",
+    "CO_CODE",
+    "DESIGN_NO",
+    "DIE_NO",
+    "GHT_PRC",
+    "GR_CODE",
+    "ITM_AMT",
+    "ITM_FINE",
+    "ITM_GHT",
+    "ITM_GWT",
+    "ITM_MRP",
+    "ITM_NWT",
+    "ITM_OTH_WT",
+    "ITM_PCS",
+    "ITM_RATE",
+    "ITM_SIZE",
+    "ITM_TOUCH",
+    "ITM_WEST_PRC",
+    "IT_TYPE",
+    "KR_NAME",
+    "LBR_AMT",
+    "LBR_PRC",
+    "LBR_RATE",
+    "LBR_TYPE",
+    "MAIN_USER",
+    "NET_AMT",
+    "OLD_SRNO",
+    "OTH_AMT",
+    "PAGE_NO",
+    "PR_CODE",
+    "RATE_TYPE",
+    "SR_NO",
+    "TAG_COST",
+    "VCH_DATE"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "DESIGN_DETL",
+   "DESIGN_IDTL",
+   "TAG_IMAGE_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "DESIGN_DETL",
+  "DESIGN_IDTL",
+  "DM_MAST",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "MODEL_MAST",
+  "PRODUCT_MAST",
+  "TAG_IMAGE_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 27,
+ "timers": 1,
+ "serialPort": true,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 5824
+}

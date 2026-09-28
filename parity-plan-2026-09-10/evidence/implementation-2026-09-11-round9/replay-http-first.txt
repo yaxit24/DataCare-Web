@@ -1,0 +1,56 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 54ms
+ ✓ test/saleReturnIncomingReplay.routes.db.test.ts (10 tests) 10804ms
+   ✓ saved Incoming Return journal HTTP authority > allows owning View to load and simulate while preserving raw, caches and every business row 1877ms
+   ✓ saved Incoming Return journal HTTP authority > classifies POST as nonpersisting View and checks current owning rights on every request 795ms
+   ✓ saved Incoming Return journal HTTP authority > requires explicit scope and rejects query overrides or another active business scope 1513ms
+   ✓ saved Incoming Return journal HTTP authority > refuses noncanonical voucher keys without silently selecting a different saved document 993ms
+   ✓ saved Incoming Return journal HTTP authority > rejects caller policy, raw cells, comparison caches, source actions and malformed journals 911ms
+   ✓ saved Incoming Return journal HTTP authority > does not admit source, hidden, labour-code or unimplemented commits through the preview route 650ms
+   ✓ saved Incoming Return journal HTTP authority > binds versions to the selected book, tenant and exact server row identity 1038ms
+   ✓ saved Incoming Return journal HTTP authority > observes master changes omitted from the existing saved-metadata token 541ms
+   ✓ saved Incoming Return journal HTTP authority > rejects stale configuration and then explicitly refuses its newly hidden field 608ms
+   ✓ saved Incoming Return journal HTTP authority > contains unsupported imported numeric state while preserving the saved raw read 332ms
+
+ Test Files  2 passed (2)
+      Tests  64 passed (64)
+   Start at  11:25:57
+   Duration  20.18s (transform 4.91s, setup 0ms, collect 7.85s, tests 10.86s, environment 0ms, prepare 216ms)
+

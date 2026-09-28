@@ -1,0 +1,214 @@
+{
+  "kind": "sales-order-lifecycle-engineering-evidence",
+  "status": "final engineering checks and production browser passed; desktop acceptance not established",
+  "scope": "Ordinary Sales configured-book/date create/read/replace/delete, rich saved values/components, ordered Design/labour events and actual saved image identity",
+  "desktopAcceptance": false,
+  "verification": {
+    "focusedSalesEditor": {
+      "files": 1,
+      "tests": 15,
+      "status": "passed"
+    },
+    "integratedApi": {
+      "files": 219,
+      "tests": 1713,
+      "status": "passed",
+      "inputFilesVerifiedUnchanged": 997
+    },
+    "integratedWeb": {
+      "files": 21,
+      "tests": 114,
+      "status": "passed"
+    },
+    "productionBuild": {
+      "tasks": 7,
+      "status": "passed"
+    },
+    "lintAndSourceTypes": {
+      "tasks": 10,
+      "status": "passed"
+    },
+    "focusedWebTypes": "passed",
+    "productionBrowser": {
+      "status": "passed",
+      "startedAt": "2026-09-11T05:51:33.011Z",
+      "finishedAt": "2026-09-11T05:52:20.433Z",
+      "mockedRequests": 0,
+      "salesLifecycle": {
+        "voucherNo": "00003",
+        "checks": [
+          "configured non-SOR book",
+          "explicit historical date and microsecond time",
+          "source labour commit sequence",
+          "two components",
+          "complete reset after save",
+          "unchanged and changed child edit",
+          "stale409 retains draft",
+          "full-scope print",
+          "imported manual/null/noncontiguous identity retention",
+          "unrelated amount edit preserves imported metal calculation",
+          "scope change and failed load clear saved state",
+          "versioned deletion"
+        ],
+        "mockedRequests": 0
+      },
+      "salesDesign": {
+        "voucherNo": "1",
+        "blankVoucherNo": "2",
+        "checks": [
+          "F1 lists exact item-product/company sources with duplicate labels and full desktop display columns",
+          "Native modal contains keyboard focus; Escape cancels without changing the draft and restores Design focus",
+          "Search distinguishes duplicate design numbers by album and cancellation remains lossless",
+          "Selection preserves invalid unrelated draft and components while copying only source-defined new-row cells",
+          "Validated Design photo previews both inside picker and immediately on the unsaved order row",
+          "Zero source defaults retain manual numerics; source percentage zero permits rate copy and NULL source image clears the immediate preview",
+          "Actual POST replays selected saved sources and later manual edit; reopening preserves parent/components and linked image",
+          "Actual PUT treats loaded parent as E: source NULL image persists as empty string, old photo disappears, numeric caches and parent/component identities stay unchanged",
+          "Explicit clear resets only Design and image N while retaining size, karigar and numerics",
+          "Actual new-row POST replaces selected photo with explicit source blank, reopens as empty string without fallback, and preserves parent/component identities and entered weights",
+          "Complete picker/create/edit/clear workflow has no unhandled browser errors"
+        ]
+      }
+    },
+    "visualReview": "Two viewport screenshots reviewed; details below fold/collapsed are explicitly not represented as visually inspected. See sales-order-visual-review.md."
+  },
+  "retainedEarlierResults": [
+    {
+      "artifact": "browser-first.txt",
+      "outcome": "failed native dialog Tab containment; explicit bounded Tab/ShiftTab cycling fixed by Design owner"
+    },
+    {
+      "artifact": "browser-focus-cache.txt",
+      "outcome": "all business fields matched; test incorrectly required a stable version across row replacement; now asserts business equality and changed nonempty edit token"
+    },
+    {
+      "artifact": "browser-version-contract.txt",
+      "outcome": "test expected image-print profile before the runner enabled image-print settings; corrected to exact actual OrderBill profile"
+    },
+    {
+      "artifact": "sales-editor-types-blank-source-first.txt",
+      "outcome": "test supplied nullable size/karigar contrary to source-option DTO; corrected fixture to blank strings, retaining nullable image and imported nullable prior values"
+    }
+  ],
+  "remainingContracts": [
+    "Desktop/business acceptance and financial/stock/report/migration reconciliation remain uncompleted global gates.",
+    "Prior-year confirmation/lock bypass remains rejected; source clock-on-add and business-date default differences are explicit.",
+    "Separate tender, metal, scheme/rate-cut/allocation, tag reservation/issue/delivery/conversion workflows remain contained.",
+    "Later source MRP/tax/total branches and midpoint behavior require independent source vectors and runtime acceptance.",
+    "Web cancel preserves selection; shared desktop Help Escape may clear it. This deliberate preservation difference requires acceptance."
+  ],
+  "files": [
+    {
+      "path": "web/apps/web/app/(app)/txn/sales-order/page.tsx",
+      "sha256": "a2544854db3892240646758b9a4151b0fbfc1364f4e286dd4b32a9efd3595d38"
+    },
+    {
+      "path": "web/apps/web/lib/salesOrderForm.ts",
+      "sha256": "fad6b74bfe41be5de895922f2f20ae17547dc31f816b16973632723c05319be7"
+    },
+    {
+      "path": "web/apps/web/test/salesOrderForm.test.ts",
+      "sha256": "dafbed5295c06adf3377da51e53c923535c923e02d052a0548405853a2872db1"
+    },
+    {
+      "path": "web/apps/web/test/sales-order.journey.mjs",
+      "sha256": "f9a68ff31b45d07b1d23daca725ca05a7da36f89d079455f32d33180bdc605c9"
+    },
+    {
+      "path": "web/apps/web/test/order-image.journey.mjs",
+      "sha256": "37a587da2a95d85f435681da5951c202bb43bac0cd06add61faf3e5557dd3486"
+    },
+    {
+      "path": "web/apps/web/lib/tourOrderForm.ts",
+      "sha256": "6f0c53cf6e46ec81c9bdff26b16877cfe269a9aa5ebea9756ee6e282ebd0dc8c"
+    },
+    {
+      "path": "web/packages/core/src/orderLabourWithCache.ts",
+      "sha256": "dd9f429992b33918e97b382d5ead1852219aece381ec7c9bb6a1cc21719f3e4f"
+    },
+    {
+      "path": "web/packages/core/src/salesOrderDesign.ts",
+      "sha256": "e6b5b1a4e79a9d93d6fab540565d0159ccde9475714d4f56276c64ce101173af"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-order-lifecycle-contract.md",
+      "sha256": "9ff17421911ab7d3dd426ff50d101e31baa4d188caa5424418e023296e0c76e0"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-order-visual-review.md",
+      "sha256": "506d8a9c36d6c207d76d658efb584974328313f046df6dd9aac7ab97a1fbee9e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-order-browser-result.json",
+      "sha256": "39445f5f6d6aeaa00c479f624f5100a38f8cdc615a4f74da2d299c8b0355f467"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-order-loaded-components.png",
+      "sha256": "33b3cc8dc495835bd42d6cc989a94ff51dca5f1d04eb970b7911d621d008600b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-order-imported-manual.png",
+      "sha256": "233580adaf4c429c69bcc1ff2dd2930c5769a8359e52a344b96f5cedc9fd3468"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-editor-unit-final-focused.txt",
+      "sha256": "f7118dba2337e2dd0562051f765f004d9c69a50240caaa3e1a7c9c611f508417"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-editor-types-final-focused.txt",
+      "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-editor-lint-final-focused.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-full-complete.txt",
+      "sha256": "4e3032426927e215927c199307d6a39ac8b787716185d9a1371cd70ad2c39719"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-verification-complete.json",
+      "sha256": "e94f263930c2bcdfbbab56481f0d28e7a04538986c5c1b3324ff19dae29eeebe"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/api-input-snapshot-complete.json",
+      "sha256": "16e1a9723fd48031f8c52fb2df2cefee76d7d5ac2afed0c7f777d783b8d5e3c3"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/web-tests-blank-source.txt",
+      "sha256": "4709268190ddc276a8f2ee91c6d8386edb9082a1f1405556231a6ac72ad06d75"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/build-blank-source.txt",
+      "sha256": "c18379856a3521cedc03ce93c7b5be47bf05d6842771a1b3900199ddd8900b4e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/lint-blank-source.txt",
+      "sha256": "34142d48f19878739a1dfd0fdf6b3d9c065dc5c73fd98f1a4e63d6878c3d6ae9"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-blank-source.txt",
+      "sha256": "d4deac70a9fc58f530a00e55f7cb8c622a8ca70e70ea0995842e11a35ca956db"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-first.txt",
+      "sha256": "530ec8094de4c3b6947b4e614cb87d2b0d81411270677209d294aee7d7d20ab2"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-focus-cache.txt",
+      "sha256": "fb97967d72f2f64b12e9c11d144e5a0ea2180ad1ae6bfe15a8383b2b1e61b271"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-version-contract.txt",
+      "sha256": "b8bb682f105d6ec8568fa4a997a91020ec5ea2aa6732da84f08a523e11f1ba36"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-editor-types-blank-source-first.txt",
+      "sha256": "7f5e0ec51d04454d07e18c89ebf3ab1f47dee23d251197fe55d5e3cc18adab91"
+    }
+  ]
+}

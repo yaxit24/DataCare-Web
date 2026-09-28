@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/saleReturnIncomingLabour.test.ts",
+    "test/saleReturnIncomingLabour.db.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:41:30.564955+00:00",
+  "finishedAtUtc": "2026-09-11T21:41:34.143800+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-api-first.txt",
+  "logSha256": "f914abf73d4c65e352ab75589341fba26509b6e6a74b67314418ce5d767eee6c",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-api-first.inputs.json",
+  "inputManifestSha256": "4f1dd6688b8035b34ba5deea5ae31c6670636a3a9fa00c40ac369551f526e192",
+  "inputCount": 1796,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

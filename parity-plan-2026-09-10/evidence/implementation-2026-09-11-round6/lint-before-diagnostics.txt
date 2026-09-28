@@ -1,0 +1,66 @@
+
+> datacare-web-saas@0.0.0 lint /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/lint-workspace.mjs && eslint . && turbo run typecheck
+
+Workspace lint passed: 773 source files parsed, 8 manifests checked, 0 policy violations.
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running typecheck in 7 packages
+   • Remote caching disabled
+
+@datacare/db:build: cache miss, executing 867b45fa596bdfda
+@datacare/db:typecheck: cache miss, executing c419e8ad749c18f6
+@datacare/parity:typecheck: cache hit, replaying logs f4c88e5cd9351d8b
+@datacare/parity:typecheck: 
+@datacare/parity:typecheck: > @datacare/parity@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/parity
+@datacare/parity:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/parity:typecheck: 
+@datacare/types:typecheck: cache hit, replaying logs f2fd982e1a5a7b6b
+@datacare/reports:typecheck: cache hit, replaying logs 7e34a26f440a8a06
+@datacare/core:typecheck: cache hit, replaying logs 6553462966d67352
+@datacare/types:typecheck: 
+@datacare/types:typecheck: > @datacare/types@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/types
+@datacare/types:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/types:typecheck: 
+@datacare/reports:typecheck: 
+@datacare/reports:typecheck: > @datacare/reports@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/reports
+@datacare/reports:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/reports:typecheck: 
+@datacare/core:typecheck: 
+@datacare/core:typecheck: > @datacare/core@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+@datacare/core:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/core:typecheck: 
+@datacare/types:build: cache hit, replaying logs e4fdc400d95edad1
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/core:build: cache hit, replaying logs a63648e333604dd1
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/web:typecheck: cache miss, executing 213b9bee1fa13f0d
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/db:typecheck: 
+@datacare/db:typecheck: > @datacare/db@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db
+@datacare/db:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/db:typecheck: 
+@datacare/web:typecheck: 
+@datacare/web:typecheck: > @datacare/web@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+@datacare/web:typecheck: > tsc --noEmit
+@datacare/web:typecheck: 
+@datacare/api:typecheck: cache miss, executing 869a5b83fe34c9d1
+@datacare/api:typecheck: 
+@datacare/api:typecheck: > @datacare/api@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+@datacare/api:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/api:typecheck: 
+
+ Tasks:    10 successful, 10 total
+Cached:    6 cached, 10 total
+  Time:    6.017s 
+

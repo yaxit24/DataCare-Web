@@ -1,0 +1,125 @@
+{
+  "kind": "additive-postgresql-storage-shape-fixture-qualification",
+  "originalPath": "/tmp/datacare-return-labour-preview-api/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+  "originalSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+  "correctedPath": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+  "correctedSha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+  "exhaustiveJsonDifferences": [
+    {
+      "path": [
+        "expected",
+        "initial",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "bb",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "bb-aa",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "bb-other",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "bb-other-aa",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "same-aa",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "same-ta",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "fixed",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    },
+    {
+      "path": [
+        "expected",
+        "prefixes",
+        "zero",
+        "preview",
+        "visible",
+        "9"
+      ],
+      "before": "1",
+      "after": "1.000"
+    }
+  ],
+  "onlyExpectedVisiblePiecesChanged": true,
+  "rawInputsUnchanged": true,
+  "allOtherJsonValuesUnchanged": true,
+  "source": [
+    "TR_SALE_RTN.cs:10376 direct Conversions.ToString(ITM_PCS), no Format0",
+    "schema.prisma:5888 SL_DETL_RTN.ITM_PCS numeric(12,3)",
+    "savedSaleReturn.ts:158-160 jsonb_each_text before driver conversion",
+    "saleReturnIncomingProjection.ts:273-274 validated PCS text preserved"
+  ],
+  "qualification": "Original top-level authorship/status/sourcePins remain historical unchanged metadata of the pre-code literal fixture. This separate qualification dates and owns only these nine post-storage text corrections; all arithmetic was frozen before implementation."
+}

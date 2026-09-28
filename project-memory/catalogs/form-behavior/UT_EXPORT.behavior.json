@@ -1,0 +1,119 @@
+{
+ "form": "UT_EXPORT",
+ "loc": 8100,
+ "gridColumns": {},
+ "inlineSql": [
+  "&Update Trfr = N For This Pc",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 100",
+  "SELECT * FROM CO_MAST WHERE CO_CODE = ' ? ' AND CO_TYPE <> ''",
+  "SELECT * FROM REP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND DATA_TRFR = 'N'",
+  "SELECT CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,MAX(VCH_NO) As LAST_VCH_SR,RIGHT('00000' + CAST(ISNULL(CAST(MAX(VCH_NO) AS INT), 0) + 1 AS VARCHAR(10)), ? ) AS NEXT_VCH_NO From REP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' Group By CO_CODE, LC_CODE, CO_YEAR, CO_BOOK Order By CO_CODE, LC_CODE, CO_YEAR, CO_BOOK",
+  "DELETE FROM REP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM REP_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? '",
+  "INSERT INTO REP_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,VCH_DATE,BILL_NO,BILL_DATE, VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,VCH_TIME,BOOK_NAME,AC_CODE,AC_NAME, NET_AMT,DISC_PRC,DISC_AMT,TAX_CODE,TAX_PRC,TAX_AMT,AC_GST_TYPE,IGST_TAX,CGST_TAX,SGST_TAX, GR_WT,NET_WT,ROF_AMT,TOT_AMT,CASH_AMT,CHQ_AMT,BANK_AC,CHQ_NO,BANK_NAME,CARD_AMT,CARD_AC, KASAR_AMT,BILL_OS,HD_VCH_NO,OLD_VCH_NO,NEW_VCH_NO,EMP_CODE, VCH_DESC,DATA_TRFR,MAIN_USER,USER_UPDATE,USER_DELETE) VALUES (' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? ',' ? VCH_DATE ? MM/dd/yyyy ? ',' ? BILL_NO ? ',NULL, ? ' ? VCH_TYPE ? ',' ? INOUT_TYPE ? ',' ? ENTRY_TYPE ? ',' ? VCH_TIME ? MM/dd/yyyy HH:mm:ss ? ',' ? BOOK_NAME ? ',' ? AC_CODE ? ',' ? AC_NAME ? ', ? NET_AMT ? , ? DISC_PRC ? , ? DISC_AMT ? ,' ? TAX_CODE ? ', ? TAX_PRC ? , ? TAX_AMT ? ,' ? AC_GST_TYPE ? ', ? IGST_TAX ? , ? CGST_TAX ? , ? SGST_TAX ? , ? GR_WT ? , ? NET_WT ? , ? ROF_AMT ? , ? TOT_AMT ? , ? CASH_AMT ? , ? CHQ_AMT ? ,' ? BANK_AC ? ',' ? CHQ_NO ? ',' ? BANK_NAME ? ', ? CARD_AMT ? ,' ? CARD_AC ? ', ? KASAR_AMT ? , ? BILL_OS ? ,' ? VCH_NO ? ',' ? OLD_VCH_NO ? ',' ? NEW_VCH_NO ? ',' ? EMP_CODE ? ', ? ' ? VCH_DESC ? ',' ? DATA_TRFR ? ',' ? MAIN_USER ? ',' ? USER_UPDATE ? ',' ? USER_DELETE ? ')",
+  "SELECT A.* FROM REP_DETL AS A WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' ORDER BY SR_NO",
+  "UPDATE REP_DATA SET DATA_TRFR = 'Y',HD_VCH_NO = ' ? ',RE_TRFR = 'N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE AD_MAST Set DATA_TRFR = 'N' WHERE DATA_TRFR Is NULL",
+  "SELECT * FROM AD_MAST WHERE CO_CODE = ' ? ' AND DATA_TRFR = 'N'",
+  "DELETE FROM AD_MAST WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? SCHM_CODE ? '",
+  "INSERT INTO AD_MAST(CO_CODE,SCHM_CODE,SCHM_NAME,SCHM_AMT,SCHM_AC,SCHM_TYPE,DATA_TRFR,MAIN_USER,BONUS_PRC,SCHM_MONTH,GOLD_RATE) VALUES (' ? CO_CODE ? ',' ? SCHM_CODE ? ',' ? SCHM_NAME ? ', ? SCHM_AMT ? , ? ' ? SCHM_AC ? ',' ? SCHM_TYPE ? ',' ? DATA_TRFR ? ',' ? MAIN_USER ? ', ? BONUS_PRC ? , ? SCHM_MONTH ? , ? GOLD_RATE ? )",
+  "UPDATE AD_MAST SET DATA_TRFR = 'Y' WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? SCHM_CODE ? '",
+  "SELECT * FROM AD_MEMB WHERE CO_CODE = ' ? ' AND DATA_TRFR = 'N' ORDER BY SCHM_CODE,MEMB_CODE",
+  "DELETE FROM AD_MEMB WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? SCHM_CODE ? ' AND MEMB_CODE = ' ? MEMB_CODE ? '",
+  "INSERT INTO AD_MEMB(CO_CODE,LC_CODE,SCHM_CODE,MEMB_CODE,MEMB_NAME,MEMB_AMT,ITM_GWT,EMP_CODE,AC_PHONE, AC_MOBILE,AC_ADD1,AC_ADD2,AC_ADD3,AC_CITY,AC_PIN,AC_AREA,AC_MOBILE2,AC_PHONE2,ID_PROF,NOMINEE_NAME,AC_EMAIL, AC_DISTRICT,BIRTH_DATE,ANV_DATE,L_BR_DATE,JOIN_DATE,EXP_DATE,BANK_NAME,BANK_AREA,BANK_AC_NO,BANK_RTGS_NO, AC_REF_CODE,SCHM_SHORT,MEMB_BONUS,DATA_TRFR,MAIN_USER) VALUES(' ? CO_CODE ? ',' ? LC_CODE ? ',' ? SCHM_CODE ? ',' ? MEMB_CODE ? ',' ? MEMB_NAME ? ', ? MEMB_AMT ? , ? ITM_GWT ? ,' ? EMP_CODE ? ',' ? AC_PHONE ? ', ? ' ? AC_MOBILE ? ',' ? AC_ADD1 ? ',' ? AC_ADD2 ? ',' ? AC_ADD3 ? ',' ? AC_CITY ? ',' ? AC_PIN ? ',' ? AC_AREA ? ',' ? AC_MOBILE2 ? ',' ? AC_PHONE2 ? ',' ? ID_PROF ? ',' ? NOMINEE_NAME ? ',' ? AC_EMAIL ? ', ? ' ? AC_DISTRICT ? ', ? BIRTH_DATE ? Null ? ' ? MM/dd/yyyy ? ' ? , ? L_BR_DATE ? Null ? ' ? MM/dd/yyyy ? ' ? , ? ANV_DATE ? Null ? ' ? MM/dd/yyyy ? ' ? , ? JOIN_DATE ? Null ? ' ? MM/dd/yyyy ? ' ? , ? EXP_DATE ? Null ? ' ? MM/dd/yyyy ? ' ? ,' ? BANK_NAME ? ',' ? BANK_AREA ? ',' ? BANK_AC_NO ? ',' ? BANK_RTGS_NO ? ', ? ' ? AC_REF_CODE ? ',' ? SCHM_SHORT ? ',' ? MEMB_BONUS ? ','Y',' ? MAIN_USER ? ')",
+  "UPDATE AD_MEMB SET DATA_TRFR = 'Y' WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? SCHM_CODE ? '",
+  "SELECT * FROM AD_DATA WHERE CO_CODE = ' ? ' AND DATA_TRFR = 'N' ORDER BY CO_BOOK,VCH_NO,SR_NO",
+  "DELETE FROM AD_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? ' AND SR_NO = ' ? SR_NO ? '",
+  "DELETE FROM UPI_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? ' AND SR_NO = ' ? SR_NO ? '",
+  "INSERT INTO AD_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,SCHM_CODE,SCHM_DATE,MEMB_CODE,MEMB_AMT, TOT_AMT,IT_DESC,MONTH_CODE,EMP_CODE,ENT_TYPE,REC_AC,ITM_GWT,ITM_RATE,BANK_NAME,CHQ_NO,ENTRY_TIME,HD_VCH_NO,MAIN_USER, DATA_TRFR,VCH_TIME,VCH_TYPE,INOUT_TYPE,BOOK_NAME,WITH_UPI) VALUES (' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? ', ? SR_NO ? ,' ? VCH_DATE ? MM/dd/yyyy ? ',' ? SCHM_CODE ? ',' ? SCHM_DATE ? MM/dd/yyyy ? ',' ? MEMB_CODE ? ', ? MEMB_AMT ? , ? TOT_AMT ? ,' ? IT_DESC ? ',' ? MONTH_CODE ? ',' ? EMP_CODE ? ',' ? ENT_TYPE ? ',' ? REC_AC ? ', ? ITM_GWT ? , ? ITM_RATE ? ,' ? BANK_NAME ? ',' ? CHQ_NO ? ',' ? VCH_TIME ? MM/dd/yyyy HH:mm:ss ? ',' ? VCH_NO ? ',' ? MAIN_USER ? ', ? 'Y',' ? VCH_TIME ? MM/dd/yyyy HH:mm:ss ? ',' ? VCH_TYPE ? ',' ? INOUT_TYPE ? ',' ? BOOK_NAME ? ',' ? WITH_UPI ? ')",
+  "SELECT A.* FROM UPI_DATA AS A WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' AND SR_NO = ? SR_NO ? ORDER BY ISR_NO",
+  "INSERT INTO UPI_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE,VCH_TIME, AC_CODE,UPI_AC_CODE,UPI_AC_NAME,UPI_AMT,MAIN_USER,UPI_ID) VALUES (' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? ', ? SR_NO ? , ? ISR_NO ? ,' ? VCH_DATE ? MM/dd/yyyy ? ',' ? VCH_DATE ? MM/dd/yyyy HH:mm:ss ? ', ? ' ? AC_CODE ? ',' ? UPI_AC_CODE ? ',' ? UPI_AC_NAME ? ', ? UPI_AMT ? ,' ? MAIN_USER ? ',' ? UPI_ID ? ')",
+  "UPDATE AD_DATA SET DATA_TRFR = 'Y',HD_VCH_NO = ' ? ',RE_TRFR = 'N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "SELECT * FROM AD_ADJ WHERE CO_CODE = ' ? ' AND DATA_TRFR = 'N' ORDER BY CO_BOOK,VCH_NO,SR_NO",
+  "DELETE FROM AD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? ' AND SR_NO = ' ? SR_NO ? '",
+  "INSERT INTO AD_ADJ(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,VCH_TIME,VCH_TYPE,INOUT_TYPE, ENTRY_TYPE,BOOK_NAME,SCHM_CODE,MEMB_CODE,MEMB_AMT,MEMB_BONUS,MEMB_LESS,ADJ_AMT,AC_CODE,AC_NAME,SBILL_NO, SBILL_LC_CODE,SBILL_YRCD,SBILL_DBCD,SBILL_AMT,SBILL_HD_VCH_NO,EMP_CODE,VCH_DESC,SIGN,HD_VCH_NO,MAIN_USER, DATA_TRFR,USER_UPDATE,USER_DELETE,GOLD_WT,GOLD_RATE,GOLD_AMT) VALUES(' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? ', ? SR_NO ? ,' ? VCH_DATE ? MM/dd/yyyy ? ',' ? VCH_TIME ? MM/dd/yyyy HH:mm ? ',' ? VCH_TYPE ? ',' ? INOUT_TYPE ? ', ? ' ? ENTRY_TYPE ? ',' ? BOOK_NAME ? ',' ? SCHM_CODE ? ',' ? MEMB_CODE ? ', ? MEMB_AMT ? , ? MEMB_BONUS ? , ? MEMB_LESS ? , ? ADJ_AMT ? ,' ? AC_CODE ? ',' ? AC_NAME ? ',' ? SBILL_NO ? ', ? ' ? SBILL_LC_CODE ? ',' ? SBILL_YRCD ? ',' ? SBILL_DBCD ? ', ? SBILL_AMT ? ,' ? SBILL_HD_VCH_NO ? ',' ? EMP_CODE ? ',' ? VCH_DESC ? ',' ? SIGN ? ',' ? ',' ? MAIN_USER ? ', ? ' ? DATA_TRFR ? ',' ? USER_UPDATE ? ',' ? USER_DELETE ? ', ? GOLD_WT ? , ? GOLD_RATE ? , ? GOLD_AMT ? )",
+  "UPDATE AD_ADJ SET DATA_TRFR = 'Y',HD_VCH_NO = ' ? ',RE_TRFR = 'N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "SELECT A.* FROM SL_ORD_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND B.TRFR_BOOK = 'Y' AND A.DATA_TRFR = 'N'",
+  "DELETE FROM SL_ORD_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? HD_VCH_NO ? '",
+  "DELETE FROM SL_ORD_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? HD_VCH_NO ? '",
+  "DELETE FROM SL_ORD_IDTL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? HD_VCH_NO ? '",
+  "DELETE FROM SL_PR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? HD_VCH_NO ? '",
+  "DELETE FROM SL_ORD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? HD_VCH_NO ? '",
+  "SELECT A.* FROM SL_ORD_DETL AS A WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' ORDER BY SR_NO",
+  "SELECT A.* FROM SL_ORD_IDTL AS A WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' ORDER BY SR_NO",
+  "INSERT INTO SL_ORD_IDTL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE,VCH_TYPE,INOUT_TYPE, ENTRY_TYPE,BOOK_NAME,AC_CODE,TAG_NO,VCH_SRNO,IT_CODE,IT_TYPE,DM_CODE,DM_SIZE,DM_SFNO,DM_LEB,IT_PCS,IT_PCS_WT, KR_WT,KR_LESS_PRC,IT_GWT,IT_CON_PRC,IT_CON_WT,IT_RATE_TYPE,IT_RATE,IT_AMT,IT_LBR_RATE,IT_LBR_AMT,IT_NET_AMT, KR_CON_PRC,KR_CON_WT,KR_RATE,KR_AMT,KR_LBR_RATE,KR_LBR_AMT,KR_NET_AMT,HD_VCH_NO,OLD_VCH_NO,NEW_VCH_NO, MAIN_USER,DM_ORIGIN,DM_REMARK,DM_COLOR,DM_NAME) VALUES (' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? HD_VCH_NO ? ', ? SR_NO ? , ? ISR_NO ? ,' ? VCH_DATE ? MM/dd/yyyy ? ',' ? VCH_TYPE ? ',' ? INOUT_TYPE ? ', ? ' ? ENTRY_TYPE ? ',' ? BOOK_NAME ? ',' ? AC_CODE ? ',' ? TAG_NO ? ',' ? VCH_SRNO ? ',' ? IT_CODE ? ',' ? IT_TYPE ? ',' ? DM_CODE ? ',' ? DM_SIZE ? ',' ? DM_SFNO ? ',' ? DM_LEB ? ',' ? IT_PCS ? ',' ? IT_PCS_WT ? ', ? KR_WT ? , ? KR_LESS_PRC ? , ? IT_GWT ? ,' ? IT_CON_PRC ? ', ? IT_CON_WT ? ,' ? IT_RATE_TYPE ? ', ? IT_RATE ? , ? IT_AMT ? , ? IT_LBR_RATE ? , ? IT_LBR_AMT ? , ? IT_NET_AMT ? , ? KR_CON_PRC ? , ? KR_CON_WT ? , ? KR_RATE ? , ? KR_AMT ? , ? KR_LBR_RATE ? , ? KR_LBR_AMT ? , ? KR_NET_AMT ? ,' ? VCH_NO ? ',' ? OLD_VCH_NO ? ',' ? NEW_VCH_NO ? ', ? ' ? MAIN_USER ? ',' ? DM_ORIGIN ? ',' ? DM_REMARK ? ',' ? DM_COLOR ? ',' ? DM_NAME ? ')",
+  "SELECT A.* FROM SL_PR_DETL AS A WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' ORDER BY SR_NO",
+  "INSERT INTO SL_PR_DETL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,VCH_TIME,VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME, AC_CODE,IT_CODE,IT_DESC,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_FINE,ITM_RATE,NET_AMT,IT_TYPE,HD_VCH_NO,DATA_TRFR,OLD_VCH_NO,NEW_VCH_NO,MAIN_USER, ITM_OTH_WT,HM_ID2,HM_ID3,HM_ID4,HM_ID_WT,HM_ID2_WT,HM_ID3_WT,HM_ID4_WT,HM_ID) VALUES (' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? HD_VCH_NO ? ', ? SR_NO ? ,' ? VCH_DATE ? MM/dd/yyyy ? ',' ? VCH_TIME ? MM/dd/yyyy HH:mm:ss ? ',' ? VCH_TYPE ? ',' ? INOUT_TYPE ? ',' ? ENTRY_TYPE ? ',' ? BOOK_NAME ? ', ? ' ? AC_CODE ? ',' ? IT_CODE ? ',' ? IT_DESC ? ', ? ITM_PCS ? , ? ITM_GWT ? , ? ITM_NWT ? , ? ITM_TOUCH ? , ? ITM_FINE ? , ? ITM_RATE ? , ? NET_AMT ? ,' ? IT_TYPE ? ',' ? VCH_NO ? ','Y',' ? OLD_VCH_NO ? ',' ? NEW_VCH_NO ? ',' ? MAIN_USER ? ', ? ITM_OTH_WT ? ,' ? HM_ID2 ? ',' ? HM_ID3 ? ',' ? HM_ID4 ? ', ? HM_ID_WT ? , ? HM_ID2_WT ? , ? HM_ID3_WT ? , ? HM_ID4_WT ? ,' ? HM_ID ? ')",
+  "SELECT A.* FROM SL_ORD_ADJ AS A WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' ORDER BY SR_NO",
+  "INSERT INTO SL_ORD_ADJ(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,VCH_TYPE,INOUT_TYPE,ENTRY_TYPE, VCH_TIME,BOOK_NAME,AC_CODE,AC_NAME,ORD_HD_VCH_NO,ORD_NO,ORD_LC,ORD_YRCD,ORD_DBCD,ORD_AC_CODE,ORD_SIGN,ORD_AMT, ORD_GOLD,ORD_SILVER,PAID_AMT,OLD_VCH_NO,NEW_VCH_NO,DATA_TRFR,HD_VCH_NO,MAIN_USER,ADD_USER,KASAR_AMT,ORD_BAL_AMT, IT_DESC,EMP_CODE,PAID_AC) VALUES (' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? HD_VCH_NO ? ', ? SR_NO ? ,' ? VCH_DATE ? MM/dd/yyyy ? ',' ? VCH_TYPE ? ',' ? INOUT_TYPE ? ',' ? ENTRY_TYPE ? ', ? ' ? VCH_TIME ? MM/dd/yyyy HH: mm : ss ? ',' ? BOOK_NAME ? ',' ? AC_CODE ? ',' ? AC_NAME ? ',' ? ORD_NO ? ',' ? ORD_HD_VCH_NO ? ',' ? ORD_LC ? ',' ? ORD_YRCD ? ',' ? ORD_DBCD ? ',' ? ORD_AC_CODE ? ',' ? ORD_SIGN ? ', ? ORD_AMT ? , ? ORD_GOLD ? , ? ORD_SILVER ? , ? PAID_AMT ? ,' ? OLD_VCH_NO ? ',' ? NEW_VCH_NO ? ',' ? DATA_TRFR ? ',' ? HD_VCH_NO ? ',' ? MAIN_USER ? ',' ? ADD_USER ? ', ? KASAR_AMT ? , ? ORD_BAL_AMT ? , ? ' ? IT_DESC ? ',' ? EMP_CODE ? ',' ? PAID_AC ? ')",
+  "UPDATE SL_ORD_DATA SET DATA_TRFR = 'Y',HD_VCH_NO = ' ? ',RE_TRFR = 'N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "SELECT A.* FROM SL_ORD_ADJ AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND B.TRFR_BOOK = 'Y' AND A.DATA_TRFR = 'N' AND B.MAIN_BOOK <> 'SALES' AND A.ORD_SIGN = '-' ORDER BY A.CO_BOOK,A.VCH_NO,A.SR_NO",
+  "UPDATE SL_ORD_ADJ SET DATA_TRFR = 'Y' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' AND SR_NO = ? SR_NO ? ",
+  "SELECT * FROM ITM_OPBL AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.DATA_TRFR = 'N' ORDER BY A.IT_CODE",
+  "DELETE FROM ITM_OPBL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "INSERT INTO ITM_OPBL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,IT_CODE,VCH_NO,SR_NO, ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_FINE,ITM_RATE,ITM_AMT,LBR_AMT,OTH_AMT,NET_AMT, DM_WT,DM_RATE,DM_AMT,MAIN_USER,ADD_DATE,LBR_RATE,LBR_TYPE,ITM_WEST_PRC,DATA_TRFR) VALUES (' ? CO_CODE ? ',' ? LC_CODE ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? IT_CODE ? ',' ? VCH_NO ? ', ? SR_NO ? , ? ITM_PCS ? , ? ITM_GWT ? , ? ITM_NWT ? , ? ITM_TOUCH ? , ? ITM_FINE ? , ? ITM_RATE ? , ? ITM_AMT ? , ? LBR_AMT ? , ? OTH_AMT ? , ? NET_AMT ? , ? DM_WT ? , ? DM_RATE ? , ? DM_AMT ? ,' ? MAIN_USER ? ',NULL, ? LBR_RATE ? ,' ? LBR_TYPE ? ', ? ITM_WEST_PRC ? ,'Y')"
+ ],
+ "keyboard": {
+  "Ctrl+Esc": 1,
+  "Ctrl+O": 1
+ },
+ "calc": [
+  "text = Strings.Format((object)(Conversion.Val(text) + 1.0), \"00000\");",
+  "string text = ((dataTable4.Rows.Count != 0) ? Strings.Format((object)(Conversion.Val(Operators.ConcatenateObject(dataTable4.Rows[0][\"CoCode\"], (object)\"\")) + 1.0), \"00000\") : \"00001\");",
+  "num = (int)Math.Round(Conversion.Val(Operators.ConcatenateObject(dataTable4.Rows[0][\"CoCode\"], (object)\"\")) + 1.0);",
+  "string text = ((dataTable4.Rows.Count != 0) ? Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(dataTable4.Rows[0][\"CoCode\"])) + 1.0), \"00000\") : \"00001\");",
+  "num = (int)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(dataTable4.Rows[0][\"CoCode\"])) + 1.0);",
+  "num = Conversions.ToDouble(Strings.Format((object)Conversion.Val((object)(num5 * num6 / 100.0)), \"0.000\"));"
+ ],
+ "validations": [
+  {
+   "message": "Are You Sure To Data Transfer.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Data Transfer.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Please Insert CoType In Company Master...",
+   "when": "DC_Main.Rshlp.Rows.Count <= 0"
+  },
+  {
+   "message": "Process Are Complete....",
+   "when": ""
+  },
+  {
+   "message": "Process Are Complete....Please B Data Refersh And Check Ledger And Stock Then Reset Data",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To All Data ReTransfer.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To All Data ReTransfer.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To A Data Reset.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To A Data Reset.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Are You Sure To Cash Balance Transfer to CoType = A.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Cash Balance Transfer to CoType = A.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To Opning Balance Transfer to CoType = A.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Opning Balance Transfer to CoType = A.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Please Reset A Type Stock First Then Tag Stock Transfer....",
+   "when": "DC_Main.Tbl.Rows.Count > 0"
+  },
+  {
+   "message": "Data Import Is Done...",
+   "when": ""
+  },
+  {
+   "message": "Process Are Complete....Please B Data Refersh and Check Ledger and Stock Then Reset Data",
+   "when": "Operators.CompareString(TrFrCoType, \"B\", false) == 0"
+  },
+  {
+   "message": "Process Are Complete....Please A Data Refersh and Check Stock.....",
+   "when": ""
+  }
+ ]
+}

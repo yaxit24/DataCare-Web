@@ -1,0 +1,33 @@
+{
+  "status": "integrated-awaiting-workspace-checks",
+  "manifestSha256": "77e0de75edb44f45c2c56250c2558e8aa056f019a01ff36b8699ea73ede691fd",
+  "files": [
+    {
+      "path": "web/packages/core/src/saleReturnIncomingSaveProjection.ts",
+      "sha256": "96d8f57b32ccdbfb4fa53e68b4d3435059df8b74fa1cb98f7744ff4b57e32ea4"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncomingSaveProjection.test.ts",
+      "sha256": "6b49316b2a6ae3a7c4e613f6dfa9977b3441a83d0fd0ce1511d111809c22dc2f"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "sha256": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50"
+    }
+  ],
+  "postFormattingFiles": [
+    {
+      "path": "web/packages/core/src/saleReturnIncomingSaveProjection.ts",
+      "sha256": "7278d4ef822b5cc6c0e48620a824ec890f69f948ee2023137a44fbd46f05d138"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncomingSaveProjection.test.ts",
+      "sha256": "ddacc56b82217f3d611177f3c2da5a821744cbb8b56fac8fa54f7d543c773084"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "sha256": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50"
+    }
+  ],
+  "formatQualification": "Repository Prettier formatted source/test after copying stage. Frozen originals retained; actual workspace tests determine post-format verification."
+}

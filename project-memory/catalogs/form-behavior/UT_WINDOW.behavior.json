@@ -1,0 +1,27 @@
+{
+ "form": "UT_WINDOW",
+ "loc": 2661,
+ "gridColumns": {},
+ "inlineSql": [
+  "SELECT * FROM TILE_DATA",
+  "Select * From USER_SET WHERE USER_NAME = ' ? ' AND SUB_MENU = ' ? ' AND FRM_VIEW = 'Y'"
+ ],
+ "keyboard": {
+  "Esc": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Rights.....",
+   "when": "RsRight.Rows.Count == 0"
+  },
+  {
+   "message": "No Menu Found.....",
+   "when": ""
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  }
+ ]
+}

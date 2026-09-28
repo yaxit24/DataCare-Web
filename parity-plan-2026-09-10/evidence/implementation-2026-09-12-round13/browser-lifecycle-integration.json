@@ -1,0 +1,108 @@
+{
+  "atUtc": "2026-09-11T21:03:35.502479+00:00",
+  "status": "integrated-unverified",
+  "files": [
+    {
+      "path": "web/apps/web/app/(app)/backup/page.tsx",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": "8f8a70032002e433b90d21b8e9b6cbebdee94d3463c8540d2f4888a4ea5158ec",
+      "afterSha256": "2654de13e5efba853f4821e0aa0d7433eb95fd9796751fc36dec7b09c8c94278"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/data-refresh/page.tsx",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": "e3a8f9ce0eb22ade38b87d5d2700f39a95b2c2a895259b84a74e2b8b8efa91dc",
+      "afterSha256": "c0de884109cd5ec50538dd732e6d2678269403af06240a526838e5df00f1ef69"
+    },
+    {
+      "path": "web/apps/web/components/ScaleCapture.tsx",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": "700c91c4c18c8b44d7ec362b5c62b1b343826634b8e04b5b87536aa2613118ed",
+      "afterSha256": "73282871cd890c16ded8f7ac313c9fbb2367a45b3e3190e0ae6b4fdcf283cf72"
+    },
+    {
+      "path": "web/apps/web/lib/api.ts",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": "406f2dca134cd85c3a0d23ccdb1f33232ceefa049ce54e220de34b42af3c3dc6",
+      "afterSha256": "752786074a6de23482dc33560ed677751c59fc8d686c2d25d893ad82598cc015"
+    },
+    {
+      "path": "web/apps/web/lib/deviceContextLease.ts",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": null,
+      "afterSha256": "201488a60afb3ae985436caba954aadd2b7135a488e9e2f14bb0238dc74f3b1b"
+    },
+    {
+      "path": "web/apps/web/lib/pageContext.ts",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": "c1c952e40328ef1518b169ba14273b088294a497cedf0f24d05898cfd40d1176",
+      "afterSha256": "1f157fc8f55cee17e914bebbf77d5b709f42640f902f10228e41b4478dc20426"
+    },
+    {
+      "path": "web/apps/web/test/directFetchContext.test.ts",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": null,
+      "afterSha256": "eb1d8a3e9741aae37faa326116edaccb151a6267dc27156fbf5fb76c2ef6d927"
+    },
+    {
+      "path": "web/apps/web/test/pageContextSelectionPause.test.ts",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": null,
+      "afterSha256": "a260bfcef09ebcea044dc3d1bd4f7b6a36ab4418bbf624e6dc6eeaa73ea782f9"
+    },
+    {
+      "path": "web/apps/web/test/scaleCaptureContext.test.ts",
+      "stage": "direct-fetch-staged",
+      "beforeSha256": null,
+      "afterSha256": "d527b7eaf0785172c305180e55b1a856249a3aebf04185919edc0fa0d2208984"
+    },
+    {
+      "path": "web/apps/web/app/(app)/layout.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "b345a9445216a39567b1d48b065bc8ca329e4ed464bf56f1653e4b35ac8f1ab3",
+      "afterSha256": "451a47d79eabbd5088786662ad782fdfd1af69dda84694c87bbb0fbfb0d9ae38"
+    },
+    {
+      "path": "web/apps/web/app/login/page.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "f03a7b78e7688f5b590b7e7c93789e756ccfbc8e89b7e6762211ac382b04f451",
+      "afterSha256": "8f15c529cbf969f88c3a905742b48671608adb4bdf7d641cde913f349b7b033e"
+    },
+    {
+      "path": "web/apps/web/app/password-change/page.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "a57980e2a00d8130c786f552b8bc9d26f98079762443541dab2253c5ffde57db",
+      "afterSha256": "f4a9f214e2142f1123dd78e8d5838d293d85aaf524ee982cd8fb6a96399904ef"
+    },
+    {
+      "path": "web/apps/web/app/select/page.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "b24d2465b835f10a81184e21985f3eb2395a463f25b4ea445e815a6e68f60c83",
+      "afterSha256": "2e3965ceb00575dc5e4a7e8552c93885aa03567cfb4274636ca9ea2bbdbfc038"
+    },
+    {
+      "path": "web/apps/web/components/Shell.tsx",
+      "stage": "browser-root-staged",
+      "beforeSha256": "a92f33cb62ffed9678682b071d58cd80bba7885e3b91925a1560b1176188e66b",
+      "afterSha256": "162a4ded277d4e7a829e45eb5f1b030fb8794c2faeba07d912c3a4a056a872eb"
+    },
+    {
+      "path": "web/apps/web/components/useOperationLease.ts",
+      "stage": "browser-root-staged",
+      "beforeSha256": null,
+      "afterSha256": "584e1e1b609aa1a5d1fb10f0801ec5d4e4c3d28269b810a6d54b4ecfae87912b"
+    },
+    {
+      "path": "web/apps/web/lib/contextSelection.ts",
+      "stage": "browser-root-staged",
+      "beforeSha256": "f1e11c5f96429a2a060c29f013e7f97ddbbc6390d5081a745fbc08242d1f909c",
+      "afterSha256": "b66344f45ea33af2e01e5aadd443011c03666edebbf91b53f9594b68a49db2dd"
+    },
+    {
+      "path": "web/apps/web/test/contextSelection.test.ts",
+      "stage": "browser-root-staged",
+      "beforeSha256": "b7f2e59b53717517d06e229a7a8ecff466935c79df5fb25b7268187c037d8023",
+      "afterSha256": "42713342962d92eea2c29e5f90daa054bde7fb5d6886a3fa08f2992707d9883a"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "browser-retention-bound-label-revision/v1",
+  "status": "staged-not-executed",
+  "createdAtUtc": "2026-09-12T01:53:00.344179+00:00",
+  "priorScriptSha256": "31c4daedccb7fa4696cf0a09e4c3fbea6f790452b177d1601789952104c51fcc",
+  "newScriptSha256": "e78d78f631678e032d5e8202c7d0fc33b7d66215aa21cd1e0bf40010f21afacb",
+  "unchangedContractSha256": "3fc625b7dc3b78fc9b230b06b4478b082881af106c1a527d05c4af10e66043b0",
+  "changes": {
+    "browser-qualified": "browser-bound",
+    "browser-context-qualified": "browser-context-bound",
+    "browser-labour-qualified": "browser-labour-bound",
+    "parity-real-stack-round14-qualified": "parity-real-stack-round14-bound",
+    "session-context-round14-qualified": "session-context-round14-bound",
+    "labour-preview-lifecycle-round14-qualified": "labour-preview-lifecycle-round14-bound"
+  },
+  "proof": "Exactly six literal substitutions; all source, result, count, fault, time, run/input binding and retention assertions byte-identical. Python syntax parsed only.",
+  "reason": "Root seeds the previously missing direct R13 required-check input and reruns three browsers with unique labels/folders. Original failed stage retained; no API rerun is asserted necessary by this artifact."
+}

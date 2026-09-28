@@ -1,0 +1,666 @@
+{
+  "kind": "datacare.plan-coverage-obligations/1.0",
+  "status": "planned-not-runtime-verified",
+  "scope": "Full reachable primary desktop product; later explicit subset scope cannot close the full-product claim",
+  "fixedCountsAreReleaseThresholds": false,
+  "mandatorySourceSupplements": [
+    "evidence/additional-control-candidates.json",
+    "evidence/supporting-source-register.json"
+  ],
+  "scenarioAnchors": [
+    "SET-01",
+    "SET-02",
+    "SET-03",
+    "SET-04",
+    "SET-05",
+    "SET-06",
+    "SET-07",
+    "SET-08",
+    "SET-09",
+    "SET-10",
+    "PUR-01",
+    "PUR-02",
+    "PUR-03",
+    "PUR-04",
+    "PUR-05",
+    "PUR-06",
+    "PUR-07",
+    "PUR-08",
+    "PUR-09",
+    "PUR-10",
+    "SAL-01",
+    "SAL-02",
+    "SAL-03",
+    "SAL-04",
+    "SAL-05",
+    "SAL-06",
+    "SAL-07",
+    "SAL-08",
+    "SAL-09",
+    "SAL-10",
+    "SAL-11",
+    "SAL-12",
+    "SAL-13",
+    "SAL-14",
+    "SAL-15",
+    "SAL-16",
+    "SAL-17",
+    "SAL-18",
+    "SAL-19",
+    "SAL-20",
+    "FLOW-01",
+    "FLOW-02",
+    "FLOW-03",
+    "FLOW-04",
+    "FLOW-05",
+    "FLOW-06",
+    "FIN-01",
+    "FIN-02",
+    "FIN-03",
+    "FIN-04",
+    "FIN-05",
+    "FIN-06",
+    "FIN-07",
+    "FIN-08",
+    "FIN-09",
+    "FIN-10",
+    "FIN-11",
+    "FIN-12",
+    "FIN-13",
+    "FIN-14",
+    "STK-01",
+    "STK-02",
+    "STK-03",
+    "STK-04",
+    "STK-05",
+    "STK-06",
+    "STK-07",
+    "STK-08",
+    "STK-09",
+    "STK-10",
+    "STK-11",
+    "STK-12",
+    "MFG-01",
+    "MFG-02",
+    "MFG-03",
+    "MFG-04",
+    "MFG-05",
+    "MFG-06",
+    "MFG-07",
+    "MFG-08",
+    "MFG-09",
+    "MFG-10",
+    "SCH-01",
+    "SCH-02",
+    "SCH-03",
+    "SCH-04",
+    "SCH-05",
+    "SCH-06",
+    "SCH-07",
+    "SCH-08",
+    "SCH-09",
+    "SCH-10",
+    "RPT-01",
+    "RPT-02",
+    "RPT-03",
+    "RPT-04",
+    "RPT-05",
+    "RPT-06",
+    "RPT-07",
+    "RPT-08",
+    "RPT-09",
+    "OPS-01",
+    "OPS-02",
+    "OPS-03",
+    "OPS-04",
+    "OPS-05",
+    "OPS-06",
+    "OPS-07",
+    "OPS-08",
+    "OPS-09",
+    "OPS-10",
+    "OPS-11",
+    "OPS-12",
+    "OPS-13",
+    "OPS-14",
+    "OPS-15",
+    "SET-11",
+    "SET-12",
+    "SET-13",
+    "FLOW-07",
+    "RPT-10",
+    "OPS-16",
+    "OPS-17",
+    "OPS-18",
+    "OPS-19",
+    "OPS-20",
+    "OPS-21",
+    "OPS-22"
+  ],
+  "coverage": [
+    {
+      "id": "COV-01",
+      "domain": "Product inventory, source extraction and independent reference",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P00-01",
+        "P00-02",
+        "P00-03",
+        "P00-04",
+        "P00-05"
+      ],
+      "scenarioGroups": [
+        "SET",
+        "OPS"
+      ],
+      "releaseGates": [
+        "R00",
+        "R01",
+        "R13"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-02",
+      "domain": "Identity and scope",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P01-01"
+      ],
+      "scenarioGroups": [
+        "SET",
+        "FIN",
+        "STK"
+      ],
+      "releaseGates": [
+        "R07"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-03",
+      "domain": "Arithmetic and override precedence",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P01-02"
+      ],
+      "scenarioGroups": [
+        "PUR",
+        "SAL",
+        "FIN",
+        "MFG",
+        "SCH"
+      ],
+      "releaseGates": [
+        "R01",
+        "R04",
+        "R07"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-04",
+      "domain": "Posting, lifecycle, concurrency and retry",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P01-03",
+        "P01-04",
+        "P01-05"
+      ],
+      "scenarioGroups": [
+        "PUR",
+        "SAL",
+        "FLOW",
+        "FIN",
+        "STK",
+        "MFG",
+        "SCH",
+        "OPS"
+      ],
+      "releaseGates": [
+        "R04",
+        "R07"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-05",
+      "domain": "Form depth, grids, calculation triggers and operator navigation",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P02-01",
+        "P02-02",
+        "P02-03",
+        "P02-04"
+      ],
+      "scenarioGroups": [
+        "SET",
+        "SAL",
+        "OPS"
+      ],
+      "releaseGates": [
+        "R03",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-06",
+      "domain": "Settings effects",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P02-05"
+      ],
+      "scenarioGroups": [
+        "SET",
+        "PUR",
+        "SAL",
+        "FIN",
+        "STK",
+        "MFG",
+        "SCH"
+      ],
+      "releaseGates": [
+        "R06"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-07",
+      "domain": "Session, connectivity and internet-independent service",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P02-06"
+      ],
+      "scenarioGroups": [
+        "OPS"
+      ],
+      "releaseGates": [
+        "R03",
+        "R10",
+        "R11"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-08",
+      "domain": "Rich masters and business provisioning",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P03-01",
+        "P03-02",
+        "P03-03",
+        "P03-04",
+        "P03-05"
+      ],
+      "scenarioGroups": [
+        "SET"
+      ],
+      "releaseGates": [
+        "R01",
+        "R03",
+        "R06"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-09",
+      "domain": "Purchase, old metal, supplier return and settlement",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P04-01",
+        "P04-02",
+        "P04-03",
+        "P04-04",
+        "P04-05"
+      ],
+      "scenarioGroups": [
+        "PUR"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R07",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-10",
+      "domain": "Sales variants and return depth",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P05-01",
+        "P05-02",
+        "P05-03",
+        "P05-08"
+      ],
+      "scenarioGroups": [
+        "SAL",
+        "FLOW"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R07",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-11",
+      "domain": "Orders, approval, tour, parcel, conversion and repair",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P05-04",
+        "P05-05",
+        "P05-06",
+        "P05-07"
+      ],
+      "scenarioGroups": [
+        "FLOW",
+        "SAL"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R07",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-12",
+      "domain": "Finance, metal accounts, booking and rate-cut",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P06-01",
+        "P06-02",
+        "P06-03",
+        "P06-04",
+        "P06-05",
+        "P06-06"
+      ],
+      "scenarioGroups": [
+        "FIN"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R07",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-13",
+      "domain": "Stock, tag operations, lots and physical count",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P07-01",
+        "P07-02",
+        "P07-03",
+        "P07-04",
+        "P07-05",
+        "P07-06"
+      ],
+      "scenarioGroups": [
+        "STK"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R07",
+        "R11"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-14",
+      "domain": "Manufacturing, karigar, WIP and melting",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P08-01",
+        "P08-02",
+        "P08-03",
+        "P08-04",
+        "P08-05",
+        "P08-06"
+      ],
+      "scenarioGroups": [
+        "MFG"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R07",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-15",
+      "domain": "Dhiran, loan, member and scheme lifecycles",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P09-01",
+        "P09-02",
+        "P09-03",
+        "P09-04",
+        "P09-05"
+      ],
+      "scenarioGroups": [
+        "SCH"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R07",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-16",
+      "domain": "Reports, documents, printing, filters and export",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P10-01",
+        "P10-02",
+        "P10-03",
+        "P10-04",
+        "P10-05",
+        "P10-06",
+        "P10-07"
+      ],
+      "scenarioGroups": [
+        "RPT"
+      ],
+      "releaseGates": [
+        "R05",
+        "R12"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-17",
+      "domain": "Correction, refresh and identifier utilities",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P11-01"
+      ],
+      "scenarioGroups": [
+        "OPS"
+      ],
+      "releaseGates": [
+        "R04",
+        "R07"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-18",
+      "domain": "Devices, messaging, rates, statutory and Olocker flows",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P11-02",
+        "P11-03"
+      ],
+      "scenarioGroups": [
+        "OPS"
+      ],
+      "releaseGates": [
+        "R08",
+        "R10"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-19",
+      "domain": "Authorization, startup, background work and preferences",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P11-04",
+        "P11-05"
+      ],
+      "scenarioGroups": [
+        "SET",
+        "RPT",
+        "OPS"
+      ],
+      "releaseGates": [
+        "R03",
+        "R07",
+        "R08"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-20",
+      "domain": "Migration and continued operation of historical business",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P12-01",
+        "P12-02",
+        "P12-03"
+      ],
+      "scenarioGroups": [
+        "FLOW",
+        "OPS"
+      ],
+      "releaseGates": [
+        "R03",
+        "R04",
+        "R09"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-21",
+      "domain": "Recovery, deployment, load and service operations",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P12-04",
+        "P12-05"
+      ],
+      "scenarioGroups": [
+        "OPS"
+      ],
+      "releaseGates": [
+        "R10",
+        "R13",
+        "R14"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-22",
+      "domain": "Edition, companion and unresolved-artifact closure",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P13-01",
+        "P13-02",
+        "P13-03"
+      ],
+      "scenarioGroups": [
+        "SET",
+        "RPT",
+        "OPS"
+      ],
+      "releaseGates": [
+        "R00",
+        "R11"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    },
+    {
+      "id": "COV-23",
+      "domain": "Full-product certification, UAT, cutover and stabilization",
+      "status": "planned-verification-required",
+      "workItems": [
+        "P14-01",
+        "P14-02",
+        "P14-03",
+        "P14-04",
+        "P14-05",
+        "P14-06"
+      ],
+      "scenarioGroups": [
+        "SET",
+        "PUR",
+        "SAL",
+        "FLOW",
+        "FIN",
+        "STK",
+        "MFG",
+        "SCH",
+        "RPT",
+        "OPS"
+      ],
+      "releaseGates": [
+        "R00",
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        "R14"
+      ],
+      "closure": "All discovered leaf requirements and applicable form/mode/action branches need actual-candidate evidence; group linkage alone is not proof",
+      "evidence": []
+    }
+  ],
+  "currentReview": "11-current-completion-review.md",
+  "currentExecutionBacklog": "13-execution-backlog.json",
+  "reviewDate": "2026-09-11"
+}

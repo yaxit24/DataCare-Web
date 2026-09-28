@@ -1,0 +1,47 @@
+{
+  "version": "login-context-staged-independent-review-v1",
+  "status": "unexecuted",
+  "declaredDbTests": 13,
+  "refs": [
+    {
+      "path": "/tmp/datacare-session-context-next/login-staged/web/apps/api/src/modules/auth/sessionContextLogin.ts",
+      "sha256": "6d32b25270c7a09bedcd6d876c95490368391936238de74f52c675b5c143c5d5"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/login-staged/web/apps/api/test/sessionContextLogin.db.test.ts",
+      "sha256": "4cfa33da425d9a968152973e2d07a09551aa0ae38314a0f603ff85735a6cc4d1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/auth.service.ts",
+      "sha256": "cb6269a6b3793d9dc7163bbd1f144336f12da461cdec7177e620b5f5f74f026e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/password.ts",
+      "sha256": "d30b92fbb64891f7ba1f2eed000a341e3039dbcb5aeef81da52f920780e178b2"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/passwordAccount.ts",
+      "sha256": "f566af63d2048bd64f69c7e04aaede8102a5a789a11750a8450d7016cda5ce56"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "ee079f09d0076f2339dd1307a3912c249624786566d216b1f17466af134b3acd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/login-staged/login-independent-review.md",
+      "sha256": "be52c2eee3f40033ff5b5e2bdbcd492fcf99b9006aee361ae9f31c6de5735d64"
+    }
+  ]
+}

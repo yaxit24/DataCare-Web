@@ -1,0 +1,257 @@
+{
+ "form": "MS_POINT",
+ "controlCount": 23,
+ "byKind": {
+  "button": 5,
+  "textbox": 7,
+  "combo": 1,
+  "grid": 3,
+  "panel": 1,
+  "label": 6
+ },
+ "grids": [
+  "DGV_AC",
+  "MSG",
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "TEXT_AC",
+   "DGV_AC",
+   "cboCurInUse",
+   "Label6",
+   "nMinPoint",
+   "Label3",
+   "nPointAmt",
+   "Label2",
+   "Label1",
+   "tPointCode",
+   "tPointName",
+   "Label4",
+   "DGV",
+   "PnlBotam",
+   "TEXT_ENTRY",
+   "MSG",
+   "Text1",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "tPointCode",
+   "type": "TextBox",
+   "location": "593,69",
+   "size": "61,23",
+   "tabIndex": "0",
+   "text": "01",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "tPointName",
+   "type": "TextBox",
+   "location": "593,98",
+   "size": "252,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "nPointAmt",
+   "type": "TextBox",
+   "location": "593,128",
+   "size": "61,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "nMinPoint",
+   "type": "TextBox",
+   "location": "784,128",
+   "size": "61,23",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "cboCurInUse",
+   "type": "ComboBox",
+   "location": "946,128",
+   "size": "69,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "783,226",
+   "size": "100,18",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "DGV_AC",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "16,322",
+   "size": "1144,228",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "80,42",
+   "size": "402,18",
+   "tabIndex": "8",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "593,160",
+   "size": "422,147",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "79,69",
+   "size": "404,238",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "101",
+   "text": "Point Master",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "527,69",
+   "size": "60,20",
+   "tabIndex": "1174",
+   "text": "Code",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "527,98",
+   "size": "60,20",
+   "tabIndex": "1176",
+   "text": "Name",
+   "kind": "label"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "507,127",
+   "size": "80,20",
+   "tabIndex": "1178",
+   "text": "1 Point Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "671,128",
+   "size": "104,20",
+   "tabIndex": "1180",
+   "text": "Minimum Point",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "859,129",
+   "size": "81,20",
+   "tabIndex": "1182",
+   "text": "Cur In Use",
+   "kind": "label"
+  },
+  {
+   "name": "TEXT_AC",
+   "type": "TextBox",
+   "location": "367,422",
+   "size": "100,18",
+   "tabIndex": "1183",
+   "text": "",
+   "kind": "textbox"
+  }
+ ]
+}

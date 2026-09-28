@@ -1,156 +1,111 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ApiError, del, get, post } from '../lib/api';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { del, get, post } from '../lib/api';
+import type { ImageEditLease, ImageEditorPayload } from '../lib/imageEditorSession';
+import { useImageEditor, useImageScopeBarrier } from '../lib/useImageEditor';
+import { useBusinessScope } from './BusinessScope';
 import { useCameraCapture } from './CameraCapture';
 
-/**
- * Tag photograph panel — the desktop's `BtnImgS` (select), `BtnImgC` (capture) and `BtnImgD` (delete)
- * controls, plus click-to-enlarge.
- *
- * 24 desktop forms carry these buttons. Rather than repeat the plumbing per form, every surface that shows a
- * tag mounts this one component keyed on the tag instance `(TAG_NO, VCH_SRNO)` — the same identity the
- * desktop uses, and the identity `TAG_IMAGE_DATA` is keyed on.
- *
- * The image is fetched as a blob URL rather than a base64 payload so a large photo does not sit in React
- * state, and the URL is revoked on change to avoid leaking object URLs as the operator moves between rows.
- */
 export type ImageEntityType = 'TAG' | 'AC' | 'MEMB' | 'SCHM' | 'DESIGN' | 'ITEM';
 
+/** Shared photographs use the exact scoped entity identity and the revision observed by this editor. */
 export function EntityImagePanel({
   entityType = 'TAG',
   entityKey,
   instance = 0,
   imageType,
   label = 'Image',
-  disabled,
+  disabled = false,
   testId = 'entity-image',
+  endpoint = '/stock/tag-image',
 }: {
-  /** Which kind of record owns the photograph: a tag, a party, a member, a scheme, a design. */
   entityType?: ImageEntityType;
-  /** Tag number, account code, member code, scheme code or design number. */
   entityKey: string;
-  /** Voucher instance for a tag; 0 for master records. */
   instance?: number;
-  /** Single-character desktop code: 'T' tag (default), 'D' design. */
   imageType?: string;
   label?: string;
   disabled?: boolean;
   testId?: string;
+  /** Design Book keeps its own saved-parent validation and form authority. */
+  endpoint?: string;
 }) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [meta, setMeta] = useState<{ size: number; type: string } | null>(null);
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [zoom, setZoom] = useState(false);
-  const fileRef = useRef<HTMLInputElement | null>(null);
-  const urlRef = useRef<string | null>(null);
-  const camera = useCameraCapture({ fileName: `${entityKey || 'image'}.jpg` });
-
-  const query = useCallback(() => {
-    const q = new URLSearchParams({
-      entityType,
-      entityKey,
-      instance: String(instance),
-    });
-    if (imageType) q.set('imageType', imageType);
-    return q.toString();
-  }, [entityType, entityKey, instance, imageType]);
-
-  const release = useCallback(() => {
-    if (urlRef.current) {
-      URL.revokeObjectURL(urlRef.current);
-      urlRef.current = null;
-    }
-  }, []);
-
-  const load = useCallback(async () => {
-    release();
-    setUrl(null);
-    setMeta(null);
-    if (!entityKey) return;
-    try {
-      // The image route returns raw bytes, so it is fetched directly rather than through the JSON helper.
-      const res = await fetch(`/api/stock/tag-image?${query()}`, { credentials: 'include' });
-      if (res.status === 404) return; // no image for this tag is the normal case
-      if (!res.ok) {
-        setError('Could not load the image');
-        return;
-      }
-      const blob = await res.blob();
-      // A 200 with an empty or non-image body is NOT an image. Trusting the status alone would render a
-      // broken thumbnail and enable Delete for something that does not exist.
-      if (blob.size === 0 || !blob.type.startsWith('image/')) return;
-      const objectUrl = URL.createObjectURL(blob);
-      urlRef.current = objectUrl;
-      setUrl(objectUrl);
-      setMeta({ size: blob.size, type: blob.type });
-    } catch {
-      setError('Could not load the image');
-    }
-  }, [entityKey, query, release]);
-
-  useEffect(() => {
-    void load();
-    return release;
-  }, [load, release]);
-
-  const upload = useCallback(
-    async (file: File) => {
-      setBusy(true);
-      setError('');
-      try {
-        const buf = await file.arrayBuffer();
-        // btoa needs a binary string; chunked to avoid blowing the argument limit on a large photo.
-        let binary = '';
-        const bytes = new Uint8Array(buf);
-        for (let i = 0; i < bytes.length; i += 8192) {
-          binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
-        }
-        await post('/stock/tag-image', {
-          entityType,
-          entityKey,
-          instance,
-          imageType,
-          data: btoa(binary),
-          // The server verifies magic bytes and REFUSES a declared type that disagrees, so the browser's
-          // guess is sent only as a cross-check, never as the authority.
-          mimeType: file.type || undefined,
-        });
-        await load();
-      } catch (e) {
-        setError(
-          e instanceof ApiError
-            ? e.body?.message || e.body?.error || 'Upload failed'
-            : 'Upload failed',
-        );
-      } finally {
-        setBusy(false);
-      }
-    },
-    [entityKey, entityType, imageType, instance, load],
+  const scope = useBusinessScope();
+  const scopeBarrier = useImageScopeBarrier(scope);
+  const imageCode = imageType || 'T';
+  const query = new URLSearchParams({
+    ...scope,
+    entityType,
+    entityKey,
+    instance: String(instance),
+    imageType: imageCode,
+  }).toString();
+  const body = JSON.stringify({ ...scope, entityType, entityKey, instance, imageType: imageCode });
+  const ready = Boolean(
+    scope.coCode && scope.lcCode && scope.coYear && entityKey && Number.isFinite(instance),
   );
+  const identity = ready && !scopeBarrier.blocked ? `${endpoint}?${query}` : '';
+  const transport = useMemo(
+    () => ({
+      read: () => get<ImageEditorPayload>(`${endpoint}/state?${query}`),
+      upload: (image: { data: string; mimeType?: string }, version: string) =>
+        post(endpoint, { ...JSON.parse(body), ...image, version }),
+      remove: (version: string) =>
+        del(`${endpoint}?${query}&version=${encodeURIComponent(version)}`),
+    }),
+    [body, endpoint, query],
+  );
+  const { session, state } = useImageEditor(identity, transport, disabled);
+  const payload = state.payload;
+  const busy = state.loading || state.writing;
+  const canUpdate =
+    ready &&
+    !scopeBarrier.blocked &&
+    !disabled &&
+    !busy &&
+    !state.needsReload &&
+    payload?.canUpdate;
+  const canDelete =
+    ready &&
+    !scopeBarrier.blocked &&
+    !disabled &&
+    !busy &&
+    !state.needsReload &&
+    payload?.canDelete &&
+    payload.image.state !== 'absent';
+  const [zoom, setZoom] = useState(false);
+  const [imageProblem, setImageProblem] = useState<{ identity: string; version: string } | null>(
+    null,
+  );
+  const fileRef = useRef<HTMLInputElement>(null);
+  const chooser = useRef<{ lease: ImageEditLease | null } | null>(null);
+  const cameraLease = useRef<ImageEditLease | null>(null);
+  const camera = useCameraCapture({ fileName: `${entityKey || 'image'}.jpg` });
+  const stopCamera = camera.stop;
+  useEffect(() => {
+    // Keep a cancelled native chooser distinguishable from programmatic file assignment.
+    if (chooser.current) chooser.current.lease = null;
+    cameraLease.current = null;
+    stopCamera();
+    return stopCamera;
+  }, [identity, disabled, payload?.version, state.writing, stopCamera]);
+  useEffect(() => setZoom(false), [identity, payload?.version]);
+  const failedImage =
+    imageProblem?.identity === identity && imageProblem.version === payload?.version;
+  const image = payload?.image.state === 'present' && !failedImage ? payload.image : null;
+  const error = state.error || (failedImage ? 'The saved image could not be displayed.' : '');
 
-  const remove = useCallback(async () => {
-    setBusy(true);
-    setError('');
-    try {
-      await del(`/stock/tag-image?${query()}`);
-      await load();
-    } catch (e) {
-      setError(e instanceof ApiError ? e.body?.message || 'Delete failed' : 'Delete failed');
-    } finally {
-      setBusy(false);
-    }
-  }, [load, query]);
-
-  const inert = disabled || !entityKey || busy;
-  // The hook reports 'unsupported' when the browser has no camera API; there is no separate boolean.
-  const cameraUsable = camera.status !== 'unsupported';
+  function reload() {
+    cameraLease.current = null;
+    stopCamera();
+    setImageProblem(null);
+    if (scopeBarrier.blocked) scopeBarrier.acknowledge();
+    else void session.reload();
+  }
 
   return (
-    <div className="panel" data-testid={testId}>
-      <div className="toolbar" style={{ marginBottom: 8 }}>
+    <div className="panel" data-testid={testId} style={{ minWidth: 0 }}>
+      <div className="toolbar" style={{ marginBottom: 8, flexWrap: 'wrap' }}>
         <b>{label}</b>
         <span className="muted" data-testid={`${testId}-tag`}>
           {entityKey
@@ -161,92 +116,177 @@ export function EntityImagePanel({
         </span>
         <span className="spacer" />
         <input
+          key={`${identity}:${disabled}`}
           ref={fileRef}
           type="file"
           accept="image/jpeg,image/png"
+          disabled={!canUpdate}
           style={{ display: 'none' }}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void upload(f);
-            e.target.value = '';
+          data-testid={`${testId}-file`}
+          onClick={() => {
+            chooser.current = { lease: session.lease() };
+          }}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            const lease = chooser.current ? chooser.current.lease : session.lease();
+            chooser.current = null;
+            if (file) void session.upload(file, lease);
+            event.target.value = '';
           }}
         />
         <button
           type="button"
           className="ghost"
-          disabled={inert}
+          disabled={!canUpdate}
           data-testid={`${testId}-select`}
-          onClick={() => fileRef.current?.click()}
+          onClick={() => {
+            chooser.current = { lease: session.lease() };
+            if (chooser.current.lease) fileRef.current?.click();
+          }}
         >
           Select
         </button>
+        {camera.status !== 'live' ? (
+          <button
+            type="button"
+            className="ghost"
+            disabled={!canUpdate || ['unsupported', 'requesting'].includes(camera.status)}
+            data-testid={`${testId}-capture`}
+            onClick={() => {
+              cameraLease.current = session.lease();
+              if (cameraLease.current) void camera.start();
+            }}
+          >
+            Camera
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              className="ghost"
+              disabled={!canUpdate}
+              data-testid={`${testId}-camera-capture`}
+              onClick={async () => {
+                const lease = cameraLease.current;
+                const file = await camera.capture();
+                if (!lease || cameraLease.current !== lease || !session.isCurrentContext()) return;
+                cameraLease.current = null;
+                stopCamera();
+                if (file) void session.upload(file, lease);
+              }}
+            >
+              Capture photo
+            </button>
+            <button type="button" className="ghost" onClick={stopCamera}>
+              Stop camera
+            </button>
+          </>
+        )}
         <button
           type="button"
           className="ghost"
-          disabled={inert || !cameraUsable}
-          data-testid={`${testId}-capture`}
-          onClick={async () => {
-            const f = await camera.capture();
-            if (f) void upload(f);
-          }}
-        >
-          Camera
-        </button>
-        <button
-          type="button"
-          className="ghost"
-          disabled={inert || !url}
+          disabled={!canDelete}
           data-testid={`${testId}-delete`}
-          onClick={remove}
+          onClick={() => void session.remove()}
         >
           Delete
         </button>
+        <button
+          type="button"
+          className="ghost"
+          disabled={!ready || busy || disabled}
+          data-testid={`${testId}-reload`}
+          onClick={reload}
+        >
+          Reload image
+        </button>
       </div>
 
-      {/* Honest device status: without a granted camera this must never claim to be live. */}
+      <p className="muted" data-testid={`${testId}-scope`}>
+        Company {scope.coCode} · Location {scope.lcCode} · Year {scope.coYear}
+      </p>
+      {scopeBarrier.blocked && (
+        <p role="status" data-testid={`${testId}-scope-changed`}>
+          Scope changed. Reload this record’s image before editing.
+        </p>
+      )}
+
+      <video
+        ref={camera.videoRef}
+        muted
+        playsInline
+        aria-label="Camera preview"
+        data-testid={`${testId}-camera-preview`}
+        style={{
+          display: camera.status === 'live' ? 'block' : 'none',
+          maxWidth: '100%',
+          width: 260,
+        }}
+      />
       <div className="muted" data-testid={`${testId}-camera-status`}>
         camera: {camera.status}
         {camera.message ? ` — ${camera.message}` : ''}
       </div>
-
+      {busy && <p role="status">{state.writing ? 'Saving image…' : 'Loading image…'}</p>}
       {error && (
-        <div className="msg err" data-testid={`${testId}-error`}>
-          {error}
+        <div className="msg err" role="alert" data-testid={`${testId}-error`}>
+          {state.conflict ? <span data-testid={`${testId}-conflict`}>{error}</span> : error}
         </div>
       )}
-
-      {url ? (
+      {state.pendingFile && (
+        <div className="row" style={{ alignItems: 'center', marginBottom: 8 }}>
+          <span className="muted">Selected file: {state.pendingFile.name}</span>
+          <button
+            type="button"
+            className="ghost"
+            disabled={!canUpdate}
+            data-testid={`${testId}-retry-upload`}
+            onClick={() => void session.retryUpload()}
+          >
+            Retry upload
+          </button>
+        </div>
+      )}
+      {payload?.image.state === 'unavailable' && (
+        <p className="msg err" role="alert" data-testid={`${testId}-unavailable`}>
+          {payload.image.message || 'The stored image could not be decoded.'}
+        </p>
+      )}
+      {image ? (
         <>
           <button
             type="button"
             className="ghost"
             style={{ padding: 0, border: 0, background: 'none' }}
-            onClick={() => setZoom((z) => !z)}
+            onClick={() => setZoom((value) => !value)}
             aria-label={zoom ? `Shrink ${label}` : `Enlarge ${label}`}
             data-testid={`${testId}-zoom`}
           >
             <img
-              src={url}
+              src={`data:${image.mimeType};base64,${image.data}`}
               alt={`${label} ${entityKey}`}
+              data-testid={`${testId}-preview`}
               style={{
                 maxWidth: zoom ? '100%' : 180,
                 maxHeight: zoom ? 600 : 180,
                 objectFit: 'contain',
                 border: '1px solid var(--line, #ccc)',
               }}
+              onError={() => {
+                if (payload) setImageProblem({ identity, version: payload.version });
+              }}
             />
           </button>
-          {meta && (
-            <div className="muted">
-              {meta.type} · {Math.ceil(meta.size / 1024)} KB
-            </div>
-          )}
+          <div className="muted">
+            {image.mimeType}
+            {image.size != null ? ` · ${Math.ceil(image.size / 1024)} KB` : ''}
+          </div>
         </>
-      ) : (
+      ) : payload?.image.state === 'absent' || !ready ? (
         <div className="muted" data-testid={`${testId}-empty`}>
           {entityKey ? 'No image for this record' : ''}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -1,0 +1,14 @@
+{
+  "command": "NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter @datacare/api exec tsc -p tsconfig.test.json --noEmit",
+  "project": "web/apps/api/tsconfig.test.json",
+  "status": "passed",
+  "heapMiB": 4096,
+  "scope": "Same complete strict TypeScript project including empty-header correction; no omitted files or skip options.",
+  "recordedAtUtc": "2026-09-11T13:09:42.459081+00:00",
+  "inputSnapshot": "test-types-inputs-verified.json",
+  "inputSnapshotSha256": "56d3b2c0f1c30daa0ef66d62d5ebaf146a8184466abc4113779fab0277a119f9",
+  "priorPassedStage": "test-types-invocation.json; before empty-header correction, retained without current pass credit",
+  "exitCode": 0,
+  "verifiedAtUtc": "2026-09-11T13:12:48.117736+00:00",
+  "changedInputs": []
+}

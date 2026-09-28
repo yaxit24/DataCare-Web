@@ -1,0 +1,14 @@
+{
+  "historicalPriorCheckpoint": "39-implementation-checkpoint-round13.json",
+  "priorBytesPreserved": true,
+  "apiQualification": "The actual Round13 API3050 pass preceded the17th browser runner journey. Its manifest captured that runner, but required current-prefix domains omitted it. The pass is historical, not final-source API evidence. The first Round14 full3157 run exposed the16-versus17 mismatch; source and negative regression now require17.",
+  "kernelQualification": "Earlier source-based captures did not pin the compiled kernelConformance.js actually imported by the CLI. R14 explicitly pins that compiled file and current-source scanner inputs; old outcomes are retained with this limit.",
+  "environmentQualification": "Earlier checks omitted secret-safe dotenv file identities. Qualified wrapper runs record only presence/hash for five explicit environment discovery paths; no secret contents enter sourceFiles or archives.",
+  "runtimeQualification": "Earlier browser checks record source/build timing but not complete built-runtime membership. Qualified R14 browser runs separately hash API dist and production Next server/static/top-level runtime manifests, exclude cache/trace, and enforce exact unchanged/current membership. Installed dependency bytes are not archived; package/lockfile versions remain declared inputs.",
+  "retainedIntermediateRuns": {
+    "api-final": "3158 tests passed; provenance helper expansion during execution is explicit, no product-input change. Superseded by required api-qualified for final evidence.",
+    "browser-final/browser-context-final/browser-labour-final": "17/14/5 actual passing checks precede complete configuration/runtime provenance. Superseded by three qualified browser runs.",
+    "core-save-prerequisites-build/core-final-build": "Successful compiler runs changed only declared generated core outputs. Later stable-input core/full workspace runs provide final evidence."
+  },
+  "limits": "No old checkpoint, failed log, source freeze, gate budget or acceptance denominator is rewritten. This is measured engineering coverage, not a whole-product parity claim."
+}

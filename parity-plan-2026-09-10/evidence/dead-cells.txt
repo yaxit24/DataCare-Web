@@ -1,0 +1,2 @@
+dead-cell audit: 603 extended columns checked across 20 pages
+  all extended grid columns are consumed by their writer.

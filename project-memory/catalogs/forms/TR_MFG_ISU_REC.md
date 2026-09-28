@@ -1,0 +1,40 @@
+# TR_MFG_ISU_REC
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_MFG_ISU_REC.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** DELETE_DATA, TAG_PRINT_DATA
+- **UPDATE:** MENU_DATA, MFG_DETL, MFG_ISU_REC
+
+## Tables deleted / reversed
+- **DELETE:** MAIN_STOCK, MFG_DATA, MFG_DETL, MFG_IDTL, MFG_ISU_REC, REMARK_DATA, TAG_PRINT_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- AC_MAST, MFG_DATA, MFG_DETL, MFG_ISU_REC, ITEM_MAST, MFG_IDTL, TEMP_BOOK_DATA, EMP_MAST, MAIN_STOCK, TAX_MAST, TAG_PRINT_DATA, USER_SET, MFG_MAST, REMARK_DATA
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L5369: UPDATE MFG_ISU_REC
+- L5753: DELETE MFG_DATA
+- L5754: DELETE MFG_DETL
+- L5755: DELETE MFG_IDTL
+- L5758: DELETE TEMP_BOOK_DATA
+- L5966: DELETE MFG_ISU_REC
+- L6026: DELETE MAIN_STOCK
+- L6089: INSERT DELETE_DATA
+- L6091: UPDATE MFG_DETL
+- L6095: DELETE MAIN_STOCK
+- L6098: DELETE REMARK_DATA
+- L6099: DELETE TEMP_BOOK_DATA
+- L6100: DELETE MFG_ISU_REC
+- L6101: DELETE MFG_DATA
+- L6102: DELETE MFG_DETL
+- L6103: DELETE MFG_IDTL
+- L6259: UPDATE MFG_DETL
+- L6878: UPDATE MENU_DATA
+- L7752: DELETE TAG_PRINT_DATA
+- L7759: INSERT TAG_PRINT_DATA
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

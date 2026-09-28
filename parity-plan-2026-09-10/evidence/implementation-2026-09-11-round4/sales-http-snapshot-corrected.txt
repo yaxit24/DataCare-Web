@@ -1,0 +1,104 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/salesOrderLifecycle.routes.db.test.ts (11 tests | 2 failed) 1576ms
+   × ordinary Sales Order configured HTTP lifecycle > requires owning Sales update/delete rights and preserves data after denied requests 120ms
+     → expected 201 to be 403 // Object.is equality
+   × ordinary Sales Order configured HTTP lifecycle > deletes only the selected saved order with Sales delete rights and its current version 97ms
+     → expected [ { vchNo: '00002', …(7) } ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > requires owning Sales update/delete rights and preserves data after denied requests
+AssertionError: expected 201 to be 403 // Object.is equality
+
+- Expected
++ Received
+
+- 403
++ 201
+
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:239:73
+    237|       ).toBe(403);
+    238|     for (const role of ['view', 'tour'])
+    239|       expect((await request('POST', path(), draft(), role)).statusCode…
+       |                                                                         ^
+    240|     expect(await snapshot()).toEqual(original);
+    241|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > deletes only the selected saved order with Sales delete rights and its current version
+AssertionError: expected [ { vchNo: '00002', …(7) } ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   Object {
++     "acCode": "PARTY",
++     "acName": "HTTP Customer",
++     "advance": 0,
++     "book": "S51",
++     "delDate": null,
++     "total": 920,
++     "vchDate": "2024-07-10T00:00:00.000Z",
++     "vchNo": "00002",
++   },
++ ]
+
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:348:25
+    346|     expect(removed.statusCode, removed.body).toBe(200);
+    347|     const list = await request('GET', path());
+    348|     expect(list.json()).toEqual([]);
+       |                         ^
+    349|     expect(await read('S52')).toEqual(other);
+    350|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 passed (11)
+   Start at  05:05:07
+   Duration  4.13s (transform 1.37s, setup 0ms, collect 2.10s, tests 1.58s, environment 0ms, prepare 51ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/salesOrderLifecycle.routes.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1

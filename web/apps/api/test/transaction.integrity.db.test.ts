@@ -52,6 +52,10 @@ databaseDescribe('database-backed transaction integrity', () => {
       'SL_IDTL',
       'SL_PR_DETL',
       'ROJ_MEL_DATA',
+      // SL_DETL_RTN was absent from this list, so a run that failed mid-transaction left rows behind and the
+      // NEXT run failed on a unique-key conflict inside postVoucherTx — a stale-fixture failure that reads
+      // exactly like a posting defect.
+      'SL_DETL_RTN',
       'SL_DETL',
       'SL_DATA',
       'BAR_IDTL',
@@ -62,6 +66,7 @@ databaseDescribe('database-backed transaction integrity', () => {
       'PR_DATA',
       'MAIN_STOCK',
       'TAG_STOCK',
+      'TEMP_BOOK_DATA',
       'SRNO_MAST',
       'BOOK_DETL',
       'BOOK_DATA',
@@ -324,8 +329,8 @@ databaseDescribe('database-backed transaction integrity', () => {
     expect(Number(soldRows[0]?.configured_ledger)).toBeGreaterThan(0);
     expect(Number(soldRows[0]?.configured_tax)).toBe(2);
     await owner.$executeRawUnsafe(
-      `INSERT INTO "UPI_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","UPI_AMT")
-       VALUES ($1,$2,$3,$4,'SAL','00001',1,10)`,
+      `INSERT INTO "UPI_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","UPI_AMT")
+       VALUES ($1,$2,$3,$4,'SAL','00001',1,1,10)`,
       TENANT,
       CO,
       LC,
@@ -548,6 +553,7 @@ databaseDescribe('database-backed transaction integrity', () => {
         vchDate: DAY,
         taxRatePct: 3,
         interState: false,
+        mainUser: 'prt-user',
       },
       [
         {
@@ -598,4 +604,59 @@ databaseDescribe('database-backed transaction integrity', () => {
       }),
     ).resolves.toBe(true);
   }, 30_000);
+  it('records attribution and a hidden voucher identity on a purchase return', async () => {
+    // A purchase return reverses stock and money, and previously recorded NO acting user, NO VCH_TIME and
+    // NO HD_VCH_NO — while a purchase records all three (purchase.ts, 13 assignments). HD_VCH_NO is the
+    // hidden identity TEMP_BOOK_DATA and the day book join on, so return rows could not be joined back.
+    const purchase = await createPurchase(
+      runtime,
+      {
+        scope: scope('PUR'),
+        acCode: 'SUPP',
+        vchDate: DAY,
+        taxRatePct: 0,
+        interState: false,
+        mainUser: 'buyer',
+      },
+      [{ itCode: 'GOLD', pcs: 1, grossWt: 5, netWt: 5, touch: 90, rate: 6000 }],
+    );
+    const ret = await createPurchaseReturn(
+      runtime,
+      {
+        scope: scope('PRT'),
+        acCode: 'SUPP',
+        origBook: 'PUR',
+        origVchNo: purchase.vchNo,
+        vchDate: DAY,
+        taxRatePct: 0,
+        interState: false,
+        mainUser: 'prt-user',
+      },
+      [{ itCode: 'GOLD', pcs: 1, grossWt: 5, netWt: 5, touch: 90, rate: 6000 }],
+    );
+
+    const header = (
+      (await owner.$queryRawUnsafe(
+        `SELECT "MAIN_USER","HD_VCH_NO","VCH_TIME" FROM "PR_DATA"
+          WHERE tenant_id=$1 AND "CO_BOOK"='PRT' AND "VCH_NO"=$2`,
+        TENANT,
+        String(ret.vchNo).padStart(5, '0'),
+      )) as Array<Record<string, unknown>>
+    )[0]!;
+    expect(String(header.MAIN_USER)).toBe('prt-user');
+    expect(String(header.HD_VCH_NO ?? '')).not.toBe('');
+    expect(header.VCH_TIME).toBeTruthy();
+
+    // The detail rows must carry the same identity, or a line cannot be traced to its voucher.
+    const detail = (
+      (await owner.$queryRawUnsafe(
+        `SELECT "MAIN_USER","HD_VCH_NO" FROM "PR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='PRT' AND "VCH_NO"=$2 AND "SR_NO"=1`,
+        TENANT,
+        String(ret.vchNo).padStart(5, '0'),
+      )) as Array<Record<string, unknown>>
+    )[0]!;
+    expect(String(detail.MAIN_USER)).toBe('prt-user');
+    expect(String(detail.HD_VCH_NO)).toBe(String(header.HD_VCH_NO));
+  });
 });

@@ -1,0 +1,37 @@
+{
+ "form": "UT_BANK",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "AD_DATA",
+  "CASH_DATA",
+  "PR_DATA",
+  "SL_DATA",
+  "UPI_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "AC_DATA",
+   "CASH_DATA"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "AD_DATA",
+  "PR_DATA",
+  "SL_DATA",
+  "UPI_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 9,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 2288
+}

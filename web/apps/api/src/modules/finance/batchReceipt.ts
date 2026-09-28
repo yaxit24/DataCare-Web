@@ -6,7 +6,8 @@ import {
   assertBalanced,
   type LedgerLine,
 } from '../posting/posting.js';
-import { settlementAc, type PayMode } from './finance.js';
+import { type PayMode } from './finance.js';
+import { requirePostingAccount, resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 
 export class BatchReceiptValidationError extends Error {
   constructor(msg: string) {
@@ -20,9 +21,6 @@ const RCT_BOOK = 'RCT';
 const RCT_BOOK_NAME = 'RECEIPT';
 /** Desktop receipt voucher type — every CASH_DATA row and AC_DATA leg is marked VCH_TYPE 'RCT'. */
 const RCT_TYPE = 'RCT';
-/** Discount / round-off ("kasar") write-off ledger — the give-up taken when a party is settled in
- *  full while collecting slightly less cash. Mirrors the hard-coded 'CASH'/'BANK' settlement codes. */
-const KASAR_AC = 'KASAR';
 
 type VoucherKey = {
   CO_CODE: string;
@@ -61,6 +59,8 @@ export interface BatchReceiptLineInput {
   bankAc?: string; // cash/bank ledger receiving the money (defaults by mode)
   chqNo?: string;
   kasarAmt?: number; // discount / round-off written off on this party (>= 0)
+  /** Write-off ledger for this line's kasar. Required when `kasarAmt` is non-zero (P0-04). */
+  kasarAc?: string;
   bankCharges?: number; // BANK_CHARGES — the bank's own charge on the instrument (varchar in schema)
   chqPrintName?: string; // CHQ_PRINT_NAME — the payee name printed on the cheque
   clearDate?: Date | string; // CLR_DATE — when the instrument cleared
@@ -71,6 +71,8 @@ export interface BatchReceiptInput {
   scope: VoucherScope;
   vchDate?: Date | string;
   lines: BatchReceiptLineInput[];
+  /** Voucher-level write-off ledger, used by any line that does not name its own. */
+  kasarAc?: string;
 }
 
 export interface BatchReceiptResult {
@@ -123,6 +125,11 @@ export async function postBatchReceipt(
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, RCT_BOOK);
     const base = { ...key, VCH_TYPE: RCT_TYPE, VCH_DATE: vchDate };
+    // P0-04: the settlement and write-off accounts used to be the literals `'CASH'`/`'BANK'` and a module
+    // constant `'KASAR'`. Neither exists in a real dataset. The book's configured slot 1 answers for the
+    // settlement, the caller names the write-off account, and a collection that needs either without having
+    // one is refused inside this transaction — so the voucher serial taken above rolls back with it.
+    const bookSettlementAc = await resolveBookSlotAccountTx(tx, input.scope, 'cash-settlement', 1);
 
     const ledger: LedgerLine[] = [];
     const cashRows: Record<string, unknown>[] = [];
@@ -132,15 +139,29 @@ export async function postBatchReceipt(
       const mode = String(l.mode || 'cash').toLowerCase() as PayMode;
       const amount = round2(num(l.amount));
       const kasar = round2(num(l.kasarAmt));
-      const recAc = settlementAc(mode, l.bankAc); // CASH for cash, else bankAc ?? BANK
+      // An explicit bank wins for a non-cash line; cash settles to the book's configured account.
+      const recAc =
+        mode === 'cash'
+          ? bookSettlementAc
+          : requirePostingAccount(
+              'bank-settlement',
+              l.bankAc,
+              `batch receipt line ${idx + 1} settles ${amount} by ${mode}`,
+            );
       const cleared = round2(amount + kasar); // party credited the full settlement (received + kasar)
       total = round2(total + amount);
 
       // Dr cash/bank for the money actually received.
       ledger.push({ ...base, AC_CODE: recAc, DR_AMT: amount, CR_AMT: 0, SIGN: 'D' });
-      // Dr KASAR (discount / round-off) for the give-up — only when there is one.
-      if (kasar > 0)
-        ledger.push({ ...base, AC_CODE: KASAR_AC, DR_AMT: kasar, CR_AMT: 0, SIGN: 'D' });
+      // Dr the write-off account for the give-up — only when there is one.
+      if (kasar > 0) {
+        const kasarAc = requirePostingAccount(
+          'kasar',
+          l.kasarAc ?? input.kasarAc,
+          `batch receipt line ${idx + 1} writes off ${kasar}`,
+        );
+        ledger.push({ ...base, AC_CODE: kasarAc, DR_AMT: kasar, CR_AMT: 0, SIGN: 'D' });
+      }
       // Cr the party for amount + kasar (clears the party in full).
       ledger.push({ ...base, AC_CODE: l.partyAc, DR_AMT: 0, CR_AMT: cleared, SIGN: 'C' });
 

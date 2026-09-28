@@ -1,0 +1,9 @@
+{
+  "phase": "preimplementation",
+  "status": "frozen source contract and26 independent unexecuted schedules",
+  "files": {
+    "implementation-contract.md": "e3dd7ad89afa3934337ce3652729a7fefc31e7224b186cd50ae318aaab55e502",
+    "source-inputs.json": "0a20f7956b5ee8b18100a9df4f83faf955ba6d83f9eb0c6dd3bbf31c4ea7a887",
+    "order-command-independent.v1.json": "c6f86ef10f4f948c570e417f4f1a0336df196fb1085b2028c1f79a1e432c979e"
+  }
+}

@@ -1,0 +1,137 @@
+{
+ "form": "TR_MEMB_ADJ",
+ "loc": 3314,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cSchmCode": 1,
+  "cMembCode": 2,
+  "cMembName": 3,
+  "cGoldWt": 4,
+  "cGoldRate": 5,
+  "cGoldAmt": 6,
+  "cMembTot": 7,
+  "cBonus": 8,
+  "cLessAmt": 9,
+  "cSBilNo": 10,
+  "cSBilAmt": 11,
+  "cMembAdjAmt": 12,
+  "cMembBal": 13,
+  "cPaidAc": 14,
+  "cPaidAcName": 15,
+  "cSBilYrCd": 16,
+  "cSBilDbCd": 17,
+  "cSBilHdVchNo": 18,
+  "cEntryMod": 19,
+  "cSBilLc": 20,
+  "cSchmType": 21,
+  "cGoldLessAmt": 22
+ },
+ "inlineSql": [
+  "Select * From AD_MAST WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "SELECT SCHM_CODE as SchmCode,SCHM_NAME As SchemeNameL,SCHM_AMT AS SchmAmtR,SCHM_TYPE As SchmTypeM FROM AD_MAST WHERE CO_CODE = ' ? ' ORDER BY SCHM_CODE",
+  "SELECT A.MEMB_CODE,B.MEMB_NAME,A.SCHM_CODE,B.MEMB_AMT,SUM(CASE WHEN SIGN = '+' THEN A.GOLD_WT ELSE -A.GOLD_WT END)as MembGoldW,SUM(CASE WHEN SIGN = '+' THEN A.ADJ_AMT ELSE -A.ADJ_AMT END)as BalAmt FROM AD_OS AS A LEFT JOIN AD_MEMB AS B ON A.CO_CODE = B.CO_CODE AND A.SCHM_CODE = B.SCHM_CODE AND A.MEMB_CODE = B.MEMB_CODE WHERE A.CO_CODE = ' ? ' AND A.SCHM_CODE = ' ? ' AND A.MEMB_CODE = ' ? ' GROUP BY A.MEMB_CODE,B.MEMB_NAME,A.SCHM_CODE,B.MEMB_AMT",
+  "SELECT A.MEMB_CODE as MembNoL,B.MEMB_NAME As MembNameL,A.SCHM_CODE AS SchemeL,SUM(CASE WHEN SIGN = '+' THEN A.GOLD_WT ELSE 0 END) AS MembMtlWtW,SUM(CASE WHEN SIGN = '-' THEN A.GOLD_WT ELSE 0 END) AS MembAdjW,SUM(CASE WHEN SIGN = '+' THEN A.ADJ_AMT ELSE -A.ADJ_AMT END)as BalAmt FROM AD_OS AS A LEFT JOIN AD_MEMB B ON A.CO_CODE = B.CO_CODE AND A.SCHM_CODE = B.SCHM_CODE AND A.MEMB_CODE = B.MEMB_CODE WHERE A.CO_CODE = ' ? ' AND A.SCHM_CODE = ' ? ' GROUP BY A.MEMB_CODE,B.MEMB_NAME,A.SCHM_CODE ORDER BY A.MEMB_CODE",
+  "SELECT A.MEMB_CODE,B.MEMB_NAME,A.SCHM_CODE,B.MEMB_AMT,SUM(CASE WHEN SIGN = '+' THEN A.ADJ_AMT ELSE -A.ADJ_AMT END)as MembAmt FROM AD_OS AS A LEFT JOIN AD_MEMB AS B ON A.CO_CODE = B.CO_CODE AND A.SCHM_CODE = B.SCHM_CODE AND A.MEMB_CODE = B.MEMB_CODE WHERE A.CO_CODE = ' ? ' AND A.SCHM_CODE = ' ? ' AND A.MEMB_CODE = ' ? ' GROUP BY A.MEMB_CODE,B.MEMB_NAME,A.SCHM_CODE,B.MEMB_AMT",
+  "SELECT A.MEMB_CODE as MembNoL,B.MEMB_NAME As MembNameL,A.SCHM_CODE AS SchemeL,SUM(CASE WHEN SIGN = '+' THEN A.ADJ_AMT ELSE 0 END) AS MembAmtR,SUM(CASE WHEN SIGN = '-' THEN A.ADJ_AMT ELSE 0 END) AS MembAdjR FROM AD_OS AS A LEFT JOIN AD_MEMB B ON A.CO_CODE = B.CO_CODE AND A.SCHM_CODE = B.SCHM_CODE AND A.MEMB_CODE = B.MEMB_CODE WHERE A.CO_CODE = ' ? ' AND A.SCHM_CODE = ' ? ' GROUP BY A.MEMB_CODE,B.MEMB_NAME,A.SCHM_CODE ORDER BY A.MEMB_CODE",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT C.AC_NAME As AcNameL,C.AC_CODE As AcCodeL,D.AC_GR_NAME AS GroupL,C.AC_AREA As AreaL,C.AC_ADD1 As AddressL,C.AC_CITY As CityL,C.AC_MOBILE As MobileL FROM AC_MAST AS C LEFT JOIN AC_GROUP AS D ON C.CO_CODE = D.CO_CODE AND C.AC_GR = D.AC_GR WHERE C.CO_CODE = ' ? ' AND CAST(C.AC_CODE AS INT) < 100 UNION ALL SELECT A.AC_NAME,A.AC_CODE,B.AC_GR_NAME,A.AC_AREA,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CAST(A.AC_CODE AS INT) >=200 ORDER BY C.AC_NAME",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL,B.AC_GR_NAME AS GroupL,A.AC_AREA As AreaL,A.AC_ADD1 As AddressL,A.AC_CITY As CityL,A.AC_MOBILE As MobileL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ORDER BY A.AC_NAME",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "Select MAX(VCH_NO) As VchNo From AD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT MAX(VCH_NO) AS VchNo From TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM AD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT EMP_NAME FROM EMP_MAST WHERE CO_CODE =' ? ' AND EMP_CODE = ' ? '",
+  "SELECT MEMB_NAME FROM AD_MEMB WHERE CO_CODE =' ? ' AND SCHM_CODE = ' ? SCHM_CODE ? ' AND MEMB_CODE = ' ? MEMB_CODE ? '",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE =' ? ' AND AC_CODE = ' ? AC_CODE ? '",
+  "Please Select Employee Code and Try......",
+  "SELECT MAX(VCH_NO) AS VchNo From AD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM AD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "This Member Scheme Expiry Date Update As Scheme Adjust Date... ? ",
+  "UPDATE AD_MEMB SET EXP_DATE = ' ? MM/dd/yyyy ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' AND MEMB_CODE = ' ? '",
+  "DELETE FROM AD_OS WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM ROJ_MEL_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT A.*,B.BOOK_NAME As LinkBook FROM AD_ADJ AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.SBILL_DBCD = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' AND A.SBILL_NO <> ''",
+  "INSERT INTO DELETE_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,DELETE_DATE,VCH_TYPE,VCH_TIME,DELETE_TIME, BOOK_NAME,AC_CODE,AC_NAME,VCH_VAL_DR,VCH_VAL_CR,FINE_TYPE,VCH_FINE_DR,VCH_FINE_CR,HD_VCH_NO,MAIN_USER,DELETE_USER,VCH_DESC) SELECT A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,SR_NO,VCH_DATE,' ? MM/dd/yyyy ? ',B.BOOK_SNAME,VCH_TIME,' ? MM/dd/yyyy HH:mm:ss ? ', SUBSTRING(B.BOOK_NAME,1,20),AC_CODE,AC_NAME,0,ADJ_AMT,'A',0,0,HD_VCH_NO,A.MAIN_USER,' ? ',SUBSTRING(VCH_DESC,1,149) FROM AD_ADJ AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM REMARK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT A.VCH_NO As VchNoL,replace(convert(NVARCHAR,A.VCH_DATE, 103), ' ', '/') AS VchDateL,A.MEMB_CODE As MembL,B.MEMB_NAME As MembNameL,A.SCHM_CODE As SchmL,A.MAIN_USER As UserL,SUM(A.MEMB_AMT) As MembAmtR,SUM(A.ADJ_AMT) As AdjAmtR FROM AD_ADJ AS A LEFT JOIN AD_MEMB AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.SCHM_CODE = B.SCHM_CODE AND A.MEMB_CODE = B.MEMB_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' GROUP BY A.VCH_NO,A.VCH_DATE,A.MEMB_CODE,B.MEMB_NAME,A.SCHM_CODE,A.MAIN_USER ORDER BY A.VCH_NO",
+  "SELECT VCH_NO FROM AD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 3,
+  "Up": 2,
+  "Down": 2,
+  "Enter": 4,
+  "Right": 1,
+  "Left": 1
+ },
+ "calc": [
+  "mSG_TOT[0, 4] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 4]) + Conversion.Val(MSG[DC_Main.M, 4]))), \"0.000\");",
+  "mSG_TOT[0, 7] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 7]) + Conversion.Val(MSG[DC_Main.M, 7]))), \"0.00\");",
+  "mSG_TOT[0, 12] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 12]) + Conversion.Val(MSG[DC_Main.M, 12]))), \"0.00\");",
+  "mSG_TOT[0, 9] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 9]) + Conversion.Val(MSG[DC_Main.M, 9]))), \"0.00\");",
+  "mSG_TOT[0, 8] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 8]) + Conversion.Val(MSG[DC_Main.M, 8]))), \"0.00\");",
+  "NewValTot = Conversion.Val(MSG_TOT[0, 7]) + Conversion.Val(MSG_TOT[0, 12]);",
+  "val[val.Row, 12] = Strings.Format((object)(Conversion.Val(val[val.Row, 7]) + Conversion.Val(val[val.Row, 8]) - Conversion.Val(val[val.Row, 9])), \"0.00\");",
+  "val[val.Row, 13] = Strings.Format((object)(Conversion.Val(val[val.Row, 7]) + Conversion.Val(val[val.Row, 8]) - (Conversion.Val(val[val.Row, 12]) + Conversion.Val(val[val.Row, 9]))), \"0.00\");",
+  "val[val.Row, 6] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 4]) * Conversion.Val(val[val.Row, 5]), 0), \"0.00\");",
+  "tVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "tHdVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "OldValTot = Conversion.Val(MSG_TOT[0, 7]) + Conversion.Val(MSG_TOT[0, 12]);",
+  "if ((Operators.CompareString(mSG[DC_Main.i, 2], \"\", false) != 0) & (Conversion.Val(mSG[DC_Main.i, 4]) + Conversion.Val(mSG[DC_Main.i, 12]) + Conversion.Val(mSG[DC_Main.i, 9]) != 0.0))",
+  "string text = Strings.Format((object)(Conversion.Val(tVchNo.Text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) + 1.0), \"00000\");"
+ ],
+ "validations": [
+  {
+   "message": "You Cant Save New Entry Because Your lIcence Has been Expired Please Renew lIcence....",
+   "when": "(Operators.CompareString(DC_Main.MsSoftNoUse, \"Y\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save This Voucher Becouse This Company Type is B......",
+   "when": "(Operators.CompareString(DC_Main.MCo_Type, \"B\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...",
+   "when": "(DateTime.Compare(Conversions.ToDate(DC_Main.MCo_OpDate), Conversions.ToDate(mVchDate.Text)) > 0) | (DateTime.Compare(Conversions.ToDate(DC_Main.MCo_ClDate), Co"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "Operators.CompareString(UsUPdate, \"Y\", false) != 0 && ((Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) =="
+  },
+  {
+   "message": "Please Select Employee Code and Try......",
+   "when": "(Operators.CompareString(DC_Main.MsEmpCodeMendetry, \"Y\", false) == 0) & (Operators.CompareString(tEmpCode.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Please Insert VchNo and try",
+   "when": "Operators.CompareString(tVchNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "This Member Scheme Expiry Date Update As Scheme Adjust Date...?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"This Member Scheme Expiry Date Update As Scheme Adjust Date...?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) == 6"
+  },
+  {
+   "message": "Are You Sure To Delete This Voucher now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Last Record...",
+   "when": "Conversion.Val(tVchNo.Text) >= Conversion.Val(LastVchNo)"
+  }
+ ]
+}

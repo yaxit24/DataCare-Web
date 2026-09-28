@@ -1,0 +1,17 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "exec",
+    "vitest",
+    "run",
+    "test/savedSaleReturnClock.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T17:52:31.338817+00:00",
+  "finishedAtUtc": "2026-09-11T17:52:32.844980+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-core-first.txt"
+}

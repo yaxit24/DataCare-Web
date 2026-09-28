@@ -1,0 +1,12 @@
+{
+  "command": [
+    "pnpm",
+    "docs:refs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T18:05:30.051736+00:00",
+  "finishedAtUtc": "2026-09-11T18:05:34.186108+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/document-references-combined.txt"
+}

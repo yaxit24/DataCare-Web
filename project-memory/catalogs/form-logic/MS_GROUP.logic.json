@@ -1,0 +1,35 @@
+{
+ "form": "MS_GROUP",
+ "tables": [
+  "AC_MAST",
+  "BAL_GR",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "ITEM_MAST"
+  ],
+  "DELETE": [
+   "GROUP_MAST"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BAL_GR",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 14,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2350
+}

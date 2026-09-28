@@ -1,10 +1,15 @@
-import { applyLastDayLock } from './modules/shared/lastDayLock.js';
+import { LastDayLockConfigurationError } from './modules/shared/lastDayLock.js';
+import { loginSessionContext } from './modules/auth/sessionContextLogin.js';
+import { refreshSessionContext, type RefreshContextDependencies } from './modules/auth/sessionContextRefresh.js';
+import { selectSessionContext, ContextSelectionError } from './modules/auth/sessionContextSelection.js';
+import { validateAccessSessionContext } from './modules/auth/sessionContextAccess.js';
+import type { UnknownSessionLedgerContext } from './modules/auth/sessionContextValue.js';
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
 import { withTenant } from '@datacare/db';
 import type { UserRights } from '@datacare/types';
-import { authenticate, AuthError, type LoginMastRow } from './modules/auth/auth.service.js';
+import { AuthError } from './modules/auth/auth.service.js';
 import {
   issueAccess,
   issueRefresh,
@@ -13,17 +18,12 @@ import {
   type SessionClaims,
 } from './modules/auth/jwt.js';
 import {
-  createAuthSession,
   revokeSession,
-  rotateRefreshSession,
   SessionRejectedError,
-  updateSessionScope,
-  validateAccessSession,
 } from './modules/auth/session.js';
 import {
   changeOwnPassword,
   PasswordChangeError,
-  upgradeLegacyPassword,
 } from './modules/auth/passwordAccount.js';
 import { PasswordPolicyError } from './modules/auth/password.js';
 import {
@@ -32,8 +32,6 @@ import {
   listScopeCompanies,
   listScopeLocations,
   listScopeYears,
-  resolveLoginScope,
-  resolveSelectedScope,
   ScopeError,
   type BusinessScope,
 } from './modules/auth/businessScope.js';
@@ -54,6 +52,7 @@ import {
 } from './modules/rbac/routePolicy.js';
 import { MASTERS } from './modules/masters/configs.js';
 import { GENERATED_FORM_FIELDS } from './modules/masters/generated-formfields.js';
+import { ColumnSettingsError, listColumnSettings } from './modules/masters/columnSettings.js';
 import { resolveFormFields, withGroups } from './modules/masters/master.service.js';
 import {
   createMaster,
@@ -70,7 +69,7 @@ import {
 } from './modules/masters/master.service.js';
 import { registerTxnRoutes } from './routes/txn.js';
 import { logAudit, listAudit } from './modules/ops/audit.js';
-import { backupCompany } from './modules/ops/backup.js';
+import { backupCompany, recordCompanyBackup } from './modules/ops/backup.js';
 import { healthPayload, readiness, type PdfRendererProbe } from './modules/ops/health.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
 import { collectDatabaseMetrics, MetricsRegistry, type RouteClass } from './modules/ops/metrics.js';
@@ -80,6 +79,7 @@ import {
   REPORT_FILTER_KEYS,
   supportedFilters,
 } from './modules/reports/reportFilters.js';
+import { reportFormForSlug } from './modules/reports/reportAuthorization.js';
 
 export interface BuildOpts {
   prisma: any;
@@ -96,6 +96,7 @@ export interface BuildOpts {
 interface Session extends SessionClaims {
   rights: UserRights;
   principal: Principal;
+  ledgerContext: UnknownSessionLedgerContext;
 }
 
 interface RequestState extends FastifyRequest {
@@ -244,23 +245,23 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     return opts.defaultTenantId?.trim() || 'default';
   };
 
-  const loadUser = (tenantId: string, co: string, name: string): Promise<LoginMastRow | null> =>
-    withTenant(prisma, tenantId, async (tx: any) => {
-      const rows = await tx.$queryRawUnsafe(
-        `SELECT "CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG",
-                "USER_UPDATE","USER_DELETE","USER_PRINT",
-                "PASSWORD_RESET_REQUIRED","PASSWORD_CHANGED_AT"
-           FROM "LOGIN_MAST"
-          WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1`,
-        co,
-        name,
-      );
-      return rows[0] ?? null;
-    });
-
-  const audit = async (): Promise<void> => {
-    // Login failures intentionally expose no credential detail. Mutation audit begins after a
-    // session exists; operational authentication events can be added to a dedicated immutable log.
+  const contextDescriptor = (session: {
+    sessionId: string; contextEpoch: string; coCode: string; lcCode: string; coYear?: string;
+  }) => ({
+    sessionId: session.sessionId, contextEpoch: session.contextEpoch,
+    coCode: session.coCode, lcCode: session.lcCode, coYear: session.coYear ?? null,
+  });
+  const issueContextTokens: RefreshContextDependencies['issueTokens'] = async ({ session, principal, refreshJti }) => {
+    const accessToken = await issueAccess({
+      sub: session.loginName, tenantId: session.tenantId, sid: session.sessionId,
+      loginCoCode: session.loginCoCode, coCode: session.coCode, lcCode: session.lcCode,
+      coYear: session.coYear, contextEpoch: session.contextEpoch,
+      rights: principal.rights, passwordResetRequired: principal.passwordResetRequired,
+    }, secret);
+    const refreshToken = await issueRefresh({
+      sub: session.loginName, tenantId: session.tenantId, sid: session.sessionId, jti: refreshJti,
+    }, secret);
+    return { accessToken, refreshToken };
   };
 
   const sess = (req: FastifyRequest): Session => (req as RequestState).session as Session;
@@ -275,6 +276,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     };
 
   async function requireAuth(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const route = req.routeOptions.url ?? '';
+    if (route === '/me' || route.startsWith('/auth/') || route.startsWith('/context/')) {
+      reply.header('Cache-Control', 'no-store');
+    }
     const state = req as RequestState;
     if (state.session) return;
     const token = (req as any).cookies?.access as string | undefined;
@@ -284,14 +289,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     }
     try {
       const claims = await verifyAccessToken(token, secret);
-      const stored = await validateAccessSession(prisma, claims);
-      if (
-        claims.coCode !== stored.coCode ||
-        claims.lcCode !== stored.lcCode ||
-        (claims.coYear ?? '') !== (stored.coYear ?? '') ||
-        claims.loginCoCode !== stored.loginCoCode
-      ) {
-        throw new SessionRejectedError('session-invalid');
+      const stored = await validateAccessSessionContext(prisma, claims);
+      const pageSession = req.headers['x-session-context-id'];
+      const pageEpoch = req.headers['x-session-context-epoch'];
+      if ((pageSession !== undefined || pageEpoch !== undefined) &&
+          (pageSession !== stored.sessionId || pageEpoch !== stored.contextEpoch)) {
+        await reply.code(409).send({ error: 'context-stale' });
+        return;
       }
       const principal = await loadPrincipal(prisma, {
         tenantId: claims.tenantId,
@@ -302,6 +306,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       state.principal = principal;
       state.session = {
         ...claims,
+        contextEpoch: stored.contextEpoch,
+        ledgerContext: stored.ledgerContext,
         coCode: stored.coCode,
         lcCode: stored.lcCode,
         coYear: stored.coYear,
@@ -319,37 +325,41 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     }
   }
 
-  // Central authorization executes before every route-local preHandler. Existing `requireAuth`
-  // declarations remain as defense in depth and become no-ops once this hook loaded the session.
+  // Central authorization executes before report-filter validation and every route-local preHandler. Existing
+  // `requireAuth` declarations remain as defense in depth and become no-ops once this hook loaded the session.
   /**
-   * Global guard: a shared report filter is REFUSED unless the report actually applies it.
+   * Refuse a shared report filter unless the authorized report actually applies it.
    *
-   * Installed as a hook rather than per builder because only the bound reports call `applyFilters`. Live
-   * verification showed `GET /reports/day-book?city=Surat` returning 200 with an UNFILTERED result set — the
-   * exact failure the refusal design exists to prevent, since the operator would read a whole-year day book
-   * as if it were narrowed to one city. Every report route is now covered, including those with no binding.
+   * Only bound reports call `applyFilters`. Live verification showed `GET /reports/day-book?city=Surat`
+   * returning 200 with an UNFILTERED result set — the exact failure this refusal prevents. This function is
+   * called only after authentication and per-form authorization, so an invalid filter cannot reveal report
+   * capabilities or replace the required 401/403 response for an unauthenticated or unauthorized caller.
    */
-  app.addHook('preHandler', async (req: FastifyRequest, reply: FastifyReply) => {
+  const enforceReportFilters = async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const url = req.routeOptions.url ?? '';
     if (!url.startsWith('/reports/')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;
     // The slug is the first path segment after /reports/, which is how every report route is shaped.
-    const slug = String((req.params as any)?.report ?? url.split('/')[2] ?? '').replace(
+    const dynamicReport = (req.params as any)?.report;
+    const slug = String(dynamicReport ?? url.split('/')[2] ?? '').replace(
       /\.(csv|xlsx|pdf|print)$/,
       '',
     );
+    // Unknown dynamic slugs have already failed central @report resolution. Keep this defensive return so
+    // this validation helper can never classify an unresolved slug as a filter-capability error.
+    if (dynamicReport != null && !reportFormForSlug(slug)) return;
     const binding = REPORT_FILTER_BINDINGS[slug];
     const allowed = new Set(binding ? supportedFilters(binding) : []);
     const bad = asked.filter((k) => !allowed.has(k));
     if (bad.length) {
-      return reply.code(400).send({
+      await reply.code(400).send({
         error: 'ReportFilterError',
         message: `this report cannot filter by: ${bad.join(', ')}`,
       });
     }
-  });
+  };
 
   app.addHook('preHandler', async (req: FastifyRequest, reply: FastifyReply) => {
     const policy = (req.routeOptions.config as any)?.authorizationPolicy as RoutePolicy | undefined;
@@ -406,6 +416,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         });
       }
       state.routeAuthorized = true;
+      await enforceReportFilters(req, reply);
     } catch (error) {
       if (error instanceof ScopeError) {
         return reply.code(error.statusCode).send({ error: error.code });
@@ -443,79 +454,23 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     async (req: FastifyRequest, reply: FastifyReply) => {
       const b = (req.body ?? {}) as Record<string, string | undefined>;
       const tenantId = tenantOf(req);
+      reply.header('Cache-Control', 'no-store');
       if (!b.coCode || !b.loginName || !b.password) {
         return reply.code(400).send({ error: 'missing-fields' });
       }
       try {
-        const authenticated = await authenticate(
-          { loadUser, audit },
-          {
-            tenantId,
-            coCode: b.coCode,
-            lcCode: b.lcCode,
-            loginName: b.loginName,
-            password: b.password,
-          },
-        );
-        if (authenticated.legacyPassword) {
-          await upgradeLegacyPassword(prisma, {
-            tenantId,
-            coCode: authenticated.coCode,
-            loginName: authenticated.userId,
-            legacyPassword: b.password,
-          });
-        }
-        const scope = await resolveLoginScope(prisma, {
-          tenantId,
-          coCode: authenticated.coCode,
-          lcCode: b.lcCode,
-          coYear: b.coYear,
-        });
-        const principal = await loadPrincipal(prisma, {
-          tenantId,
-          loginName: authenticated.userId,
-          coCode: scope.coCode,
-          loginCoCode: authenticated.coCode,
-        });
-        const created = await createAuthSession(prisma, {
-          tenantId,
-          loginName: authenticated.userId,
-          loginCoCode: authenticated.coCode,
-          coCode: scope.coCode,
-          lcCode: scope.lcCode,
-          coYear: scope.coYear,
-        });
-        const access = await issueAccess(
-          {
-            sub: authenticated.userId,
-            tenantId,
-            loginCoCode: authenticated.coCode,
-            coCode: scope.coCode,
-            lcCode: scope.lcCode,
-            coYear: scope.coYear,
-            sid: created.session.sessionId,
-            rights: principal.rights,
-            passwordResetRequired: principal.passwordResetRequired,
-          },
-          secret,
-        );
-        const refresh = await issueRefresh(
-          {
-            sub: authenticated.userId,
-            tenantId,
-            sid: created.session.sessionId,
-            jti: created.refreshJti,
-          },
-          secret,
-        );
-        reply
-          .setCookie('access', access, accessCookie)
-          .setCookie('refresh', refresh, refreshCookie);
+        const created = await loginSessionContext(prisma, {
+          tenantId, coCode: b.coCode, loginName: b.loginName, password: b.password,
+          lcCode: b.lcCode, coYear: b.coYear,
+        }, { issueTokens: issueContextTokens });
+        reply.setCookie('access', created.accessToken, accessCookie)
+          .setCookie('refresh', created.refreshToken, refreshCookie);
         return {
-          user: authenticated.userId,
-          rights: principal.rights,
-          forcedReset: principal.passwordResetRequired,
-          scope: { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear ?? null },
+          user: created.session.loginName, rights: created.principal.rights,
+          forcedReset: created.principal.passwordResetRequired,
+          scope: { coCode: created.session.coCode, lcCode: created.session.lcCode, coYear: created.session.coYear ?? null },
+          context: contextDescriptor(created.session),
+          ledgerContext: created.session.ledgerContext,
         };
       } catch (error) {
         // The client response stays deliberately generic so it cannot be used to enumerate users or
@@ -538,42 +493,15 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   );
 
   app.post('/auth/refresh', async (req: FastifyRequest, reply: FastifyReply) => {
+    reply.header('Cache-Control', 'no-store');
     const token = (req as any).cookies?.refresh as string | undefined;
     if (!token) return reply.code(401).send({ error: 'invalid-refresh' });
     try {
       const claims = await verifyRefreshToken(token, secret);
-      const rotated = await rotateRefreshSession(prisma, claims);
-      const principal = await loadPrincipal(prisma, {
-        tenantId: claims.tenantId,
-        loginName: claims.sub,
-        coCode: rotated.session.coCode,
-        loginCoCode: rotated.session.loginCoCode,
-      });
-      const access = await issueAccess(
-        {
-          sub: claims.sub,
-          tenantId: claims.tenantId,
-          loginCoCode: rotated.session.loginCoCode,
-          coCode: rotated.session.coCode,
-          lcCode: rotated.session.lcCode,
-          coYear: rotated.session.coYear,
-          sid: rotated.session.sessionId,
-          rights: principal.rights,
-          passwordResetRequired: principal.passwordResetRequired,
-        },
-        secret,
-      );
-      const refresh = await issueRefresh(
-        {
-          sub: claims.sub,
-          tenantId: claims.tenantId,
-          sid: rotated.session.sessionId,
-          jti: rotated.refreshJti,
-        },
-        secret,
-      );
-      reply.setCookie('access', access, accessCookie).setCookie('refresh', refresh, refreshCookie);
-      return { refreshed: true };
+      const refreshed = await refreshSessionContext(prisma, claims, { issueTokens: issueContextTokens });
+      reply.setCookie('access', refreshed.accessToken, accessCookie)
+        .setCookie('refresh', refreshed.refreshToken, refreshCookie);
+      return { refreshed: true, context: contextDescriptor(refreshed.session), ledgerContext: refreshed.session.ledgerContext };
     } catch {
       reply.clearCookie('access', cookieBase).clearCookie('refresh', cookieBase);
       return reply.code(401).send({ error: 'invalid-refresh' });
@@ -623,7 +551,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     },
   );
 
-  app.get('/me', { preHandler: requireAuth }, async (req: FastifyRequest) => {
+  app.get('/me', { preHandler: requireAuth }, async (req: FastifyRequest, reply: FastifyReply) => {
+    reply.header('Cache-Control', 'no-store');
     const s = sess(req);
     const principal = principalOf(req);
     const allowedForms = await resolveAllowedForms(
@@ -634,6 +563,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     );
     return {
       user: s.sub,
+      context: contextDescriptor({ sessionId: s.sid, contextEpoch: s.contextEpoch, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear }),
+      ledgerContext: s.ledgerContext,
       coCode: s.coCode,
       lcCode: s.lcCode,
       coYear: s.coYear ?? null,
@@ -654,6 +585,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     { preHandler: requireAuth },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const data = await backupCompany(prisma, sess(req).tenantId, sess(req).coCode);
+      // The artefact is now in the operator's hands, so record its identity append-only. This is what a
+      // destructive data repair must later name as its recovery cover.
+      await recordCompanyBackup(prisma, data, sess(req).sub);
       return reply
         .header('content-type', 'application/json')
         .header(
@@ -697,42 +631,31 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     '/context/select',
     { preHandler: requireAuth },
     async (req: FastifyRequest, reply: FastifyReply) => {
-      const b = (req.body ?? {}) as Record<string, string | undefined>;
+      reply.header('Cache-Control', 'no-store');
       const s = sess(req);
-      const principal = principalOf(req);
-      if (!b.coCode) return reply.code(400).send({ error: 'missing-fields' });
       try {
-        const scope = await resolveSelectedScope(prisma, {
-          tenantId: s.tenantId,
-          loginName: s.sub,
-          isAdmin: principal.isAdmin,
-          coCode: b.coCode,
-          lcCode: b.lcCode,
-          coYear: b.coYear,
-        });
-        // Desktop applies the previous-day auto lock when the company is opened
-        // (MS_OPNCOMP.cs:1503-1507), before any voucher can be entered in that session.
-        await applyLastDayLock(prisma, s.tenantId, scope.coCode);
-        await updateSessionScope(prisma, s.tenantId, s.sid, scope);
-        const access = await issueAccess(
-          {
-            sub: s.sub,
-            tenantId: s.tenantId,
-            loginCoCode: s.loginCoCode,
-            coCode: scope.coCode,
-            lcCode: scope.lcCode,
-            coYear: scope.coYear,
-            sid: s.sid,
-            rights: principal.rights,
-            passwordResetRequired: principal.passwordResetRequired,
-          },
-          secret,
-        );
-        reply.setCookie('access', access, accessCookie);
-        return { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear, scoped: true };
+        const selected = await selectSessionContext(prisma, {
+          identity: { tenantId: s.tenantId, sessionId: s.sid, loginName: s.sub,
+            loginCoCode: s.loginCoCode, coCode: s.coCode, lcCode: s.lcCode,
+            coYear: s.coYear, contextEpoch: s.contextEpoch },
+          request: req.body,
+        }, { signAccess: (descriptor) => issueAccess({ ...descriptor }, secret) });
+        reply.setCookie('access', selected.accessToken, accessCookie);
+        return { coCode: selected.session.coCode, lcCode: selected.session.lcCode,
+          coYear: selected.session.coYear, scoped: true, replayed: selected.replayed,
+          ledgerContext: selected.session.ledgerContext,
+          context: contextDescriptor(selected.session) };
       } catch (error) {
-        if (error instanceof ScopeError)
-          return reply.code(error.statusCode).send({ error: error.code });
+        if (error instanceof ScopeError) return reply.code(error.statusCode).send({ error: error.code });
+        if (error instanceof ContextSelectionError) {
+          const status = error.code === 'invalid-context-selection-request' ? 400 :
+            ['password-reset-required','target-password-reset-required'].includes(error.code) ? 403 :
+            ['session-invalid','session-revoked','session-expired'].includes(error.code) ? 401 :
+            error.code === 'context-signing-failed' ? 500 : 409;
+          return reply.code(status).send({ error: error.code });
+        }
+        if (error instanceof PrincipalUnavailableError) return reply.code(401).send({ error: 'session-invalid' });
+        if (error instanceof LastDayLockConfigurationError) return reply.code(409).send({ error: 'last-day-lock-invalid' });
         throw error;
       }
     },
@@ -758,6 +681,22 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     async (req: FastifyRequest, reply: FastifyReply) => {
       const cfg = masterOf(req, reply);
       if (!cfg) return;
+      if (cfg.table === 'COL_MAST') {
+        const query = req.query as Record<string, unknown>;
+        reply.header('Cache-Control', 'no-store');
+        try {
+          return await listColumnSettings(prisma, masterScope(req), {
+            offset: query.offset,
+            limit: query.limit,
+            family: query.family,
+            search: query.search,
+          });
+        } catch (error) {
+          if (error instanceof ColumnSettingsError)
+            return reply.code(error.statusCode).send({ error: error.code, message: error.message });
+          throw error;
+        }
+      }
       return listMaster(prisma, masterScope(req), cfg);
     },
   );
@@ -769,11 +708,40 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       const cfg = masterOf(req, reply);
       if (!cfg) return;
       const ff = resolveFormFields(cfg, GENERATED_FORM_FIELDS[cfg.table]);
+      let columnCapabilities:
+        { canCreate: boolean; canUpdate: boolean; canDelete: boolean } | undefined;
+      if (cfg.table === 'COL_MAST') {
+        const scope = masterScope(req);
+        reply.header('Cache-Control', 'no-store');
+        const allowed = await Promise.all(
+          (['create', 'update', 'delete'] as const).map(async (action) => {
+            try {
+              await authorizeForm(prisma, {
+                tenantId: scope.tenantId,
+                lcCode: scope.lcCode!,
+                principal: principalOf(req),
+                form: 'Masters/Styles / Columns',
+                action,
+              });
+              return true;
+            } catch (error) {
+              if (error instanceof FormForbiddenError) return false;
+              throw error;
+            }
+          }),
+        );
+        columnCapabilities = {
+          canCreate: allowed[0]!,
+          canUpdate: allowed[1]!,
+          canDelete: allowed[2]!,
+        };
+      }
       return {
         table: cfg.table,
         keyColumns: cfg.keyColumns,
         requiredColumns: cfg.requiredColumns,
         formFields: ff ? withGroups(ff) : null,
+        ...(columnCapabilities ? { capabilities: columnCapabilities } : {}),
       };
     },
   );
@@ -793,6 +761,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         );
         return reply.code(201).send({ created: true });
       } catch (e) {
+        if (e instanceof ColumnSettingsError)
+          return reply.code(e.statusCode).send({ error: e.code, message: e.message });
         if (e instanceof ValidationError)
           return reply.code(400).send({ error: 'missing-required', missing: e.missing });
         if (e instanceof DuplicateKeyError) return reply.code(409).send({ error: 'duplicate-key' });
@@ -820,6 +790,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         );
         return { updated: true };
       } catch (e) {
+        if (e instanceof ColumnSettingsError)
+          return reply.code(e.statusCode).send({ error: e.code, message: e.message });
         if (e instanceof ValidationError)
           return reply.code(400).send({ error: 'missing-required', missing: e.missing });
         if (e instanceof NotFoundError) return reply.code(404).send({ error: 'not-found' });
@@ -845,6 +817,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         );
         return { deleted: true };
       } catch (e) {
+        if (e instanceof ColumnSettingsError)
+          return reply.code(e.statusCode).send({ error: e.code, message: e.message });
         if (e instanceof ReferencedError)
           return reply.code(409).send({ error: 'referenced', ref: e.ref });
         throw e;

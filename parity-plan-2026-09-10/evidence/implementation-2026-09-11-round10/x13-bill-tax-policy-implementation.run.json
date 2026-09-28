@@ -1,0 +1,82 @@
+{
+  "kind": "x13-bill-tax-policy-focused-implementation-v1",
+  "status": "focused-engineering-passed",
+  "apiAcceptance": false,
+  "desktopRuntimeAcceptance": false,
+  "databaseOrBrowserRun": false,
+  "policyVersion": "sale-return-company-open-tax-policy-v1",
+  "inputProfile": "sql-int32-text-and-null-v1",
+  "verification": [
+    {
+      "name": "focused-unit",
+      "exitCode": 0,
+      "files": 1,
+      "tests": 89,
+      "skipped": 0,
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/bill-tax-policy-unit-first.txt"
+    },
+    {
+      "name": "focused-strict-types",
+      "exitCode": 0,
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/bill-tax-policy-types-first.txt",
+      "emptyCompilerOutput": true
+    }
+  ],
+  "historicalFailure": {
+    "name": "root-first-production-build",
+    "exitCode": 2,
+    "reason": "TS2322 literal property widening in unannotated base helper",
+    "preservedCopy": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/bill-tax-policy-initial-build-failure.txt",
+    "copiedFrom": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/build.txt"
+  },
+  "inputs": [
+    {
+      "path": "web/packages/core/src/saleReturnBillTaxPolicy.ts",
+      "sha256": "4e12c8b129cbdc168bafb01cb40a7a723e1db2bfb57af57a3c73f9099b809622"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnBillTaxPolicy.test.ts",
+      "sha256": "1ec8f36a00953de378e6d851e04eda7c305e384ff00c0c6ee58902c95122fdea"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/bill-tax-policy-unit-first.txt",
+      "sha256": "319038067348207636b094725260282a6205d72b2b4cfdd0bb27bf8f0bad8d08"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/bill-tax-policy-types-first.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/bill-tax-policy-initial-build-failure.txt",
+      "sha256": "8309a2bbb811e729ef51fbd00c943c144a4ea2c8cdf0ae36ec67d512da9fdf56"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-source-addendum.md",
+      "sha256": "9f41889ef665c3a0934412c619921bf5788b853269967ea81e8ca267f09347ae"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-bill-tax-policy-implementation.md",
+      "sha256": "87ed3692a58b36a8b40ae71f7ca6c2c4e230c17514e57cd5307a63d934097736"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_SETTING_MAIN.cs",
+      "sha256": "76116b14149afc1c6a5b93562c9aa9877979c43bdf6372e1d8fe1e6296aec4c5"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    }
+  ]
+}

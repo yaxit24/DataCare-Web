@@ -1,0 +1,61 @@
+{
+  "status": "prospective next implementation prerequisites, not waived",
+  "chosenDirection": "Option A, selected by root; no business acceptance",
+  "items": [
+    {
+      "id": "A1",
+      "issue": "Source-shaped N companion admission",
+      "next": "Pure exact BAR_DATA/BAR_DETL matcher with all source assignments, conditional defaults/overrides, retained identity and storage-qualified observations; no writer."
+    },
+    {
+      "id": "A2",
+      "issue": "USER_UPDATE N/current capability distinction",
+      "next": "Separate new numeric admission with fresh form Update rights; retain original metadata/preview refusal profile and original raw flag."
+    },
+    {
+      "id": "A3",
+      "issue": "Complete row calculation fixture",
+      "next": "Freeze full raw/visible/caches/configuration/width inputs proving c27 changes only permitted persisted numeric fields."
+    },
+    {
+      "id": "A4",
+      "issue": "Target numeric/Float/date representation",
+      "next": "Qualify every touched amount and retained date/clock; no Number-is-finite surrogate for exactness."
+    },
+    {
+      "id": "A5",
+      "issue": "STR-based ledger key and physical identities",
+      "next": "Pin exact existing expression/key representation and collision-free membership; no guessed JavaScript serial formatting."
+    },
+    {
+      "id": "A6",
+      "issue": "Book/detail/tax/account/group cardinality",
+      "next": "Observe complete canonical inputs and aliases/duplicates; instantiate source-owned effect columns and exact before/after rows."
+    },
+    {
+      "id": "A7",
+      "issue": "Edition E USER_DATA",
+      "next": "Resolve trusted edition or separately accepted explicit web audit policy; preserve unknown as a blocker rather than assume no audit."
+    },
+    {
+      "id": "A8",
+      "issue": "Cash/employee/counter/year/lock and other Save facts",
+      "next": "Source-qualified config/helper input adapters or proof that individual branch is inert for the final state."
+    },
+    {
+      "id": "A9",
+      "issue": "Post-replay membership and direction",
+      "next": "Refuse row omission, bill zero/received-side switch, BAR header/parent inclusion changes and unowned mapped deltas under first profile."
+    },
+    {
+      "id": "A10",
+      "issue": "External reference and phantom ownership",
+      "next": "Closed source/settlement/allocation/transfer/reference inventory with same-transaction observation and deterministic locks."
+    },
+    {
+      "id": "A11",
+      "issue": "Full Serializable commit verification",
+      "next": "After pure/read-only prerequisites, exact-row Update-only commit with fixed session authority, complete rollback and stale/refusal tests; no generic editSaleReturn reuse."
+    }
+  ]
+}

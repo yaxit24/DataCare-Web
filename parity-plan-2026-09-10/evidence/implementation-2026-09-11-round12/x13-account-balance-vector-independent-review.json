@@ -1,0 +1,31 @@
+{
+  "kind": "round12-account-balance-vector-independent-review/1",
+  "reviewedAtUtc": "2026-09-11T16:14:47.202160+00:00",
+  "status": "static-source-arithmetic-agrees",
+  "vectorCasesReviewed": 12,
+  "fixture": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-independent-vectors.json",
+    "sha256": "32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7"
+  },
+  "primarySource": {
+    "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+    "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+    "lines": "1463-1487"
+  },
+  "findings": [
+    "A cross-book amount14 opening and42 inclusive closing; gold1 and2.",
+    "B amount20 and silver2.5, including pre-cutoff ENTRY_TIME with later VCH_DATE.",
+    "C combines NULL/other DATA_TYPE: opening39/gold.875/silver2, inclusive67/gold1.875/silver2.",
+    "Subtract beforeSUM: one NULL operand nulls that row difference; known row differences survive, all-null groups remain unknown.",
+    "Other-type CASE0 can make gold/silver knownzero even where matching-metal FINE_WT isNULL; single matching-metal allNULL remains unsupported.",
+    "NULL/blank sign takes ELSE -FINE_WT; negating negative fine produces positive.",
+    "No grouped row preserves source initializedzero; this is distinct from a grouped NULL conversion failure."
+  ],
+  "correctionsRequested": [],
+  "execution": {
+    "implementationInspected": false,
+    "databaseRun": false,
+    "windowsRuntime": false
+  },
+  "limits": "Independent static review of frozen literal outcomes, not implementation, SQLServer collation, original Double/Format, auth/session authority, clock adapter or financial acceptance."
+}

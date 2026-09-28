@@ -1,0 +1,394 @@
+{
+ "report": "EInvoice",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section8",
+     "kind": "ReportHeader",
+     "height": 270,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 508,
+       "top": 30,
+       "width": 1097,
+       "height": 240,
+       "text": "Tax Rate"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 1845,
+       "top": 30,
+       "width": 1260,
+       "height": 226,
+       "text": "Igst Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 3240,
+       "top": 30,
+       "width": 1260,
+       "height": 226,
+       "text": "Cgst Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 4620,
+       "top": 30,
+       "width": 1260,
+       "height": 226,
+       "text": "Sgst Amt"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupHeader",
+     "height": 87,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 228,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 1845,
+       "top": 17,
+       "width": 1260,
+       "height": 204,
+       "dataSource": "{SL_DETL.ITM_IGST_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 3240,
+       "top": 17,
+       "width": 1260,
+       "height": 204,
+       "dataSource": "{SL_DETL.ITM_CGST_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 4620,
+       "top": 17,
+       "width": 1260,
+       "height": 204,
+       "dataSource": "{SL_DETL.ITM_SGST_AMT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 256,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 297,
+       "top": 30,
+       "width": 1308,
+       "height": 226,
+       "dataSource": "{@Txprc}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 1845,
+       "top": 30,
+       "width": 1260,
+       "height": 216,
+       "dataSource": "Sum ({SL_DETL.ITM_IGST_AMT}, {SL_DETL.TAX_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 3240,
+       "top": 30,
+       "width": 1260,
+       "height": 216,
+       "dataSource": "Sum ({SL_DETL.ITM_CGST_AMT}, {SL_DETL.TAX_CODE})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 4620,
+       "top": 30,
+       "width": 1260,
+       "height": 216,
+       "dataSource": "Sum ({SL_DETL.ITM_SGST_AMT}, {SL_DETL.TAX_CODE})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 163,
+     "objects": []
+    },
+    {
+     "name": "Section9",
+     "kind": "ReportFooter",
+     "height": 150,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "Txprc",
+   "ref": "{@Txprc}",
+   "type": "StringField",
+   "text": "{TAX_MAST.TAX_PRC} & \" %\""
+  },
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD1}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcCity",
+   "ref": "{@AcCity}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_CITY} + ' Mo : ' + {AC_MAST.AC_MOBILE}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "StringField",
+   "text": "'GSTIN : ' & {AC_MAST.AC_GSTNO}"
+  },
+  {
+   "name": "AcState",
+   "ref": "{@AcState}",
+   "type": "StringField",
+   "text": "'State Code : ' & {STATE_MAST.STATE_CODE} & ' - ' & {AC_MAST.AC_STATE}"
+  },
+  {
+   "name": "Cashamt",
+   "ref": "{@Cashamt}",
+   "type": "NumberField",
+   "text": "if {SL_DATA.AC_CODE} = '00045' then {SL_DATA.TOT_AMT}-{SL_DATA.ADV_AMT}-{SL_DATA.OLD_GL_AMT}-{SL_DATA.OLD_SL_AMT}-{SL_DATA.KASAR_AMT} else {SL_DATA.CASH_AMT}"
+  },
+  {
+   "name": "ClAmt",
+   "ref": "{@ClAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "ClAmtCrDr",
+   "ref": "{@ClAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@ClAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "CoAdd1",
+   "ref": "{@CoAdd1}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD1} else {CO_MAST.CO_ADD1}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD2}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE}"
+  },
+  {
+   "name": "CoName",
+   "ref": "{@CoName}",
+   "type": "StringField",
+   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_NAME} ELSE {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CoState",
+   "ref": "{@CoState}",
+   "type": "StringField",
+   "text": "'State Code : ' & {CO_MAST.CO_STATE_CODE} & ' - ' & {CO_MAST.CO_STATE}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DrownBank",
+   "ref": "{@DrownBank}",
+   "type": "StringField",
+   "text": "if {SL_DATA.CHQ_NO} <> '' Then {SL_DATA.BANK_NAME} + ' Chq No : ' + {SL_DATA.CHQ_NO} else {SL_DATA.BANK_NAME}"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "GstNo",
+   "ref": "{@GstNo}",
+   "type": "StringField",
+   "text": "'GSTIN : ' & {CO_MAST.CO_GST_NO}"
+  },
+  {
+   "name": "InVoiceType",
+   "ref": "{@InVoiceType}",
+   "type": "StringField",
+   "text": "'ORIGINAL FOR RECIPIENT'"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "StringField",
+   "text": "{ITEM_MAST.IT_NAME}"
+  },
+  {
+   "name": "LbrAmt",
+   "ref": "{@LbrAmt}",
+   "type": "NumberField",
+   "text": "if {SL_DETL.LBR_PRC} <> 0 then {SL_DETL.LBR_PRC} else if {SL_DETL.LBR_RATE} <> 0 then {SL_DETL.LBR_RATE} else {SL_DETL.LBR_AMT}"
+  },
+  {
+   "name": "LbrPrint",
+   "ref": "{@LbrPrint}",
+   "type": "StringField",
+   "text": "'N'"
+  },
+  {
+   "name": "OpAmt",
+   "ref": "{@OpAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpAmtCrDr",
+   "ref": "{@OpAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@OpAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "OsPrint",
+   "ref": "{@OsPrint}",
+   "type": "StringField",
+   "text": "'N'"
+  },
+  {
+   "name": "OtherCharg",
+   "ref": "{@OtherCharg}",
+   "type": "NumberField",
+   "text": "{SL_DETL.LBR_AMT}+{SL_DETL.OTH_AMT}"
+  },
+  {
+   "name": "RefNo",
+   "ref": "{@RefNo}",
+   "type": "StringField",
+   "text": "IF {SL_DATA.BILL_NO} <> \"\" THEN {BOOK_DATA.BOOK_SR_NAME} & \"-\" & {SL_DATA.VCH_NO} & \" / \" & 'Ref No : ' & {SL_DATA.BILL_NO} ELSE {BOOK_DATA.BOOK_SR_NAME} & \"-\" & {SL_DATA.VCH_NO}"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "TaxCGST",
+   "ref": "{@TaxCGST}",
+   "type": "StringField",
+   "text": "'CGST :'"
+  },
+  {
+   "name": "TaxIGST",
+   "ref": "{@TaxIGST}",
+   "type": "StringField",
+   "text": "'IGST :'"
+  },
+  {
+   "name": "TaxSGST",
+   "ref": "{@TaxSGST}",
+   "type": "StringField",
+   "text": "'SGST :'"
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.CASH_AMT} +{SL_DATA.CARD_AMT}+{SL_DATA.CHQ_AMT}"
+  },
+  {
+   "name": "Unit",
+   "ref": "{@Unit}",
+   "type": "StringField",
+   "text": "{ITEM_MAST.UNIT_NAME}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{SL_DATA.CO_YEAR}+{SL_DATA.CO_BOOK}+{SL_DATA.VCH_NO}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "StringField",
+   "text": "numbervar RmVal:=0; numbervar Amt:=0; numbervar pAmt:=0; stringvar InWords :=\"Rupees :\"; Amt := ({SL_DATA.TOT_AMT}); if Amt > 10000000 then RmVal := truncate(Amt/10000000); if Amt = 10000000 then RmVa"
+  }
+ ],
+ "sectionCount": 7,
+ "objectCount": 11,
+ "formulaCount": 35
+}

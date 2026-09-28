@@ -1,0 +1,55 @@
+
+> datacare-web-saas@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> turbo run build
+
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running build in 7 packages
+   • Remote caching disabled
+
+@datacare/core:build: cache miss, executing c62d90559d46534e
+@datacare/reports:build: cache hit, replaying logs e39286397a8c7315
+@datacare/parity:build: cache hit, replaying logs 771d602a9ad80574
+@datacare/reports:build: 
+@datacare/reports:build: > @datacare/reports@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/reports
+@datacare/reports:build: > tsc -p tsconfig.json
+@datacare/reports:build: 
+@datacare/parity:build: 
+@datacare/parity:build: > @datacare/parity@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/parity
+@datacare/parity:build: > tsc -p tsconfig.json
+@datacare/parity:build: 
+@datacare/types:build: cache hit, replaying logs f58a874d80d74b33
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/db:build: cache hit, replaying logs 19b4f9b07d4bf5ea
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/core:build: src/saleReturnBillTaxPolicy.ts(138,5): error TS2322: Type 'Readonly<{ status: "unsupported"; policy: null; diagnostics: readonly Readonly<{ key?: "CO_SET.TAX_ROF" | "CO_SET.ALL_ROF_REMOVE" | undefined; code: SaleReturnBillTaxPolicyCode; message: string; }>[]; version: string; profile: string; raw: Readonly<...> | null; provenance: readonly SaleReturnBillTaxPolicyProvenance[...' is not assignable to type 'SaleReturnBillTaxPolicyResult'.
+@datacare/core:build:   Type 'Readonly<{ status: "unsupported"; policy: null; diagnostics: readonly Readonly<{ key?: "CO_SET.TAX_ROF" | "CO_SET.ALL_ROF_REMOVE" | undefined; code: SaleReturnBillTaxPolicyCode; message: string; }>[]; version: string; profile: string; raw: Readonly<...> | null; provenance: readonly SaleReturnBillTaxPolicyProvenance[...' is not assignable to type 'ResolutionBase & { readonly status: "unsupported"; readonly policy: null; readonly diagnostics: readonly SaleReturnBillTaxPolicyDiagnostic[]; }'.
+@datacare/core:build:     Type 'Readonly<{ status: "unsupported"; policy: null; diagnostics: readonly Readonly<{ key?: "CO_SET.TAX_ROF" | "CO_SET.ALL_ROF_REMOVE" | undefined; code: SaleReturnBillTaxPolicyCode; message: string; }>[]; version: string; profile: string; raw: Readonly<...> | null; provenance: readonly SaleReturnBillTaxPolicyProvenance[...' is not assignable to type 'ResolutionBase'.
+@datacare/core:build:       Types of property 'version' are incompatible.
+@datacare/core:build:         Type 'string' is not assignable to type '"sale-return-company-open-tax-policy-v1"'.
+@datacare/core:build: src/saleReturnBillTaxPolicy.ts(212,3): error TS2322: Type 'Readonly<{ status: "ready"; raw: Readonly<{ 'CO_SET.TAX_ROF': string | null; 'CO_SET.ALL_ROF_REMOVE': string | null; }>; policy: Readonly<{ version: "sale-return-company-open-tax-policy-v1"; taxRoundingDecimals: 0 | ... 4 more ... | 5; }>; diagnostics: readonly []; version: string; profile: string; provenance: reado...' is not assignable to type 'SaleReturnBillTaxPolicyResult'.
+@datacare/core:build:   Type 'Readonly<{ status: "ready"; raw: Readonly<{ 'CO_SET.TAX_ROF': string | null; 'CO_SET.ALL_ROF_REMOVE': string | null; }>; policy: Readonly<{ version: "sale-return-company-open-tax-policy-v1"; taxRoundingDecimals: 0 | ... 4 more ... | 5; }>; diagnostics: readonly []; version: string; profile: string; provenance: reado...' is not assignable to type 'ResolutionBase & { readonly status: "ready"; readonly raw: Readonly<{ 'CO_SET.TAX_ROF': string | null; 'CO_SET.ALL_ROF_REMOVE': string | null; }>; readonly policy: SaleReturnBillTaxPolicy; readonly diagnostics: readonly []; }'.
+@datacare/core:build:     Type 'Readonly<{ status: "ready"; raw: Readonly<{ 'CO_SET.TAX_ROF': string | null; 'CO_SET.ALL_ROF_REMOVE': string | null; }>; policy: Readonly<{ version: "sale-return-company-open-tax-policy-v1"; taxRoundingDecimals: 0 | ... 4 more ... | 5; }>; diagnostics: readonly []; version: string; profile: string; provenance: reado...' is not assignable to type 'ResolutionBase'.
+@datacare/core:build:       Types of property 'version' are incompatible.
+@datacare/core:build:         Type 'string' is not assignable to type '"sale-return-company-open-tax-policy-v1"'.
+@datacare/core:build:  ELIFECYCLE  Command failed with exit code 2.
+ ERROR  @datacare/core#build: command (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core) /opt/homebrew/bin/pnpm run build exited (2)
+
+ Tasks:    4 successful, 5 total
+Cached:    4 cached, 5 total
+  Time:    821ms 
+Failed:    @datacare/core#build
+
+ ERROR  run failed: command  exited (2)
+ ELIFECYCLE  Command failed with exit code 2.

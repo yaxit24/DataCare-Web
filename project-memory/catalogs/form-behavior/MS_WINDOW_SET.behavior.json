@@ -1,0 +1,42 @@
+{
+ "form": "MS_WINDOW_SET",
+ "loc": 1301,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cMenuName": 1,
+  "cDisplayName": 2,
+  "cItmShow": 3,
+  "cShortName": 4,
+  "ctileName": 5
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * From CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT A.* FROM TILE_DATA AS A ORDER BY A.SR_NO",
+  "UPDATE TILE_DATA SET SM_MAIN_NAME = ' ? ', DISPLAY_NAME = ' ? ', ITM_SHOW = ' ? ' WHERE SR_NO = ' ? '",
+  "SELECT SM_MAIN_NAME As MenuNameL,BTN_NAME As MainMenuL FROM MENU_DATA WHERE TILE_ITEM = 'Y' ORDER BY MAIN_SRNO,SM_CODE",
+  "UPDATE CO_SET_NEW SET TILE_MENU = ' ? ' WHERE CO_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Window Menu Side Is Set ....",
+   "when": ""
+  }
+ ]
+}

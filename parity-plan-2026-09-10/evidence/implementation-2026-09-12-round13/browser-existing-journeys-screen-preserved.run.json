@@ -1,0 +1,21 @@
+{
+  "command": [
+    "env",
+    "PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round13-screen-preserved",
+    "pnpm",
+    "test:parity:browser"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:30:08.570378+00:00",
+  "finishedAtUtc": "2026-09-11T21:30:30.250190+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-existing-journeys-screen-preserved.txt",
+  "logSha256": "9881eebcb8285de64301fa316c665dd94640a9ebc3e526ec340d698e46f4f1e9",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-existing-journeys-screen-preserved.inputs.json",
+  "inputManifestSha256": "fc8f0962131d2da477c51495d7e91436283d53822ef54aedf67fff5f46fb37ce",
+  "inputCount": 1788,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

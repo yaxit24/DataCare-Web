@@ -1,0 +1,616 @@
+# End-to-end implementation plan
+
+## Target and operating rules
+
+Deliver the complete web replacement for the supported DataCareNext desktop product: the same business operations, fields, defaults, calculations, validations, decisions, document relationships, stock/money effects, reports, printing and practical operator efficiency. Preserve the existing web investment where it meets that contract. This is a behaviour-preserving migration, not a bulk relabelling exercise.
+
+**Full-product parity is the default target of this request.** Here, “in scope” means every reachable capability of the agreed primary desktop version, including supported country/book variants and companion functions it relies on. Historical waivers, low usage, missing extraction, absent web pages and engineering difficulty do not reduce that scope. A later explicitly narrowed deployment may be certified only for its declared subset; it cannot be called the complete desktop replacement. A source-backed proof that a duplicate/compiler artifact has no distinct business effect is a disposition, not a feature exclusion.
+
+The 83 packages are delivery containers, not a fixed ceiling on requirements or tests. Complete the discovery inside them, create additional child requirements/tasks for every newly found behaviour, and keep each parent open until its descendants and cross-module acceptance obligations pass. The [re-verification report](08-plan-reverification.md) and [additional source register](09-additional-source-register.md) are mandatory inputs. No statement in this plan certifies the current application or guarantees that implementation will succeed without those measurements.
+
+“Production for generic jewellery businesses” means configuration and data variation are supported: different charts of accounts and book codes, branches, years, products, rates, labour methods, stock policies, settlement methods, printers and roles. An implementation that only reproduces one demo company's records is insufficient.
+
+Keep two explicit lanes. **Desktop compatibility** preserves source-confirmed business semantics. **Web production improvements** add concurrency handling, session isolation, safe retries, observability, responsive usability, accessible controls and recoverability. When they alter visible desktop behaviour, document the difference and obtain business acceptance. Do not reproduce an unsafe implementation detail merely because the desktop uses it, and do not silently change a financial rule while improving the implementation.
+
+All work begins from the reviewed working tree, not a reset to HEAD. Inventory and preserve current modifications. Use an isolated development/test environment; existing business databases are not test fixtures. This plan does not authorize production migration or actual customer/provider communications.
+
+## A requirement is complete only when its entire path works
+
+For every form field and action, record:
+
+| Contract element | Required detail |
+| --- | --- |
+| Identity | Stable requirement ID; source form; grid/control or action; desktop version/hash |
+| Visibility | Edition, country, book, user, company-setting and workflow-state conditions |
+| Input | Type, length, scale, signedness, units, enumeration, default and blank/null/zero distinction |
+| Lookup | Dataset, scope/filter, sort/search, picker columns, default selection and dependent fills |
+| Calculation | Trigger event, formula, order, rounding point, override precedence and downstream effects |
+| Validation | Condition, operator message, focus destination, blocking versus confirmable behaviour |
+| Persistence | Request field; route adapter; domain input; write column; source references; full ownership key |
+| Reading/editing | Reader and hydration mapping; identity preservation; untouched-value preservation |
+| Effects | Ledger, Rojmel, stock, tax, outstanding, allocation, image, audit and printing effects |
+| Branches and callers | Menu/constructor/book/state/role/setting entry conditions; helper, timer and asynchronous callers; state transition and error/confirmation alternatives |
+| Continuity and history | Required network/service mode; historical-record behaviour; offline/retry/upgrade effects; permitted technical differences |
+| Proof | Golden vectors, API/DB/browser tests, desktop capture, exact differences and operator acceptance |
+
+An occurrence in TypeScript, an API accepting a field, or a generated input box satisfies none of the later steps by itself. Computed fields need visible accurate results and round-trip protection; hidden/internal fields need preserved server identity, not editable inputs.
+
+## Work sequence, ownership and release boundaries
+
+| Phase | Outcome | Depends on | Lead responsibility |
+| --- | --- | --- | --- |
+| P00 | Trustworthy scope, source baseline and verification environment | None | Technical lead + desktop specialist + QA |
+| P01 | Consistent identity, arithmetic, posting and lifecycle contracts | P00 | Backend/domain lead |
+| P02 | Complete shared form interaction and settings framework | P00, P01 contracts | Frontend lead + QA |
+| P03 | Rich masters and correct business provisioning | P00–P02 | Full-stack master-data owner |
+| P04 | Purchasing, old metal and supplier workflows | P01–P03; stock contracts from P07 | Purchasing domain owner |
+| P05 | Sales, orders, approval, tour and repair journeys | P01–P04, P07 stock foundation | Sales domain owner |
+| P06 | Finance, bullion, fine metal and settlement | P01–P03 | Accounting/bullion owner |
+| P07 | Stock, tags, lots and physical inventory | P01–P03 | Inventory owner |
+| P08 | Manufacturing, karigar, jobwork and melting | P01–P03, P07 | Manufacturing owner |
+| P09 | Dhiran, loans, membership and schemes | P01–P03, P06 settlement | Lending/scheme owner |
+| P10 | Complete report workflows and output | P00 inventory; family contracts progressively | Reporting owner + accountant |
+| P11 | Utilities, devices, integrations and access controls | P01/P02 plus related families | Platform/full-stack owner |
+| P12 | Migration, operations, backup and recovery | P00 starts discovery; P01/P03 and mature families for rehearsal | Database/platform owner |
+| P13 | Edition, auxiliary-binary and geography closure | P00 scope reconciliation | Product owner + desktop specialist |
+| P14 | Full-system certification and controlled transition | Every in-scope phase | QA lead + business owner + operations |
+
+Phase numbers are stable work labels, not a strict one-at-a-time schedule. P07 stock foundations precede stock-dependent sales; P10 report discovery and P12 migration discovery start early. Existing engineering work is reused after its evidence is checked. Release requires all applicable phases; completion of a module does not waive its cross-module dependencies.
+
+The lead roles identify expertise, not people already assigned. Size work after the first five representative contracts and desktop captures. Track actual time per field class, transition and report family, then produce pessimistic/expected/optimistic estimates. Do not promise a calendar date from source-line or page counts. Reserve explicit capacity for desktop observation, data cleanup, printer/device work and business UAT; these are part of delivery.
+
+## P00 — Establish trustworthy scope and evidence
+
+### P00-01 — Freeze and reconcile the complete product inventory
+
+Preserve the current dirty tree, executable/source hashes, dependency lockfile, schema/migration version and existing evidence. Reconcile 204 source units, 198 menu entries, 101 web route files, 255 report binaries, 20 additional report references, 146 table units and the initializer/restored-schema counts. Parse `MDI_FORM.cs` menu handlers, constructor parameters, book classifications and runtime menu data. Resolve the 12 unresolved menu labels and inspect mismatched mappings such as loan issue/receipt rather than trusting their names.
+
+Reconcile the whole primary assembly tree, not just the `DataCareNext/` namespace directory: it has 212 C# files, including eight support files outside the original 204-unit register. Include entry point, settings/resources, referenced DLLs, database routines, installer/configuration dependencies and companion invocations. Merge the 916 additional modifier-bearing input declarations in the supplemental register with the original 1,599 candidates, retaining provenance and deduplicating semantic identities. Resolve the 43 named-grid records without a literal line match. Neither 2,515 combined declaration candidates nor the original field ratio is a semantic completion denominator.
+
+Output a canonical inventory with stable IDs, category, variant parameters, current web destinations, explicit missing/partial/unverified status, ownership and dependencies. Keep one form mapped to several routes and several forms mapped to one route visible. **Accept when every source/menu/report/data item has a disposition and the source totals reconcile; no new waiver is inferred from a previous narrative.**
+
+### P00-02 — Capture the desktop as an independent reference
+
+Prepare an isolated Windows installation with the correct executable, dependencies, Crystal runtime, fonts, permissions, settings and sanitised databases. Preserve the installer and hashes. Observe each business mode; capture input actions, prompts, intermediate totals, output documents and before/after database state. Existing SQL Server exports of real records prove historical stored results, but do not by themselves prove the user action sequence or application version that produced them.
+
+Create desktop cases for create, unchanged edit, changed edit, cancellation/deletion, import/adjustment and print. Include at least two unrelated business configurations and two branches/years for scope-sensitive operations. **Accept when captures are reproducible and attributable to an executable, configuration, fixture and operator/run; synthetic fixtures used to test the differ are separately labelled.**
+
+### P00-03 — Replace misleading completion metrics
+
+Repair scanners to recognize typed setting aliases, actual `recalcLine` use, quoted/unquoted report registry keys, dynamic masters, conditional grids and wrapper props. Replace global field-name matching with page → route → writer/reader mapping. Discover all grid pages before applying the dead-cell audit; an unmapped page is a failing coverage obligation. Validate the scanners with positive and negative controls, including an unused field with the same name on a different page.
+
+Validate declaration modifiers, inherited/resource-created controls and supported third-party control types against independent source samples. In particular, `MS_PRINT` has three `private virtual CheckBox` declarations although the original scanner counted zero inputs. Extract async/non-void methods, delegated actions and call sites; a regex event list is only a starting index. Compare parsed control trees to rendered desktop forms and actual event wiring. Inventory disagreements fail coverage rather than being normalized into a smaller denominator.
+
+Keep old scanner numbers for historical comparison but introduce requirement coverage, transition coverage, field-path coverage, configuration effect coverage and independently matching cases as separate measures. **Accept when deliberate broken controls fail for the intended reason, shared variants remain distinct and no dashboard calls a count ratio “functional parity.”**
+
+### P00-04 — Create a real full-stack verification environment
+
+Provision fresh PostgreSQL from migrations, force RLS, create non-owner runtime credentials and seed isolated test businesses. Run real API and web services with matching build identifiers. Retain the existing stubbed browser tests for interaction feedback, and add a separate authenticated suite that uses real requests and inspects resulting rows. Enumerate dynamic master names and report slugs, not only one sample per dynamic route.
+
+Keep test fixtures independent of the demo/live tenant, enforce UTC in deterministic arithmetic tests, and add explicit India/local-time business-date tests. **Accept when every required route can be exercised with valid context, auth failures are distinguishable from render failures, and DB tests cannot pass by skipping.**
+
+### P00-05 — Make contracts and CI enforce coverage
+
+Extend the existing 11 authored contracts using the form register. Each field/action gets the contract elements above; each conditional branch gets a test or a source-backed not-applicable disposition. Fill missing formula vectors through source interpretation and desktop runs. A debt ratchet that accepts unresolved draft rules remains an engineering guard, not a release gate.
+
+Create a versioned requirement graph from product → capability → form/mode → action/field/decision → request/reader/writer → tables/reports/provider effects → case evidence. Enumerate business decisions inside handlers, constructors, startup/shutdown, timers, context menus, shared engines and error/retry paths. Each leaf has an owner and exact work-item/test links; each source item has a reviewed disposition. Test source-dead claims across callers and configurations. No package closes on a declaration count, a sample contract or passing tests for only one caller of a shared helper. New discoveries expand the graph and reopen affected parent acceptance.
+
+Move/register web build and release workflows under the actual repository-root `.github/workflows/`, with correct working directories. Verify the required checks are active in the hosting repository and attach retained evidence through approved artifact retrieval. **Accept when a PR with a deliberately omitted required contract/test fails and the actual CI system runs the checks.**
+
+## P01 — Compatibility kernel and transaction integrity
+
+### P01-01 — Formalize identity and scope for every table family
+
+Use tenant + company + location + fiscal year + book + voucher number as the logical voucher scope, with table-specific exceptions documented explicitly. Preserve zero padding, spaces, hidden voucher identities, line serials, tag-instance serials and reference keys. Follow `vouchers/numbering.ts`, `vouchers/lifecycle.ts` and `posting/posting.ts`; audit every read, mutation and report query for complete keys.
+
+Desktop `LEDR_KEY` layouts differ by family and sometimes by leg within one voucher. Catalogue them rather than using one universal string concatenation. Treat HUIDs, account codes and identifiers as text. **Accept on two-company/two-location/two-year fixtures sharing book/voucher/tag numbers, with no cross-scope reads, writes or images and exact persisted identity comparison.**
+
+### P01-02 — Complete numerical policies and precedence
+
+For every desktop formula, identify whether it uses formatting, `Math.Round` or another conversion; capture negative midpoints, per-line versus voucher rounding, rates per gram/ten grams/kilogram/piece, fine and net bases, wastage, ghat, stone conversion and customer/karigar valuations. Preserve blank versus explicit zero and distinguish operator overrides from derived values.
+
+Use `packages/core/src/money.ts`, `finePolicy.ts`, `shared/roundingPolicy*`, `labourDesktop.ts` and related helpers where they match the measured contract. Replace local arithmetic only after vectors establish the required policy. **Accept when source-cited vectors match the desktop at every rounding boundary and preview/API/persisted values agree; no blanket epsilon adjustment or arbitrary tolerance is allowed.**
+
+### P01-03 — Close complete posting footprints
+
+For each family, enumerate header/detail/subdetail, `AC_DATA`, `ROJ_MEL_DATA`, `MAIN_STOCK`, tax, outstanding, order/booking/member adjustments, tender identity, image and audit writes. Measure row counts and semantic role codes by book. A balanced ledger alone is insufficient: a balanced voucher can omit both sides or write the wrong accounts. Rojmel is a movement view, not a ledger mirror; signed metal rows and unsigned money rows have different meaning.
+
+Keep configured book-account resolution fail-closed; remove unmeasured fallback account/leg assumptions through contracts. Reconcile the retained 510 field differences and missing/extra rows one classified defect at a time. **Accept when the full allowed write set matches desktop evidence, other tables do not change, and downstream stock, outstanding and reports reconcile.**
+
+### P01-04 — Standardize create/open/edit/delete and correction transitions
+
+Define which families permit saved-but-not-effected state, direct posting, reversal, deletion, controlled correction and dependent-document locks. Preserve observed business states even when implementation makes the transaction atomic. Use `postVoucherTx`/lifecycle helpers for period checks, numbering and complete reversal. Do not replace a separate `UT_USER_REQUEST` workflow with an invented mandatory reason on every delete.
+
+Require row/version or equivalent stale-edit detection, documented read/modify semantics and preserved immutable reference identities. Test unchanged reopen/save using distinct rich values, then edit one field, add/remove/reorder child rows and delete. **Accept when unchanged business values remain unchanged, permitted audits are explicit, dependent documents remain valid, and unauthorized/locked transitions have zero partial effects.**
+
+### P01-05 — Make concurrent writes and retries deterministic
+
+Specify uniqueness and transaction locks for voucher allocation, live tag consumption, book sequence, order balances, outstanding settlement and booking drawdown. Add idempotency for user-initiated mutations that may be retried after a lost response. A retry must return the original result; conflicting payload reuse must be rejected. Keep external sends after committed state with durable attempt identities.
+
+Run overlapping sales of one tag, two payments against one bill, simultaneous source allocation, edit-versus-delete and request timeout immediately after commit. **Accept when no duplicate voucher/payment exists, balances cannot be overconsumed, the losing operator receives an actionable conflict and rollback/retry leaves no orphan row.**
+
+## P02 — Shared form richness, interaction and settings
+
+### P02-01 — Define a reusable form contract without flattening variants
+
+Extend the current shared components rather than introduce a second application stack. Define metadata for header fields, line grids, child grids, browse panels, totals bands and conditional groups. Metadata must support row-level dependencies, validators, defaults, lookups, derived displays, precision, read-only rules and mode-specific fields. Use specialized screens when a generic renderer cannot express the workflow cleanly.
+
+Build a reference screen with main lines, two distinct subdetail sets, source allocation, dual valuation and editable payment/received totals. **Accept when its full desktop contract can be represented and tested without hiding domain logic in arbitrary field-name conventions.**
+
+### P02-02 — Complete child-grid editing and calculation
+
+Extend `SubDetailGrid.tsx` and `shared/stoneSubDetail.ts` with per-form columns and calculations. Cover diamond/certificate data, pieces and piece weight, conversion, amount, labour, net amount, customer valuation, karigar valuation, component return/breakage and old issue references. Match field names (`lbrRate` versus `labourRate`, for example) through the actual writer. There are 38 retained IDTL grids across 35 forms; validate that inventory against source.
+
+Keep stable child identity under row insertion, removal and sorting; distinguish source/return component sets. Recompute or preserve overrides exactly as desktop does. **Accept with two parents having dissimilar children, reorder/delete/copy tests, complete save/read/edit preservation, correct totals and cross-parent isolation.**
+
+### P02-03 — Implement cell-exit, lookup and totals behaviour
+
+Trace the 416 desktop grid event sites into functional behaviours. Adopt recalculation only on applicable forms; do not require meaningless hooks on header-only screens. Implement lookup fill chains, current-row item/photo/balance panels, automatic touch/rate/slab selection and reset of dependent fields. Create an editable totals/settlement component with the desktop's row-oriented tax, discount, TCS/TDS or round-off, cash/cheque/card/UPI, advance, old-gold, scheme, kasar and outstanding cells.
+
+Keep manual override flags explicit; changing an upstream field must recompute derived values without accidentally freezing a previous preview as an override. **Accept when tabbing, picking, pasting and editing yield the same intermediate and final numbers as the source contract and server.**
+
+### P02-04 — Complete keyboard and high-volume operator ergonomics
+
+Audit F1–F12, modifier shortcuts, Enter/Tab/arrows, row append/delete, Escape, save/print/new and modal focus. F6 is present; F10 requires desktop observation because a caption alone is insufficient. Preserve the effect of row-change/search preferences required by current scope. Support full grids with clear grouping, fixed identity/totals columns, column visibility preferences and readable amounts/weights.
+
+Test primary workflows keyboard-only, barcode scanning into the correct focus, lookup cancel, empty row removal, validation focus and conflict recovery. Add accessible labels/error associations and useful 1366×768, larger-counter and tablet layouts. **Accept when experienced operators can complete the benchmark without hidden required fields, trapped focus or materially worse throughput.**
+
+Include the desktop's practical use of multiple open forms: consult a ledger or master while preserving an unfinished invoice, return to the same row/selection, compare two documents and open a related record. Implement equivalent tab/window navigation without leaking company/book context or stale defaults. Distinguish per-user, per-device and per-form preferences; test session/context change with several tabs open. Do not demand the old Windows window chrome, but preserve the operator's task and information density.
+
+### P02-05 — Implement settings as observable business policies
+
+For all 130 inventory rows and configuration in `CO_MAST`, `TAG_SET`, books, users and window settings, record table/key, exact default, allowed values, load/consumer paths and all affected forms. Deduplicate registry keys by table/key rather than spelling alone. Prioritize money/stock/validation settings, then workflow/printing, then interaction preferences. Verify the typed alias effects already present before adding code.
+
+Examples still requiring consumers or further proof include `BRANCH_ALL_AC_SHOW`, `DUP_PRINT`, `CUR_DAY_POSTING`, `SL_TAG_WT_DIFF`, lot stock, estimate locks/tax, weight/fine locks, silver precision and image-print switches. `CUR_DAY_POSTING` governs stock refresh scope; it must not be implemented as a guessed date restriction. `SL_TAG_WT_DIFF` changes stock reconciliation, not merely sale permission.
+
+**Accept with table-driven allowed-value/default/invalid tests plus real persisted outcome tests for each business branch. A loader read or disabled UI input is not enough; direct requests must obey the same policy.**
+
+### P02-06 — Complete form session and error behaviour
+
+Keep draft values through recoverable errors and session refresh; warn before navigation discards meaningful work. Resolve company/year/book changes explicitly and clear dependent state safely. Show server validation at the relevant field/row and preserve the failed values. Prevent double submit, identify successful saves after uncertain network responses and avoid accidental duplicate printing or messaging on retry.
+
+Make internet-independent operation an explicit P00 architecture decision and R10/R11 release obligation. Distinguish internet outage, LAN loss, server failure and device-bridge failure. A browser served by a local/LAN application and database can preserve shop posting during an internet outage; a cloud-only deployment ordinarily cannot. If disconnected browser posting is required, specify its local store, access control, document identities, reserved stock/number ownership, stale rates/permissions, synchronization, conflicts, reconciliation and restart recovery before implementation. Do not select a local server or offline synchronization solely from this plan without validating the intended topology.
+
+The user's full operational-parity target remains open until ordinary desktop-independent sales, stock, settlement, lookup and printing can continue under the agreed outage conditions, or the user explicitly accepts a narrower operating service. Such a limitation must appear in the release claim. Cached pages or saved drafts alone do not prove offline business operation. Online provider actions retain their actual connectivity requirement and visible pending/failed states.
+
+**Accept with a documented service-mode decision and expired-session, internet/LAN/server disconnect, reload, back-navigation, local persistence/reconnect and retry tests for that mode; no silent data loss, conflicting accepted stock, duplicate posting or ambiguous posted status.**
+
+## P03 — Masters and company configuration
+
+### P03-01 — Complete party, account and organization masters
+
+Review `MS_ACCT`, account groups, addresses, company, location, user, book, year, employee and related masters. Bring over conditional requirements, contact/demographic fields, tax classification, bank details, credit days/limits, fine balances, reference accounts, photos and duplicate/reference rules. Extend `master.service.ts` validations to inspect the whole row plus settings and related records where required.
+
+Preserve exact code generation, field lengths, text identifiers and blank/default meanings. **Accept with valid/invalid conditional combinations, referenced-master edits/deletes, multi-branch lookup rules and complete rich-row reopen/save through the browser.**
+
+### P03-02 — Complete item, product, rate, touch, labour and stock-limit masters
+
+Cover `MS_ITEM`, `MS_PRODUCT`, `MS_GROUP`, `MS_GOLD_MAST`, `MS_RATE`, `MS_TASTING`, `MS_LBR_TYPE`, `MS_TRADE`, `MS_AUTO_ITEM`, `MS_STK_LIMIT`, counters/styles/diamonds and manufacturing masters. Expose applicable gold conversion, wastage/ghat, units, rates, labour basis, stock limits and party/item/weight slab collections. Avoid one flat row when the desktop edits children beneath a selected parent.
+
+**Accept when changing each policy actually affects the intended transaction/report, boundary slab selection is correct, lookup defaults are consistent and unrelated items/parties retain their settings.**
+
+### P03-03 — Deliver the complete design-book workflow
+
+Implement a rich `MS_DESIGN_BOOK` replacement using `masters/designBook.ts` and a dedicated or collection-capable screen. Support book/product/page/design identity; main lines; `DESIGN_IDTL` children; die, size, weight, touch, wastage, ghat, fine, rate type, item/labour/other/net amounts, cost and MRP. Preserve desktop row references during edit and delete. Complete customer/karigar component calculation and image associations by the full desktop entity key.
+
+**Accept on two books and two products sharing a design number, multiple component rows, distinct images, derived/overridden values, unchanged edit and one-child deletion. Compare both DESIGN tables and prints to the desktop.**
+
+### P03-04 — Provision branches, books, years and settings completely
+
+Observe `MS_LOCT` cloning/provisioning of `BOOK_DATA`, `BOOK_DETL` and `TABLE_MAST`; implement equivalent atomic branch setup rather than only inserting `LOCT_MAST`. Verify company creation/cloning and settings row creation, user permissions, counters, opening dates and books. Retain existing year open/close/reopen/carry-forward work after tests; the old “already parity” description is not a fresh certificate.
+
+**Accept when a newly provisioned branch/year can execute an authorized purchase/sale/settlement without manual database repairs, and a failed setup leaves no partially usable company or branch.**
+
+### P03-05 — Make master imports, bulk edits and search usable
+
+Provide scoped import preview with field mapping, row errors, duplicate policy, reference resolution, encoding, decimal/date handling and rollback; test export/import round-trip for supported data. Reproduce desktop picker search modes where meaningful, leading-zero searches, multi-field matches and contextual filters. Keep asynchronous lookups from overwriting a newer selection.
+
+**Accept with malformed and partially valid batches, duplicate identifiers, non-English names, conflicting parent references, large catalogs and a real operator benchmark. Imported configuration must trigger the same validation as individual edits.**
+
+## P04 — Purchase and supplier workflows
+
+### P04-01 — Close retail/wholesale purchase form depth
+
+Trace `TR_PURC` main, receive/return-side and IDTL grids plus the editable totals band. Complete item/lot/tag/HUID/design/style/counter/size, bag/less/net/gross/fine, touch/wastage/ghat, rate basis, labour, other costs, tax, supplier, booking and source references according to book mode. Reuse existing purchase writer fields after confirming they are consumed and returned; do not add redundant request contracts.
+
+**Accept each book variant with multi-line/multi-stone data, mixed metals, explicit overrides, calculations and full UI → DB → reopen preservation. Source-conditioned style/edition fields remain conditional.**
+
+### P04-02 — Complete hallmark, old-gold, quotation and other purchase variants
+
+Make `TR_PURC_HM` a real variant matching its 95-declared-column receive grid, HUID/weight and component behaviour, not merely the same purchase page with a different label. Verify old-gold purity/conversion, expense/other purchase, commission and supplier quotation modes reached by desktop menu/constructor parameters. Record TDS/TCS and hallmark-tax effects as historical compatibility rules with source-version dates.
+
+**Accept variant-specific writes, tax classifications, supplier documents and conversions. Zero tax, absent rate, configured tax disabled and cross-state cases must be represented by independent fixtures; current statutory rules are validated in P11.**
+
+### P04-03 — Complete supplier settlement and outstanding lifecycle
+
+Implement cash, cheque, bank, card/UPI, credit, advance, adjustment and kasar according to actual desktop support. Preserve per-tender identity and ledger role codes; verify `BILL_OS`, Rojmel, `OP_LDR`, lot rows and bill-outstanding tables against measured branches instead of assuming extra rows are harmless. Support bill selection, partial/multiple allocation and reversal.
+
+**Accept fully paid versus outstanding purchases, mixed payments, over-allocation rejection, settlement change on edit and deletion after permitted dependency handling. Each report must show the same supplier liability and metal balance.**
+
+### P04-04 — Complete purchase returns and source linkage
+
+Reproduce selection of original purchase rows, partial/complete quantity and component returns, original pricing/tax references, stock restoration/consumption and refund/credit allocation. Test every displayed extended field against `purchaseReturn.ts`, not against a purchase interface; the prior dead-field defect makes this a required regression case.
+
+**Accept repeat return attempts, over-return, source edit/delete conflicts, multi-year source selection rules, return cancellation and exact stock/tax/outstanding reversal. Unchanged edits preserve all child and tag identities.**
+
+### P04-05 — Certify the purchasing business journey
+
+Run supplier creation → purchase/old-metal receipt → component/tag/lot availability → partial return → payment/adjustment → supplier ledger → purchase/GST/stock reports → source correction. Drive it through real screens with two configurations and at least one multi-location flow. **Accept on complete desktop/write-set/report agreement and purchasing-operator sign-off, with no direct SQL used to complete missing steps.**
+
+## P05 — Sales, orders, approval, tour and repair
+
+### P05-01 — Close retail and hallmark invoice richness
+
+Complete `TR_SALE` and `TR_SALE_HM` line, IDTL, old-gold, order, UPI and credit-note grids. Include order linkage, counter/design/style/size, HUIDs, bag/less/ghat, fixed ghat/wastage, fine, rate/labour modes, discount, cost/margin, employee commission and karigar-side fields when desktop mode requires them. The current sales page has no `SubDetailGrid` adoption; prove its child-entry path rather than assuming shared component presence elsewhere covers it.
+
+**Accept scan/pick/manual-entry cases, stock and weight locks, per-cell totals, complete tender data, printed invoice and full read/edit preservation. Preserve current negative-stock and hallmark-tax settings while extending them to all applicable modes.**
+
+### P05-02 — Complete wholesale, labour and fine-sale variants
+
+Respect `TR_WH_SALE`'s separate issued/sold and received/purchase-side grids, full component and karigar valuation, rate/tax/settlement, book classifications and source references. Complete `TR_SALE_LBR` receive lines (currently an API-only candidate), labour derivation, supplied-metal handling, tax and print paths. Verify fine sale/purchase with P06 rather than forcing ordinary retail arithmetic onto metal-account settlement.
+
+Implement bulk wastage changes, tag-derived karigar touch/fine refresh and editable totals only when verified by the desktop handler. **Accept each variant independently, with its own write footprint and document; a shared route must not erase variant behaviour.**
+
+### P05-03 — Complete retail and wholesale returns
+
+Support the original-invoice selector, returned sale items, separately received/exchanged items where present, both IDTL sets, HUID/tag detail, original references, tax and payment/credit adjustments. Preserve original cost/tag/customer/karigar valuation where the desktop does. Use dedicated variant adapters rather than copying a purchase registry into an unrelated writer.
+
+**Accept partial and complete returns, repeated selection, over-return, linked-order effects, refund/credit-note allocation, post-return stock availability and permitted delete/reversal. Reopen rich returns unchanged and compare every stored business column.**
+
+### P05-04 — Complete orders, quotations and fulfillment
+
+Build exact `TR_SALE_ORD`, quotation and order-adjustment paths: design/component specification, photos, promised dates, old-metal advances, cash/UPI installment rows, manufacturing/design issue and reissue, partial production, tag reservation/reduction policy, partial delivery and final invoice allocation. Maintain remaining quantities and money/fine advances independently.
+
+**Accept quotation → order/invoice conversions, order → manufacturing → delivery, multiple deliveries against one order, canceled delivery, excess allocation rejection and dependency-protected source deletion. Source documents must remain discoverable and balances must reconcile.**
+
+### P05-05 — Complete approval, consignment, tour and parcel workflows
+
+Map `TR_APR_ISU`, `TR_TOUR`, `TR_TOUR_ORD`, `TR_TOUR_SALE`, `TR_VP`, `TR_VP_ADJ` and consignment menu variants by actual constructor/state. Provide source selection, issued tags/components, partial return, partial sale, source status, photos, responsibility/location, settlement and parcel adjustment. Shared tour pages require distinct modes with explicit authority and inventory effects.
+
+**Accept a mixed return-and-sale on one issue, tag still-out versus available visibility, repeated import prevention, branch transfer during custody, source cancellation rules and final customer/employee/stock reconciliation.**
+
+### P05-06 — Implement imports, conversions and voucher transfer as complete operations
+
+Reproduce approval-to-sale bulk import and quotation-to-sale selection, preserving line/component references and source availability. Distinguish cross-book voucher transfer from the existing renumber utility. Transfer must update every affected header/detail/subdetail/allocation/UPI/stock/tax/ledger/Rojmel reference atomically, enforce source/destination period and book permissions, and leave a discoverable history.
+
+**Accept partial/full imports, repeat attempts, stale source, deleted source, locked destination, collision, edit/delete after conversion and injected halfway failure. Counts, source balances and reports must remain consistent.**
+
+### P05-07 — Finish repair as a connected lifecycle
+
+Verify existing repair receipt, karigar issue, karigar return and customer delivery modules and documents. Match desktop receipt details, images, customer-owned weights/components, promised dates, estimates, labour/charges, item condition, stage history, partial completion and settlement. Preserve the distinction between customer custody and owned saleable stock.
+
+**Accept receive → issue → partial return → completion → customer delivery/refund, missing-photo/device cases, stage reversal/dependency locks and printed acknowledgements. No stage is certified solely because its standalone page saves.**
+
+### P05-08 — Certify sales operations as business journeys
+
+Execute tagged retail sale, mixed old-gold exchange, order fulfillment, wholesale metal settlement, return, approval/tour sale and repair delivery through real UI. Reconcile invoice, cash/bank, stock/fine, outstanding, scheme/order adjustments, tax, commission and prints. **Accept when salespeople and the accountant can complete each configured journey with no hidden manual workarounds and desktop differential results are clean.**
+
+## P06 — Finance, bullion and settlement
+
+### P06-01 — Complete cash, bank and tender identities
+
+Verify cash/bank receipts and payments, batch receipts, card settlement, UPI receipts, contra and clearance/reconciliation. Cover multiple counterparties/lines, bank charges, cheque number/date/clearance, payee and account-payee printing, UPI bank/type/transaction identity, employee/reference/description and allocation details. Preserve distinct bank versus cash leg codes and inward/outward kasar account policies.
+
+**Accept positive/negative/zero boundary cases permitted by the contract, mixed tender, repeated receipt, bounce/reversal where supported, partial allocation and statement reconciliation. An aggregate payment amount cannot substitute for identity rows.**
+
+### P06-02 — Complete journals, opening balances and location/fine transfers
+
+Verify account opening, journal, employee JV, ledger adjustment, gold book, fine JV, fine in/out and location amount branches. Preserve money versus metal balance signs and gold/silver separation. Determine when `TR_FN_INOUT` posts party-fine settlement/TDS or money by source; do not rely on older “no money ledger” comments. Record opening-year and carry-forward effects.
+
+**Accept separate amount/fine openings, transfers between parties/locations, balanced and invalid journal structures, period locks, edit/delete and trial-balance/stock reconciliation without inappropriate mirror rows.**
+
+### P06-03 — Complete bill-to-bill and cross-document settlement
+
+Expose source bills, due date/aging, balance currency/metal, allocation amounts, residual outstanding and supported cross-adjustments. Use full source identities and atomic allocations. Handle partial receipts, several receipts against one bill, one receipt across bills, advance adjustment, refund and deletion of allocations independently from source documents.
+
+**Accept concurrent allocation, over-allocation, changed source total, reversal and multi-year/branch permission rules; outstanding reports and party statements must tie exactly to allocation rows.**
+
+### P06-04 — Complete bullion booking and rate-cut receiving
+
+`TR_BUL_BOOKING` requires a multi-party line workflow where supported; one header quantity is not necessarily equivalent. Complete booking rate basis, fine/weight, MCX/premium, validity and settlement. Add the missing `RATE_CUT_REC` contract, reader/writer/reversal and receive-side grid alongside `RATE_CUT_ISU`.
+
+Use the existing booking consume/release function after verifying the selector resolves complete source references. Preserve `ADJ_WT` semantics across create/edit/delete. **Accept issued-only, received-only and two-sided cuts; booking exhaustion; partial booking allocation; rate changes; source reversal; concurrent drawdown; and exact money/fine postings on both sides.**
+
+### P06-05 — Complete wholesale fine/rate-cut arithmetic and docs
+
+Unify source-backed rate basis, conversion rate, purity, hallmark fine, labour, other charges, price overrides and payment/received totals for `TR_BUL_SALE`, `TR_WH_SALE`, `TR_PR_SL_HEDG` and fine sale/purchase modes. Replace only the measured local preview formulas; per-piece preview currently lacks a fully expressed piece basis in the rate-cut page.
+
+**Accept every allowed basis and sign, mixed gold/silver where supported, no-rate/zero-rate semantics, whole-unit and fractional rounding, rich document rendering and ledger/daybook/fine outstanding comparison.**
+
+### P06-06 — Certify accountant workflows and closing
+
+Run opening balance → purchase/sale → mixed receipts/payments → bill allocations → bank reconciliation → journals/fine transfers → daybook/trial balance/outstanding → year-end preview. Verify each balance against independently captured desktop outputs, not only an aggregate zero. **Accept when the accountant can explain each movement and drill to its source, adjustments survive correction and all scope boundaries hold.**
+
+## P07 — Inventory, tags, lots and physical stock
+
+### P07-01 — Establish complete stock identity and availability
+
+Map `MAIN_STOCK`, barcode header/detail/IDTL, lots, counters, tag images and purchase/manufacturing lineage. Separate a tag number from a live tag instance and its serial history. Define available, reserved, issued, sold, returned, canceled, split and replaced states, and which table/row proves each state. Preserve company/location/year/book scope while allowing only desktop-supported historical references.
+
+Verify gross/net/fine/stone quantities, pieces, gold/silver/other separation, stock basis settings, purchase cost and tag cost. **Accept when lookup, availability checks, reports and mutation locks agree for each state, and identical visible tag numbers cannot select another instance.**
+
+### P07-02 — Complete opening, item-lot and stock adjustment forms
+
+Finish `TR_TAG_OPBL`, `TR_ITM_OPBL`, `TR_ITM_LOT`, counter transfer, stock in/out and adjustment modes. Include the tag opening's main/IDTL fields, HUID1–4 with associated weights, bag/less/wax/kundan/jadtar, karigar costing, images, design and source identities where applicable. Keep the released tag-opening edit preservation tests; extend them through the actual browser payload.
+
+**Accept create/reopen/unchanged edit/changed edit/delete, imported openings, linked transactions, serial stability, amount/weight/piece conservation and no loss of the rich BAR_DETL or BAR_IDTL fields.**
+
+### P07-03 — Complete and release tag transfer and cancellation
+
+For transfer, reproduce exact source live-serial selection, destination/counter/location fields, source/child references, images, component data and reversal. For cancellation, select one live instance, preserve cancel detail and source lineage, enforce dependent sales/issue locks and expose missing operator fields such as tag lot, polish and target table only where desktop permits them.
+
+Use shared locks with sale/split/weight-change operations. Keep the containment rules until create/get/edit/delete, conservation, concurrent conflict and real desktop differential gates pass. **Accept each operation separately; removing a notice or returning HTTP 200 is not release evidence.**
+
+### P07-04 — Complete and release tag split
+
+Implement atomic parent consumption and allocation of unique child tag identities, barcode detail, IDTL, images, parent/child links and associated stock/financial effects. Reproduce the desktop's input versus output grids and settlement band; preserve all HUID/weight/cost/karigar fields per child. Define residual, wastage and rounding allocation with source evidence; never silently discard a remainder.
+
+**Accept unequal splits, multiple components, parent images, mixed permitted output items, zero/invalid children, duplicate child IDs, simultaneous parent sale, failure after some children are prepared, edit and deletion with downstream dependency checks. Parent/child quantities, money and fine reconcile at specified precision.**
+
+### P07-05 — Complete and release tag weight difference
+
+Model the full desktop replacement/correction workflow, including old/new tag detail, serial linkage, gross/net/fine differences, component/image changes, karigar/settlement branches, barcode records and Rojmel. This is more than incrementing net stock. Implement `SL_TAG_WT_DIFF` sale-driven stock reconciliation separately according to `Ac_Stock.cs`, including its special row identities and exact branch conditions.
+
+**Accept positive/negative/no-change differences, tagged versus untagged input, full unchanged edit and reverse, source already consumed, concurrent mutation and desktop row-set comparison. Every contained operation exits through its own evidence record.**
+
+### P07-06 — Complete physical stock and inventory reconciliation
+
+Support count sessions, scan/manual entry, expected versus counted pieces/weights, missing/extra/duplicate tags, counter/lot/location filters and desktop-supported adjustment posting. Establish the snapshot time and handling of sales during counting. Complete HUID, stock level, movement, valuation and component-stock outputs with P10.
+
+**Accept duplicate scans, unknown tag, wrong branch, item/stone differences, concurrent sale after snapshot, canceled count, repeated finalize and reconciliation to posted adjustments. Operators must see what will change before finalization and be able to trace each adjustment.**
+
+## P08 — Manufacturing, karigar, jobwork and melting
+
+### P08-01 — Extract the complete stage and material model
+
+Map `TR_MFG_ORD_ISU`, `TR_MFG_ORD_REC`, `TR_MFG_ISU_REC`, `TR_MFG_KR_ISU_REC`, `TR_MFG_ITEM`, `TR_MFG_GHAT_REC`, `TR_MFG_WITH_LOT`, `TR_JDT_REC`, `TR_KR_ISU` and related forms. Distinguish order-linked, free issue/receive, jobwork, karigar and stage-configured modes. Record item/lot/tag/component ownership, source references, stage stock flags, `IR_TYPE`/stock behaviour, wages and metal settlement.
+
+**Accept a state/transition table per variant and a conservation equation per material class, tied to source handlers and real desktop runs. A generic issue/receive endpoint cannot stand in for all modes without explicit evidence.**
+
+### P08-02 — Finish manufacturing line, component and settlement depth
+
+Complete party, order, design, lot, item, gross/net/ghat/chole/ghis/other losses, touch/wastage/fine, labour basis/rate/override, sundry charges, weights and component consumption/return/breakage. Expose customer and karigar valuations where distinct. Preserve blank labour derivation, `westPct` and issue-specific fine policy already repaired in `KarigarForm.tsx`.
+
+Add the desktop's payment/received tender rows, account selection by configured book slots and stage-dependent stock/tax effects. **Accept rich multi-line fixtures with two components per parent, partial returns, losses, manual/automatic labour and full browser/API/database round-trip.**
+
+### P08-03 — Deliver lot-based manufacturing end to end
+
+Create a dedicated route and screen for the `TR_MFG_WITH_LOT` contract, using `mfgLotBalance` only for the portion it actually implements. Load issue/lot balances, prevent overconsumption, handle return/receipt materials and carry the correct lot/source serial into component rows. Follow the desktop's difference-weight and fine chains; the old source references around form lines 4182 and 4245–4304 are investigation starting points, not assumed formulas for every mode.
+
+**Accept issue → partial lot receipt → second receipt → exhausted lot, multiple lots, component return/breakage, correction and source reversal. Lot ledger, karigar ledger, stage balances and stock must reconcile, including concurrent receipts.**
+
+### P08-04 — Complete order-linked production and design issue
+
+Connect sale orders/designs to manufacturing issue, production stages, receipt, tag creation and customer delivery. Reproduce design reissue, remaining production, labour billing, stage completion and restrictions after downstream consumption. Preserve photos/design/component specifications across conversion.
+
+**Accept one order across several karigars and receipts, several orders at a supported stage, rejected/reworked material, partially completed orders, reissue and canceled receipt. Tracking reports must explain promised, issued, received, loss, available and delivered quantities.**
+
+### P08-05 — Complete melting and fine-loss settlement
+
+Validate `TR_MLT_PRO`, `melting.ts`, `meltingPro.ts` and measured melting policies. Cover source lots/material, gross/net/fine input, testing/touch, process loss, output items/metal, byproducts/residuals, labour/other amounts and financial settlement. Preserve real source associations and use separate input/output child grids where required.
+
+**Accept multiple inputs and outputs, changing assay/purity, zero/negative invalid inputs, rounding residues, partial material allocation, edit/delete and a failed midway posting. Fine and physical material differences must equal the configured/entered process losses and desktop evidence.**
+
+### P08-06 — Certify the manufacturing business day
+
+Run sale-order production and independent jobwork through issue, partial receipt, return/breakage, karigar settlement, tagging and final sale. Include unfinished work carried over a period boundary and a correction after an intermediate stage. **Accept with manufacturing operator and accountant sign-off, clean DB differentials, and matching WIP, lot, karigar, day-work and manufacturing report outputs.**
+
+## P09 — Dhiran, loans, membership and schemes
+
+### P09-01 — Reconcile distinct dhiran and loan modes
+
+Map `TR_DHRN_ISU`, `TR_DHRN_REC`, `TR_DHRN_INTREC`, khata and opening-loan variants using actual book configuration and source. Correct misleading menu mappings by observing what the operator does. Capture customer identity, pledge items, gross/net/purity/valuation, images, principal, disbursement, interest basis, due dates, custody and closure rules.
+
+**Accept separate contracts for each issue/receipt/interest/loan mode and complete borrower/pledge history with preserved images and item identity. A form sharing the dhiran engine must still implement the right direction and book.**
+
+### P09-02 — Complete interest and repayment behaviour
+
+Verify monthly/daily modes, configured year-day basis, compounding, inclusive/exclusive dates, same-day events, partial repayment, backdated events and manual interest overrides. Keep omission of blank interest; distinguish explicit zero from auto-calculation. Match historical rules without presenting them as current legal requirements.
+
+**Accept source/desktop vectors across month ends, leap days, fractional periods, changed principal, multiple interest receipts, closing receipt and reversal. Reopening must not overwrite accrued interest or change dates, and customer ledger/pledge outstanding must agree.**
+
+### P09-03 — Complete member and scheme enrollment
+
+Finish `TR_MEMB_ENT`, product/scheme/member masters, nominee/contact/demographic fields, enrollment terms, installment plan, branches, images and commission settings. Support multi-line enrollment/receipt modes where present and the installment-history grid. Show UPI flags/identity rows through the real route; `withUpi` remains an API-only operator candidate in two interfaces.
+
+**Accept independent enrollment of several members, same member under permitted schemes, default/override installment amounts, wrong scheme/member errors and rich read/edit preservation. Demographic fields must feed the intended reminders and reports.**
+
+### P09-04 — Complete installments, maturity, adjustment and loyalty
+
+Support installments, arrears, prepayment, bonus/commission, maturity, refund, gold/money adjustment, branch in/out and invoice redemption according to scheme configuration. Keep scheme and points/loyalty distinct when the desktop does. Preserve balance and adjustment lineage so one receipt cannot be redeemed twice.
+
+**Accept partial and multiple redemptions, canceled invoice, scheme closure, refund, receipt deletion after adjustment, concurrent redemption and year/branch transitions. Passbook, scheme/member balances, commission and accounting reports must reconcile.**
+
+### P09-05 — Certify borrower and scheme journeys
+
+Execute pledge → disbursement → partial interest/principal → closure/release and enrollment → installments → maturity/redemption → invoice/return. Include images/receipts/notifications only through authorized test channels. **Accept borrower/member operator sign-off, exact date and amount/metal calculation proof and full desktop/write-set/report agreement.**
+
+## P10 — Reports, documents, printing and analysis
+
+### P10-01 — Repair report binding and full scope first
+
+Remove unsupported-family fallback to sales in `reportBind.ts`. Introduce an explicit report/template binding registry that describes dataset query, main/detail/subdetail aliases, parameters, scoped keys, grouping, sorting and supported formats. Unknown bindings must show a clear unsupported error and remain unoffered for production use. Pass year/location to `/reports/render` and require the full document identity in every header/detail query.
+
+**Accept fixtures with the same book/number in two branches and years, an unsupported non-sales layout, multi-row IDTL data and report authorization checks. No document can show another scoped voucher or disguise a missing binder as a sales report.**
+
+### P10-02 — Reconcile every report screen, launcher mode and template
+
+Use all 45 RP source units (44 report screens plus launcher), 53 current registry entries, direct report routes, 255 supplied Crystal files and 20 absent references. Do not add invented slugs merely to meet the old count target. Resolve dynamic report names, variants and `TagStkIdtlRpt` extraction state from the original install. Inventory Crystal formulas, parameters, subreports, groups, sections, suppression, running totals and fonts per template.
+
+**Accept when every reachable primary-product report launch path has an explicit dataset and template/mode mapping; source-backed non-business/duplicate dispositions remain separately reviewable. One equivalent report may cover several modes only when filters, data and layout satisfy each contract.**
+
+### P10-03 — Complete financial, statutory and management parameters
+
+Implement ledger opening/detail/summary/zero-balance/fine modes, outstanding amount/fine/interest/day/divider/gold/silver options, group/area views, multi-select party/location/group filters, valuation dates/rates and detailed GST sections. Complete bill aging, bill profit, trial balance, trading/P&L/balance sheet, cash/bank, Rojmel and purchase/sales/tax registers.
+
+For every endpoint, define supported filters and reject unsupported ones. Apply the same validation to direct GST/report/document routes; a filter must not be silently discarded. **Accept filter truth tables including blank/all/single/multiple/invalid values, exact totals, empty-result semantics and matching export/print data.**
+
+### P10-04 — Complete stock, manufacturing, customer and specialist reports
+
+Revalidate and finish existing HUID, item-weight levels, bill profit, physical-stock verification and movement reports. Implement still-unmapped desktop behaviour for fine stock, WIP, lot/manufacturing zoom, day work, order tracking, component/other items, approvals/consignment, tour/VP, branch in/out, reminders, address printing, entry/user audit and graph/analysis views. Separate “report module exists” from correct menu reachability and parameter depth.
+
+**Accept against desktop datasets and operational reconciliation: movement totals explain stock, WIP explains issued-minus-returned materials, order tracking explains delivery, and reminder dates/balances match their source documents.**
+
+### P10-05 — Complete document layout and printer output
+
+For each invoice/receipt/passbook/repair/karigar/cheque/tag format, match required company/party details, line columns, components, units, totals, statutory identity, signature areas, barcode/QR, copy labels, images and page breaks. Preserve desktop-supported paper sizes, orientation, margins, repeat headers, continuation totals, duplicate/triplicate copies and printer selection. Confirm character rendering in actual business languages.
+
+**Accept separately on semantic data comparison, rendered-page review and physical output. Test one-line, many-line, long-description, multi-page, missing-image, large-number and negative/return documents. Existing 254 web layout baselines prove only web regression, not Crystal equivalence.**
+
+Cover the actual print dialog and template-selection workflow: original/duplicate/triplicate choices, preview versus print versus cancel, default focus/action, copy labels, selected book/branch format and reprint history. Trace `MS_PRINT`'s `MsPrintOpt`, `MsPrintOg`, `MsPrintDup` and `MsPrintTrip` effects through callers. Inventory business-specific layout files and configurable text/fonts/logo paths; where the desktop permits format selection or customization, provide and test the same practical capability. Do not infer a report designer from a template selector. A count of exported geometry files does not prove Crystal formula, suppression or physical output equivalence.
+
+### P10-06 — Complete drill-down, export and print permissions
+
+Provide report → source voucher → related allocation/stock/document navigation with original context preserved. Keep view, print and export authority scoped to the report and business data; review `/render/pdf` and named-template routes instead of treating every render action as system infrastructure. Ensure CSV/XLSX/PDF preserves number precision, dates, Unicode, leading-zero identifiers and filter selections.
+
+**Accept role-denied direct requests, multi-tenant/branch report access, drill-back, export total equality, spreadsheet formula-like input treatment and large exports with explicit progress/cancel/failure status.**
+
+### P10-07 — Certify every report family
+
+Create `report-comparison-latest.json` with per-report/mode fixture IDs, parameters, row/column differences, totals, source/binary hashes, output artifacts, capture time and release identity. Compare data before screenshots. Define tolerances only for justified visual rasterization, never business amounts. Recheck every report affected by shared binder/formula changes.
+
+**Accept when every in-scope report/mode is independently compared and approved, no required template has unknown binding or missing source, and report totals reconcile to the transaction cases used for certification.**
+
+## P11 — Utilities, devices, integrations and operational workflows
+
+### P11-01 — Complete safe correction, renumber, transfer and refresh utilities
+
+Review `UT_USER_REQUEST`, renumber, balance transfer, import/export, estimate reset, stock/data refresh, repair, opening/carry-forward and year-end operations. Build a complete ownership/reference graph before any utility rewrites identifiers or derived tables. The renumber allowlist is not sufficient evidence for full voucher reference closure. Differentiate preview, authorized execution, progress, cancellation, validation and audit.
+
+Implement missing stock-refresh behaviour for `CUR_DAY_POSTING` against the desktop's full/from-date branches. **Accept dry-run/execution equality, idempotence, dependency locks, two-company/year noninterference, interruption recovery and before/after reconciliation of every touched table.**
+
+### P11-02 — Complete actual peripheral workflows
+
+Inventory scales/protocols, barcode scanners, tag/receipt/A4/cheque printers, cameras and label sizes from representative shops. Use the existing scale/bridge/image components where valid. Validate stability/tare/unit conversion/precision on a real scale, focus/terminator/duplicate handling on scanners, and camera/photo ownership, transfer and printing. Document installation, pairing, permission, reconnect and offline-device behaviour.
+
+Browser serial access has limited browser availability and requires a secure context; plan supported browser/device combinations and a local bridge where required. [MDN's Web Serial documentation](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API) supports this constraint. **Accept on actual devices and target OS/browser versions; interface mocks cannot certify physical workflows.**
+
+### P11-03 — Complete messaging, rates and provider-backed statutory flows
+
+Verify WhatsApp/SMS, rates, e-invoice/GSP, QR and any payment-related adapter against official provider/current statutory documentation before implementation sign-off. Track date/version of the rules. Historical desktop behaviour is a compatibility reference, not proof of current compliance. Capture submit/status/retry/cancel/error workflows; never report a fabricated provider ID as successful live processing.
+
+Include the primary desktop's Olocker policy-generation action (`TR_SALE.cs:21567`, `OlockerService.cs:87`). It requires a saved/reopened invoice and has an invoice-age check before constructing tag, metal and stone payloads. The web has no counterpart found by this review. Contract the actual desktop behaviour, confirm current provider requirements independently, and implement the authorized saved-invoice workflow with result/history and duplicate-request handling. Do not silently omit it as a helper-class detail.
+
+Use sandbox/test destinations for automated tests, durable outbox/attempt records and idempotency. Set permissions and secrets through deployment configuration. **Accept success, rejection, timeout-after-acceptance, duplicate response, credential rotation and recovery with attributable provider evidence. Actual customer messages and production submissions require the operator's explicit authorization.**
+
+### P11-04 — Complete authorization and audit across the whole workflow
+
+Preserve current session, origin, password-reset, RLS and form/location rights. Test direct route access for view/create/edit/delete/print/export, cross-company/year changes, source imports, utility execution, master provisioning, images and report variants. Audit who changed what and when, before/after business values, reason where the actual workflow requests it and source/dependency identity.
+
+**Accept tests using non-owner runtime database roles and restricted users, including denied requests with no side effects. Hiding a button is not an authorization test. Keep operational diagnostics free of customer identifiers and credentials unless explicitly required and protected.**
+
+### P11-05 — Finish operator setup, navigation and help
+
+Make every supported menu mode discoverable, including differently named or shared pages. Add contextual explanations for desktop terms, units, stock state and recovery actions, while keeping implementation details out of shop workflows. Complete startup daily-rate/reminder preferences, saved grid/window preferences, user/context switching and help/search behaviours required for parity.
+
+**Accept role-specific navigation and operator onboarding from a fresh business setup. Every menu entry in the 198-row register must lead to its verified behaviour or clearly document a currently agreed exclusion.**
+
+Trace application lifecycle from `DataCareNext.My/MyApplication.cs` through login and `MDI_FORM` load, timers and background workers. Define job ownership, schedule, timezone, deduplication, retry, credential failure and operator status in the web topology. For example, `MDI_FORM.myTimer_Tick` starts `Module_Schm.bgWorker` conditionally; timer presence is not its complete business contract. Multiple open tabs must not repeat a background business action. Review shutdown/settings persistence and all startup prompts against the desktop before assigning browser/server responsibility.
+
+## P12 — Data migration, recovery and production operations
+
+### P12-01 — Build the complete source ownership and conversion manifest
+
+Inventory every customer database, shared configuration database, auxiliary image/employee database, external report/template and file attachment. Reconcile supplied backups with live schemas, table columns, keys, collations, decimals, date/time semantics, nullable/blank values, binary images and linked filenames. Assign each table to migrate, deterministically rebuild, retain as archive or exclude with reason.
+
+Replace partial implicit table lists with explicit ownership predicates and dependency order. **Accept full source-to-target reconciliation including currently unused tables and stale/orphan data. One empty demo database is not migration proof.**
+
+### P12-02 — Implement staged, scoped and restartable loading
+
+Extract read-only into a staging area; validate counts/types/keys/references and produce a dry-run report. Transform into a shadow target and apply controlled loads by selected tenant/company/location/year scope. Never replace a tenant-wide dataset for a company-scoped migration. Preserve source identities and sequences; use stable legacy-to-web ID mappings for deliberate new technical identities.
+
+Keep `production-cutover-load` contained until its exit gates pass. **Accept two companies/two years in the same source and target, retry after partial extraction/load, malformed source rows, missing required tables and explicit zero-row tables. Missing or skipped input is failure, not success.**
+
+### P12-03 — Rehearse reconciliation with representative histories
+
+Use at least two business datasets with different book/account settings and realistic histories, including active and canceled documents, old balances, stock tags/components, WIP, pledges, schemes, photos and reports. Compare row counts, stable-key sets, field values, opening/closing money and fine, stock/pieces, allocations, image hashes and representative printed documents. Categorize legitimate transformations explicitly.
+
+**Accept two consecutive clean shadow loads from a frozen source snapshot with reproducible results and a business reconciliation signed by the accountant/store operator. Do not correct parity differences by patching only the imported fixture.**
+
+Prove active business after migration: open and print historic records, perform permitted unchanged/changed edits, return an imported sale, settle an imported outstanding bill, consume an imported tag/lot/order balance, redeem an imported scheme and reverse the new dependent transaction. Include old years and partially completed work. Preserve historical tax/rate/rounding values separately from currently effective rules for new transactions; define effective-date/version selection explicitly. Row-count equality without these continuations cannot pass R09.
+
+### P12-04 — Certify backup, restore and rollback
+
+Exercise physical recovery and the implemented logical company restore independently. Include database, attachment/object storage, settings, templates, keys/secrets needed for recovery and sequence state. Restore into a separate target, validate row/hash totals and business journeys, then measure recovery time and data loss against agreed targets. Test a single-company restore without altering another company and interruption during restore.
+
+Logical restore remains contained until its engineering, deployment and authorized controlled-drill gates pass. **Accept recovery from a corrupted/incomplete backup with clear failure, recovery from a valid backup with correct invariants, and a rehearsed switchback procedure. A file downloaded successfully is not a restore test.**
+
+### P12-05 — Complete production deployment and service operations
+
+Inspect production topology: TLS and same-origin API proxy, web/API build alignment, database migrations, runtime non-owner role, connection pools, background jobs, private backups, secret injection, health/readiness and persistent storage. Validate actual deployment files include every service or document the separately hosted service. Pin supported dependencies/images and test their current vulnerability/compatibility posture before release without upgrading blindly during parity work.
+
+Add metrics for post latency, failure/conflict/retry rate, sequence contention, outbox/provider errors, reconciliation anomalies, backup age and restore status. **Accept load/soak/failure tests, actionable alerts/runbooks, safe rolling/backward-compatible migration strategy and operator-visible status during planned outages.**
+
+## P13 — Product variants and scope closure
+
+### P13-01 — Resolve UAE and edition-dependent behaviour explicitly
+
+The old waiver file records temporary UAE exclusions and several UX omissions. The current request asks for complete richness and working equivalence. Include all reachable primary-product modes, including the two UAE source forms, and their settings/reports. A pilot may activate a subset without marking the remaining product delivered. Only a later explicit user scope change can exclude a capability, and its resulting release claim must identify the reduced coverage.
+
+**Accept a versioned product-scope matrix with no omitted reachable primary-product capability for the full-product claim. Record excluded deployment variants separately from source-backed duplicate/dead artifacts. Country/edition configuration that affects any required mode must work; a subset certificate cannot satisfy the full-product gate.**
+
+### P13-02 — Assess NextDm and supporting applications
+
+Compare `NextDm.exe`/`csharp_nextdm` to the primary binary by hashes, menu/actions, grids, rules, schema, reports and supporting dependencies. Determine whether it is a second edition, an older build or a separate supported product from executable/runtime evidence and business use. Inspect NextEmp/NextImage and installer assets for employee/image/device/report functions consumed by the primary desktop.
+
+The planning review already established 199 shared filenames, 76 byte-identical files, 123 changed files and five primary-only files in `evidence/edition-delta.json`. Use that to focus semantic review; a filename subset does not prove a behaviour subset.
+
+**Accept a delta inventory with every unique dependency or business behaviour assigned to an existing phase or a separately sized variant package. Do not duplicate two entire applications if they share a proven contract, and do not omit auxiliary data merely because the main UI does not edit it.**
+
+### P13-03 — Close missing artifacts and unresolved behaviours
+
+Resolve absent report files, incomplete extraction, dynamic UI visibility, opaque ActiveX/resource behaviour and data-dependent code branches on the actual desktop. For apparently dead settings or unused forms, prove the absence of a reachable business effect for the supported version; otherwise preserve an unresolved requirement.
+
+**Accept with no unresolved in-scope artifact or behaviour. A runtime blocker remains a blocker; it cannot become a waived success because source inspection is difficult.**
+
+## P14 — Full certification and business transition
+
+### P14-01 — Execute every requirement and business journey
+
+Run the verification contract in the companion document across all forms, variants, fields, settings, reports and supported device configurations. Link every result to requirement IDs, fixture IDs and exact build identity. Re-run affected cross-module journeys after any shared posting, calculation, auth, settings, schema or report change.
+
+**Accept zero unresolved mandatory cases, zero skipped DB/browser/desktop checks, zero data-loss/concurrency defects and zero unclassified differences. A phase ends only after its cross-module effects are verified.**
+
+### P14-02 — Bind release evidence to the code that actually runs
+
+Use a clean reviewed candidate tree; record commit, dirty-tree refusal, dependency lock hash, schema/migrations, image/build digests, desktop executable/configuration/fixture hashes and test/capture timestamps. Strengthen local certification to verify the checked-out tree and build, not only a supplied SHA string. Confirm CI runs from the correct repository and retrieves required evidence securely; a secret naming a local filesystem path does not put a file on a hosted runner.
+
+Require full contract closure, endpoint/variant field reachability, real browser tests, report/desktop comparison, hardware evidence, migration/recovery evidence and business acceptance in addition to the current 17 release gate declarations. **Accept only evidence for the actual candidate; reject missing, stale, synthetic, empty, skipped or self-rebaselined results.**
+
+Implement the exact-set certification contract in the verification document. Freeze and hash the required requirement/case/report/device sets before execution; compare expected IDs to returned IDs, not merely counts or “all received results passed.” Detect duplicate IDs, missing cases, non-zero expected sets replaced with zero, missing table/field extraction and test processes that exit successfully without assertions. A later source/configuration/schema/template change invalidates affected evidence through dependency links. Discovery/start dependencies in `07-work-items.json` do not grant phase certification: P10/P11/P12 also require mature family contracts and the actual release candidate, and P14 requires every required descendant closed.
+
+### P14-03 — Complete business UAT by role and business type
+
+Use experienced retail, wholesale, karigar/manufacturing, accounting and scheme/loan operators. Give them realistic daily work and exceptions, not click-by-click test instructions. Measure correctness, task time, keystrokes, re-entry, lookup success, print quality and recovery from mistakes. Verify configuration-specific behaviours with more than one representative shop.
+
+**Accept signed UAT for every in-scope business journey and report, no necessary desktop fallback and no substantial counter-efficiency regression. Cosmetic modernization is accepted separately from business equivalence.**
+
+Maintain a behavioural difference register: expected desktop result, observed web result, reason, affected requirements/data, risks, independent review and compensating acceptance tests. Separate a proven technical representation mapping from a business deviation. An approved security/provider/statutory change can be the correct production decision but must be disclosed as a deliberate difference; it is not evidence of literal behavioural identity. Missing functionality, lost offline service, absent reports or untested branches cannot be reclassified as cosmetic modernization.
+
+### P14-04 — Rehearse cutover and rollback on a production-like target
+
+Freeze a source snapshot, perform the final shadow load, reconcile, deploy the candidate, configure peripherals/providers, run smoke journeys, and practice the rollback decision. Define source-of-truth ownership during the transition, delta handling between snapshot and switch, duplicate-entry prevention and handling of new web transactions if a rollback is needed.
+
+**Accept a timed rehearsal, reconciled opening balances/stock/outstanding, usable recovered desktop/archive, tested communications and a precise go/no-go checklist. After web writes begin, rollback must reconcile/replay them; restoring an old backup would lose accepted business.**
+
+### P14-05 — Perform controlled business rollout and stabilization
+
+Start with a representative business/branch only after its entire required scope is certified. Compare daily closing totals, stock, fine balances, allocations, provider statuses and prints during the agreed observation window. Expand only after acceptance. Keep a named support owner, defect response process, reconciliation schedule and rollback authority.
+
+**Accept completion when all intended businesses/configurations are covered, normal and exception workflows operate without unplanned manual work, recovery targets are proven, and the business owner accepts the handover. A technically successful deployment alone is not completion.**
+
+### P14-06 — Retire contradictory progress claims
+
+Update the canonical completion register, contract statuses, current handoff, journal and release notes with verified evidence. Preserve old audits as dated history; mark them superseded where facts changed. Separate implemented, engineering-verified, desktop-compared, business-accepted and production-certified states. Include the remaining whole-product exclusions, if any, in the product's supported-scope documentation.
+
+**Accept one navigable current record that another engineer or business owner can audit without relying on this conversation. No “100%” claim may coexist with an in-scope contained, absent, skipped or unverified workflow.**
+
+## Execution discipline and change review
+
+Each work package is delivered as a reviewable vertical slice: approved desktop contract → required schema/API/UI/report changes → focused regression and failure tests → desktop differential → business demo → evidence/status update. Small UI wiring changes need meaningful field-path/round-trip verification rather than a new test that merely repeats a property name.
+
+The first implementation sprint should complete P00-01 through P00-04 and fix the P10-01 report binding/scope defects, while finalizing P01 contracts for identity and lifecycle. Then use purchase/tag opening and a rich sales/return case as reference slices before propagating shared UI changes. This order validates the method on financially meaningful examples before scaling it to every source unit.
+
+Review numerical and write-footprint changes with an engineer who did not author the implementation and a domain operator/accountant for business semantics. Test evidence must show that negative controls fail for the intended reason. If a fixture, scanner or baseline changes, distinguish the measurement change from a product improvement.
+
+Never close a requirement using an arbitrary minimum page count, a minimum count of validation messages, 100% API field-name occurrence, a DB-column write count, a screenshot of a populated form or a balanced trial balance alone. The closure target is **all applicable requirements and transitions verified**, regardless of how many components/routes implement them.

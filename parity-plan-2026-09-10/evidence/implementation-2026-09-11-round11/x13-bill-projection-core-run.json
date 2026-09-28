@@ -1,0 +1,207 @@
+{
+  "contract": "round11-saved-bill-projection-scoped-proof-v1",
+  "authoredAtUtc": "2026-09-11T14:31:43.227137+00:00",
+  "status": "scoped-proof-final",
+  "scope": "Pure saved-header read projection only. No load callbacks, aggregate/bill execution, database, HTTP, browser, numeric writes, ledger resolution or original desktop runtime acceptance. Root owns integration checks and index exports.",
+  "projectionVersion": "sale-return-bill-projection-v1",
+  "fixtureSha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c",
+  "goldenAuthoring": "Complete literal matrix and raw/labels/caches/control inputs authored before implementation file existed; no application calculator used; portable/evidence copies identical.",
+  "currentDirectInputs": [
+    {
+      "path": "packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9"
+    },
+    {
+      "path": "packages/core/test/saleReturnBillProjection.test.ts",
+      "sha256": "fd2f21128607f588fe4bc4b9698345facac60196d43b6458bf0135c87832fe87"
+    },
+    {
+      "path": "packages/core/test/fixtures/sale-return-bill-projection.v1.json",
+      "sha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    }
+  ],
+  "currentStage": {
+    "files": 1,
+    "tests": 84,
+    "skips": 0,
+    "durationMs": 350,
+    "runtimeExitCode": 0,
+    "runtimeLog": {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-focused-final.txt",
+      "sha256": "9ff1c43225f67f5baa41cc792e42655ff502674c48f35484878ad73f0a201c57"
+    },
+    "runtimeCommand": "pnpm --filter @datacare/core test -- test/saleReturnBillProjection.test.ts",
+    "strictTestCompilerExitCode": 0,
+    "strictTestCompilerLog": {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-test-types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "strictTestCompilerCommand": "pnpm --filter @datacare/core exec tsc --noEmit --strict --noUncheckedIndexedAccess --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck test/saleReturnBillProjection.test.ts",
+    "beforeAfter": {
+      "inputs": 10,
+      "result": "unchanged",
+      "snapshot": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-final-inputs.json",
+        "sha256": "8e977c26075148b24759f8dbff77718ecf1a0035e5431397bd6bf2c5606160d3"
+      },
+      "verification": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-final-input-verification.json",
+        "sha256": "c656f9b6ef7b42033e474b263e57f211b0dc89ae5cc23e029d99467835a5674f"
+      },
+      "indexScope": "Not imported by the focused test. Package index and full workspace checks belong to root."
+    }
+  },
+  "historicalStages": [
+    {
+      "files": 1,
+      "tests": 84,
+      "runtimeExitCode": 0,
+      "durationMs": 332,
+      "strictTestCompilerExitCode": 1,
+      "correction": "Decimal default import replaced by repository named-import convention in new module/test; const tuple added for label validation keys. Initial runtime passed; strict errors retained. No fixture/semantic change.",
+      "inputCaptureScope": "After-run record before typing correction; not a claimed pre-run snapshot."
+    }
+  ],
+  "limitations": [
+    "Mathematical exact-decimal Format intent does not establish original VB Double/locale behavior.",
+    "Only four explicit Fnv fields admit NULL/ASCII blank; direct-Val numeric NULL/blank remains contained rather than guessed.",
+    "Display-label source identity/availability belongs to API observations; null supplied labels render blank only.",
+    "Closing always unavailable, with no guessed zero/mode/history.",
+    "Strict focused compile skips dependency declaration checks; root owns full workspace build/types/runtime.",
+    "No lint coverage claimed."
+  ],
+  "references": [
+    {
+      "path": "packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9"
+    },
+    {
+      "path": "packages/core/test/saleReturnBillProjection.test.ts",
+      "sha256": "fd2f21128607f588fe4bc4b9698345facac60196d43b6458bf0135c87832fe87"
+    },
+    {
+      "path": "packages/core/test/fixtures/sale-return-bill-projection.v1.json",
+      "sha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-bill-projection-independent-vectors.json",
+      "sha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-bill-projection-vectors-authorship.json",
+      "sha256": "5180499883ca031b65acd5aa54183b2e5d543cda8abe7b1333131eb0fd8d836f"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-bill-projection-core-implementation.md",
+      "sha256": "e3e01ef101ec5cc5202c6209945bcc08c501fc19f8ab8c756ddc87a5da271e7e"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-focused-first.txt",
+      "sha256": "164e674717a5704f6066c514a489751fdd8d88e1f611f4b5020d4fc38bf30a88"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-test-types-first.txt",
+      "sha256": "b166f456b7fb39e7ee86e323b3669b84165aba3bc2a1b2528c58fb11bd60a2c0"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-first-stage-inputs.json",
+      "sha256": "ed17587ce3aa63b9bd9bfae999c833e98161173dda5b03e771245eacf34dc0d6"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-focused-final.txt",
+      "sha256": "9ff1c43225f67f5baa41cc792e42655ff502674c48f35484878ad73f0a201c57"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-test-types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-final-inputs.json",
+      "sha256": "8e977c26075148b24759f8dbff77718ecf1a0035e5431397bd6bf2c5606160d3"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-bill-projection-final-input-verification.json",
+      "sha256": "c656f9b6ef7b42033e474b263e57f211b0dc89ae5cc23e029d99467835a5674f"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-contract.md",
+      "sha256": "7240e8f6b3e0ea5b25ddd98535862d6e7a8cbf50cd981caccf049ef35b707b6b"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-source-addendum.md",
+      "sha256": "9f41889ef665c3a0934412c619921bf5788b853269967ea81e8ca267f09347ae"
+    }
+  ]
+}

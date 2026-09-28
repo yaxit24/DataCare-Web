@@ -1,0 +1,22 @@
+{
+  "authoredAtUtc": "2026-09-11T18:45:23.237304+00:00",
+  "implementationInspected": false,
+  "authority": "Root explicitly selected lowercase UUIDv4 and RFC4122 variant8/9/a/b before freeze. Other values derive from the staged implementation contract.",
+  "contract": {
+    "path": "/tmp/datacare-session-context-next/implementation-contract.md",
+    "sha256": "e6852f3a05b8dd93198566ebbb0b67d074ecfca607843574c9da51ff078f64fc"
+  },
+  "fixture": {
+    "path": "/tmp/datacare-session-context-next/context-vectors/session-context-dto-independent.v1.json",
+    "sha256": "6596159e7e7b1fe1ce2fdf40370b6d2533837b13e834f65dbc38f37f0c654910",
+    "cases": 63,
+    "counts": {
+      "epoch": 23,
+      "successor": 5,
+      "ledgerContext": 18,
+      "selectionId": 17
+    }
+  },
+  "workspaceMutations": false,
+  "testsCompilerDbRun": false
+}

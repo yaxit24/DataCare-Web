@@ -1,0 +1,12 @@
+{
+  "capturedAt": "2026-09-12T02:44:49.165280+00:00",
+  "files": {
+    "web/packages/core/src/saleReturnSaveGuards.ts": "0022bfd0aa00085aabd2c0085341386e2b7c7b6168c0de5c6b421740479a5e7f",
+    "web/packages/core/test/saleReturnSaveGuards.test.ts": "2e0dee599d776d0899d4bcd7db3674d160ddb6777f7558a0a573c109a1c55824",
+    "web/packages/core/test/fixtures/saleReturnSaveGuards.independent.json": "6af7121c2952c9be055f1e83671d0e1bd0139c80a1d81bc9482c1edb90fd8e78",
+    "web/packages/core/test/fixtures/saleReturnSaveGuards.fine-amendment.json": "87de6652da68f4400389e862edc590cfa4a919d882ddddd7b7ad51bed22790c5",
+    "web/vitest.config.mts": "3ddec2b9a7bda30ee1a5efbd95c351c8c0e719b9c7b238dec8315892472ba7f5",
+    "web/package.json": "ddcd749afddb82a4c7ea34e56d0f26f53858cf7bd82813b57b56016a71b593ac",
+    "web/packages/core/package.json": "3d718205936c94aa502058a868f5fcf61d945bbce1d14225ae8ef63829a05c62"
+  }
+}

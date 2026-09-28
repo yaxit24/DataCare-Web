@@ -7,9 +7,16 @@ import { get, post, ApiError } from '../../../../lib/api';
  *
  * The desktop runs each repair immediately on a button press with no preview and no record. Here every
  * operation is preview-then-apply: the operator sees exact per-table insert/update/delete counts and a
- * sample of affected records BEFORE anything is committed, and the run is recorded permanently. High-risk
- * operations additionally require a typed confirmation.
+ * sample of affected records BEFORE anything is committed, and the run is recorded permanently.
+ *
+ * A destructive (high/danger) operation additionally requires a typed confirmation, a written reason, the
+ * operator's own password, and the checksum of a recent company backup. The server derives those
+ * requirements from the operation's risk and returns them on the preview, so this screen asks for exactly
+ * what will be demanded rather than guessing.
  */
+
+/** Kept in step with REPAIR_REASON_MIN_LENGTH in the API's dataRepair module. */
+const REASON_MIN_LENGTH = 12;
 
 interface Operation {
   id: string;
@@ -25,6 +32,12 @@ interface TableDiff {
   update: number;
   delete: number;
 }
+interface Authority {
+  confirmation: string | null;
+  reason: boolean;
+  reauthentication: boolean;
+  backupReference: boolean;
+}
 interface Preview {
   operationId: string;
   previewHash: string;
@@ -33,12 +46,14 @@ interface Preview {
   clean: boolean;
   risk: string;
   requiresConfirmation: string | null;
+  authority: Authority;
 }
 interface RunRow {
   operation_id: string;
   state: string;
   operator: string;
   reason: string | null;
+  backup_reference: string | null;
   counts: TableDiff[] | null;
   applied_counts: TableDiff[] | null;
   created_at: string;
@@ -59,6 +74,8 @@ export default function DataRepairPage() {
   const [active, setActive] = useState<Operation | null>(null);
   const [confirmation, setConfirmation] = useState('');
   const [reason, setReason] = useState('');
+  const [operatorPassword, setOperatorPassword] = useState('');
+  const [backupReference, setBackupReference] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
 
@@ -90,6 +107,8 @@ export default function DataRepairPage() {
     setPreview(null);
     setActive(op);
     setConfirmation('');
+    setOperatorPassword('');
+    setBackupReference('');
     try {
       const p = await post<Preview>(`/utilities/data-repair/${op.id}/preview`, {});
       setPreview(p);
@@ -110,7 +129,15 @@ export default function DataRepairPage() {
     try {
       const r = await post<{ applied: TableDiff[]; deduplicated: boolean }>(
         `/utilities/data-repair/${active.id}/apply`,
-        { previewHash: preview.previewHash, confirmation, reason },
+        {
+          previewHash: preview.previewHash,
+          confirmation,
+          reason,
+          // Sent only when the server said this operation demands them, so a low-risk repair never
+          // transmits a password.
+          ...(preview.authority?.reauthentication ? { operatorPassword } : {}),
+          ...(preview.authority?.backupReference ? { backupReference } : {}),
+        },
       );
       const total = r.applied.reduce((a, d) => a + d.insert + d.update + d.delete, 0);
       setMsg({
@@ -123,10 +150,14 @@ export default function DataRepairPage() {
       setActive(null);
       setReason('');
       setConfirmation('');
+      setOperatorPassword('');
+      setBackupReference('');
       await loadRuns();
     } catch (e) {
       fail(e, 'Apply failed');
     } finally {
+      // The password never survives an attempt, successful or not.
+      setOperatorPassword('');
       setBusy(false);
     }
   }
@@ -230,8 +261,22 @@ export default function DataRepairPage() {
           )}
           <div className="row">
             <div className="field">
-              <label htmlFor="reason">Reason (recorded)</label>
-              <input id="reason" value={reason} onChange={(e) => setReason(e.target.value)} />
+              <label htmlFor="reason">
+                Reason (recorded)
+                {preview.authority?.reason
+                  ? ` — required, min ${REASON_MIN_LENGTH} characters`
+                  : ''}
+              </label>
+              <input
+                id="reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                required={preview.authority?.reason}
+                aria-describedby="reason-help"
+              />
+              <span id="reason-help" className="muted">
+                Recorded permanently against this run.
+              </span>
             </div>
             {preview.requiresConfirmation && (
               <div className="field">
@@ -246,11 +291,53 @@ export default function DataRepairPage() {
               </div>
             )}
           </div>
+          {(preview.authority?.reauthentication || preview.authority?.backupReference) && (
+            <div className="row">
+              {preview.authority?.backupReference && (
+                <div className="field">
+                  <label htmlFor="backupReference">Backup checksum (last 24 hours)</label>
+                  <input
+                    id="backupReference"
+                    value={backupReference}
+                    onChange={(e) => setBackupReference(e.target.value)}
+                    required
+                    aria-describedby="backup-help"
+                  />
+                  <span id="backup-help" className="muted">
+                    The <code>checksum</code> field of a recent backup of this company. Download one
+                    from Backup first; the server verifies it exists and is recent.
+                  </span>
+                </div>
+              )}
+              {preview.authority?.reauthentication && (
+                <div className="field">
+                  <label htmlFor="operatorPassword">Confirm your password</label>
+                  <input
+                    id="operatorPassword"
+                    type="password"
+                    autoComplete="current-password"
+                    value={operatorPassword}
+                    onChange={(e) => setOperatorPassword(e.target.value)}
+                    required
+                    aria-describedby="reauth-help"
+                  />
+                  <span id="reauth-help" className="muted">
+                    Re-entered so an unattended session cannot rewrite history.
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
           <button
             className="primary"
             disabled={
               busy ||
-              Boolean(preview.requiresConfirmation && confirmation !== preview.requiresConfirmation)
+              Boolean(
+                preview.requiresConfirmation && confirmation !== preview.requiresConfirmation,
+              ) ||
+              Boolean(preview.authority?.reason && reason.trim().length < REASON_MIN_LENGTH) ||
+              Boolean(preview.authority?.reauthentication && !operatorPassword) ||
+              Boolean(preview.authority?.backupReference && !backupReference.trim())
             }
             onClick={runApply}
           >
@@ -270,6 +357,7 @@ export default function DataRepairPage() {
               <th className="num">Records</th>
               <th>Operator</th>
               <th>Reason</th>
+              <th>Backup</th>
             </tr>
           </thead>
           <tbody>
@@ -283,11 +371,14 @@ export default function DataRepairPage() {
                 </td>
                 <td>{r.operator}</td>
                 <td className="muted">{r.reason ?? ''}</td>
+                <td className="muted">
+                  {r.backup_reference ? <code>{r.backup_reference.slice(0, 12)}…</code> : ''}
+                </td>
               </tr>
             ))}
             {runs.length === 0 && (
               <tr>
-                <td colSpan={6} className="muted">
+                <td colSpan={7} className="muted">
                   No repairs have been run.
                 </td>
               </tr>

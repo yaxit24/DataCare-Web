@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { get } from '../lib/api';
 
 export interface ScopeBook {
@@ -29,8 +29,15 @@ export function BookSelect({
   const [loaded, setLoaded] = useState(false);
   const valueRef = useRef(value);
   const onChangeRef = useRef(onChange);
-  const mainBookFilter = (mainBooks ?? []).map((name) => name.trim().toUpperCase()).filter(Boolean);
-  const mainBookKey = mainBookFilter.join('|');
+  // `mainBooks` is a prop array, so it is a NEW reference on every render. Deriving a stable string key and
+  // memoising the parsed filter off that key keeps the fetch effect from re-firing each render while letting
+  // it declare an honest dependency set — previously the effect depended on `mainBookKey` but read
+  // `mainBookFilter`, which react-hooks/exhaustive-deps correctly flagged.
+  const mainBookKey = (mainBooks ?? [])
+    .map((name) => name.trim().toUpperCase())
+    .filter(Boolean)
+    .join('|');
+  const mainBookFilter = useMemo(() => (mainBookKey ? mainBookKey.split('|') : []), [mainBookKey]);
   useEffect(() => {
     valueRef.current = value;
     onChangeRef.current = onChange;
@@ -66,7 +73,7 @@ export function BookSelect({
     return () => {
       cancelled = true;
     };
-  }, [preferred, mainBookKey]);
+  }, [preferred, mainBookFilter]);
 
   return (
     <select

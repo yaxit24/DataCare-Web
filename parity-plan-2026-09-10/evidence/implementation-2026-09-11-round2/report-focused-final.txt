@@ -1,0 +1,58 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+23 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 173 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "reportBind.test.ts" "orderReport.test.ts" "orderReport.db.test.ts" "reportChildren.db.test.ts" "reportRender.db.test.ts" "reportEngine.test.ts" "tourOrderPrint.routes.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/reportChildren.db.test.ts (12 tests) 957ms
+ ✓ test/orderReport.db.test.ts (8 tests) 2522ms
+   ✓ full order document datasets, subreport and ledger cutoff > binds 'OrderBill' scoped parents, components and received-metal without fanout 433ms
+   ✓ full order document datasets, subreport and ledger cutoff > binds 'TourOrdVch' scoped parents, components and received-metal without fanout 373ms
+ ✓ test/tourOrderPrint.routes.db.test.ts (4 tests) 2629ms
+   ✓ X14 Tour Order confirmation HTTP permissions > prints configured Tour Order HTML with only Karigar/Tour Order print rights 313ms
+ ✓ test/reportRender.db.test.ts (5 tests) 956ms
+ ✓ test/orderReport.test.ts (12 tests) 184ms
+ ✓ test/reportBind.test.ts (32 tests) 91ms
+ ✓ test/reportEngine.test.ts (4 tests) 33ms
+
+ Test Files  7 passed (7)
+      Tests  77 passed (77)
+   Start at  22:41:51
+   Duration  19.15s (transform 3.74s, setup 0ms, collect 6.42s, tests 7.37s, environment 3ms, prepare 983ms)
+

@@ -1,0 +1,157 @@
+{
+  "kind": "datacare.parity-descriptor-scanner-evidence/1.0",
+  "capturedAtUtc": "2026-09-10T23:07:40.836156+00:00",
+  "status": "partial-scanner-correction",
+  "sourceFiles": [
+    {
+      "path": "web/scripts/check-depth.mjs",
+      "sha256": "02887291c8e230250ac0b27d04e0fe2c9273bb6ee66cae08566de4ea24df6be1",
+      "prior15Sha256": "2ec2deea1100a9c92bea8a8534327fe71e37d136b20c79cb16dffc75db0200e8",
+      "unchangedSince15": false
+    },
+    {
+      "path": "web/scripts/lib/ui-descriptors.mjs",
+      "sha256": "21790e183d9fb942005c88e9a911b1c64b81da1117040d5d6fc410c10f140d64",
+      "prior15Sha256": null,
+      "unchangedSince15": null
+    },
+    {
+      "path": "web/scripts/measure-ui-descriptors.mjs",
+      "sha256": "9a24e360b83a3663c0d7a0e139c85daf35e655a213d153fe8785432e3f57b0a1",
+      "prior15Sha256": null,
+      "unchangedSince15": null
+    },
+    {
+      "path": "web/scripts/test/ui-descriptors.test.mjs",
+      "sha256": "5da014d7da09beb2bfeb3c929f57cd5db10a2e6740cce22c93134d854bda6829",
+      "prior15Sha256": null,
+      "unchangedSince15": null
+    },
+    {
+      "path": "project-memory/parity/richness_web.py",
+      "sha256": "254b92b15376e8bd7c90d7f8bbdcc7caa49eda273994185fe7532a17188c8558",
+      "prior15Sha256": null,
+      "unchangedSince15": null
+    },
+    {
+      "path": "project-memory/parity/gap_manifest.py",
+      "sha256": "0404f2b930215b1c90dbdce0e3f4ab1fc0b0328dd28554aeeb8dbcb5150c5a35",
+      "prior15Sha256": null,
+      "unchangedSince15": null
+    },
+    {
+      "path": "web/scripts/check-dead-cells.mjs",
+      "sha256": "2bb7ff02e925e63a034f5bb0e5f6bcb7a1212daac2a02e442d13a9e248a4863e",
+      "prior15Sha256": "2bb7ff02e925e63a034f5bb0e5f6bcb7a1212daac2a02e442d13a9e248a4863e",
+      "unchangedSince15": true
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx",
+      "sha256": "196a583a5e4d80eb186eb60a31ec935866d6f641eea57bfff8b63e82c325b0bd",
+      "prior15Sha256": "196a583a5e4d80eb186eb60a31ec935866d6f641eea57bfff8b63e82c325b0bd",
+      "unchangedSince15": true
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/rateCut.ts",
+      "sha256": "a4814f32fc5ab3aada7aeb1085891f096ddb5dfa3cf09b95fc1d85597f116512",
+      "prior15Sha256": "a4814f32fc5ab3aada7aeb1085891f096ddb5dfa3cf09b95fc1d85597f116512",
+      "unchangedSince15": true
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "sha256": "e6eba0e63764428b305c3b3b0736cc5e45a54b0821b3083eeff2c9c4eb44ca5f",
+      "prior15Sha256": "b3e19fceb2d7f0847cbbaac2b87c62621f123f519a958a41b3fd60e2d0b274f5",
+      "unchangedSince15": false
+    },
+    {
+      "path": "web/apps/web/lib/designBookDraft.ts",
+      "sha256": "e157b7fb6f8937afd78f240a911100b9b31f68e7510fe1e418c6830d599ab4cf",
+      "prior15Sha256": "5434cca88bdb798baf63eb84572c665899bcb7e022858e7ec2a5b7f2376a5c5c",
+      "unchangedSince15": false
+    },
+    {
+      "path": "web/apps/web/lib/tourOrderForm.ts",
+      "sha256": "27ab5b536e698f981be47b4e8c87d396773e47ad9c0170f6b868e951fc1d3af4",
+      "prior15Sha256": "12d96263ebd555b7775a4b5b9f82e94f9f355225f0145dd1598b6aff0aa6b100",
+      "unchangedSince15": false
+    },
+    {
+      "path": "web/parity/depth-parity-baseline.json",
+      "sha256": "f1715408a150d2382fad4ef48df67c91d453e239b4462c04e42043ecd7efd032",
+      "prior15Sha256": "f1715408a150d2382fad4ef48df67c91d453e239b4462c04e42043ecd7efd032",
+      "unchangedSince15": true
+    },
+    {
+      "path": "web/parity/depth-budget.json",
+      "sha256": "6b2893a435e66f969b334f104eab19e01465899fc4a8a21b9e5f2e0590ad7cdc",
+      "prior15Sha256": "6b2893a435e66f969b334f104eab19e01465899fc4a8a21b9e5f2e0590ad7cdc",
+      "unchangedSince15": true
+    }
+  ],
+  "tests": {
+    "command": "node --test scripts/test/ui-descriptors.test.mjs",
+    "passed": 12,
+    "failed": 0
+  },
+  "legacyDeadCellObservationBefore": {
+    "command": "node scripts/check-dead-cells.mjs",
+    "exitCode": 1,
+    "checkedColumns": 606,
+    "fields": [
+      "issueYear",
+      "issueBook",
+      "issueNo",
+      "issueSrno"
+    ],
+    "route": "/txn/wholesale-sale",
+    "provenance": "Pre-edit command output observed in this task; after-log retained; detector/page/writer files remain identical to checkpoint15"
+  },
+  "functionalParityPercentage": null,
+  "acceptedExecutionCards": [],
+  "limits": "Additive candidate descriptor measurement only; full route/writer/reader tracing and X02 acceptance remain open.",
+  "legacyAuditFieldsUnchanged": true,
+  "descriptorStage": {
+    "discoveredPages": 123,
+    "pagesWithDescriptorCandidates": 19,
+    "distinctDescriptorCandidates": 589,
+    "gridCandidates": 48,
+    "inputCandidates": 589,
+    "identityCandidates": 3,
+    "editableInputCandidates": 586,
+    "conditionalCandidates": 132,
+    "unsupportedConsumers": 103,
+    "basis": "Additive static descriptor candidates reached from returned JSX maps; historical heuristic counters and budgets unchanged",
+    "limits": "Candidate field origins only. Conditional configuration, generic props, indirect/re-exported factories and unsupported expressions require further tracing. No route, writer, reader, persistence, runtime visibility or functional parity is certified. Do not add these candidates to the historical totals: overlap is intentional and un-reconciled.",
+    "detailedAudit": "node scripts/measure-ui-descriptors.mjs"
+  },
+  "artifactFiles": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/depth-scanner-after.json",
+      "sha256": "b410388141fe4f7857550cda55eb658e33ebb0132b9dc44b93f537a53c4fc7de"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/depth-scanner-before.json",
+      "sha256": "1561554f4c52b4157aa323f9fedfb1d7e28b1745858917fe791e8cf65e9df7f5"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/depth-scanner-dead-cells-after.txt",
+      "sha256": "14d187bac52760c75ac51a188dd7037118fbe40b1acad757f9c72321251dc795"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/depth-scanner-descriptor-origins.json",
+      "sha256": "b54165e568259f68416bef5886bf1edeec5c968f9f95a6b3a3c1f4d9428b0432"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/depth-scanner-gap-after.json",
+      "sha256": "204d65343609a1d6a07c6c13112239003fce30182c8bc184fe4941bcdcc4efac"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/depth-scanner-review.md",
+      "sha256": "c44ca9e2a2e055d48e327250abd3695b9b96175046d4ae846e6a9032af2699ba"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/depth-scanner-tests.txt",
+      "sha256": "3a3b2041baeccb00c49e2b51ff2ee18ee28782cba97052b136a7f73a1fe3eef6"
+    }
+  ]
+}

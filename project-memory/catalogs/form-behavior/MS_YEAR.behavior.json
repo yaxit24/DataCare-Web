@@ -1,0 +1,92 @@
+{
+ "form": "MS_YEAR",
+ "loc": 1597,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM YEAR_MAST WHERE CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND YEAR_MONTH = ' ? '",
+  "SELECT * FROM LOGIN_MAST WHERE CO_CODE = ' ? ' AND LOGIN_NAME = ' ? '",
+  "DELETE FROM LOGIN_MAST WHERE CO_CODE = ' ? ' AND LOGIN_NAME = ' ? '",
+  "DELETE FROM USER_SET WHERE CO_CODE = ' ? ' AND USER_NAME = ' ? '",
+  "SELECT * FROM LOGIN_MAST WHERE CO_CODE = ' ? ' ORDER BY LOGIN_NAME",
+  "SELECT * FROM YEAR_MAST WHERE CO_YEAR = ' ? ' AND YEAR_MONTH = ' ? '",
+  "SELECT * FROM YEAR_MAST WHERE CO_YEAR = ' ? '",
+  "DELETE FROM YEAR_MAST WHERE CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND YEAR_MONTH = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM AD_ADJ WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM AD_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM AD_OS WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM APR_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM APR_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM APR_IDTL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BANK_RECONCILE",
+  "DELETE FROM BAR_CAN_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BAR_CAN_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BAR_CAN_IDTL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BAR_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BAR_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BAR_IDTL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BILL_OS_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM BUL_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM CARD_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM CASH_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM CONTRA_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM CRNT_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM CUT_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM CUT_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM CUT_STK_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DELETE_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DHRN_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DHRN_ISU_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DHRN_ISU_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DHRN_REC_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DHRN_REC_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DM_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM DM_KR_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM E_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM EMP_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM FINE_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM INOUT_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM INOUT_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM INOUT_IDTL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM ITM_LOT_DETL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM ITM_OPBL WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM KR_DATA WHERE CO_YEAR <> ' ? '",
+  "DELETE FROM KR_DETL WHERE CO_YEAR <> ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 3
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "Operators.CompareString(UserDelete, \"Y\", false) != 0"
+  },
+  {
+   "message": "Are You Sure To Delete This User now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This User now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "All Master And Parameter are Created...Now ReOpen Sofware...",
+   "when": "Operators.CompareString(DC_Main.NewCompCode, \"\", false) != 0"
+  },
+  {
+   "message": "New Year are Created...Now ReOpen Sofware...",
+   "when": ""
+  },
+  {
+   "message": "Year Is Already Exist...Now ReOpen Sofware...",
+   "when": ""
+  }
+ ]
+}

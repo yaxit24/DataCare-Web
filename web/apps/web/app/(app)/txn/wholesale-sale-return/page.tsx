@@ -6,6 +6,15 @@ import { BookSelect } from '../../../../components/BookSelect';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
+import SubDetailGrid, {
+  SUB_DETAIL_COMPONENT,
+  useSubDetail,
+} from '../../../../components/SubDetailGrid';
 
 type ReturnLine = {
   tagNo: string;
@@ -30,6 +39,12 @@ type ReturnLine = {
   remark: string;
   fineWt?: number;
   netAmount?: number;
+  tableCode: string;
+  designNo: string;
+  size: string;
+  ghatPct: string;
+  mrp: string;
+  taxCode: string;
 };
 
 type ReturnView = {
@@ -52,6 +67,44 @@ type SaveResult = {
   lines: number;
 };
 
+/**
+ * P7 extended grid columns: desktop columns this form has and the web did not.
+ *
+ * Every entry was verified against the WRITER, not the API interface — a field present on the
+ * interface is not necessarily persisted (purchase hard-codes ITM_SIZE to blank, and five
+ * SaleLineInput fields have no SL_DETL column at all), and such a cell would silently discard
+ * what the operator types.
+ */
+const extendedLineFields: Array<[keyof ReturnLine, string]> = [
+  ['tableCode', 'Counter'],
+  ['designNo', 'Design'],
+  ['size', 'Size'],
+  ['ghatPct', 'Ght%'],
+  ['mrp', 'Mrp'],
+  ['taxCode', 'TaxCode'],
+];
+
+/** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
+const NUMERIC_EXTENDED = new Set<string>(['ghatPct']);
+
+/**
+ * Normalise the P7 extended cells before they reach the API.
+ *
+ * This page spreads the whole row into the payload (`...line`), so new fields travel automatically —
+ * but they are held as strings in the row, and the API types ghatPct and mrp as numbers. Sending ''
+ * for a numeric field would either be rejected or silently become 0, and a silent 0 is an override at
+ * the writer. Blank therefore becomes ABSENT, and declared numerics become numbers.
+ */
+const normaliseExtended = (line: Record<string, unknown>): Record<string, unknown> => {
+  const out = { ...line };
+  for (const [key] of extendedLineFields) {
+    const raw = String(out[key as string] ?? '').trim();
+    if (raw === '') delete out[key as string];
+    else out[key as string] = NUMERIC_EXTENDED.has(key as string) ? Number(raw) : raw;
+  }
+  return out;
+};
+
 const blankLine = (): ReturnLine => ({
   tagNo: '',
   itemCode: '',
@@ -68,6 +121,12 @@ const blankLine = (): ReturnLine => ({
   otherAmount: 0,
   taxPct: 0,
   remark: '',
+  tableCode: '',
+  designNo: '',
+  size: '',
+  ghatPct: '',
+  mrp: '',
+  taxCode: '',
 });
 
 export default function WholesaleSaleReturnPage() {
@@ -79,9 +138,16 @@ export default function WholesaleSaleReturnPage() {
   const [loadedVoucherNo, setLoadedVoucherNo] = useState('');
   const [partyCode, setPartyCode] = useState('');
   const [billNo, setBillNo] = useState('');
+  // P3: a non-cash settlement must name the bank account it lands in. The API accepted
+  // `bankAccount` and the page never sent it, so a cheque or card return posted to no bank.
+  const [bankAccount, setBankAccount] = useState('');
   const [employeeCode, setEmployeeCode] = useState('');
   const [description, setDescription] = useState('');
   const [rows, setRows] = useState<ReturnLine[]>([blankLine()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop TR_WH_SALE_RTN / MSG_PR_IDTL (30 cols) hangs a component row set under each line; the server already
+  // accepts `components` and this page sent nothing.
+  const sub = useSubDetail(rows.length);
   const [saved, setSaved] = useState<SaveResult | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -97,7 +163,10 @@ export default function WholesaleSaleReturnPage() {
   const gridKeys = useGridKeyboard({
     rowCount: rows.length,
     columnCount: 15,
-    onAppendRow: () => setRows((current) => [...current, blankLine()]),
+    onAppendRow: () => {
+      setRows((current) => [...current, blankLine()]);
+      sub.appendLine();
+    },
     onRemoveRow: (index) => {
       if (rows.length === 1) return false;
       setRows((current) => current.filter((_, i) => i !== index));
@@ -149,9 +218,12 @@ export default function WholesaleSaleReturnPage() {
   }
 
   async function save() {
-    const lines = rows.filter(
-      (row) => row.tagNo.trim() || row.itemCode.trim() || row.pcs !== 0 || row.grossWt !== 0,
-    );
+    const lines = rows
+      // Original index carried through the filter so components attach to the right line.
+      .map((row, sourceIndex) => ({ row, sourceIndex }))
+      .filter(
+        ({ row }) => row.tagNo.trim() || row.itemCode.trim() || row.pcs !== 0 || row.grossWt !== 0,
+      );
     if (!coBook || !partyCode.trim() || !lines.length) {
       setError('Select a WH RTN book, enter a party, and add at least one item or sold tag.');
       return;
@@ -160,15 +232,29 @@ export default function WholesaleSaleReturnPage() {
     setError('');
     try {
       const body = {
+        bankAccount: bankAccount.trim() || undefined,
         vchDate,
         partyCode,
         billNo,
         employeeCode,
         description,
-        lines: lines.map(({ itemName: _itemName, fineWt: _fine, netAmount: _net, ...line }) =>
-          line.tagNo.trim()
-            ? { ...line, itemCode: undefined, tagNo: line.tagNo.trim() }
-            : { ...line, tagNo: 'N' },
+        lines: lines.map(
+          ({
+            row: { itemName: _itemName, fineWt: _fine, netAmount: _net, ...line },
+            sourceIndex,
+          }) =>
+            line.tagNo.trim()
+              ? {
+                  ...normaliseExtended(line),
+                  itemCode: undefined,
+                  tagNo: line.tagNo.trim(),
+                  components: sub.componentsFor(sourceIndex),
+                }
+              : {
+                  ...normaliseExtended(line),
+                  tagNo: 'N',
+                  components: sub.componentsFor(sourceIndex),
+                },
         ),
       };
       const result = loadedVoucherNo
@@ -240,6 +326,10 @@ export default function WholesaleSaleReturnPage() {
             <input value={billNo} onChange={(event) => setBillNo(event.target.value)} />
           </label>
           <label>
+            Bank A/c
+            <input value={bankAccount} onChange={(event) => setBankAccount(event.target.value)} />
+          </label>
+          <label>
             Employee
             <input value={employeeCode} onChange={(event) => setEmployeeCode(event.target.value)} />
           </label>
@@ -270,6 +360,12 @@ export default function WholesaleSaleReturnPage() {
           account, tag, tax, and book metadata are always resolved by the server.
         </p>
         <div className="table-wrap" onKeyDown={gridKeys}>
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="wholesale-sale-return-grid-mode"
+          />
           <table aria-label="Wholesale sale return lines">
             <thead>
               <tr>
@@ -288,6 +384,7 @@ export default function WholesaleSaleReturnPage() {
                 <th>Other amt</th>
                 <th>Remark</th>
                 <th aria-label="Row actions" />
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
               </tr>
             </thead>
             <tbody>
@@ -400,6 +497,31 @@ export default function WholesaleSaleReturnPage() {
               ))}
             </tbody>
           </table>
+          <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
+            <div className="field">
+              <label>Components for line</label>
+              <select
+                value={sub.activeLine}
+                onChange={(e) => sub.setActiveLine(Number(e.target.value))}
+              >
+                {rows.map((r, i) => (
+                  <option key={i} value={i}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <span className="muted">{sub.totalRows} row(s) on this voucher</span>
+            </div>
+          </div>
+          <SubDetailGrid
+            rows={sub.rowsFor(sub.activeLine)}
+            onRowsChange={(r) => sub.setRowsFor(sub.activeLine, r)}
+            columns={SUB_DETAIL_COMPONENT}
+            parentLabel={`line ${sub.activeLine + 1}`}
+            desktopSource="TR_WH_SALE_RTN / MSG_PR_IDTL (30 cols)"
+          />
         </div>
         <button type="button" onClick={() => setRows((current) => [...current, blankLine()])}>
           Add row

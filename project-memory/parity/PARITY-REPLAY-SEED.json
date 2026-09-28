@@ -1,0 +1,881 @@
+{
+  "derivedFrom": "project-memory/parity/bundles/desktop-latest.json",
+  "derivedAt": "2026-08-31T08:08:39.050Z",
+  "capturedAt": "2026-08-30T18:46:46.015Z",
+  "scope": {
+    "companies": [
+      "01"
+    ],
+    "locations": [
+      "00"
+    ],
+    "years": [
+      "2024-2025"
+    ]
+  },
+  "taxCodes": [
+    "00",
+    "10"
+  ],
+  "books": [
+    {
+      "code": "002",
+      "name": "CASH PAY",
+      "vchType": "CPAY",
+      "inout": "",
+      "entryType": "",
+      "cases": 1,
+      "slots": [
+        {
+          "code": "00001",
+          "drLegs": 0,
+          "crLegs": 9,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00052",
+          "drLegs": 7,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "000463",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "001",
+      "name": "CASH REC",
+      "vchType": "CREC",
+      "inout": "",
+      "entryType": "",
+      "cases": 1,
+      "slots": [
+        {
+          "code": "00001",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00057",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "035",
+      "name": "PURCHASE",
+      "vchType": "FGPR",
+      "inout": "I",
+      "entryType": "P",
+      "cases": 29,
+      "slots": [
+        {
+          "code": "00008",
+          "drLegs": 10,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00001",
+          "drLegs": 0,
+          "crLegs": 2,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00085",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "036",
+      "name": "PURCHASE",
+      "vchType": "FSPR",
+      "inout": "I",
+      "entryType": "P",
+      "cases": 7,
+      "slots": [
+        {
+          "code": "00009",
+          "drLegs": 7,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00001",
+          "drLegs": 0,
+          "crLegs": 3,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00042",
+          "drLegs": 0,
+          "crLegs": 2,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00085",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "037",
+      "name": "PURCHASE",
+      "vchType": "FOGPR",
+      "inout": "I",
+      "entryType": "P",
+      "cases": 7,
+      "slots": [
+        {
+          "code": "00010",
+          "drLegs": 7,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00001",
+          "drLegs": 0,
+          "crLegs": 5,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "038",
+      "name": "PURCHASE",
+      "vchType": "FOSPR",
+      "inout": "I",
+      "entryType": "P",
+      "cases": 5,
+      "slots": [
+        {
+          "code": "00011",
+          "drLegs": 5,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00001",
+          "drLegs": 0,
+          "crLegs": 1,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "041",
+      "name": "PURCHASE",
+      "vchType": "TGLPR",
+      "inout": "I",
+      "entryType": "P",
+      "cases": 3,
+      "slots": [
+        {
+          "code": "00008",
+          "drLegs": 3,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00085",
+          "drLegs": 3,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00081",
+          "drLegs": 2,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "001008",
+          "drLegs": 0,
+          "crLegs": 2,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "027",
+      "name": "SALES",
+      "vchType": "TSSL",
+      "inout": "O",
+      "entryType": "S",
+      "cases": 1,
+      "slots": [
+        {
+          "code": "00004",
+          "drLegs": 0,
+          "crLegs": 1,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00085",
+          "drLegs": 0,
+          "crLegs": 1,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "074",
+      "name": "MEMB ENTRY",
+      "vchType": "MBENT",
+      "inout": "",
+      "entryType": "",
+      "cases": 1,
+      "slots": [
+        {
+          "code": "000858",
+          "drLegs": 0,
+          "crLegs": 1,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00001",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "034",
+      "name": "WH SALES",
+      "vchType": "WSALE",
+      "inout": "",
+      "entryType": "",
+      "cases": 15,
+      "slots": [
+        {
+          "code": "00003",
+          "drLegs": 0,
+          "crLegs": 2,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00001",
+          "drLegs": 2,
+          "crLegs": 2,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00008",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00077",
+          "drLegs": 1,
+          "crLegs": 0,
+          "itTypes": [
+            "A"
+          ]
+        },
+        {
+          "code": "00098",
+          "drLegs": 0,
+          "crLegs": 0,
+          "itTypes": [
+            "G"
+          ]
+        },
+        {
+          "code": "00057",
+          "drLegs": 1,
+          "crLegs": 1,
+          "itTypes": [
+            "A"
+          ]
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "code": "000760",
+      "name": "JASHRAJ DHAKAN",
+      "role": "party",
+      "gstType": ""
+    },
+    {
+      "code": "00001",
+      "name": "RUPALBEN DODIYA",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "00052",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000463",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000926",
+      "name": "KASHYAP KAMBALIYA",
+      "role": "party",
+      "gstType": ""
+    },
+    {
+      "code": "00057",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000903",
+      "name": "RUPALBEN DODIYA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00008",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000211",
+      "name": "TEJAS JEWELLERS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000286",
+      "name": "DEV JEWELLERS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000258",
+      "name": "JAY JEWELLERS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000530",
+      "name": "JAIN CHAIN",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000636",
+      "name": "SANGAM SONA CHAIN",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000261",
+      "name": "RAMANI ORNAMENTS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000740",
+      "name": "ANURAG ARTS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000220",
+      "name": "MAHAVIR JEWELLERS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00085",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000976",
+      "name": "ANILBHAI RAJAPARA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000275",
+      "name": "MILAN VADANAGARA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000208",
+      "name": "REVANSIDDH REFINERY",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000770",
+      "name": "TIRTH GOLD",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000294",
+      "name": "RAJUBHAI KANTHIWALA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00009",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "00042",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000942",
+      "name": "CHANDRESHBHAI MALI",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000614",
+      "name": "YAMUNA SILVER",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000281",
+      "name": "DHARMANANDAN JEWELLERS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000773",
+      "name": "LAKSHMI NARAYAN SILVER",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000854",
+      "name": "JAYDIPBHAI M NIMAVAT",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00010",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000935",
+      "name": "KIRTIBHAI KAMDAR",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00050",
+      "name": "CASH PURCHASE A/C",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000472",
+      "name": "ASHOKBHAI AGRAVAT",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000695",
+      "name": "RAHULBHAI BHIKHUBHAI MUJARIYA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "001024",
+      "name": "SANJAYBHAI MULIYA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "001029",
+      "name": "NASIRBHAI LATIFBHAI GHOGHARI",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000929",
+      "name": "NATHABHAI KAVA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00011",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000933",
+      "name": "KIRITBHAI JOGI",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000455",
+      "name": "SHAILESHBHAI MUNGALPARA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000604",
+      "name": "RAMESHBHAI RAMJIBHAI KOTHARI",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000995",
+      "name": "ASHVINBHAI VAGHELA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "000219",
+      "name": "J K SONS",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00081",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "001008",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000888",
+      "name": "VINUBHAI VALJIBHAI LUNAGARIYA",
+      "role": "party",
+      "gstType": "L"
+    },
+    {
+      "code": "00004",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000858",
+      "name": "03 - ALAUDIN MAKASUDBHAI KADARI",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "00003",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "000778",
+      "name": "JAY AMBE JEWELLERS",
+      "role": "party",
+      "gstType": ""
+    },
+    {
+      "code": "000477",
+      "name": "AARATIBEN PATEL",
+      "role": "party",
+      "gstType": ""
+    },
+    {
+      "code": "00077",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    },
+    {
+      "code": "00098",
+      "name": "",
+      "role": "slot",
+      "gstType": ""
+    }
+  ],
+  "items": [
+    {
+      "code": "999",
+      "desc": "FINE GOLD",
+      "itType": "G",
+      "rateType": "G",
+      "prCode": "FN",
+      "withStock": "Y",
+      "tagged": false,
+      "name": "FINE GOLD"
+    },
+    {
+      "code": "ORG",
+      "desc": "NANO CHAIN",
+      "itType": "G",
+      "rateType": "G",
+      "prCode": "OR",
+      "withStock": "Y",
+      "tagged": false,
+      "name": "GOLD ORNAMENTS"
+    },
+    {
+      "code": "OR925",
+      "desc": "G.BRACLATE",
+      "itType": "S",
+      "rateType": "G",
+      "prCode": "OR",
+      "withStock": "Y",
+      "tagged": false,
+      "name": "925 SILVER ORNAMENTS"
+    },
+    {
+      "code": "OS",
+      "desc": "OLD SILVER",
+      "itType": "S",
+      "rateType": "G",
+      "prCode": "OS",
+      "withStock": "Y",
+      "tagged": false,
+      "name": "OLD SILVER"
+    },
+    {
+      "code": "ORS",
+      "desc": "SILVER ORNAMENTS",
+      "itType": "S",
+      "rateType": "G",
+      "prCode": "OR",
+      "withStock": "Y",
+      "tagged": false,
+      "name": "SILVER ORNAMENTS"
+    },
+    {
+      "code": "OG",
+      "desc": "OLD GOLD",
+      "itType": "G",
+      "rateType": "G",
+      "prCode": "OG",
+      "withStock": "Y",
+      "tagged": false,
+      "name": "OLD GOLD"
+    },
+    {
+      "code": "MA925",
+      "desc": "",
+      "itType": "S",
+      "rateType": "G",
+      "prCode": "MA",
+      "withStock": "",
+      "tagged": true,
+      "name": "MACHHALI - 925"
+    },
+    {
+      "code": "DHOG",
+      "desc": "",
+      "itType": "",
+      "rateType": "",
+      "prCode": "",
+      "withStock": "",
+      "tagged": false,
+      "name": "DHAL OG"
+    },
+    {
+      "code": "BK916",
+      "desc": "",
+      "itType": "",
+      "rateType": "",
+      "prCode": "",
+      "withStock": "",
+      "tagged": false,
+      "name": "BACHA KADALI - 916"
+    }
+  ],
+  "families": [
+    {
+      "name": "cashpay",
+      "cases": 1,
+      "books": [
+        "002"
+      ],
+      "tables": [
+        "AC_DATA",
+        "CASH_DATA",
+        "OP_LDR",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ]
+    },
+    {
+      "name": "cashrec",
+      "cases": 1,
+      "books": [
+        "001"
+      ],
+      "tables": [
+        "AC_DATA",
+        "CASH_DATA",
+        "OP_LDR",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ]
+    },
+    {
+      "name": "purc",
+      "cases": 51,
+      "books": [
+        "035",
+        "036",
+        "037",
+        "038",
+        "041"
+      ],
+      "tables": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "PR_DATA",
+        "PR_DETL",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA",
+        "PR_IDTL",
+        "DELETE_DATA",
+        "TAX_DATA"
+      ]
+    },
+    {
+      "name": "sale",
+      "cases": 1,
+      "books": [
+        "027"
+      ],
+      "tables": [
+        "AC_DATA",
+        "BILL_OS_DATA",
+        "MAIN_STOCK",
+        "OP_LDR",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ]
+    },
+    {
+      "name": "scheme",
+      "cases": 1,
+      "books": [
+        "074"
+      ],
+      "tables": [
+        "AC_DATA",
+        "AD_DATA",
+        "AD_OS",
+        "OP_LDR",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ]
+    },
+    {
+      "name": "wsale",
+      "cases": 15,
+      "books": [
+        "034"
+      ],
+      "tables": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA",
+        "DELETE_DATA",
+        "RATE_CUT_REC",
+        "RATE_CUT_ISU_REC"
+      ]
+    }
+  ],
+  "notDerivable": [
+    "CO_SET",
+    "CO_SET_NEW"
+  ]
+}

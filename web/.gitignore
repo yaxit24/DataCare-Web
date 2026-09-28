@@ -1,10 +1,12 @@
+# Dependencies and reproducible generated output only. Environment snapshots are intentionally
+# versioned in this private owner-authorized baseline; see ../SECURITY-NOTICE.md.
 node_modules/
 dist/
 .next/
 .turbo/
 coverage/
+test-results/
+playwright-report/
+blob-report/
 *.log
-.env
-.env.*
-!.env.example
 .DS_Store

@@ -1,0 +1,18 @@
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/businessScope.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextValue.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/authorization.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContext.extraction.test.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/sessionContextValue.test.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+✖ 5 problems (0 errors, 5 warnings)
+

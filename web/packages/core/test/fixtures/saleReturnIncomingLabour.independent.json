@@ -1,0 +1,693 @@
+{
+  "kind": "prospective-incoming-return-labour-code-copy-candidates-v1",
+  "status": "Literal independent candidate expectations; not implemented or executed.",
+  "boundary": "Only server-resolved pre-calculation copy; no existing preview allowlist or writer changes.",
+  "scope": {
+    "coCode": "01"
+  },
+  "baseline": {
+    "rowIdentity": "independent-row-17-old31",
+    "raw": {
+      "SR_NO": "17",
+      "OLD_SRNO": "31",
+      "LBR_CODE": "",
+      "TAG_LBR_CODE": null,
+      "LBR_RATE": "23.0000",
+      "HM_ID": null,
+      "IT_CODE": "IT001"
+    },
+    "visible": {
+      "0": "1",
+      "1": "IT001",
+      "2": "",
+      "3": "",
+      "4": "",
+      "5": "",
+      "6": "",
+      "7": "",
+      "8": "",
+      "9": "",
+      "10": "1.234",
+      "11": "",
+      "12": "1.111",
+      "13": "",
+      "14": "14.00",
+      "15": "",
+      "16": "90.00",
+      "17": "17.00",
+      "18": "",
+      "19": "100.00",
+      "20": "",
+      "21": "21.00",
+      "22": "N",
+      "23": "23.00",
+      "24": "24.00",
+      "25": "",
+      "26": "",
+      "27": "",
+      "28": "28.00",
+      "29": "",
+      "30": "30.00",
+      "31": "31.00",
+      "32": "32.00",
+      "33": "",
+      "34": "",
+      "35": "35.00",
+      "36": "",
+      "37": "3.00",
+      "38": "",
+      "39": "",
+      "40": "",
+      "41": "",
+      "42": "",
+      "43": "",
+      "44": "",
+      "50": "",
+      "51": "",
+      "52": "",
+      "53": "",
+      "54": "",
+      "55": "",
+      "56": "",
+      "57": "",
+      "59": "",
+      "60": "",
+      "61": "",
+      "62": "",
+      "63": "",
+      "64": "",
+      "65": "",
+      "68": "",
+      "69": "",
+      "70": ""
+    },
+    "caches": {
+      "45": "1.234",
+      "46": "1.111",
+      "47": "90.00",
+      "48": "17.00",
+      "49": "100.00",
+      "58": "23.00",
+      "66": "21.00",
+      "67": "3.00"
+    },
+    "journal": []
+  },
+  "cases": [
+    {
+      "id": "C13-01",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "01 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "23": "12.50",
+          "24": "",
+          "21": "",
+          "14": "",
+          "17": "",
+          "28": "",
+          "13": "S1",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "labourCodeSelection",
+        "activeColumn": 13,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C29-01",
+      "field": 29,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "01 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "31": "12.50",
+          "32": "",
+          "30": "",
+          "35": "",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "tagLabourCodeSelection",
+        "activeColumn": 29,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C13-02",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "02 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "23": "",
+          "24": "",
+          "21": "12.50",
+          "14": "",
+          "17": "",
+          "28": "",
+          "13": "S1",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "labourCodeSelection",
+        "activeColumn": 13,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C29-02",
+      "field": 29,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "02 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "31": "",
+          "32": "",
+          "30": "12.50",
+          "35": "",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "tagLabourCodeSelection",
+        "activeColumn": 29,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C13-03",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "03 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "23": "",
+          "24": "12.50",
+          "21": "",
+          "14": "",
+          "17": "",
+          "28": "",
+          "13": "S1",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "labourCodeSelection",
+        "activeColumn": 13,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C29-03",
+      "field": 29,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "03 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "31": "",
+          "32": "12.50",
+          "30": "",
+          "35": "",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "tagLabourCodeSelection",
+        "activeColumn": 29,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C13-04",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "04 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "23": "",
+          "24": "",
+          "21": "",
+          "14": "",
+          "17": "12.50",
+          "28": "",
+          "13": "S1",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "labourCodeSelection",
+        "activeColumn": 13,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C29-04",
+      "field": 29,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "04 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "31": "",
+          "32": "",
+          "30": "",
+          "35": "",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "tagLabourCodeSelection",
+        "activeColumn": 29,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C13-05",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "05 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "23": "",
+          "24": "",
+          "21": "",
+          "14": "12.50",
+          "17": "",
+          "28": "",
+          "13": "S1",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "labourCodeSelection",
+        "activeColumn": 13,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C29-05",
+      "field": 29,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "05 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "31": "",
+          "32": "",
+          "30": "",
+          "35": "",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "tagLabourCodeSelection",
+        "activeColumn": 29,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C13-06",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "06 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "23": "12.50",
+          "24": "",
+          "21": "",
+          "14": "",
+          "17": "",
+          "28": "",
+          "13": "S1",
+          "22": "K",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "labourCodeSelection",
+        "activeColumn": 13,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C29-06",
+      "field": 29,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "06 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "31": "12.50",
+          "32": "",
+          "30": "",
+          "35": "",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "tagLabourCodeSelection",
+        "activeColumn": 29,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C13-07",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "07 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "23": "",
+          "24": "",
+          "21": "",
+          "14": "",
+          "17": "",
+          "28": "12.50",
+          "13": "S1",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "labourCodeSelection",
+        "activeColumn": 13,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "C29-07",
+      "field": 29,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "07 category",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "31": "",
+          "32": "",
+          "30": "",
+          "35": "12.50",
+          "29": "S1"
+        },
+        "unchanged": "Every other visible cell, complete raw, all eight caches and prior journal.",
+        "nextPhase": "calculateAfterCopy",
+        "cause": "tagLabourCodeSelection",
+        "activeColumn": 29,
+        "editorText": "S1"
+      }
+    },
+    {
+      "id": "SAME-13",
+      "field": 13,
+      "baselineOverrides": {
+        "13": "S1",
+        "29": "T9"
+      },
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "01 Rate",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "13": "S1",
+          "23": "12.50"
+        },
+        "noClears": true,
+        "tagCode": "T9",
+        "nextPhase": "calculateAfterCopy"
+      }
+    },
+    {
+      "id": "SAME-29",
+      "field": 29,
+      "baselineOverrides": {
+        "29": "S1"
+      },
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "02 Percent",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "29": "S1",
+          "30": "12.50"
+        },
+        "noClears": true,
+        "nextPhase": "calculateAfterCopy"
+      }
+    },
+    {
+      "id": "ZERO-COPY",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "01 Rate",
+        "LBR_VAL": "0"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "13": "S1",
+          "29": "S1",
+          "23": "0.00",
+          "24": "",
+          "21": "",
+          "14": "",
+          "17": "",
+          "28": ""
+        },
+        "zeroIsCopied": true
+      }
+    },
+    {
+      "id": "KEEP-TAG-CODE",
+      "field": 13,
+      "baselineOverrides": {
+        "29": "T9"
+      },
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "03 Amount",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "ready",
+        "visiblePatch": {
+          "13": "S1",
+          "23": "",
+          "24": "12.50",
+          "21": "",
+          "14": "",
+          "17": "",
+          "28": ""
+        },
+        "tagCode": "T9"
+      }
+    },
+    {
+      "id": "NULL-VALUE",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": "01 Rate",
+        "LBR_VAL": null
+      },
+      "expect": {
+        "status": "unsupported",
+        "reason": "Unproved saved numeric NULL formatting; retained observation, no copy/calculation."
+      }
+    },
+    {
+      "id": "PREFIX-SPACE",
+      "field": 13,
+      "editorText": "S1",
+      "masterRaw": {
+        "CO_CODE": "01",
+        "LBR_CODE": "S1",
+        "LBR_CATG": " 01 Rate",
+        "LBR_VAL": "12.5"
+      },
+      "expect": {
+        "status": "unsupported",
+        "reason": "Category prefix is exactly the first two characters; do not trim into01. Initial known-category profile restriction."
+      }
+    },
+    {
+      "id": "BLANK-EDITOR",
+      "field": 13,
+      "editorText": "",
+      "expect": {
+        "status": "unsupported",
+        "reason": "Blank Enter/Leave transition lies outside initial resolved-code-only admission; no guessed clear/copy/callback."
+      }
+    },
+    {
+      "id": "ABSENT-CODE",
+      "field": 13,
+      "editorText": "S1",
+      "observedMasters": [],
+      "expect": {
+        "status": "lookup-required",
+        "rowUnchanged": true,
+        "calculate": false,
+        "reason": "Source opens help and returns; choosing help does not immediately execute the resolved-copy branch."
+      }
+    },
+    {
+      "id": "CASE-ALIAS",
+      "field": 13,
+      "editorText": "S1",
+      "observedMasters": [
+        {
+          "CO_CODE": "01",
+          "LBR_CODE": "S1",
+          "LBR_CATG": "01 Rate",
+          "LBR_VAL": "12.5"
+        },
+        {
+          "CO_CODE": "01",
+          "LBR_CODE": "s1",
+          "LBR_CATG": "03 Amount",
+          "LBR_VAL": "99"
+        }
+      ],
+      "expect": {
+        "status": "unsupported",
+        "reason": "Discovered case alias requires collation containment; never choose exact row while ignoring relevant alias."
+      }
+    },
+    {
+      "id": "FOREIGN-ONLY",
+      "field": 13,
+      "editorText": "S1",
+      "observedMasters": [
+        {
+          "CO_CODE": "02",
+          "LBR_CODE": "S1",
+          "LBR_CATG": "01 Rate",
+          "LBR_VAL": "12.5"
+        }
+      ],
+      "expect": {
+        "status": "lookup-required",
+        "rowUnchanged": true,
+        "calculate": false,
+        "reason": "No matching current-company master; no cross-company fallback."
+      }
+    }
+  ],
+  "structuralCandidates": [
+    "Different row identity or stale master/config/document observation refuses before copying.",
+    "Exact duplicate observations refuse even if values match; canonical DB PK prevents ordinary exact duplicates.",
+    "SQL float exponent, nonfinite, malformed/missing value refuse the initial exact decimal profile.",
+    "Code longer than current LBR_MAST varchar2 is unsupported; desktop editor MaxLength4 is not schema authority.",
+    "Caller-supplied master values/category/cache/policy cannot replace authoritative observations."
+  ],
+  "notClaimed": [
+    "Final numeric row totals",
+    "Full Enter/Leave/F1 keyboard behavior",
+    "Aggregate/bill invocation timing",
+    "Source tag/child admission",
+    "Numeric/stock/financial writes",
+    "Windows Double/Format or SQL Server collation equivalence"
+  ],
+  "baselineQualification": "Complete structural pre-copy cell/cache snapshot for this isolated copy function; no calculation or complete numeric saved-projection eligibility is claimed. Raw is immutable and distinct from subsequent visible overrides."
+}

@@ -1,0 +1,9 @@
+
+> @datacare/web@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> tsc --noEmit
+
+test/salesOrderForm.test.ts(346,41): error TS2322: Type 'null' is not assignable to type 'string'.
+test/salesOrderForm.test.ts(346,56): error TS2322: Type 'null' is not assignable to type 'string'.
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/web@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

@@ -1,0 +1,10 @@
+apps/web/lib/api.ts(73,28): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(o: {}): string[]', gave the following error.
+    Argument of type 'Record<string, any> | undefined' is not assignable to parameter of type '{}'.
+      Type 'undefined' is not assignable to type '{}'.
+  Overload 2 of 2, '(o: object): string[]', gave the following error.
+    Argument of type 'Record<string, any> | undefined' is not assignable to parameter of type 'object'.
+      Type 'undefined' is not assignable to type 'object'.
+apps/web/lib/salesReturnBillReplay.ts(367,28): error TS18048: 'expected' is possibly 'undefined'.
+apps/web/lib/salesReturnForm.ts(1,36): error TS6142: Module '../components/BusinessScope' was resolved to '/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/BusinessScope.tsx', but '--jsx' is not set.
+apps/web/lib/salesReturnReplay.ts(357,28): error TS18048: 'expected' is possibly 'undefined'.

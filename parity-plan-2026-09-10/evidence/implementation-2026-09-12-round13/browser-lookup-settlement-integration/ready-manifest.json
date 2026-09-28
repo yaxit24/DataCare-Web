@@ -1,0 +1,82 @@
+{
+  "kind": "session-context-browser-lookup-settlement-correction-v1",
+  "status": "ready-shared-stack-unexecuted",
+  "createdAtUtc": "2026-09-11T21:45:17.009699+00:00",
+  "actualFailedStage": {
+    "checksPassed": 5,
+    "error": "Timed out observing the actual durable JSON response"
+  },
+  "causeQualification": "source-backed pending lookup schedule; not an observed per-request trace of the failed production attempt",
+  "toyDiagnostic": {
+    "status": "passed",
+    "scope": "isolated localhost toy server/realChromium only; no shared app/DB",
+    "browser": "149.0.7827.55"
+  },
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/test-results/session-context-real-stack-durable/result.json",
+      "sha256": "480813d8aa28f5abd83cc1c8cfc5ab39abbdce0ebb0d4e62451a74102702913d"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/LookupPicker.tsx",
+      "sha256": "113d6bd103e08e9b9940a5e7c0464991624e15f9c6cd26972f9a5a861687d46a"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/browser-durable-diagnostic/capture.mjs",
+      "sha256": "3a0f69ed9c368d27361a0371b32c70d57214d41112b5f696fc1ed3e27b4679b5"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/browser-durable-diagnostic/capture-first.json",
+      "sha256": "30356416b7c9e542b3b3d4ae845f5c57213b1cab2940def7b9b5479e61d703ce"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/browser-durable-response-staged/ready-manifest.json",
+      "sha256": "610ff4197b3488dcc48c26c32437cb96a2b1e8ce9812c3fcfd6fcbae3a063b5c"
+    }
+  ],
+  "journeyComparison": [
+    {
+      "file": "session-context.journey.mjs",
+      "requiredCheckStringsIdentical": true,
+      "priorSha256": "e17e926998cde474c8757b6feabe3f8a0614fb67bdfc99a57496a8cfaf7db0bd",
+      "sha256": "113c5841f9390c3a826b5c6d4c63e96bc0fd232197b3101cfddc8378a0bf1798"
+    },
+    {
+      "file": "session-context-lifecycle.journey.mjs",
+      "requiredCheckStringsIdentical": true,
+      "priorSha256": "3037c004c16d3634507bdb1c5553c3c320bf441215693ad38e11df57fa40b708",
+      "sha256": "3037c004c16d3634507bdb1c5553c3c320bf441215693ad38e11df57fa40b708"
+    }
+  ],
+  "requiredChecks": 14,
+  "transportFaults": 5,
+  "files": [
+    {
+      "path": "correction.md",
+      "sha256": "4e5874918a4cec8953b521201143c1c11eddce0d656b93ecd24c798501a40a49"
+    },
+    {
+      "path": "lookup-settlement.patch",
+      "sha256": "e61acbf6e682203e94856139bc54589d56f4a3eb708fd831ae29b32625599a66"
+    },
+    {
+      "path": "web/apps/web/test/session-context-lifecycle.journey.mjs",
+      "sha256": "3037c004c16d3634507bdb1c5553c3c320bf441215693ad38e11df57fa40b708"
+    },
+    {
+      "path": "web/apps/web/test/session-context-response-observation.mjs",
+      "sha256": "c0282d1be8d7e8f107c9dca7d222e9580d7fea5e144e5dd01c80168600cbaf29"
+    },
+    {
+      "path": "web/apps/web/test/session-context.journey.mjs",
+      "sha256": "113c5841f9390c3a826b5c6d4c63e96bc0fd232197b3101cfddc8378a0bf1798"
+    }
+  ],
+  "execution": {
+    "sharedBrowser": false,
+    "database": false,
+    "compiler": false,
+    "isolatedToyBrowser": true,
+    "formatter": "staged JavaScript only"
+  }
+}

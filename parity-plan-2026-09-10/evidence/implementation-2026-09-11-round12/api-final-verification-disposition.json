@@ -1,0 +1,60 @@
+{
+  "capturedAtUtc": "2026-09-11T17:04:20.325843+00:00",
+  "status": "passed-after-retained-failed-stage",
+  "finalRun": "api-full-complete.run.json",
+  "actualFiles": 239,
+  "actualTests": 2227,
+  "skipped": 0,
+  "finalInputs": "api-input-snapshot-complete.json",
+  "finalInputVerification": "api-input-verification-complete.json",
+  "capturedFiles": 1368,
+  "externalObservations": 8,
+  "changedInputs": [],
+  "changedExternalObservations": [],
+  "earlierStages": {
+    "api-full-final": "All239/2227 passed; dependency capture incomplete.",
+    "api-full-qualified": "Stopped during collection; zero exit without complete summary receives no pass credit.",
+    "api-full-audited": "Completed with2 transaction failures; all1368files/eight external observations unchanged.",
+    "api-full-complete": "All239/2227 passed with complete captured inputs. Existing failing cases passed without source/assertion/deadline changes."
+  },
+  "temporaryEnvironment": "Only disposable PostgreSQL CPU scheduling weight raised0\u21922048 and retained through the successful rerun; restoration is separately recorded after browser verification.",
+  "limits": "Local functional regression, not production load/timeout acceptance or proof of a unique cause for earlier failures. Shared-workspace certification logic is not this team's delivered ledger/mode work.",
+  "identities": [
+    {
+      "path": "api-full-complete.run.json",
+      "sha256": "b54c5d8110d0991ca637d7719e8802a62f8bdd60843c7f6a65b755543dab1893"
+    },
+    {
+      "path": "api-full-complete.txt",
+      "sha256": "145018bc94ea55f525b86c78a6322561b5d665b05e72e65cfcd6310fd6844753"
+    },
+    {
+      "path": "api-input-snapshot-complete.json",
+      "sha256": "3c04bd4552be7e373eb7e50fe851ee52e7dfb039b4133b418b3d9bd56c87c04e"
+    },
+    {
+      "path": "api-input-verification-complete.json",
+      "sha256": "5fa68be68830c16f9a93a927a19860400f18fa64801fa01f0b21422e6eb93d3d"
+    },
+    {
+      "path": "api-full-audited.run.json",
+      "sha256": "1e7c9191e89d91b5cf09e3f69b95e76d1c5e9d901c5d548f5f7b466b2fd5b3e3"
+    },
+    {
+      "path": "api-full-audited.txt",
+      "sha256": "7c06e88af37da5bb92af97977066ca721fc6a142cf47a994cfd542ccf4b150eb"
+    },
+    {
+      "path": "x13-audited-api-failure-triage.md",
+      "sha256": "5b4fec9e66c5a55793880dc2ae4e3fc749164c7de4cd8d8422e993d467515bdb"
+    },
+    {
+      "path": "test-database-scheduling-adjustment.json",
+      "sha256": "92870baf6e15a314c954d3e47d1d3e4b1c1ea8d497acf05644c7814668cc084d"
+    },
+    {
+      "path": "shared-workspace-and-input-qualification.json",
+      "sha256": "8f1174129fafebfdeb95d0c50219d3fc1ab9dda3b132cc8407ac7be44822a05f"
+    }
+  ]
+}

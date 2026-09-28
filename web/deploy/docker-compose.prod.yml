@@ -41,6 +41,16 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set in .env}
       APP_VERSION: ${APP_VERSION:-0.0.0}
       APP_TENANT_ID: ${APP_TENANT_ID:?set in .env}
+      # e-Invoice / IRN. Passed through UNSET-by-default on purpose: with NODE_ENV=production the API refuses
+      # to issue an IRN rather than fabricating one, so an absent value fails loudly at the point of use
+      # instead of silently producing an invalid invoice. Previously these were not forwarded at all, so
+      # setting them in .env had no effect and e-invoicing always ran fake.
+      GSP_ASPID: ${GSP_ASPID:-}
+      GSP_PASSWORD: ${GSP_PASSWORD:-}
+      GSP_GSTIN: ${GSP_GSTIN:-}
+      GSP_USER: ${GSP_USER:-}
+      GSP_EINV_PWD: ${GSP_EINV_PWD:-}
+      GSP_SANDBOX: ${GSP_SANDBOX:-}
     depends_on:
       postgres:
         condition: service_healthy

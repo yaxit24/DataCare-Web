@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/node_modules/.bin/vitest",
+    "run",
+    "--config",
+    "vitest.config.ts"
+  ],
+  "cwd": "/tmp/datacare-round15-financial-effects/web/packages/core",
+  "startedAtUtc": "2026-09-12T02:39:47.568912+00:00",
+  "finishedAtUtc": "2026-09-12T02:39:48.090133+00:00",
+  "exitCode": 1,
+  "logSha256": "e2a76719a2a50e3b1877e1a79e429afff94b0c89be1b76ecca38ada6cef20086"
+}

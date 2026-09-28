@@ -1,0 +1,12 @@
+[
+  {
+    "manifest": "x13-aggregate-independent-tests-run.json",
+    "references": 33,
+    "mismatches": []
+  },
+  {
+    "manifest": "x13-bill-tax-policy-implementation.run.json",
+    "references": 12,
+    "mismatches": []
+  }
+]

@@ -1,0 +1,16 @@
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "orderImageReport.test.ts" "orderReport.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/orderReport.test.ts (14 tests) 66ms
+ ✓ test/orderImageReport.test.ts (7 tests) 47ms
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  03:02:02
+   Duration  1.63s (transform 194ms, setup 0ms, collect 242ms, tests 113ms, environment 0ms, prepare 203ms)
+

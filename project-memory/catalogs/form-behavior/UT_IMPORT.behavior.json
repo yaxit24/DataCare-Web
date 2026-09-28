@@ -1,0 +1,161 @@
+{
+ "form": "UT_IMPORT",
+ "loc": 14467,
+ "gridColumns": {},
+ "inlineSql": [
+  "Plus Ref And Con Person Update",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "UPDATE HDD_MAST SET REF_NO = 'S'",
+  "UPDATE YEAR_MAST SET OP_DATE = ' ? MM/dd/yyyy ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE LOCT_MAST SET TRY_DATE = ' ? MM/dd/yyyy ? ' WHERE CO_CODE = '01' AND LC_CODE = '00'",
+  "DELETE FROM OP_LDR WHERE CO_CODE = ' ? '",
+  "Select A.AC_CODE,format(Sum(A.CR_AMT-A.DR_AMT),'0.00') as Amount,format(SUM(iif(A.IT_TYPE = 'G',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0)),'0.000') as GoldWt,format(sum(iif(A.IT_TYPE = 'S',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0)),'0.000') as SilverWt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND B.AC_MAIN_GR < '3' and VCH_DATE <= # ? MM/dd/yyyy ? # GROUP BY A.AC_CODE HAVING (Sum(A.CR_AMT-A.DR_AMT)+ SUM(iif(A.IT_TYPE = 'G',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0))+sum(iif(A.IT_TYPE = 'S',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0))) <> 0 ORDER BY A.AC_CODE",
+  "SELECT A.AC_CODE,A.CO_BOOK,A.VCH_DATE,A.VCH_NO,B.BOOK_SNAME,B.BOOK_INOUT,B.MAIN_BOOK, SUM(A.CR_AMT) As CrAmt,SUM(A.DR_AMT) as DrAmt, SUM(iif(IT_TYPE = 'G' AND SIGN = '+',FINE_WT,0)) AS CrGold, SUM(iif(IT_TYPE = 'G' AND SIGN = '-',FINE_WT,0)) AS DrGold, SUM(iif(IT_TYPE = 'S' AND SIGN = '+',FINE_WT,0)) AS CrSl, SUM(iif(IT_TYPE = 'S' AND SIGN = '-',FINE_WT,0)) AS DrSl FROM AC_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.AC_CODE = ' ? AC_CODE ? ' AND A.VCH_DATE <= # ? MM/dd/yyyy ? # ? GROUP BY A.AC_CODE,A.CO_BOOK,A.VCH_DATE,A.VCH_NO,B.BOOK_SNAME,B.BOOK_INOUT,B.MAIN_BOOK ORDER BY A.CO_BOOK,A.VCH_DATE,A.VCH_NO",
+  "INSERT INTO OP_LDR(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,DATA_TYPE,VCH_DATE, VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME,AC_CODE, CR_AMT,DR_AMT,CR_GL_FINE,DR_GL_FINE,CR_SL_FINE,DR_SL_FINE) VALUES (' ? ',' ? ',' ? ',' ? CO_BOOK ? ',' ? VCH_NO ? ','A',' ? VCH_DATE ? MM/dd/yyyy ? ', ? ' ? BOOK_SNAME ? ',' ? BOOK_INOUT ? ',' ? BOOK_INOUT ? ',' ? MAIN_BOOK ? ',' ? AC_CODE ? ', ? CrAmt ? , ? DrAmt ? , ? CrGold ? , ? DrGold ? , ? CrSl ? , ? DrSl ? )",
+  "DELETE FROM TOUCH_MAST WHERE CO_CODE = ' ? ' and LC_CODE = ' ? '",
+  "SELECT * FROM TOUCH_MAST WHERE CO_CODE = ' ? ' AND IT_CODE <> '' AND AC_CODE <> '' ORDER BY AC_CODE,IT_CODE",
+  "INSERT INTO TOUCH_MAST(CO_CODE,LC_CODE,AC_CODE,AC_IT_CODE,AC_TOUCH,AC_WEST, AC_GHAT_PRC,AC_LBR_PRC,AC_LBR_RATE,AC_RATE,AC_LBR_TYPE,MAIN_USER) VALUES (' ? ',' ? ',' ? AC_CODE ? ',' ? IT_CODE ? ', ? IT_TOUCH ? , ? IT_WEST ? , ? GHAT_PRC ? ,0,0,0,'',' ? ')",
+  "SELECT IT_CODE FROM MAIN_STOCK WHERE CO_CODE = ' ? ' GROUP BY IT_CODE",
+  "DELETE FROM SL_ORD_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM SL_ORD_DETL WHERE CO_CODE = ' ? '",
+  "SELECT * FROM SL_ORD_DATA WHERE CO_CODE = ' ? ' AND VCH_DATE < # ? MM/dd/yyyy ? # AND ((ADV_AMT+OLD_GL+OLD_SL) - (ORD_ADJ_AMT+ADJ_GOLD+ADJ_SILVER)) > 0 ORDER BY CO_BOOK,VCH_DATE,VCH_NO",
+  "INSERT INTO SL_ORD_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,VCH_DATE,VCH_TIME, BILL_NO,HD_VCH_NO,AC_CODE,AC_NAME,NET_AMT,TAX_CODE,TAX_PRC,TAX_AMT,TOT_AMT,ADV_AMT, ORD_ADJ_AMT,OLD_GL_AMT,OLD_SL_AMT,CASH_AMT,CARD_AMT,CHQ_AMT,SCHM_AMT,DEL_DATE, CARD_AC,BANK_AC,CHQ_NO,BANK_NAME,EMP_CODE,VCH_DESC,ENTRY_TIME,SL_BILL_TYPE,OLD_GL, ADJ_GOLD,OLD_SL,ADJ_SILVER,CARD_ADJ,DATA_TRFR,OLD_VCH_NO,NEW_VCH_NO,MAIN_USER) VALUES (' ? CO_CODE ? ',' ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? VCH_NO ? ',' ? VCH_DATE ? MM/dd/yyyy ? ',' ? VCH_DATE ? MM/dd/yyyy ? ', ? ' ? BILL_NO ? ',' ? HD_VCH_NO ? ',' ? AC_CODE ? ',' ? AC_NAME ? ',",
+  "SELECT A.*,B.BOOK_SNAME,B.MAIN_BOOK,B.BOOK_INOUT FROM SL_ORD_DETL AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND CO_YEAR = ' ? CO_YEAR ? ' and A.CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' ORDER BY A.SR_NO",
+  "INSERT INTO SL_ORD_DETL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO,VCH_DATE,VCH_TIME, VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME,AC_CODE,IT_CODE,TAG_NO,LOT_NO,DESIGN_NO,TBL_CODE,ITM_SIZE, ITM_PCS,BAG_WT,ITM_GWT,ITM_OTH_WT,ITM_NWT,ITM_GHT_WT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE,LBR_PRC,LBR_RATE, LBR_TYPE,LBR_AMT,OTH_AMT,ITM_RATE,ITM_AMT,TAG_COST,ITM_MRP,TOT_AMT,TAX_PRC,NET_AMT,ITM_REMARK, VCH_SRNO,KR_NET_WT,KR_TOUCH,KR_WEST_PRC,KR_FINE,KR_NAME,RATE_TYPE,IT_TYPE,PR_CODE, HD_VCH_NO,DATA_TRFR,OLD_VCH_NO,NEW_VCH_NO,MAIN_USER,ADD_USER) VALUES (' ? ',' ? ',' ? CO_YEAR ? ',' ? CO_BOOK ? ',' ? VCH_NO ? ', ? SR_NO ? , ? SR_NO ? ,' ? VCH_DATE ? MM/dd/yyyy ? ',' ? VCH_DATE ? MM/dd/yyyy ? ', ? ' ? BOOK_SNAME ? ',' ? BOOK_INOUT ? ','O',' ? MAIN_BOOK ? ',' ? AC_CODE ? ',' ? IT_CODE ? ',' ? TAG_NO ? ','',' ? DESIGN ? ','',' ? ITM_SIZE ? ', ? ",
+  "DELETE FROM ITM_OPBL WHERE CO_CODE = ' ? '",
+  "SELECT A.IT_CODE AS Code,B.IT_NAME AS Name,B.IT_TYPE,B.GR_CODE,B.AVG_TOUCH,SUM(iif(SIGN = '+', ITM_PCS, -ITM_PCS)) AS ClPcs,SUM(iif(SIGN = '+',ITM_NWT,-ITM_NWT)) AS ClWt ,SUM(iif(SIGN = '+',ITM_GWT,-ITM_GWT)) AS ClWtGr,SUM(iif(SIGN = '+', (ITM_PCS*B.ITEM_RATE), -(ITM_PCS*B.ITEM_RATE))) AS ItAmt FROM MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND VCH_DATE <= # ? MM/dd/yyyy ? # AND A.IT_CODE <> '' AND (A.TAG_NO = '' OR A.TAG_NO IS NULL) GROUP BY A.IT_CODE,B.IT_NAME,B.IT_TYPE,B.GR_CODE,B.AVG_TOUCH ORDER BY B.GR_CODE,A.IT_CODE",
+  "INSERT INTO ITM_OPBL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,IT_CODE,VCH_NO,SR_NO, ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_FINE,ITM_RATE,ITM_AMT,LBR_AMT,OTH_AMT, NET_AMT,DM_WT,DM_RATE,DM_AMT,MAIN_USER,LBR_RATE) VALUES (' ? ',' ? ',' ? ','000',' ? Code ? ',' ? IT_TYPE ? ', ? , ? ",
+  "DELETE FROM BAR_DATA WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_DETL WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAR_IDTL WHERE CO_CODE = ' ? '",
+  "SELECT A.IT_CODE,B.IT_TYPE FROM MAIN_TAG_DATA AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> '' AND A.IT_CODE <> '' GROUP BY A.IT_CODE,B.IT_TYPE ORDER BY B.IT_TYPE,A.IT_CODE",
+  "SELECT A.TAG_NO,A.IT_CODE,C.DESIGN,C.ITM_SIZE,C.ITM_PCS,C.ITM_GWT,C.VCH_SRNO,SUM(IIF(SIGN='+',A.VCH_SRNO ,- A.VCH_SRNO)) AS CurStk,C.ITM_NWT AS TagNwt ,C.LBR_AMT,C.OTH_AMT,C.CO_BOOK,C.VCH_NO,C.VCH_DATE,C.VCH_TYPE,C.BOOK_NAME,C.CUST_AC,C.AC_CODE,C.MRP,C.NET_COST,C.KR_NAME from (MAIN_TAG_DATA AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO AND A.IT_CODE = C.IT_CODE)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> '' AND A.IT_CODE = ' ? IT_CODE ? '",
+  "SELECT A.*,B.BOOK_SNAME,B.MAIN_BOOK FROM BAR_DETL AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND CO_YEAR = ' ? ' and TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO =",
+  "SELECT A.*,B.IT_TYPE FROM BAR_IDTL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND TAG_NWT = ? TagNwt ? ORDER BY A.ISR_NO",
+  "INSERT INTO BAR_DETL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO, VCH_DATE,STK_DATE,VCH_TIME,VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME,AC_CODE,IT_CODE, TAG_NO,LOT_NO,DESIGN_NO,TBL_CODE,ITM_SIZE,ITM_PCS,BAG_WT,ITM_GWT,ITM_OTH_WT,ITM_NWT, ITM_GHT_PRC,ITM_GHT_WT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE,LBR_PRC,LBR_RATE,LBR_TYPE, LBR_AMT,OTH_AMT,ITM_RATE,ITM_AMT,TAG_COST,ITM_MARGIN,ITM_MRP,ITM_REMARK,SF_NO, KR_NAME,KR_OTH_WT,KR_NET_WT,KR_GHT_PRC,KR_GHT_WT,KR_TOUCH,KR_WEST_PRC,KR_FINE, KR_LBR_RATE,KR_LBR_AMT,KR_OTH_AMT,KR_COST,TAG_SRNO,VCH_SRNO,RATE_TYPE,IT_TYPE, TAG_TYPE,PR_CODE,APR_ISU,ORD_NO,ORD_SRNO,ORD_YRCD,ORD_DBCD,ORD_AC,MAIN_USER,ADD_USER,DATA_TRFR, HM_ID,HM_ID2,HM_ID3,HM_ID4,HM_ID_WT,HM_ID2_WT,HM_ID3_WT,HM_ID4_WT) VALUES (' ? CO_CODE ? ',' ? ',' ? ','000',' ? ', ? , ? , ? ' ? MM/dd/yyyy ? ',' ? MM/dd/yyyy ? ',' ? MM/dd/yyyy ? ',' ? BOOK_SNAME ? ','I','O',' ? MAIN_BOOK ? ',' ? AC_CODE ? ',' ? IT_CODE ? ', ? ' ? TAG_NO ? ','',' ? DESIGN ? ','001',' ? ITM_SIZE ? ',",
+  "INSERT INTO BAR_IDTL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE, VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME,AC_CODE,TAG_NO,VCH_SRNO,IT_CODE,IT_TYPE, DM_CODE,DM_SIZE,DM_SFNO,DM_LEB,IT_PCS,IT_PCS_WT,KR_WT,KR_LESS_PRC,IT_GWT,IT_CON_PRC, IT_CON_WT,IT_RATE_TYPE,IT_RATE,IT_AMT,IT_LBR_RATE,IT_LBR_AMT,IT_NET_AMT,KR_CON_PRC, KR_CON_WT,KR_RATE,KR_AMT,KR_LBR_RATE,KR_LBR_AMT,KR_NET_AMT,MAIN_USER) VALUES (' ? ',' ? ',' ? ','000',' ? ', ? , ? ,' ? MM/dd/yyyy ? ', ' ? BOOK_SNAME ? ','I','O',' ? MAIN_BOOK ? ',' ? AC_CODE ? ',' ? TAG_NO ? ', ? ,' ? IT_CODE ? ',' ? IT_TYPE ? ', ? '','','','',",
+  "INSERT INTO BAR_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,VCH_DATE,VCH_TIME,AC_CODE,CUST_AC, OP_STK,STK_IT_CODE,EMP_CODE,VCH_DESC,HD_VCH_NO,MAIN_USER,DATA_TRFR) VALUES (' ? ',' ? ',' ? ','000',' ? ',' ? MM/dd/yyyy ? ',' ? MM/dd/yyyy ? ','','', 'Y','','','',' ? ',' ? ','N')",
+  "DELETE FROM PRODUCT_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM PRODUCT_MAST WHERE CO_CODE = ' ? '",
+  "INSERT INTO PRODUCT_MAST(CO_CODE,PR_CODE,PR_NAME,MAIN_USER) VALUES (' ? ',' ? PR_CODE ? ',' ? PR_NAME ? ',' ? ' )",
+  "DELETE FROM GROUP_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM GROUP_MAST WHERE CO_CODE = ' ? '",
+  "INSERT INTO GROUP_MAST(CO_CODE,GR_CODE,GR_NAME,GR_TYPE,TRAD_TYPE,GR_TOUCH,GR_PURC_TOUCH,MELTING_PRC, GR_RATE,WEST_PRC,SALE_AC,PURC_AC,HSN_CODE,MAIN_USER,TAX_PRC,AVG_TOUCH,AVG_FINE,AVG_NWT) VALUES (' ? CO_CODE ? ',' ? GR_CODE ? ',' ? GR_NAME ? ',' ? GR_TYPE ? ','', ? GR_TOUCH ? ,0, ? MELTING_PRC ? , ? GR_RATE ? ,0,' ? SALE_AC ? ',' ? PURC_AC ? ',' ? HSN_CODE ? ',' ? ',0,0,0,0 )",
+  "DELETE FROM TABLE_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM TABLE_MAST WHERE CO_CODE = ' ? '",
+  "INSERT INTO TABLE_MAST(CO_CODE,LC_CODE,TABLE_CODE,TABLE_NAME,MAIN_USER) VALUES (' ? CO_CODE ? ',' ? ',' ? TABLE_CODE ? ',' ? TABLE_NAME ? ',' ? ')",
+  "DELETE FROM ITEM_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? '",
+  "INSERT INTO ITEM_MAST(CO_CODE,IT_CODE,IT_NAME,IT_TYPE,TAG_TYPE,PR_CODE,GR_CODE,TRAD_TYPE,UNIT_NAME,RATE_TYPE,HSN_CODE, ITEM_RATE,LBR_PRC,CON_PRC,DISC_PRC,IT_TOUCH,IT_WEST,OTHER_RATE,MIN_STK,AVG_TOUCH,AVG_FINE,AVG_NWT,AC_ITEM,MAIN_USER,STK_DISPLAY,SAFE_NAME) VALUES (' ? CO_CODE ? ',' ? IT_CODE ? ',' ? IT_NAME ? ',' ? IT_TYPE ? ',' ? TAG_TYPE ? ',' ? PR_CODE ? ',' ? GR_CODE ? ','',' ? UNIT_NAME ? ',' ? RATE_TYPE ? ',' ? HSN_CODE ? ', ? ITEM_RATE ? ,0,0,0,0,0,0,0,0,0,0,' ? IT_CODE ? ',' ? ','Y','MAIN')",
+  "SELECT A.*,B.TABLE_NAME FROM ITEM_MAST AS A LEFT JOIN TABLE_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.TABLE_CODE = B.TABLE_CODE WHERE A.CO_CODE = ' ? '",
+  "DELETE FROM OP_DATA WHERE CO_CODE = ' ? '",
+  "Select A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE,format(Sum(A.CR_AMT-A.DR_AMT),'0.00') as Amount,format(SUM(iif(A.IT_TYPE = 'G',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0)),'0.000') as GoldWt,format(sum(iif(A.IT_TYPE = 'S',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0)),'0.000') as SilverWt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' and VCH_DATE <= # ? MM/dd/yyyy ? # GROUP BY A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE HAVING (Sum(A.CR_AMT-A.DR_AMT)+ SUM(iif(A.IT_TYPE = 'G',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0))+sum(iif(A.IT_TYPE = 'S',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0))) <> 0 ORDER BY B.AC_NAME",
+  "INSERT INTO OP_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,AC_CODE, OP_AMT,OP_SIGN,FINE_BAL,FINE_SIGN,SL_FINE_BAL,SL_FINE_SIGN, DATA_TYPE,MAIN_USER,ADD_USER,ADD_DATE) VALUES (' ? ',' ? ',' ? ','000','00000',' ? AC_CODE ? ', ? Amount ? , ? Amount ? 'C' ? 'D' ? , ? GoldWt ? , ? GoldWt ? 'C' ? 'D' ? , ? SilverWt ? , ? SilverWt ? 'C' ? 'D' ? , ? 'A',' ? ','',NULL)",
+  "DELETE FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE >= '00101'",
+  "SELECT A.*,B.AREA_NAME FROM AC_MAST AS A LEFT JOIN AREA_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_AREA = B.AREA_CODE WHERE A.CO_CODE = ' ? ' AND AC_CODE > '00100'"
+ ],
+ "keyboard": {
+  "Enter": 1,
+  "Esc": 1
+ },
+ "calc": [
+  "num = Conversions.ToDouble(Strings.Format((object)Conversion.Val((object)(num5 * num6 / 100.0)), \"0.000\"));",
+  "text = Strings.Format((object)(Conversion.Val(text) + 1.0), \"00000\");",
+  "string text = ((dataTable4.Rows.Count != 0) ? Strings.Format((object)(Conversion.Val(Operators.ConcatenateObject(dataTable4.Rows[0][\"CoCode\"], (object)\"\")) + 1.0), \"00000\") : \"00001\");",
+  "num = (int)Math.Round(Conversion.Val(Operators.ConcatenateObject(dataTable4.Rows[0][\"CoCode\"], (object)\"\")) + 1.0);",
+  "string text = ((dataTable4.Rows.Count != 0) ? Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(dataTable4.Rows[0][\"CoCode\"])) + 1.0), \"00000\") : \"00001\");",
+  "num = (int)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(dataTable4.Rows[0][\"CoCode\"])) + 1.0);",
+  "text = ((DC_Main.Rshlp.Rows.Count != 0) ? Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\") : \"00001\");",
+  "text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00000\");"
+ ],
+ "validations": [
+  {
+   "message": "Are You Sure To Import Old Software Data In Next Software ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Old Software Data In Next Software ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Process Are Complete....",
+   "when": ""
+  },
+  {
+   "message": "Record will delete permantley ?",
+   "when": "Operators.CompareString(DC_Main.MCo_Type, \"\", false) == 0 && (int)Interaction.MsgBox((object)\"Record will delete permantley ?\", (MsgBoxStyle)292, (object)null) "
+  },
+  {
+   "message": "Process are Complite....Please Data Refresh After This Porcess...",
+   "when": "Operators.CompareString(DC_Main.SSRegSrNo, \"VS026NSVS\", false) == 0"
+  },
+  {
+   "message": "0 Balance Record will delete permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"0 Balance Record will delete permantley ?\", (MsgBoxStyle)292, (object)null) != 6"
+  },
+  {
+   "message": "Are You Sure To Import Old Software Dharan Account Update iN Next Software ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Old Software Dharan Account Update iN Next Software ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To Import Old Software Tag Other Detl iN Next Software ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Old Software Tag Other Detl iN Next Software ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Update is ok..",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Import Old Software Account Update iN Next Software ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Old Software Account Update iN Next Software ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To Data Transfer.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Data Transfer.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Please Insert Import Data Sql Link And Try...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To ReImport Ac Master Access to Next Software.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To ReImport Ac Master Access to Next Software.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To All Item Last Tag no Insert in SRNO_MAST To Next Software.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To All Item Last Tag no Insert in SRNO_MAST To Next Software.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == "
+  },
+  {
+   "message": "A and B Data Mearge Then Importy",
+   "when": "(int)Interaction.MsgBox((object)\"A and B Data Mearge Then Importy\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Hu Id Update To Next Software.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Hu Id Update To Next Software.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To Import Stock Date in Next software.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Stock Date in Next software.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To Import Ac Refrence and Contect Person in software.... ?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are You Sure To Import Ac Refrence and Contect Person in software.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) "
+  },
+  {
+   "message": "Are You Sure To Update Huid in Old Year to Curent Year.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Update Huid in Old Year to Curent Year.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Are You Sure To Import Tag Data Type.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Tag Data Type.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Reparing Pricess Import.... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Reparing Pricess Import.... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Scheme Area Are Complete....",
+   "when": ""
+  },
+  {
+   "message": "Data Import is Done...",
+   "when": ""
+  }
+ ]
+}

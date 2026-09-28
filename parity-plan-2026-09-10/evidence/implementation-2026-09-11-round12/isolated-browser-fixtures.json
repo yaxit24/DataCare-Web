@@ -1,0 +1,40 @@
+{
+  "kind": "datacare.frozen-browser-reference-supplement/1.0",
+  "capturedAtUtc": "2026-09-11T18:53:22.000718+00:00",
+  "sourceRoot": "/Users/yakshitsavaliya/Desktop/imodule-extracted",
+  "verificationRoot": "/tmp/datacare-round12-verification",
+  "qualifiedManifestSha256": "52177ad18ac7717c709ccb4b74cdbc325158c5984c9cbc466c7e31c927e9857d",
+  "changedQualifiedInputs": [],
+  "files": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json",
+      "sha256": "2aac326a8124c6baec42f2cad8969337d8c497fb1a836d0edb914e8e38ea997e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/browser-required-checks.json",
+      "sha256": "f48f8062ea01b0bb94dea90fcb6156c5e41e787ea99d2bf7e22462ab09ba08ef"
+    }
+  ],
+  "failedRun": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-browser.run.json",
+    "sha256": "9467d76737aa12515685ee1481d17f792908ff7bbf483d1ff7ef38ed0ee55017"
+  },
+  "reason": "The first frozen browser run stopped during import because its original bill acceptance-check JSON was outside the API reference audit. The original row and bill acceptance fixtures are copied exactly; no application, harness, test, expected check or threshold is changed.",
+  "audit": {
+    "scope": "Static review of filesystem reads and local imports in apps/web/test/*.mjs, parity-test-env.mjs and their local input paths.",
+    "missingRuntimeRead": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json",
+    "additionalAcceptanceControl": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/browser-required-checks.json",
+    "alreadyCaptured": [
+      "API image fixtures",
+      "bill independent JSON vector",
+      "local journey imports",
+      "test DB compose and setup SQL"
+    ],
+    "generatedBuildInputs": [
+      "web/apps/api/dist",
+      "web/apps/web/.next"
+    ],
+    "excludedSecretInput": "Disposable .env.parity-test; no values recorded.",
+    "limits": "Static local dependency review, not a system-call trace or original desktop acceptance."
+  }
+}

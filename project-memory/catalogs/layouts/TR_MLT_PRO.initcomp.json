@@ -1,0 +1,530 @@
+{
+ "form": "TR_MLT_PRO",
+ "controlCount": 50,
+ "byKind": {
+  "textbox": 16,
+  "button": 9,
+  "masked": 1,
+  "combo": 1,
+  "label": 16,
+  "panel": 2,
+  "grid": 4,
+  "other": 1
+ },
+ "grids": [
+  "MSG",
+  "MSG_TOT",
+  "MSG_IDTL",
+  "MSG_BILL_TOT"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "FlowLayoutPanel1",
+   "BtnLast",
+   "BtnFirst"
+  ],
+  "this": [
+   "btnOrdHelp",
+   "tLotGen",
+   "Label6",
+   "Label5",
+   "nAvgTouch",
+   "nPcs",
+   "nItNwt",
+   "nitGwt",
+   "Label15",
+   "cboItemTyp",
+   "Label7",
+   "tVchDesc",
+   "Label4",
+   "LClSilver",
+   "lClGold",
+   "LClAmt",
+   "MSG_BILL_TOT",
+   "LOpSilver",
+   "LOpGold",
+   "LOpAmt",
+   "tAcCode",
+   "tAcName",
+   "Label1",
+   "tEmpCode",
+   "tEmpName",
+   "Label3",
+   "tHdVchNo",
+   "Cr",
+   "BtnF1",
+   "TEXT_IDTL",
+   "MSG_IDTL",
+   "TEXT_ENTRY",
+   "MSG_TOT",
+   "MSG",
+   "mDay",
+   "mTime",
+   "mVchDate",
+   "lblBDate",
+   "Label2",
+   "tVchNo",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "104,45",
+   "size": "76,22",
+   "tabIndex": "0",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "mVchDate",
+   "type": "MaskedTextBox",
+   "location": "308,45",
+   "size": "76,22",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "104,78",
+   "size": "117,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "521,163",
+   "size": "100,18",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_IDTL",
+   "type": "TextBox",
+   "location": "509,343",
+   "size": "100,18",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnLast",
+   "type": "SimpleButton",
+   "location": "199,3",
+   "size": "41,37",
+   "tabIndex": "5",
+   "text": ">",
+   "kind": "button"
+  },
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "92,447",
+   "size": "57,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnFirst",
+   "type": "SimpleButton",
+   "location": "152,3",
+   "size": "41,37",
+   "tabIndex": "6",
+   "text": "<",
+   "kind": "button"
+  },
+  {
+   "name": "tVchDesc",
+   "type": "TextBox",
+   "location": "92,476",
+   "size": "386,75",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "7",
+   "text": "Malting  Process",
+   "kind": "label"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "623,477",
+   "size": "93,23",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tHdVchNo",
+   "type": "TextBox",
+   "location": "8,8",
+   "size": "56,15",
+   "tabIndex": "8",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "FlowLayoutPanel1",
+   "type": "FlowLayoutPanel",
+   "location": "246,3",
+   "size": "575,36",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "21,46",
+   "size": "66,20",
+   "tabIndex": "1125",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "238,46",
+   "size": "71,20",
+   "tabIndex": "1126",
+   "text": "Vch Date",
+   "kind": "label"
+  },
+  {
+   "name": "mTime",
+   "type": "TextBox",
+   "location": "389,45",
+   "size": "75,22",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mDay",
+   "type": "TextBox",
+   "location": "469,45",
+   "size": "83,22",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "18,110",
+   "size": "1149,143",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "18,254",
+   "size": "1148,17",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_IDTL",
+   "type": "AxMSFlexGrid",
+   "location": "18,275",
+   "size": "1149,146",
+   "tabIndex": "1140",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnF1",
+   "type": "SimpleButton",
+   "location": "186,44",
+   "size": "35,23",
+   "tabIndex": "1149",
+   "text": "F1",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1176,402",
+   "size": "28,28",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "16,447",
+   "size": "69,20",
+   "tabIndex": "1161",
+   "text": "Employee",
+   "kind": "label"
+  },
+  {
+   "name": "tEmpName",
+   "type": "TextBox",
+   "location": "155,447",
+   "size": "249,22",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "722,477",
+   "size": "285,23",
+   "tabIndex": "1210",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "527,479",
+   "size": "90,20",
+   "tabIndex": "1211",
+   "text": "Emp Ac Code",
+   "kind": "label"
+  },
+  {
+   "name": "LOpAmt",
+   "type": "Label",
+   "location": "1039,39",
+   "size": "114,20",
+   "tabIndex": "1212",
+   "text": "OpAmt",
+   "kind": "label"
+  },
+  {
+   "name": "LOpGold",
+   "type": "Label",
+   "location": "1039,59",
+   "size": "114,20",
+   "tabIndex": "1213",
+   "text": "OpGold",
+   "kind": "label"
+  },
+  {
+   "name": "LOpSilver",
+   "type": "Label",
+   "location": "1039,79",
+   "size": "114,20",
+   "tabIndex": "1214",
+   "text": "OpSilver",
+   "kind": "label"
+  },
+  {
+   "name": "MSG_BILL_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "21,423",
+   "size": "1144,17",
+   "tabIndex": "1215",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "LClAmt",
+   "type": "Label",
+   "location": "1033,496",
+   "size": "123,20",
+   "tabIndex": "1216",
+   "text": "ClAmt",
+   "kind": "label"
+  },
+  {
+   "name": "lClGold",
+   "type": "Label",
+   "location": "1033,517",
+   "size": "123,20",
+   "tabIndex": "1217",
+   "text": "ClGold",
+   "kind": "label"
+  },
+  {
+   "name": "LClSilver",
+   "type": "Label",
+   "location": "1034,537",
+   "size": "123,20",
+   "tabIndex": "1218",
+   "text": "ClSilver",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "19,477",
+   "size": "67,20",
+   "tabIndex": "1221",
+   "text": "Vch Desc",
+   "kind": "label"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "8,77",
+   "size": "79,20",
+   "tabIndex": "1223",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "235,78",
+   "size": "66,20",
+   "tabIndex": "1228",
+   "text": "Item Wt",
+   "kind": "label"
+  },
+  {
+   "name": "nitGwt",
+   "type": "TextBox",
+   "location": "389,78",
+   "size": "75,23",
+   "tabIndex": "1229",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nItNwt",
+   "type": "TextBox",
+   "location": "469,78",
+   "size": "83,23",
+   "tabIndex": "1230",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nPcs",
+   "type": "TextBox",
+   "location": "307,78",
+   "size": "76,23",
+   "tabIndex": "1231",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nAvgTouch",
+   "type": "TextBox",
+   "location": "623,447",
+   "size": "68,23",
+   "tabIndex": "1232",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "548,448",
+   "size": "69,20",
+   "tabIndex": "1233",
+   "text": "Avg Touch",
+   "kind": "label"
+  },
+  {
+   "name": "tLotGen",
+   "type": "TextBox",
+   "location": "623,509",
+   "size": "93,23",
+   "tabIndex": "1234",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "501,511",
+   "size": "116,20",
+   "tabIndex": "1235",
+   "text": "Lot Generate",
+   "kind": "label"
+  },
+  {
+   "name": "btnOrdHelp",
+   "type": "SimpleButton",
+   "location": "560,42",
+   "size": "96,26",
+   "tabIndex": "1236",
+   "text": "Ord Weight",
+   "kind": "button"
+  }
+ ]
+}

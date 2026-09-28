@@ -30,7 +30,7 @@ model AC_DATA {
   SIGN          String?   @db.VarChar(1)
   FINE_WT       Decimal?  @db.Decimal(14, 3)
   IT_DESC       String?
-  ENTRY_TIME    DateTime? @db.Date
+  ENTRY_TIME    DateTime? @db.Timestamp(6)
   HD_VCH_NO     String?   @db.VarChar(10)
   CLR_DATE      DateTime? @db.Date
   DATA_TYPE     String?   @db.VarChar(1)
@@ -1791,6 +1791,7 @@ model DESIGN_DETL {
   VCH_DATE      DateTime? @db.Date
   GR_CODE       String?   @db.VarChar(3)
   DESIGN_NO     String?   @db.VarChar(15)
+  ITM_STYLE     String    @default("") @db.VarChar(50)
   ITM_SIZE      String?   @db.VarChar(15)
   DIE_NO        String?   @db.VarChar(10)
   ITM_PCS       Decimal?  @db.Decimal(12, 3)
@@ -3538,6 +3539,7 @@ model LBR_REC_DETL {
   AC_CODE       String?   @db.VarChar(8)
   IT_CODE       String?   @db.VarChar(6)
   LOT_NO        String?   @db.VarChar(15)
+  ITM_LOT       String?   @db.VarChar(15)
   DESIGN_NO     String?   @db.VarChar(20)
   TBL_CODE      String?   @db.VarChar(3)
   ITM_SIZE      String?   @db.VarChar(20)
@@ -3800,6 +3802,12 @@ model AuthSession {
   expiresAt      DateTime  @map("expires_at") @db.Timestamptz(6)
   revokedAt      DateTime? @map("revoked_at") @db.Timestamptz(6)
   revokeReason   String?   @map("revoke_reason") @db.VarChar(40)
+
+  contextEpoch             BigInt  @default(1) @map("context_epoch") @db.BigInt
+  ledgerContext            Json    @default("{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"vendor-authority-unresolved\"}") @map("ledger_context") @db.JsonB
+  lastContextSelectionId   String? @map("last_context_selection_id") @db.VarChar(36)
+  lastContextRequestSha256 String? @map("last_context_request_sha256") @db.Char(64)
+  lastContextFromEpoch     BigInt? @map("last_context_from_epoch") @db.BigInt
 
   @@id([tenantId, sessionId])
   @@index([tenantId, loginName, loginCoCode], map: "auth_session_login_idx")
@@ -4137,48 +4145,51 @@ model MFG_DETL {
 }
 
 model MFG_IDTL {
-  tenantId     String    @map("tenant_id") @db.VarChar(24)
-  CO_CODE      String    @db.VarChar(2)
-  LC_CODE      String    @db.VarChar(2)
-  CO_YEAR      String    @db.VarChar(10)
-  CO_BOOK      String    @db.VarChar(3)
-  VCH_NO       String    @db.VarChar(8)
-  SR_NO        Float
-  ISR_NO       Float
-  VCH_DATE     DateTime? @db.Date
-  VCH_TYPE     String?   @db.VarChar(6)
-  INOUT_TYPE   String?   @db.VarChar(1)
-  ENTRY_TYPE   String?   @db.VarChar(1)
-  BOOK_NAME    String?   @db.VarChar(20)
-  AC_CODE      String?   @db.VarChar(8)
-  TAG_NO       String?   @db.VarChar(15)
-  VCH_SRNO     Float?
-  IT_CODE      String?   @db.VarChar(5)
-  IT_TYPE      String?   @db.VarChar(1)
-  IT_PCS       Decimal?  @db.Decimal(12, 3)
-  IT_PCS_WT    Decimal?  @db.Decimal(14, 3)
-  IT_GWT       Decimal?  @db.Decimal(14, 3)
-  IT_CON_PRC   Decimal?  @db.Decimal(9, 4)
-  IT_CON_WT    Decimal?  @db.Decimal(14, 3)
-  IT_RATE_TYPE String?   @db.VarChar(1)
-  IT_RATE      Decimal?  @db.Decimal(18, 2)
-  IT_AMT       Decimal?  @db.Decimal(18, 2)
-  IT_LBR_RATE  Decimal?  @db.Decimal(18, 2)
-  IT_LBR_AMT   Decimal?  @db.Decimal(18, 2)
-  IT_NET_AMT   Decimal?  @db.Decimal(18, 2)
-  HD_VCH_NO    String?   @db.VarChar(10)
-  MAIN_USER    String?   @db.VarChar(15)
-  OLD_ITM_ISU  String?   @db.VarChar(1)
-  KR_CODE      String?   @db.VarChar(10)
-  DM_SIZE      String?   @db.VarChar(15)
-  DM_PCS_GHT   Float?
-  DM_TOT_GHT   Float?
-  ORD_PCS      Float?
-  ORD_WT       Decimal?  @db.Decimal(14, 3)
-  RTN_PCS      Float?
-  RTN_GWT      Decimal?  @db.Decimal(14, 3)
-  BROK_PCS     Float?
-  BROK_WT      Decimal?  @db.Decimal(14, 3)
+  // Ac_Image.CoFieldAdd:8213/8590; preserve child material identity separately from its parent lot.
+  ITM_LOT         String    @default("") @db.VarChar(10)
+  ITM_LOT_AC_CODE String    @default("") @db.VarChar(10)
+  tenantId        String    @map("tenant_id") @db.VarChar(24)
+  CO_CODE         String    @db.VarChar(2)
+  LC_CODE         String    @db.VarChar(2)
+  CO_YEAR         String    @db.VarChar(10)
+  CO_BOOK         String    @db.VarChar(3)
+  VCH_NO          String    @db.VarChar(8)
+  SR_NO           Float
+  ISR_NO          Float
+  VCH_DATE        DateTime? @db.Date
+  VCH_TYPE        String?   @db.VarChar(6)
+  INOUT_TYPE      String?   @db.VarChar(1)
+  ENTRY_TYPE      String?   @db.VarChar(1)
+  BOOK_NAME       String?   @db.VarChar(20)
+  AC_CODE         String?   @db.VarChar(8)
+  TAG_NO          String?   @db.VarChar(15)
+  VCH_SRNO        Float?
+  IT_CODE         String?   @db.VarChar(5)
+  IT_TYPE         String?   @db.VarChar(1)
+  IT_PCS          Decimal?  @db.Decimal(12, 3)
+  IT_PCS_WT       Decimal?  @db.Decimal(14, 3)
+  IT_GWT          Decimal?  @db.Decimal(14, 3)
+  IT_CON_PRC      Decimal?  @db.Decimal(9, 4)
+  IT_CON_WT       Decimal?  @db.Decimal(14, 3)
+  IT_RATE_TYPE    String?   @db.VarChar(1)
+  IT_RATE         Decimal?  @db.Decimal(18, 2)
+  IT_AMT          Decimal?  @db.Decimal(18, 2)
+  IT_LBR_RATE     Decimal?  @db.Decimal(18, 2)
+  IT_LBR_AMT      Decimal?  @db.Decimal(18, 2)
+  IT_NET_AMT      Decimal?  @db.Decimal(18, 2)
+  HD_VCH_NO       String?   @db.VarChar(10)
+  MAIN_USER       String?   @db.VarChar(15)
+  OLD_ITM_ISU     String?   @db.VarChar(1)
+  KR_CODE         String?   @db.VarChar(10)
+  DM_SIZE         String?   @db.VarChar(15)
+  DM_PCS_GHT      Float?
+  DM_TOT_GHT      Float?
+  ORD_PCS         Float?
+  ORD_WT          Decimal?  @db.Decimal(14, 3)
+  RTN_PCS         Float?
+  RTN_GWT         Decimal?  @db.Decimal(14, 3)
+  BROK_PCS        Float?
+  BROK_WT         Decimal?  @db.Decimal(14, 3)
 
   @@id([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO, SR_NO, ISR_NO])
   @@map("MFG_IDTL")
@@ -4202,6 +4213,7 @@ model MFG_ISU_REC {
   KR_AC_CODE    String?   @db.VarChar(8)
   IT_CODE       String?   @db.VarChar(5)
   LOT_NO        String?   @db.VarChar(15)
+  ITM_LOT       String?   @db.VarChar(15)
   DESIGN_NO     String?   @db.VarChar(20)
   ITM_SIZE      String?   @db.VarChar(20)
   IT_TYPE       String?   @db.VarChar(1)
@@ -5629,6 +5641,8 @@ model ROJ_MEL_DATA {
 }
 
 model SL_DATA {
+  // MS_OPNCOMP:5709. Blank selects the item-group ledger; a nonblank value is a header override.
+  LDR_CODE         String    @default("") @db.VarChar(10)
   tenantId         String    @map("tenant_id") @db.VarChar(24)
   rowId            BigInt    @id @default(autoincrement()) @map("row_id")
   VCH_NO           String?   @db.VarChar(8)
@@ -5920,6 +5934,7 @@ model SL_DETL_RTN {
   EMP_CODE       String?   @db.VarChar(5)
   LBR_CODE       String?   @db.VarChar(4)
   TAG_MRP        Decimal?  @db.Decimal(18, 2)
+  TAG_LBR_CODE   String    @default("") @db.VarChar(4)
   DESIGN_IMG_ID  String?   @db.VarChar(50)
   EMP_ISU        String?   @db.VarChar(1)
   APR_ISU        String?   @db.VarChar(1)
@@ -6786,11 +6801,11 @@ model UPI_DATA {
   MAIN_USER   String?   @db.VarChar(15)
   UPI_ID      String?   @db.VarChar(25)
   SCHM_CODE   String?   @db.VarChar(3)
-  ISR_NO      Float?
+  ISR_NO      Float
   HD_VCH_NO   String?   @db.VarChar(10)
   UPI_TYPE    String?   @db.VarChar(25)
 
-  @@id([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO, SR_NO])
+  @@id([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO, SR_NO, ISR_NO])
   @@map("UPI_DATA")
 }
 

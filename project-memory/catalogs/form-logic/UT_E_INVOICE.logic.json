@@ -1,0 +1,21 @@
+{
+ "form": "UT_E_INVOICE",
+ "tables": [
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 4,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2041
+}

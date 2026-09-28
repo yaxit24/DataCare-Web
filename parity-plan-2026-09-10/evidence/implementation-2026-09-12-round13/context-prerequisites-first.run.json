@@ -1,0 +1,27 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/sessionContext.extraction.test.ts",
+    "test/sessionContextValue.test.ts",
+    "test/auth.session.test.ts",
+    "test/rbac.authorization.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T19:09:56.333454+00:00",
+  "finishedAtUtc": "2026-09-11T19:09:57.918628+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-prerequisites-first.txt",
+  "logSha256": "051479f450c72263e2415df1b7edcf358b8c97aa2bfbae02e6f1bd90f4a10ee3",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-prerequisites-first.inputs.json",
+  "inputManifestSha256": "c5f481334bcdd2774f9af14421b6fb94a899e8a4fb8d6d2a6dbe7c2aaf3fd0cb",
+  "inputCount": 1753,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

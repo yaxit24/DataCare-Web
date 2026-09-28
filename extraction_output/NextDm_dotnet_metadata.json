@@ -1,0 +1,14 @@
+{
+  "file": "NextDm.exe",
+  "file_size": 23382528,
+  "assembly": {
+    "name": "N/A"
+  },
+  "assembly_references_error": "'AssemblyRef' object is not iterable",
+  "type_definitions_error": "'TypeDef' object is not iterable",
+  "method_definitions_error": "'MethodDef' object is not iterable",
+  "module_references_error": "'ModuleRef' object is not iterable",
+  "type_references_error": "'TypeRef' object is not iterable",
+  "member_references_error": "'MemberRef' object is not iterable",
+  "manifest_resources_error": "'ManifestResource' object is not iterable"
+}

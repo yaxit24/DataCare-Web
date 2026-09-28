@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTenant, type Tx } from '@datacare/db';
 import type { UserRights } from '@datacare/types';
 import { rightsOf, type LoginMastRow } from '../auth/auth.service.js';
 import { rightNamesForForm, canonicalFormsForRight } from './formCatalog.js';
@@ -44,45 +44,47 @@ interface PrincipalRow extends LoginMastRow {
   PASSWORD_RESET_REQUIRED?: string | null;
 }
 
+interface PrincipalInput {
+  tenantId: string;
+  loginName: string;
+  coCode: string;
+  loginCoCode: string;
+}
+
 /**
  * Resolve the user on every authenticated request so role changes, password resets, and deletion
  * take effect immediately rather than waiting for a JWT to expire. The selected company is tried
  * first; `loginCoCode` is the immutable authentication company used when an admin selected another
  * company context.
  */
-export async function loadPrincipal(
-  prisma: any,
-  input: {
-    tenantId: string;
-    loginName: string;
-    coCode: string;
-    loginCoCode: string;
-  },
-): Promise<Principal> {
-  return withTenant(prisma, input.tenantId, async (tx: any) => {
-    const rows: PrincipalRow[] = await tx.$queryRawUnsafe(
-      `SELECT "CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG",
+export async function loadPrincipal(prisma: any, input: PrincipalInput): Promise<Principal> {
+  return withTenant(prisma, input.tenantId, (tx) => loadPrincipalTx(tx, input));
+}
+
+/** The caller owns the transaction and must already bind input.tenantId through withTenant. */
+export async function loadPrincipalTx(tx: Tx, input: PrincipalInput): Promise<Principal> {
+  const rows = await tx.$queryRawUnsafe<PrincipalRow[]>(
+    `SELECT "CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG",
               "USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED"
          FROM "LOGIN_MAST"
         WHERE "LOGIN_NAME"=$1 AND "CO_CODE" IN ($2,$3)
         ORDER BY CASE WHEN "CO_CODE"=$2 THEN 0 ELSE 1 END
         LIMIT 1`,
-      input.loginName,
-      input.coCode,
-      input.loginCoCode,
-    );
-    const row = rows[0];
-    if (!row?.LOGIN_NAME || !row.CO_CODE) throw new PrincipalUnavailableError();
-    const role = String(row.LOGIN_CATG ?? '');
-    return {
-      loginName: String(row.LOGIN_NAME),
-      loginCoCode: String(row.CO_CODE),
-      role,
-      isAdmin: isAdminRole(role),
-      rights: rightsOf(row),
-      passwordResetRequired: Y(row.PASSWORD_RESET_REQUIRED),
-    };
-  });
+    input.loginName,
+    input.coCode,
+    input.loginCoCode,
+  );
+  const row = rows[0];
+  if (!row?.LOGIN_NAME || !row.CO_CODE) throw new PrincipalUnavailableError();
+  const role = String(row.LOGIN_CATG ?? '');
+  return {
+    loginName: String(row.LOGIN_NAME),
+    loginCoCode: String(row.CO_CODE),
+    role,
+    isAdmin: isAdminRole(role),
+    rights: rightsOf(row),
+    passwordResetRequired: Y(row.PASSWORD_RESET_REQUIRED),
+  };
 }
 
 /**
@@ -91,16 +93,33 @@ export async function loadPrincipal(
  * Creating a new record requires View, while modifying an existing record requires Edit; this
  * preserves the desktop behavior demonstrated by a user who can create a sale but cannot edit it.
  */
+export interface FormAuthorizationInput {
+  tenantId: string;
+  lcCode: string;
+  principal: Principal;
+  form: string;
+  action: RouteAction;
+  adminOnly?: boolean;
+}
+
 export async function authorizeForm(
   prisma: any,
-  input: {
-    tenantId: string;
-    lcCode: string;
-    principal: Principal;
-    form: string;
-    action: RouteAction;
-    adminOnly?: boolean;
-  },
+  input: FormAuthorizationInput,
+): Promise<FormAuthorization> {
+  // Preserve the existing public wrapper's pre-transaction administrator shortcut.
+  if (input.adminOnly && !input.principal.isAdmin) {
+    throw new FormForbiddenError(input.form, input.action);
+  }
+  if (input.principal.isAdmin) {
+    return { form: input.form, action: input.action, principal: input.principal };
+  }
+  return withTenant(prisma, input.tenantId, (tx) => authorizeFormTx(tx, input));
+}
+
+/** The caller owns the tenant-bound transaction; keep the existing authorization decisions. */
+export async function authorizeFormTx(
+  tx: Tx,
+  input: FormAuthorizationInput,
 ): Promise<FormAuthorization> {
   if (input.adminOnly && !input.principal.isAdmin) {
     throw new FormForbiddenError(input.form, input.action);
@@ -121,16 +140,14 @@ export async function authorizeForm(
     FRM_EDIT?: string | null;
     FRM_DELETE?: string | null;
     FRM_PRINT?: string | null;
-  }> = await withTenant(prisma, input.tenantId, (tx: any) =>
-    tx.$queryRawUnsafe(
-      `SELECT "FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT"
+  }> = await tx.$queryRawUnsafe(
+    `SELECT "FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT"
          FROM "USER_SET"
         WHERE "LC_CODE"=$1 AND "USER_NAME"=$2
           AND UPPER(TRIM(COALESCE("SUB_MENU",''))) IN (${placeholders})
         ORDER BY "row_id"
         LIMIT 1`,
-      ...params,
-    ),
+    ...params,
   );
   const row = rows[0];
   const view = Y(row?.FRM_VIEW);

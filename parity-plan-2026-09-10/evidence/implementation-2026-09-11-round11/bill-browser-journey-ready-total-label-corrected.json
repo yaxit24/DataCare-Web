@@ -1,0 +1,38 @@
+{
+  "kind": "x13-bill-browser-total-label-corrected-ready-v1",
+  "status": "syntax-checked-not-executed",
+  "journeyNumber": 16,
+  "requiredCheckCount": 15,
+  "databaseOrBrowserRun": false,
+  "priorReady": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-journey-ready.json",
+    "sha256": "04f37bc7bb2b8847ad896e7d408b82e7d2a2a2bde97d22785422195d27230bb2"
+  },
+  "correction": "Source5178 Total : at column5 for opened/event folded totals; loaded allblank unchanged",
+  "inputs": [
+    {
+      "path": "web/apps/web/test/sales-return-bill-replay.journey.mjs",
+      "sha256": "0fe115dffbba4c1f2614a7865f36cf9dae426d023ff60c1e7855626e34d458e3"
+    },
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "170de78b8cd988596622f7c009bc3973c828a99fe3afc6fb10386ef188043d31"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/saleReturnBillReplay.independent.json",
+      "sha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json",
+      "sha256": "2aac326a8124c6baec42f2cad8969337d8c497fb1a836d0edb914e8e38ea997e"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-total-label-correction.md",
+      "sha256": "16c34ba4029ddb92c75146a2084057c8d02b0b62f6db7b77fc2cdb89a92daacd"
+    }
+  ]
+}

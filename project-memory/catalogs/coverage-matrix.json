@@ -1,0 +1,2744 @@
+{
+ "total": 161,
+ "byModuleStatus": {
+  "master/PAGE": 26,
+  "master/MISSING": 7,
+  "report/PAGE": 15,
+  "report/SPEC": 30,
+  "transaction/PAGE": 50,
+  "transaction/MISSING": 11,
+  "utility/MISSING": 12,
+  "utility/PAGE": 10
+ },
+ "rows": [
+  {
+   "form": "MS_ACCT",
+   "module": "master",
+   "status": "PAGE",
+   "web": "party",
+   "posting": true,
+   "tables": [
+    "AC_MAST",
+    "AC_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 8,
+    "valid": 24
+   }
+  },
+  {
+   "form": "MS_AC_GROUP",
+   "module": "master",
+   "status": "PAGE",
+   "web": "ac-groups",
+   "posting": true,
+   "tables": [
+    "AC_GROUP",
+    "BOOK_IDTL",
+    "BOOK_IDTL"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 10,
+    "calc": 0,
+    "valid": 13
+   }
+  },
+  {
+   "form": "MS_ADD_MAST",
+   "module": "master",
+   "status": "PAGE",
+   "web": "addresses",
+   "posting": true,
+   "tables": [
+    "ADD_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 23,
+    "calc": 2,
+    "valid": 10
+   }
+  },
+  {
+   "form": "MS_AUTO_ITEM",
+   "module": "master",
+   "status": "PAGE",
+   "web": "auto-item",
+   "posting": true,
+   "tables": [
+    "BAR_DETL",
+    "BAR_IDTL",
+    "CO_SET_NEW",
+    "ITEM_MAST"
+   ],
+   "rich": {
+    "grid": 54,
+    "sql": 50,
+    "calc": 4,
+    "valid": 11
+   }
+  },
+  {
+   "form": "MS_BOOK",
+   "module": "master",
+   "status": "PAGE",
+   "web": "books",
+   "posting": true,
+   "tables": [
+    "BOOK_DATA",
+    "BOOK_DETL"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 21,
+    "calc": 0,
+    "valid": 14
+   }
+  },
+  {
+   "form": "MS_BOOKLIST",
+   "module": "master",
+   "status": "MISSING",
+   "web": null,
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 0,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "MS_COMPANY",
+   "module": "master",
+   "status": "PAGE",
+   "web": "companies",
+   "posting": true,
+   "tables": [
+    "COL_MAST",
+    "CONV_MAST",
+    "CO_MAST",
+    "FAN_AC_MAST",
+    "GROUP_MAST",
+    "ITEM_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 0,
+    "valid": 17
+   }
+  },
+  {
+   "form": "MS_DESIGN_BOOK",
+   "module": "master",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DESIGN_DETL"
+   ],
+   "rich": {
+    "grid": 76,
+    "sql": 34,
+    "calc": 46,
+    "valid": 20
+   }
+  },
+  {
+   "form": "MS_DM",
+   "module": "master",
+   "status": "PAGE",
+   "web": "diamonds",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 12,
+    "calc": 1,
+    "valid": 9
+   }
+  },
+  {
+   "form": "MS_EMP",
+   "module": "master",
+   "status": "PAGE",
+   "web": "employees",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 11,
+    "calc": 0,
+    "valid": 9
+   }
+  },
+  {
+   "form": "MS_GOLD_MAST",
+   "module": "master",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DG_GOLD_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 12,
+    "calc": 0,
+    "valid": 8
+   }
+  },
+  {
+   "form": "MS_GROUP",
+   "module": "master",
+   "status": "PAGE",
+   "web": "groups",
+   "posting": true,
+   "tables": [
+    "ITEM_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 15,
+    "calc": 0,
+    "valid": 10
+   }
+  },
+  {
+   "form": "MS_HELP",
+   "module": "master",
+   "status": "MISSING",
+   "web": null,
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 0,
+    "calc": 6,
+    "valid": 0
+   }
+  },
+  {
+   "form": "MS_ITEM",
+   "module": "master",
+   "status": "PAGE",
+   "web": "items",
+   "posting": true,
+   "tables": [
+    "GROUP_MAST",
+    "PRODUCT_MAST",
+    "BAR_DETL"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 30,
+    "calc": 1,
+    "valid": 17
+   }
+  },
+  {
+   "form": "MS_LBR_TYPE",
+   "module": "master",
+   "status": "PAGE",
+   "web": "labour",
+   "posting": true,
+   "tables": [
+    "BAR_DETL"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 19,
+    "calc": 1,
+    "valid": 12
+   }
+  },
+  {
+   "form": "MS_LOCT",
+   "module": "master",
+   "status": "PAGE",
+   "web": "locations",
+   "posting": true,
+   "tables": [
+    "BOOK_DATA",
+    "BOOK_DETL",
+    "TABLE_MAST",
+    "MENU_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 0,
+    "valid": 10
+   }
+  },
+  {
+   "form": "MS_LOGIN",
+   "module": "master",
+   "status": "PAGE",
+   "web": "login",
+   "posting": true,
+   "tables": [
+    "AC_MAST_SRNO"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 8,
+    "calc": 0,
+    "valid": 3
+   }
+  },
+  {
+   "form": "MS_MEMB",
+   "module": "master",
+   "status": "PAGE",
+   "web": "membership",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 32,
+    "calc": 4,
+    "valid": 9
+   }
+  },
+  {
+   "form": "MS_MFG_MAST",
+   "module": "master",
+   "status": "PAGE",
+   "web": "mfg",
+   "posting": true,
+   "tables": [
+    "USER_SET",
+    "BOOK_DATA",
+    "MENU_DATA",
+    "MFG_MAST",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 14,
+    "sql": 32,
+    "calc": 0,
+    "valid": 14
+   }
+  },
+  {
+   "form": "MS_OPNCOMP",
+   "module": "master",
+   "status": "PAGE",
+   "web": "select",
+   "posting": true,
+   "tables": [
+    "AC_MAST_SRNO",
+    "BOOK_IDTL",
+    "CO_SET",
+    "MENU_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 34,
+    "calc": 0,
+    "valid": 2
+   }
+  },
+  {
+   "form": "MS_POINT",
+   "module": "master",
+   "status": "PAGE",
+   "web": "points",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 16,
+    "sql": 13,
+    "calc": 2,
+    "valid": 5
+   }
+  },
+  {
+   "form": "MS_PRINT",
+   "module": "master",
+   "status": "PAGE",
+   "web": "print-formats",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 0,
+    "calc": 0,
+    "valid": 0
+   }
+  },
+  {
+   "form": "MS_PRODUCT",
+   "module": "master",
+   "status": "PAGE",
+   "web": "products",
+   "posting": true,
+   "tables": [
+    "AD_MAST",
+    "BOOK_IDTL",
+    "CO_MAST",
+    "ITEM_MAST",
+    "PRODUCT_MAST",
+    "TABLE_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 47,
+    "calc": 1,
+    "valid": 26
+   }
+  },
+  {
+   "form": "MS_RATE",
+   "module": "master",
+   "status": "PAGE",
+   "web": "rates",
+   "posting": true,
+   "tables": [
+    "RATE_MAST",
+    "GROUP_MAST"
+   ],
+   "rich": {
+    "grid": 10,
+    "sql": 17,
+    "calc": 9,
+    "valid": 4
+   }
+  },
+  {
+   "form": "MS_STK_LIMIT",
+   "module": "master",
+   "status": "MISSING",
+   "web": null,
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 18,
+    "sql": 16,
+    "calc": 5,
+    "valid": 8
+   }
+  },
+  {
+   "form": "MS_STYLE",
+   "module": "master",
+   "status": "PAGE",
+   "web": "/masters/styles",
+   "posting": true,
+   "tables": [
+    "DESIGN_MAST",
+    "ITM_CITY",
+    "MODEL_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 11,
+    "calc": 0,
+    "valid": 14
+   }
+  },
+  {
+   "form": "MS_TASTING",
+   "module": "master",
+   "status": "MISSING",
+   "web": null,
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 0,
+    "calc": 0,
+    "valid": 0
+   }
+  },
+  {
+   "form": "MS_TAX",
+   "module": "master",
+   "status": "PAGE",
+   "web": "taxes",
+   "posting": true,
+   "tables": [
+    "AC_MAST"
+   ],
+   "rich": {
+    "grid": 5,
+    "sql": 12,
+    "calc": 0,
+    "valid": 9
+   }
+  },
+  {
+   "form": "MS_TRADE",
+   "module": "master",
+   "status": "PAGE",
+   "web": "trade",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 9,
+    "sql": 9,
+    "calc": 0,
+    "valid": 5
+   }
+  },
+  {
+   "form": "MS_UPDATE",
+   "module": "master",
+   "status": "PAGE",
+   "web": "/masters/labour-update",
+   "posting": true,
+   "tables": [
+    "AC_MAST",
+    "BANK_RECONCILE",
+    "BOOK_DATA",
+    "BOOK_DETL",
+    "BOOK_IDTL",
+    "COL_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 1,
+    "valid": 26
+   }
+  },
+  {
+   "form": "MS_USER",
+   "module": "master",
+   "status": "PAGE",
+   "web": "users",
+   "posting": true,
+   "tables": [
+    "BOOK_DATA",
+    "BOOK_IDTL",
+    "LOGIN_MAST",
+    "MENU_DATA",
+    "TILE_DATA",
+    "USER_SET"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 0,
+    "valid": 18
+   }
+  },
+  {
+   "form": "MS_WINDOW_SET",
+   "module": "master",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "CO_SET_NEW",
+    "TILE_DATA"
+   ],
+   "rich": {
+    "grid": 6,
+    "sql": 6,
+    "calc": 0,
+    "valid": 4
+   }
+  },
+  {
+   "form": "MS_YEAR",
+   "module": "master",
+   "status": "PAGE",
+   "web": "year-create",
+   "posting": true,
+   "tables": [
+    "AC_GROUP",
+    "AC_MAST",
+    "BAL_GR",
+    "BOOK_DATA",
+    "BOOK_DETL",
+    "COL_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 0,
+    "valid": 7
+   }
+  },
+  {
+   "form": "RP_ADDRESS",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/masters/addresses",
+   "posting": true,
+   "tables": [
+    "TEMP_ADD"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 25,
+    "calc": 0,
+    "valid": 3
+   }
+  },
+  {
+   "form": "RP_ALL",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "RATE_CUT_ISU_REC",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 39,
+    "calc": 0,
+    "valid": 8
+   }
+  },
+  {
+   "form": "RP_BALANCE",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/masters/opening-balance",
+   "posting": true,
+   "tables": [
+    "AC_DATA",
+    "BAL_GR"
+   ],
+   "rich": {
+    "grid": 13,
+    "sql": 15,
+    "calc": 8,
+    "valid": 3
+   }
+  },
+  {
+   "form": "RP_BAL_ZOOM",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "LEDR_AC_DATA",
+    "REPORT_DATA"
+   ],
+   "rich": {
+    "grid": 41,
+    "sql": 35,
+    "calc": 16,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_BILL_PROFIT",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 65,
+    "sql": 24,
+    "calc": 29,
+    "valid": 4
+   }
+  },
+  {
+   "form": "RP_CASH_BANK",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "TEMP_AD_DATA"
+   ],
+   "rich": {
+    "grid": 27,
+    "sql": 28,
+    "calc": 1,
+    "valid": 2
+   }
+  },
+  {
+   "form": "RP_CONSI_APR",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 25,
+    "sql": 10,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_CUST",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/reports/customer-crm",
+   "posting": true,
+   "tables": [
+    "AC_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 5,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_CUST_CRM",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 27,
+    "sql": 17,
+    "calc": 1,
+    "valid": 3
+   }
+  },
+  {
+   "form": "RP_DAY_WORK",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 27,
+    "sql": 11,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_DHRN_LOAN",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "DHRN_DATA",
+    "DHRN_ISU_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 22,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_DHRN_OS",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "REPORT_DATA"
+   ],
+   "rich": {
+    "grid": 60,
+    "sql": 18,
+    "calc": 19,
+    "valid": 3
+   }
+  },
+  {
+   "form": "RP_EMP",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "REPORT_DATA"
+   ],
+   "rich": {
+    "grid": 23,
+    "sql": 17,
+    "calc": 10,
+    "valid": 4
+   }
+  },
+  {
+   "form": "RP_GRAPH",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 19,
+    "calc": 0,
+    "valid": 2
+   }
+  },
+  {
+   "form": "RP_GST",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 19,
+    "sql": 17,
+    "calc": 2,
+    "valid": 3
+   }
+  },
+  {
+   "form": "RP_HUID",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "TAG_STOCK_PRINT",
+    "BAR_DETL"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 20,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_INOUT",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/txn/fine-inout",
+   "posting": true,
+   "tables": [
+    "REPORT_DATA"
+   ],
+   "rich": {
+    "grid": 80,
+    "sql": 30,
+    "calc": 12,
+    "valid": 2
+   }
+  },
+  {
+   "form": "RP_JDTR_ZOOM",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 28,
+    "sql": 11,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_LC_INOUT",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 22,
+    "sql": 11,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_LC_SALE",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 22,
+    "sql": 15,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_LEDR",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "FINE_DATA",
+    "LEDR_AC_DATA"
+   ],
+   "rich": {
+    "grid": 81,
+    "sql": 50,
+    "calc": 0,
+    "valid": 12
+   }
+  },
+  {
+   "form": "RP_MFG",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 8,
+    "calc": 0,
+    "valid": 0
+   }
+  },
+  {
+   "form": "RP_MFG_LEDR",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 35,
+    "sql": 11,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_MFG_ZOOM",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "MFG_MAST"
+   ],
+   "rich": {
+    "grid": 43,
+    "sql": 25,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_MOVEMENT",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 49,
+    "sql": 25,
+    "calc": 9,
+    "valid": 2
+   }
+  },
+  {
+   "form": "RP_ORDER",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/txn/mfg-order-issue",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 73,
+    "sql": 16,
+    "calc": 4,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_ORD_TRACK",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 50,
+    "sql": 16,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_OS",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "LEDR_AC_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 29,
+    "calc": 5,
+    "valid": 7
+   }
+  },
+  {
+   "form": "RP_OTH_DETL",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 21,
+    "calc": 0,
+    "valid": 2
+   }
+  },
+  {
+   "form": "RP_PHY_STOCK",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/txn/stock",
+   "posting": true,
+   "tables": [
+    "TAG_STOCK_PRINT"
+   ],
+   "rich": {
+    "grid": 17,
+    "sql": 14,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_REMINDER",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/utilities/reminders",
+   "posting": true,
+   "tables": [
+    "REPORT_DATA",
+    "PR_DATA",
+    "RATE_CUT_DATA",
+    "SL_DATA",
+    "USER_REQUEST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 31,
+    "calc": 2,
+    "valid": 3
+   }
+  },
+  {
+   "form": "RP_ROJMEL",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "LEDR_AC_DATA",
+    "ROJMEL_BAL",
+    "TAG_STOCK_PRINT",
+    "GROUP_MAST"
+   ],
+   "rich": {
+    "grid": 41,
+    "sql": 50,
+    "calc": 2,
+    "valid": 4
+   }
+  },
+  {
+   "form": "RP_SLPR_ZOOM",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 138,
+    "sql": 30,
+    "calc": 1,
+    "valid": 4
+   }
+  },
+  {
+   "form": "RP_STK_LEVEL",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 19,
+    "sql": 14,
+    "calc": 3,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_STK_MOVE",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "MAIN_STOCK"
+   ],
+   "rich": {
+    "grid": 38,
+    "sql": 14,
+    "calc": 39,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_STOCK",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/txn/stock",
+   "posting": true,
+   "tables": [
+    "REPORT_DATA",
+    "ITEM_MAST",
+    "MAIN_STOCK"
+   ],
+   "rich": {
+    "grid": 38,
+    "sql": 49,
+    "calc": 2,
+    "valid": 5
+   }
+  },
+  {
+   "form": "RP_STOCK_FINE",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/txn/stock",
+   "posting": true,
+   "tables": [
+    "BAL_GR",
+    "GROUP_MAST",
+    "ITEM_MAST"
+   ],
+   "rich": {
+    "grid": 45,
+    "sql": 24,
+    "calc": 11,
+    "valid": 2
+   }
+  },
+  {
+   "form": "RP_STOCK_VALUE",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/txn/stock",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 45,
+    "sql": 9,
+    "calc": 12,
+    "valid": 1
+   }
+  },
+  {
+   "form": "RP_TAG",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "TAG_STOCK_PRINT",
+    "TAG_SUM_DATA",
+    "APR_DETL",
+    "BAR_CAN_DETL",
+    "KR_DETL",
+    "LBR_ISU_DETL"
+   ],
+   "rich": {
+    "grid": 29,
+    "sql": 50,
+    "calc": 0,
+    "valid": 12
+   }
+  },
+  {
+   "form": "RP_TAG_ESTMATE",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": true,
+   "tables": [
+    "TAG_STOCK_PRINT",
+    "TAG_IMAGE_DATA"
+   ],
+   "rich": {
+    "grid": 48,
+    "sql": 34,
+    "calc": 11,
+    "valid": 11
+   }
+  },
+  {
+   "form": "RP_TAG_IMAGE",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 23,
+    "sql": 26,
+    "calc": 3,
+    "valid": 13
+   }
+  },
+  {
+   "form": "RP_TAX",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 12,
+    "calc": 0,
+    "valid": 0
+   }
+  },
+  {
+   "form": "RP_TOUR_ZOOM",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/txn/tour",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 77,
+    "sql": 12,
+    "calc": 2,
+    "valid": 2
+   }
+  },
+  {
+   "form": "RP_TRADING",
+   "module": "report",
+   "status": "SPEC",
+   "web": "/reports/report-layouts",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 19,
+    "sql": 12,
+    "calc": 10,
+    "valid": 4
+   }
+  },
+  {
+   "form": "RP_USER",
+   "module": "report",
+   "status": "PAGE",
+   "web": "/admin/users",
+   "posting": true,
+   "tables": [
+    "REPORT_DATA",
+    "TAG_STOCK_PRINT",
+    "USER_DATA"
+   ],
+   "rich": {
+    "grid": 54,
+    "sql": 26,
+    "calc": 1,
+    "valid": 3
+   }
+  },
+  {
+   "form": "TR_AC_OPBL",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "ac-opbl",
+   "posting": true,
+   "tables": [
+    "CONTRA_DATA",
+    "DELETE_DATA",
+    "OP_DATA",
+    "USER_DATA",
+    "CONTRA_DATA"
+   ],
+   "rich": {
+    "grid": 19,
+    "sql": 31,
+    "calc": 29,
+    "valid": 16
+   }
+  },
+  {
+   "form": "TR_APR_ISU",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "estimate",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "APR_DETL",
+    "BAR_DETL",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 99,
+    "sql": 50,
+    "calc": 70,
+    "valid": 22
+   }
+  },
+  {
+   "form": "TR_BILL_TO",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "bill-to-bill",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "SL_DATA"
+   ],
+   "rich": {
+    "grid": 39,
+    "sql": 40,
+    "calc": 34,
+    "valid": 15
+   }
+  },
+  {
+   "form": "TR_BUL_BOOKING",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "bullion",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 19,
+    "sql": 28,
+    "calc": 21,
+    "valid": 15
+   }
+  },
+  {
+   "form": "TR_BUL_SALE",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "sales",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "RATE_CUT_ISU_REC",
+    "TOUCH_MAST",
+    "BUL_DATA",
+    "TOUCH_MAST"
+   ],
+   "rich": {
+    "grid": 141,
+    "sql": 50,
+    "calc": 70,
+    "valid": 15
+   }
+  },
+  {
+   "form": "TR_CARD_REC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "batch-receipt",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 25,
+    "calc": 17,
+    "valid": 10
+   }
+  },
+  {
+   "form": "TR_CASH",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "receipt",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 14,
+    "sql": 27,
+    "calc": 10,
+    "valid": 12
+   }
+  },
+  {
+   "form": "TR_CONTRA",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "contra",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 9,
+    "sql": 24,
+    "calc": 12,
+    "valid": 13
+   }
+  },
+  {
+   "form": "TR_DHRN_INTREC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "dhrn-interest",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 29,
+    "calc": 38,
+    "valid": 9
+   }
+  },
+  {
+   "form": "TR_DHRN_ISU",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "dhrn-issue",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "DHRN_ISU_DATA"
+   ],
+   "rich": {
+    "grid": 27,
+    "sql": 39,
+    "calc": 41,
+    "valid": 14
+   }
+  },
+  {
+   "form": "TR_DHRN_REC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "dhrn-receipt",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "DHRN_ISU_DATA",
+    "DHRN_ISU_DETL"
+   ],
+   "rich": {
+    "grid": 28,
+    "sql": 47,
+    "calc": 57,
+    "valid": 13
+   }
+  },
+  {
+   "form": "TR_EMP_JV",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "employee-jv",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 25,
+    "sql": 25,
+    "calc": 28,
+    "valid": 11
+   }
+  },
+  {
+   "form": "TR_FINE_SL_PR",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "MAIN_STOCK",
+    "PR_DETL",
+    "RATE_CUT_ISU"
+   ],
+   "rich": {
+    "grid": 57,
+    "sql": 48,
+    "calc": 45,
+    "valid": 14
+   }
+  },
+  {
+   "form": "TR_FN_INOUT",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "fine-inout",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "GROUP_MAST",
+    "ITEM_MAST",
+    "PRODUCT_MAST",
+    "FAN_DATA",
+    "FAN_DETL"
+   ],
+   "rich": {
+    "grid": 120,
+    "sql": 50,
+    "calc": 70,
+    "valid": 21
+   }
+  },
+  {
+   "form": "TR_GOLD_BOOK",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 19,
+    "sql": 24,
+    "calc": 16,
+    "valid": 13
+   }
+  },
+  {
+   "form": "TR_INOUT",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/txn/fine-inout",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 127,
+    "sql": 50,
+    "calc": 59,
+    "valid": 21
+   }
+  },
+  {
+   "form": "TR_ITM_LOT",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "item-lot",
+   "posting": true,
+   "tables": [
+    "TAG_PRINT_DATA"
+   ],
+   "rich": {
+    "grid": 36,
+    "sql": 37,
+    "calc": 33,
+    "valid": 11
+   }
+  },
+  {
+   "form": "TR_ITM_OPBL",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "item-opening",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 18,
+    "sql": 9,
+    "calc": 16,
+    "valid": 7
+   }
+  },
+  {
+   "form": "TR_JDT_REC",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "TAG_PRINT_DATA",
+    "APR_DETL",
+    "MFG_DETL"
+   ],
+   "rich": {
+    "grid": 101,
+    "sql": 50,
+    "calc": 70,
+    "valid": 20
+   }
+  },
+  {
+   "form": "TR_KR_ISU",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "karigar-issue",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 60,
+    "sql": 50,
+    "calc": 70,
+    "valid": 16
+   }
+  },
+  {
+   "form": "TR_LEDR_ADJ",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "ledger-adjust",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 10,
+    "sql": 24,
+    "calc": 13,
+    "valid": 14
+   }
+  },
+  {
+   "form": "TR_LOCT_AMT",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 10,
+    "sql": 26,
+    "calc": 14,
+    "valid": 13
+   }
+  },
+  {
+   "form": "TR_MEMB_ADJ",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "membership",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "AD_MEMB"
+   ],
+   "rich": {
+    "grid": 23,
+    "sql": 33,
+    "calc": 16,
+    "valid": 11
+   }
+  },
+  {
+   "form": "TR_MEMB_ENT",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "membership",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "TEMP_AD_DATA",
+    "USER_DATA"
+   ],
+   "rich": {
+    "grid": 28,
+    "sql": 46,
+    "calc": 17,
+    "valid": 16
+   }
+  },
+  {
+   "form": "TR_MFG_GHAT_REC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "APR_DETL",
+    "MFG_DETL"
+   ],
+   "rich": {
+    "grid": 72,
+    "sql": 43,
+    "calc": 49,
+    "valid": 15
+   }
+  },
+  {
+   "form": "TR_MFG_ISU_REC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "TAG_PRINT_DATA",
+    "MENU_DATA",
+    "MFG_DETL",
+    "MFG_ISU_REC"
+   ],
+   "rich": {
+    "grid": 84,
+    "sql": 50,
+    "calc": 50,
+    "valid": 17
+   }
+  },
+  {
+   "form": "TR_MFG_ITEM",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "TAG_PRINT_DATA",
+    "MENU_DATA",
+    "MFG_DETL"
+   ],
+   "rich": {
+    "grid": 106,
+    "sql": 50,
+    "calc": 68,
+    "valid": 17
+   }
+  },
+  {
+   "form": "TR_MFG_KR_ISU_REC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "TAG_PRINT_DATA",
+    "MENU_DATA",
+    "MFG_DETL",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 143,
+    "sql": 50,
+    "calc": 70,
+    "valid": 17
+   }
+  },
+  {
+   "form": "TR_MFG_ORD_ISU",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 113,
+    "sql": 50,
+    "calc": 70,
+    "valid": 21
+   }
+  },
+  {
+   "form": "TR_MFG_ORD_REC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "TAG_PRINT_DATA",
+    "APR_DETL",
+    "MENU_DATA",
+    "MFG_DETL"
+   ],
+   "rich": {
+    "grid": 116,
+    "sql": 50,
+    "calc": 70,
+    "valid": 20
+   }
+  },
+  {
+   "form": "TR_MFG_WITH_LOT",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/masters/mfg",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "TAG_PRINT_DATA",
+    "MENU_DATA",
+    "MFG_DETL"
+   ],
+   "rich": {
+    "grid": 90,
+    "sql": 50,
+    "calc": 60,
+    "valid": 17
+   }
+  },
+  {
+   "form": "TR_MLT_PRO",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "melting",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "SL_DATA"
+   ],
+   "rich": {
+    "grid": 38,
+    "sql": 35,
+    "calc": 35,
+    "valid": 16
+   }
+  },
+  {
+   "form": "TR_OTH_COMM",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 31,
+    "sql": 34,
+    "calc": 22,
+    "valid": 13
+   }
+  },
+  {
+   "form": "TR_OTH_PURC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "other-purchase",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA"
+   ],
+   "rich": {
+    "grid": 32,
+    "sql": 37,
+    "calc": 26,
+    "valid": 14
+   }
+  },
+  {
+   "form": "TR_PHYSTK",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "physical-stock",
+   "posting": true,
+   "tables": [
+    "BAR_DETL",
+    "BAR_IDTL",
+    "TAG_PRINT_DATA",
+    "APR_DETL",
+    "BAR_DETL",
+    "MAIN_STOCK"
+   ],
+   "rich": {
+    "grid": 32,
+    "sql": 50,
+    "calc": 19,
+    "valid": 19
+   }
+  },
+  {
+   "form": "TR_PR_SL_HEDG",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "MAIN_STOCK",
+    "PR_DETL",
+    "RATE_CUT_ISU"
+   ],
+   "rich": {
+    "grid": 16,
+    "sql": 37,
+    "calc": 18,
+    "valid": 12
+   }
+  },
+  {
+   "form": "TR_PR_SL_UAE",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "purchase",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "APR_DETL"
+   ],
+   "rich": {
+    "grid": 119,
+    "sql": 50,
+    "calc": 70,
+    "valid": 22
+   }
+  },
+  {
+   "form": "TR_PURC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "purchase",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "SRNO_MAST",
+    "TAG_SET",
+    "TOUCH_MAST",
+    "USER_DATA",
+    "APR_DETL"
+   ],
+   "rich": {
+    "grid": 228,
+    "sql": 50,
+    "calc": 70,
+    "valid": 35
+   }
+  },
+  {
+   "form": "TR_PURC_HM",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "purchase-hm",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "SRNO_MAST",
+    "BAR_DETL",
+    "BAR_IDTL"
+   ],
+   "rich": {
+    "grid": 132,
+    "sql": 50,
+    "calc": 70,
+    "valid": 20
+   }
+  },
+  {
+   "form": "TR_REP_REC",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "REP_DETL"
+   ],
+   "rich": {
+    "grid": 63,
+    "sql": 50,
+    "calc": 44,
+    "valid": 18
+   }
+  },
+  {
+   "form": "TR_SALE",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "sales",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "POINT_MEMB",
+    "PRINT_MAST",
+    "USER_DATA",
+    "AC_MAST",
+    "APR_DETL"
+   ],
+   "rich": {
+    "grid": 190,
+    "sql": 50,
+    "calc": 70,
+    "valid": 35
+   }
+  },
+  {
+   "form": "TR_SALE_HM",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "hallmark-sale",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "PRINT_MAST",
+    "AC_MAST",
+    "APR_DETL",
+    "BAR_DETL",
+    "BILL_OS_DATA"
+   ],
+   "rich": {
+    "grid": 162,
+    "sql": 50,
+    "calc": 70,
+    "valid": 25
+   }
+  },
+  {
+   "form": "TR_SALE_LBR",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "labour-sale",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "RATE_CUT_ISU_REC",
+    "TOUCH_MAST",
+    "USER_DATA",
+    "LBR_ISU_DETL",
+    "SL_DETL"
+   ],
+   "rich": {
+    "grid": 153,
+    "sql": 50,
+    "calc": 70,
+    "valid": 19
+   }
+  },
+  {
+   "form": "TR_SALE_ORD",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "sales-order",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "USER_DATA",
+    "AC_DATA",
+    "BAR_DETL",
+    "MAIN_STOCK",
+    "ROJ_MEL_DATA"
+   ],
+   "rich": {
+    "grid": 142,
+    "sql": 50,
+    "calc": 70,
+    "valid": 30
+   }
+  },
+  {
+   "form": "TR_SALE_RTN",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "sale-return",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "RATE_CUT_ISU_REC",
+    "TAG_SET",
+    "USER_DATA",
+    "BAR_DETL",
+    "MAIN_STOCK"
+   ],
+   "rich": {
+    "grid": 176,
+    "sql": 50,
+    "calc": 70,
+    "valid": 23
+   }
+  },
+  {
+   "form": "TR_SALE_RTN_UAE",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "sale-return",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "PRINT_MAST",
+    "SRNO_MAST",
+    "APR_DETL",
+    "BAR_DETL",
+    "PRINT_MAST"
+   ],
+   "rich": {
+    "grid": 124,
+    "sql": 50,
+    "calc": 70,
+    "valid": 21
+   }
+  },
+  {
+   "form": "TR_SL_EBILL",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "ITEM_MAST",
+    "SL_DATA"
+   ],
+   "rich": {
+    "grid": 116,
+    "sql": 50,
+    "calc": 70,
+    "valid": 26
+   }
+  },
+  {
+   "form": "TR_SL_ORD_ADJ",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "sales-order",
+   "posting": true,
+   "tables": [
+    "BAR_DETL",
+    "BAR_IDTL",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 33,
+    "sql": 40,
+    "calc": 15,
+    "valid": 13
+   }
+  },
+  {
+   "form": "TR_SL_PR_ITEM",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "PRINT_MAST"
+   ],
+   "rich": {
+    "grid": 128,
+    "sql": 50,
+    "calc": 70,
+    "valid": 27
+   }
+  },
+  {
+   "form": "TR_TAG_CAN",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/txn/tag-cancel",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "BAR_DETL",
+    "MAIN_STOCK"
+   ],
+   "rich": {
+    "grid": 83,
+    "sql": 49,
+    "calc": 57,
+    "valid": 14
+   }
+  },
+  {
+   "form": "TR_TAG_OPBL",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "tag-opening",
+   "posting": true,
+   "tables": [
+    "BAR_DETL",
+    "BAR_IDTL",
+    "DELETE_DATA",
+    "SRNO_MAST",
+    "TAG_PRINT_DATA",
+    "TAG_SET"
+   ],
+   "rich": {
+    "grid": 153,
+    "sql": 50,
+    "calc": 70,
+    "valid": 42
+   }
+  },
+  {
+   "form": "TR_TAG_SPLIT",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "tag-split",
+   "posting": true,
+   "tables": [
+    "RATE_CUT_ISU_REC",
+    "TAG_PRINT_DATA",
+    "TAG_SET",
+    "USER_DATA"
+   ],
+   "rich": {
+    "grid": 237,
+    "sql": 50,
+    "calc": 70,
+    "valid": 21
+   }
+  },
+  {
+   "form": "TR_TAG_WT_DIFF",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "tag-weight-diff",
+   "posting": true,
+   "tables": [
+    "RATE_CUT_ISU_REC",
+    "TAG_PRINT_DATA",
+    "BAR_DETL",
+    "LBR_ISU_DETL"
+   ],
+   "rich": {
+    "grid": 134,
+    "sql": 50,
+    "calc": 70,
+    "valid": 18
+   }
+  },
+  {
+   "form": "TR_TOUR",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/txn/tour",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "APR_DETL",
+    "BAR_DETL"
+   ],
+   "rich": {
+    "grid": 94,
+    "sql": 45,
+    "calc": 54,
+    "valid": 17
+   }
+  },
+  {
+   "form": "TR_TOUR_ORD",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "/txn/tour",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "USER_DATA",
+    "BAR_DETL",
+    "MAIN_STOCK",
+    "SL_ORD_DETL"
+   ],
+   "rich": {
+    "grid": 119,
+    "sql": 50,
+    "calc": 70,
+    "valid": 25
+   }
+  },
+  {
+   "form": "TR_TOUR_SALE",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "tour",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "RATE_CUT_ISU_REC",
+    "TOUCH_MAST",
+    "USER_DATA",
+    "APR_DETL",
+    "BAR_DETL"
+   ],
+   "rich": {
+    "grid": 170,
+    "sql": 50,
+    "calc": 70,
+    "valid": 26
+   }
+  },
+  {
+   "form": "TR_UPI_REC",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "receipt",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 6,
+    "sql": 11,
+    "calc": 0,
+    "valid": 3
+   }
+  },
+  {
+   "form": "TR_VP",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "RATE_CUT_ISU_REC"
+   ],
+   "rich": {
+    "grid": 96,
+    "sql": 50,
+    "calc": 70,
+    "valid": 14
+   }
+  },
+  {
+   "form": "TR_VP_ADJ",
+   "module": "transaction",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "RATE_CUT_DATA"
+   ],
+   "rich": {
+    "grid": 14,
+    "sql": 24,
+    "calc": 10,
+    "valid": 11
+   }
+  },
+  {
+   "form": "TR_WH_SALE",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "wholesale-sale",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "PRINT_MAST",
+    "RATE_CUT_ISU_REC",
+    "TOUCH_MAST",
+    "USER_DATA",
+    "APR_DETL"
+   ],
+   "rich": {
+    "grid": 184,
+    "sql": 50,
+    "calc": 70,
+    "valid": 30
+   }
+  },
+  {
+   "form": "TR_WH_SALE_RTN",
+   "module": "transaction",
+   "status": "PAGE",
+   "web": "wholesale-sale",
+   "posting": true,
+   "tables": [
+    "DELETE_DATA",
+    "RATE_CUT_ISU_REC"
+   ],
+   "rich": {
+    "grid": 150,
+    "sql": 50,
+    "calc": 70,
+    "valid": 16
+   }
+  },
+  {
+   "form": "UT_AI_TRFR",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "BOOK_IDTL",
+    "TAG_DATA",
+    "BAR_DETL",
+    "TAG_DATA"
+   ],
+   "rich": {
+    "grid": 11,
+    "sql": 20,
+    "calc": 0,
+    "valid": 6
+   }
+  },
+  {
+   "form": "UT_BANK",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "/txn/bank-recon",
+   "posting": true,
+   "tables": [
+    "AC_DATA",
+    "CASH_DATA"
+   ],
+   "rich": {
+    "grid": 18,
+    "sql": 16,
+    "calc": 2,
+    "valid": 5
+   }
+  },
+  {
+   "form": "UT_BKP",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "backup",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 2,
+    "calc": 0,
+    "valid": 4
+   }
+  },
+  {
+   "form": "UT_CUST_ENTRY",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 17,
+    "sql": 24,
+    "calc": 4,
+    "valid": 11
+   }
+  },
+  {
+   "form": "UT_EXPORT",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "AC_MAST",
+    "AD_ADJ",
+    "AD_DATA",
+    "AD_MAST",
+    "AD_MEMB",
+    "BAR_CAN_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 6,
+    "valid": 12
+   }
+  },
+  {
+   "form": "UT_E_INVOICE",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "e-invoice",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 88,
+    "sql": 5,
+    "calc": 3,
+    "valid": 1
+   }
+  },
+  {
+   "form": "UT_HDD",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "HDD_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 1,
+    "calc": 0,
+    "valid": 1
+   }
+  },
+  {
+   "form": "UT_IMPORT",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "AC_GROUP",
+    "AC_MAST",
+    "AC_MAST_SRNO",
+    "ADD_MAST",
+    "AD_ADJ",
+    "AD_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 8,
+    "valid": 22
+   }
+  },
+  {
+   "form": "UT_PWD_UPDATE",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "users",
+   "posting": true,
+   "tables": [
+    "LOGIN_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 3,
+    "calc": 0,
+    "valid": 4
+   }
+  },
+  {
+   "form": "UT_REMINDER",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "/utilities/reminders",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 5,
+    "sql": 15,
+    "calc": 5,
+    "valid": 9
+   }
+  },
+  {
+   "form": "UT_REPORT",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "reports/[report]",
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 2,
+    "calc": 0,
+    "valid": 6
+   }
+  },
+  {
+   "form": "UT_SETTING",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "/settings",
+   "posting": true,
+   "tables": [
+    "COL_MAST",
+    "CO_SET",
+    "CO_SET_NEW"
+   ],
+   "rich": {
+    "grid": 6,
+    "sql": 32,
+    "calc": 0,
+    "valid": 28
+   }
+  },
+  {
+   "form": "UT_SETTING_MAIN",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "settings",
+   "posting": true,
+   "tables": [
+    "CO_SET",
+    "CO_SET_NEW",
+    "MENU_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 0,
+    "valid": 64
+   }
+  },
+  {
+   "form": "UT_SET_ADMIN",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "CO_SET_NEW"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 13,
+    "calc": 0,
+    "valid": 11
+   }
+  },
+  {
+   "form": "UT_SMS",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "LEDR_AC_DATA",
+    "MSG_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 27,
+    "calc": 0,
+    "valid": 13
+   }
+  },
+  {
+   "form": "UT_TAG_PRINT",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "/txn/tag-print",
+   "posting": true,
+   "tables": [
+    "TAG_PRINT_DATA",
+    "BAR_DETL",
+    "PRINT_MAST"
+   ],
+   "rich": {
+    "grid": 71,
+    "sql": 37,
+    "calc": 19,
+    "valid": 6
+   }
+  },
+  {
+   "form": "UT_USER_REQUEST",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "USER_REQUEST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 3,
+    "calc": 0,
+    "valid": 2
+   }
+  },
+  {
+   "form": "UT_VCH_RE_NUMBR",
+   "module": "utility",
+   "status": "PAGE",
+   "web": "voucher-renumber",
+   "posting": true,
+   "tables": [
+    "AD_ADJ",
+    "BAR_DATA",
+    "BAR_DETL",
+    "BAR_IDTL",
+    "BILL_OS_DATA",
+    "CASH_DATA"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 50,
+    "calc": 0,
+    "valid": 2
+   }
+  },
+  {
+   "form": "UT_WAPP_WITH_API",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "LEDR_AC_DATA",
+    "POINT_MAST",
+    "POINT_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 33,
+    "calc": 2,
+    "valid": 17
+   }
+  },
+  {
+   "form": "UT_WEB_CAM",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 0,
+    "calc": 0,
+    "valid": 0
+   }
+  },
+  {
+   "form": "UT_WHATSAPP",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": true,
+   "tables": [
+    "LEDR_AC_DATA",
+    "MSG_MAST",
+    "POINT_MAST",
+    "CO_SET_NEW",
+    "POINT_MAST"
+   ],
+   "rich": {
+    "grid": 0,
+    "sql": 38,
+    "calc": 2,
+    "valid": 19
+   }
+  },
+  {
+   "form": "UT_WINDOW",
+   "module": "utility",
+   "status": "MISSING",
+   "web": null,
+   "posting": false,
+   "tables": [],
+   "rich": {
+    "grid": 0,
+    "sql": 2,
+    "calc": 0,
+    "valid": 3
+   }
+  }
+ ]
+}

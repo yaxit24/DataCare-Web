@@ -1,0 +1,81 @@
+{
+  "kind": "independent-pure-composition-source-review",
+  "observedAtUtc": "2026-09-11T22:17:53.470310+00:00",
+  "disposition": "no-confirmed-blocker",
+  "testsExecuted": false,
+  "compilerExecuted": false,
+  "databaseOrBrowserExecuted": false,
+  "ownerManifestSha256": "ffce266143cb53f8bcba4cad3ade6fee7f51283f552340170fe991ea01fa6aca",
+  "allOwnerReferencesHashMatched": true,
+  "literalFixtureByteIdentical": true,
+  "references": [
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/required-core-export.txt",
+      "sha256": "e723b09b8cc34a20fa9a2ef90bcfff51db130c0c3a3dc5a2d8ff0ba2b6a2643c"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/README.md",
+      "sha256": "8a3ef55e69e559d8c35215de8ed5bcb097ca58189b6fd044cfb4dcca9a6503ec"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/web/packages/core/test/saleReturnIncomingLabourCompose.test.ts",
+      "sha256": "9334a5b3f770a503c85a638949f71fb66f3493fae6d5a1a66fe6d7960f30c8fe"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/web/packages/core/src/saleReturnIncomingLabourCompose.ts",
+      "sha256": "62405dc4662d23978581f8a8b91708f659af681c014f75848d539c0386fd9865"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/web/packages/core/test/fixtures/saleReturnIncomingLabourCompose.independent.json",
+      "sha256": "fd55edb9173dbc40475d7dd04a63877226600d36c983f20b1421ab013ee73dd6"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/dependency-verification.json",
+      "sha256": "09fdffe0f6154e16770ade5c607952442f0a792cb9053afb016709e7cd5bca94"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/inputs.json",
+      "sha256": "20a8ffcfba0bad984377a15f66ac87c5728e2379da8d0cdf34bb42b4e8f66dbb"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/implementation-contract.md",
+      "sha256": "5f47c2adcb05b54b923274c7566e1dd23c5f4d4e933cdd03d0d12c313ff165fd"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/literal-case-index.md",
+      "sha256": "740a17ad85d0a578eeff84009d388630e401e23d10d25c9158a192c91b60f3d2"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/labour-compose-independent.v1.json",
+      "sha256": "fd55edb9173dbc40475d7dd04a63877226600d36c983f20b1421ab013ee73dd6"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingLabour.ts",
+      "sha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/inputs.json",
+      "sha256": "ffce266143cb53f8bcba4cad3ade6fee7f51283f552340170fe991ea01fa6aca"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-review/independent-source-review.md",
+      "sha256": "2b86ef5c7f4a27610be7960b2eaa827c5a43412f4faf9dd751dae4e38a45efae"
+    }
+  ]
+}

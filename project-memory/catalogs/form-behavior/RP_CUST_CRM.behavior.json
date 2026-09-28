@@ -1,0 +1,73 @@
+{
+ "form": "RP_CUST_CRM",
+ "loc": 4237,
+ "gridColumns": {
+  "cSrNoCr": 0,
+  "cPartyNme": 1,
+  "cMobileNo": 2,
+  "cBtnUpdate": 3,
+  "cRemark": 4,
+  "cVchDate": 5,
+  "cNewRemDate": 6,
+  "cBookType": 7,
+  "cVchNo": 8,
+  "cTagNo": 9,
+  "cItCode": 10,
+  "cPcs": 11,
+  "cGrWt": 12,
+  "cNetWt": 13,
+  "cFine": 14,
+  "cTotAmt": 15,
+  "cRemDate": 16,
+  "cEmpName": 17,
+  "cMainRemark": 18,
+  "cBookCode": 19,
+  "cMainBook": 20,
+  "cEmpCode": 21,
+  "cRemSrNo": 22,
+  "cCoYear": 23,
+  "cVchSrNo": 24,
+  "cItLike": 25,
+  "cItCart": 26
+ },
+ "inlineSql": [
+  "Please Check Update Detail ... Because Entry Is Not Proper....",
+  "DELETE FROM CUST_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND SR_NO = ? AND ISR_NO = ? ",
+  "SELECT * FROM CUST_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND SR_NO = ? AND ISR_NO = ? ",
+  "SELECT A.* FROM (CUST_DATA AS A LEFT JOIN CUST_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE AND A.CO_YEAR = C.CO_YEAR AND A.CO_BOOK = C.CO_BOOK AND A.VCH_NO = C.VCH_NO AND A.SR_NO = C.SR_NO) LEFT JOIN ? .dbo.AC_MAST AS B ON A.CO_CODE = B.CO_CODE And A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' and A.LC_CODE = ' ? ' And (C.REM_DATE >= ' ? MM/dd/yyyy ? ' And C.REM_DATE <= ' ? MM/dd/yyyy ? ')",
+  "SELECT TOP 1 B.REM_DATE,B.ITM_REMARK,B.ITM_SALE,B.REM_CLOSE FROM CUST_DATA AS A LEFT JOIN CUST_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_YEAR = B.CO_YEAR AND A.CO_BOOK = B.CO_BOOK AND A.VCH_NO = B.VCH_NO AND A.SR_NO = B.SR_NO WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' AND B.SR_NO = ? AND B.ISR_NO <> 1 ORDER BY B.ISR_NO DESC",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT Sum(CR_AMT - DR_AMT) as BalAmt FROM AC_DATA WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? ' and VCH_DATE < ' ? MM/dd/yyyy ? ' HAVING SUM(CR_AMT-DR_AMT) <> 0",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE As AcCodeL, AC_GR AS GroupL,AC_ADD1 As AddressL,AC_PHONE As PhoneL,AC_MOBILE As MobileL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT Sum(CR_AMT - DR_AMT) as BalAmt FROM AC_DATA WHERE CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND AC_CODE = ' ? ' and VCH_DATE < ' ? MM/dd/yyyy ? ' ? C ? AND DATA_TYPE = ' ? ' ? HAVING SUM(CR_AMT-DR_AMT) <> 0",
+  "Select * From ADD_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "Select AC_NAME From CUST_DATA WHERE CO_CODE = ' ? ' AND AC_NAME = ' ? ' AND AC_CODE = '' AND CUST_CODE = ''",
+  "SELECT AC_NAME As AcNameL FROM CUST_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = '' AND CUST_CODE = '' GROUP BY AC_NAME ORDER BY AC_NAME",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT ROW_NUMBER() OVER (ORDER BY B.ISR_NO) AS SrNo,B.REM_DATE,B.ITM_REMARK,B.ITM_SALE,B.REM_CLOSE FROM CUST_DATA AS A LEFT JOIN CUST_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_YEAR = B.CO_YEAR AND A.CO_BOOK = B.CO_BOOK AND A.VCH_NO = B.VCH_NO AND A.SR_NO = B.SR_NO WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' AND B.SR_NO = ? ORDER BY B.ISR_NO"
+ ],
+ "keyboard": {
+  "Enter": 10,
+  "Esc": 1
+ },
+ "calc": [
+  "nIsrNo.Text = Conversions.ToString(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[0][\"ISR_NO\"])) + 1.0);"
+ ],
+ "validations": [
+  {
+   "message": "Please Check Update Detail ... Because Entry Is Not Proper....",
+   "when": "(Operators.CompareString(tCoYear.Text, \"\", false) == 0) | (Operators.CompareString(tVchNo.Text, \"\", false) == 0) | (Operators.CompareString(nSrNo.Text, \"\", fals"
+  },
+  {
+   "message": "Record Is Update...",
+   "when": ""
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": ""
+  }
+ ]
+}

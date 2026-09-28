@@ -1,0 +1,673 @@
+{
+ "form": "TR_CARD_REC",
+ "controlCount": 65,
+ "byKind": {
+  "textbox": 28,
+  "button": 9,
+  "masked": 1,
+  "panel": 2,
+  "label": 24,
+  "other": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "FlowLayoutPanel1",
+   "BtnLast",
+   "BtnFirst"
+  ],
+  "this": [
+   "Label8",
+   "nCardNetAmt",
+   "Label22",
+   "Label20",
+   "nCashPaid",
+   "nBankComAmt",
+   "Label14",
+   "nBillOs",
+   "nBankNetAmt",
+   "Label12",
+   "nBankCom2",
+   "Label10",
+   "nCardAmt",
+   "Label9",
+   "nBillAdjAmt",
+   "Label7",
+   "Label6",
+   "nBankCom1",
+   "tCardAc",
+   "tCardBankName",
+   "Label25",
+   "BtnIssue",
+   "Label23",
+   "tBillDbCd",
+   "tBillYrCd",
+   "tBillNo",
+   "Label21",
+   "nCardComAmt",
+   "Label15",
+   "nSchPrc",
+   "Label17",
+   "nCardCommPrc",
+   "Label5",
+   "nBankComPrc",
+   "Label16",
+   "nBillAmt",
+   "LClAmt",
+   "LOpAmt",
+   "tVchDesc",
+   "Label4",
+   "tEmpCode",
+   "tEmpName",
+   "Label3",
+   "tHdVchNo",
+   "tAcCode",
+   "tAcName",
+   "Label1",
+   "Cr",
+   "BtnF1",
+   "mDay",
+   "mTime",
+   "mVchDate",
+   "lblBDate",
+   "Label2",
+   "tVchNo",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "335,92",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "mVchDate",
+   "type": "MaskedTextBox",
+   "location": "543,92",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "335,121",
+   "size": "76,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "tBillNo",
+   "type": "TextBox",
+   "location": "335,150",
+   "size": "76,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "tBillYrCd",
+   "type": "TextBox",
+   "location": "543,150",
+   "size": "83,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnLast",
+   "type": "SimpleButton",
+   "location": "199,3",
+   "size": "41,37",
+   "tabIndex": "5",
+   "text": ">",
+   "kind": "button"
+  },
+  {
+   "name": "tBillDbCd",
+   "type": "TextBox",
+   "location": "714,150",
+   "size": "90,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnFirst",
+   "type": "SimpleButton",
+   "location": "152,3",
+   "size": "41,37",
+   "tabIndex": "6",
+   "text": "<",
+   "kind": "button"
+  },
+  {
+   "name": "nBillAmt",
+   "type": "TextBox",
+   "location": "335,178",
+   "size": "76,22",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nBankCom1",
+   "type": "TextBox",
+   "location": "418,319",
+   "size": "96,22",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nBillAdjAmt",
+   "type": "TextBox",
+   "location": "543,179",
+   "size": "83,22",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nBankCom2",
+   "type": "TextBox",
+   "location": "418,346",
+   "size": "96,22",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nBillOs",
+   "type": "TextBox",
+   "location": "714,179",
+   "size": "90,22",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCardAmt",
+   "type": "TextBox",
+   "location": "335,206",
+   "size": "76,22",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCardCommPrc",
+   "type": "TextBox",
+   "location": "543,208",
+   "size": "83,22",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCardComAmt",
+   "type": "TextBox",
+   "location": "335,234",
+   "size": "76,22",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nCashPaid",
+   "type": "TextBox",
+   "location": "543,262",
+   "size": "83,22",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tCardAc",
+   "type": "TextBox",
+   "location": "335,289",
+   "size": "76,23",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nBankComPrc",
+   "type": "TextBox",
+   "location": "335,318",
+   "size": "76,22",
+   "tabIndex": "14",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nSchPrc",
+   "type": "TextBox",
+   "location": "335,346",
+   "size": "76,22",
+   "tabIndex": "15",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nBankComAmt",
+   "type": "TextBox",
+   "location": "335,374",
+   "size": "76,22",
+   "tabIndex": "16",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "nBankNetAmt",
+   "type": "TextBox",
+   "location": "335,402",
+   "size": "76,22",
+   "tabIndex": "17",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tEmpCode",
+   "type": "TextBox",
+   "location": "335,430",
+   "size": "76,23",
+   "tabIndex": "18",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tVchDesc",
+   "type": "TextBox",
+   "location": "335,459",
+   "size": "402,53",
+   "tabIndex": "19",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "20",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "21",
+   "text": "Cared Received",
+   "kind": "label"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "418,121",
+   "size": "386,23",
+   "tabIndex": "26",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "FlowLayoutPanel1",
+   "type": "FlowLayoutPanel",
+   "location": "246,3",
+   "size": "575,36",
+   "tabIndex": "27",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "264,90",
+   "size": "62,20",
+   "tabIndex": "1125",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "466,93",
+   "size": "71,20",
+   "tabIndex": "1126",
+   "text": "Vch Date",
+   "kind": "label"
+  },
+  {
+   "name": "mTime",
+   "type": "TextBox",
+   "location": "625,92",
+   "size": "83,23",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "mDay",
+   "type": "TextBox",
+   "location": "714,92",
+   "size": "91,23",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnF1",
+   "type": "SimpleButton",
+   "location": "418,92",
+   "size": "35,23",
+   "tabIndex": "1149",
+   "text": "F1",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1161,409",
+   "size": "28,28",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "251,119",
+   "size": "75,20",
+   "tabIndex": "1157",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "tHdVchNo",
+   "type": "TextBox",
+   "location": "8,8",
+   "size": "56,15",
+   "tabIndex": "1159",
+   "text": "00001",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "257,438",
+   "size": "69,20",
+   "tabIndex": "1161",
+   "text": "Employee",
+   "kind": "label"
+  },
+  {
+   "name": "tEmpName",
+   "type": "TextBox",
+   "location": "418,430",
+   "size": "208,23",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "250,466",
+   "size": "76,20",
+   "tabIndex": "1163",
+   "text": "Vch Desc",
+   "kind": "label"
+  },
+  {
+   "name": "LOpAmt",
+   "type": "Label",
+   "location": "1022,41",
+   "size": "148,20",
+   "tabIndex": "1208",
+   "text": "OpAmt",
+   "kind": "label"
+  },
+  {
+   "name": "LClAmt",
+   "type": "Label",
+   "location": "1022,533",
+   "size": "148,20",
+   "tabIndex": "1211",
+   "text": "ClAmt",
+   "kind": "label"
+  },
+  {
+   "name": "Label16",
+   "type": "Label",
+   "location": "247,182",
+   "size": "79,20",
+   "tabIndex": "1213",
+   "text": "Bill Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "222,321",
+   "size": "107,20",
+   "tabIndex": "1215",
+   "text": "Bank Comm %",
+   "kind": "label"
+  },
+  {
+   "name": "Label17",
+   "type": "Label",
+   "location": "444,208",
+   "size": "93,20",
+   "tabIndex": "1219",
+   "text": "Card Comm %",
+   "kind": "label"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "213,349",
+   "size": "115,20",
+   "tabIndex": "1221",
+   "text": "Sch Charg%",
+   "kind": "label"
+  },
+  {
+   "name": "Label21",
+   "type": "Label",
+   "location": "222,238",
+   "size": "105,20",
+   "tabIndex": "1232",
+   "text": "Card Comm Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label23",
+   "type": "Label",
+   "location": "259,150",
+   "size": "67,20",
+   "tabIndex": "1238",
+   "text": "Bill No",
+   "kind": "label"
+  },
+  {
+   "name": "BtnIssue",
+   "type": "SimpleButton",
+   "location": "418,150",
+   "size": "35,23",
+   "tabIndex": "1239",
+   "text": "F1",
+   "kind": "button"
+  },
+  {
+   "name": "tCardBankName",
+   "type": "TextBox",
+   "location": "418,290",
+   "size": "387,23",
+   "tabIndex": "1242",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label25",
+   "type": "Label",
+   "location": "231,292",
+   "size": "95,20",
+   "tabIndex": "1243",
+   "text": "Card Bank Ac",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "207,377",
+   "size": "119,20",
+   "tabIndex": "1248",
+   "text": "Bank Comm Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "466,150",
+   "size": "71,20",
+   "tabIndex": "1250",
+   "text": "Bill Year",
+   "kind": "label"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "458,180",
+   "size": "79,20",
+   "tabIndex": "1252",
+   "text": "Bill Adj",
+   "kind": "label"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "228,210",
+   "size": "98,20",
+   "tabIndex": "1254",
+   "text": "Card Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "219,405",
+   "size": "107,20",
+   "tabIndex": "1262",
+   "text": "Bank Net Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label14",
+   "type": "Label",
+   "location": "632,180",
+   "size": "76,20",
+   "tabIndex": "1275",
+   "text": "Bill Os",
+   "kind": "label"
+  },
+  {
+   "name": "Label20",
+   "type": "Label",
+   "location": "418,263",
+   "size": "119,20",
+   "tabIndex": "1283",
+   "text": "Cash Paid Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label22",
+   "type": "Label",
+   "location": "637,150",
+   "size": "71,20",
+   "tabIndex": "1284",
+   "text": "Bill Book",
+   "kind": "label"
+  },
+  {
+   "name": "nCardNetAmt",
+   "type": "TextBox",
+   "location": "335,261",
+   "size": "76,22",
+   "tabIndex": "1285",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "222,263",
+   "size": "105,20",
+   "tabIndex": "1286",
+   "text": "Card Net Amt",
+   "kind": "label"
+  }
+ ]
+}

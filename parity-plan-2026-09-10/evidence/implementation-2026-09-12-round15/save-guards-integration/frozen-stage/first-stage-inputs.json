@@ -1,0 +1,39 @@
+{
+  "stage": "first123-runtime-and-strict-passed-before-formatting",
+  "files": [
+    {
+      "path": "web/packages/core/src/saleReturnSaveGuards.ts",
+      "sha256": "9adf6d1a254c5ff41089792fae5c4aa04be87e5d9ac335cb423ca71fcedb9c98"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnSaveGuards.test.ts",
+      "sha256": "4b20bbccffadd17bedfbff70adbc22c209591eb66940757c668ee8a957cab116"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnSaveGuards.independent.json",
+      "sha256": "6af7121c2952c9be055f1e83671d0e1bd0139c80a1d81bc9482c1edb90fd8e78"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnSaveGuards.fine-amendment.json",
+      "sha256": "87de6652da68f4400389e862edc590cfa4a919d882ddddd7b7ad51bed22790c5"
+    },
+    {
+      "path": "web/vitest.config.mts",
+      "sha256": "188dd96780d598595a353370bc1949b95582aa56e86ac83d31262c792f65a45b"
+    }
+  ],
+  "runs": [
+    {
+      "command": "node /Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/vitest/vitest.mjs run --config vitest.config.mts",
+      "cwd": "/tmp/datacare-round15-save-guards/web",
+      "exitCode": 0,
+      "log": "focused-first.txt"
+    },
+    {
+      "command": "tsc --noEmit --strict --noUncheckedIndexedAccess --isolatedModules --target ES2022 --module NodeNext --moduleResolution NodeNext --skipLibCheck --esModuleInterop packages/core/test/saleReturnSaveGuards.test.ts",
+      "cwd": "/tmp/datacare-round15-save-guards/web",
+      "exitCode": 0,
+      "log": "types-first.txt"
+    }
+  ]
+}

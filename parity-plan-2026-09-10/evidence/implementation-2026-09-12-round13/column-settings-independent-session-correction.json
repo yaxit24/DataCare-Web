@@ -1,0 +1,6 @@
+{
+  "path": "web/apps/web/test/column-settings.journey.mjs",
+  "beforeSha256": "c820d22dadac2910cdd666b19774ca4125cd23446318ef834aed279fca7c7010",
+  "afterSha256": "c284d7482f44c6cd77b486eec9bde6cbb16f8c4a6192e0423e986c9e88dfbe8a",
+  "reason": "The otherClient fixture cloned the first session access cookie. Epoch-aware A\u2192B\u2192A now correctly rejects that stale clone with401. Authenticate the intended independent concurrent editor as its own real session and assert different session IDs; retain all version conflict/unchanged row/scope/draft assertions. Same-session ABA refusal remains explicitly covered by the dedicated lifecycle suite."
+}

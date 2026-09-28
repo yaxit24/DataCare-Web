@@ -1,0 +1,48 @@
+{
+  "integratedAtUtc": "2026-09-11T22:46:40.799049+00:00",
+  "manifestSha256": "b1f7e8f50d362a6301bf140d3710754fa1914e7d764638f06c1b804cf68d0230",
+  "changes": [
+    {
+      "path": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "beforeSha256": "a3c91053e27cbae2c1fbea06c93ad8cfba9846bcae5562b1a1e37323dc15ddd1",
+      "afterSha256": "d0c880975689647e30379bf91b2fcd46115719fa216618c5c29c1f248e67c884"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/tourExactValues.independent.json",
+      "beforeSha256": null,
+      "afterSha256": "4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a"
+    },
+    {
+      "path": "web/apps/api/test/tourOrderExactValues.db.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "443ed7c5c1a1a9f30c52507666961090339d059c199a90af6b96aa63c09c53bd"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "beforeSha256": "05ee74b06728d71e44d6dcbf7d6bd927a7024bae47557912e536b6f6a70baf1c",
+      "afterSha256": "f0e7f6e463475485fd7243165dea6e344043418926092dcf94244254671a45e0"
+    },
+    {
+      "path": "web/apps/web/lib/tourOrderForm.ts",
+      "beforeSha256": "6f0c53cf6e46ec81c9bdff26b16877cfe269a9aa5ebea9756ee6e282ebd0dc8c",
+      "afterSha256": "6fdb9b06e672335ac5b482597cab12a1cfb6a4a51a95dc5cdbeb22c4c78a3366"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/tourExactValues.independent.json",
+      "beforeSha256": null,
+      "afterSha256": "4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a"
+    },
+    {
+      "path": "web/apps/web/test/tourOrderExactValues.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "64796d3e68fed0c051128c1330080f586960f92b9a1afc0683ee8e1a6b58f46d"
+    },
+    {
+      "path": "web/apps/api/test/orderSessionCommands.db.test.ts",
+      "beforeSha256": "dd2e9d984e2cbf2f73e439da116908db7b5b809a2ab3dac061901d6e91868d5e",
+      "afterSha256": "1ab1ff011f17ab60407447f40e09dcf9b28e64ea0968a5871ef36eb045d3d07a"
+    }
+  ],
+  "status": "integrated-awaiting-tests",
+  "review": "Root reviewed final3-file behavior and frozen contract; peer source review described the API-identical/pre-format web stage. Only formatting changed the two web review hashes. Existing old-family34 test is corrected separately to assert actual exact GET scalar, with its original rejected rounded-DTO path retained in frozen evidence. Existing changed-value refusal remains separately required."
+}

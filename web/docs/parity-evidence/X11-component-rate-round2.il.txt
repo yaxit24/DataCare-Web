@@ -1,0 +1,90 @@
+		IL_04ca: ldloc.s 4
+		IL_04cc: ldarg.1
+		IL_04cd: ldc.i4.s 16
+		IL_04cf: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)
+		IL_04d4: ldstr "P"
+		IL_04d9: ldc.i4.0
+		IL_04da: call int32 [Microsoft.VisualBasic]Microsoft.VisualBasic.CompilerServices.Operators::CompareString(string, string, bool)
+		IL_04df: ldc.i4.0
+		IL_04e0: ceq
+		IL_04e2: ldc.i4.0
+		IL_04e3: cgt.un
+		IL_04e5: neg
+		IL_04e6: conv.i8
+		IL_04e7: ldloc.s 4
+		IL_04e9: ldarg.1
+		IL_04ea: ldc.i4.s 17
+		IL_04ec: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)
+		IL_04f1: call float64 [Microsoft.VisualBasic]Microsoft.VisualBasic.Conversion::Val(string)
+		IL_04f6: call float64 [mscorlib]System.Math::Round(float64)
+		IL_04fb: conv.ovf.i8
+		IL_04fc: and
+		IL_04fd: ldc.i4.0
+		IL_04fe: conv.i8
+		IL_04ff: cgt.un
+		IL_0501: stloc.s 14
+		IL_0503: ldloc.s 14
+		IL_0505: brfalse.s IL_0543
+
+		IL_0507: ldloc.s 4
+		IL_0509: ldarg.1
+		IL_050a: ldc.i4.s 18
+		IL_050c: ldloc.s 4
+		IL_050e: ldarg.1
+		IL_050f: ldc.i4.s 17
+		IL_0511: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)
+		IL_0516: call float64 [Microsoft.VisualBasic]Microsoft.VisualBasic.Conversion::Val(string)
+		IL_051b: ldloc.s 4
+		IL_051d: ldarg.1
+		IL_051e: ldc.i4.s 10
+		IL_0520: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)
+		IL_0525: call float64 [Microsoft.VisualBasic]Microsoft.VisualBasic.Conversion::Val(string)
+		IL_052a: mul
+		IL_052b: box [mscorlib]System.Double
+		IL_0530: ldstr "0.00"
+		IL_0535: call string [Microsoft.VisualBasic]Microsoft.VisualBasic.Strings::Format(object, string)
+		IL_053a: callvirt instance void [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::set_TextMatrix(int32, int32, string)
+		IL_053f: nop
+		IL_0540: nop
+		IL_0541: br.s IL_05a0
+
+		IL_0543: ldloc.s 4
+		IL_0545: ldarg.1
+		IL_0546: ldc.i4.s 17
+		IL_0548: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)
+		IL_054d: call float64 [Microsoft.VisualBasic]Microsoft.VisualBasic.Conversion::Val(string)
+		IL_0552: ldc.r8 0.0
+		IL_055b: ceq
+		IL_055d: ldc.i4.0
+		IL_055e: ceq
+		IL_0560: stloc.s 15
+		IL_0562: ldloc.s 15
+		IL_0564: brfalse.s IL_05a0
+
+		IL_0566: ldloc.s 4
+		IL_0568: ldarg.1
+		IL_0569: ldc.i4.s 18
+		IL_056b: ldloc.s 4
+		IL_056d: ldarg.1
+		IL_056e: ldc.i4.s 17
+		IL_0570: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)
+		IL_0575: call float64 [Microsoft.VisualBasic]Microsoft.VisualBasic.Conversion::Val(string)
+		IL_057a: ldloc.s 4
+		IL_057c: ldarg.1
+		IL_057d: ldc.i4.s 14
+		IL_057f: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)
+		IL_0584: call float64 [Microsoft.VisualBasic]Microsoft.VisualBasic.Conversion::Val(string)
+		IL_0589: mul
+		IL_058a: box [mscorlib]System.Double
+		IL_058f: ldstr "0.00"
+		IL_0594: call string [Microsoft.VisualBasic]Microsoft.VisualBasic.Strings::Format(object, string)
+		IL_0599: callvirt instance void [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::set_TextMatrix(int32, int32, string)
+		IL_059e: nop
+		IL_059f: nop
+
+		IL_05a0: nop
+
+		IL_05a1: ldloc.s 4
+		IL_05a3: ldarg.1
+		IL_05a4: ldc.i4.s 19
+		IL_05a6: callvirt instance string [AxInterop.MSFlexGridLib]AxMSFlexGridLib.AxMSFlexGrid::get_TextMatrix(int32, int32)

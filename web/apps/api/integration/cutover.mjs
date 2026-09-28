@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import sql from 'mssql';
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
+import { parityContainmentProblem } from '@datacare/core/containment';
 
 export const DEFAULT_TABLES = [
   'CO_MAST',
@@ -507,6 +508,18 @@ export async function executeCutover({
       tables: [],
       totals: { tables: 0, failedTables: 0, sourceRows: 0, loadedRows: 0, skippedRows: 0 },
       error: { code: 'CONFIGURATION_ERROR', message: errorMessage(error) },
+    };
+  }
+
+  const containment = parityContainmentProblem('production-cutover-load');
+  if (!options.dryRun && containment) {
+    return {
+      schemaVersion: 1,
+      mode: 'load',
+      status: 'failed',
+      tables: [],
+      totals: { tables: 0, failedTables: 0, sourceRows: 0, loadedRows: 0, skippedRows: 0 },
+      error: containment.body,
     };
   }
 

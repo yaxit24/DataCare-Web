@@ -17,6 +17,30 @@ const num = (v: unknown): number => {
 };
 const round3 = (n: number): number => Math.round(n * 1000) / 1000;
 const round2 = (n: number): number => Math.round(n * 100) / 100;
+const isoDate = (v: unknown): string | null => {
+  if (!v) return null;
+  const d = v instanceof Date ? v : new Date(String(v));
+  return Number.isFinite(d.getTime()) ? d.toISOString().slice(0, 10) : null;
+};
+const todayIso = (): string => new Date().toISOString().slice(0, 10);
+const txt = (v: unknown): string | null => {
+  const s = String(v ?? '').trim();
+  return s ? s : null;
+};
+const flagFrom = (v: unknown, defaultValue: boolean): boolean => {
+  if (v == null || v === '') return defaultValue;
+  const s = String(v).trim().toLowerCase();
+  if (['1', 'true', 'y', 'yes', 'on'].includes(s)) return true;
+  if (['0', 'false', 'n', 'no', 'off'].includes(s)) return false;
+  return defaultValue;
+};
+
+function pushText(params: unknown[], where: string[], expr: string, value: unknown): void {
+  const s = String(value ?? '').trim();
+  if (!s) return;
+  params.push(s);
+  where.push(`${expr}=$${params.length}`);
+}
 
 /** Extra filter dimensions the desktop exposes on the tag estimate. */
 export interface TagEstimateFilters extends ReportFilters {
@@ -248,6 +272,390 @@ export async function orderLotZoom(
         // The lot's balance: what went out less what came back as tags. This is the figure the drill-down
         // exists to answer, and neither leg alone shows it.
         balanceNwt: round3(sum('nwt') - sum('tagNwt')),
+      },
+    };
+  });
+}
+
+const isoToday = (): string => new Date().toISOString().slice(0, 10);
+const firstOfThisMonth = (): string => {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-01`;
+};
+
+function deleteDataRange(s: ReportScope): { fromDate: string; toDate: string } {
+  const fromDate = s.fromDate ?? firstOfThisMonth();
+  const toDate = s.toDate ?? isoToday();
+  if (fromDate > toDate) {
+    const err = new Error('fromDate must be before or equal to toDate');
+    err.name = 'ReportValidationError';
+    throw err;
+  }
+  return { fromDate, toDate };
+}
+
+function pointAsOf(s: ReportScope): string {
+  return s.toDate ?? isoToday();
+}
+
+/** Delete Record Report — `RP_ORDER.cs` with `CurRpt = "Delete Data"`. */
+export async function deleteDataReport(prisma: any, s: ReportScope): Promise<ListReport> {
+  return withTenant(prisma, s.tenantId, async (tx: any) => {
+    const { fromDate, toDate } = deleteDataRange(s);
+    const params: unknown[] = [s.tenantId, s.coCode, s.lcCode ?? '', fromDate, toDate];
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT row_number() OVER (ORDER BY a."DELETE_DATE",a."BOOK_NAME",a."SR_NO")::int AS "srNo",
+              a."BOOK_NAME" AS "book",a."VCH_NO" AS "vchNo",a."SR_NO"::float8 AS "lineSrNo",
+              a."DELETE_DATE"::text AS "deleteDate",a."VCH_DATE"::text AS "vchDate",
+              a."AC_NAME" AS "acName",a."AC_CODE" AS "acCode",
+              coalesce(a."VCH_VAL_DR",0)::float8 AS "drAmt",coalesce(a."VCH_VAL_CR",0)::float8 AS "crAmt",
+              a."FINE_TYPE" AS "fineType",coalesce(a."VCH_FINE_DR",0)::float8 AS "drFine",
+              coalesce(a."VCH_FINE_CR",0)::float8 AS "crFine",a."MAIN_USER" AS "entryUser",
+              a."DELETE_USER" AS "deleteUser",a."VCH_DESC" AS "itemRemark"
+         FROM "DELETE_DATA" a
+         LEFT JOIN "BOOK_DATA" d
+           ON d.tenant_id=a.tenant_id AND d."CO_CODE"=a."CO_CODE" AND d."LC_CODE"=a."LC_CODE" AND d."CO_BOOK"=a."CO_BOOK"
+        WHERE a.tenant_id=$1
+          AND a."CO_CODE"=$2
+          AND ($3::text='' OR a."LC_CODE"=$3)
+          AND a."DELETE_DATE" >= $4::date
+          AND a."DELETE_DATE" <= $5::date
+        ORDER BY a."DELETE_DATE",a."BOOK_NAME",a."SR_NO"`,
+      ...params,
+    );
+    return {
+      rows: rows.map((r) => ({
+        srNo: num(r.srNo),
+        book: String(r.book ?? ''),
+        vchNo: String(r.vchNo ?? ''),
+        lineSrNo: num(r.lineSrNo),
+        deleteDate: String(r.deleteDate ?? '').slice(0, 10),
+        vchDate: String(r.vchDate ?? '').slice(0, 10),
+        acName: String(r.acName ?? ''),
+        acCode: String(r.acCode ?? ''),
+        drAmt: round2(num(r.drAmt)),
+        crAmt: round2(num(r.crAmt)),
+        fineType: String(r.fineType ?? ''),
+        drFine: round3(num(r.drFine)),
+        crFine: round3(num(r.crFine)),
+        entryUser: String(r.entryUser ?? ''),
+        deleteUser: String(r.deleteUser ?? ''),
+        itemRemark: String(r.itemRemark ?? ''),
+      })),
+    };
+  });
+}
+
+async function onePointValueTx(tx: any, s: ReportScope): Promise<number> {
+  const rows = (await tx.$queryRawUnsafe(
+    `SELECT coalesce("POINT_AMT",0)::float8 AS "pointAmt"
+       FROM "POINT_MAST"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND coalesce("CUR_IN_USE",'')='Y'
+      ORDER BY "POINT_CODE","SR_NO"
+      LIMIT 1`,
+    s.tenantId,
+    s.coCode,
+  )) as Array<{ pointAmt?: number }>;
+  return num(rows[0]?.pointAmt);
+}
+
+/** Member Point Report summary — `RP_ORDER.cs` with `CurRpt = "Point Report"`. */
+export async function pointReport(prisma: any, s: ReportScope): Promise<ListReport> {
+  return withTenant(prisma, s.tenantId, async (tx: any) => {
+    const toDate = pointAsOf(s);
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT row_number() OVER (ORDER BY b."CARD_NO",b."MEMB_NAME")::int AS "srNo",
+              a."MEMB_CODE" AS "memberCode",b."MEMB_NAME" AS "memberName",b."MOBILE_NO" AS "mobileNo",
+              b."CARD_NO" AS "cardNo",c."AC_ADD1" AS "address",c."AC_CITY" AS "city",
+              sum(CASE WHEN a."ITM_SIGN"='+' THEN coalesce(a."TOT_POINT",0) ELSE 0 END)::float8 AS "totalPoint",
+              sum(CASE WHEN a."ITM_SIGN"='-' THEN coalesce(a."TOT_POINT",0) ELSE 0 END)::float8 AS "adjustedPoint",
+              sum(CASE WHEN a."ITM_SIGN"='+' THEN coalesce(a."TOT_POINT",0) ELSE -coalesce(a."TOT_POINT",0) END)::float8 AS "balancePoint",
+              NULL::date AS "delDate"
+         FROM "POINT_DATA" a
+         INNER JOIN "POINT_MEMB" b
+           ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE" AND b."POINT_CODE"=a."POINT_CODE" AND b."MEMB_CODE"=a."MEMB_CODE"
+         LEFT JOIN "AC_MAST" c
+           ON c.tenant_id=a.tenant_id AND c."CO_CODE"=a."CO_CODE" AND c."AC_CODE"=a."MEMB_CODE"
+        WHERE a.tenant_id=$1
+          AND a."CO_CODE"=$2
+          AND ($3::text='' OR a."LC_CODE"=$3)
+          AND a."POINT_CODE"='01'
+          AND a."VCH_DATE" <= $4::date
+        GROUP BY a."MEMB_CODE",b."MEMB_NAME",b."MOBILE_NO",b."CARD_NO",c."AC_ADD1",c."AC_CITY"
+        ORDER BY b."CARD_NO",b."MEMB_NAME"`,
+      s.tenantId,
+      s.coCode,
+      s.lcCode ?? '',
+      toDate,
+    );
+    return {
+      rows: rows.map((r) => ({
+        srNo: num(r.srNo),
+        memberCode: String(r.memberCode ?? ''),
+        memberName: String(r.memberName ?? ''),
+        mobileNo: String(r.mobileNo ?? ''),
+        cardNo: String(r.cardNo ?? ''),
+        address: String(r.address ?? ''),
+        city: String(r.city ?? ''),
+        totalPoint: round2(num(r.totalPoint)),
+        adjustedPoint: round2(num(r.adjustedPoint)),
+        balancePoint: round2(num(r.balancePoint)),
+        delDate: r.delDate ? String(r.delDate).slice(0, 10) : '',
+      })),
+    };
+  });
+}
+
+/** Member Point Report detail drill-down — desktop double-click from `PointSumm()`. */
+export async function pointReportDetail(
+  prisma: any,
+  s: ReportScope,
+  memberCodeInput: string,
+): Promise<ListReport> {
+  const memberCode = String(memberCodeInput ?? '').trim();
+  if (!memberCode) {
+    const err = new Error('memberCode is required');
+    err.name = 'ReportValidationError';
+    throw err;
+  }
+  return withTenant(prisma, s.tenantId, async (tx: any) => {
+    const toDate = pointAsOf(s);
+    const onePointValue = await onePointValueTx(tx, s);
+    const rows: any[] = await tx.$queryRawUnsafe(
+      `SELECT row_number() OVER (ORDER BY a."VCH_DATE",a."VCH_NO")::int AS "srNo",
+              d."BOOK_SNAME" AS "book",a."VCH_NO" AS "vchNo",a."VCH_DATE"::text AS "vchDate",
+              b."MEMB_NAME" AS "memberName",a."CO_BOOK" AS "coBook",a."MEMB_CODE" AS "memberCode",
+              d."MAIN_BOOK" AS "mainBook",a."POINT_TYPE" AS "pointType",$5::float8 AS "onePointValue",
+              sum((CASE WHEN a."ITM_SIGN"='+' THEN coalesce(a."TOT_POINT",0) ELSE -coalesce(a."TOT_POINT",0) END) * $5::numeric)::float8 AS "pointValue",
+              sum(CASE WHEN a."ITM_SIGN"='+' THEN coalesce(a."TOT_POINT",0) ELSE 0 END)::float8 AS "totalPoint",
+              sum(CASE WHEN a."ITM_SIGN"='-' THEN coalesce(a."TOT_POINT",0) ELSE 0 END)::float8 AS "adjustedPoint",
+              sum(CASE WHEN a."ITM_SIGN"='+' THEN coalesce(a."TOT_POINT",0) ELSE -coalesce(a."TOT_POINT",0) END)::float8 AS "balancePoint"
+         FROM "POINT_DATA" a
+         LEFT JOIN "POINT_MEMB" b
+           ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE" AND b."POINT_CODE"=a."POINT_CODE" AND b."MEMB_CODE"=a."MEMB_CODE"
+         LEFT JOIN "BOOK_DATA" d
+           ON d.tenant_id=a.tenant_id AND d."CO_CODE"=a."CO_CODE" AND d."LC_CODE"=a."LC_CODE" AND d."CO_BOOK"=a."CO_BOOK"
+        WHERE a.tenant_id=$1
+          AND a."CO_CODE"=$2
+          AND ($3::text='' OR a."LC_CODE"=$3)
+          AND a."MEMB_CODE"=$4
+          AND a."VCH_DATE" <= $6::date
+        GROUP BY d."BOOK_SNAME",a."VCH_NO",a."VCH_DATE",b."MEMB_NAME",a."CO_BOOK",a."MEMB_CODE",d."MAIN_BOOK",a."POINT_TYPE"
+        ORDER BY a."VCH_DATE",a."VCH_NO"`,
+      s.tenantId,
+      s.coCode,
+      s.lcCode ?? '',
+      memberCode,
+      onePointValue,
+      toDate,
+    );
+    return {
+      rows: rows.map((r) => ({
+        srNo: num(r.srNo),
+        book: String(r.book ?? ''),
+        vchNo: String(r.vchNo ?? ''),
+        vchDate: String(r.vchDate ?? '').slice(0, 10),
+        memberName: String(r.memberName ?? ''),
+        coBook: String(r.coBook ?? ''),
+        memberCode: String(r.memberCode ?? ''),
+        mainBook: String(r.mainBook ?? ''),
+        pointType: String(r.pointType ?? ''),
+        onePointValue: round2(num(r.onePointValue)),
+        pointValue: round2(num(r.pointValue)),
+        totalPoint: round2(num(r.totalPoint)),
+        adjustedPoint: round2(num(r.adjustedPoint)),
+        balancePoint: round2(num(r.balancePoint)),
+      })),
+    };
+  });
+}
+
+export type OrderTrackStatus = 'sales-pending' | 'issue-pending' | 'receive-pending' | 'all';
+
+/**
+ * Order Track — desktop `RP_ORD_TRACK.AcSumm`.
+ *
+ * Lists sales-order lines with customer, karigar issue/receive, generated tag, employee and advance data.
+ * The status filter follows the desktop combo exactly:
+ * - Sal Panding: `TAG_SALE = N` and `TAG_GEN = Y`
+ * - Isu Panding: `DESIGN_ISU = N`
+ * - Rec Panding: `TAG_GEN = N` and `DESIGN_ISU = Y`
+ * - All: no status predicate
+ */
+export async function orderTrackReport(
+  prisma: any,
+  s: ReportScope,
+  options: {
+    orderNo?: unknown;
+    employeeCode?: unknown;
+    lcCode?: unknown;
+    onlyOrderTagStock?: unknown;
+    designNo?: unknown;
+    karigarCode?: unknown;
+    status?: unknown;
+  } = {},
+): Promise<ListReport> {
+  const fromDate = s.fromDate ?? '2010-01-01';
+  const toDate = s.toDate ?? todayIso();
+  const status = String(options.status ?? 'sales-pending').trim().toLowerCase() as OrderTrackStatus;
+  const lcCode = txt(options.lcCode) ?? s.lcCode ?? '';
+  return withTenant(prisma, s.tenantId, async (tx: any) => {
+    const params: unknown[] = [s.coCode, fromDate, toDate];
+    const where = [
+      'a.tenant_id=current_setting(\'app.tenant_id\', true)',
+      'a."CO_CODE"=$1',
+      'a."VCH_DATE">=$2::date',
+      'a."VCH_DATE"<=$3::date',
+    ];
+    pushText(params, where, 'a."VCH_NO"', options.orderNo);
+    pushText(params, where, 'b."EMP_CODE"', options.employeeCode);
+    pushText(params, where, 'a."LC_CODE"', lcCode);
+    pushText(params, where, 'a."DESIGN_NO"', options.designNo);
+    pushText(params, where, 'e."AC_CODE"', options.karigarCode);
+    if (flagFrom(options.onlyOrderTagStock, false)) {
+      where.push("a.\"TAG_STK_LESS\"='Y'");
+      where.push("coalesce(a.\"TAG_NO\",'') <> ''");
+    }
+    if (status === 'sales-pending') {
+      where.push("a.\"TAG_SALE\"='N'");
+      where.push("a.\"TAG_GEN\"='Y'");
+    } else if (status === 'issue-pending') {
+      where.push("a.\"DESIGN_ISU\"='N'");
+    } else if (status === 'receive-pending') {
+      where.push("a.\"TAG_GEN\"='N'");
+      where.push("a.\"DESIGN_ISU\"='Y'");
+    }
+
+    const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT ROW_NUMBER() OVER (ORDER BY a."VCH_DATE", a."VCH_NO", a."SR_NO") AS "srNo",
+              a."AC_CODE" AS "acCode",
+              c."AC_NAME" AS "acName",
+              c."AC_MOBILE" AS "acMobile",
+              a."VCH_NO" AS "ordNo",
+              a."VCH_DATE" AS "ordDate",
+              a."ORD_DEL_DATE" AS "delDate",
+              d."IT_NAME" AS "itName",
+              a."DESIGN_NO" AS "designNo",
+              a."ITM_SIZE" AS "size",
+              a."ITM_REMARK" AS "remark",
+              a."ITM_GWT" AS "gwt",
+              a."ITM_PCS" AS "pcs",
+              a."DESIGN_ISU" AS "designIsu",
+              f."AC_NAME" AS "karigarName",
+              e."VCH_DATE" AS "karigarIssueDate",
+              a."TAG_GEN" AS "tagGen",
+              g."VCH_DATE" AS "karigarReceiveDate",
+              g."TAG_NO" AS "tagNo",
+              a."TAG_SALE" AS "tagSale",
+              g."ITM_GWT" AS "tagGwt",
+              g."ITM_NWT" AS "tagNwt",
+              e."ORNA_REC_DATE" AS "ornaReceiveDate",
+              i."EMP_NAME" AS "employeeName",
+              a."NET_AMT" AS "netAmt",
+              a."ORD_REC_AMT" AS "ordRecAmt",
+              a."ITM_TOUCH" AS "touch",
+              a."ITM_FINE" AS "fine",
+              a."ITM_COLOR" AS "color",
+              b."FUN_DATE" AS "functionDate",
+              a."CO_BOOK" AS "coBook",
+              a."CO_YEAR" AS "coYear",
+              a."SR_NO" AS "lineNo",
+              b."ADV_AMT" AS "advAmt",
+              b."OLD_GL" AS "oldGold",
+              b."OLD_SL" AS "oldSilver"
+         FROM "SL_ORD_DETL" a
+         LEFT JOIN "SL_ORD_DATA" b
+           ON b.tenant_id=a.tenant_id
+          AND b."CO_CODE"=a."CO_CODE"
+          AND b."LC_CODE"=a."LC_CODE"
+          AND b."CO_YEAR"=a."CO_YEAR"
+          AND b."CO_BOOK"=a."CO_BOOK"
+          AND b."VCH_NO"=a."VCH_NO"
+         LEFT JOIN "ITEM_MAST" d
+           ON d.tenant_id=a.tenant_id
+          AND d."CO_CODE"=a."CO_CODE"
+          AND d."IT_CODE"::text=a."IT_CODE"::text
+         LEFT JOIN "APR_DETL" e
+           ON e.tenant_id=a.tenant_id
+          AND e."CO_CODE"=a."CO_CODE"
+          AND e."ISU_YRCD"=a."CO_YEAR"
+          AND e."ISU_DBCD"=a."CO_BOOK"
+          AND e."ISU_NO"=a."VCH_NO"
+          AND e."ISU_SRNO"=a."SR_NO"
+         LEFT JOIN "AC_MAST" c
+           ON c.tenant_id=a.tenant_id
+          AND c."CO_CODE"=a."CO_CODE"
+          AND c."AC_CODE"=a."AC_CODE"
+         LEFT JOIN "AC_MAST" f
+           ON f.tenant_id=e.tenant_id
+          AND f."CO_CODE"=e."CO_CODE"
+          AND f."AC_CODE"=e."AC_CODE"
+         LEFT JOIN "BAR_DETL" g
+           ON g.tenant_id=a.tenant_id
+          AND g."CO_CODE"=a."CO_CODE"
+          AND g."LC_CODE"=a."LC_CODE"
+          AND g."ORD_YRCD"=a."CO_YEAR"
+          AND g."ORD_DBCD"=a."CO_BOOK"
+          AND g."ORD_NO"=a."VCH_NO"
+          AND g."ORD_SRNO"=a."OLD_SRNO"
+         LEFT JOIN "BOOK_DATA" h
+           ON h.tenant_id=a.tenant_id
+          AND h."CO_CODE"=a."CO_CODE"
+          AND h."LC_CODE"=a."LC_CODE"
+          AND h."CO_BOOK"=a."CO_BOOK"
+         LEFT JOIN "EMP_MAST" i
+           ON i.tenant_id=a.tenant_id
+          AND i."CO_CODE"=a."CO_CODE"
+          AND i."EMP_CODE"=a."EMP_CODE"
+        WHERE ${where.join(' AND ')}
+        ORDER BY a."VCH_DATE", a."VCH_NO", a."SR_NO"`,
+      ...params,
+    );
+    const mapped = rows.map((row, index) => ({
+      srNo: index + 1,
+      acCode: txt(row.acCode),
+      acName: txt(row.acName),
+      acMobile: txt(row.acMobile),
+      ordNo: txt(row.ordNo),
+      ordDate: isoDate(row.ordDate),
+      delDate: txt(row.delDate),
+      itName: txt(row.itName),
+      designNo: txt(row.designNo),
+      size: txt(row.size),
+      remark: txt(row.remark),
+      gwt: round3(num(row.gwt)),
+      pcs: round3(num(row.pcs)),
+      designIsu: txt(row.designIsu),
+      karigarName: txt(row.karigarName),
+      karigarIssueDate: isoDate(row.karigarIssueDate),
+      tagGen: txt(row.tagGen),
+      karigarReceiveDate: isoDate(row.karigarReceiveDate),
+      tagNo: txt(row.tagNo),
+      tagSale: txt(row.tagSale),
+      tagGwt: round3(num(row.tagGwt)),
+      tagNwt: round3(num(row.tagNwt)),
+      ornaReceiveDate: txt(row.ornaReceiveDate),
+      employeeName: txt(row.employeeName),
+      netAmt: round2(num(row.netAmt)),
+      ordRecAmt: round2(num(row.ordRecAmt)),
+      touch: round3(num(row.touch)),
+      fine: round3(num(row.fine)),
+      color: txt(row.color),
+      functionDate: txt(row.functionDate),
+      coBook: txt(row.coBook),
+      coYear: txt(row.coYear),
+      lineNo: num(row.lineNo),
+      advAmt: round2(num(row.advAmt)),
+      oldGold: round3(num(row.oldGold)),
+      oldSilver: round3(num(row.oldSilver)),
+    }));
+    return {
+      rows: mapped,
+      totals: {
+        rows: mapped.length,
+        gwt: round3(mapped.reduce((sum, row) => sum + row.gwt, 0)),
+        netAmt: round2(mapped.reduce((sum, row) => sum + row.netAmt, 0)),
+        ordRecAmt: round2(mapped.reduce((sum, row) => sum + row.ordRecAmt, 0)),
       },
     };
   });

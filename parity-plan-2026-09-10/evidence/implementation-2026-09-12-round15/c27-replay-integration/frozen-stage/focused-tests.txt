@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-round15-c27-replay/staged/web/packages/core
+
+ ✓ test/saleReturnOtherAmountReplay.test.ts (44 tests) 62ms
+
+ Test Files  1 passed (1)
+      Tests  44 passed (44)
+   Start at  08:00:10
+   Duration  419ms (transform 113ms, setup 0ms, collect 122ms, tests 62ms, environment 0ms, prepare 40ms)
+

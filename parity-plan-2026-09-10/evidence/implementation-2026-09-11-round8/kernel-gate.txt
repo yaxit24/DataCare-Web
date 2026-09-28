@@ -1,0 +1,13 @@
+kernel conformance across 235 source files
+
+  rounding
+      Module-local rounding helper: 127 bypass(es) in 80 file(s), ceiling 108
+      use instead: @datacare/core round / roundHalfEven, or shared/roundingPolicy.resolveRoundingPolicy
+      why it matters: a float helper with an epsilon fudge is neither of the desktop mechanisms and rounds negative midpoints toward +Infinity instead of away from zero
+  book-account
+      Inline BOOK_DETL read: 5 bypass(es) in 5 file(s), ceiling 5
+      use instead: bookPolicy.resolveBookAccountTx or postingAccounts.resolveBookSlotAccountTx
+      why it matters: the shared resolvers fail closed on a missing, blank or duplicated slot; an inline LIMIT 1 read silently takes the first row and often falls back to a literal
+
+KERNEL_CONFORMANCE_RED adoption regressed
+    rounding: 127 bypasses, above the recorded ceiling of 108; use the kernel primitive instead

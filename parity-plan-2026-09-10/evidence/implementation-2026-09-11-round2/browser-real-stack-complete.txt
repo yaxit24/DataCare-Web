@@ -1,0 +1,59 @@
+
+> datacare-web-saas@0.0.0 test:parity:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+23 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 173 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: rate was entered before later ghat change
+
+120 !== 117
+
+    at exerciseTourOrder (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/tour-order.journey.mjs:246:12)
+    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs:328:22 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 120,
+  expected: 117,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.8.0
+PARITY_TEST_FAILED node exited 1
+ ELIFECYCLE  Command failed with exit code 1.

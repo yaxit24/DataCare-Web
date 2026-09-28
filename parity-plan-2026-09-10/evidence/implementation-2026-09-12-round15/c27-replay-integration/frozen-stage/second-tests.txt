@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-round15-c27-replay/staged/web/packages/core
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts (44 tests | 1 failed) 60ms
+   × saved c27 complete hydration, ordered replay and Save fold > C07 5ms
+     → expected 'row-save-projection' to be 'nonpositive-return' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnOtherAmountReplay.test.ts > saved c27 complete hydration, ordered replay and Save fold > C07
+AssertionError: expected 'row-save-projection' to be 'nonpositive-return' // Object.is equality
+
+Expected: "nonpositive-return"
+Received: "row-save-projection"
+
+ ❯ test/saleReturnOtherAmountReplay.test.ts:40:77
+     38|       expect(r.saveFold).toStrictEqual(e.final.incomingTotals);
+     39|       expect(r.final!.bill).toBe(r.prefixes.at(-1)?.bill ?? r.opened!.…
+     40|     } else { expect(r.candidate).toBeNull(); expect(r.diagnostics[0]!.…
+       |                                                                             ^
+     41|   });
+     42|   it('preserves original editor text and every same-value event', () =…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 43 passed (44)
+   Start at  07:59:35
+   Duration  545ms (transform 112ms, setup 0ms, collect 116ms, tests 60ms, environment 0ms, prepare 83ms)
+

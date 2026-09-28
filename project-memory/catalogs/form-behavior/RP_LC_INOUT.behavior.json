@@ -1,0 +1,54 @@
+{
+ "form": "RP_LC_INOUT",
+ "loc": 2948,
+ "gridColumns": {
+  "cSrNo1": 0,
+  "czSrNo": 0,
+  "cItCode1": 1,
+  "czBookType": 1,
+  "cItName1": 2,
+  "czLdAcName": 2,
+  "cBranch": 3,
+  "czVchNo": 3,
+  "czVchDate": 4,
+  "czTagNo": 5,
+  "czItemName": 6,
+  "czDesignNo": 7,
+  "czSize": 8,
+  "czPcs": 9,
+  "czGrWt": 10,
+  "czNetWt": 11,
+  "czFine": 12,
+  "czSign": 13,
+  "czBookCode": 14,
+  "czBookName": 15,
+  "czItCode": 16,
+  "czAcCode": 17
+ },
+ "inlineSql": [
+  "SELECT LC_CODE AS Loct FROM LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE <> ' ? ' ORDER BY LC_CODE",
+  "SELECT LC_NAME AS Loct FROM LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE <> ' ? ' ORDER BY LC_CODE",
+  "SELECT A.TO_LC_CODE AS TrfrLc,B.IT_TYPE,A.VCH_DATE,SUM(A.ITM_PCS) As ItmPcs,SUM(A.ITM_GWT) AS GlNwt FROM INOUT_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.BOOK_NAME IN ('OUTWORD') AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? '",
+  "SELECT A.FROM_LC_CODE AS TrfrLc,B.IT_TYPE,A.VCH_DATE,SUM(A.ITM_PCS) As ItmPcs,SUM(A.ITM_GWT) AS GlNwt FROM INOUT_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.BOOK_NAME IN ('INWORD') AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? '",
+  "SELECT LC_NAME FROM LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT BOOK_NAME ,CO_BOOK ,BOOK_TYPE,ITM_TYPE,MAIN_BOOK,BOOK_SNAME,BOOK_INOUT,MENU_NAME FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME",
+  "Select * From PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "SELECT PR_NAME As PrNameL,PR_CODE as PrCodeL FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_NAME"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 2
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": ""
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:40:28.731701+00:00",
+  "finishedAtUtc": "2026-09-11T21:40:29.692579+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-core-build.txt",
+  "logSha256": "79da90d454c83eb7b7c76d1548b439a13925b548ccc7911efbe41f4e31f94aa5",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-core-build.inputs.json",
+  "inputManifestSha256": "18a859a775df69b0ce9400e713612e4cbf4ee57bef8032f0e50eb912847a2bd5",
+  "inputCount": 1794,
+  "changedInputs": [
+    {
+      "path": "web/packages/core/dist/saleReturnIncomingLabour.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "6cfcdd59d55623da8ee420592bd6e69e29cbcaa816e8fb80435dcbe8a8fe30ab"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnIncomingLabour.js",
+      "beforeSha256": null,
+      "afterSha256": "0f5a5241a1ae4725b4aa502182a80aa55bb5fa078eabd8506c1e37c6cf5e14b1"
+    }
+  ],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

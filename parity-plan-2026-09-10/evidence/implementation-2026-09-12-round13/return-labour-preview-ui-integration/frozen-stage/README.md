@@ -1,0 +1,22 @@
+# Saved Return labour preview UI stage
+
+Frozen staging only. No active-tree edit, unit/compiler run, DB or browser execution is credited here. The complete independent API JSON remains SHA22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc. The 26 UI transition literals were authored and pinned before these runtime files (SHAe11b9b1c9597bb72fa3c3a74e3ee1e541355f2b5defdf6b1644a2fe8d9d553d5).
+
+Copy the new `lib/salesReturnLabourReplay.ts`, `components/SaleReturnLabourReplayPanel.tsx`, new test and two fixture files from `staged/web`. Apply `staged/ownership-integration.patch` against the pinned active baseline; it adds the labour union member and a third mutually exclusive SavedPanel child. Existing row/bill components and readers are unchanged. The only edit to the old bill helper is its owner-kind type union.
+
+The new reader detaches own plain JSON properties before inspecting nested data; rejects accessors, sparse or extended arrays, symbols, undefined, cycles and oversized outputs; and validates the new version/profile, exact saved/context identities, semantic versions, old embedded bill observation, source snapshots and false save/apply/closing flags. Lookup echoes the exact old prefix/field/code and cannot append. Append must contain the complete old journal plus exactly one candidate with a new prefix version. Recovery only confirms the exact retained prefix and never replaces it. The browser does not resolve labour, calculate numbers, copy raw master fields into a row, hash authority, or write financial state.
+
+Opening requires a ready matching page descriptor and synchronous owner result `true`. Every async operation is fenced by document/disabled generation, explicit draft-change invalidation, current page ticket and mount lifetime before publication/catch/finally/focus. Draft editing remains available while a lookup/append is pending: it releases local busy state and invalidates the old request without cancelling server work. Row selection remains frozen by busy work, accepted history or unresolved changed entry. Explicit field choice resets the entry/candidate deliberately. Closing always discards; focus additionally requires the original page ticket. Metadata remains frozen while any preview owns the document.
+
+The code flow is Check labour code → Preview selection, or a single deliberate Enter executing check then append. Lookup, typing, Tab and blur do not commit. A checked candidate is cleared on draft/field/history changes. Failed append retains the previous prefix and draft. A network failure permits a deliberate identical Preview selection retry using the retained candidate (no automatic resend/rebase); stale/auth/server or malformed-response failures require reload. A short unsupported-output error without recovery also requires reload. Normal valid422 recovery may confirm the same prior prefix.
+
+Selectors match the root baseline/fault browser suites. Prefix `sale-return-labour-replay-`: open, close, reload, row, field, entry, check, commit, discard-entry, candidate, events, status, error, readonly, empty, closing. `value-{column}` is a row; explicit child cells use `value-{column}-loaded` and `value-{column}-preview`. Totals use the existing fourteen source columns and IDs `total-{column}-{opened|preview}`. All loaded/opened/preview payment/received matrix cells use `matrix-{phase}-{row}-{column}`. Saved raw amount cells use `saved-{field}`. The unavailable closing reason is rendered verbatim.
+
+## Root verification after integration
+
+```sh
+pnpm --filter @datacare/web exec vitest run test/salesReturnLabourReplay.test.ts test/salesReturnBillReplay.test.ts test/salesReturnReplay.test.ts test/salesReturnForm.test.ts
+pnpm --filter @datacare/web typecheck
+```
+
+The new file declares **65 unexecuted cases**: strict wire identity/shape/refusal, frozen complete BB→AA states, ordered blank/repeated/interleaved events, exact recovery, empty/read-only boundaries, page identity, generation ABA, pending draft replacement and synchronous three-owner exclusion. The deferred-promise tests prove the helper fence, not mounted DOM/browser behavior. The small component source assertion is static wiring only. The root owns actual browser/HTTP/DB proof, including real response delay and lost delivery; neither the literal fixtures nor these staged tests establish Windows desktop parity or numeric-save authority.

@@ -1,0 +1,63 @@
+{
+  "draftPath": "/tmp/datacare-round14-progress.draft.md",
+  "draftSha256": "aef9bf2897c53ef317f2ec37c61c24c9e8457601cdbcfbbf7400716bc319c236",
+  "scope": "Completed prose and next sequence only; BAR/finalverification placeholders untouched.",
+  "replacements": [
+    {
+      "id": "P01",
+      "title": "Final guard sequencing",
+      "draftLine": 27,
+      "before": "A full final context and SQL clock check precede callback completion;",
+      "after": "After the callback returns, a full context and SQL clock check runs before transaction completion and result publication;",
+      "reason": "sessionContextSerializableCommand.ts384\u2013386 awaits work before the final guard; outer withTenant return publishes only after commit."
+    },
+    {
+      "id": "P02",
+      "title": "Exact rejected row state",
+      "draftLine": 9,
+      "before": "nonpositive credit row and tax reject the candidate patch.",
+      "after": "nonpositive row net and nonzero row tax reject the candidate patch.",
+      "reason": "Mapper468\u2013481 specifically refuses NET_AMT<=0 and TAX_PRC!=0; this is not a prohibition on every tax observation."
+    },
+    {
+      "id": "P03",
+      "title": "Conditional row-count scope",
+      "draftLine": 43,
+      "before": "For the finite conditional T-book/zero-tax profile, nine existing rows have numeric changes:",
+      "after": "In the frozen prospective Other 0\u21921 example with the fully qualified T-book/split-zero-tax predicates, nine existing rows have numeric changes:",
+      "reason": "The inventory is P1-T-split-zero-tax-other-one-prospective; same-value/other journals do not universally change nine rows."
+    },
+    {
+      "id": "P04",
+      "title": "Audit ownership differs from retained companions",
+      "draftLine": 43,
+      "before": "BAR, temporary hidden-number rows, optional remarks and edition audit remain part of ownership even when their numeric values do not change.",
+      "after": "Matched BAR, temporary hidden-number rows and applicable remarks remain in the ownership plan even when preserved unchanged. Edition-E USER_DATA may add audit rows for header changes and remains unresolved until trusted edition/audit behavior is qualified.",
+      "reason": "TR_SALE_RTN13467/13474/13512/13541 can insert new USER_DATA rows for changed header fields; it is not an assumed unchanged companion."
+    },
+    {
+      "id": "P05",
+      "title": "Complete replay-fixture inputs",
+      "draftLine": 48,
+      "before": "exact N BAR header/parent, full raw header/rows, coherent book/detail/item/group/account/tax/settings/year records, all known guard values, whole-bill phases and complete before/after effects.",
+      "after": "exact N BAR header/parent, full raw header/rows, complete visible cells and eight saved comparison caches, resolved width/calculation policy, coherent book/detail/item/group/account/tax/settings/year records, every required guard input with explicit provenance, full loaded/opened/replayed bill phases and per-prefix state, and complete before/after effects.",
+      "reason": "Effects prerequisite A3 and the source replay contracts require saved caches and width/configuration inputs; sparse seed arithmetic does not prove unchanged unowned calculations. Unresolved guard provenance cannot be represented as an invented default."
+    },
+    {
+      "id": "P06",
+      "title": "221 means seven source-owned effect-row maps per phase",
+      "draftLine": 49,
+      "before": "Implement a pure read-only effect plan/builder for those nine numeric delta rows and every retained/absent companion. Validate all221 financial column entries against source-derived expected old values, complete membership and precise identity before producing deltas.",
+      "after": "Implement a pure read-only effect plan/builder for the conditional example and every retained/absent companion. Validate the 221 source-owned field entries per phase across its seven financial effect rows (29+29+49+34+34+23+23), together with the complete saved line/header and companion observations, source-derived expected old values, complete membership and precise identity before producing deltas.",
+      "reason": "The source inventory count is per-row field entries, not221 unique columns, touched values, or the full raw column count of all nine rows. Additional raw/schema fields remain preserved and independently checked."
+    },
+    {
+      "id": "P07",
+      "title": "Historical API dependency-coverage erratum and required final recipe",
+      "draftLine": 59,
+      "before": "VERIFICATION_PLACEHOLDER",
+      "after": "The first Round14 full API run failed one release-certification case (271 files;3156 passed,1 failed): its required list still named16 journeys while the current real-browser harness emitted17, including labour replay. The [coverage erratum](evidence/implementation-2026-09-12-round14/release-browser-journey-correction/contract.json) preserves checkpoint39 and the actual earlier Round13 API3050 pass, but does not credit that pass as final-source API proof for the later17-journey harness. The broader old manifest captured the browser dependency, while the required current-prefix comparison omitted it. The corrected requirement must reject old16-only evidence, and a fresh final API run must compare the complete source/fixture dependency set after it is frozen\u2014including web/apps/web/test/, root and nested workflows, report/ratchet registers, release scripts and all other external files or absence observations read by the tests. Failed logs remain evidence; a broad capture alone cannot substitute for checking those dependencies against the tested snapshot.\n\nVERIFICATION_PLACEHOLDER",
+      "reason": "Root-qualified release-browser-journey-correction/contract.json and actual api-save-prerequisites-full failure. releaseCertification.test.ts reads the browser producer, external registers, root/nested workflows, scripts and optional evidence; every such dependency must participate in final tested-input equality, not merely be captured."
+    }
+  ]
+}

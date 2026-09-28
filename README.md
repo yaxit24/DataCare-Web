@@ -1,57 +1,80 @@
-# DataCareNext — web application
+# DataCareNext — Desktop-to-Web Migration
 
-Web replacement for the DataCareNext desktop ERP (jewellery / gold trade): Windows Forms + Crystal Reports +
-SQL Server, re-implemented as Next.js + Fastify + PostgreSQL. The technology changes; the behaviour is not
-supposed to.
+Private engineering repository for converting the DataCareNext Windows jewellery/gold ERP into a complete web application. It preserves the active Next.js/Fastify/PostgreSQL implementation together with the original Windows deployment, SQL Server datasets, decompiled and reconstructed source, Crystal Reports, extraction evidence, project memory, and the latest parity plans.
 
-## Layout
+> **Restricted plaintext snapshot:** this repository intentionally contains legacy credentials, realistic database records, local environment snapshots, and proprietary binaries. It must remain private. Read [SECURITY-NOTICE.md](SECURITY-NOTICE.md) before granting access, forking, exporting, or changing visibility.
 
-```
-web/                        the application (pnpm workspace)
-  apps/api                  Fastify API, 371 routes
-  apps/web                  Next.js UI, 101 pages
-  packages/db               Prisma schema, 170 tables, 15 migrations, forced RLS
-  docs/                     procedures, including the parity harness
-web-implementation-spec/    per-table and per-form specification
-```
+## Start here
 
-The decompiled desktop source, the installer and the Crystal `.rpt` files are **not** in this repository. See
-`.gitignore` for what is excluded and why.
+1. **Current implementation status:** [parity-plan-2026-09-10/README.md](parity-plan-2026-09-10/README.md)
+2. **Paused Round 15 continuation:** [parity-plan-2026-09-10/42-implementation-progress-round15.md](parity-plan-2026-09-10/42-implementation-progress-round15.md)
+3. **Full implementation plan:** [parity-plan-2026-09-10/02-implementation-plan.md](parity-plan-2026-09-10/02-implementation-plan.md)
+4. **Web handoff:** [web/docs/HANDOFF.md](web/docs/HANDOFF.md)
+5. **Desktop resource center:** [unified/README.md](unified/README.md)
+6. **Repository/provenance map:** [REPOSITORY-MANIFEST.md](REPOSITORY-MANIFEST.md)
 
-## Gates
+## Repository map
 
-| Command | Meaning |
+| Path | Purpose |
 |---|---|
-| `pnpm lint` | workspace policy, 491 files |
-| `pnpm build` | 7 packages |
-| `pnpm settings:parity` | all 128 configuration keys are typed and reachable |
-| `pnpm schema:readiness` | every table the desktop's initialiser declares exists |
-| `pnpm g5:parity` | **the desktop comparison — currently red** |
-| `node scripts/report-baselines.mjs` | 254 report layouts unchanged |
+| `web/` | Active pnpm monorepo: Next.js UI, Fastify API, shared calculation/report packages, Prisma/PostgreSQL schema, migrations, tests, deployment files, and parity harnesses. |
+| `parity-plan-2026-09-10/` | Current 83-package/34-card implementation and acceptance plan, progress records, immutable checkpoints, scripts, and evidence. |
+| `project-memory/` | Cross-session continuity store, ADRs, catalogs, contracts, raw parity captures/diffs, video research, journal, state, and handoff. |
+| `unified/` | Canonical desktop extraction: decompiled C#, VB.NET reconstruction, original DLLs, EXEs, databases, 255 Crystal reports, resources, images, configuration, tools, and manifests. |
+| `DataCareSetup/` | Original setup files and the complete dated RAR deployment archive. |
+| `DataCareSetup_extracted/` | Extracted original desktop deployment, including binaries, dependencies, reports, images, and SQL Server files. |
+| `DataCareNext.exe`, `NextDm.exe` | Loose original Windows executables retained as provenance inputs. |
+| `extracted_code/`, `extraction_output/` | Raw decompiler projects, dumps, categorized metadata, report XML, and extracted images. |
+| `DataCareNext_Source/`, `new/` | Reconstructed/original-style VB.NET source trees and archived source copy. |
+| `Report/`, `zip_contents/`, loose `*.rpt` | Raw report and package inputs retained alongside the canonical `unified/` copies. |
+| `web-implementation-spec/` | Form-, table-, report-, and architecture-level web implementation specifications. |
+| `docs/`, `audit/`, `tools/` | Desktop build guidance, fidelity audits, and extraction/verification utilities. |
+| `.kiro/specs/` and `.verify_*.md` | Project-local requirements and retained verification context. |
 
-Run from `web/`. Tests: `cd apps/api && npx vitest run` (907 tests, 119 files).
+The duplicated raw and canonical trees are deliberate: raw files preserve provenance while `unified/` provides the normalized desktop reference used by the rebuild.
 
-## The one thing that is not yet verified
+## Current status
 
-Nothing has ever been compared against the running desktop application. Every arithmetic claim is verified
-against the **decompiled source** — a strong form of evidence, but not the same thing.
+The web implementation is substantial, but complete desktop parity and production readiness are **not** established. The latest status records 198/198 menu entries mapped, 0/198 whole-menu acceptances closed, all 83 implementation packages and all 34 execution cards still open, and Round 15 paused after only its bounded core checks. Do not infer functional completion from page counts, static field ratios, or historical checkpoints; the linked parity plan is authoritative.
 
-`pnpm g5:parity` is red until that comparison exists, and it refuses anything that did not come from a live SQL
-Server. To turn it green:
+## Clone and hydrate artifacts
 
-- **`web/docs/WINDOWS-AGENT-PROMPT.md`** — paste into an agent on the Windows box with the desktop install
-- **`web/docs/PARITY-WINDOWS-PROCEDURE.md`** — the procedure itself
+Git LFS is required because the repository stores original executables, databases, libraries, archives, reports, media, and evidence bundles.
 
-Extraction is separate from comparison, so the Windows step is a read-only extract and the differ is unit
-tested without needing SQL Server.
+```bash
+git lfs install
+git clone https://github.com/yaxit24/DataCare-Web.git
+cd DataCare-Web
+git lfs pull
+```
 
-## Also honestly open
+Use `git lfs fsck` after cloning to verify local LFS objects. Binary integrity can also be checked against `ARTIFACT-MANIFEST.sha256`.
 
-- **Hardware** — scale, scanner, webcam, printer: implemented to their interfaces, never exercised against a
-  device.
-- **WhatsApp / SMS / GSP** — no credentials, so no live send has ever succeeded.
-- **Legacy data migration** — needs a real, sanitised customer database to rehearse against.
-- **UAE variants** — `TR_PR_SL_UAE`, `TR_SALE_RTN_UAE` formally waived by the owner.
+## Develop the web application
 
-Crystal pixel parity is **not** claimed anywhere. The 254 layout baselines detect regressions in this
-application's own renderer; they have never been compared to Crystal output.
+Requirements: Node.js 20 or newer, pnpm 9.15.4, Docker for the full database-backed workflows.
+
+```bash
+cd web
+corepack enable
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+Additional gates are defined in `web/package.json`, including lint, schema readiness, settings/type/depth parity, report baselines, and release certification. Some integration and browser gates require PostgreSQL, SQL Server parity inputs, or external hardware/providers; consult `web/docs/HANDOFF.md` and the current parity plan rather than treating a skipped external gate as a pass.
+
+## Reproduce or inspect the desktop application
+
+Use Windows and begin with [unified/docs/WINDOWS_BUILD_GUIDE.md](unified/docs/WINDOWS_BUILD_GUIDE.md). The canonical reference material is under `unified/`; raw deployment copies are retained separately so extraction and provenance can be independently checked.
+
+## Repository rules
+
+- Keep original artifacts byte-for-byte; add corrected or sanitized derivatives as separate files rather than overwriting provenance inputs.
+- Keep implementation changes, migrations, tests, documentation, and parity evidence together.
+- Update the current handoff/plan when implementation state changes.
+- Keep large/binary formats in Git LFS according to `.gitattributes`.
+- Never make this repository public without first removing and purging all content listed in `SECURITY-NOTICE.md` from Git history and LFS storage.
+
+No open-source license is granted by this repository. The desktop product, extracted code, data, and bundled third-party components remain restricted to authorized project use.

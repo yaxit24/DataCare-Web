@@ -1,0 +1,26 @@
+{
+  "files": [
+    {
+      "path": "web/packages/core/src/saleReturnFinancialEffects.ts",
+      "sha256": "2e4d51469540b7618ceb84127fc609c0611cfbcf8e468205f10515766b84a5f6"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnFinancialEffects.test.ts",
+      "sha256": "e1fb1e72793c25cb93857aad1a7fdac248e6bb0ad6e599508a5244d61c2ebebe"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnFinancialEffects.independent.json",
+      "sha256": "635e1e251837c0c5acc6acd39f2b7e2932ad19850b976d3a1f2d59cf5229a09b"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnFinancialEffects.joint.independent.json",
+      "sha256": "d1d96417de35b406d8b50d47b8547dc0e788f323f953e3d26d71a9b77323390f"
+    }
+  ],
+  "rootOwnedExport": "packages/core/src/index.ts export * from ./saleReturnFinancialEffects.js",
+  "excludedHarnessFiles": [
+    "web/packages/core/package.json",
+    "web/packages/core/vitest.config.ts",
+    "node_modules symlinks"
+  ]
+}

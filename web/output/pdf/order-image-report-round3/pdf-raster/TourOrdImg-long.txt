@@ -1,0 +1,249 @@
+Tour Order 1
+Datagenex Sample Jewellery
+12 Market Road
+Jewellery Centre , West Wing
+Ahmedabad Mo : 9000000000 Ph : 0790000000
+ORIGINAL FOR RECIPIENT
+Vch Date :
+2026-04-03
+Vch No : 00001
+Party Name :
+Meera Shah
+45 Garden Street , Navrangpura
+Ahmedabad , Gujarat
+Mo : 9000000001
+SNO Item Name Size
+Pcs. Gr Wt. Net Wt Lbr Rate Oth Amt Net Amount
+1 1 12.345 11.111 250 50 6500
+Gold ring 1 Dsgn : D-001
+14
+Ruby component
+Diamond component
+1 0.123
+2 0.456
+Handcrafted ring; retain the engraved initials and fit the clasp to the
+approved design.
+2 1 12.345 11.111 250 50 6500
+Gold ring 2 Dsgn : D-002
+14
+3 1 12.345 11.111 250 50 6500
+Gold ring 3 Dsgn : D-003
+14
+Rupees :
+Delevery : 2026-04-09
+ONE HUNDRED TWENTY THOUSAND FIVE HUNDRED TEN
+Total Advance : 2500
+Ledger Opening Bal :
+Ledger Closing Bal :
+Party signature.
+-500
+2000
+Dr
+Cr
+For : Datagenex Sample Jewellery
+signature.
+Tour Order 2
+Datagenex Sample Jewellery
+12 Market Road
+Jewellery Centre , West Wing
+Ahmedabad Mo : 9000000000 Ph : 0790000000
+Party Name :
+Meera Shah
+45 Garden Street , Navrangpura
+Ahmedabad , Gujarat
+Mo : 9000000001
+SNO Item Name ORIGINAL FOR RECIPIENT
+Vch Date :
+2026-04-03
+Vch No : 00001
+Size
+Pcs. Gr Wt. Net Wt Lbr Rate Oth Amt Net Amount
+4 1 12.345 11.111 250 50 6500
+Gold ring 4 Dsgn : D-004
+14
+5 1 12.345 11.111 250 50 6500
+Gold ring 5 Dsgn : D-005
+14
+6 1 12.345 11.111 250 50 6500
+Gold ring 6 Dsgn : D-006
+14
+7 1 12.345 11.111 250 50 6500
+Gold ring 7 Dsgn : D-007
+14
+Rupees :
+Delevery : 2026-04-09
+ONE HUNDRED TWENTY THOUSAND FIVE HUNDRED TEN
+Total Advance : 2500
+Ledger Opening Bal :
+Ledger Closing Bal :
+Party signature.
+-500
+2000
+Dr
+Cr
+For : Datagenex Sample Jewellery
+signature.
+Tour Order 3
+Datagenex Sample Jewellery
+12 Market Road
+Jewellery Centre , West Wing
+Ahmedabad Mo : 9000000000 Ph : 0790000000
+Party Name :
+Meera Shah
+45 Garden Street , Navrangpura
+Ahmedabad , Gujarat
+Mo : 9000000001
+SNO Item Name ORIGINAL FOR RECIPIENT
+Vch Date :
+2026-04-03
+Vch No : 00001
+Size
+Pcs. Gr Wt. Net Wt Lbr Rate Oth Amt Net Amount
+8 1 12.345 11.111 250 50 6500
+Gold ring 8 Dsgn : D-008
+14
+9 1 12.345 11.111 250 50 6500
+Gold ring 9 Dsgn : D-009
+14
+10 Gold ring 10 Dsgn : D-010
+14
+1 12.345 11.111 250 50 6500
+11 Gold ring 11 Dsgn : D-011
+14
+1 12.345 11.111 250 50 6500
+Rupees :
+Delevery : 2026-04-09
+ONE HUNDRED TWENTY THOUSAND FIVE HUNDRED TEN
+Total Advance : 2500
+Ledger Opening Bal :
+Ledger Closing Bal :
+Party signature.
+-500
+2000
+Dr
+Cr
+For : Datagenex Sample Jewellery
+signature.
+Datagenex Sample Jewellery
+12 Market Road
+Jewellery Centre , West Wing
+Ahmedabad Mo : 9000000000 Ph : 0790000000
+Party Name :
+Meera Shah
+45 Garden Street , Navrangpura
+Ahmedabad , Gujarat
+Mo : 9000000001
+SNO Item Name Size
+12 Gold ring 12 Dsgn : D-012
+14
+Tour Order 4
+ORIGINAL FOR RECIPIENT
+Vch Date :
+2026-04-03
+Vch No : 00001
+Pcs. Gr Wt. Net Wt Lbr Rate Oth Amt Net Amount
+1 12.345 11.111 250 50 6500
+13 Gold ring 13 Dsgn : D-013
+14
+1 12.345 11.111 250 50 6500
+14 Gold ring 14 Dsgn : D-014
+14
+1 12.345 11.111 250 50 6500
+15 Gold ring 15 Dsgn : D-015
+14
+1 12.345 11.111 250 50 6500
+Rupees :
+Delevery : 2026-04-09
+ONE HUNDRED TWENTY THOUSAND FIVE HUNDRED TEN
+Total Advance : 2500
+Ledger Opening Bal :
+Ledger Closing Bal :
+Party signature.
+-500
+2000
+Dr
+Cr
+For : Datagenex Sample Jewellery
+signature.
+Datagenex Sample Jewellery
+12 Market Road
+Jewellery Centre , West Wing
+Ahmedabad Mo : 9000000000 Ph : 0790000000
+Party Name :
+Meera Shah
+45 Garden Street , Navrangpura
+Ahmedabad , Gujarat
+Mo : 9000000001
+SNO Item Name Size
+16 Gold ring 16 Dsgn : D-016
+14
+Tour Order 5
+ORIGINAL FOR RECIPIENT
+Vch Date :
+2026-04-03
+Vch No : 00001
+Pcs. Gr Wt. Net Wt Lbr Rate Oth Amt Net Amount
+1 12.345 11.111 250 50 6500
+17 Gold ring 17 Dsgn : D-017
+14
+1 12.345 11.111 250 50 6500
+18 Gold ring 18 Dsgn : D-018
+14
+1 12.345 11.111 250 50 6500
+Confirm delivery after the final fitting. 222.21
+Net Amount :
+117000
+Tax : 3% :
+Total Amount :
+3510
+Received Item Pcs Weight Touch
+Received gold chain 1 5.125 91.6 6200 31775
+Received silver bracelet 2 8.25 92.5 85 701.25
+Total :
+3
+13.375
+120510
+Cash Amount : 1500
+Rupees :
+ONE HUNDRED TWENTY THOUSAND FIVE HUNDRED TEN
+Delevery : 2026-04-09
+Ledger Opening Bal :
+Ledger Closing Bal :
+-500
+Dr
+2000
+Cr
+Party signature.
+Total Advance : 2500
+For : Datagenex Sample Jewellery
+signature.
+Datagenex Sample Jewellery
+12 Market Road
+Jewellery Centre , West Wing
+Ahmedabad Mo : 9000000000 Ph : 0790000000
+Party Name :
+Meera Shah
+45 Garden Street , Navrangpura
+Ahmedabad , Gujarat
+Mo : 9000000001
+SNO Item Name Size
+Tour Order 6
+ORIGINAL FOR RECIPIENT
+Vch Date :
+2026-04-03
+Vch No : 00001
+Pcs. Gr Wt. Net Wt Lbr Rate Oth Amt Net Amount
+Card Amount : 1000
+Rupees :
+Delevery : 2026-04-09
+ONE HUNDRED TWENTY THOUSAND FIVE HUNDRED TEN
+Total Advance : 2500
+Ledger Opening Bal :
+Ledger Closing Bal :
+Party signature.
+-500
+2000
+Dr
+Cr
+For : Datagenex Sample Jewellery
+signature.

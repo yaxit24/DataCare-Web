@@ -22,6 +22,23 @@ export interface LabourInput {
   pct?: DecimalJs.Value;
   metalAmount?: DecimalJs.Value;
   fixed?: DecimalJs.Value;
+  /**
+   * `ITM_GHT_WT` — ghat (wastage-carrier) weight, part of the per-gram labour base.
+   *
+   * The desktop computes per-gram labour as `(NetWt + GhtWt) x rate` and drops the ghat term only
+   * when `CO_SET_NEW.LBR_WITH_GHT = 'N'` (TR_SALE.cs:11112-11123; the same branch appears in
+   * TR_APR_ISU.cs:4255 and TR_BUL_SALE.cs:5513, :5594, :7121). Its blank DEFAULT is 'Y'
+   * (MS_OPNCOMP.cs:1224-1226), so including ghat is the normal case.
+   *
+   * This was absent, so every per-gram labour charge on a line carrying ghat weight was UNDERSTATED
+   * by `ghat x rate` — a money defect, not a rounding difference.
+   */
+  ghatWt?: DecimalJs.Value;
+  /**
+   * Whether the ghat term applies. Defaults to TRUE to match the desktop's blank default; a company
+   * with `LBR_WITH_GHT = 'N'` passes false.
+   */
+  withGhat?: boolean;
 }
 
 const D = (v?: DecimalJs.Value): DecimalJs => new DecimalJs(v ?? 0);
@@ -35,7 +52,10 @@ export function labourCharge(
   let v: DecimalJs;
   switch (type) {
     case 'per_gram':
-      v = D(i.netWt).times(D(i.rate));
+      // (net + ghat) x rate, with the ghat term dropped only when the company switches it off.
+      v = D(i.netWt)
+        .plus(i.withGhat === false ? D(0) : D(i.ghatWt ?? 0))
+        .times(D(i.rate));
       break;
     case 'per_piece':
       v = D(i.pcs).times(D(i.rate));

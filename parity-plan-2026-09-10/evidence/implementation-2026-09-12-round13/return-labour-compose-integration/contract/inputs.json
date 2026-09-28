@@ -1,0 +1,64 @@
+{
+  "kind": "incoming-labour-compose-preimplementation-contract-v1",
+  "status": "frozen-prospective-contract-and-literal-cases",
+  "createdAtUtc": "2026-09-11T21:57:55.790959+00:00",
+  "noNewCompositionImplementationReadOrExecuted": true,
+  "existingDependencyImplementationsRead": true,
+  "literalCases": 23,
+  "successCases": 13,
+  "refusalCases": 10,
+  "sources": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingLabour.ts",
+      "sha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/fixtures/saleReturnIncomingLabour.independent.json",
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/fixtures/sale-return-incoming-aggregate.v1.json",
+      "sha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "author-vectors.py",
+      "sha256": "e38e5360d4277d20feef6ba0c5c13b27b6fc7bf5bb9578867b199f0a163e30b4"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "5f47c2adcb05b54b923274c7566e1dd23c5f4d4e933cdd03d0d12c313ff165fd"
+    },
+    {
+      "path": "labour-compose-independent.v1.json",
+      "sha256": "fd55edb9173dbc40475d7dd04a63877226600d36c983f20b1421ab013ee73dd6"
+    },
+    {
+      "path": "literal-case-index.md",
+      "sha256": "740a17ad85d0a578eeff84009d388630e401e23d10d25c9158a192c91b60f3d2"
+    }
+  ],
+  "verification": "Plain JSON complete-shape counts and exact pre-copy/refused-state equality only; no calculator or test execution",
+  "limits": [
+    "No HTTP/preview allowlist/numeric writer changes",
+    "Opaque matching master version sentinel is not authentication",
+    "Source decimal mathematical profile, not Windows executable equivalence"
+  ]
+}

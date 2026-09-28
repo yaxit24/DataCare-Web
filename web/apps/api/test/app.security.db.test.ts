@@ -244,7 +244,9 @@ databaseDescribe('database-backed HTTP authorization and session boundary', () =
       method: 'POST',
       url: '/context/select',
       headers: { cookie: cookieHeader(viewer.jar) },
-      payload: { coCode: COMPANY, lcCode: '02', coYear: YEAR },
+      payload: { coCode: COMPANY, lcCode: '02', coYear: YEAR,
+        expectedContextEpoch: (viewer.body.context as { contextEpoch: string }).contextEpoch,
+        selectionId: '44444444-4444-4444-8444-444444444444' },
     });
     expect(selected.statusCode).toBe(200);
     setCookies(selected as any, viewer.jar);

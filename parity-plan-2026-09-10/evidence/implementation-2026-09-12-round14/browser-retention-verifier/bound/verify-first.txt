@@ -1,0 +1,11 @@
+{
+  "status": "verified-read-only",
+  "baselineJourneys": 17,
+  "contextChecks": 14,
+  "contextTransportFaults": 5,
+  "labourChecks": 5,
+  "labourTransportFaults": 4,
+  "publicArtifacts": 63,
+  "qualification": null,
+  "qualificationSha256": null
+}

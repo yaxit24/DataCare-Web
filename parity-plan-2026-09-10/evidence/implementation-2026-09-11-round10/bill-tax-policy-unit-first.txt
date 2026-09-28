@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnBillTaxPolicy.test.ts (89 tests) 16ms
+
+ Test Files  1 passed (1)
+      Tests  89 passed (89)
+   Start at  19:29:45
+   Duration  416ms (transform 96ms, setup 0ms, collect 90ms, tests 16ms, environment 0ms, prepare 59ms)
+

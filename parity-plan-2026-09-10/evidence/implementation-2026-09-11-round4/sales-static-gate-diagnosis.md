@@ -1,0 +1,35 @@
+# Round4 static gate diagnosis and bounded correction
+
+The initial Round4 logs remain immutable evidence: `dead-cells-final.txt` reported4 dead controls, `depth-gate.txt` reported102 unreachable fields against ceiling96, and `kernel-gate.txt` remained127 local round helpers against108. No detector, budget, baseline or accepted-status record was changed to hide these results.
+
+## Four actual misleading controls
+
+`sales/page.tsx` and `sales-quotation/page.tsx` each exposed editable `oldSrNo` and `itType` in their shared compact/detail descriptor and sent both in the request. `sales.ts` declared them only in its shared return-line interface (74/76). Its ordinary Sales row writer actually assigns `OLD_SRNO:idx+1` at1078 and `IT_TYPE:metalByItem[...] ?? c.in.metal` at1080. `createSalesQuotation` calls that same `writeSaleTx` with quoteMode; neither ordinary writer reads these two client fields.
+
+The apparent previous pass was overly broad static credit: `check-dead-cells.mjs` composes every one-level relative import and calls `writerFieldReads` with no restricted entry points. `sales.ts` imports orderAdvanceAvailableTx/adjustOrderIntoSaleTx from `salesOrder.ts`; the scan could therefore borrow a same-named field read from unrelated exported Sales Order creation. Moving those order rows through the exact-preservation helper removed that incidental credit. This is not evidence that the preservation refactor stopped ordinary Sales persistence; it exposed pre-existing wrong controls. That specific imported-export leak is corrected below. General interprocedural scanner precision remains debt; opaque mappings are not marked successful.
+
+Desktop source backs removing those editable controls: TR_SALE8976/8978 hides grid columns57/59;9138/9142 derives a new hidden serial;12816/12831 obtains item type from item selection;14514/14583 reopens saved identity/type. The source saves those hidden values15386/15447. The current ordinary API's broader hidden-identity replacement behavior requires its own future snapshot acceptance; this UI correction does not claim it complete.
+
+Correction changes only the two web pages: remove the discarded descriptor entries, unused local draft properties/defaults and payload assignments. Existing saved tag-instance `vchSrno`, order references including `ordSrno`, and the supported `metal` field remain. Both full-grid and compact detail consumers use the same descriptor registry, so both lose the false edit. This control correction did not change API/core/database source. A separate later blank-source API defect was fixed and requires the new coordinated API run recorded in the Sales API contract.
+
+Two real-page descriptor regressions in `scripts/test/ui-descriptors.test.mjs` require `otherWt`/`metal` remain editable, forbid the two misleading editable identities, forbid their old request mappings, and retain tag/order identity forwarding. All14 descriptor tests passed. The intermediate dead-cell audit passed708 columns across21 pages (23 mappings),0 dead, retaining all4 nested wholesale traces, before import reachability itself was tightened. That intermediate result is retained as `dead-cells-corrected.txt` and is superseded by the strict audit below. See also `sales-derived-descriptor-tests.txt`. Reduced visible field counts reflect removal of false functionality, not lost working persistence.
+
+## The extra unreachable field
+
+`gap-manifest-round4.json` identifies the new field as `SalesOrderInput.requireDesignSelection`; `orderMainBook` was already internal. `gap_manifest.py` matches every exported *Input/*Line interface and searches for any frontend occurrence of each field name. That heuristic includes trusted server policies.
+
+`requireDesignSelection` is intentionally server-owned (`salesOrder.ts65`), forced true by the ordinary POST/PUT adapter (`txn.ts692`) and never copied from caller JSON. The HTTP regression in `salesOrderLifecycle.routes.db.test.ts` submits callerfalse plus an unselected linked identity and proves refusal with no writes. Making it an operator input would violate the implemented source policy. It is a correctly absent frontend policy field misclassified as operator depth by the legacy heuristic, not a new missing input screen.
+
+The published depth gate still fails102>96 and remains a release blocker; this explanation is a disposition for one increment, not a ceiling waiver. Existing debt and other DTO/server-derived candidates need explicit audited triage. Kernel127>108 remains unchanged and unclosed. No complete functional parity claim is made.
+
+## Strict imported-callee tracing supersedes the intermediate pass
+
+The scanner now collects lexically resolved named imports actually called in reachable runtime code. Imported aliases retain their original export name. A one-level sibling scan starts only at those selected exports rather than every exported function in the file. It does not invent namespace/dynamic dispatch. This is bounded static consumption, not a full call graph or persistence proof. No production source or acceptance budget is changed by this scanner correction.
+
+Three added request-trace regressions show: called import aliases retain exact export identity; unused exports and an uncalled local function cannot contribute sibling field reads; lexical shadowing and dynamic dispatch cannot select the wrong import; and actual ordinary Sales imports only its two advance helpers from salesOrder.ts, so unrelated createOrder oldSrNo/itType reads cannot be borrowed. Combined with the descriptor regressions, **31 tests passed** in `sales-scanner-import-regressions.txt`.
+
+The strict audit reports **33 Sale Return fields without confirmed write paths**, among708 checked columns, while retaining all4 proven nested wholesale mappings. This stricter red result supersedes the earlier708/0 pass. See `dead-cells-strict-first.txt` and the final strict log/JSON captured by root. All33 remain failures; unsupported syntax is not a success.
+
+The reported fields are ordNo, ordYrcd, ordDbcd, ordSrno, isuNo, isuYrcd, isuDbcd, isuSrno, huid, lessWt, bagWt, tagGrossWt, tagNetWt, ghtPct, itemLot, remark, discountPct, ghatAmount, rateWith, karigarNetWt, karigarTouch, karigarWestPct, karigarFine, employeeCode, orderTagStockAdd, designImageId, hallmarkId2, hallmarkId3, hallmarkId4, hallmarkIdWt, hallmarkId2Wt, hallmarkId3Wt and hallmarkId4Wt.
+
+`salesReturn.ts` imports only buildIncomeLegs and computeLine from ordinary sales.ts for these reachable helper paths. Its own return parent writer is354–416 and stock writer is below it; previously the scanner borrowed reads from unrelated ordinary Sales writer exports. Direct inspection confirms representative missing fields (order references, HUIDs and bag/karigar weights) are not supplied to the return row builder. Each of the33 must receive a source/schema/request/writer/reader disposition and runtime fixture before removal or implementation; this continuation does not silently delete them or infer their desktop shape. Root tracks that required X13 work.

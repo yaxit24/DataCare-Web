@@ -1,0 +1,11 @@
+{
+  "changedAtUtc": "2026-09-11T16:55:18.333693+00:00",
+  "container": "datacare-parity-test-postgres-1",
+  "priorCpuShares": 0,
+  "temporaryCpuShares": 2048,
+  "observedCpuShares": "2048",
+  "reason": "Audited API run reported two existing transaction failures during CPU contention; one explicitly expired at5133ms against the unchanged5000ms transaction limit. Docker stats observed disposable PostgreSQL83.75% and normal web122.65% CPU. Increase only disposable DB scheduling weight, retaining test assertions and application deadlines.",
+  "normalContainersChanged": false,
+  "restoreRequired": true,
+  "limits": "Scheduling adjustment for local functional verification, not production performance certification. Failed run remains failed."
+}

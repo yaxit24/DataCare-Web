@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>DataCareNext.MyApplication</StartupObject>
+    <RootNamespace>DataCareNext</RootNamespace>
+    <AssemblyName>DataCareNext</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <Deterministic>true</Deterministic>
+    <OptionStrict>Off</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>1</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>1</WarningLevel>
+  </PropertyGroup>
+
+  <!-- NuGet References (install these via NuGet Package Manager) -->
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web.Extensions" />
+    <!-- Crystal Reports (install SAP Crystal Reports Runtime for VS 2019/2022) -->
+    <!-- Download: https://www.crystalreports.com/crystal-reports-for-visual-studio/ -->
+    <Reference Include="CrystalDecisions.CrystalReports.Engine">
+      <HintPath>$(DevExpress)Bin\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.Windows.Forms">
+      <HintPath>$(DevExpress)Bin\CrystalDecisions.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared">
+      <HintPath>$(DevExpress)Bin\CrystalDecisions.Shared.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Source files -->
+  <ItemGroup>
+    <Compile Include="Modules\Globals.vb" />
+    <Compile Include="Modules\Database.vb" />
+    <Compile Include="Modules\MyApplication.vb" />
+    <Compile Include="Forms\MS_LOGIN.vb">      <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MDI_FORM.vb">      <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_SALE.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_SALE_RTN.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_PURC.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_CASH.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_CONTRA.vb">     <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_KR_ISU.vb">     <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_APR_ISU.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_INOUT.vb">      <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_MFG_ITEM.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_TAG_CAN.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_TAG_SPLIT.vb">  <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_DHRN_ISU.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_DHRN_REC.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_SALE_ORD.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_BUL_SALE.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_FINE_SL_PR.vb"> <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_REP_REC.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_LEDR_ADJ.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_MEMB_ENT.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_PHYSTK.vb">     <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_CARD_REC.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_UPI_REC.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_WH_SALE.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\TR_SL_EBILL.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MS_ACCT.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MS_ITEM.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MS_RATE.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MS_COMPANY.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MS_USER.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_LEDR.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_ROJMEL.vb">     <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_OS.vb">         <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_STOCK.vb">      <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_GST.vb">        <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_BALANCE.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_TAG.vb">        <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_MFG.vb">        <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_DHRN_LOAN.vb">  <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_BKP.vb">        <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_SETTING.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_TAG_PRINT.vb">  <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_E_INVOICE.vb">  <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_WAPP_WITH_API.vb"><SubType>Form</SubType></Compile>
+    <Compile Include="Forms\MS_BOOK.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MS_EMP.vb">        <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\MS_GROUP.vb">      <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_ALL.vb">        <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_BILL_PROFIT.vb"> <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_CASH_BANK.vb">   <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_MOVEMENT.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\RP_ORDER.vb">       <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_BANK.vb">        <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_EXPORT.vb">      <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_IMPORT.vb">      <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_REMINDER.vb">    <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_SMS.vb">         <SubType>Form</SubType> </Compile>
+    <Compile Include="Forms\UT_VCH_RE_NUMBR.vb"><SubType>Form</SubType> </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Database\01_Schema.sql" />
+    <None Include="Setup\SETUP_README.md" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+</Project>

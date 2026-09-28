@@ -1,0 +1,35 @@
+{
+ "form": "TR_ITM_OPBL",
+ "tables": [
+  "DM_DATA",
+  "ITEM_MAST",
+  "ITM_OPBL",
+  "MAIN_STOCK",
+  "THIS",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "DM_DATA",
+   "ITM_OPBL",
+   "MAIN_STOCK"
+  ]
+ },
+ "selectTables": [
+  "DM_DATA",
+  "ITEM_MAST",
+  "ITM_OPBL",
+  "MAIN_STOCK",
+  "THIS",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 9,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 1717
+}

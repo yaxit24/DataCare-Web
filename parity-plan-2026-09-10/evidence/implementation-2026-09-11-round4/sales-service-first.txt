@@ -1,0 +1,56 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "salesOrderRound4.db.test.ts" "tourOrderHydration.db.test.ts" "routePolicy.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (52 tests) 41ms
+ ✓ test/tourOrderHydration.db.test.ts (14 tests) 5970ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions 2708ms
+   ✓ Tour Order configured-book and complete editor round trip > hydrates all persisted input fields and multiple independent children; unchanged edit keeps business rows 851ms
+   ✓ Tour Order configured-book and complete editor round trip > isolates identical voucher numbers across configured books, locations and fiscal years 543ms
+   ✓ Tour Order configured-book and complete editor round trip > blocks the allocated source order while allowing the same number in another book, branch or year 403ms
+ ✓ test/salesOrderRound4.db.test.ts (6 tests) 921ms
+   ✓ Sales ordinary saved state and ordered design source replay > preserves complete imported business rows, six-digit clock, nullable values and exact large decimals on unchanged edit 467ms
+
+ Test Files  3 passed (3)
+      Tests  72 passed (72)
+   Start at  05:10:25
+   Duration  10.37s (transform 953ms, setup 0ms, collect 1.80s, tests 6.93s, environment 1ms, prepare 228ms)
+

@@ -1,0 +1,10 @@
+--- a/parity-plan-2026-09-10/run_check_round15.py
++++ b/parity-plan-2026-09-10/run_check_round15.py
+@@ -32,6 +32,7 @@
+     'execution-addendum-intro.md', 'round14_runtime_inputs.py',
+         'checkpoint_recipe_round14.py', 'test_checkpoint_recipe_round14.py',
+     'run_check_round15.py', 'capture_implementation_checkpoint_round15.py',
++    'checkpoint_recipe_round15.py', 'test_checkpoint_recipe_round15.py',
+ ])
+ sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+ now = lambda: datetime.datetime.now(datetime.timezone.utc).isoformat()

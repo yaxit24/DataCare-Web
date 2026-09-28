@@ -1,0 +1,2230 @@
+--- a/web/apps/api/src/modules/auth/businessScope.ts
++++ b/web/apps/api/src/modules/auth/businessScope.ts
+@@ -1,4 +1,4 @@
+-import { withTenant } from '@datacare/db';
++import { withTenant, type Tx } from '@datacare/db';
+ import type { FastifyRequest } from 'fastify';
+ 
+ export interface BusinessScope {
+@@ -45,46 +45,40 @@
+   year?: string | null;
+ }
+ 
+-async function company(
+-  prisma: any,
+-  tenantId: string,
++async function companyTx(
++  tx: Tx,
+   coCode: string,
+   access?: { loginName: string; isAdmin: boolean },
+ ): Promise<CompanyRow> {
+-  const rows: CompanyRow[] = await withTenant(prisma, tenantId, (tx: any) =>
+-    tx.$queryRawUnsafe(
+-      `SELECT c."CO_CODE",c."CO_NAME",c."LC_CODE",
++  const rows = await tx.$queryRawUnsafe<CompanyRow[]>(
++    `SELECT c."CO_CODE",c."CO_NAME",c."LC_CODE",
+               ($3::boolean OR EXISTS(
+                 SELECT 1 FROM "LOGIN_MAST" l
+                  WHERE l."CO_CODE"=c."CO_CODE" AND l."LOGIN_NAME"=$2
+               )) AS allowed
+          FROM "CO_MAST" c WHERE c."CO_CODE"=$1 LIMIT 1`,
+-      coCode,
+-      access?.loginName ?? '',
+-      access?.isAdmin ?? true,
+-    ),
++    coCode,
++    access?.loginName ?? '',
++    access?.isAdmin ?? true,
+   );
+   const row = rows[0];
+   if (!row?.CO_CODE || row.allowed === false) throw new ScopeError('company-unavailable');
+   return row;
+ }
+ 
+-async function location(
+-  prisma: any,
+-  tenantId: string,
++async function locationTx(
++  tx: Tx,
+   coCode: string,
+   requested: string | undefined,
+   companyDefault: string | undefined,
+ ): Promise<string> {
+-  const rows: LocationRow[] = await withTenant(prisma, tenantId, (tx: any) =>
+-    tx.$queryRawUnsafe(
+-      `SELECT "LC_CODE","LC_NAME" FROM "LOCT_MAST"
++  const rows = await tx.$queryRawUnsafe<LocationRow[]>(
++    `SELECT "LC_CODE","LC_NAME" FROM "LOCT_MAST"
+         WHERE "CO_CODE"=$1 AND "LC_CODE" IS NOT NULL AND "LC_CODE"<>''
+         ORDER BY CASE WHEN "LC_CODE"=$2 THEN 0 WHEN "LC_CODE"=$3 THEN 1 ELSE 2 END,"LC_CODE"`,
+-      coCode,
+-      requested ?? '',
+-      companyDefault ?? '',
+-    ),
++    coCode,
++    requested ?? '',
++    companyDefault ?? '',
+   );
+   if (requested) {
+     const exact = rows.find((row) => String(row.LC_CODE ?? '') === requested);
+@@ -96,24 +90,17 @@
+   return selected;
+ }
+ 
+-async function year(
+-  prisma: any,
+-  tenantId: string,
+-  coCode: string,
+-  requested?: string,
+-): Promise<string | undefined> {
+-  const rows: YearRow[] = await withTenant(prisma, tenantId, (tx: any) =>
+-    tx.$queryRawUnsafe(
+-      `SELECT COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) AS year
++async function yearTx(tx: Tx, coCode: string, requested?: string): Promise<string | undefined> {
++  const rows = await tx.$queryRawUnsafe<YearRow[]>(
++    `SELECT COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) AS year
+          FROM "YEAR_MAST"
+         WHERE "CO_CODE"=$1
+           AND COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) IS NOT NULL
+         ORDER BY CASE WHEN COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4))=$2
+                       THEN 0 ELSE 1 END,
+                  COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) DESC`,
+-      coCode,
+-      requested ?? '',
+-    ),
++    coCode,
++    requested ?? '',
+   );
+   if (requested) {
+     if (!rows.some((row) => text(row.year) === requested)) throw new ScopeError('year-unavailable');
+@@ -122,47 +109,53 @@
+   return text(rows[0]?.year);
+ }
+ 
++interface LoginScopeInput {
++  tenantId: string;
++  coCode: string;
++  lcCode?: string;
++  coYear?: string;
++}
++
++interface SelectedScopeInput extends LoginScopeInput {
++  loginName: string;
++  isAdmin: boolean;
++}
++
++/** The caller owns the transaction and must already bind input.tenantId through withTenant. */
++export async function resolveLoginScopeTx(tx: Tx, input: LoginScopeInput): Promise<BusinessScope> {
++  const co = await companyTx(tx, input.coCode);
++  const lcCode = await locationTx(tx, input.coCode, input.lcCode, text(co.LC_CODE));
++  const coYear = await yearTx(tx, input.coCode, input.coYear);
++  return { tenantId: input.tenantId, coCode: input.coCode, lcCode, coYear };
++}
++
+ export async function resolveLoginScope(
+   prisma: any,
+-  input: { tenantId: string; coCode: string; lcCode?: string; coYear?: string },
+-): Promise<BusinessScope> {
+-  const co = await company(prisma, input.tenantId, input.coCode);
+-  const lcCode = await location(
+-    prisma,
+-    input.tenantId,
+-    input.coCode,
+-    input.lcCode,
+-    text(co.LC_CODE),
+-  );
+-  const coYear = await year(prisma, input.tenantId, input.coCode, input.coYear);
+-  return { tenantId: input.tenantId, coCode: input.coCode, lcCode, coYear };
+-}
+-
+-export async function resolveSelectedScope(
+-  prisma: any,
+-  input: {
+-    tenantId: string;
+-    loginName: string;
+-    isAdmin: boolean;
+-    coCode: string;
+-    lcCode?: string;
+-    coYear?: string;
+-  },
+-): Promise<BusinessScope> {
+-  const co = await company(prisma, input.tenantId, input.coCode, {
++  input: LoginScopeInput,
++): Promise<BusinessScope> {
++  return withTenant(prisma, input.tenantId, (tx) => resolveLoginScopeTx(tx, input));
++}
++
++/** The caller owns the transaction and must already bind input.tenantId through withTenant. */
++export async function resolveSelectedScopeTx(
++  tx: Tx,
++  input: SelectedScopeInput,
++): Promise<BusinessScope> {
++  const co = await companyTx(tx, input.coCode, {
+     loginName: input.loginName,
+     isAdmin: input.isAdmin,
+   });
+-  const lcCode = await location(
+-    prisma,
+-    input.tenantId,
+-    input.coCode,
+-    input.lcCode,
+-    text(co.LC_CODE),
+-  );
+-  const coYear = await year(prisma, input.tenantId, input.coCode, input.coYear);
++  const lcCode = await locationTx(tx, input.coCode, input.lcCode, text(co.LC_CODE));
++  const coYear = await yearTx(tx, input.coCode, input.coYear);
+   if (!coYear) throw new ScopeError('year-unavailable');
+   return { tenantId: input.tenantId, coCode: input.coCode, lcCode, coYear };
++}
++
++export async function resolveSelectedScope(
++  prisma: any,
++  input: SelectedScopeInput,
++): Promise<BusinessScope> {
++  return withTenant(prisma, input.tenantId, (tx) => resolveSelectedScopeTx(tx, input));
+ }
+ 
+ export async function listScopeCompanies(
+--- a/web/apps/api/src/modules/rbac/authorization.ts
++++ b/web/apps/api/src/modules/rbac/authorization.ts
+@@ -1,4 +1,4 @@
+-import { withTenant } from '@datacare/db';
++import { withTenant, type Tx } from '@datacare/db';
+ import type { UserRights } from '@datacare/types';
+ import { rightsOf, type LoginMastRow } from '../auth/auth.service.js';
+ import { rightNamesForForm, canonicalFormsForRight } from './formCatalog.js';
+@@ -44,45 +44,47 @@
+   PASSWORD_RESET_REQUIRED?: string | null;
+ }
+ 
++interface PrincipalInput {
++  tenantId: string;
++  loginName: string;
++  coCode: string;
++  loginCoCode: string;
++}
++
+ /**
+  * Resolve the user on every authenticated request so role changes, password resets, and deletion
+  * take effect immediately rather than waiting for a JWT to expire. The selected company is tried
+  * first; `loginCoCode` is the immutable authentication company used when an admin selected another
+  * company context.
+  */
+-export async function loadPrincipal(
+-  prisma: any,
+-  input: {
+-    tenantId: string;
+-    loginName: string;
+-    coCode: string;
+-    loginCoCode: string;
+-  },
+-): Promise<Principal> {
+-  return withTenant(prisma, input.tenantId, async (tx: any) => {
+-    const rows: PrincipalRow[] = await tx.$queryRawUnsafe(
+-      `SELECT "CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG",
++export async function loadPrincipal(prisma: any, input: PrincipalInput): Promise<Principal> {
++  return withTenant(prisma, input.tenantId, (tx) => loadPrincipalTx(tx, input));
++}
++
++/** The caller owns the transaction and must already bind input.tenantId through withTenant. */
++export async function loadPrincipalTx(tx: Tx, input: PrincipalInput): Promise<Principal> {
++  const rows = await tx.$queryRawUnsafe<PrincipalRow[]>(
++    `SELECT "CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG",
+               "USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED"
+          FROM "LOGIN_MAST"
+         WHERE "LOGIN_NAME"=$1 AND "CO_CODE" IN ($2,$3)
+         ORDER BY CASE WHEN "CO_CODE"=$2 THEN 0 ELSE 1 END
+         LIMIT 1`,
+-      input.loginName,
+-      input.coCode,
+-      input.loginCoCode,
+-    );
+-    const row = rows[0];
+-    if (!row?.LOGIN_NAME || !row.CO_CODE) throw new PrincipalUnavailableError();
+-    const role = String(row.LOGIN_CATG ?? '');
+-    return {
+-      loginName: String(row.LOGIN_NAME),
+-      loginCoCode: String(row.CO_CODE),
+-      role,
+-      isAdmin: isAdminRole(role),
+-      rights: rightsOf(row),
+-      passwordResetRequired: Y(row.PASSWORD_RESET_REQUIRED),
+-    };
+-  });
++    input.loginName,
++    input.coCode,
++    input.loginCoCode,
++  );
++  const row = rows[0];
++  if (!row?.LOGIN_NAME || !row.CO_CODE) throw new PrincipalUnavailableError();
++  const role = String(row.LOGIN_CATG ?? '');
++  return {
++    loginName: String(row.LOGIN_NAME),
++    loginCoCode: String(row.CO_CODE),
++    role,
++    isAdmin: isAdminRole(role),
++    rights: rightsOf(row),
++    passwordResetRequired: Y(row.PASSWORD_RESET_REQUIRED),
++  };
+ }
+ 
+ /**
+--- /dev/null
++++ b/web/apps/api/test/sessionContext.extraction.test.ts
+@@ -0,0 +1,326 @@
++import { describe, expect, it, vi } from 'vitest';
++import { createHash } from 'node:crypto';
++import { readFileSync } from 'node:fs';
++import { withTenant, type Tx } from '@datacare/db';
++import type { PrismaClient } from '@prisma/client';
++import {
++  resolveLoginScope,
++  resolveLoginScopeTx,
++  resolveSelectedScope,
++  resolveSelectedScopeTx,
++  ScopeError,
++} from '../src/modules/auth/businessScope.js';
++import { loadPrincipal, loadPrincipalTx } from '../src/modules/rbac/authorization.js';
++import independent from './fixtures/sessionContext.extraction.independent.json';
++
++interface ReadStep {
++  table: string;
++  params: unknown[];
++  rows?: unknown[];
++  error?: Error;
++}
++
++/**
++ * A transaction-boundary double, not a SQL/database emulator. Each read receives a literal,
++ * preordered database result. The real withTenant helper supplies the tenant binding.
++ */
++function scriptedDb(steps: ReadStep[], bindingError?: Error, tenantId = 'tenant-scope-extraction') {
++  const pending = [...steps];
++  const trace: string[] = [];
++  const query = vi.fn(async (sql: string, ...params: unknown[]) => {
++    const next = pending.shift();
++    if (!next) throw new Error(`Unexpected extra read: ${sql}`);
++    expect(sql).toContain(`FROM "${next.table}"`);
++    expect(sql).not.toMatch(/FOR\s+(?:UPDATE|SHARE)/i);
++    expect(params).toEqual(next.params);
++    trace.push(`read:${next.table}`);
++    if (next.error) throw next.error;
++    return structuredClone(next.rows ?? []);
++  });
++  const execute = vi.fn(async (sql: string, ...params: unknown[]) => {
++    expect(sql).toBe("SELECT set_config('app.tenant_id', $1, true)");
++    trace.push('bind');
++    if (bindingError) throw bindingError;
++    expect(params).toEqual([tenantId]);
++    return 1;
++  });
++  // Only these raw methods are exercised. This explicit double does not claim to be a live Tx.
++  const tx = { $queryRawUnsafe: query, $executeRawUnsafe: execute } as unknown as Tx;
++  const transaction = vi.fn(async (fn: (value: Tx) => Promise<unknown>, options?: unknown) => {
++    expect(options).toBeUndefined();
++    trace.push('begin');
++    try {
++      const result = await fn(tx);
++      trace.push('commit');
++      return result;
++    } catch (error) {
++      trace.push('rollback');
++      throw error;
++    }
++  });
++  const prisma = { $transaction: transaction } as unknown as PrismaClient;
++  return { prisma, tx, trace, transaction, query, execute, pending };
++}
++
++const login = { tenantId: 'tenant-scope-extraction', coCode: '02' };
++const selected = { ...login, loginName: 'operator', isAdmin: false };
++const principalInput = { ...login, loginName: 'operator', loginCoCode: '01' };
++const principalRow = {
++  CO_CODE: '02',
++  LOGIN_NAME: 'operator',
++  LOGIN_PWD: 'unchanged-secret-sentinel',
++  LOGIN_CATG: 'USER',
++  USER_UPDATE: 'Y',
++  USER_DELETE: 'N',
++  USER_PRINT: '1',
++  PASSWORD_RESET_REQUIRED: 'TRUE',
++};
++const companyStep = (admin = false, name = 'operator'): ReadStep => ({
++  table: 'CO_MAST',
++  params: ['02', name, admin],
++  rows: [{ CO_CODE: '02', LC_CODE: '03', allowed: true }],
++});
++const locationStep = (): ReadStep => ({
++  table: 'LOCT_MAST',
++  params: ['02', '', '03'],
++  rows: [{ LC_CODE: '03' }],
++});
++const yearStep = (): ReadStep => ({
++  table: 'YEAR_MAST',
++  params: ['02', ''],
++  rows: [{ year: '2025' }],
++});
++const principalStep = (): ReadStep => ({
++  table: 'LOGIN_MAST',
++  params: ['operator', '02', '01'],
++  rows: [principalRow],
++});
++
++interface DecisionCase {
++  id: string;
++  reason: string;
++  operation: string;
++  input: {
++    tenantId: string;
++    coCode: string;
++    lcCode?: string;
++    coYear?: string;
++    loginName?: string;
++    isAdmin?: boolean;
++    loginCoCode?: string;
++  };
++  queries: ReadStep[];
++  expected: {
++    value?: Record<string, unknown>;
++    ownUndefinedKeys?: string[];
++    errorName?: string;
++    errorCode?: string;
++    errorMessage?: string;
++  };
++}
++
++// The independent reviewer froze these literals before inspecting the staged implementation.
++const decisions: DecisionCase[] = independent.cases;
++function invokeDecision(
++  fixture: DecisionCase,
++  db: ReturnType<typeof scriptedDb>,
++  viaWrapper: boolean,
++) {
++  const input = fixture.input;
++  if (fixture.operation === 'login') {
++    return viaWrapper ? resolveLoginScope(db.prisma, input) : resolveLoginScopeTx(db.tx, input);
++  }
++  if (fixture.operation === 'selected') {
++    if (typeof input.loginName !== 'string' || typeof input.isAdmin !== 'boolean') {
++      throw new Error(`Malformed independent selected fixture ${fixture.id}`);
++    }
++    const selectedInput = { ...input, loginName: input.loginName, isAdmin: input.isAdmin };
++    return viaWrapper
++      ? resolveSelectedScope(db.prisma, selectedInput)
++      : resolveSelectedScopeTx(db.tx, selectedInput);
++  }
++  if (fixture.operation === 'principal') {
++    if (typeof input.loginName !== 'string' || typeof input.loginCoCode !== 'string') {
++      throw new Error(`Malformed independent principal fixture ${fixture.id}`);
++    }
++    const principal = { ...input, loginName: input.loginName, loginCoCode: input.loginCoCode };
++    return viaWrapper ? loadPrincipal(db.prisma, principal) : loadPrincipalTx(db.tx, principal);
++  }
++  throw new Error(`Unknown independent operation ${fixture.operation}`);
++}
++
++describe.each([false, true])('independent decision fixtures; public wrapper=%s', (viaWrapper) => {
++  it.each(decisions)('$id $reason', async (fixture) => {
++    const inputBefore = structuredClone(fixture.input);
++    const queriesBefore = structuredClone(fixture.queries);
++    const db = scriptedDb(fixture.queries, undefined, fixture.input.tenantId);
++    const outcome = invokeDecision(fixture, db, viaWrapper);
++    if (fixture.expected.errorName) {
++      const expected: Record<string, unknown> = { name: fixture.expected.errorName };
++      if (fixture.expected.errorCode) expected.code = fixture.expected.errorCode;
++      if (fixture.expected.errorMessage) expected.message = fixture.expected.errorMessage;
++      await expect(outcome).rejects.toMatchObject(expected);
++    } else {
++      if (!fixture.expected.value) throw new Error(`Missing expected value ${fixture.id}`);
++      const expected = { ...fixture.expected.value };
++      for (const key of fixture.expected.ownUndefinedKeys ?? []) expected[key] = undefined;
++      await expect(outcome).resolves.toStrictEqual(expected);
++    }
++    expect(db.pending).toHaveLength(0);
++    expect(db.query).toHaveBeenCalledTimes(fixture.queries.length);
++    expect(db.transaction).toHaveBeenCalledTimes(viaWrapper ? 1 : 0);
++    expect(db.execute).toHaveBeenCalledTimes(viaWrapper ? 1 : 0);
++    const reads = fixture.queries.map((query) => `read:${query.table}`);
++    expect(db.trace).toEqual(
++      viaWrapper
++        ? ['begin', 'bind', ...reads, fixture.expected.errorName ? 'rollback' : 'commit']
++        : reads,
++    );
++    expect(fixture.input).toStrictEqual(inputBefore);
++    expect(fixture.queries).toStrictEqual(queriesBefore);
++  });
++});
++
++describe('session-context transaction extraction boundaries', () => {
++  it('pins the independently authored decision fixture and all 31 cases', () => {
++    const bytes = readFileSync(
++      new URL('./fixtures/sessionContext.extraction.independent.json', import.meta.url),
++    );
++    expect(createHash('sha256').update(bytes).digest('hex')).toBe(
++      '5fb741ce33c4615e1c1f905aef9dabf86ef97a58ca1514a56fe44bb46827c8d7',
++    );
++    expect(decisions).toHaveLength(31);
++  });
++
++  it('login binds once before all three reads and preserves optional-year output shape', async () => {
++    const db = scriptedDb([companyStep(true, ''), locationStep(), { ...yearStep(), rows: [] }]);
++    const result = await resolveLoginScope(db.prisma, login);
++    expect(result).toStrictEqual({ ...login, lcCode: '03', coYear: undefined });
++    expect(db.trace).toEqual([
++      'begin',
++      'bind',
++      'read:CO_MAST',
++      'read:LOCT_MAST',
++      'read:YEAR_MAST',
++      'commit',
++    ]);
++    expect(db.transaction).toHaveBeenCalledTimes(1);
++    expect(db.execute).toHaveBeenCalledTimes(1);
++    expect(db.pending).toHaveLength(0);
++  });
++
++  it('selection binds once and keeps selected-user membership parameters', async () => {
++    const db = scriptedDb([companyStep(), locationStep(), yearStep()]);
++    await expect(resolveSelectedScope(db.prisma, selected)).resolves.toStrictEqual({
++      ...login,
++      lcCode: '03',
++      coYear: '2025',
++    });
++    expect(db.trace).toEqual([
++      'begin',
++      'bind',
++      'read:CO_MAST',
++      'read:LOCT_MAST',
++      'read:YEAR_MAST',
++      'commit',
++    ]);
++    expect(db.transaction).toHaveBeenCalledTimes(1);
++    expect(db.execute).toHaveBeenCalledTimes(1);
++    expect(db.pending).toHaveLength(0);
++  });
++
++  it('principal wrapper binds once, preserves credential-owner output, and never exposes the password', async () => {
++    const db = scriptedDb([principalStep()]);
++    await expect(loadPrincipal(db.prisma, principalInput)).resolves.toStrictEqual({
++      loginName: 'operator',
++      loginCoCode: '02',
++      role: 'USER',
++      isAdmin: false,
++      rights: { userUpdate: true, userDelete: false, userPrint: true },
++      passwordResetRequired: true,
++    });
++    expect(db.trace).toEqual(['begin', 'bind', 'read:LOGIN_MAST', 'commit']);
++    expect(db.transaction).toHaveBeenCalledTimes(1);
++    expect(db.execute).toHaveBeenCalledTimes(1);
++  });
++
++  it('composes selection and principal reads in one caller-owned tenant transaction', async () => {
++    const db = scriptedDb([companyStep(), locationStep(), yearStep(), principalStep()]);
++    const result = await withTenant(db.prisma, login.tenantId, async (tx) => ({
++      scope: await resolveSelectedScopeTx(tx, selected),
++      principal: await loadPrincipalTx(tx, principalInput),
++    }));
++    expect(result.scope).toStrictEqual({ ...login, lcCode: '03', coYear: '2025' });
++    expect(result.principal.loginCoCode).toBe('02');
++    expect(db.trace).toEqual([
++      'begin',
++      'bind',
++      'read:CO_MAST',
++      'read:LOCT_MAST',
++      'read:YEAR_MAST',
++      'read:LOGIN_MAST',
++      'commit',
++    ]);
++    expect(db.transaction).toHaveBeenCalledTimes(1);
++    expect(db.execute).toHaveBeenCalledTimes(1);
++    expect(db.pending).toHaveLength(0);
++  });
++
++  it('direct login Tx helper neither begins nor binds a second transaction', async () => {
++    const db = scriptedDb([companyStep(true, ''), locationStep(), yearStep()]);
++    await expect(resolveLoginScopeTx(db.tx, login)).resolves.toStrictEqual({
++      ...login,
++      lcCode: '03',
++      coYear: '2025',
++    });
++    expect(db.trace).toEqual(['read:CO_MAST', 'read:LOCT_MAST', 'read:YEAR_MAST']);
++    expect(db.transaction).not.toHaveBeenCalled();
++    expect(db.execute).not.toHaveBeenCalled();
++  });
++
++  it('tenant binding failure performs no scope or principal read', async () => {
++    const failure = new Error('tenant binding failed');
++    const db = scriptedDb([], failure);
++    await expect(resolveSelectedScope(db.prisma, selected)).rejects.toBe(failure);
++    expect(db.trace).toEqual(['begin', 'bind', 'rollback']);
++    expect(db.query).not.toHaveBeenCalled();
++  });
++
++  it('late selection denial rejects the same transaction without a success result', async () => {
++    const db = scriptedDb([companyStep(), locationStep(), { ...yearStep(), rows: [] }]);
++    await expect(resolveSelectedScope(db.prisma, selected)).rejects.toMatchObject({
++      name: 'ScopeError',
++      code: 'year-unavailable',
++      statusCode: 409,
++    });
++    expect(db.trace).toEqual([
++      'begin',
++      'bind',
++      'read:CO_MAST',
++      'read:LOCT_MAST',
++      'read:YEAR_MAST',
++      'rollback',
++    ]);
++    expect(db.transaction).toHaveBeenCalledTimes(1);
++    expect(db.pending).toHaveLength(0);
++  });
++
++  it('unavailable company stops before location/year reads and retains ScopeError identity', async () => {
++    const db = scriptedDb([{ ...companyStep(), rows: [{ CO_CODE: '02', allowed: false }] }]);
++    await expect(resolveSelectedScope(db.prisma, selected)).rejects.toBeInstanceOf(ScopeError);
++    expect(db.trace).toEqual(['begin', 'bind', 'read:CO_MAST', 'rollback']);
++  });
++
++  it('query failure escapes unchanged and prevents later principal reads in a composed transaction', async () => {
++    const failure = new Error('query failure sentinel');
++    const db = scriptedDb([companyStep(), { ...locationStep(), error: failure }]);
++    await expect(
++      withTenant(db.prisma, login.tenantId, async (tx) => {
++        await resolveSelectedScopeTx(tx, selected);
++        return loadPrincipalTx(tx, principalInput);
++      }),
++    ).rejects.toBe(failure);
++    expect(db.trace).toEqual(['begin', 'bind', 'read:CO_MAST', 'read:LOCT_MAST', 'rollback']);
++    expect(db.query).toHaveBeenCalledTimes(2);
++  });
++});
+--- /dev/null
++++ b/web/apps/api/test/fixtures/sessionContext.extraction.independent.json
+@@ -0,0 +1,1627 @@
++{
++  "version": 1,
++  "kind": "batch1-tx-extraction-current-behavior-independent",
++  "authoredBeforeStagedImplementationInspection": true,
++  "sourceOfExpectedDecisions": "Current original web businessScope.ts/authorization.ts/rightsOf/isAdminRole; this is an extraction regression contract, not new desktop parity or auth-session integration evidence.",
++  "queryRowsMeaning": "Literal results are in the order produced by the existing SQL. A fake query queue must not emulate SQL sorting/membership. Separately compare SQL semantics and bindings to the original source.",
++  "undefinedEncoding": "expected.ownUndefinedKeys names own output properties whose values must be undefined; omitted JSON keys are not evidence that the JS result omits these properties.",
++  "cases": [
++    {
++      "id": "S01",
++      "reason": "Missing company refuses before location/year",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": []
++        }
++      ],
++      "expected": {
++        "errorCode": "company-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S02",
++      "reason": "Ordinary selected company requires exact login membership",
++      "operation": "selected",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "isAdmin": false
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "operator",
++            false
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": false
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "errorCode": "company-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S03",
++      "reason": "Ordinary selected company with membership resolves all three queries",
++      "operation": "selected",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "isAdmin": false
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "operator",
++            false
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S04",
++      "reason": "Admin bypass is an explicit company-query parameter",
++      "operation": "selected",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "isAdmin": true
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "operator",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S05",
++      "reason": "Login resolver company query uses existing unconditional access path",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S06",
++      "reason": "Requested branch wins over company default",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "lcCode": "07"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "07",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "07"
++            },
++            {
++              "LC_CODE": "02"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "07",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S07",
++      "reason": "Missing requested branch refuses before querying year",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "lcCode": "99"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "99",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "errorCode": "location-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S08",
++      "reason": "Company default is supplied to SQL ordering; first returned row is used",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "07",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "07"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "07"
++            },
++            {
++              "LC_CODE": "02"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "07",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S09",
++      "reason": "Empty location master retains existing trimmed company-default fallback",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": " 07 ",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "07"
++          ],
++          "rows": []
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "07",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S10",
++      "reason": "Missing both location rows and company default refuses",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": null,
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            ""
++          ],
++          "rows": []
++        }
++      ],
++      "expected": {
++        "errorCode": "location-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S11",
++      "reason": "With no company default SQL-ordered first branch is selected",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": null,
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            ""
++          ],
++          "rows": [
++            {
++              "LC_CODE": "01"
++            },
++            {
++              "LC_CODE": "03"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "01",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S12",
++      "reason": "Requested historical year is exact and does not become latest",
++      "operation": "selected",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "isAdmin": false,
++        "coYear": "2020-2021"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "operator",
++            false
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            "2020-2021"
++          ],
++          "rows": [
++            {
++              "year": "2020-2021"
++            },
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02",
++          "coYear": "2020-2021"
++        }
++      }
++    },
++    {
++      "id": "S13",
++      "reason": "Explicit unavailable year refuses even at login",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "coYear": "1999-2000"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            "1999-2000"
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "errorCode": "year-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S14",
++      "reason": "Login with no year retains incomplete scope without invented year",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": []
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02"
++        },
++        "ownUndefinedKeys": [
++          "coYear"
++        ]
++      }
++    },
++    {
++      "id": "S15",
++      "reason": "Selection with no year remains unavailable",
++      "operation": "selected",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "isAdmin": false
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "operator",
++            false
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": []
++        }
++      ],
++      "expected": {
++        "errorCode": "year-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S16",
++      "reason": "Default year comes from first descending SQL observation",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2025-2026"
++            },
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02",
++          "coYear": "2025-2026"
++        }
++      }
++    },
++    {
++      "id": "S17",
++      "reason": "Requested branch is not silently trimmed",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "lcCode": " 02 "
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            " 02 ",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "errorCode": "location-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S18",
++      "reason": "Requested year is not silently trimmed",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "coYear": " 2024-2025 "
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            " 2024-2025 "
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "errorCode": "year-unavailable",
++        "errorName": "ScopeError"
++      }
++    },
++    {
++      "id": "S19",
++      "reason": "Empty-string requested branch/year follow current default path",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "lcCode": "",
++        "coYear": ""
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": "2024-2025"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02",
++          "coYear": "2024-2025"
++        }
++      }
++    },
++    {
++      "id": "S20",
++      "reason": "Year output is trimmed; OP_DATE-derived four-digit observation is retained",
++      "operation": "login",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02"
++      },
++      "queries": [
++        {
++          "table": "CO_MAST",
++          "params": [
++            "02",
++            "",
++            true
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "CO_NAME": "Fixture company",
++              "LC_CODE": "02",
++              "allowed": true
++            }
++          ]
++        },
++        {
++          "table": "LOCT_MAST",
++          "params": [
++            "02",
++            "",
++            "02"
++          ],
++          "rows": [
++            {
++              "LC_CODE": "02",
++              "LC_NAME": "Default branch"
++            }
++          ]
++        },
++        {
++          "table": "YEAR_MAST",
++          "params": [
++            "02",
++            ""
++          ],
++          "rows": [
++            {
++              "year": " 2024 "
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "tenantId": "tx-fixture",
++          "coCode": "02",
++          "lcCode": "02",
++          "coYear": "2024"
++        }
++      }
++    },
++    {
++      "id": "P01",
++      "reason": "Selected company credential owns effective rights even when login-company credential is admin",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "U",
++              "USER_UPDATE": "Y",
++              "USER_DELETE": "N",
++              "USER_PRINT": "1",
++              "PASSWORD_RESET_REQUIRED": "y"
++            },
++            {
++              "CO_CODE": "01",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "A",
++              "USER_UPDATE": "N",
++              "USER_DELETE": "N",
++              "USER_PRINT": "N",
++              "PASSWORD_RESET_REQUIRED": "N"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "02",
++          "role": "U",
++          "isAdmin": false,
++          "rights": {
++            "userUpdate": true,
++            "userDelete": false,
++            "userPrint": true
++          },
++          "passwordResetRequired": true
++        }
++      }
++    },
++    {
++      "id": "P02",
++      "reason": "Absent selected credential falls back to immutable-login-company lookup",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "01",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "A",
++              "USER_UPDATE": "N",
++              "USER_DELETE": "N",
++              "USER_PRINT": "N",
++              "PASSWORD_RESET_REQUIRED": "N"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "01",
++          "role": "A",
++          "isAdmin": true,
++          "rights": {
++            "userUpdate": true,
++            "userDelete": true,
++            "userPrint": true
++          },
++          "passwordResetRequired": false
++        }
++      }
++    },
++    {
++      "id": "P03",
++      "reason": "No principal rows refuses",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": []
++        }
++      ],
++      "expected": {
++        "errorName": "PrincipalUnavailableError",
++        "errorMessage": "principal-unavailable"
++      }
++    },
++    {
++      "id": "P04",
++      "reason": "Lowercase a-prefix is admin and grants all global rights",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "assistant",
++              "USER_UPDATE": null,
++              "USER_DELETE": null,
++              "USER_PRINT": null,
++              "PASSWORD_RESET_REQUIRED": "N"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "02",
++          "role": "assistant",
++          "isAdmin": true,
++          "rights": {
++            "userUpdate": true,
++            "userDelete": true,
++            "userPrint": true
++          },
++          "passwordResetRequired": false
++        }
++      }
++    },
++    {
++      "id": "P05",
++      "reason": "Leading-space admin role is not trimmed into admin",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": " Admin",
++              "USER_UPDATE": "N",
++              "USER_DELETE": "N",
++              "USER_PRINT": "N",
++              "PASSWORD_RESET_REQUIRED": "N"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "02",
++          "role": " Admin",
++          "isAdmin": false,
++          "rights": {
++            "userUpdate": false,
++            "userDelete": false,
++            "userPrint": false
++          },
++          "passwordResetRequired": false
++        }
++      }
++    },
++    {
++      "id": "P06",
++      "reason": "Global rights accept exactly Y/1/lowercase true",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "U",
++              "USER_UPDATE": "Y",
++              "USER_DELETE": "1",
++              "USER_PRINT": "true",
++              "PASSWORD_RESET_REQUIRED": "N"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "02",
++          "role": "U",
++          "isAdmin": false,
++          "rights": {
++            "userUpdate": true,
++            "userDelete": true,
++            "userPrint": true
++          },
++          "passwordResetRequired": false
++        }
++      }
++    },
++    {
++      "id": "P07",
++      "reason": "Global rights do not inherit forced-reset uppercase normalization",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "U",
++              "USER_UPDATE": "y",
++              "USER_DELETE": "TRUE",
++              "USER_PRINT": " Y ",
++              "PASSWORD_RESET_REQUIRED": "true"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "02",
++          "role": "U",
++          "isAdmin": false,
++          "rights": {
++            "userUpdate": false,
++            "userDelete": false,
++            "userPrint": false
++          },
++          "passwordResetRequired": true
++        }
++      }
++    },
++    {
++      "id": "P08",
++      "reason": "Forced-reset flag does not trim spaces",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "U",
++              "USER_UPDATE": "N",
++              "USER_DELETE": "N",
++              "USER_PRINT": "N",
++              "PASSWORD_RESET_REQUIRED": " TRUE "
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "02",
++          "role": "U",
++          "isAdmin": false,
++          "rights": {
++            "userUpdate": false,
++            "userDelete": false,
++            "userPrint": false
++          },
++          "passwordResetRequired": false
++        }
++      }
++    },
++    {
++      "id": "P09",
++      "reason": "NULL role remains empty and global NULL flags remain false",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": null,
++              "USER_UPDATE": null,
++              "USER_DELETE": null,
++              "USER_PRINT": null,
++              "PASSWORD_RESET_REQUIRED": null
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "value": {
++          "loginName": "operator",
++          "loginCoCode": "02",
++          "role": "",
++          "isAdmin": false,
++          "rights": {
++            "userUpdate": false,
++            "userDelete": false,
++            "userPrint": false
++          },
++          "passwordResetRequired": false
++        }
++      }
++    },
++    {
++      "id": "P10",
++      "reason": "Missing principal company is refused",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": null,
++              "LOGIN_NAME": "operator",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "U",
++              "USER_UPDATE": "N",
++              "USER_DELETE": "N",
++              "USER_PRINT": "N",
++              "PASSWORD_RESET_REQUIRED": "N"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "errorName": "PrincipalUnavailableError",
++        "errorMessage": "principal-unavailable"
++      }
++    },
++    {
++      "id": "P11",
++      "reason": "Missing principal name is refused",
++      "operation": "principal",
++      "input": {
++        "tenantId": "tx-fixture",
++        "coCode": "02",
++        "loginName": "operator",
++        "loginCoCode": "01"
++      },
++      "queries": [
++        {
++          "table": "LOGIN_MAST",
++          "params": [
++            "operator",
++            "02",
++            "01"
++          ],
++          "rows": [
++            {
++              "CO_CODE": "02",
++              "LOGIN_NAME": "",
++              "LOGIN_PWD": "fixture-not-authenticated",
++              "LOGIN_CATG": "U",
++              "USER_UPDATE": "N",
++              "USER_DELETE": "N",
++              "USER_PRINT": "N",
++              "PASSWORD_RESET_REQUIRED": "N"
++            }
++          ]
++        }
++      ],
++      "expected": {
++        "errorName": "PrincipalUnavailableError",
++        "errorMessage": "principal-unavailable"
++      }
++    }
++  ],
++  "transactionInvariants": [
++    {
++      "id": "TX01",
++      "expected": "Each public login/selected/principal wrapper opens exactly one withTenant callback with input.tenantId; all its domain queries use that callback tx."
++    },
++    {
++      "id": "TX02",
++      "expected": "Direct Tx helpers open zero transactions and do not call set_config, $transaction, withTenant or set isolation; caller must already bind tenant and choose transaction isolation."
++    },
++    {
++      "id": "TX03",
++      "expected": "An original query rejection propagates as the same error without reclassification, swallowing, fallback query or partial successful return."
++    },
++    {
++      "id": "TX04",
++      "expected": "Company refusal stops before location/year; location refusal stops before year; principal absence remains PrincipalUnavailableError."
++    },
++    {
++      "id": "TX05",
++      "expected": "No new row-lock clause, writes, LOGIN/USER_SET semantics, input coercion, last-day-lock invocation, token/session/epoch/ledger integration is added."
++    },
++    {
++      "id": "TX06",
++      "expected": "One default withTenant transaction is not a RepeatableRead guarantee and is not atomic with later separate auth/session/last-lock calls."
++    }
++  ]
++}

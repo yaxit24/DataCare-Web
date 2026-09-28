@@ -1,0 +1,58 @@
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/salesReturnForm.test.ts (31 tests) 6ms
+ ✓ test/salesReturnReplay.test.ts (32 tests) 14ms
+ ✓ test/salesReturnBillReplay.test.ts (67 tests) 22ms
+ ✓ test/apiContext.test.ts (20 tests) 63ms
+ ✓ test/imageEditorSession.test.ts (20 tests) 60ms
+ ✓ test/salesOrderForm.test.ts (15 tests) 8ms
+ ✓ test/contextSelection.test.ts (53 tests) 244ms
+ ✓ test/columnSettings.test.ts (27 tests) 8ms
+ ✓ test/designBookRepeat.test.ts (12 tests) 6ms
+ ✓ test/tourOrderForm.test.ts (8 tests) 7ms
+ ✓ test/directFetchContext.test.ts (8 tests) 20ms
+ ✓ test/pageContextSelectionPause.test.ts (7 tests) 16ms
+ ✓ test/formKeys.test.ts (7 tests) 3ms
+ ✓ test/pageContext.test.ts (37 tests) 7ms
+ ✓ test/designBookCalculation.test.ts (5 tests) 5ms
+ ✓ test/lineRecalc.test.ts (6 tests) 2ms
+ ✓ test/designBookPage.test.ts (5 tests) 6ms
+ ✓ test/parityContainment.test.ts (5 tests) 5ms
+ ✓ test/rateCutSettlementPayload.test.ts (5 tests) 2ms
+ ✓ test/subDetailGrid.test.ts (7 tests) 3ms
+ ✓ test/derivedValueSources.test.ts (4 tests) 16ms
+✔ accepts an assertion-backed journey and derives zero provenance counters (2.528ms)
+✔ uses an explicit journey status and fails closed on missing checks or result objects (1.630917ms)
+✔ detects nested mock, response, and interception indicators (0.099417ms)
+✔ detects mock indicators nested inside arrays (0.072833ms)
+✔ rejects malformed provenance instead of coercing it to zero (0.858375ms)
+✔ runner-observed route registration fails the aggregate evidence (0.206ms)
+ ❯ test/parity-real-stack-evidence.test.mjs (0 test)
+ ✓ test/mfgLotView.test.ts (4 tests) 2ms
+ ✓ test/scaleCaptureContext.test.ts (9 tests) 567ms
+ ✓ test/gridKeyboard.test.ts (5 tests) 2ms
+ ✓ test/masterSearch.test.ts (7 tests) 5ms
+ ✓ test/reportSurfaceLinks.test.ts (1 test) 7ms
+ ✓ test/textIdentifiers.test.ts (10 tests) 52ms
+ ✓ test/cameraRequestGuard.test.ts (3 tests) 3ms
+ ✓ test/chequePrintPage.test.ts (2 tests) 4ms
+ ✓ test/wholesaleSalePayload.test.ts (2 tests) 5ms
+ ✓ test/stockLimitPages.test.ts (1 test) 1ms
+ ✓ test/schemeInstallmentUpi.test.ts (1 test) 2ms
+ ✓ test/eInvoiceExcelPage.test.ts (2 tests) 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/parity-real-stack-evidence.test.mjs [ test/parity-real-stack-evidence.test.mjs ]
+Error: No test suite found in file /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity-real-stack-evidence.test.mjs
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 33 passed (34)
+      Tests  428 passed (428)
+   Start at  03:30:49
+   Duration  1.64s (transform 903ms, setup 0ms, collect 1.65s, tests 1.17s, environment 3ms, prepare 1.53s)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run

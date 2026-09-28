@@ -1,0 +1,296 @@
+{
+  "startedAt": "2026-09-10T23:01:18.936Z",
+  "database": "disposable localhost:55433 / app_user",
+  "mockedRequests": 0,
+  "status": "failed",
+  "designBook": {
+    "checks": [
+      "browser create/reload",
+      "two components",
+      "style and text page number",
+      "unchanged edit",
+      "saved image upload/read/delete",
+      "changed component",
+      "stale edit409 retains form",
+      "browser deletion"
+    ]
+  },
+  "designCalculations": {
+    "checks": [
+      "new-book configured item defaults",
+      "ordered cell leaves",
+      "invalid numeric refresh retains draft with field validation and no page error",
+      "customer/karigar conversion and labour",
+      "component-only aggregate trigger",
+      "explicit parent refresh",
+      "whole-amount bankers rounding",
+      "transient margin and saved MRP",
+      "server replay save/reopen",
+      "unchanged snapshot without replay",
+      "zero-rate manual amount retention",
+      "IL P-basis 0.50/0.51 boundary",
+      "delete calculated design"
+    ]
+  },
+  "tourOrder": {
+    "voucherNo": "00001",
+    "scope": {
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "Z09",
+      "acCode": "TOURAC",
+      "itemCode": "GOLD",
+      "componentCode": "STONE"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "POST",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "DELETE",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      }
+    ],
+    "checks": [
+      "configured book",
+      "browser create/reopen",
+      "two component rows",
+      "legacy flattened update400 preserves children",
+      "unchanged edit",
+      "changed child",
+      "whole-rupee pieces and percentage labour",
+      "manual paise unchanged edit",
+      "rate-before-ghat ordered commits",
+      "voucher time preservation",
+      "stale edit409 retains form",
+      "scoped print",
+      "browser deletion"
+    ]
+  },
+  "error": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('combobox').first()\u001b[22m\n\u001b[2m    - locator resolved to <select aria-label=\"Company\" title=\"Switch company\">…</select>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - did not find some options\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - did not find some options\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m       - did not find some options\u001b[22m\n\u001b[2m     - retrying select option action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+  "finishedAt": "2026-09-10T23:01:56.916Z"
+}

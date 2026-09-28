@@ -1,0 +1,30 @@
+{
+  "method": "Controlled source comparison using the same CURRENT heuristic scanner against frozen Round12 API/web source. The scanner file is absent from the frozen checkout; failed direct invocation is not a baseline result.",
+  "scannerSha256": "0404f2b930215b1c90dbdce0e3f4ab1fc0b0328dd28554aeeb8dbcb5150c5a35",
+  "frozenSourceTotals": {
+    "inputInterfaces": 166,
+    "inputFields": 2382,
+    "reachableFromUi": 2278,
+    "apiOnlyUnreachable": 104,
+    "reachablePct": 95.6
+  },
+  "currentSourceTotals": {
+    "inputInterfaces": 168,
+    "inputFields": 2390,
+    "reachableFromUi": 2284,
+    "apiOnlyUnreachable": 106,
+    "reachablePct": 95.6
+  },
+  "added": [
+    [
+      "FormAuthorizationInput",
+      "adminOnly"
+    ],
+    [
+      "SaleReturnIncomingLabourReadInput",
+      "enteredCode"
+    ]
+  ],
+  "removed": [],
+  "qualification": "Two new internal contracts are counted as operator input by the interface-name heuristic. No threshold or scanner exemption changed. The106/96 gate remains failed; this diagnostic is not whole-product reachability proof."
+}

@@ -1,0 +1,26 @@
+model AuthSession {
+  tenantId       String    @map("tenant_id") @db.VarChar(24)
+  sessionId      String    @map("session_id") @db.VarChar(36)
+  loginName      String    @map("login_name") @db.VarChar(255)
+  loginCoCode    String    @map("login_co_code") @db.VarChar(2)
+  coCode         String    @map("co_code") @db.VarChar(2)
+  lcCode         String    @map("lc_code") @db.VarChar(2)
+  coYear         String?   @map("co_year") @db.VarChar(9)
+  refreshJtiHash String    @map("refresh_jti_hash") @db.Char(64)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastUsedAt     DateTime  @default(now()) @map("last_used_at") @db.Timestamptz(6)
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt      DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokeReason   String?   @map("revoke_reason") @db.VarChar(40)
+
+  contextEpoch             BigInt  @default(1) @map("context_epoch") @db.BigInt
+  ledgerContext            Json    @default("{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"vendor-authority-unresolved\"}") @map("ledger_context") @db.JsonB
+  lastContextSelectionId   String? @map("last_context_selection_id") @db.VarChar(36)
+  lastContextRequestSha256 String? @map("last_context_request_sha256") @db.Char(64)
+  lastContextFromEpoch     BigInt? @map("last_context_from_epoch") @db.BigInt
+
+  @@id([tenantId, sessionId])
+  @@index([tenantId, loginName, loginCoCode], map: "auth_session_login_idx")
+  @@index([tenantId, expiresAt], map: "auth_session_expiry_idx")
+  @@map("auth_session")
+}

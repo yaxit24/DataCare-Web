@@ -32,13 +32,33 @@
  * WHAT IT ENFORCES
  *   * every item carries a known state
  *   * nothing remains `unclassified` once the register is declared complete (`--strict`)
- *   * `verified` requires an `evidence` path that EXISTS on disk
- *   * `implemented-elsewhere`, `dead-in-dataset` and `scope-excluded` each require a `note`
- *   * evidence younger than the code it certifies (staleness is checked by --strict)
+ *   * `verified` requires an `evidence` path that is a real, NON-EMPTY FILE
+ *   * `implemented-elsewhere`, `dead-in-dataset`, `scope-excluded` and `absent` each require a `note`
+ *   * a state that claims a web surface must carry one, and one that denies it must not
+ *   * the item list matches its own declared count, with no duplicate tab/menu pair
+ *
+ * WHAT IT DELIBERATELY DOES NOT DO
+ * It does not resolve a `webSurface` claim. Whether `GET /reports/day-book` is a real route, `accounts` a real
+ * dynamic master, or a page path a real file is decided by the actual route registry and the filesystem, so
+ * that check lives in `apps/api/test/completionRegister.test.ts` where `routePolicyFor` can be imported and
+ * dynamic families such as `POST /masters/:name/import` resolve correctly. A text search in this script would
+ * report a false negative on exactly those, and a gate that cries wolf gets bypassed.
+ *
+ * TWO DIFFERENT BARS, DELIBERATELY SEPARATE
+ *   `--strict`  is WP-04's bar: every entry is CLASSIFIED. It says nothing about whether the classification is
+ *               a good one, only that no entry is still `unclassified`.
+ *   `--release` is the plan's §11.2/§14 bar: every visible entry is `verified`, or `scope-excluded`/
+ *               `dead-in-dataset` with a recorded decision. §14 states it outright — "implemented-unverified
+ *               is not done" — and an `absent` entry is a missing feature, so neither may pass a release.
+ *
+ * Keeping them apart is what stops a completed classification from being read as a completed migration. After
+ * WP-04, `--strict` passes and `--release` fails on all 198, which is the true position: we now know exactly
+ * what is missing and exactly what is unproven, and knowing is not shipping.
  *
  * Usage:
- *   node scripts/check-completion-register.mjs            # report, fail on a malformed or dishonest entry
- *   node scripts/check-completion-register.mjs --strict    # additionally fail on any unclassified item
+ *   node scripts/check-completion-register.mjs                       # well-formedness
+ *   node scripts/check-completion-register.mjs --strict              # WP-04: nothing unclassified
+ *   node scripts/check-completion-register.mjs --strict --release    # release: nothing unproven or missing
  */
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
@@ -56,12 +76,35 @@ const STATES = new Set([
   'implemented-elsewhere',
   'dead-in-dataset',
   'scope-excluded',
+  // Visible on desktop, no web surface. Added by WP-04 because the six original states could not express it:
+  // an unimplemented feature had to be called implemented, elsewhere, dead or excluded, and three of those
+  // need evidence a classifier does not have. Forcing that choice is how a register starts lying.
+  'absent',
 ]);
 /** States that are meaningless without a written justification. */
-const NEEDS_NOTE = new Set(['implemented-elsewhere', 'dead-in-dataset', 'scope-excluded']);
+const NEEDS_NOTE = new Set([
+  'implemented-elsewhere',
+  'dead-in-dataset',
+  'scope-excluded',
+  'absent',
+]);
+/** States that assert a web surface exists, and must therefore name it. */
+const NEEDS_SURFACE = new Set(['verified', 'implemented-unverified', 'implemented-elsewhere']);
+/** States that assert nothing exists, and must not quietly carry a surface. */
+const FORBIDS_SURFACE = new Set(['absent']);
+const SURFACE_KINDS = new Set(['route', 'page', 'form', 'master', 'report']);
 
 const strict = process.argv.includes('--strict');
+const release = process.argv.includes('--release');
 const problems = [];
+
+/**
+ * States a release may contain.
+ *
+ * `verified` is the only positive one. `scope-excluded` and `dead-in-dataset` are acceptable ONLY because each
+ * already requires a written decision, which plan §11.2 additionally expects an owner to have signed.
+ */
+const RELEASE_ACCEPTABLE = new Set(['verified', 'scope-excluded', 'dead-in-dataset']);
 
 async function main() {
   let reg;
@@ -78,10 +121,15 @@ async function main() {
   }
 
   const byState = new Map();
+  const seen = new Map();
   for (const it of items) {
     const label = `${it.tab ?? '?'}/${it.menu ?? '?'}`;
     const state = it.state ?? '(missing)';
     byState.set(state, (byState.get(state) ?? 0) + 1);
+
+    // A duplicated menu entry would let one classification stand in for two desktop actions.
+    if (seen.has(label)) problems.push(`${label}: duplicate entry`);
+    seen.set(label, true);
 
     if (!STATES.has(state)) {
       problems.push(`${label}: unknown state '${state}'`);
@@ -91,8 +139,12 @@ async function main() {
       if (!it.evidence) {
         problems.push(`${label}: state 'verified' with no evidence path`);
       } else {
+        // A directory or an empty file satisfied the previous check, which is not evidence of anything.
         try {
-          await stat(path.resolve(repo, it.evidence));
+          const st = await stat(path.resolve(repo, it.evidence));
+          if (!st.isFile()) problems.push(`${label}: evidence is not a file -> ${it.evidence}`);
+          else if (st.size === 0)
+            problems.push(`${label}: evidence file is empty -> ${it.evidence}`);
         } catch {
           problems.push(`${label}: evidence does not exist on disk -> ${it.evidence}`);
         }
@@ -101,6 +153,29 @@ async function main() {
     if (NEEDS_NOTE.has(state) && !String(it.note ?? '').trim()) {
       problems.push(`${label}: state '${state}' requires a note explaining it`);
     }
+    if (NEEDS_SURFACE.has(state)) {
+      const surface = it.webSurface;
+      if (!surface || typeof surface !== 'object') {
+        problems.push(`${label}: state '${state}' claims a web equivalent but names no webSurface`);
+      } else {
+        if (!SURFACE_KINDS.has(surface.kind)) {
+          problems.push(`${label}: webSurface.kind '${surface.kind}' is not a known kind`);
+        }
+        if (!String(surface.surface ?? '').trim()) {
+          problems.push(`${label}: webSurface has no surface value`);
+        }
+      }
+    }
+    if (FORBIDS_SURFACE.has(state) && it.webSurface) {
+      problems.push(`${label}: state '${state}' must not carry a webSurface`);
+    }
+  }
+
+  // The register's own declared total is the denominator every release claim cites; a silent drift in the
+  // item list would move that denominator without anyone deciding to.
+  const declared = reg.counts?.items;
+  if (declared != null && declared !== items.length) {
+    problems.push(`register declares counts.items=${declared} but carries ${items.length} items`);
   }
 
   console.log(`completion register: ${items.length} desktop menu item(s)`);
@@ -125,6 +200,42 @@ async function main() {
     console.log(`REGISTER_RED ${unclassified} item(s) still unclassified (--strict)`);
     process.exit(1);
   }
+
+  if (release) {
+    // Plan §14: "'Implemented-unverified' is not done." §11.2: every evaluated-visible entry is verified or
+    // mapped, and every excluded or dead entry carries an owner-signed consequence. So a release may contain
+    // neither an unproven entry nor a missing one.
+    const blocking = items.filter((it) => !RELEASE_ACCEPTABLE.has(it.state));
+    if (blocking.length) {
+      const counts = new Map();
+      for (const it of blocking) counts.set(it.state, (counts.get(it.state) ?? 0) + 1);
+      console.log(
+        `REGISTER_RED ${blocking.length} of ${items.length} item(s) cannot be released (--release)`,
+      );
+      for (const [state, n] of [...counts].sort((a, b) => b[1] - a[1])) {
+        console.log(`    ${String(n).padStart(4)}  ${state}`);
+      }
+      const absent = blocking.filter((it) => it.state === 'absent');
+      if (absent.length) {
+        console.log(
+          `    ${absent.length} entr${absent.length === 1 ? 'y has' : 'ies have'} no web surface at all:`,
+        );
+        for (const it of absent.slice(0, 12)) {
+          console.log(`      ${it.tab}/${it.menu}`);
+        }
+        if (absent.length > 12) console.log(`      … and ${absent.length - 12} more`);
+        const hidden = absent.filter((it) => it.visibleOnDesktop === false);
+        if (hidden.length) {
+          console.log(
+            `    of those, ${hidden.length} are hidden on the desktop and need an owner-signed exclusion ` +
+              `rather than an implementation: ${hidden.map((it) => `${it.tab}/${it.menu}`).join(', ')}`,
+          );
+        }
+      }
+      process.exit(1);
+    }
+  }
+
   console.log('REGISTER_OK every entry is well-formed and honestly evidenced');
   if (unclassified) {
     console.log(

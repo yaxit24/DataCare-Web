@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   buildIrnPayload,
+  buildCreditNoteIrnPayload,
   validateIrnPayload,
   fmtIrnDate,
   EInvoiceValidationError,
@@ -30,6 +31,7 @@ describe('irn payload', () => {
     const p = buildIrnPayload({ seller, buyer, sale, items });
     expect(p.Version).toBe('1.1');
     expect(p.TranDtls.SupTyp).toBe('B2B');
+    expect(p.DocDtls.Typ).toBe('INV');
     expect(p.DocDtls.No).toBe('DF/00005');
     expect(p.DocDtls.Dt).toBe('09/06/2023');
     expect(p.ItemList[0]!.HsnCd).toBe('711319');
@@ -39,6 +41,13 @@ describe('irn payload', () => {
     expect(p.ValDtls.TotInvVal).toBe(22241.82);
     expect(validateIrnPayload(p)).toEqual([]);
   });
+  it('builds a CRN payload for the desktop E CrntNote document type', () => {
+    const p = buildCreditNoteIrnPayload({ seller, buyer, sale, items });
+    expect(p.DocDtls.Typ).toBe('CRN');
+    expect(p.DocDtls.No).toBe('DF/00005');
+    expect(validateIrnPayload(p)).toEqual([]);
+  });
+
   it('requires recipient GSTIN (B2B only)', () => {
     expect(() => buildIrnPayload({ seller, buyer: { ...buyer, gstin: '' }, sale, items })).toThrow(
       EInvoiceValidationError,

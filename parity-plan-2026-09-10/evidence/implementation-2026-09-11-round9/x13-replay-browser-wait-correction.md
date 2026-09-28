@@ -1,0 +1,7 @@
+# Combined browser interruption and wait correction
+
+The `round9-empty-header-verified` attempt ended with an unhandled `page.waitForResponse` timeout in the new journey loading R92 after the held-read A→B→A scenario. It did not produce result.json or complete the empty-header case. The surviving test-only Next process group22268 was identified by its4411 command and stopped; customer/normal application processes were unchanged.
+
+The response promise had been started before awaiting a separate click. A rejected response wait could become unhandled while the click was still pending, preventing the harness finally block from recording its result and cleanup. The new load/open/commit helpers immediately join their response wait and triggering action with Promise.all so both failures are observed. Book selection now waits for the existing two-animation-frame render/effect settlement and explicitly checks the selected book and cleared voucher before filling the next voucher. This targets the suspected post-selection timing race; the failed attempt did not capture enough state to prove that as its root cause.
+
+No application logic, timeouts, expected API results, financial values or original fifteen check strings were changed. The final run must still pass all prior journeys, the held-read assertions and the complete preview journey. A successful later run does not turn this interrupted attempt into a pass.

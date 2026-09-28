@@ -89,7 +89,15 @@ export default function DhrnReceiptPage() {
         borrowerAc,
         borrowerName: borrowerName || undefined,
         principalRepaid: Number(principalRepaid || 0),
-        interest: Number(interest || 0),
+        // P1-1: send `interest` ONLY when the operator typed one.
+        //
+        // `dhrn.ts:563-566` computes interest from the configured mode (monthly vs daily,
+        // inclusive vs exclusive day counting, company year-days, compound annual blocks) but
+        // only when the field is ABSENT. Sending `Number('' || 0)` made an untouched field an
+        // explicit override of zero, so every receipt saved through this screen charged no
+        // interest and the whole engine — matching desktop `TR_DHRN_REC.cs:5626-5643` and
+        // `:5704-5714` — was dead. `undefined` is what hands control back to it.
+        interest: interest.trim() === '' ? undefined : Number(interest),
         adjustDhiran: extra.adjustDhiran ? Number(extra.adjustDhiran) : undefined,
         adjustInterest: extra.adjustInterest ? Number(extra.adjustInterest) : undefined,
         advanceDhiranReceipt: extra.advanceDhiranReceipt
@@ -186,7 +194,20 @@ export default function DhrnReceiptPage() {
             </div>
             <div className="field">
               <label>Interest</label>
-              <input value={interest} onChange={(e) => setInterest(e.target.value)} />
+              <input
+                value={interest}
+                onChange={(e) => setInterest(e.target.value)}
+                placeholder="blank = compute from the loan's configured rate"
+                aria-describedby="dhrn-receipt-interest-help"
+              />
+              {/* The desktop shows months/days/rate and the accrued figure on the form
+                  (TR_DHRN_REC.cs:5740-5815). Until that preview exists, say plainly that an
+                  empty field is not zero — otherwise leaving it blank looks like waiving the
+                  interest rather than delegating it. */}
+              <small id="dhrn-receipt-interest-help" className="hint">
+                Leave blank to charge the interest the configured mode computes; type a value only
+                to override it.
+              </small>
             </div>
             <div className="field">
               <label>&nbsp;</label>

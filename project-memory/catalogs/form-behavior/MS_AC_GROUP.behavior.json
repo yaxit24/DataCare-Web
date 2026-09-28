@@ -1,0 +1,80 @@
+{
+ "form": "MS_AC_GROUP",
+ "loc": 2056,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM AC_GROUP WHERE CO_CODE = ' ? ' ORDER BY AC_GR",
+  "DELETE FROM AC_GROUP WHERE CO_CODE = ' ? ' AND AC_GR = ' ? '",
+  "INSERT INTO AC_GROUP (CO_CODE,AC_GR,AC_GR_NAME,AC_MAIN_GR,AC_SUB_GR,MAIN_USER,USER_SHOW_GROUP) VALUES (' ? ',' ? ',' ? ',' ? ',' ? ',' ? ',' ? ')",
+  "Please Select Group For Delete.",
+  "SELECT * FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 100",
+  "INSERT INTO BOOK_IDTL(MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME,SVR_PWD)VALUES(' ? ',100,'O',' ? ',' ? ',' ? ')",
+  "Server Ip is Update....Ok..",
+  "UPDATE BOOK_IDTL SET MAIN_BOOK = ' ? ',INOUT_TYPE = 'O',AC_CODE = ' ? ',AC_NAME = ' ? ' ,SVR_PWD = ' ? ' WHERE SR_NO = 100"
+ ],
+ "keyboard": {
+  "F1": 2,
+  "Enter": 9,
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1,
+  "Backspace": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Please Insert Group Name ...",
+   "when": "Operators.CompareString(tGrName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Enter Group Code.",
+   "when": "Operators.CompareString(tGrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Enter Group Name.",
+   "when": "Operators.CompareString(tGrName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": "DC_Main.Dc.State == ConnectionState.Open"
+  },
+  {
+   "message": "Please Select Group For Delete.",
+   "when": "Operators.CompareString(tGrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Record now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "You Cant Delete Record This Ac Group Use in Ac Master....",
+   "when": "DC_Main.Tbl.Rows.Count > 0"
+  },
+  {
+   "message": "You Cant Delete Record, This Group Is Default Account Group....",
+   "when": "Conversion.Val(tGrCode.Text) < 50.0"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "Please Fild Is Not Blank Alloud...",
+   "when": "(Operators.CompareString(tServerIp.Text, \"\", false) == 0) | (Operators.CompareString(tDataBaseName.Text, \"\", false) == 0) | (Operators.CompareString(tMasterData"
+  },
+  {
+   "message": "Server Ip is Update....Ok..",
+   "when": "DC_Main.Rshlp.Rows.Count == 0"
+  }
+ ]
+}

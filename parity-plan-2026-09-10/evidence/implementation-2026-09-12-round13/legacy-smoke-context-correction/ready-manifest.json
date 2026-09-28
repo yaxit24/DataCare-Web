@@ -1,0 +1,79 @@
+{
+  "kind": "legacy-smoke-context-mock-correction-staged",
+  "capturedAtUtc": "2026-09-11T22:11:31.171093+00:00",
+  "browserExecuted": false,
+  "databaseExecuted": false,
+  "activeFilesChanged": false,
+  "existingActionsAndAssertionsByteIdentical": true,
+  "syntaxCheck": {
+    "command": "node --check web/apps/web/test/browser.smoke.mjs",
+    "cwd": "/tmp/session-legacy-smoke-correction",
+    "exitCode": 0
+  },
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs",
+      "sha256": "50f6f4951b7126fc50ea01b50b0c7b26850f4cf1e4243286c07f6bddbe2b44a9"
+    },
+    {
+      "path": "/tmp/session-legacy-smoke-correction/web/apps/web/test/browser.smoke.mjs",
+      "sha256": "ca51ace0460b91c9ff9255188262aa6f709119ed661d10f2dd788b34628e78e1"
+    },
+    {
+      "path": "/tmp/session-legacy-smoke-correction/correction.patch",
+      "sha256": "08aa6a21e865b9bb5cbf3997322d0d5fd1e4021c43efd65826e28a565478c04a"
+    },
+    {
+      "path": "/tmp/session-legacy-smoke-correction/qualification.md",
+      "sha256": "07319001acdafeee3d45f8715a6fa372a09b12d71ed77b7381bdca97f5c7f512"
+    },
+    {
+      "path": "/tmp/session-legacy-smoke-correction/syntax-check.txt",
+      "sha256": "e5cb9c8e863c3b1424f6afdde25c1d904d3f19aa44fe2412ec3614db85f110c2"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/api.ts",
+      "sha256": "752786074a6de23482dc33560ed677751c59fc8d686c2d25d893ad82598cc015"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/pageContext.ts",
+      "sha256": "1f157fc8f55cee17e914bebbf77d5b709f42640f902f10228e41b4478dc20426"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/contextSelection.ts",
+      "sha256": "b66344f45ea33af2e01e5aadd443011c03666edebbf91b53f9594b68a49db2dd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/select/page.tsx",
+      "sha256": "2e3965ceb00575dc5e4a7e8552c93885aa03567cfb4274636ca9ea2bbdbfc038"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/Shell.tsx",
+      "sha256": "ce6c376aa8d4e4e008bedfcda7bd3c7aeff4f7d1b4a927bf9938448e82594827"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/legacy-browser-after-session-command.txt",
+      "sha256": "dfe8bd1b69ac28fc05a73dfec39aabf76732db70e05d53b39e7bc9fdb1fe5e23"
+    },
+    {
+      "path": "/var/folders/qp/2x_ztvln36v5xfrz6_8ks2j40000gn/T/datacare-browser-smoke-failure-nsMvdy/diagnostics.json",
+      "sha256": "707d4ccdddf21fc621f2b4cbfc35c445a011abc7d536ef06df54b8c0af033595"
+    },
+    {
+      "path": "/var/folders/qp/2x_ztvln36v5xfrz6_8ks2j40000gn/T/datacare-browser-smoke-failure-nsMvdy/page.html",
+      "sha256": "ca8faff1b440271e3cdebd0fed872dcc6125c5d5ebc8c163ae1626031347ac0e"
+    },
+    {
+      "path": "/var/folders/qp/2x_ztvln36v5xfrz6_8ks2j40000gn/T/datacare-browser-smoke-failure-nsMvdy/page.png",
+      "sha256": "9ba5ac3a29228ab4c0782f71e4dc4a857bda4301d2c332ed69d28762a65069c3"
+    }
+  ]
+}

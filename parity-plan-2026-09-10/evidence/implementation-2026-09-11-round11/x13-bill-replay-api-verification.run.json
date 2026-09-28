@@ -1,0 +1,154 @@
+{
+  "kind": "x13-saved-bill-replay-independent-api-verification-v1",
+  "status": "focused-engineering-passed",
+  "numericPersistenceAcceptance": false,
+  "desktopRuntimeAcceptance": false,
+  "closingAcceptance": false,
+  "dbPort": 55433,
+  "databaseLeaseReleased": true,
+  "testFormattingOnlyAfterFinalRun": true,
+  "verification": [
+    {
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-focused-scope-contract.txt",
+      "files": 13,
+      "tests": 365,
+      "skipped": 0,
+      "exitCode": 0,
+      "stage": "before-additional-downstream-test"
+    },
+    {
+      "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-downstream-corrected.txt",
+      "files": 2,
+      "tests": 44,
+      "skipped": 0,
+      "exitCode": 0,
+      "stage": "final-new-tests"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "web/apps/api/test/saleReturnBillReplay.db.test.ts",
+      "sha256": "75a8535c45d1be37d466fa88d7bd406c6962bdc8071ed5b2f78d185832ce48db"
+    },
+    {
+      "path": "web/apps/api/test/saleReturnBillReplay.routes.db.test.ts",
+      "sha256": "d3017b2b3f529744f8ae911940ba5f62cb8a37684bb5dc951185ea01c94c68bc"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/saleReturnBillReplay.fixture.ts",
+      "sha256": "15b7d9d591052c38be2efbd6aef083b376fb848bd8c03e751f8eb963f1471eb5"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/saleReturnBillReplay.independent.json",
+      "sha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "b78bbed89d97a401227fa1399448b3b56081c07676986621b89e697ef968d953"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e"
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "sha256": "5935fe23532df5248db5b03a7d6ab920375f1c30f9b19c23bf3aaf7016b3cc9c"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnBillTaxPolicy.ts",
+      "sha256": "4e12c8b129cbdc168bafb01cb40a7a723e1db2bfb57af57a3c73f9099b809622"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-contract.md",
+      "sha256": "7240e8f6b3e0ea5b25ddd98535862d6e7a8cbf50cd981caccf049ef35b707b6b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-source-addendum.md",
+      "sha256": "9f41889ef665c3a0934412c619921bf5788b853269967ea81e8ca267f09347ae"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-bill-replay-api-verification.md",
+      "sha256": "7ec62e9b1afb375a1c098423fc762a5fc64ba542ef49005588ed6586e838d94b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-bill-replay-independent-vectors.json",
+      "sha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-focused-first.txt",
+      "sha256": "df5ba326dba23c501d4ab8765e5f1c579bc6389038315f1574e7fe15eb05497f"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-focused-code-mapping.txt",
+      "sha256": "1b3aa3207b20721c32f9a333efecaf1ea036172a84ddd89a2bd51fc70ceabc63"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-focused-scope-contract.txt",
+      "sha256": "4fa488b9a77c106f42cf583b778a3b2e5403effcb9dd7019d835a31842194484"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-downstream-boundary.txt",
+      "sha256": "2bf2ea4a281ecfdd451f6376028294c61e420756dab2b938d7caaf24d67a4236"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-downstream-corrected.txt",
+      "sha256": "60e43b9573a78c4cc6adeb302c70c0b8f05a094f8e075a9a8d67f9b3c57b529a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-test-format.txt",
+      "sha256": "3bb2047c1acc37433971e375cfd375c807bedd39926525d0a4b76ffab6954620"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-replay-test-lint.txt",
+      "sha256": "ca749d24d57dace30d5569529ddfedfd50cdd62ddff2b07f7f6e0f798eb57386"
+    }
+  ]
+}

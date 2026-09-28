@@ -1,0 +1,23 @@
+{
+ "form": "UT_PWD_UPDATE",
+ "tables": [
+  "LOGIN_MAST"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "LOGIN_MAST"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "LOGIN_MAST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 4,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 749
+}

@@ -1,0 +1,94 @@
+{
+ "form": "MS_BOOK",
+ "loc": 3123,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT MAIN_BOOK FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' GROUP BY MAIN_BOOK ORDER BY MAIN_BOOK",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE as AcCodeL, A.AC_GR As GroupL,B.AC_GR_NAME AS GrNameL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' ORDER BY A.AC_NAME",
+  "SELECT * FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY BOOK_NAME",
+  "SELECT * FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY CO_BOOK",
+  "SELECT EMP_NAME FROM EMP_MAST WHERE CO_CODE =' ? ' AND EMP_CODE = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE MAIN_BOOK = ' ? ' ORDER BY SR_NO",
+  "SELECT * FROM BOOK_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' ORDER BY SR_NO",
+  "DELETE FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "DELETE FROM BOOK_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT * FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT * FROM BOOK_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "Please Select Product For Delete.",
+  "SELECT * FROM AC_DATA WHERE CO_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT * FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE MAIN_BOOK = ' ? ' AND SR_NO <> 0 ORDER BY SR_NO",
+  "UPDATE BOOK_DATA SET DATA_TYPE = 'A' WHERE CO_CODE = ' ? '",
+  "UPDATE BOOK_DETL SET DATA_TYPE = 'A' WHERE CO_CODE = ' ? '",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME"
+ ],
+ "keyboard": {
+  "Ctrl+Esc": 1,
+  "Ctrl+O": 1,
+  "Enter": 8,
+  "F1": 2,
+  "Backspace": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "This Is a Reserve Code You Cant Use It...",
+   "when": "(Operators.CompareString(tBkCode.Text, \"218\", false) == 0) | (Operators.CompareString(tBkCode.Text, \"888\", false) == 0) | (Operators.CompareString(tBkCode.Text,"
+  },
+  {
+   "message": "Please Insert Book Short Name",
+   "when": "Operators.CompareString(tBkShort.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Error Found : Please Enter Book Detail First...",
+   "when": "(Operators.CompareString(tBkCode.Text, \"\", false) == 0) | (Operators.CompareString(tBkName.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Product For Delete.",
+   "when": "Operators.CompareString(tBkCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Cant Delete Record This Book Code Use in Account Transection....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "You Cant Delete Record This Book Code Use in Stock Transection....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Book now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Book now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Book now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Error Found : Please Enter Book Name First...",
+   "when": "Operators.CompareString(tBkName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "All Book will Set Data Type = A permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"All Book will Set Data Type = A permantley ?\", (MsgBoxStyle)20, (object)null) == 6"
+  },
+  {
+   "message": "All Book Data Type A is Set ... Please Restart Sofware Again and Data Will Refresh ...",
+   "when": "(int)Interaction.MsgBox((object)\"All Book will Set Data Type = A permantley ?\", (MsgBoxStyle)20, (object)null) == 6"
+  }
+ ]
+}

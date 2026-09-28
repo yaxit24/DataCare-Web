@@ -1,0 +1,166 @@
+{
+  "kind": "read-only-hash-comparison",
+  "checks": [
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/implementation-contract.md",
+      "expected": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+      "actual": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/source-save-grid-map.json",
+      "expected": "a4d017691828aadfcecdc836ba057b829f7179456bffd310b8fc624a949e2f72",
+      "actual": "a4d017691828aadfcecdc836ba057b829f7179456bffd310b8fc624a949e2f72",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/independent-candidates.json",
+      "expected": "108e4c9f1145d7ae8a7b20d9b931e7657bd76d826beb20e8fc600e94adfc8c48",
+      "actual": "108e4c9f1145d7ae8a7b20d9b931e7657bd76d826beb20e8fc600e94adfc8c48",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/review.md",
+      "expected": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8",
+      "actual": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/mandatory-stock-identity-erratum.json",
+      "expected": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7",
+      "actual": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/additive-review-candidates.json",
+      "expected": "0232648af06cfb5c59edff23749897336aaef6e2c1cf156a00eb23890dd4508f",
+      "actual": "0232648af06cfb5c59edff23749897336aaef6e2c1cf156a00eb23890dd4508f",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/38-implementation-progress-round13.md",
+      "expected": "d4a11930b24e8fb717eb89a6c224f59a6d4760e6fa5f58e0df064e777f89b790",
+      "actual": "d4a11930b24e8fb717eb89a6c224f59a6d4760e6fa5f58e0df064e777f89b790",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "expected": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "actual": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "expected": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "actual": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "expected": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "actual": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingProjection.ts",
+      "expected": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e",
+      "actual": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "expected": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "actual": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "matches": true
+    },
+    {
+      "from": "source-inputs.json",
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingLabourCompose.ts",
+      "expected": "62405dc4662d23978581f8a8b91708f659af681c014f75848d539c0386fd9865",
+      "actual": "62405dc4662d23978581f8a8b91708f659af681c014f75848d539c0386fd9865",
+      "matches": true
+    },
+    {
+      "from": "fixture-freeze.json",
+      "path": "/tmp/datacare-return-save-map-staged/implementation-contract.md",
+      "expected": "bfc72c2f37878033fa3627498705cf342f4d5672f1395e678c16d12d4e80f34f",
+      "actual": "bfc72c2f37878033fa3627498705cf342f4d5672f1395e678c16d12d4e80f34f",
+      "matches": true
+    },
+    {
+      "from": "fixture-freeze.json",
+      "path": "/tmp/datacare-return-save-map-staged/author-fixture.py",
+      "expected": "615309a22a7aaa60a5730a01df578eafce259e2ccd9992d27cdc64d4ee1f25fc",
+      "actual": "615309a22a7aaa60a5730a01df578eafce259e2ccd9992d27cdc64d4ee1f25fc",
+      "matches": true
+    },
+    {
+      "from": "fixture-freeze.json",
+      "path": "/tmp/datacare-return-save-map-staged/fixture-authorship.json",
+      "expected": "c279534b390d8fb6cd7da323ca0e5756e9342fe41ae907cb167dc810751491ae",
+      "actual": "c279534b390d8fb6cd7da323ca0e5756e9342fe41ae907cb167dc810751491ae",
+      "matches": true
+    },
+    {
+      "from": "fixture-freeze.json",
+      "path": "/tmp/datacare-return-save-map-staged/source-inputs.json",
+      "expected": "91e474f963660210cea252a32e90dde3e4945f64b03119a777640e8cd17928a6",
+      "actual": "91e474f963660210cea252a32e90dde3e4945f64b03119a777640e8cd17928a6",
+      "matches": true
+    },
+    {
+      "from": "fixture-freeze.json",
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "expected": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50",
+      "actual": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50",
+      "matches": true
+    },
+    {
+      "from": "focused-final.inputs.json",
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/src/saleReturnIncomingSaveProjection.ts",
+      "expected": "96d8f57b32ccdbfb4fa53e68b4d3435059df8b74fa1cb98f7744ff4b57e32ea4",
+      "actual": "96d8f57b32ccdbfb4fa53e68b4d3435059df8b74fa1cb98f7744ff4b57e32ea4",
+      "matches": true
+    },
+    {
+      "from": "focused-final.inputs.json",
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/test/saleReturnIncomingSaveProjection.test.ts",
+      "expected": "6b49316b2a6ae3a7c4e613f6dfa9977b3441a83d0fd0ce1511d111809c22dc2f",
+      "actual": "6b49316b2a6ae3a7c4e613f6dfa9977b3441a83d0fd0ce1511d111809c22dc2f",
+      "matches": true
+    },
+    {
+      "from": "focused-final.inputs.json",
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "expected": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50",
+      "actual": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50",
+      "matches": true
+    },
+    {
+      "from": "focused-final.inputs.json",
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/vitest.config.ts",
+      "expected": "a28b987604c0ded000ccdbe483b023bea051839173ea3f390defb2d1ec0428f5",
+      "actual": "a28b987604c0ded000ccdbe483b023bea051839173ea3f390defb2d1ec0428f5",
+      "matches": true
+    },
+    {
+      "from": "focused-final.inputs.json",
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/package.json",
+      "expected": "75310bff016b194c22167683f733bcd0991ba7d1d2a288c77763698eafecf4e8",
+      "actual": "75310bff016b194c22167683f733bcd0991ba7d1d2a288c77763698eafecf4e8",
+      "matches": true
+    }
+  ]
+}

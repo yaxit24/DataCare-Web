@@ -1,0 +1,217 @@
+{
+ "form": "UT_BANK",
+ "controlCount": 19,
+ "byKind": {
+  "masked": 2,
+  "button": 6,
+  "textbox": 3,
+  "panel": 1,
+  "label": 4,
+  "grid": 2,
+  "other": 1
+ },
+ "grids": [
+  "MSG",
+  "MSG_TOT"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "btnBalance"
+  ],
+  "this": [
+   "mToDt",
+   "tAcCode",
+   "tAcName",
+   "Label3",
+   "Label1",
+   "Cr",
+   "TEXT_ENTRY",
+   "MSG_TOT",
+   "MSG",
+   "mFromDt",
+   "lblBDate",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "73,50",
+   "size": "76,22",
+   "tabIndex": "0",
+   "text": "01/",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "214,50",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "390,48",
+   "size": "76,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "526,192",
+   "size": "100,18",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Bank Reconcile",
+   "kind": "label"
+  },
+  {
+   "name": "btnBalance",
+   "type": "SimpleButton",
+   "location": "724,3",
+   "size": "97,37",
+   "tabIndex": "28",
+   "text": "&Bal Chk",
+   "kind": "button"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "11,52",
+   "size": "61,20",
+   "tabIndex": "1126",
+   "text": "From Dt",
+   "kind": "label"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "13,83",
+   "size": "1145,453",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "MSG_TOT",
+   "type": "AxMSFlexGrid",
+   "location": "18,538",
+   "size": "1132,17",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1181,449",
+   "size": "28,28",
+   "tabIndex": "1155",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "164,51",
+   "size": "44,20",
+   "tabIndex": "1156",
+   "text": "To Dt",
+   "kind": "label"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "472,48",
+   "size": "282,23",
+   "tabIndex": "1167",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "308,50",
+   "size": "75,20",
+   "tabIndex": "1168",
+   "text": "Bank Code",
+   "kind": "label"
+  }
+ ]
+}

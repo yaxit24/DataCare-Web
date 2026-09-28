@@ -1,0 +1,25 @@
+{
+  "command": [
+    "pnpm",
+    "exec",
+    "eslint",
+    "apps/api/src/modules/auth/businessScope.ts",
+    "apps/api/src/modules/rbac/authorization.ts",
+    "apps/api/src/modules/auth/sessionContextValue.ts",
+    "apps/api/test/sessionContext.extraction.test.ts",
+    "apps/api/test/sessionContextValue.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T19:15:48.157406+00:00",
+  "finishedAtUtc": "2026-09-11T19:15:50.893888+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-prerequisites-lint.txt",
+  "logSha256": "98b84446af44f559ebe363fdfa850951f8d7cbeb4e4e77f0a0c5d3dc3e3ff318",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-prerequisites-lint.inputs.json",
+  "inputManifestSha256": "f4731ec9d0080443fdd9b24d28d0b3052e9a0524ff0f198765f999e47c09ea08",
+  "inputCount": 1753,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

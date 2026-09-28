@@ -1,0 +1,9 @@
+{
+  "frozenAtUtc": "2026-09-12T02:22:11.850624+00:00",
+  "fixture": "web/packages/core/test/fixtures/saleReturnEffectContext.independent.json",
+  "sha256": "1c3285b2a7d4f9d75c2e442cc560a1e0960784cf8095fd640f89149614a8fe1c",
+  "cases": 60,
+  "ready": 6,
+  "sourceSha256": "d23429910bf87b5be74d1c1531ab5b813f2958bc4add6e5cbe661f554ebdc86b",
+  "implementationPresent": false
+}

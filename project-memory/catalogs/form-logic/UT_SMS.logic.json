@@ -1,0 +1,66 @@
+{
+ "form": "UT_SMS",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_MAST",
+  "AD_MEMB",
+  "LEDR_AC_DATA",
+  "LOGIN_MAST",
+  "MSG_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "MSG_MAST": [
+    "CO_CODE",
+    "MSG_DETL",
+    "MSG_TYPE",
+    "MSG_TYPING"
+   ],
+   "LEDR_AC_DATA": [
+    "AC_CODE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "CR_FINE_WT",
+    "CR_SL_FINE",
+    "DATA_TYPE",
+    "DR_AMT",
+    "DR_FINE_WT",
+    "DR_SL_FINE",
+    "LC_CODE",
+    "VCH_DT"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "LEDR_AC_DATA",
+   "MSG_MAST"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_MAST",
+  "AD_MEMB",
+  "LEDR_AC_DATA",
+  "LOGIN_MAST",
+  "MSG_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 23,
+ "timers": 2,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4783
+}

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "tsc",
+    "-p",
+    "../../../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-db-test-tsconfig.json",
+    "--noEmit"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T17:54:45.417575+00:00",
+  "finishedAtUtc": "2026-09-11T17:54:55.186279+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-db-strict.txt"
+}

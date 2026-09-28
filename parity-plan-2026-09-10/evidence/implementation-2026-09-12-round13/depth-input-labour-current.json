@@ -1,0 +1,2789 @@
+{
+  "kind": "gap-manifest",
+  "note": "apiOnlyFields are accepted by a server input contract but named by no frontend file, so no screen can supply them. Closing these is wiring, not new engine work. A field may be legitimately server-derived; each entry must be triaged, not assumed to be a defect.",
+  "totals": {
+    "inputInterfaces": 169,
+    "inputFields": 2394,
+    "reachableFromUi": 2288,
+    "apiOnlyUnreachable": 106,
+    "reachablePct": 95.6
+  },
+  "byModule": {
+    "sales": {
+      "interfaces": 26,
+      "fields": 580,
+      "apiOnly": 20,
+      "reachable": 560,
+      "reachablePct": 96.6
+    },
+    "shared": {
+      "interfaces": 10,
+      "fields": 100,
+      "apiOnly": 16,
+      "reachable": 84,
+      "reachablePct": 84.0
+    },
+    "dhrn": {
+      "interfaces": 4,
+      "fields": 84,
+      "apiOnly": 10,
+      "reachable": 74,
+      "reachablePct": 88.1
+    },
+    "finance": {
+      "interfaces": 26,
+      "fields": 188,
+      "apiOnly": 9,
+      "reachable": 179,
+      "reachablePct": 95.2
+    },
+    "stock": {
+      "interfaces": 25,
+      "fields": 343,
+      "apiOnly": 9,
+      "reachable": 334,
+      "reachablePct": 97.4
+    },
+    "membership": {
+      "interfaces": 9,
+      "fields": 123,
+      "apiOnly": 9,
+      "reachable": 114,
+      "reachablePct": 92.7
+    },
+    "manufacturing": {
+      "interfaces": 11,
+      "fields": 211,
+      "apiOnly": 6,
+      "reachable": 205,
+      "reachablePct": 97.2
+    },
+    "einvoice": {
+      "interfaces": 1,
+      "fields": 10,
+      "apiOnly": 5,
+      "reachable": 5,
+      "reachablePct": 50.0
+    },
+    "bullion": {
+      "interfaces": 4,
+      "fields": 41,
+      "apiOnly": 4,
+      "reachable": 37,
+      "reachablePct": 90.2
+    },
+    "ops": {
+      "interfaces": 5,
+      "fields": 21,
+      "apiOnly": 4,
+      "reachable": 17,
+      "reachablePct": 81.0
+    },
+    "purchase": {
+      "interfaces": 11,
+      "fields": 208,
+      "apiOnly": 4,
+      "reachable": 204,
+      "reachablePct": 98.1
+    },
+    "vouchers": {
+      "interfaces": 1,
+      "fields": 9,
+      "apiOnly": 3,
+      "reachable": 6,
+      "reachablePct": 66.7
+    },
+    "utilities": {
+      "interfaces": 4,
+      "fields": 26,
+      "apiOnly": 2,
+      "reachable": 24,
+      "reachablePct": 92.3
+    },
+    "integrations": {
+      "interfaces": 1,
+      "fields": 4,
+      "apiOnly": 2,
+      "reachable": 2,
+      "reachablePct": 50.0
+    },
+    "rbac": {
+      "interfaces": 4,
+      "fields": 21,
+      "apiOnly": 1,
+      "reachable": 20,
+      "reachablePct": 95.2
+    },
+    "tour": {
+      "interfaces": 5,
+      "fields": 82,
+      "apiOnly": 1,
+      "reachable": 81,
+      "reachablePct": 98.8
+    },
+    "posting": {
+      "interfaces": 2,
+      "fields": 7,
+      "apiOnly": 1,
+      "reachable": 6,
+      "reachablePct": 85.7
+    },
+    "auth": {
+      "interfaces": 1,
+      "fields": 5,
+      "apiOnly": 0,
+      "reachable": 5,
+      "reachablePct": 100.0
+    },
+    "masters": {
+      "interfaces": 7,
+      "fields": 80,
+      "apiOnly": 0,
+      "reachable": 80,
+      "reachablePct": 100.0
+    },
+    "reports": {
+      "interfaces": 1,
+      "fields": 5,
+      "apiOnly": 0,
+      "reachable": 5,
+      "reachablePct": 100.0
+    },
+    "repair": {
+      "interfaces": 9,
+      "fields": 191,
+      "apiOnly": 0,
+      "reachable": 191,
+      "reachablePct": 100.0
+    },
+    "inout": {
+      "interfaces": 2,
+      "fields": 55,
+      "apiOnly": 0,
+      "reachable": 55,
+      "reachablePct": 100.0
+    }
+  },
+  "worstInterfaces": [
+    {
+      "interface": "IrnItemInput",
+      "file": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "module": "einvoice",
+      "fieldCount": 10,
+      "reachableCount": 5,
+      "apiOnlyCount": 5,
+      "apiOnlyFields": [
+        "qty",
+        "unit",
+        "unitPrice",
+        "assAmt",
+        "gstRt"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 8,
+      "reachableCount": 3,
+      "apiOnlyCount": 5,
+      "apiOnlyFields": [
+        "lineNo",
+        "bonusAc",
+        "settlementAc",
+        "settledAgainstBillAmount",
+        "memberName"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DhrnIssueInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "fieldCount": 26,
+      "reachableCount": 22,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "entryType",
+        "expectedMainBook",
+        "expectedBookInout",
+        "ledgerMode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DhrnReceiptInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "fieldCount": 42,
+      "reachableCount": 38,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "entryType",
+        "expectedMainBook",
+        "expectedBookInout",
+        "ledgerMode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineJvRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 7,
+      "reachableCount": 3,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "lineNo",
+        "ldCode",
+        "creditFine",
+        "debitFine"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RequestLogInput",
+      "file": "web/apps/api/src/modules/ops/requestContext.ts",
+      "module": "ops",
+      "fieldCount": 9,
+      "reachableCount": 5,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "correlationId",
+        "durationMs",
+        "companyCode",
+        "locationCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleLineInput",
+      "file": "web/apps/api/src/modules/sales/sales.ts",
+      "module": "sales",
+      "fieldCount": 72,
+      "reachableCount": 68,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "tagLabourPct",
+        "tagLabourRate",
+        "tagLabourAmount",
+        "tagOtherAmount"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FieldAuditInput",
+      "file": "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "module": "vouchers",
+      "fieldCount": 9,
+      "reachableCount": 6,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "originalUser",
+        "editingUser",
+        "ignore"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ProfitLineInput",
+      "file": "web/apps/api/src/modules/sales/billProfit.ts",
+      "module": "sales",
+      "fieldCount": 8,
+      "reachableCount": 5,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "itmMrp",
+        "krFine",
+        "avgTouch"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SettlementInput",
+      "file": "web/apps/api/src/modules/sales/settlement.ts",
+      "module": "sales",
+      "fieldCount": 8,
+      "reachableCount": 5,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "drFine",
+        "crFine",
+        "ratePar"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StockInoutInput",
+      "file": "web/apps/api/src/modules/stock/stockInout.ts",
+      "module": "stock",
+      "fieldCount": 13,
+      "reachableCount": 10,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "fromVchNo",
+        "toVchNo",
+        "stockTransferred"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagCancelLine",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "fieldCount": 45,
+      "reachableCount": 42,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "tagLot",
+        "itmPolish",
+        "toTblCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagWeightDiffInput",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "fieldCount": 12,
+      "reachableCount": 9,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "stockAdjAc",
+        "diffAc",
+        "labourAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteDhrnInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "fieldCount": 6,
+      "reachableCount": 4,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "headerTable",
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteFinanceInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 6,
+      "reachableCount": 4,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "headerTable",
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DesktopAccountBalanceInput",
+      "file": "web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "module": "shared",
+      "fieldCount": 4,
+      "reachableCount": 2,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "accountCode",
+        "cutoffLocalSecond"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "EmployeeJvInput",
+      "file": "web/apps/api/src/modules/finance/employeeJv.ts",
+      "module": "finance",
+      "fieldCount": 14,
+      "reachableCount": 12,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "tdsAc",
+        "pfAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineSalePurchaseInput",
+      "file": "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "module": "bullion",
+      "fieldCount": 14,
+      "reachableCount": 12,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "fineSalesAc",
+        "finePurchaseAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "KarigarRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 10,
+      "reachableCount": 8,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "lineNo",
+        "contraAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "LabourInvoiceInput",
+      "file": "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "module": "sales",
+      "fieldCount": 25,
+      "reachableCount": 23,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "labourAc",
+        "receiveLines"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MfgIssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "fieldCount": 14,
+      "reachableCount": 12,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "irType",
+        "postStock"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PurchaseInput",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "fieldCount": 50,
+      "reachableCount": 48,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "saleBillLc",
+        "consiLcCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 18,
+      "reachableCount": 16,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "lineNo",
+        "revenueAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SalesOrderInput",
+      "file": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "module": "sales",
+      "fieldCount": 44,
+      "reachableCount": 42,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "requireDesignSelection",
+        "orderMainBook"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ScaleReadingInput",
+      "file": "web/apps/api/src/modules/integrations/deviceBridge.ts",
+      "module": "integrations",
+      "fieldCount": 4,
+      "reachableCount": 2,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "unit",
+        "timestamp"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeGoldAdjustLineInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 20,
+      "reachableCount": 18,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "saleBillLcCode",
+        "saleBillHeaderVoucherNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeInstallmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 21,
+      "reachableCount": 19,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "liabAc",
+        "upiLines"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeInstallmentLine",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 15,
+      "reachableCount": 13,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "liabAc",
+        "upiLines"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "BullionBookingInput",
+      "file": "web/apps/api/src/modules/bullion/bullion.ts",
+      "module": "bullion",
+      "fieldCount": 15,
+      "reachableCount": 14,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "payableAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ComputedLine",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "fieldCount": 10,
+      "reachableCount": 9,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "itmAmt"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteAcOpeningInput",
+      "file": "web/apps/api/src/modules/finance/acOpening.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteBatchReceiptInput",
+      "file": "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteBillSettlementInput",
+      "file": "web/apps/api/src/modules/finance/billToBill.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteBullionBookingInput",
+      "file": "web/apps/api/src/modules/bullion/bullion.ts",
+      "module": "bullion",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteKarigarInput",
+      "file": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "module": "manufacturing",
+      "fieldCount": 5,
+      "reachableCount": 4,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteMfgInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "fieldCount": 5,
+      "reachableCount": 4,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeletePurchaseInput",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeletePurchaseReturnInput",
+      "file": "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+      "module": "purchase",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteRateCutInput",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSaleInput",
+      "file": "web/apps/api/src/modules/sales/sales.ts",
+      "module": "sales",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSaleReturnInput",
+      "file": "web/apps/api/src/modules/sales/salesReturn.ts",
+      "module": "sales",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSchemeInstallmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 5,
+      "reachableCount": 4,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSchemeMaturityInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteTourInput",
+      "file": "web/apps/api/src/modules/tour/tour.ts",
+      "module": "tour",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FormAuthorizationInput",
+      "file": "web/apps/api/src/modules/rbac/authorization.ts",
+      "module": "rbac",
+      "fieldCount": 6,
+      "reachableCount": 5,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "adminOnly"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "IssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "module": "manufacturing",
+      "fieldCount": 38,
+      "reachableCount": 37,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "accountGstType"
+      ],
+      "desktopProvenance": {
+        "accountGstType": "AcGstType           :13022"
+      }
+    },
+    {
+      "interface": "MeltingProInput",
+      "file": "web/apps/api/src/modules/manufacturing/meltingPro.ts",
+      "module": "manufacturing",
+      "fieldCount": 11,
+      "reachableCount": 10,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OrderOldMetalLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 11,
+      "reachableCount": 10,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "lineNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PaymentInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 11,
+      "reachableCount": 10,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "lineNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RateCutInput",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "fieldCount": 27,
+      "reachableCount": 26,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "hdVchNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ReceiptInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 15,
+      "reachableCount": 14,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "lineNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RepairApplyInput",
+      "file": "web/apps/api/src/modules/utilities/dataRepair.ts",
+      "module": "utilities",
+      "fieldCount": 7,
+      "reachableCount": 6,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "loginCoCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ReverseInput",
+      "file": "web/apps/api/src/modules/posting/posting.ts",
+      "module": "posting",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteLog"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleReturnIncomingLabourReadInput",
+      "file": "web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "module": "sales",
+      "fieldCount": 2,
+      "reachableCount": 1,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "enteredCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeMaturityInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 14,
+      "reachableCount": 13,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "liabAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "WindowTileInput",
+      "file": "web/apps/api/src/modules/utilities/windowTiles.ts",
+      "module": "utilities",
+      "fieldCount": 6,
+      "reachableCount": 5,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "mainName"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AcOpeningInput",
+      "file": "web/apps/api/src/modules/finance/acOpening.ts",
+      "module": "finance",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AcOpeningLineInput",
+      "file": "web/apps/api/src/modules/finance/acOpening.ts",
+      "module": "finance",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AmountBasisInput",
+      "file": "web/apps/api/src/modules/shared/settingsBehavior.ts",
+      "module": "shared",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AuthInput",
+      "file": "web/apps/api/src/modules/auth/auth.service.ts",
+      "module": "auth",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    }
+  ],
+  "interfaces": [
+    {
+      "interface": "AcOpeningInput",
+      "file": "web/apps/api/src/modules/finance/acOpening.ts",
+      "module": "finance",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AcOpeningLineInput",
+      "file": "web/apps/api/src/modules/finance/acOpening.ts",
+      "module": "finance",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AmountBasisInput",
+      "file": "web/apps/api/src/modules/shared/settingsBehavior.ts",
+      "module": "shared",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AuthInput",
+      "file": "web/apps/api/src/modules/auth/auth.service.ts",
+      "module": "auth",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "AutoItemInput",
+      "file": "web/apps/api/src/modules/masters/autoItem.ts",
+      "module": "masters",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "BatchReceiptInput",
+      "file": "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "BatchReceiptLineInput",
+      "file": "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "module": "finance",
+      "fieldCount": 12,
+      "reachableCount": 12,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "BillSettleInput",
+      "file": "web/apps/api/src/modules/finance/billToBill.ts",
+      "module": "finance",
+      "fieldCount": 10,
+      "reachableCount": 10,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "BullionBookingInput",
+      "file": "web/apps/api/src/modules/bullion/bullion.ts",
+      "module": "bullion",
+      "fieldCount": 15,
+      "reachableCount": 14,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "payableAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ChequeInput",
+      "file": "web/apps/api/src/modules/finance/chequePrint.ts",
+      "module": "finance",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ClosingStockInput",
+      "file": "web/apps/api/src/modules/reports/closingStock.ts",
+      "module": "reports",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ComputedLine",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "fieldCount": 10,
+      "reachableCount": 9,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "itmAmt"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ContraInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 10,
+      "reachableCount": 10,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ContractInput",
+      "file": "web/apps/api/src/modules/ops/contractIntegrity.ts",
+      "module": "ops",
+      "fieldCount": 2,
+      "reachableCount": 2,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "CounterTransferInput",
+      "file": "web/apps/api/src/modules/stock/stock.ts",
+      "module": "stock",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "CounterTransferLine",
+      "file": "web/apps/api/src/modules/stock/stock.ts",
+      "module": "stock",
+      "fieldCount": 11,
+      "reachableCount": 11,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "CreateUserInput",
+      "file": "web/apps/api/src/modules/rbac/users.ts",
+      "module": "rbac",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "CustomerRepairIssueInput",
+      "file": "web/apps/api/src/modules/repair/repairCustomerIssue.ts",
+      "module": "repair",
+      "fieldCount": 20,
+      "reachableCount": 20,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "CustomerRepairReceiptInput",
+      "file": "web/apps/api/src/modules/repair/repairReceipt.ts",
+      "module": "repair",
+      "fieldCount": 17,
+      "reachableCount": 17,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DailyRateInput",
+      "file": "web/apps/api/src/modules/masters/dailyRate.ts",
+      "module": "masters",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteAcOpeningInput",
+      "file": "web/apps/api/src/modules/finance/acOpening.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteBatchReceiptInput",
+      "file": "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteBillSettlementInput",
+      "file": "web/apps/api/src/modules/finance/billToBill.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteBullionBookingInput",
+      "file": "web/apps/api/src/modules/bullion/bullion.ts",
+      "module": "bullion",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteDhrnInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "fieldCount": 6,
+      "reachableCount": 4,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "headerTable",
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteEnrollmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteFinanceInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 6,
+      "reachableCount": 4,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "headerTable",
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteKarigarInput",
+      "file": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "module": "manufacturing",
+      "fieldCount": 5,
+      "reachableCount": 4,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteMfgInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "fieldCount": 5,
+      "reachableCount": 4,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeletePurchaseInput",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeletePurchaseReturnInput",
+      "file": "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+      "module": "purchase",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteRateCutInput",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSaleInput",
+      "file": "web/apps/api/src/modules/sales/sales.ts",
+      "module": "sales",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSaleReturnInput",
+      "file": "web/apps/api/src/modules/sales/salesReturn.ts",
+      "module": "sales",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSchemeInstallmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 5,
+      "reachableCount": 4,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteSchemeMaturityInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 4,
+      "reachableCount": 3,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DeleteTourInput",
+      "file": "web/apps/api/src/modules/tour/tour.ts",
+      "module": "tour",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DesignBookInput",
+      "file": "web/apps/api/src/modules/masters/designBook.ts",
+      "module": "masters",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DesignBookLine",
+      "file": "web/apps/api/src/modules/masters/designBook.ts",
+      "module": "masters",
+      "fieldCount": 35,
+      "reachableCount": 35,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DesktopAccountBalanceInput",
+      "file": "web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "module": "shared",
+      "fieldCount": 4,
+      "reachableCount": 2,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "accountCode",
+        "cutoffLocalSecond"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DesktopInterestInput",
+      "file": "web/apps/api/src/modules/shared/settingsBehavior.ts",
+      "module": "shared",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DhrnInterestInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "fieldCount": 10,
+      "reachableCount": 10,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DhrnIssueInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "fieldCount": 26,
+      "reachableCount": 22,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "entryType",
+        "expectedMainBook",
+        "expectedBookInout",
+        "ledgerMode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DhrnReceiptInput",
+      "file": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "module": "dhrn",
+      "fieldCount": 42,
+      "reachableCount": 38,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "entryType",
+        "expectedMainBook",
+        "expectedBookInout",
+        "ledgerMode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "DiamondSizeLine",
+      "file": "web/apps/api/src/modules/masters/stockLimit.ts",
+      "module": "masters",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "EmployeeJvInput",
+      "file": "web/apps/api/src/modules/finance/employeeJv.ts",
+      "module": "finance",
+      "fieldCount": 14,
+      "reachableCount": 12,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "tdsAc",
+        "pfAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "EnrollSchemeInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 35,
+      "reachableCount": 35,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FieldAuditInput",
+      "file": "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "module": "vouchers",
+      "fieldCount": 9,
+      "reachableCount": 6,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "originalUser",
+        "editingUser",
+        "ignore"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineInoutInput",
+      "file": "web/apps/api/src/modules/inout/fineInout.ts",
+      "module": "inout",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineInoutLine",
+      "file": "web/apps/api/src/modules/inout/fineInout.ts",
+      "module": "inout",
+      "fieldCount": 48,
+      "reachableCount": 48,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineJvInput",
+      "file": "web/apps/api/src/modules/finance/fineJv.ts",
+      "module": "finance",
+      "fieldCount": 9,
+      "reachableCount": 9,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineJvRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 7,
+      "reachableCount": 3,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "lineNo",
+        "ldCode",
+        "creditFine",
+        "debitFine"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineLine",
+      "file": "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "module": "bullion",
+      "fieldCount": 9,
+      "reachableCount": 9,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FineSalePurchaseInput",
+      "file": "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "module": "bullion",
+      "fieldCount": 14,
+      "reachableCount": 12,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "fineSalesAc",
+        "finePurchaseAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FormAuthorizationInput",
+      "file": "web/apps/api/src/modules/rbac/authorization.ts",
+      "module": "rbac",
+      "fieldCount": 6,
+      "reachableCount": 5,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "adminOnly"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "FormRightInput",
+      "file": "web/apps/api/src/modules/rbac/formRights.ts",
+      "module": "rbac",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "GoldBookInput",
+      "file": "web/apps/api/src/modules/finance/goldBook.ts",
+      "module": "finance",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "GoldBookLineInput",
+      "file": "web/apps/api/src/modules/finance/goldBook.ts",
+      "module": "finance",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "HallmarkWeightLine",
+      "file": "web/apps/api/src/modules/shared/counterStockPolicy.ts",
+      "module": "shared",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "IrnItemInput",
+      "file": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "module": "einvoice",
+      "fieldCount": 10,
+      "reachableCount": 5,
+      "apiOnlyCount": 5,
+      "apiOnlyFields": [
+        "qty",
+        "unit",
+        "unitPrice",
+        "assAmt",
+        "gstRt"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "IssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "module": "manufacturing",
+      "fieldCount": 38,
+      "reachableCount": 37,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "accountGstType"
+      ],
+      "desktopProvenance": {
+        "accountGstType": "AcGstType           :13022"
+      }
+    },
+    {
+      "interface": "ItemLotInput",
+      "file": "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+      "module": "stock",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ItemLotLine",
+      "file": "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+      "module": "stock",
+      "fieldCount": 18,
+      "reachableCount": 18,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ItemOpeningInput",
+      "file": "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+      "module": "stock",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ItemOpeningLine",
+      "file": "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+      "module": "stock",
+      "fieldCount": 13,
+      "reachableCount": 13,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "JournalInput",
+      "file": "web/apps/api/src/modules/finance/journal.ts",
+      "module": "finance",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "JournalLineInput",
+      "file": "web/apps/api/src/modules/finance/journal.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "KarigarLine",
+      "file": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "module": "manufacturing",
+      "fieldCount": 46,
+      "reachableCount": 46,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "KarigarRepairIssueInput",
+      "file": "web/apps/api/src/modules/repair/repairKarigarIssue.ts",
+      "module": "repair",
+      "fieldCount": 17,
+      "reachableCount": 17,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "KarigarRepairReceiptInput",
+      "file": "web/apps/api/src/modules/repair/repairKarigarReceipt.ts",
+      "module": "repair",
+      "fieldCount": 20,
+      "reachableCount": 20,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "KarigarRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 10,
+      "reachableCount": 8,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "lineNo",
+        "contraAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "LabourInvoiceInput",
+      "file": "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "module": "sales",
+      "fieldCount": 25,
+      "reachableCount": 23,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "labourAc",
+        "receiveLines"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "LabourLine",
+      "file": "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "module": "sales",
+      "fieldCount": 41,
+      "reachableCount": 41,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "LabourReceiptLine",
+      "file": "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "module": "sales",
+      "fieldCount": 28,
+      "reachableCount": 28,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "LedgerAdjustInput",
+      "file": "web/apps/api/src/modules/finance/ledgerAdjust.ts",
+      "module": "finance",
+      "fieldCount": 8,
+      "reachableCount": 8,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "LocationAmountInput",
+      "file": "web/apps/api/src/modules/finance/locationAmount.ts",
+      "module": "finance",
+      "fieldCount": 10,
+      "reachableCount": 10,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "LocationAmountLineInput",
+      "file": "web/apps/api/src/modules/finance/locationAmount.ts",
+      "module": "finance",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MeltInput",
+      "file": "web/apps/api/src/modules/manufacturing/melting.ts",
+      "module": "manufacturing",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MeltLine",
+      "file": "web/apps/api/src/modules/manufacturing/melting.ts",
+      "module": "manufacturing",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MeltingOutInput",
+      "file": "web/apps/api/src/modules/manufacturing/meltingParity.ts",
+      "module": "manufacturing",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MeltingProInput",
+      "file": "web/apps/api/src/modules/manufacturing/meltingPro.ts",
+      "module": "manufacturing",
+      "fieldCount": 11,
+      "reachableCount": 10,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteUser"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MeltingResultInput",
+      "file": "web/apps/api/src/modules/manufacturing/meltingParity.ts",
+      "module": "manufacturing",
+      "fieldCount": 12,
+      "reachableCount": 12,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MfgIssueInput",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "fieldCount": 14,
+      "reachableCount": 12,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "irType",
+        "postStock"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "MfgLine",
+      "file": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "module": "manufacturing",
+      "fieldCount": 63,
+      "reachableCount": 63,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OldGoldValuationInput",
+      "file": "web/apps/api/src/modules/sales/oldGoldValuation.ts",
+      "module": "sales",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OpenCustomerRepairDeliveryLine",
+      "file": "web/apps/api/src/modules/repair/repairCustomerIssue.ts",
+      "module": "repair",
+      "fieldCount": 36,
+      "reachableCount": 36,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OpenCustomerRepairLine",
+      "file": "web/apps/api/src/modules/repair/repairKarigarIssue.ts",
+      "module": "repair",
+      "fieldCount": 22,
+      "reachableCount": 22,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OpenKarigarRepairIssueLine",
+      "file": "web/apps/api/src/modules/repair/repairKarigarReceipt.ts",
+      "module": "repair",
+      "fieldCount": 28,
+      "reachableCount": 28,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OpeningInput",
+      "file": "web/apps/api/src/modules/masters/openingBalance.ts",
+      "module": "masters",
+      "fieldCount": 9,
+      "reachableCount": 9,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OrderOldMetalLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 11,
+      "reachableCount": 10,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "lineNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OtherCommissionInput",
+      "file": "web/apps/api/src/modules/purchase/otherCommission.ts",
+      "module": "purchase",
+      "fieldCount": 18,
+      "reachableCount": 18,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OtherCommissionLineInput",
+      "file": "web/apps/api/src/modules/purchase/otherCommission.ts",
+      "module": "purchase",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OtherIncomeInput",
+      "file": "web/apps/api/src/modules/purchase/otherIncome.ts",
+      "module": "purchase",
+      "fieldCount": 21,
+      "reachableCount": 21,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OtherIncomeLineInput",
+      "file": "web/apps/api/src/modules/purchase/otherIncome.ts",
+      "module": "purchase",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OtherPurchaseInput",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "fieldCount": 18,
+      "reachableCount": 18,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "OtherPurchaseLine",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PaymentInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 11,
+      "reachableCount": 10,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "lineNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PhysicalStockInput",
+      "file": "web/apps/api/src/modules/stock/physicalStock.ts",
+      "module": "stock",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PhysicalStockLineInput",
+      "file": "web/apps/api/src/modules/stock/physicalStock.ts",
+      "module": "stock",
+      "fieldCount": 2,
+      "reachableCount": 2,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PostInput",
+      "file": "web/apps/api/src/modules/posting/posting.ts",
+      "module": "posting",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ProfitLineInput",
+      "file": "web/apps/api/src/modules/sales/billProfit.ts",
+      "module": "sales",
+      "fieldCount": 8,
+      "reachableCount": 5,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "itmMrp",
+        "krFine",
+        "avgTouch"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PurchaseInput",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "fieldCount": 50,
+      "reachableCount": 48,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "saleBillLc",
+        "consiLcCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PurchaseLineInput",
+      "file": "web/apps/api/src/modules/purchase/purchase.ts",
+      "module": "purchase",
+      "fieldCount": 53,
+      "reachableCount": 53,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "PurchaseReturnInput",
+      "file": "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+      "module": "purchase",
+      "fieldCount": 23,
+      "reachableCount": 23,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RateCutInput",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "fieldCount": 27,
+      "reachableCount": 26,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "hdVchNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RateCutLine",
+      "file": "web/apps/api/src/modules/sales/rateCut.ts",
+      "module": "sales",
+      "fieldCount": 38,
+      "reachableCount": 38,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ReceiptInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 15,
+      "reachableCount": 14,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "lineNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ReceiptPaymentLine",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ReceiptPaymentLinesInput",
+      "file": "web/apps/api/src/modules/finance/finance.ts",
+      "module": "finance",
+      "fieldCount": 8,
+      "reachableCount": 8,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ReminderEntryInput",
+      "file": "web/apps/api/src/modules/utilities/reminderEntry.ts",
+      "module": "utilities",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RepairApplyInput",
+      "file": "web/apps/api/src/modules/utilities/dataRepair.ts",
+      "module": "utilities",
+      "fieldCount": 7,
+      "reachableCount": 6,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "loginCoCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RepairImageKeyInput",
+      "file": "web/apps/api/src/modules/repair/repairImage.ts",
+      "module": "repair",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RepairLineInput",
+      "file": "web/apps/api/src/modules/repair/repairReceipt.ts",
+      "module": "repair",
+      "fieldCount": 27,
+      "reachableCount": 27,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RequestLogInput",
+      "file": "web/apps/api/src/modules/ops/requestContext.ts",
+      "module": "ops",
+      "fieldCount": 9,
+      "reachableCount": 5,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "correlationId",
+        "durationMs",
+        "companyCode",
+        "locationCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ReverseInput",
+      "file": "web/apps/api/src/modules/posting/posting.ts",
+      "module": "posting",
+      "fieldCount": 3,
+      "reachableCount": 2,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "deleteLog"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "RojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 18,
+      "reachableCount": 16,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "lineNo",
+        "revenueAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleInput",
+      "file": "web/apps/api/src/modules/sales/sales.ts",
+      "module": "sales",
+      "fieldCount": 57,
+      "reachableCount": 57,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleLineInput",
+      "file": "web/apps/api/src/modules/sales/sales.ts",
+      "module": "sales",
+      "fieldCount": 72,
+      "reachableCount": 68,
+      "apiOnlyCount": 4,
+      "apiOnlyFields": [
+        "tagLabourPct",
+        "tagLabourRate",
+        "tagLabourAmount",
+        "tagOtherAmount"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleReturnIncomingLabourReadInput",
+      "file": "web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "module": "sales",
+      "fieldCount": 2,
+      "reachableCount": 1,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "enteredCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleReturnIncomingReplayInput",
+      "file": "web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "module": "sales",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleReturnInput",
+      "file": "web/apps/api/src/modules/sales/salesReturn.ts",
+      "module": "sales",
+      "fieldCount": 23,
+      "reachableCount": 23,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SaleReturnLabourPrefixInput",
+      "file": "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "module": "sales",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SalesOrderInput",
+      "file": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "module": "sales",
+      "fieldCount": 44,
+      "reachableCount": 42,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "requireDesignSelection",
+        "orderMainBook"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SalesOrderLine",
+      "file": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "module": "sales",
+      "fieldCount": 78,
+      "reachableCount": 78,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "ScaleReadingInput",
+      "file": "web/apps/api/src/modules/integrations/deviceBridge.ts",
+      "module": "integrations",
+      "fieldCount": 4,
+      "reachableCount": 2,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "unit",
+        "timestamp"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeAdjRojmelLine",
+      "file": "web/apps/api/src/modules/shared/rojmel.ts",
+      "module": "shared",
+      "fieldCount": 8,
+      "reachableCount": 3,
+      "apiOnlyCount": 5,
+      "apiOnlyFields": [
+        "lineNo",
+        "bonusAc",
+        "settlementAc",
+        "settledAgainstBillAmount",
+        "memberName"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeGoldAdjustLineInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 20,
+      "reachableCount": 18,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "saleBillLcCode",
+        "saleBillHeaderVoucherNo"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeInstallmentInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 21,
+      "reachableCount": 19,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "liabAc",
+        "upiLines"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeInstallmentLine",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 15,
+      "reachableCount": 13,
+      "apiOnlyCount": 2,
+      "apiOnlyFields": [
+        "liabAc",
+        "upiLines"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeMaturityInput",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 14,
+      "reachableCount": 13,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "liabAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SchemeUpiLine",
+      "file": "web/apps/api/src/modules/membership/scheme.ts",
+      "module": "membership",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SendReminderInput",
+      "file": "web/apps/api/src/modules/ops/reminders.ts",
+      "module": "ops",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SetUserRoleInput",
+      "file": "web/apps/api/src/modules/rbac/users.ts",
+      "module": "rbac",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "SettlementInput",
+      "file": "web/apps/api/src/modules/sales/settlement.ts",
+      "module": "sales",
+      "fieldCount": 8,
+      "reachableCount": 5,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "drFine",
+        "crFine",
+        "ratePar"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StockAdjustInput",
+      "file": "web/apps/api/src/modules/stock/stock.ts",
+      "module": "stock",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StockAdjustLine",
+      "file": "web/apps/api/src/modules/stock/stock.ts",
+      "module": "stock",
+      "fieldCount": 15,
+      "reachableCount": 15,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StockInoutInput",
+      "file": "web/apps/api/src/modules/stock/stockInout.ts",
+      "module": "stock",
+      "fieldCount": 13,
+      "reachableCount": 10,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "fromVchNo",
+        "toVchNo",
+        "stockTransferred"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StockInoutLine",
+      "file": "web/apps/api/src/modules/stock/stockInout.ts",
+      "module": "stock",
+      "fieldCount": 49,
+      "reachableCount": 49,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StockLimitLine",
+      "file": "web/apps/api/src/modules/masters/stockLimit.ts",
+      "module": "masters",
+      "fieldCount": 10,
+      "reachableCount": 10,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StoneDmCfInput",
+      "file": "web/apps/api/src/modules/stock/stoneDmCf.ts",
+      "module": "stock",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StoneDmCfLineInput",
+      "file": "web/apps/api/src/modules/stock/stoneDmCf.ts",
+      "module": "stock",
+      "fieldCount": 21,
+      "reachableCount": 21,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "StoneSubDetailInput",
+      "file": "web/apps/api/src/modules/shared/stoneSubDetail.ts",
+      "module": "shared",
+      "fieldCount": 24,
+      "reachableCount": 24,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagAdjustInput",
+      "file": "web/apps/api/src/modules/stock/tagAdjust.ts",
+      "module": "stock",
+      "fieldCount": 9,
+      "reachableCount": 9,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagAdjustLine",
+      "file": "web/apps/api/src/modules/stock/tagAdjust.ts",
+      "module": "stock",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagCancelInput",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagCancelLine",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "fieldCount": 45,
+      "reachableCount": 42,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "tagLot",
+        "itmPolish",
+        "toTblCode"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagOpeningInput",
+      "file": "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+      "module": "stock",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagOpeningLine",
+      "file": "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+      "module": "stock",
+      "fieldCount": 65,
+      "reachableCount": 65,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagSplitInput",
+      "file": "web/apps/api/src/modules/stock/tagSplit.ts",
+      "module": "stock",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagTransferInput",
+      "file": "web/apps/api/src/modules/stock/stock.ts",
+      "module": "stock",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagTransferLine",
+      "file": "web/apps/api/src/modules/stock/stock.ts",
+      "module": "stock",
+      "fieldCount": 13,
+      "reachableCount": 13,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagWeightDiffInput",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "fieldCount": 12,
+      "reachableCount": 9,
+      "apiOnlyCount": 3,
+      "apiOnlyFields": [
+        "stockAdjAc",
+        "diffAc",
+        "labourAc"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TagWeightDiffLine",
+      "file": "web/apps/api/src/modules/stock/tagOps.ts",
+      "module": "stock",
+      "fieldCount": 8,
+      "reachableCount": 8,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TourIssueInput",
+      "file": "web/apps/api/src/modules/tour/tour.ts",
+      "module": "tour",
+      "fieldCount": 8,
+      "reachableCount": 8,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TourIssueLine",
+      "file": "web/apps/api/src/modules/tour/tour.ts",
+      "module": "tour",
+      "fieldCount": 53,
+      "reachableCount": 53,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TourReturnInput",
+      "file": "web/apps/api/src/modules/tour/tour.ts",
+      "module": "tour",
+      "fieldCount": 9,
+      "reachableCount": 9,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "TourReturnLine",
+      "file": "web/apps/api/src/modules/tour/tour.ts",
+      "module": "tour",
+      "fieldCount": 9,
+      "reachableCount": 9,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "UserRequestInput",
+      "file": "web/apps/api/src/modules/utilities/userRequest.ts",
+      "module": "utilities",
+      "fieldCount": 7,
+      "reachableCount": 7,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "VpAdjustmentInput",
+      "file": "web/apps/api/src/modules/finance/vpAdjustment.ts",
+      "module": "finance",
+      "fieldCount": 5,
+      "reachableCount": 5,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "VpAdjustmentLineInput",
+      "file": "web/apps/api/src/modules/finance/vpAdjustment.ts",
+      "module": "finance",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "VpParcelComponentInput",
+      "file": "web/apps/api/src/modules/sales/vpParcel.ts",
+      "module": "sales",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "VpParcelInput",
+      "file": "web/apps/api/src/modules/sales/vpParcel.ts",
+      "module": "sales",
+      "fieldCount": 9,
+      "reachableCount": 9,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "VpParcelLineInput",
+      "file": "web/apps/api/src/modules/sales/vpParcel.ts",
+      "module": "sales",
+      "fieldCount": 34,
+      "reachableCount": 34,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "WholesaleSaleReturnComponentInput",
+      "file": "web/apps/api/src/modules/sales/wholesaleSaleReturn.ts",
+      "module": "sales",
+      "fieldCount": 6,
+      "reachableCount": 6,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "WholesaleSaleReturnInput",
+      "file": "web/apps/api/src/modules/sales/wholesaleSaleReturn.ts",
+      "module": "sales",
+      "fieldCount": 15,
+      "reachableCount": 15,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "WholesaleSaleReturnLineInput",
+      "file": "web/apps/api/src/modules/sales/wholesaleSaleReturn.ts",
+      "module": "sales",
+      "fieldCount": 26,
+      "reachableCount": 26,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "WindowTileInput",
+      "file": "web/apps/api/src/modules/utilities/windowTiles.ts",
+      "module": "utilities",
+      "fieldCount": 6,
+      "reachableCount": 5,
+      "apiOnlyCount": 1,
+      "apiOnlyFields": [
+        "mainName"
+      ],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "YearEndInput",
+      "file": "web/apps/api/src/modules/ops/yearEnd.ts",
+      "module": "ops",
+      "fieldCount": 3,
+      "reachableCount": 3,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    },
+    {
+      "interface": "YearEndPreviewInput",
+      "file": "web/apps/api/src/modules/ops/yearEnd.ts",
+      "module": "ops",
+      "fieldCount": 2,
+      "reachableCount": 2,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    }
+  ]
+}

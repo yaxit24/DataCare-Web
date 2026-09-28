@@ -1,0 +1,54 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/desktopAccountBalance.db.test.ts (54 tests) 11405ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > pins the independent fixture authored before reading the new reader 378ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > 'cross-book-A-before-and-at' 315ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > 'nonplus-sign-is-negation' 360ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > 'signed-fixed-storage-cancellation' 312ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > observes raw exact scale, NULL, both books, physical revisions and microsecond predicate evidence 520ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > binds eligible same-value physical updates and present-row recreation 1799ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > binds other-book eligible inserts but excludes future, null-time and foreign rows from its narrow token 1838ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > rejects 'extra-client-mode-alias' without business writes or guessed defaults 491ms
+   ✓ internal source-qualified MsAcBal observation without mode or closing authority > rejects 'unknown-book-predicate' without business writes or guessed defaults 573ms
+
+ Test Files  1 passed (1)
+      Tests  54 passed (54)
+   Start at  16:17:03
+   Duration  12.39s (transform 127ms, setup 0ms, collect 196ms, tests 11.40s, environment 0ms, prepare 102ms)
+

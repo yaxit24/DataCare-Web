@@ -1,0 +1,174 @@
+{
+  "kind": "independent-header-float-storage-v1",
+  "qualification": "Exact mathematical storage vectors authored before implementation; not desktop or PostgreSQL execution.",
+  "cases": [
+    {
+      "id": "zero",
+      "text": "0",
+      "expectedCanonical": "0",
+      "diagnosticCode": null
+    },
+    {
+      "id": "negative-zero",
+      "text": "-0.00",
+      "expectedCanonical": "0",
+      "diagnosticCode": null
+    },
+    {
+      "id": "spaces-plus",
+      "text": "  +00111.000  ",
+      "expectedCanonical": "111",
+      "diagnosticCode": null
+    },
+    {
+      "id": "half",
+      "text": "0.5",
+      "expectedCanonical": "0.5",
+      "diagnosticCode": null
+    },
+    {
+      "id": "quarter",
+      "text": "1.25",
+      "expectedCanonical": "1.25",
+      "diagnosticCode": null
+    },
+    {
+      "id": "negative-eighth",
+      "text": "-0.125",
+      "expectedCanonical": "-0.125",
+      "diagnosticCode": null
+    },
+    {
+      "id": "integer-53-edge",
+      "text": "9007199254740991",
+      "expectedCanonical": "9007199254740991",
+      "diagnosticCode": null
+    },
+    {
+      "id": "power53",
+      "text": "9007199254740992",
+      "expectedCanonical": "9007199254740992",
+      "diagnosticCode": null
+    },
+    {
+      "id": "even-above53",
+      "text": "9007199254740994",
+      "expectedCanonical": "9007199254740994",
+      "diagnosticCode": null
+    },
+    {
+      "id": "power64",
+      "text": "18446744073709551616",
+      "expectedCanonical": "18446744073709551616",
+      "diagnosticCode": null
+    },
+    {
+      "id": "small-dyadic",
+      "text": "0.000003814697265625",
+      "expectedCanonical": "0.000003814697265625",
+      "diagnosticCode": null
+    },
+    {
+      "id": "decimal-tenth",
+      "text": "0.1",
+      "expectedCanonical": null,
+      "diagnosticCode": "inexact-binary64"
+    },
+    {
+      "id": "decimal-minus-tenth",
+      "text": "-0.1",
+      "expectedCanonical": null,
+      "diagnosticCode": "inexact-binary64"
+    },
+    {
+      "id": "odd-above53",
+      "text": "9007199254740993",
+      "expectedCanonical": null,
+      "diagnosticCode": "inexact-binary64"
+    },
+    {
+      "id": "odd-above53-next",
+      "text": "9007199254740995",
+      "expectedCanonical": null,
+      "diagnosticCode": "inexact-binary64"
+    },
+    {
+      "id": "tiny-nondyadic",
+      "text": "0.000000000000000001",
+      "expectedCanonical": null,
+      "diagnosticCode": "inexact-binary64"
+    },
+    {
+      "id": "precision-visible",
+      "text": "1.000000000000000001",
+      "expectedCanonical": null,
+      "diagnosticCode": "inexact-binary64"
+    },
+    {
+      "id": "decimal-display-not-float",
+      "text": "2.0000000000000004",
+      "expectedCanonical": null,
+      "diagnosticCode": "inexact-binary64"
+    },
+    {
+      "id": "too-many-decimals",
+      "text": "0.00000095367431640625",
+      "expectedCanonical": null,
+      "diagnosticCode": "unsupported-precision"
+    },
+    {
+      "id": "magnitude-limit",
+      "text": "1000000000000000000000000000000000000",
+      "expectedCanonical": null,
+      "diagnosticCode": "unsupported-precision"
+    },
+    {
+      "id": "scientific",
+      "text": "1e2",
+      "expectedCanonical": null,
+      "diagnosticCode": "invalid-decimal"
+    },
+    {
+      "id": "newline",
+      "text": "111\n",
+      "expectedCanonical": null,
+      "diagnosticCode": "invalid-decimal"
+    },
+    {
+      "id": "blank",
+      "text": "",
+      "expectedCanonical": null,
+      "diagnosticCode": "invalid-decimal"
+    },
+    {
+      "id": "nan",
+      "text": "NaN",
+      "expectedCanonical": null,
+      "diagnosticCode": "invalid-decimal"
+    },
+    {
+      "id": "infinity",
+      "text": "Infinity",
+      "expectedCanonical": null,
+      "diagnosticCode": "invalid-decimal"
+    },
+    {
+      "id": "multiple-sign",
+      "text": "--1",
+      "expectedCanonical": null,
+      "diagnosticCode": "invalid-decimal"
+    },
+    {
+      "id": "fraction-without-leading",
+      "text": "+.5",
+      "expectedCanonical": "0.5",
+      "diagnosticCode": null
+    },
+    {
+      "id": "trailing-dot",
+      "text": "1.",
+      "expectedCanonical": "1",
+      "diagnosticCode": null
+    }
+  ]
+}

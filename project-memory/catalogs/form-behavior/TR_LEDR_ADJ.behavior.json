@@ -1,0 +1,124 @@
+{
+ "form": "TR_LEDR_ADJ",
+ "loc": 3759,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cCrAmt": 1,
+  "cDrAmt": 2,
+  "cDiffAmt": 3,
+  "cItType": 4,
+  "cCrFine": 5,
+  "cDrFine": 6,
+  "cDiffFine": 7,
+  "cEntryMod": 8,
+  "cItDesc": 9
+ },
+ "inlineSql": [
+  "Please Select Item Type G or S Then Try...",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "Select MAX(VCH_NO) As VchNo From LDR_ADJ_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT MAX(VCH_NO) AS VchNo From TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM LDR_ADJ_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE =' ? ' AND AC_CODE = ' ? '",
+  "SELECT EMP_NAME FROM EMP_MAST WHERE CO_CODE =' ? ' AND EMP_CODE = ' ? '",
+  "Please Select Employee Code and Try......",
+  "SELECT MAX(VCH_NO) AS VchNo From LDR_ADJ_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM LDR_ADJ_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM ROJ_MEL_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "Select A.AC_NAME,A.REC_AMT,B.AC_MOBILE,A.CHQ_NO FROM LDR_ADJ_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' AND B.AC_MOBILE <> '' ORDER BY A.SR_NO",
+  "DELETE FROM REMARK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT A.VCH_NO As VchNoL,replace(convert(NVARCHAR,A.VCH_DATE, 103), ' ', '/') AS VchDateL,B.AC_NAME As PartyNameL,B.AC_ADD1 As AddressL,A.IT_REMARK As VchDescL,A.MAIN_USER As UserL,A.DIFF_AMT As AdjAmtR,A.DIFF_FINE As AdjFineW FROM LDR_ADJ_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' ORDER BY A.VCH_NO,A.SR_NO",
+  "SELECT VCH_NO FROM LDR_ADJ_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME",
+  "SELECT IT_DESC As VchDescL FROM LDR_ADJ_DATA WHERE IT_DESC <> '' AND LEN(IT_DESC) < ? AND IT_DESC <> '' GROUP BY IT_DESC ORDER BY IT_DESC",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL,B.AC_GR_NAME AS GroupL,A.AC_AREA As AreaL,A.AC_ADD1 As AddressL,A.AC_CITY As CityL,A.AC_MOBILE As MobileL,A.AC_ADD2 As Add2,A.AC_ADD3 As Add3,A.AC_GSTNO As Gst,A.AC_REF_NAME As Ref,A.BR_DATE As BrDt,A.AN_DATE As AnDt FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' ? S ? AND A.AC_GR <> '15' ? ORDER BY A.LC_CODE,A.AC_NAME",
+  "SELECT C.AC_NAME As AcNameL,C.AC_CODE As AcCodeL,D.AC_GR_NAME AS GroupL,C.AC_AREA As AreaL,C.AC_ADD1 As AddressL,C.AC_CITY As CityL,C.AC_MOBILE As MobileL,C.AC_ADD2 As Add2,C.AC_ADD3 As Add3,C.AC_GSTNO As Gst,C.AC_REF_NAME As Ref,C.BR_DATE As BrDt,C.AN_DATE As AnDt FROM AC_MAST AS C LEFT JOIN AC_GROUP AS D ON C.CO_CODE = D.CO_CODE AND C.AC_GR = D.AC_GR WHERE C.CO_CODE = ' ? ' AND CAST(C.AC_CODE AS INT) < 100 UNION ALL SELECT A.AC_NAME,A.AC_CODE,B.AC_GR_NAME,A.AC_AREA,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE,A.AC_ADD2,A.AC_ADD3,A.AC_GSTNO,A.AC_REF_NAME,A.BR_DATE,A.AN_DATE FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ? S ? AND A.AC_GR <> '15' ? AND CAST(A.AC_CODE AS INT) >=200 ORDER BY C.AC_NAME"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 3,
+  "Up": 2,
+  "Down": 2,
+  "Enter": 5,
+  "Right": 1,
+  "Left": 1
+ },
+ "calc": [
+  "mSG[mSG.Row, 7] = Strings.Format((object)(Math.Abs(CustOpGold) - Conversion.Val(mSG[mSG.Row, 6])), \"0.000\");",
+  "mSG[mSG.Row, 7] = Strings.Format((object)(Math.Abs(CustOpGold) - Conversion.Val(mSG[mSG.Row, 5])), \"0.000\");",
+  "mSG[mSG.Row, 7] = Strings.Format((object)(Math.Abs(CustOpSilver) - Conversion.Val(mSG[mSG.Row, 6])), \"0.000\");",
+  "mSG[mSG.Row, 7] = Strings.Format((object)(Math.Abs(CustOpSilver) - Conversion.Val(mSG[mSG.Row, 5])), \"0.000\");",
+  "mSG[mSG.Row, 3] = Strings.Format((object)(Math.Abs(CustOpAmt) - Conversion.Val(mSG[mSG.Row, 2])), \"0.00\");",
+  "mSG[mSG.Row, 3] = Strings.Format((object)(Math.Abs(CustOpAmt) - Conversion.Val(mSG[mSG.Row, 1])), \"0.00\");",
+  "tVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "tHdVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "OldValTot = Conversion.Val(MSG[0, 3]) + Conversion.Val(MSG[0, 7]);",
+  "NewValTot = Conversion.Val(MSG[0, 3]) + Conversion.Val(MSG[0, 7]);",
+  "string text = Strings.Format((object)(Conversion.Val(tVchNo.Text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) + 1.0), \"00000\");"
+ ],
+ "validations": [
+  {
+   "message": "This Row Record will Removed permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"This Row Record will Removed permantley ?\", (MsgBoxStyle)36, (object)null) == 6"
+  },
+  {
+   "message": "Please Save This Voucher Then Effect....",
+   "when": ""
+  },
+  {
+   "message": "Please Select Item Type G or S Then Try...",
+   "when": "(Operators.CompareString(TEXT_ENTRY.Text, \"G\", false) != 0) & (Operators.CompareString(TEXT_ENTRY.Text, \"S\", false) != 0)"
+  },
+  {
+   "message": "You Cant Save New Entry Because Your lIcence Has been Expired Please Renew lIcence....",
+   "when": "(Operators.CompareString(DC_Main.MsSoftNoUse, \"Y\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "Please Select Employee Code and Try......",
+   "when": "(Operators.CompareString(DC_Main.MsEmpCodeMendetry, \"Y\", false) == 0) & (Operators.CompareString(tEmpCode.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save Whout Remark If Only Remark Is Tick......",
+   "when": "chkRemark.Checked & (Operators.CompareString(tItDesc.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save This Voucher Becouse This Company Type is B......",
+   "when": "(Operators.CompareString(DC_Main.MCo_Type, \"B\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...",
+   "when": "(DateTime.Compare(Conversions.ToDate(DC_Main.MCo_OpDate), Conversions.ToDate(mVchDate.Text)) > 0) | (DateTime.Compare(Conversions.ToDate(DC_Main.MCo_ClDate), Co"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "Operators.CompareString(UsUPdate, \"Y\", false) != 0 && ((Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) =="
+  },
+  {
+   "message": "Please Insert VchNo and try",
+   "when": "Operators.CompareString(tVchNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Voucher now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Last Record...",
+   "when": "Conversion.Val(tVchNo.Text) >= Conversion.Val(LastVchNo)"
+  }
+ ]
+}

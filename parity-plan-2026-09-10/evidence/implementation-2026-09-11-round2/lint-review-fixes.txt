@@ -1,0 +1,27 @@
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/einvoice/einvoice.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/reports/orderReportValues.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/reports/reportBind.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/salesOrder.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/creditNoteIrnAmounts.test.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/orderReport.db.test.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/orderReport.test.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/tourOrderHydration.db.test.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+✖ 8 problems (0 errors, 8 warnings)
+

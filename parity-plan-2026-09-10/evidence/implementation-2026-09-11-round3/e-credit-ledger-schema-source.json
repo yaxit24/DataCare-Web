@@ -1,0 +1,26 @@
+{
+  "sourceFiles": [
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SL_EBILL.cs",
+      "sha256": "d4b1ed161a2cc26daa7e40c643eac02fbe8936a18acc8084ee7a3e79d317508c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a"
+    },
+    {
+      "path": "DataCareNext.exe",
+      "sha256": "c85f93fd336853a2a639c6452b47748290a1dddb214e2fdf3fc78f47bc0ca6c8"
+    }
+  ],
+  "ddlSourceLine": 5709,
+  "ddl": "ALTER TABLE SL_DATA ADD LDR_CODE VARCHAR(10)Not NULL DEFAULT ''",
+  "executableUtf16Offset": 19493318,
+  "executableUtf16HexOffset": "0x12971c6",
+  "implementation": "Add missing SL_DATA.LDR_CODE VARCHAR(10) NOT NULL DEFAULT blank. Existing rows become blank, unknown historical override requires reimport, never inferred.",
+  "acceptance": "schema/read only; E CRNT writer remains unimplemented"
+}

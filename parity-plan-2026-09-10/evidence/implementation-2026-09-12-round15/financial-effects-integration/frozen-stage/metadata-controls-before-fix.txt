@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-round15-financial-effects/web/packages/core
+
+ ✓ test/saleReturnFinancialEffects.test.ts (291 tests | 286 skipped) 9ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed | 286 skipped (291)
+   Start at  08:13:54
+   Duration  211ms (transform 43ms, setup 0ms, collect 49ms, tests 9ms, environment 0ms, prepare 37ms)
+

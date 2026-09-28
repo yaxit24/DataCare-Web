@@ -1,12 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
+  INOUT_ISSUE,
   deleteKarigar,
   editKarigar,
   getKarigar,
   issueKarigar,
+  receiveKarigar,
 } from '../src/modules/manufacturing/karigar.js';
 import { deleteMfg, editMfg, getMfg, IR_TYPE, issueMfg } from '../src/modules/manufacturing/mfg.js';
+import { withTenant } from '@datacare/db';
+import { checkTagInvariants } from '../src/modules/stock/tagInvariants.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 
@@ -227,7 +231,6 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
       lines: [
         {
           itCode: 'GOLD1',
-          tagNo: 'K-TAG-1',
           pcs: 1,
           grossWt: 13,
           netWt: 10,
@@ -267,7 +270,7 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
       vchDate: DAY,
       karigarAc: 'KRG1',
       mode: 'issue',
-      lines: [{ itCode: 'GOLD1', tagNo: 'K-TAG-1', netWt: 10, ghtWt: 2 }],
+      lines: [{ itCode: 'GOLD1', netWt: 10, ghtWt: 2 }],
     });
 
     await editKarigar(runtime, {
@@ -281,7 +284,6 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
       lines: [
         {
           itCode: 'GOLD2',
-          tagNo: 'K-TAG-2',
           pcs: 2,
           grossWt: 10,
           netWt: 8,
@@ -294,7 +296,6 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
         },
         {
           itCode: 'GOLD3',
-          tagNo: 'K-TAG-3',
           pcs: 1,
           grossWt: 6,
           netWt: 5,
@@ -412,13 +413,17 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
         AC_NAME: 'Karigar Two Edited',
         VCH_VAL_DR: 5,
         VCH_VAL_CR: 0,
-        FINE_TYPE: null,
+        // '' rather than null: DELETE_DATA.FINE_TYPE carries the metal classification (A/G/S) and the
+        // desktop NEVER stores null there — 72 of 72 real rows are valued. This fixture's detail line
+        // declares no metal, so the value is the empty string under the desktop's non-NULL convention
+        // (see insertRowTx in posting.ts). A line that declares a metal records G/S as before.
+        FINE_TYPE: '',
         VCH_FINE_DR: 0,
         VCH_FINE_CR: 8,
         HD_VCH_NO: '00008',
         MAIN_USER,
         DELETE_USER: 'deleter',
-        VCH_DESC: 'ItCode / GOLD2   TagNo / K-TAG-2',
+        VCH_DESC: 'ItCode / GOLD2   TagNo / N',
         clock: initialHeaders[0]!.clock,
         delete_date_set: true,
         delete_time_set: true,
@@ -437,13 +442,17 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
         AC_NAME: 'Karigar Two Edited',
         VCH_VAL_DR: 8,
         VCH_VAL_CR: 0,
-        FINE_TYPE: null,
+        // '' rather than null: DELETE_DATA.FINE_TYPE carries the metal classification (A/G/S) and the
+        // desktop NEVER stores null there — 72 of 72 real rows are valued. This fixture's detail line
+        // declares no metal, so the value is the empty string under the desktop's non-NULL convention
+        // (see insertRowTx in posting.ts). A line that declares a metal records G/S as before.
+        FINE_TYPE: '',
         VCH_FINE_DR: 0,
         VCH_FINE_CR: 5,
         HD_VCH_NO: '00008',
         MAIN_USER,
         DELETE_USER: 'deleter',
-        VCH_DESC: 'ItCode / GOLD3   TagNo / K-TAG-3',
+        VCH_DESC: 'ItCode / GOLD3   TagNo / N',
         clock: initialHeaders[0]!.clock,
         delete_date_set: true,
         delete_time_set: true,
@@ -894,5 +903,383 @@ databaseDescribe('database-backed karigar/manufacturing edit lifecycle', () => {
     // Desktop literals on this block.
     expect(d.tag_cost).toBe(0);
     expect(d.vch_srno).toBe(0);
+  }, 30_000);
+
+  /**
+   * WP-08c — a tagged karigar receipt must survive being reopened and saved.
+   *
+   * No test anywhere exercised `mode: 'receive'`, so the entire karigar tag-creation path was uncovered. Two
+   * defects live behind that gap, both on `PUT /karigar/receive/:vchNo`, which WP-01 does NOT contain:
+   *
+   *   1. `karigarWriteSet` includes `BAR_DETL` and `editKarigar` deletes the whole write set, but only the
+   *      CREATE path has a `barDetl` builder. An edit therefore DESTROYS the tag's barcode record. The
+   *      ornament stays in `MAIN_STOCK` but `issueTagTx` resolves availability from `TAG_STOCK` or `BAR_DETL`,
+   *      so the physical ornament becomes unsellable. Plan §7.1 invariant 11 — "delete/edit restores the
+   *      complete prior state or fails before any mutation" — is violated outright.
+   *   2. The `BAR_DETL` builder never names `VCH_SRNO`, so a karigar tag has no serial identity. Plan §7
+   *      requires the identity to preserve it, and `issueTagTx` resolves an exact instance on
+   *      `(CO, LC, TAG_NO, VCH_SRNO)`.
+   */
+  it('keeps a tagged karigar receipt intact across reopen and save unchanged', async () => {
+    const karigarScope = scope(KARIGAR_BOOK);
+    const richLine = {
+      itCode: 'GOLD1',
+      tagNo: 'KR-TAG-9',
+      tblCode: '007',
+      designNo: 'KD-321',
+      itmSize: '18',
+      pcs: 1,
+      grossWt: 9.876,
+      othWt: 0.321,
+      netWt: 9.555,
+      touch: 91.5,
+      lbrRate: 45.5,
+      lbrPct: 2.5,
+      lbrAmt: 434.75,
+      othAmt: 12.25,
+    };
+
+    await receiveKarigar(runtime, {
+      scope: karigarScope,
+      karigarAc: 'KRG1',
+      karigarName: 'Karigar One',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      labourAmt: 434.75,
+      lines: [richLine],
+    } as never);
+
+    const barRows = async (): Promise<Array<Record<string, unknown>>> => {
+      const rows = (await owner.$queryRawUnsafe(
+        `SELECT * FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 ORDER BY "SR_NO"`,
+        TENANT,
+        KARIGAR_BOOK,
+      )) as Array<Record<string, unknown>>;
+      return rows.map((row) => {
+        const copy = { ...row };
+        delete copy.row_id;
+        return copy;
+      });
+    };
+
+    const before = await barRows();
+    expect(before, 'a tagged receipt must create a barcode record').toHaveLength(1);
+    expect(
+      Number(before[0]!.VCH_SRNO ?? 0),
+      'a karigar tag must carry a serial identity (plan §7)',
+    ).toBeGreaterThan(0);
+
+    const reopened = (await getKarigar(runtime, karigarScope, 1)) as Record<string, unknown> & {
+      lines: Array<Record<string, unknown>>;
+    };
+    await editKarigar(runtime, {
+      scope: karigarScope,
+      vchNo: '00001',
+      mode: 'receive',
+      karigarAc: 'KRG1',
+      karigarName: 'Karigar One',
+      vchDate: String(reopened.vchDate),
+      mainUser: MAIN_USER,
+      labourAmt: 434.75,
+      lines: reopened.lines,
+    } as never);
+
+    const after = await barRows();
+    expect(after, 'an edit must not destroy the tag barcode record').toHaveLength(1);
+    const changed = Object.keys(before[0] ?? {}).filter(
+      (column) => String(before[0]![column] ?? '') !== String(after[0]?.[column] ?? ''),
+    );
+    expect(
+      changed,
+      `an unchanged save altered BAR_DETL: ${changed.map((c) => `${c} ${String(before[0]![c])} -> ${String(after[0]?.[c])}`).join('; ')}`,
+    ).toEqual([]);
+
+    // Allocating a serial where none existed must not have created a duplicate identity: BAR_DETL has no
+    // uniqueness constraint (WP-07 measured that), so INV-2 is the only thing that would notice.
+    const invariants = await withTenant(runtime, TENANT, (tx) => checkTagInvariants(tx));
+    expect(
+      invariants.results.flatMap((r) =>
+        r.violations.map((v) => `${r.invariant} ${v.identity} ${v.detail}`),
+      ),
+      'the karigar round trip must leave every tag invariant intact',
+    ).toEqual([]);
+
+    /**
+     * WP-08d exit evidence: the karigar-created tag is VISIBLE as tagged stock.
+     *
+     * `stockRows` wrote neither `TAG_NO` nor `VCH_SRNO`, so the ornament's stock movement was untagged. It was
+     * invisible twice over — tag-level views select tagged rows, and the desktop's loose views select
+     * `TAG_NO = 'N'` (TR_KR_ISU.cs:6961) — so a row carrying neither appeared in no stock view at all, while
+     * INV-3 could only satisfy invariant 9 vacuously by examining nothing.
+     *
+     * The desktop writes this movement from the barcode row for manufacturing tag books (Ac_Stock.cs:28,
+     * `MAIN_BOOK IN ('OPSTK','JDTR TAG','MFG TAG')`, `ITM_SIGN '+'`, `ITM_QTY 1`).
+     */
+    const stock = await withTenant(runtime, TENANT, (tx) =>
+      tx.$queryRawUnsafe<Array<Record<string, unknown>>>(
+        `SELECT "TAG_NO","VCH_SRNO","ITM_SIGN","ITM_PCS" FROM "MAIN_STOCK"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 ORDER BY "SR_NO"`,
+        TENANT,
+        KARIGAR_BOOK,
+      ),
+    );
+    expect(stock.length, 'the karigar receipt must post a stock movement').toBeGreaterThan(0);
+    const tagged = stock.filter((r) => String(r.TAG_NO ?? '') === after[0]!.TAG_NO);
+    expect(tagged, 'the movement must name the tag the receipt created').toHaveLength(1);
+    expect(Number(tagged[0]!.VCH_SRNO)).toBe(Number(after[0]!.VCH_SRNO));
+    expect(String(tagged[0]!.ITM_SIGN)).toBe('+');
+
+    // INV-3 must now EXAMINE the identity rather than skip it, and see it held exactly once.
+    const inv3 = invariants.results.find((r) => r.invariant.startsWith('INV-3'))!;
+    expect(
+      inv3.examined,
+      'INV-3 must examine the karigar tag rather than pass vacuously',
+    ).toBeGreaterThan(0);
+    expect(inv3.violations).toEqual([]);
+  }, 30_000);
+
+  /**
+   * WP-08e. Issuing an EXISTING tagged ornament back out to a karigar.
+   *
+   * `TR_KR_ISU.cs:3318` resolves the issue screen's tag availability from `MAIN_STOCK` grouped by
+   * `(TAG_NO, VCH_SRNO)`, so the desktop can send an already-tagged ornament to a karigar for repair or
+   * remaking, and its save routine persists both columns on the detail row (`:5109`/`:5113`, `:5150`). The web's
+   * issue path had no tag handling at all, so the `-` movement was untagged and the ornament's signed on-hand
+   * never fell — it looked permanently held while physically sitting with the karigar.
+   *
+   * The whole chain here runs through the real module functions: nothing is hand-seeded, so the test also proves
+   * WP-08d's `+` movement is what makes the tag resolvable in the first place.
+   */
+  it('issues an existing tagged ornament out and back, moving signed on-hand 1 → 0 → 1', async () => {
+    const karigarScope = scope(KARIGAR_BOOK);
+    const line = {
+      itCode: 'GOLD1',
+      tagNo: 'KR-OUT-1',
+      pcs: 1,
+      grossWt: 8.5,
+      netWt: 8.2,
+      touch: 92,
+    };
+
+    // 1. Karigar receipt creates the tag and its '+' movement (WP-08d).
+    await receiveKarigar(runtime, {
+      scope: karigarScope,
+      karigarAc: 'KRG1',
+      karigarName: 'Karigar One',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      lines: [line],
+    } as never);
+
+    const onHand = async (): Promise<number> => {
+      const rows = (await owner.$queryRawUnsafe(
+        `SELECT coalesce(sum(CASE WHEN "ITM_SIGN"::text='+'
+                                  THEN coalesce("ITM_PCS",0) ELSE -coalesce("ITM_PCS",0) END),0)::float net
+           FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "TAG_NO"::text=$2`,
+        TENANT,
+        'KR-OUT-1',
+      )) as Array<{ net: number }>;
+      return Number(rows[0]?.net ?? 0);
+    };
+    expect(await onHand(), 'the received ornament is held').toBe(1);
+
+    // 2. Issue that same tag out to the karigar. The identity is resolved, not allocated.
+    await issueKarigar(runtime, {
+      scope: karigarScope,
+      karigarAc: 'KRG1',
+      karigarName: 'Karigar One',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      lines: [line],
+    } as never);
+
+    expect(await onHand(), 'issuing it out takes signed on-hand to 0').toBe(0);
+    const issued = (await owner.$queryRawUnsafe(
+      `SELECT "TAG_NO","VCH_SRNO","ITM_SIGN" FROM "MAIN_STOCK"
+        WHERE tenant_id=$1 AND "TAG_NO"::text=$2 AND "ITM_SIGN"::text='-'`,
+      TENANT,
+      'KR-OUT-1',
+    )) as Array<Record<string, unknown>>;
+    expect(issued, 'the issue posts exactly one tagged out-movement').toHaveLength(1);
+    expect(Number(issued[0]!.VCH_SRNO)).toBeGreaterThan(0);
+
+    // The detail row carries the identity too, which the desktop persists at :5109/:5150.
+    const detail = (await owner.$queryRawUnsafe(
+      `SELECT "TAG_NO","VCH_SRNO" FROM "KR_DETL"
+        WHERE tenant_id=$1 AND "TAG_NO"::text=$2 AND "INOUT_TYPE"::text=$3`,
+      TENANT,
+      'KR-OUT-1',
+      INOUT_ISSUE,
+    )) as Array<Record<string, unknown>>;
+    expect(detail, 'the issued detail row names the tag').toHaveLength(1);
+    expect(Number(detail[0]!.VCH_SRNO)).toBe(Number(issued[0]!.VCH_SRNO));
+
+    // 3. While it is out it is no longer available, so it cannot be issued twice.
+    await expect(
+      issueKarigar(runtime, {
+        scope: karigarScope,
+        karigarAc: 'KRG1',
+        vchDate: DAY,
+        mainUser: MAIN_USER,
+        lines: [line],
+      } as never),
+    ).rejects.toThrow(/not available/i);
+
+    // 4. INV-3 is satisfied at 0 — out, not violated.
+    const report = await withTenant(runtime, TENANT, (tx) => checkTagInvariants(tx));
+    expect(report.totalViolations, 'a tag that is out is not an invariant violation').toBe(0);
+
+    // 5. Receiving it back returns the signed on-hand to exactly 1.
+    await receiveKarigar(runtime, {
+      scope: karigarScope,
+      karigarAc: 'KRG1',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      lines: [line],
+    } as never);
+    expect(await onHand(), 'receiving it back returns it to held').toBe(1);
+    const after = await withTenant(runtime, TENANT, (tx) => checkTagInvariants(tx));
+    expect(after.totalViolations).toBe(0);
+  }, 30_000);
+
+  it('refuses the same tag twice on one karigar issue voucher', async () => {
+    // The desktop refuses this in the grid with "Duplicate Tag No" (TR_KR_ISU.cs:3352). Without the check the
+    // voucher posts two '-' movements for one ornament, driving its signed on-hand to -1 by itself.
+    const karigarScope = scope(KARIGAR_BOOK);
+    const line = { itCode: 'GOLD1', tagNo: 'KR-DUP-1', pcs: 1, grossWt: 5, netWt: 5, touch: 90 };
+    await receiveKarigar(runtime, {
+      scope: karigarScope,
+      karigarAc: 'KRG1',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      lines: [line],
+    } as never);
+
+    await expect(
+      issueKarigar(runtime, {
+        scope: karigarScope,
+        karigarAc: 'KRG1',
+        vchDate: DAY,
+        mainUser: MAIN_USER,
+        lines: [line, { ...line }],
+      } as never),
+    ).rejects.toThrow(/Duplicate tag/i);
+
+    // The refusal must leave nothing behind: the ornament is still held exactly once.
+    const report = await withTenant(runtime, TENANT, (tx) => checkTagInvariants(tx));
+    expect(report.totalViolations).toBe(0);
+  }, 30_000);
+
+  /**
+   * P1-3 — karigar ISSUE fine must include ghat, wastage and less-weight.
+   *
+   * Desktop TR_KR_ISU.cs:3938-3944 and `finePolicy.ts` case 'karigarIssue':
+   *   fine = ((net + ghat) x (touch + wastage)) / 100 - lessWeight
+   *
+   * The shared `KarigarForm` previewed `net x touch / 100` and omitted `westPct` from the issue
+   * payload entirely, so an operator's wastage percentage reached neither the screen nor the
+   * saved voucher. The server always supported it; only the client suppressed it. This test pins
+   * the persisted figure against the full formula so a regression to touch-only is visible.
+   */
+  it('karigar issue fine honours ghat, wastage and less weight', async () => {
+    const created = await issueKarigar(runtime, {
+      scope: scope(KARIGAR_BOOK),
+      karigarAc: 'KRG1',
+      karigarName: 'Karigar One',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      lines: [
+        {
+          itCode: 'GOLD1',
+          pcs: 1,
+          grossWt: 13,
+          netWt: 10,
+          ghtWt: 2,
+          touch: 91.6,
+          westPct: 2,
+          lesWt: 0.5,
+        },
+      ],
+    } as never);
+
+    // ((10 + 2) x (91.6 + 2)) / 100 - 0.5 = 11.232 - 0.5 = 10.732
+    const expected = 10.732;
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "ITM_FINE"::float8 AS fine FROM "KR_DETL"
+        WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+      TENANT,
+      String(created.vchNo).padStart(5, '0'),
+    )) as Array<{ fine: number }>;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.fine).toBeCloseTo(expected, 3);
+
+    // Guard against the specific regression: touch-only would give 9.16, and dropping only
+    // wastage would give 10.492. Neither may pass.
+    expect(rows[0]!.fine).not.toBeCloseTo(9.16, 2);
+    expect(rows[0]!.fine).not.toBeCloseTo(10.492, 2);
+  }, 30_000);
+
+  /**
+   * P1-2 — typed labour must derive from type and rate when no amount is supplied.
+   *
+   * `mfg.ts:448-451` (and the karigar writer) treat a supplied `lbrAmt` as an OVERRIDE. The shared
+   * form always sent `n(l.lbrAmt)`, which is 0 for an untouched field, so `labourAmount()` — the
+   * desktop's per-piece / per-gross / per-net+ghat derivation at TR_KR_ISU.cs:4025-4129 — could
+   * never run from the UI. Both halves of the contract are pinned here.
+   */
+  it('derives karigar labour from type and rate, and lets an explicit amount override it', async () => {
+    const derived = await receiveKarigar(runtime, {
+      scope: scope(KARIGAR_BOOK),
+      karigarAc: 'KRG1',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      lines: [
+        {
+          itCode: 'GOLD1',
+          pcs: 2,
+          grossWt: 20,
+          netWt: 18,
+          ghtWt: 1,
+          touch: 90,
+          lbrType: 'N', // per (net + ghat)
+          lbrRate: 50,
+          // lbrAmt deliberately ABSENT — this is what a blank field must now send
+        },
+      ],
+    } as never);
+
+    const labourOf = async (vchNo: unknown) => {
+      const rows = (await owner.$queryRawUnsafe(
+        `SELECT "LBR_AMT"::float8 AS lbr FROM "KR_DETL"
+          WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+        TENANT,
+        String(vchNo).padStart(5, '0'),
+      )) as Array<{ lbr: number }>;
+      return rows[0]!.lbr;
+    };
+
+    // labourAmount('N', ...) = (net + ghat) x rate = (18 + 1) x 50 = 950
+    expect(await labourOf(derived.vchNo)).toBeCloseTo(950, 2);
+
+    const overridden = await receiveKarigar(runtime, {
+      scope: scope(KARIGAR_BOOK),
+      karigarAc: 'KRG1',
+      vchDate: DAY,
+      mainUser: MAIN_USER,
+      lines: [
+        {
+          itCode: 'GOLD1',
+          pcs: 2,
+          grossWt: 20,
+          netWt: 18,
+          ghtWt: 1,
+          touch: 90,
+          lbrType: 'N',
+          lbrRate: 50,
+          lbrAmt: 111.11, // explicit override must win over the derived 950
+        },
+      ],
+    } as never);
+    expect(await labourOf(overridden.vchNo)).toBeCloseTo(111.11, 2);
   }, 30_000);
 });

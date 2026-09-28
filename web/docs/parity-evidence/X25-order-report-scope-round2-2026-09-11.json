@@ -1,0 +1,2600 @@
+{
+  "card": "X25",
+  "round": 2,
+  "capturedAtUtc": "2026-09-10T23:03:47.072850+00:00",
+  "status": "partial-engineering-evidence",
+  "warning": "Registration does not certify Crystal or desktop production parity. The recovered 3 order reports were outside the former 102-name inferred inventory; the 79 former contained dispositions are unchanged.",
+  "priorInventory": {
+    "path": "docs/parity-evidence/X25-report-binding-scope-2026-09-11.json",
+    "sha256": "702163d569132372ca85961c5e0006534c97fbbe44a2cdea709446aec411a335",
+    "preservedRecordCount": 102
+  },
+  "counts": {
+    "catalogNames": 254,
+    "previouslyInferred": 102,
+    "registeredDatasetOrDocumentContracts": 26,
+    "containedPreviouslyInferred": 79,
+    "recoveredContractsOutsidePreviousInventory": 3,
+    "recordsInThisInventory": 105
+  },
+  "additionalKnownUnregisteredOrderVariants": [
+    {
+      "report": "OrdVchImg",
+      "selectedWhen": "parent-containing order and CO_SET_NEW.ORD_IMG_PRINT=Y",
+      "bindingState": "contained-selected-image-order-template-unsupported",
+      "productionAcceptance": "open"
+    },
+    {
+      "report": "TourOrdImg",
+      "selectedWhen": "parent-containing order and CO_SET_NEW.ORD_IMG_PRINT=Y",
+      "bindingState": "contained-selected-image-order-template-unsupported",
+      "productionAcceptance": "open"
+    }
+  ],
+  "reports": [
+    {
+      "report": "AcCrList",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcCrList.spec.json",
+      "specSha256": "c6717d322c34b2ff2071485bb7a105e76047479630d110bcabd354b10aa2e01b",
+      "referencedTables": [
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcDrList",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcDrList.spec.json",
+      "specSha256": "bb1037588026f1f41e90b930a83091aed0e82d9f87ccab07b027a38a9102b9cc",
+      "referencedTables": [
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcFineGold",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcFineGold.spec.json",
+      "specSha256": "c45627b0c8a9d1d90977b7a4f71504e8019269414185820055544c96d7d5e14c",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcFineSilver",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcFineSilver.spec.json",
+      "specSha256": "85a6641dee32d27eb7cd9ad9d15a237053282e7274fd53f37035a41a3d4e2b24",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcGroupRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcGroupRpt.spec.json",
+      "specSha256": "9c6378579d8d5f087afd8aabb7c73cfdf427ef79153fe35a901fadce3ada45e1",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcLedger",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcLedger.spec.json",
+      "specSha256": "3de6f39365dd3d05c7ca30e54e02adb059ce3fb2750c1e3932c7290238b52020",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "AC_MAST_LEDR",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "AcLedgerSelected",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcLedgerSelected.spec.json",
+      "specSha256": "f0b4457afafcf2fc57eafa92f23226476b2b87dec7f1bd4219212546507aec21",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "AC_MAST_LEDR",
+        "CO_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcOsArea",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcOsArea.spec.json",
+      "specSha256": "71542295c72d99d36aaf8ad720e90682210a166b14fadcd7d5856b0d8879d706",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcOsWithAdd",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcOsWithAdd.spec.json",
+      "specSha256": "3ed9f4e94ab0d6836ee5de8a82d77c57de46f1b74a2aa1a8bacf1efe14af3f64",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "AC_MAST_REF_AC",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcPurcRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcPurcRpt.spec.json",
+      "specSha256": "6e5ae996b1d92ed894aa830b4f629a22149a87a68df40554e905e16ef5ce4adc",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "PR_DATA",
+        "PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcPurcSummRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcPurcSummRpt.spec.json",
+      "specSha256": "470dc16af901a0c40eebe3f45d3226c75dbe2ae2f5840de69ecc5eec5f1b3db3",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "PR_DATA",
+        "PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcSumm",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcSumm.spec.json",
+      "specSha256": "627ad4b9dd48ffbaadab7f0c2eae6a125b1c0a3a4aa12b708a5fd64483f412e4",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcSummLdr",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcSummLdr.spec.json",
+      "specSha256": "12f9f4f6738aed4ec65089e57ab412d17cc985db8393a4e41d3c646a28dfd925",
+      "referencedTables": [
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcWithWt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcWithWt.spec.json",
+      "specSha256": "60485043f38c410ed9eebf410eecd61fdf2fede9b2c4da1d9957dd222df0d8ae",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "CO_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcWithWtGold",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcWithWtGold.spec.json",
+      "specSha256": "33fcfa26744ae1e3ee8ffb1632ca051e442ecb8ef6c1c184e053d28de083a643",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "AC_MAST_LEDR",
+        "CO_MAST",
+        "RATE_CUT_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AcWithWtSumm",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AcWithWtSumm.spec.json",
+      "specSha256": "4370d13768c74fc463a58cf93ca8bc6c5e3e7c04b32e8c93bfc5a14b6b8d1355",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "AC_MAST_LEDR",
+        "CO_MAST",
+        "RATE_CUT_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "AprBill",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/AprBill.spec.json",
+      "specSha256": "f06a64cf10356806c281b76c8f4769fbd7d69d4ab70109340da5c77acbb87385",
+      "referencedTables": [
+        "AC_MAST",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "B2BPurcBillA4Tax",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/B2BPurcBillA4Tax.spec.json",
+      "specSha256": "e413c2b14b64659dba16d2db3f394e1cbf3e767a17f4f9363bcc95a7720af425",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "B2BPurcImgVch",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/B2BPurcImgVch.spec.json",
+      "specSha256": "c2b5a18c204008751efbbcd4339ef6bc9af2df6db7639ffce8420473ab410295",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "B2BSaleBillA4Tax",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/B2BSaleBillA4Tax.spec.json",
+      "specSha256": "30c840023ff251f67f986618e10a69be98459630bc585b7e9864c5ad2d76f78b",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "B2BSaleImgVch",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/B2BSaleImgVch.spec.json",
+      "specSha256": "cb78e5aa117676881f3eba10afc585683ade154ef949dc1aaf4f203f0ab2701b",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "BalanceHz",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/BalanceHz.spec.json",
+      "specSha256": "54d4e89d1357cfb72133fe72be58a0807aeaade4c1af7da49b4f7c5824a22a8f",
+      "referencedTables": [
+        "AC_GROUP",
+        "AC_MAST",
+        "COMP_PARM",
+        "CO_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "BillRecVch",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/BillRecVch.spec.json",
+      "specSha256": "aa6c76ddb6df781306833fe5051b39ca2d5aa9cb9cb099a4d4bbbfd023740ca0",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CASH_DATA",
+        "CO_MAST",
+        "LOCT_MAST",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "BillWiseOrderAdjust",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/BillWiseOrderAdjust.spec.json",
+      "specSha256": "c007ce6af21a91e76abc380b1fc60c883cf94ddb0db441022a19a97735a43732",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "SL_DATA",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "CashBankBill",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/CashBankBill.spec.json",
+      "specSha256": "ca49d65d701395cfc205743024b604254bb9446c79042f6fd305d26b0c24f648",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CASH_DATA",
+        "CO_MAST",
+        "LOCT_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "CashBankBillAc",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/CashBankBillAc.spec.json",
+      "specSha256": "618fcf8e6290db18692bf51af03b12566df96ef8be57f60bd8545bd07e846310",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CASH_DATA",
+        "CO_MAST",
+        "LOCT_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ChqPrint010",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ChqPrint010.spec.json",
+      "specSha256": "fd1596c7c61b8165471989c852a5f4c101b553a4152f92c7044995a9a1fd4439",
+      "referencedTables": [
+        "CASH_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ChqPrint011",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ChqPrint011.spec.json",
+      "specSha256": "eb3aaf62d4ad1a34ba0b7138eea8ccf10793af0e139a6537dc83d09b393c335a",
+      "referencedTables": [
+        "CASH_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ChqPrint012",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ChqPrint012.spec.json",
+      "specSha256": "cbad5804a46e8302e2c201d12a31a6654b894cfe63c0e6290f7b840a648fb110",
+      "referencedTables": [
+        "CASH_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ChqPrint013",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ChqPrint013.spec.json",
+      "specSha256": "64e1f32f411071320fc55f641cfa87513a729801e68d212e0cc66adfdd85cef9",
+      "referencedTables": [
+        "CASH_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ChqPrint014",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ChqPrint014.spec.json",
+      "specSha256": "d017532d1c739d1f659ce5276db832ab859257e5d2be8aab9695a4e4d7456221",
+      "referencedTables": [
+        "CASH_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "CntrTagStkRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/CntrTagStkRpt.spec.json",
+      "specSha256": "4df1ca21c18e5272cfcf6599907932598e4ac2a1bdd40342c3ded62fe220e158",
+      "referencedTables": [
+        "CO_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "TABLE_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "CntrTagSumRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/CntrTagSumRpt.spec.json",
+      "specSha256": "81184eb985cf56acab641ebf4158d1ee309d1ce3748158e035fcd2826e016f34",
+      "referencedTables": [
+        "CO_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "TABLE_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ConsiBill",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ConsiBill.spec.json",
+      "specSha256": "cc39601a7b69838e43904a08eadf041d23c01fb541165ace9ed6ffc11cfbb186",
+      "referencedTables": [
+        "AC_MAST",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "EInvOthIncom",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/EInvOthIncom.spec.json",
+      "specSha256": "3ab10d998e8b0045874d91ac2ff3247c3af16bcf234d2fab68d4c9109d013ef0",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "STATE_MAST",
+        "TAX_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "EInvoice",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/EInvoice.spec.json",
+      "specSha256": "6197d88b14d0cefbc2d7cac55bdbed3b8ce818e06d346f8f18062f71a9d89714",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "STATE_MAST",
+        "TAX_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "EmpIsuRecVch",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/EmpIsuRecVch.spec.json",
+      "specSha256": "c1ab8199e5722ce19af17126ed13e742babeecdbd5ecbd83c60d7777bd7472dc",
+      "referencedTables": [
+        "AC_MAST",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BOOK_DATA",
+        "CO_MAST",
+        "EMP_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "EmpSaleReport",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/EmpSaleReport.spec.json",
+      "specSha256": "1905d4a7f1744e66cf5d72432f896a627f6b12440ecb32c4a919ab2a6d84b40f",
+      "referencedTables": [
+        "BOOK_DATA",
+        "CO_MAST",
+        "EMP_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "GhatDesignIsu",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/GhatDesignIsu.spec.json",
+      "specSha256": "99eb8103828f7c2678109c89a32dcd7b9535ddbf937eecde5644a91c400c0c6e",
+      "referencedTables": [
+        "AC_MAST",
+        "APR_DATA",
+        "APR_DETL",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "GoldInterest",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/GoldInterest.spec.json",
+      "specSha256": "12e48ea08d6197fd8d4b70b599bbfd8b489d9371b1cfce80a55d383079445b62",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "DYBK_MAST",
+        "TRAN_DEDC",
+        "UNIT_NAME"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ItemPurcVch",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ItemPurcVch.spec.json",
+      "specSha256": "2908289b11c19d08c5df72ff60bcefc0b9c35c00e223ac976fea0e3c755cb438",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "STATE_MAST",
+        "TAX_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ItemSalesVch",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ItemSalesVch.spec.json",
+      "specSha256": "8c78bd9c2f2a1888029f71ed93da245b276923106646d6f4464063488d76eb9a",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "STATE_MAST",
+        "TAX_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "ItemSalesVchWithQr",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ItemSalesVchWithQr.spec.json",
+      "specSha256": "d68739ee5e2d7c014393678d1579aab0cf166c1cf00b51a06a745d049b96c189",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "STATE_MAST",
+        "TAX_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "JmUdAmt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/JmUdAmt.spec.json",
+      "specSha256": "03234f8fe8a59f25af4a8405165f093fb290482a944bcdf7d7a8967ad4e32f93",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "CO_MAST",
+        "MAIN_STOCK"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "KrDesignIsuImg",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrDesignIsuImg.spec.json",
+      "specSha256": "1c0b91ec5cf5186219d32fd1d35081d65e798eb81a02d9552383abf4262ac27f",
+      "referencedTables": [
+        "AC_MAST",
+        "APR_DATA",
+        "APR_DETL",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "KrDesignIsuVch",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrDesignIsuVch.spec.json",
+      "specSha256": "7b370a7da742fd0b032edb19eabbb95bd23945af96b8d43d3d5e9c648bf465ab",
+      "referencedTables": [
+        "AC_MAST",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "KrDmIsuRec",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrDmIsuRec.spec.json",
+      "specSha256": "3ff87afa2ba89bd2c111cc213999492b74c053a3c07dc7237926c1a35ffdbbcc",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "DM_KR_DATA",
+        "ITEM_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "KrDmWtInOut",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrDmWtInOut.spec.json",
+      "specSha256": "6f48e59c39305f2f4b9cb1bcb01724f7d8e7ae5fce2d6df571c40cdf9d55159e",
+      "referencedTables": [
+        "AC_MAST",
+        "CO_MAST",
+        "DM_KR_DATA",
+        "ITEM_MAST"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "KrIsuBill",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrIsuBill.spec.json",
+      "specSha256": "d1fb74b203090ccba0d846f2f12c7bbfa0a10de8b5a143482c88821e09b3e2f2",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "KR_DATA",
+        "KR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "KrIsuBillGst",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrIsuBillGst.spec.json",
+      "specSha256": "e0c52cc3de223226a9a8060d83642f76a4f189a312de32ba9a74dee3833d10a8",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "KR_DATA",
+        "KR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "KrRecVch",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrRecVch.spec.json",
+      "specSha256": "960375b4dc3dc5ab717c4f8df64bae1029d8446560aa3fcbafaa4cfaea7e2536",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "KR_DATA",
+        "KR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "KrRecVchGst",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/KrRecVchGst.spec.json",
+      "specSha256": "83c9068c9495b209bcfc6b05e5e1d9f6696e91b22033a31548fe7af023e3529c",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LOCT_MAST"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "MfgGhatIsu",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/MfgGhatIsu.spec.json",
+      "specSha256": "4a294eb7688bc34664a5aec5d939658546e2edc782e5cb60ebd900def5e5ffdd",
+      "referencedTables": [
+        "AC_MAST",
+        "APR_DATA",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "MFG_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "MtlIsu",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/MtlIsu.spec.json",
+      "specSha256": "608bc0e1fc2661c704045161d5b168e9d5717c1f1a1daf5248ccb54df84ed212",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "KR_DATA",
+        "KR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "OldItmSaleVch",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/OldItmSaleVch.spec.json",
+      "specSha256": "3ef1d7bbf320ae35fb2187dd54dbe3c637574a0972a1f61c937b7867376745ef",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "KR_DATA",
+        "KR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "OrdAdjBillWise",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/OrdAdjBillWise.spec.json",
+      "specSha256": "a5882a555c1d355da88720336256d0d4a2d26e1f178b94e1f378a17094fe0a46",
+      "referencedTables": [
+        "AC_MAST",
+        "CO_MAST",
+        "SL_DATA",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PartyIntSumm",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PartyIntSumm.spec.json",
+      "specSha256": "9ba8b42543af4538b5297a442cee0a2f47d2773ea7c56e3b6073b169d5633a44",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "DYBK_MAST",
+        "TRAN_DEDC",
+        "UNIT_NAME"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PartyInterest",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PartyInterest.spec.json",
+      "specSha256": "8f5269769333168f7fc0d8be3e10369fe3f13c2b02bb2bda95a2bf698f8088d8",
+      "referencedTables": [
+        "AC_DATA",
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "DYBK_MAST",
+        "TRAN_DEDC",
+        "UNIT_NAME"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PrRtnBill",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PrRtnBill.spec.json",
+      "specSha256": "187226bcca1f7416cafdadeb69237183b04e0e8768eeb952f623ec6e41d425fe",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "PR_DATA",
+        "PR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "PrRtnBillGst",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PrRtnBillGst.spec.json",
+      "specSha256": "ee974f520847fe1e26d9c5b144a611a028d609ce900f222c9a527e2931f31d47",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "ProfitLossHz",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/ProfitLossHz.spec.json",
+      "specSha256": "c9e4dc3fb74be789a66146ff5adc7926ba20e78d0c5e74172f7a07c3b57184f2",
+      "referencedTables": [
+        "AC_GROUP",
+        "AC_MAST",
+        "COMP_PARM",
+        "CO_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PurcBillA4",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcBillA4.spec.json",
+      "specSha256": "2face1d42acd5f732f18fc32e75d0afade62f5c3bc909f2244dcb3d4ac5a2511",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "PR_DATA",
+        "PR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "PurcBillA4Gst",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcBillA4Gst.spec.json",
+      "specSha256": "87beb49cd0ac4e5203cebae5dd7bf6c5e1e81656defa7b3ce369f9fba41150d9",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "PurcBillHalfGst",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcBillHalfGst.spec.json",
+      "specSha256": "a605e7122b95a69a3c120d47a7601bbd69a44f0bd4702dbfdeb39e1c65d82e6e",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "PurcGroupWise",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcGroupWise.spec.json",
+      "specSha256": "b305b915e073a70526ebb8ae8de8d2dbb43184fcab68296b22c611675c02bc24",
+      "referencedTables": [
+        "CO_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PR_DATA",
+        "PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PurcItem",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcItem.spec.json",
+      "specSha256": "eada83dac19483880347adadf7c4394516e3beb062895f91c51572bd6623d6d3",
+      "referencedTables": [
+        "AC_MAST",
+        "CO_BOOK",
+        "CO_MAST",
+        "ITEM_MAST",
+        "PR_DATA",
+        "PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PurcReport",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcReport.spec.json",
+      "specSha256": "be9313fe299f2838f6638751b600aa9c7e652b39128bf39f725b38a10c209742",
+      "referencedTables": [
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PurcSumm",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcSumm.spec.json",
+      "specSha256": "3331dd6dd88ad12a72989b61f6307fe08fc4af8c0b51cdf029137de2860fffc7",
+      "referencedTables": [
+        "AC_MAST",
+        "CO_MAST",
+        "PR_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "PurcToSalesFixingVch",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/PurcToSalesFixingVch.spec.json",
+      "specSha256": "806f023879abe7c1c6d8a3be428add64fec19ee5a86cd6e7672aeb74bd1a5f07",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "RojMelCash",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/RojMelCash.spec.json",
+      "specSha256": "d86b69e961df2bf02ebb61092c3fdb0061ad7aedf5a97a13c793476ff6ae9a28",
+      "referencedTables": [
+        "AC_DATA",
+        "CO_MAST",
+        "GROUP_MAST",
+        "MAIN_STOCK",
+        "RATE_CUT_DATA",
+        "ROJ_MEL_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "RojMelCrDr",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/RojMelCrDr.spec.json",
+      "specSha256": "2777d176be948fb29bae74778f8bd631ffe7a2bd91c6a46b47fa6e0c8c26b149",
+      "referencedTables": [
+        "CO_MAST",
+        "GROUP_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "RojMelJmaUdhar",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/RojMelJmaUdhar.spec.json",
+      "specSha256": "dba36ad726ee7d84fa028ef87283be7ab1823b6c40ccdd620710e94ccd86db39",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "RtlHuidPrint",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/RtlHuidPrint.spec.json",
+      "specSha256": "36b1eda1b8f821e373dbaabe628f8ba30e2c6d3242609d758e32668748b4ed06",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SaleOrnaIsu",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SaleOrnaIsu.spec.json",
+      "specSha256": "42c1689c1344aa22ecc4518961ad9d0a64f4759385b8c7401953107f30c6f556",
+      "referencedTables": [
+        "AC_MAST",
+        "BILL_OS_DATA",
+        "CO_MAST",
+        "SL_DATA",
+        "SL_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SaleReport",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SaleReport.spec.json",
+      "specSha256": "90b94ca75492c1270919adecab8d5790880d4412daeab27712a78be430880cf1",
+      "referencedTables": [
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SaleRtnReport",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SaleRtnReport.spec.json",
+      "specSha256": "3cc519bd8a8f23b6c627a5d1d87ae40b088d65e9223b949d04980ab7a3cd7ec5",
+      "referencedTables": [
+        "BAR_IDTL",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "SL_DATA",
+        "SL_DETL_RTN"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "return-specific-parent-and-child-link-contract-required"
+      ]
+    },
+    {
+      "report": "SalesBillA4",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillA4.spec.json",
+      "specSha256": "10e32d140ac82e3025446d1db01df019fa726b2ff1ff5a396acbc58314838e45",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "SalesBillA4Gst",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillA4Gst.spec.json",
+      "specSha256": "135178cf0557d17f8a7e99205902e825b7a1fe76d406d749c0b0c4f85627df34",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "SalesBillA4_WithImage",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillA4_WithImage.spec.json",
+      "specSha256": "6c0cee36f789fce95ff210ef33698bc4d2ef5f0b42139806fef128d4ceab4699",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BlobFieldObject",
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "image-subreport-or-other-object-contract-required"
+      ]
+    },
+    {
+      "report": "SalesBillHz",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillHz.spec.json",
+      "specSha256": "296e585a7b5bf0947d12f40bc57e045af1e9e99b323cad92e978a589529920b8",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST_IDTL",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "SalesBillHzGst",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillHzGst.spec.json",
+      "specSha256": "f53f93c963e03415c735809d5354cefec544cd22a7251e423f56c7dfde603d11",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "SalesBillOrgDup",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillOrgDup.spec.json",
+      "specSha256": "c6fd91d458cb87053da86a495e9cd3681796ca9243a185cb173e0e8c06a11159",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesBillOs",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillOs.spec.json",
+      "specSha256": "a50e6b7f44c830adb3f83f00ac4024bb68ab79042d90df34c7602c811daa3369",
+      "referencedTables": [
+        "AC_MAST",
+        "BILL_OS_DATA",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesBillVr",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesBillVr.spec.json",
+      "specSha256": "ff926bcb2f52aef457259c1444dea1af5ccb165ac32d4abb4629706a763a2d07",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesGroupWise",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesGroupWise.spec.json",
+      "specSha256": "455e27ec29ecd31148df921d650e05e2a2ac412003e25149e053835834e063a8",
+      "referencedTables": [
+        "CO_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "SL_DATA",
+        "SL_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesItem",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesItem.spec.json",
+      "specSha256": "494f9c3d5c9d528e21b40d437d4893c8f7f62eb72df496a5e3a03e7b73864ef6",
+      "referencedTables": [
+        "CO_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "SL_DATA",
+        "SL_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesQuotation",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesQuotation.spec.json",
+      "specSha256": "bf84aa7129a41733611c0b29d62643269a731d4f3e3d132d3a473c0513bd1018",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "child-values-in-group-footer-require-explicit-grouping-evidence"
+      ]
+    },
+    {
+      "report": "SalesRtnA4",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesRtnA4.spec.json",
+      "specSha256": "6eebeb1b6f3dea905d32957af100a5a04f5ef59c6c2d331006eb5e692637b997",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LBR_ISU_IDTL",
+        "RATE_CUT_ISU_REC",
+        "SL_DATA"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesRtnA4Gst",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesRtnA4Gst.spec.json",
+      "specSha256": "3881fab7d27ef6d4afc2b3342f6b09c521a53ad74dff6272379644f3acfc65ef",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "SL_DATA",
+        "SL_DETL_RTN",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "return-specific-parent-and-child-link-contract-required"
+      ]
+    },
+    {
+      "report": "SalesRtnBillUae",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesRtnBillUae.spec.json",
+      "specSha256": "7775506ad173d362b5e80216a716839b64e47f7244c0e0efcd150d02754312d1",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL_RTN",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "return-specific-parent-and-child-link-contract-required"
+      ]
+    },
+    {
+      "report": "SalesRtnItem",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesRtnItem.spec.json",
+      "specSha256": "b0b786b4f94dfaa62e6e56f80df6cc76072ba24d1da0867368a7fbee0aad64de",
+      "referencedTables": [
+        "CO_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "SL_DATA",
+        "SL_DETL_RTN"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "return-specific-parent-and-child-link-contract-required"
+      ]
+    },
+    {
+      "report": "SalesRtnSumm",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesRtnSumm.spec.json",
+      "specSha256": "0d0e0b6e804d74bd3ee0d5ab5a6a316a56557bd66bbd9e6532f9a3e79bd065fa",
+      "referencedTables": [
+        "AC_MAST",
+        "CO_MAST",
+        "SL_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesSumm",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesSumm.spec.json",
+      "specSha256": "e71c8afc763009cb50eaa7d0f737ea7c77a2f5f3d73c45ce2fe92922ce9b5319",
+      "referencedTables": [
+        "AC_MAST",
+        "CO_MAST",
+        "ITEM_MAST",
+        "SL_DATA",
+        "SL_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "SalesToPurcFixingVch",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SalesToPurcFixingVch.spec.json",
+      "specSha256": "afa15d9202bad2ff804232b3fa755506e8a1d3645658104a3b658894ec3b5628",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "SlBillWapp",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/SlBillWapp.spec.json",
+      "specSha256": "004d6ffdc4007fb6bd9cbadb74fa8737f3e67adfc546ed9c49c3d1295415dd12",
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "TRialBalHz",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TRialBalHz.spec.json",
+      "specSha256": "91516ce06e82c6078b8d0aca8647c80b6497d5f8f49758d1bfaa138921866eef",
+      "referencedTables": [
+        "AC_GROUP",
+        "AC_MAST",
+        "COMP_PARM",
+        "CO_MAST",
+        "LEDR_AC_DATA"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "TagHuIdRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TagHuIdRpt.spec.json",
+      "specSha256": "3ca0cedaddc318cb9caef01448bd2874e1a2b86f0877a99d30976176294f3566",
+      "referencedTables": [
+        "BAR_DETL",
+        "CO_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "TagItmSumm",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TagItmSumm.spec.json",
+      "specSha256": "219bbb23e7dbf274d29112fbf863d6db9112813d184e00a4a1db1aeca5b533b5",
+      "referencedTables": [
+        "CO_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "TagStkItemSumRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TagStkItemSumRpt.spec.json",
+      "specSha256": "7ffbe86d2169d3070af9921eef6ef56c0959e3234f5b6afef4e1952efef4b49d",
+      "referencedTables": [
+        "CO_MAST",
+        "ITEM_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "TagStkRpt",
+      "previouslyInferred": true,
+      "bindingState": "registered-dataset-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TagStkRpt.spec.json",
+      "specSha256": "15e76337b4b061a5d1b5670cf68fd500b2727cbf52f55745924d56978442eaf6",
+      "referencedTables": [
+        "CO_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": []
+    },
+    {
+      "report": "TagStkRptDmSum",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TagStkRptDmSum.spec.json",
+      "specSha256": "7dbf03174e55d654c94f635b295f4e2645256965acb4a973ada69232f750a6e0",
+      "referencedTables": [
+        "BAR_DETL",
+        "BAR_IDTL",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "PRODUCT_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "TagStkSummRpt",
+      "previouslyInferred": true,
+      "bindingState": "contained-unregistered",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TagStkSummRpt.spec.json",
+      "specSha256": "6862198d5572687a52c3e34f2cc2b35eb2f0d2e39b20c87e3d3d1fd6802fa663",
+      "referencedTables": [
+        "CO_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "TAG_STOCK_PRINT"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "unregistered-selection-grouping-aggregation-or-dataset-contract"
+      ]
+    },
+    {
+      "report": "OrderVch",
+      "previouslyInferred": false,
+      "bindingState": "registered-recovered-order-document-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/OrderVch.spec.json",
+      "specSha256": "e3e88cd83314e2d650d7311e54647ef72241e70b410802c71bef859703b6d161",
+      "semanticSpecSha256": "ae98795a6e5797bbf38b6bbc9100517a6bfc7cfd3a47174b604177aadc63a136",
+      "source": {
+        "kind": "order-xml-v1",
+        "xml": "extraction_output/rpt_xml/OrderVch.xml",
+        "sha256": "df6241686f9815e782f80aa1b79537901538d8ee57ca4a8a0c7dcac2a8b38cd3"
+      },
+      "sectionCount": 11,
+      "objectCount": 58,
+      "independentSubreports": [
+        "OrdRec"
+      ],
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "FieldObject",
+        "LineObject",
+        "SubreportObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "desktop-golden-formula-number-locale-font-layout-acceptance-open",
+        "physical-print-and-business-acceptance-open",
+        "historical-ledger-timestamp-reimport-required",
+        "full-copy-dialog-data-type-selection-and-peripheral-workflows-open"
+      ]
+    },
+    {
+      "report": "OrderBill",
+      "previouslyInferred": false,
+      "bindingState": "registered-recovered-order-document-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/OrderBill.spec.json",
+      "specSha256": "9d41fd605ade7c18ed10406d8361df3dca8b12bcaff00e1dbcf41cf4accb9f5c",
+      "semanticSpecSha256": "0273b928b4c08082b2df511184b2c7df057f00cf8876d751ba61f9557f19ed82",
+      "source": {
+        "kind": "order-xml-v1",
+        "xml": "extraction_output/rpt_xml/OrderBill.xml",
+        "sha256": "73270086cc7e665d8122c35e258e5eaee9f5acfe9f6e5bc75900de3c7864106a"
+      },
+      "sectionCount": 16,
+      "objectCount": 93,
+      "independentSubreports": [
+        "OrdRec"
+      ],
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "BlobFieldObject",
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "SubreportObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "desktop-golden-formula-number-locale-font-layout-acceptance-open",
+        "physical-print-and-business-acceptance-open",
+        "historical-ledger-timestamp-reimport-required",
+        "full-copy-dialog-data-type-selection-and-peripheral-workflows-open"
+      ]
+    },
+    {
+      "report": "TourOrdVch",
+      "previouslyInferred": false,
+      "bindingState": "registered-recovered-order-document-contract",
+      "productionAcceptance": "open",
+      "spec": "apps/api/report-specs/TourOrdVch.spec.json",
+      "specSha256": "df1b3e3e51b5b1b06c116144c52d2bc1d534ffe207a5ec0eaa61bb73a5c92cc1",
+      "semanticSpecSha256": "92d5d2eda3826f907b87c98f25be872cc0de3c14d2964c509e5fc72716fc9477",
+      "source": {
+        "kind": "order-xml-v1",
+        "xml": "extraction_output/rpt_xml/TourOrdVch.xml",
+        "sha256": "448b93030f73b40153c111e2ca2aade2f70150a90ffaef80caa5ddc5f2df21ba"
+      },
+      "sectionCount": 15,
+      "objectCount": 92,
+      "independentSubreports": [
+        "OrdRec"
+      ],
+      "referencedTables": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "CO_MAST",
+        "ITEM_MAST",
+        "ITEM_MAST_IDTL",
+        "LOCT_MAST",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL"
+      ],
+      "objectTypes": [
+        "BoxObject",
+        "FieldObject",
+        "LineObject",
+        "SubreportObject",
+        "TextObject"
+      ],
+      "remainingContractReasons": [
+        "desktop-golden-formula-number-locale-font-layout-acceptance-open",
+        "physical-print-and-business-acceptance-open",
+        "historical-ledger-timestamp-reimport-required",
+        "full-copy-dialog-data-type-selection-and-peripheral-workflows-open"
+      ]
+    }
+  ]
+}

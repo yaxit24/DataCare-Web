@@ -1,0 +1,38 @@
+{
+  "status": "staged-unexecuted",
+  "inputs": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/run_check_round14.py",
+      "sha256": "2961ce890d51bd31d79f5924bb64fcfedf2df7ccd9708a604bbc483a684b47de"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/capture_implementation_checkpoint_round14.py",
+      "sha256": "ba51c7e0c2791c4841487b9e85f134b614ee248fe5fd1f2a529f24aab44e9e92"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/validate_current_review.py",
+      "sha256": "318d84cb6d8f1ce23e73a402501e4dd924f45dfad133b8a8295cfd73b4b46f66"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "staged/parity-plan-2026-09-10/checkpoint_recipe_round14.py",
+      "sha256": "e0e4d21cea6418d4dc7e45396d4d25b206e8658304a780510cdbe370102c82bf"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/test_checkpoint_recipe_round14.py",
+      "sha256": "e2c3cd9a9869b1ca9e947966b90a4e7ec393aebbbac0f20b29498136274f84ef"
+    },
+    {
+      "path": "integration.patch",
+      "sha256": "a29642a54b02f3976b8081bc53eb4dcd58f2a0a0e749017a0169727282bd42a4"
+    }
+  ],
+  "staticSyntax": "ast.parse only; no helper/tests executed",
+  "command": [
+    "python3",
+    "../parity-plan-2026-09-10/test_checkpoint_recipe_round14.py"
+  ],
+  "cwd": "web",
+  "limits": "No application acceptance. Anchor patch preserves all other root edits; confirm anchors when applying."
+}

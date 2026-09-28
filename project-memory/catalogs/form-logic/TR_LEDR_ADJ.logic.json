@@ -1,0 +1,43 @@
+{
+ "form": "TR_LEDR_ADJ",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "EMP_MAST",
+  "LDR_ADJ_DATA",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "AC_DATA",
+   "LDR_ADJ_DATA",
+   "REMARK_DATA",
+   "ROJ_MEL_DATA",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "EMP_MAST",
+  "LDR_ADJ_DATA",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 21,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 3759
+}

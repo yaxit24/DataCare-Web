@@ -1,0 +1,57 @@
+[
+  {
+    "path": "/tmp/datacare-return-labour-preview-browser/web/apps/web/test/sales-return-labour-replay.journey.mjs",
+    "sha256": "339fb86f08a95f123283c26b66875d3f4c3dcebbaeada52d7b5175cffeaa2148",
+    "bytes": 24737
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-browser/runner.patch",
+    "sha256": "c9a8807b9575cf336239bc80bd00786a3a4b190a8431017a4dd1c7cccce27344",
+    "bytes": 2684
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-browser/runner-before.mjs",
+    "sha256": "243bb2595ee503037d34a0bd0d0fd2097c075f4d0b92931b3a52b1abdb8263fb",
+    "bytes": 24555
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-browser/browser-required-checks.json",
+    "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+    "bytes": 1874
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-ui/ready-manifest.json",
+    "sha256": "0ffaf649acfb9947a5137dd0badd441492c631a9768adc5ffe95eb718832506e",
+    "bytes": 3614
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+    "sha256": "37bb3caadde0ede84be2f7f1a188131b69563dffca0c040bcc340c4b8892382e",
+    "bytes": 27579
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnLabourReplay.ts",
+    "sha256": "a5c5b4c21bf630d9fc99c86294660a2465c0d1392ee45f09f9b65cbd57139ae8",
+    "bytes": 20916
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnSavedPanel.tsx",
+    "sha256": "b086e6d847bbdf45bee7e65e1c48ac1d590402463cbd483d11e234150bc90f25",
+    "bytes": 27732
+  },
+  {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+    "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+    "bytes": 262459
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-api-correction/fixture-diff-proof.json",
+    "sha256": "8ed3216f911e6e2beecb5ce2202b610182acb924801e34e4f55356e7fef23900",
+    "bytes": 2925
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+    "sha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+    "bytes": 62711
+  }
+]

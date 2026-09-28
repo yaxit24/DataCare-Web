@@ -1,0 +1,7 @@
+{
+  "reason": "Complete the separate actual /lookup/items?q=NEXT request before deliberate A\u2192B\u2192A while still holding the successful component-default response. Retains every original required check and transport fault.",
+  "evidence": "First current run reached7 required checks then observed no new request and one response while waiting for Load409; screenshot retainedstaledraft. LookupPicker onChange schedules180ms item search independent of onBlur component-default. This causal diagnosis is source-backed; original unlogged response pathname is not asserted as observed.",
+  "productChanged": false,
+  "beforeSha256": "113c5841f9390c3a826b5c6d4c63e96bc0fd232197b3101cfddc8378a0bf1798",
+  "afterSha256": "98edbb25e246dcf59aeae669d4551779048ed721a2a3e4cff4918d2d6f1b1539"
+}

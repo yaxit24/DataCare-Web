@@ -1,0 +1,85 @@
+
+> datacare-web-saas@0.0.0 test:parity:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+23 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 173 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.selectOption: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('combobox').first()[22m
+[2m    - locator resolved to <select aria-label="Company" title="Switch company">…</select>[22m
+[2m  - attempting select option action[22m
+[2m    2 × waiting for element to be visible and enabled[22m
+[2m      - did not find some options[22m
+[2m    - retrying select option action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible and enabled[22m
+[2m      - did not find some options[22m
+[2m    - retrying select option action[22m
+[2m      - waiting 100ms[22m
+[2m    59 × waiting for element to be visible and enabled[22m
+[2m       - did not find some options[22m
+[2m     - retrying select option action[22m
+[2m       - waiting 500ms[22m
+
+    at exerciseCreditNote (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/credit-note.journey.mjs:18:14)
+    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs:329:23 {
+  log: [
+    "  - waiting for getByRole('combobox').first()",
+    '    - locator resolved to <select aria-label="Company" title="Switch company">…</select>',
+    '  - attempting select option action',
+    '    2 × waiting for element to be visible and enabled',
+    '      - did not find some options',
+    '    - retrying select option action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible and enabled',
+    '      - did not find some options',
+    '    - retrying select option action',
+    '      - waiting 100ms',
+    '    59 × waiting for element to be visible and enabled',
+    '       - did not find some options',
+    '     - retrying select option action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.8.0
+PARITY_TEST_FAILED node exited 1
+ ELIFECYCLE  Command failed with exit code 1.

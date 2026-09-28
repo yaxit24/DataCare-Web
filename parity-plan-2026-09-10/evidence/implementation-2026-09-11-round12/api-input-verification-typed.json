@@ -1,0 +1,15 @@
+{
+  "verifiedAtUtc": "2026-09-11T17:43:43.878079+00:00",
+  "capturedInputs": 1368,
+  "changedInputs": [
+    "web/apps/api/src/modules/ops/releaseCertification.ts",
+    "web/apps/api/test/releaseCandidateIdentity.test.mjs",
+    "web/apps/web/test/parity.real-stack.mjs",
+    "web/scripts/lib/release-candidate-identity.mjs"
+  ],
+  "addedInputs": [],
+  "changedExternalObservations": [],
+  "status": "failed",
+  "snapshot": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/api-input-snapshot-typed.json",
+  "snapshotSha256": "570caeb7c421282844ce823198b716adf6cfe235145435289062a07e82afaf42"
+}

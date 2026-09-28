@@ -1,0 +1,6 @@
+{
+  "path": "web/apps/web/components/Shell.tsx",
+  "beforeSha256": "162a4ded277d4e7a829e45eb5f1b030fb8794c2faeba07d912c3a4a056a872eb",
+  "afterSha256": "ce6c376aa8d4e4e008bedfcda7bd3c7aeff4f7d1b4a927bf9938448e82594827",
+  "reason": "Preserve prior Shell full-reload current-route behavior after confirmed company/year selection. Initial integration incorrectly sent every Shell switch to dashboard, disrupting existing screen continuity. Explicit /select Open still goes to dashboard. New confirmation and context/draft guards remain."
+}

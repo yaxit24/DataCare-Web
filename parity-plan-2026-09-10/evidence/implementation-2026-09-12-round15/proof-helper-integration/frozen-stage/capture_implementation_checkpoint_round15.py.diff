@@ -1,0 +1,72 @@
+--- capture_implementation_checkpoint_round14.py
++++ capture_implementation_checkpoint_round15.py
+@@ -5,7 +5,7 @@
+ """
+ from pathlib import Path
+ from round14_runtime_inputs import runtime_inputs
+-from checkpoint_recipe_round14 import validate_required_runs
++from checkpoint_recipe_round15 import CURRENT_CORE_COUNT, validate_required_runs
+ import argparse
+ import datetime
+ import hashlib
+@@ -19,9 +19,9 @@
+ 
+ PLAN = Path(__file__).resolve().parent
+ ROOT = PLAN.parent
+-OUT = PLAN / 'evidence/implementation-2026-09-12-round14'
+-PRIOR = PLAN / '39-implementation-checkpoint-round13.json'
+-PRIOR_SHA = 'db25b3e107d6e67629f2d445cb2ee191ff9794220cb19dac8cfc7ac9edfababf'
++OUT = PLAN / 'evidence/implementation-2026-09-12-round15'
++PRIOR = PLAN / '41-implementation-checkpoint-round14.json'
++PRIOR_SHA = '643bf89ad0ac50729c7feff06c28dfa6bf8cca7d6318e498397cd5c57bf9ebea'
+ 
+ 
+ def digest(data):
+@@ -36,6 +36,7 @@
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--write', action='store_true')
+     args = parser.parse_args()
++    assert CURRENT_CORE_COUNT > 0, "Round15 core count is pending; no checkpoint validation/publication yet"
+     assert digest(PRIOR.read_bytes()) == PRIOR_SHA, 'Historical checkpoint changed'
+     prior = json.loads(PRIOR.read_text())
+     spec = importlib.util.spec_from_file_location(
+@@ -50,10 +51,10 @@
+     seeds.update(str(path.relative_to(ROOT)) for path in (ROOT / 'web/docs').rglob('*') if path.is_file() and path.suffix in {'.md', '.json'})
+     seeds.update(str(path.relative_to(ROOT)) for path in (ROOT / 'project-memory/parity').glob('*.py'))
+     seeds.update(str((PLAN / name).relative_to(ROOT)) for name in [
+-        'capture_implementation_checkpoint_round14.py', 'run_check_round14.py',
++        'capture_implementation_checkpoint_round15.py', 'run_check_round15.py',
+         'validate_current_review.py', 'build_execution_addendum.py',
+         'execution-addendum-intro.md', 'round14_runtime_inputs.py',
+-        'checkpoint_recipe_round14.py', 'test_checkpoint_recipe_round14.py',
++        'checkpoint_recipe_round15.py', 'test_checkpoint_recipe_round15.py',
+     ])
+     names = sorted(module.universe(ROOT, seeds))
+     sources = []
+@@ -132,7 +133,7 @@
+         text = (ROOT / run['log']).read_text()
+         for literal in requirement.get('requiredText', []):
+             assert literal in text, (requirement['label'], literal)
+-    output = PLAN / '41-implementation-checkpoint-round14.json'
++    output = PLAN / '43-implementation-checkpoint-round15.json'
+     archive = OUT / 'current-source-snapshot.tar.gz'
+     archive_record = None
+     if args.write:
+@@ -158,7 +159,7 @@
+                       and path.name not in {'document-validation.json', 'document-validation-complete.txt'}}
+     artifact_paths.update(PLAN / name for name in [
+         '02-implementation-plan.md', '07-work-items.json', '12-execution-addendum.md',
+-        '13-execution-backlog.json', '40-implementation-progress-round14.md', 'README.md',
++        '13-execution-backlog.json', '42-implementation-progress-round15.md', 'README.md',
+     ])
+     artifact_paths.update(ROOT / 'web/docs' / name for name in [
+         'HANDOFF.md', 'STATE-OF-PARITY.md', 'TECHNICAL-REFERENCE.md'])
+@@ -171,7 +172,7 @@
+         'workingTree': 'Existing changes preserved; isolated synthetic test data; no commit or deployment.',
+         'baseReviewSourceManifestSha256': digest((PLAN / 'evidence/review-2026-09-11/reviewed-source-hashes.json').read_bytes()),
+         'priorCheckpoint': PRIOR.name, 'priorCheckpointSha256': PRIOR_SHA,
+-        'progressDocument': '40-implementation-progress-round14.md',
++        'progressDocument': '42-implementation-progress-round15.md',
+         'wholeProductImplementationPercentage': None, 'verifiedMenus': 0,
+         'acceptedExecutionCards': [], 'acceptedOriginalPackages': [],
+         'implementedSlices': recipe['implementedSlices'],

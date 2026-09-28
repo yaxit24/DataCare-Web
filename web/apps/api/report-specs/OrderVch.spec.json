@@ -1,339 +1,1782 @@
 {
- "report": "OrderVch",
- "areas": [
-  {
-   "kind": "ReportHeader",
-   "name": "Area3",
-   "sections": [
+  "report": "OrderVch",
+  "areas": [
     {
-     "name": "Section3",
-     "kind": "ReportHeader",
-     "height": 275,
-     "objects": [
-      {
-       "type": "TextObject",
-       "name": "Text10",
-       "left": 180,
-       "top": 30,
-       "width": 1679,
-       "height": 240,
-       "text": "Received Item"
-      },
-      {
-       "type": "TextObject",
-       "name": "Text1",
-       "left": 3736,
-       "top": 30,
-       "width": 839,
-       "height": 240,
-       "text": "Pcs"
-      },
-      {
-       "type": "TextObject",
-       "name": "Text2",
-       "left": 4966,
-       "top": 30,
-       "width": 839,
-       "height": 240,
-       "text": "Weight"
-      },
-      {
-       "type": "TextObject",
-       "name": "Text3",
-       "left": 6121,
-       "top": 30,
-       "width": 839,
-       "height": 240,
-       "text": "Touch"
-      },
-      {
-       "type": "TextObject",
-       "name": "Text5",
-       "left": 7891,
-       "top": 30,
-       "width": 839,
-       "height": 240,
-       "text": "Rate"
-      },
-      {
-       "type": "LineObject",
-       "name": "Line4",
-       "left": 60,
-       "top": 255,
-       "width": 10740,
-       "height": 0
-      },
-      {
-       "type": "LineObject",
-       "name": "Line2",
-       "left": 60,
-       "top": 255,
-       "width": 0,
-       "height": 405
-      }
-     ]
+      "kind": "ReportHeader",
+      "name": "Area3",
+      "sections": [
+        {
+          "name": "Section3",
+          "kind": "ReportHeader",
+          "height": 456,
+          "objects": [
+            {
+              "type": "FieldObject",
+              "name": "Field3",
+              "left": 68,
+              "top": 120,
+              "width": 10905,
+              "height": 336,
+              "suppressed": false,
+              "canGrow": true,
+              "dataSource": "{@RptTitle}",
+              "alignment": "HorizontalCenterAlign",
+              "font": {
+                "name": "Tahoma",
+                "points": 14.0,
+                "bold": true,
+                "italic": false
+              }
+            }
+          ],
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "kind": "PageHeader",
+      "name": "Area1",
+      "sections": [
+        {
+          "name": "Section1",
+          "kind": "PageHeader",
+          "height": 2730,
+          "objects": [
+            {
+              "type": "FieldObject",
+              "name": "Field24",
+              "left": 1650,
+              "top": 1695,
+              "width": 9330,
+              "height": 226,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.AC_NAME}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Verdana",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field27",
+              "left": 7800,
+              "top": 900,
+              "width": 1440,
+              "height": 244,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.VCH_DATE}",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Verdana",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text19",
+              "left": 6720,
+              "top": 900,
+              "width": 1095,
+              "height": 255,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Vch Date :",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Verdana",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text1",
+              "left": 6720,
+              "top": 1290,
+              "width": 1095,
+              "height": 255,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Vch No :",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Verdana",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field30",
+              "left": 7800,
+              "top": 1290,
+              "width": 1200,
+              "height": 266,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.VCH_NO}",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Verdana",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "LineObject",
+              "name": "Line1",
+              "left": 6300,
+              "top": 375,
+              "width": 0,
+              "height": 1230,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "LineObject",
+              "name": "Line2",
+              "left": 105,
+              "top": 1605,
+              "width": 10995,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "LineObject",
+              "name": "Line3",
+              "left": 6300,
+              "top": 1245,
+              "width": 4800,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field4",
+              "left": 10590,
+              "top": 0,
+              "width": 510,
+              "height": 228,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@CurPag}",
+              "alignment": "HorizontalCenterAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "LineObject",
+              "name": "Line4",
+              "left": 6300,
+              "top": 810,
+              "width": 4800,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field18",
+              "left": 6360,
+              "top": 465,
+              "width": 4680,
+              "height": 282,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@InVoiceType}",
+              "alignment": "HorizontalCenterAlign",
+              "font": {
+                "name": "Arial",
+                "points": 11.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field1",
+              "left": 1650,
+              "top": 1935,
+              "width": 9330,
+              "height": 230,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@AcAdd1}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Microsoft Sans Serif",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field5",
+              "left": 1650,
+              "top": 2175,
+              "width": 9330,
+              "height": 230,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@AcAdd2}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Microsoft Sans Serif",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field6",
+              "left": 1650,
+              "top": 2430,
+              "width": 4571,
+              "height": 230,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@AcMobile}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Microsoft Sans Serif",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field7",
+              "left": 6360,
+              "top": 2430,
+              "width": 4620,
+              "height": 230,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@AcGstNo}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Microsoft Sans Serif",
+                "points": 10.0,
+                "bold": false,
+                "italic": false
+              },
+              "suppressWhen": "{AC_MAST.AC_GSTNO} = ''"
+            },
+            {
+              "type": "TextObject",
+              "name": "Text11",
+              "left": 273,
+              "top": 1695,
+              "width": 1257,
+              "height": 219,
+              "suppressed": false,
+              "canGrow": true,
+              "text": "Party Name :",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field45",
+              "left": 285,
+              "top": 1050,
+              "width": 5988,
+              "height": 230,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@CoAdd2}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Microsoft Sans Serif",
+                "points": 9.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field46",
+              "left": 285,
+              "top": 1290,
+              "width": 6015,
+              "height": 230,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@CoCity}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Microsoft Sans Serif",
+                "points": 9.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "LineObject",
+              "name": "Line17",
+              "left": 105,
+              "top": 375,
+              "width": 11025,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "LineObject",
+              "name": "Line18",
+              "left": 11100,
+              "top": 375,
+              "width": 0,
+              "height": 5955,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "LineObject",
+              "name": "Line20",
+              "left": 105,
+              "top": 375,
+              "width": 0,
+              "height": 5955,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "LineObject",
+              "name": "Line6",
+              "left": 135,
+              "top": 2685,
+              "width": 10995,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "TextObject",
+              "name": "Text2",
+              "left": 285,
+              "top": 0,
+              "width": 10695,
+              "height": 360,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Order Advance",
+              "alignment": "HorizontalCenterAlign",
+              "font": {
+                "name": "Tahoma",
+                "points": 14.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field2",
+              "left": 285,
+              "top": 465,
+              "width": 6015,
+              "height": 226,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@CoName}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Verdana",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field8",
+              "left": 285,
+              "top": 780,
+              "width": 5988,
+              "height": 226,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@CoAdd1}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Microsoft Sans Serif",
+                "points": 9.0,
+                "bold": false,
+                "italic": false
+              }
+            }
+          ],
+          "suppressed": false
+        }
+      ]
+    },
+    {
+      "kind": "GroupHeader",
+      "name": "Area7",
+      "sections": [
+        {
+          "name": "Section6",
+          "kind": "GroupHeader",
+          "height": 230,
+          "objects": [],
+          "suppressed": false
+        }
+      ]
+    },
+    {
+      "kind": "Detail",
+      "name": "Area5",
+      "sections": [
+        {
+          "name": "Section5",
+          "kind": "Detail",
+          "height": 226,
+          "objects": [],
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "kind": "GroupFooter",
+      "name": "Area8",
+      "sections": [
+        {
+          "name": "Section7",
+          "kind": "GroupFooter",
+          "height": 525,
+          "objects": [
+            {
+              "type": "LineObject",
+              "name": "Line5",
+              "left": 120,
+              "top": 15,
+              "width": 11010,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field39",
+              "left": 1650,
+              "top": 75,
+              "width": 9300,
+              "height": 230,
+              "suppressed": false,
+              "canGrow": true,
+              "dataSource": "{SL_ORD_DATA.VCH_DESC}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text3",
+              "left": 285,
+              "top": 75,
+              "width": 1080,
+              "height": 216,
+              "suppressed": false,
+              "canGrow": true,
+              "text": "Remarks :",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            }
+          ],
+          "suppressed": false
+        },
+        {
+          "name": "Section23",
+          "kind": "GroupFooter",
+          "height": 285,
+          "objects": [
+            {
+              "type": "SubreportObject",
+              "name": "Subreport1",
+              "left": 285,
+              "top": 15,
+              "width": 10815,
+              "height": 227,
+              "suppressed": false,
+              "canGrow": true,
+              "subreportName": "OrdRec",
+              "alignment": "LeftAlign"
+            }
+          ],
+          "suppressed": false,
+          "suppressWhen": "{@OldItem} = 'N'"
+        },
+        {
+          "name": "Section20",
+          "kind": "GroupFooter",
+          "height": 300,
+          "objects": [
+            {
+              "type": "TextObject",
+              "name": "Text17",
+              "left": 7945,
+              "top": 45,
+              "width": 1700,
+              "height": 255,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Cash Amount  :",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field37",
+              "left": 9787,
+              "top": 45,
+              "width": 1193,
+              "height": 221,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.CASH_AMT}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "LineObject",
+              "name": "Line16",
+              "left": 7890,
+              "top": 0,
+              "width": 3210,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "LineObject",
+              "name": "Line15",
+              "left": 9720,
+              "top": 0,
+              "width": 0,
+              "height": 1305,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "LineObject",
+              "name": "Line13",
+              "left": 7890,
+              "top": 0,
+              "width": 0,
+              "height": 1305,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            }
+          ],
+          "suppressed": false,
+          "suppressWhen": "{SL_ORD_DATA.CASH_AMT} = 0"
+        },
+        {
+          "name": "Section21",
+          "kind": "GroupFooter",
+          "height": 285,
+          "objects": [
+            {
+              "type": "TextObject",
+              "name": "Text16",
+              "left": 7945,
+              "top": 30,
+              "width": 1700,
+              "height": 255,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Card Amount  :",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field40",
+              "left": 9800,
+              "top": 30,
+              "width": 1180,
+              "height": 221,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.CARD_AMT}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "LineObject",
+              "name": "Line19",
+              "left": 7920,
+              "top": 15,
+              "width": 3210,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            }
+          ],
+          "suppressed": false,
+          "suppressWhen": "{SL_ORD_DATA.CARD_AMT} = 0"
+        },
+        {
+          "name": "Section22",
+          "kind": "GroupFooter",
+          "height": 255,
+          "objects": [
+            {
+              "type": "TextObject",
+              "name": "Text18",
+              "left": 7945,
+              "top": 0,
+              "width": 1700,
+              "height": 255,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Chq Amount  :",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field41",
+              "left": 9720,
+              "top": 0,
+              "width": 1260,
+              "height": 221,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.CHQ_AMT}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "LineObject",
+              "name": "Line21",
+              "left": 7890,
+              "top": 0,
+              "width": 3210,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            }
+          ],
+          "suppressed": false,
+          "suppressWhen": "{SL_ORD_DATA.CHQ_AMT} = 0"
+        }
+      ]
+    },
+    {
+      "kind": "ReportFooter",
+      "name": "Area4",
+      "sections": [
+        {
+          "name": "Section4",
+          "kind": "ReportFooter",
+          "height": 220,
+          "objects": [],
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "kind": "PageFooter",
+      "name": "Area2",
+      "sections": [
+        {
+          "name": "Section2",
+          "kind": "PageFooter",
+          "height": 2085,
+          "objects": [
+            {
+              "type": "LineObject",
+              "name": "Line10",
+              "left": 105,
+              "top": 0,
+              "width": 10995,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field38",
+              "left": 6717,
+              "top": 885,
+              "width": 4398,
+              "height": 316,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@for}",
+              "alignment": "HorizontalCenterAlign",
+              "font": {
+                "name": "Verdana",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text23",
+              "left": 8056,
+              "top": 1755,
+              "width": 3044,
+              "height": 270,
+              "suppressed": false,
+              "canGrow": false,
+              "text": " signature.",
+              "alignment": "HorizontalCenterAlign",
+              "font": {
+                "name": "Arial",
+                "points": 11.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text15",
+              "left": 810,
+              "top": 1755,
+              "width": 3044,
+              "height": 270,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Party signature.",
+              "alignment": "HorizontalCenterAlign",
+              "font": {
+                "name": "Arial",
+                "points": 11.0,
+                "bold": false,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text25",
+              "left": 7947,
+              "top": 105,
+              "width": 1700,
+              "height": 330,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Total Advance  :",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field44",
+              "left": 9720,
+              "top": 105,
+              "width": 1259,
+              "height": 221,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.ADV_AMT}",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "LineObject",
+              "name": "Line27",
+              "left": 105,
+              "top": 735,
+              "width": 11025,
+              "height": 0,
+              "suppressed": false,
+              "canGrow": false,
+              "alignment": "DefaultAlign"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field34",
+              "left": 1530,
+              "top": 105,
+              "width": 6450,
+              "height": 221,
+              "suppressed": false,
+              "canGrow": true,
+              "dataSource": "{@WordRuppes}",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text20",
+              "left": 270,
+              "top": 105,
+              "width": 1080,
+              "height": 216,
+              "suppressed": false,
+              "canGrow": true,
+              "text": "Rupees :",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "TextObject",
+              "name": "Text27",
+              "left": 270,
+              "top": 435,
+              "width": 1080,
+              "height": 216,
+              "suppressed": false,
+              "canGrow": true,
+              "text": "Delevery :",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field47",
+              "left": 1530,
+              "top": 435,
+              "width": 2118,
+              "height": 221,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{SL_ORD_DATA.DEL_DATE}",
+              "alignment": "DefaultAlign",
+              "font": {
+                "name": "Arial",
+                "points": 9.0,
+                "bold": true,
+                "italic": false
+              }
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field60",
+              "left": 3816,
+              "top": 1305,
+              "width": 288,
+              "height": 226,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@ClAmtCrDr}",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              },
+              "suppressWhen": "{SL_ORD_DATA.AC_CODE} = '00020'"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field57",
+              "left": 3816,
+              "top": 965,
+              "width": 288,
+              "height": 226,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@OpAmtCrDr}",
+              "alignment": "LeftAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              },
+              "suppressWhen": "{SL_ORD_DATA.AC_CODE} = '00020'"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field54",
+              "left": 2518,
+              "top": 1305,
+              "width": 1248,
+              "height": 238,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@ClAmt}",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              },
+              "suppressWhen": "{SL_ORD_DATA.AC_CODE} = '00020'"
+            },
+            {
+              "type": "FieldObject",
+              "name": "Field20",
+              "left": 2508,
+              "top": 965,
+              "width": 1258,
+              "height": 238,
+              "suppressed": false,
+              "canGrow": false,
+              "dataSource": "{@OpAmt}",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              },
+              "suppressWhen": "{SL_ORD_DATA.AC_CODE} = '00020'"
+            },
+            {
+              "type": "TextObject",
+              "name": "Text43",
+              "left": 196,
+              "top": 1305,
+              "width": 2160,
+              "height": 255,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Ledger Closing Bal :",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              },
+              "suppressWhen": "{SL_ORD_DATA.AC_CODE} = '00020'"
+            },
+            {
+              "type": "TextObject",
+              "name": "Text31",
+              "left": 116,
+              "top": 965,
+              "width": 2240,
+              "height": 255,
+              "suppressed": false,
+              "canGrow": false,
+              "text": "Ledger Opening Bal :",
+              "alignment": "RightAlign",
+              "font": {
+                "name": "Arial",
+                "points": 10.0,
+                "bold": true,
+                "italic": false
+              },
+              "suppressWhen": "{SL_ORD_DATA.AC_CODE} = '00020'"
+            }
+          ],
+          "suppressed": false
+        }
+      ]
     }
-   ]
+  ],
+  "formulas": [
+    {
+      "name": "AcAdd1",
+      "ref": "{@AcAdd1}",
+      "type": "StringField",
+      "text": "{AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
+    },
+    {
+      "name": "AcAdd2",
+      "ref": "{@AcAdd2}",
+      "type": "StringField",
+      "text": "{AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
+    },
+    {
+      "name": "AcGstNo",
+      "ref": "{@AcGstNo}",
+      "type": "StringField",
+      "text": "'Gst No : ' + {AC_MAST.AC_GSTNO}"
+    },
+    {
+      "name": "AcMobile",
+      "ref": "{@AcMobile}",
+      "type": "StringField",
+      "text": "if {AC_MAST.AC_MOBILE} <> '' then\n        'Mo : ' + {AC_MAST.AC_MOBILE}\n    else if {AC_MAST.AC_PHONE} <> '' then\n        'Ph : ' + {AC_MAST.AC_MOBILE}\n    else\n        'Mo : ' + {AC_MAST.AC_MOBILE2}"
+    },
+    {
+      "name": "ClAmt",
+      "ref": "{@ClAmt}",
+      "type": "NumberField",
+      "text": "0"
+    },
+    {
+      "name": "ClAmtCrDr",
+      "ref": "{@ClAmtCrDr}",
+      "type": "StringField",
+      "text": "if {@ClAmt} > 0 then\n    'Cr'\nelse\n    'Dr'"
+    },
+    {
+      "name": "CoAdd1",
+      "ref": "{@CoAdd1}",
+      "type": "StringField",
+      "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN\n    {LOCT_MAST.LC_ADD1}\nelse\n    {CO_MAST.CO_ADD1}"
+    },
+    {
+      "name": "CoAdd2",
+      "ref": "{@CoAdd2}",
+      "type": "StringField",
+      "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN\n    {LOCT_MAST.LC_ADD2} + ' , ' + {LOCT_MAST.LC_ADD3}\nelse\n    {CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+    },
+    {
+      "name": "CoCity",
+      "ref": "{@CoCity}",
+      "type": "StringField",
+      "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN\n    {LOCT_MAST.LC_CITY} + '   Mo : ' + {LOCT_MAST.LC_MOBILE} + '  Ph : ' + {LOCT_MAST.LC_PHONE}\nelse\n    {CO_MAST.CO_CITY} + '   Mo : ' + {CO_MAST.CO_MOBILE}  + '  Ph : ' + {CO_MAST.CO_PHONE}"
+    },
+    {
+      "name": "CoName",
+      "ref": "{@CoName}",
+      "type": "StringField",
+      "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN\n    {LOCT_MAST.LC_NAME}\nELSE\n    {CO_MAST.CO_NAME}"
+    },
+    {
+      "name": "CurPag",
+      "ref": "{@CurPag}",
+      "type": "NumberField",
+      "text": "PageNumber"
+    },
+    {
+      "name": "for",
+      "ref": "{@for}",
+      "type": "StringField",
+      "text": "'For : ' + {CO_MAST.CO_NAME}"
+    },
+    {
+      "name": "InVoiceType",
+      "ref": "{@InVoiceType}",
+      "type": "StringField",
+      "text": "'ORIGINAL'"
+    },
+    {
+      "name": "ItemName",
+      "ref": "{@ItemName}",
+      "type": "UnknownField",
+      "text": "{ITEM_MAST.IT_NAME} + ' Dsgn : ' + {SL_ORD_DETL.DESIGN}"
+    },
+    {
+      "name": "OldItem",
+      "ref": "{@OldItem}",
+      "type": "StringField",
+      "text": "'N'"
+    },
+    {
+      "name": "OpAmt",
+      "ref": "{@OpAmt}",
+      "type": "NumberField",
+      "text": "0"
+    },
+    {
+      "name": "OpAmtCrDr",
+      "ref": "{@OpAmtCrDr}",
+      "type": "StringField",
+      "text": "if {@OpAmt} > 0 then\n    'Cr'\nelse\n    'Dr'"
+    },
+    {
+      "name": "RptTitle",
+      "ref": "{@RptTitle}",
+      "type": "StringField",
+      "text": "{BOOK_DATA.BOOK_NAME}"
+    },
+    {
+      "name": "Tax",
+      "ref": "{@Tax}",
+      "type": "StringField",
+      "text": "'Tax : ' & {SL_ORD_DATA.TAX_PRC} & '% :'"
+    },
+    {
+      "name": "TotalRecAmt",
+      "ref": "{@TotalRecAmt}",
+      "type": "NumberField",
+      "text": "{SL_ORD_DATA.CASH_AMT} +{SL_ORD_DATA.CARD_AMT}+{SL_ORD_DATA.CHQ_AMT}"
+    },
+    {
+      "name": "VchGroup",
+      "ref": "{@VchGroup}",
+      "type": "StringField",
+      "text": "{SL_ORD_DATA.CO_YEAR}+{SL_ORD_DATA.CO_BOOK}+{SL_ORD_DATA.VCH_NO}"
+    },
+    {
+      "name": "WordRuppes",
+      "ref": "{@WordRuppes}",
+      "type": "StringField",
+      "text": "if  {SL_ORD_DATA.ADV_AMT} <> 0 then\n    ucase(ToWords ({SL_ORD_DATA.ADV_AMT},0 ))"
+    }
+  ],
+  "sectionCount": 11,
+  "objectCount": 58,
+  "formulaCount": 22,
+  "groups": [
+    "{@VchGroup}"
+  ],
+  "databaseFields": {
+    "SL_ORD_DATA.CO_CODE": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.LC_CODE": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.CO_YEAR": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.CO_BOOK": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.VCH_NO": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.VCH_DATE": "crFieldValueTypeDateField",
+    "SL_ORD_DATA.VCH_TIME": "crFieldValueTypeDateTimeField",
+    "SL_ORD_DATA.BILL_NO": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.HD_VCH_NO": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.AC_CODE": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.AC_NAME": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.NET_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.TAX_CODE": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.TAX_PRC": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.TAX_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.TOT_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.ADV_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.ORD_ADJ_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.OLD_GL_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.OLD_SL_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.CASH_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.CARD_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.CHQ_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.SCHM_AMT": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.DEL_DATE": "crFieldValueTypeDateField",
+    "SL_ORD_DATA.CARD_AC": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.BANK_AC": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.CHQ_NO": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.BANK_NAME": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.EMP_CODE": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.VCH_DESC": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.ENTRY_TIME": "crFieldValueTypeDateTimeField",
+    "SL_ORD_DATA.SL_BILL_TYPE": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.OLD_GL": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.ADJ_GOLD": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.OLD_SL": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.ADJ_SILVER": "crFieldValueTypeNumberField",
+    "SL_ORD_DATA.CARD_ADJ": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.DATA_TRFR": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.OLD_VCH_NO": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.NEW_VCH_NO": "crFieldValueTypeStringField",
+    "SL_ORD_DATA.MAIN_USER": "crFieldValueTypeStringField",
+    "CO_MAST.CO_CODE": "crFieldValueTypeStringField",
+    "CO_MAST.CO_NAME": "crFieldValueTypeStringField",
+    "CO_MAST.LC_CODE": "crFieldValueTypeStringField",
+    "CO_MAST.CO_SNAME": "crFieldValueTypeStringField",
+    "CO_MAST.CO_ADD1": "crFieldValueTypeStringField",
+    "CO_MAST.CO_ADD2": "crFieldValueTypeStringField",
+    "CO_MAST.CO_ADD3": "crFieldValueTypeStringField",
+    "CO_MAST.CO_COUNTRY": "crFieldValueTypeStringField",
+    "CO_MAST.CO_STATE_CODE": "crFieldValueTypeStringField",
+    "CO_MAST.CO_STATE": "crFieldValueTypeStringField",
+    "CO_MAST.CO_CITY": "crFieldValueTypeStringField",
+    "CO_MAST.CO_PIN": "crFieldValueTypeStringField",
+    "CO_MAST.CO_PHONE": "crFieldValueTypeStringField",
+    "CO_MAST.CO_PHONE2": "crFieldValueTypeStringField",
+    "CO_MAST.CO_MOBILE": "crFieldValueTypeStringField",
+    "CO_MAST.CO_MOBILE2": "crFieldValueTypeStringField",
+    "CO_MAST.CO_MAIL": "crFieldValueTypeStringField",
+    "CO_MAST.CO_JUD": "crFieldValueTypeStringField",
+    "CO_MAST.CO_LSTNO": "crFieldValueTypeStringField",
+    "CO_MAST.CO_CSTNO": "crFieldValueTypeStringField",
+    "CO_MAST.CO_GST_NO": "crFieldValueTypeStringField",
+    "CO_MAST.CO_PAN_NO": "crFieldValueTypeStringField",
+    "CO_MAST.DHIRAN_NO": "crFieldValueTypeStringField",
+    "CO_MAST.BANK_NAME": "crFieldValueTypeStringField",
+    "CO_MAST.BANK_AREA": "crFieldValueTypeStringField",
+    "CO_MAST.BANK_AC_NO": "crFieldValueTypeStringField",
+    "CO_MAST.BANK_RTGS_NO": "crFieldValueTypeStringField",
+    "CO_MAST.CO_TYPE": "crFieldValueTypeStringField",
+    "CO_MAST.ALTER_YEAR": "crFieldValueTypeStringField",
+    "CO_MAST.CO_MSG": "crFieldValueTypeStringField",
+    "CO_MAST.REP_ADD_TYPE": "crFieldValueTypeStringField",
+    "CO_MAST.MAIN_USER": "crFieldValueTypeStringField",
+    "CO_MAST.WORK_TYPE": "crFieldValueTypeStringField",
+    "CO_MAST.METAL_TYPE": "crFieldValueTypeStringField",
+    "BOOK_DATA.CO_CODE": "crFieldValueTypeStringField",
+    "BOOK_DATA.LC_CODE": "crFieldValueTypeStringField",
+    "BOOK_DATA.CO_BOOK": "crFieldValueTypeStringField",
+    "BOOK_DATA.BOOK_NAME": "crFieldValueTypeStringField",
+    "BOOK_DATA.BOOK_SNAME": "crFieldValueTypeStringField",
+    "BOOK_DATA.CUR_USE": "crFieldValueTypeStringField",
+    "BOOK_DATA.BOOK_INOUT": "crFieldValueTypeStringField",
+    "BOOK_DATA.MAIN_BOOK": "crFieldValueTypeStringField",
+    "BOOK_DATA.ITM_TYPE": "crFieldValueTypeStringField",
+    "BOOK_DATA.BOOK_TYPE": "crFieldValueTypeStringField",
+    "BOOK_DATA.BOOK_VCH_TYPE": "crFieldValueTypeStringField",
+    "BOOK_DATA.MAIN_USER": "crFieldValueTypeStringField",
+    "BOOK_DATA.BOOK_SR_NAME": "crFieldValueTypeStringField",
+    "AC_MAST.CO_CODE": "crFieldValueTypeStringField",
+    "AC_MAST.AC_CODE": "crFieldValueTypeStringField",
+    "AC_MAST.LC_CODE": "crFieldValueTypeStringField",
+    "AC_MAST.AC_NAME": "crFieldValueTypeStringField",
+    "AC_MAST.AC_SHORT": "crFieldValueTypeStringField",
+    "AC_MAST.AC_MAIN_GR": "crFieldValueTypeStringField",
+    "AC_MAST.AC_GR": "crFieldValueTypeStringField",
+    "AC_MAST.AC_PERSON": "crFieldValueTypeStringField",
+    "AC_MAST.AC_ADD1": "crFieldValueTypeStringField",
+    "AC_MAST.AC_ADD2": "crFieldValueTypeStringField",
+    "AC_MAST.AC_ADD3": "crFieldValueTypeStringField",
+    "AC_MAST.AC_COUNTRY": "crFieldValueTypeStringField",
+    "AC_MAST.AC_STATE": "crFieldValueTypeStringField",
+    "AC_MAST.AC_DISTRICT": "crFieldValueTypeStringField",
+    "AC_MAST.AC_CITY": "crFieldValueTypeStringField",
+    "AC_MAST.AC_AREA": "crFieldValueTypeStringField",
+    "AC_MAST.AC_PIN": "crFieldValueTypeStringField",
+    "AC_MAST.AC_PHONE": "crFieldValueTypeStringField",
+    "AC_MAST.AC_PHONE2": "crFieldValueTypeStringField",
+    "AC_MAST.AC_MOBILE": "crFieldValueTypeStringField",
+    "AC_MAST.AC_MOBILE2": "crFieldValueTypeStringField",
+    "AC_MAST.AC_EMAIL": "crFieldValueTypeStringField",
+    "AC_MAST.AC_GSTNO": "crFieldValueTypeStringField",
+    "AC_MAST.AC_GST_TYPE": "crFieldValueTypeStringField",
+    "AC_MAST.AC_PANNO": "crFieldValueTypeStringField",
+    "AC_MAST.AC_REF_CODE": "crFieldValueTypeStringField",
+    "AC_MAST.AC_KHATA_NO": "crFieldValueTypeStringField",
+    "AC_MAST.BR_DATE": "crFieldValueTypeDateField",
+    "AC_MAST.L_BR_DATE": "crFieldValueTypeDateField",
+    "AC_MAST.AN_DATE": "crFieldValueTypeDateField",
+    "AC_MAST.AC_CR_DAYS": "crFieldValueTypeNumberField",
+    "AC_MAST.AC_INT_PRC": "crFieldValueTypeNumberField",
+    "AC_MAST.DPC_PRC": "crFieldValueTypeNumberField",
+    "AC_MAST.AC_WEST_PRC": "crFieldValueTypeNumberField",
+    "AC_MAST.BANK_NAME": "crFieldValueTypeStringField",
+    "AC_MAST.BANK_AREA": "crFieldValueTypeStringField",
+    "AC_MAST.BANK_AC_NO": "crFieldValueTypeStringField",
+    "AC_MAST.BANK_RTGS_NO": "crFieldValueTypeStringField",
+    "AC_MAST.BANK_DETL": "crFieldValueTypeStringField",
+    "AC_MAST.AC_TYPE": "crFieldValueTypeStringField",
+    "AC_MAST.LAST_DATE": "crFieldValueTypeDateField",
+    "AC_MAST.DATA_TRFR": "crFieldValueTypeStringField",
+    "AC_MAST.MAIN_USER": "crFieldValueTypeStringField",
+    "LOCT_MAST.CO_CODE": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_CODE": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_NAME": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_ADD1": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_ADD2": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_ADD3": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_CITY": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_PHONE": "crFieldValueTypeStringField",
+    "LOCT_MAST.LC_MOBILE": "crFieldValueTypeStringField",
+    "LOCT_MAST.MAIN_USER": "crFieldValueTypeStringField"
   },
-  {
-   "kind": "Detail",
-   "name": "Area5",
-   "sections": [
-    {
-     "name": "Section5",
-     "kind": "Detail",
-     "height": 270,
-     "objects": [
-      {
-       "type": "FieldObject",
-       "name": "Field2",
-       "left": 180,
-       "top": 15,
-       "width": 3540,
-       "height": 226,
-       "dataSource": "{SL_PR_DETL.IT_DESC}"
+  "runningTotals": [],
+  "subreportLinks": [],
+  "subreports": {
+    "OrdRec": {
+      "report": "OrdRec",
+      "areas": [
+        {
+          "kind": "ReportHeader",
+          "name": "Area3",
+          "sections": [
+            {
+              "name": "Section3",
+              "kind": "ReportHeader",
+              "height": 275,
+              "objects": [
+                {
+                  "type": "TextObject",
+                  "name": "Text10",
+                  "left": 180,
+                  "top": 30,
+                  "width": 1679,
+                  "height": 240,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "text": "Received Item",
+                  "alignment": "LeftAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "TextObject",
+                  "name": "Text1",
+                  "left": 3736,
+                  "top": 30,
+                  "width": 839,
+                  "height": 240,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "text": "Pcs",
+                  "alignment": "RightAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "TextObject",
+                  "name": "Text2",
+                  "left": 4966,
+                  "top": 30,
+                  "width": 839,
+                  "height": 240,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "text": "Weight",
+                  "alignment": "RightAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "TextObject",
+                  "name": "Text3",
+                  "left": 6121,
+                  "top": 30,
+                  "width": 839,
+                  "height": 240,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "text": "Touch",
+                  "alignment": "RightAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "LineObject",
+                  "name": "Line4",
+                  "left": 60,
+                  "top": 255,
+                  "width": 10740,
+                  "height": 0,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "alignment": "DefaultAlign"
+                },
+                {
+                  "type": "LineObject",
+                  "name": "Line2",
+                  "left": 60,
+                  "top": 255,
+                  "width": 0,
+                  "height": 405,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "alignment": "DefaultAlign"
+                },
+                {
+                  "type": "TextObject",
+                  "name": "Text5",
+                  "left": 7891,
+                  "top": 30,
+                  "width": 839,
+                  "height": 240,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "text": "Rate",
+                  "alignment": "RightAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                }
+              ],
+              "suppressed": false
+            }
+          ]
+        },
+        {
+          "kind": "Detail",
+          "name": "Area5",
+          "sections": [
+            {
+              "name": "Section5",
+              "kind": "Detail",
+              "height": 270,
+              "objects": [
+                {
+                  "type": "FieldObject",
+                  "name": "Field2",
+                  "left": 180,
+                  "top": 15,
+                  "width": 3540,
+                  "height": 226,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "{SL_PR_DETL.IT_DESC}",
+                  "alignment": "DefaultAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": false,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "FieldObject",
+                  "name": "Field3",
+                  "left": 3922,
+                  "top": 15,
+                  "width": 653,
+                  "height": 204,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "{SL_PR_DETL.ITM_PCS}",
+                  "alignment": "DefaultAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": false,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "FieldObject",
+                  "name": "Field5",
+                  "left": 5079,
+                  "top": 15,
+                  "width": 726,
+                  "height": 204,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "{SL_PR_DETL.ITM_NWT}",
+                  "alignment": "DefaultAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": false,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "FieldObject",
+                  "name": "Field6",
+                  "left": 6162,
+                  "top": 15,
+                  "width": 798,
+                  "height": 204,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "{SL_PR_DETL.ITM_TOUCH}",
+                  "alignment": "DefaultAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": false,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "FieldObject",
+                  "name": "Field8",
+                  "left": 7457,
+                  "top": 15,
+                  "width": 1273,
+                  "height": 216,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "{SL_PR_DETL.ITM_RATE}",
+                  "alignment": "DefaultAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "FieldObject",
+                  "name": "Field9",
+                  "left": 9525,
+                  "top": 15,
+                  "width": 1185,
+                  "height": 216,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "{SL_PR_DETL.NET_AMT}",
+                  "alignment": "DefaultAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "LineObject",
+                  "name": "Line3",
+                  "left": 60,
+                  "top": 270,
+                  "width": 10230,
+                  "height": 0,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "alignment": "DefaultAlign"
+                }
+              ],
+              "suppressed": false
+            }
+          ]
+        },
+        {
+          "kind": "ReportFooter",
+          "name": "Area4",
+          "sections": [
+            {
+              "name": "Section4",
+              "kind": "ReportFooter",
+              "height": 330,
+              "objects": [
+                {
+                  "type": "FieldObject",
+                  "name": "Field11",
+                  "left": 5063,
+                  "top": 60,
+                  "width": 742,
+                  "height": 216,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "Sum ({SL_PR_DETL.ITM_NWT})",
+                  "alignment": "RightAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "FieldObject",
+                  "name": "Field12",
+                  "left": 3908,
+                  "top": 60,
+                  "width": 667,
+                  "height": 216,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "dataSource": "Sum ({SL_PR_DETL.ITM_PCS})",
+                  "alignment": "RightAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                },
+                {
+                  "type": "LineObject",
+                  "name": "Line1",
+                  "left": 60,
+                  "top": 0,
+                  "width": 10740,
+                  "height": 0,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "alignment": "DefaultAlign"
+                },
+                {
+                  "type": "TextObject",
+                  "name": "Text4",
+                  "left": 2880,
+                  "top": 60,
+                  "width": 839,
+                  "height": 240,
+                  "suppressed": false,
+                  "canGrow": false,
+                  "text": "Total :",
+                  "alignment": "RightAlign",
+                  "font": {
+                    "name": "Arial",
+                    "points": 9.0,
+                    "bold": true,
+                    "italic": false
+                  }
+                }
+              ],
+              "suppressed": false
+            }
+          ]
+        }
+      ],
+      "formulas": [],
+      "sectionCount": 3,
+      "objectCount": 18,
+      "formulaCount": 0,
+      "groups": [],
+      "databaseFields": {
+        "SL_PR_DETL.CO_CODE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.LC_CODE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.CO_YEAR": "crFieldValueTypeStringField",
+        "SL_PR_DETL.CO_BOOK": "crFieldValueTypeStringField",
+        "SL_PR_DETL.VCH_NO": "crFieldValueTypeStringField",
+        "SL_PR_DETL.SR_NO": "crFieldValueTypeInt32sField",
+        "SL_PR_DETL.VCH_DATE": "crFieldValueTypeDateField",
+        "SL_PR_DETL.VCH_TIME": "crFieldValueTypeDateTimeField",
+        "SL_PR_DETL.VCH_TYPE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.INOUT_TYPE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.ENTRY_TYPE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.BOOK_NAME": "crFieldValueTypeStringField",
+        "SL_PR_DETL.AC_CODE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.IT_CODE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.IT_DESC": "crFieldValueTypeStringField",
+        "SL_PR_DETL.ITM_PCS": "crFieldValueTypeInt32sField",
+        "SL_PR_DETL.ITM_GWT": "crFieldValueTypeNumberField",
+        "SL_PR_DETL.ITM_NWT": "crFieldValueTypeNumberField",
+        "SL_PR_DETL.ITM_TOUCH": "crFieldValueTypeNumberField",
+        "SL_PR_DETL.ITM_FINE": "crFieldValueTypeNumberField",
+        "SL_PR_DETL.ITM_RATE": "crFieldValueTypeNumberField",
+        "SL_PR_DETL.NET_AMT": "crFieldValueTypeNumberField",
+        "SL_PR_DETL.IT_TYPE": "crFieldValueTypeStringField",
+        "SL_PR_DETL.HD_VCH_NO": "crFieldValueTypeStringField",
+        "SL_PR_DETL.DATA_TRFR": "crFieldValueTypeStringField",
+        "SL_PR_DETL.OLD_VCH_NO": "crFieldValueTypeStringField",
+        "SL_PR_DETL.NEW_VCH_NO": "crFieldValueTypeStringField",
+        "SL_PR_DETL.MAIN_USER": "crFieldValueTypeStringField"
       },
-      {
-       "type": "FieldObject",
-       "name": "Field3",
-       "left": 3922,
-       "top": 15,
-       "width": 653,
-       "height": 204,
-       "dataSource": "{SL_PR_DETL.ITM_PCS}"
-      },
-      {
-       "type": "FieldObject",
-       "name": "Field5",
-       "left": 5079,
-       "top": 15,
-       "width": 726,
-       "height": 204,
-       "dataSource": "{SL_PR_DETL.ITM_NWT}"
-      },
-      {
-       "type": "FieldObject",
-       "name": "Field6",
-       "left": 6162,
-       "top": 15,
-       "width": 798,
-       "height": 204,
-       "dataSource": "{SL_PR_DETL.ITM_TOUCH}"
-      },
-      {
-       "type": "FieldObject",
-       "name": "Field8",
-       "left": 7457,
-       "top": 15,
-       "width": 1273,
-       "height": 216,
-       "dataSource": "{SL_PR_DETL.ITM_RATE}"
-      },
-      {
-       "type": "FieldObject",
-       "name": "Field9",
-       "left": 9525,
-       "top": 15,
-       "width": 1185,
-       "height": 216,
-       "dataSource": "{SL_PR_DETL.NET_AMT}"
-      },
-      {
-       "type": "LineObject",
-       "name": "Line3",
-       "left": 60,
-       "top": 270,
-       "width": 10230,
-       "height": 0
-      }
-     ]
+      "runningTotals": [],
+      "subreportLinks": [
+        {
+          "LinkedParameterName": "{?Pm-SL_ORD_DATA.CO_CODE}",
+          "MainReportFieldName": "{SL_ORD_DATA.CO_CODE}",
+          "SubreportFieldName": "{SL_PR_DETL.CO_CODE}"
+        },
+        {
+          "LinkedParameterName": "{?Pm-SL_ORD_DATA.CO_YEAR}",
+          "MainReportFieldName": "{SL_ORD_DATA.CO_YEAR}",
+          "SubreportFieldName": "{SL_PR_DETL.CO_YEAR}"
+        },
+        {
+          "LinkedParameterName": "{?Pm-SL_ORD_DATA.CO_BOOK}",
+          "MainReportFieldName": "{SL_ORD_DATA.CO_BOOK}",
+          "SubreportFieldName": "{SL_PR_DETL.CO_BOOK}"
+        },
+        {
+          "LinkedParameterName": "{?Pm-SL_ORD_DATA.VCH_NO}",
+          "MainReportFieldName": "{SL_ORD_DATA.VCH_NO}",
+          "SubreportFieldName": "{SL_PR_DETL.VCH_NO}"
+        },
+        {
+          "LinkedParameterName": "{?Pm-SL_ORD_DATA.LC_CODE}",
+          "MainReportFieldName": "{SL_ORD_DATA.LC_CODE}",
+          "SubreportFieldName": "{SL_PR_DETL.LC_CODE}"
+        }
+      ],
+      "subreports": {}
     }
-   ]
   },
-  {
-   "kind": "ReportFooter",
-   "name": "Area4",
-   "sections": [
-    {
-     "name": "Section4",
-     "kind": "ReportFooter",
-     "height": 330,
-     "objects": [
-      {
-       "type": "LineObject",
-       "name": "Line1",
-       "left": 60,
-       "top": 0,
-       "width": 10740,
-       "height": 0
-      },
-      {
-       "type": "TextObject",
-       "name": "Text4",
-       "left": 2880,
-       "top": 60,
-       "width": 839,
-       "height": 240,
-       "text": "Total :"
-      },
-      {
-       "type": "FieldObject",
-       "name": "Field12",
-       "left": 3908,
-       "top": 60,
-       "width": 667,
-       "height": 216,
-       "dataSource": "Sum ({SL_PR_DETL.ITM_PCS})"
-      },
-      {
-       "type": "FieldObject",
-       "name": "Field11",
-       "left": 5063,
-       "top": 60,
-       "width": 742,
-       "height": 216,
-       "dataSource": "Sum ({SL_PR_DETL.ITM_NWT})"
-      }
-     ]
-    }
-   ]
+  "source": {
+    "kind": "order-xml-v1",
+    "xml": "extraction_output/rpt_xml/OrderVch.xml",
+    "sha256": "df6241686f9815e782f80aa1b79537901538d8ee57ca4a8a0c7dcac2a8b38cd3"
+  },
+  "printOptions": {
+    "PageContentHeight": "7618",
+    "PageContentWidth": "11520",
+    "PaperOrientation": "Portrait",
+    "PaperSize": "DefaultPaperSize",
+    "PaperSource": "FormSource",
+    "PrinterDuplex": "Default",
+    "PrinterName": "",
+    "marginTop": "284",
+    "marginRight": "215",
+    "marginBottom": "7938",
+    "marginLeft": "505"
   }
- ],
- "formulas": [
-  {
-   "name": "AcAdd1",
-   "ref": "{@AcAdd1}",
-   "type": "StringField",
-   "text": "{AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
-  },
-  {
-   "name": "AcAdd2",
-   "ref": "{@AcAdd2}",
-   "type": "StringField",
-   "text": "{AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
-  },
-  {
-   "name": "AcGstNo",
-   "ref": "{@AcGstNo}",
-   "type": "StringField",
-   "text": "'Gst No : ' + {AC_MAST.AC_GSTNO}"
-  },
-  {
-   "name": "AcMobile",
-   "ref": "{@AcMobile}",
-   "type": "StringField",
-   "text": "if {AC_MAST.AC_MOBILE} <> '' then 'Mo : ' + {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then 'Ph : ' + {AC_MAST.AC_MOBILE} else 'Mo : ' + {AC_MAST.AC_MOBILE2}"
-  },
-  {
-   "name": "ClAmt",
-   "ref": "{@ClAmt}",
-   "type": "NumberField",
-   "text": "0"
-  },
-  {
-   "name": "ClAmtCrDr",
-   "ref": "{@ClAmtCrDr}",
-   "type": "StringField",
-   "text": "if {@ClAmt} > 0 then 'Cr' else 'Dr'"
-  },
-  {
-   "name": "CoAdd1",
-   "ref": "{@CoAdd1}",
-   "type": "StringField",
-   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD1} else {CO_MAST.CO_ADD1}"
-  },
-  {
-   "name": "CoAdd2",
-   "ref": "{@CoAdd2}",
-   "type": "StringField",
-   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_ADD2} + ' , ' + {LOCT_MAST.LC_ADD3} else {CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
-  },
-  {
-   "name": "CoCity",
-   "ref": "{@CoCity}",
-   "type": "StringField",
-   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_CITY} + ' Mo : ' + {LOCT_MAST.LC_MOBILE} + ' Ph : ' + {LOCT_MAST.LC_PHONE} else {CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE} + ' Ph : ' + {CO_M"
-  },
-  {
-   "name": "CoName",
-   "ref": "{@CoName}",
-   "type": "StringField",
-   "text": "if {CO_MAST.REP_ADD_TYPE} = 'L' THEN {LOCT_MAST.LC_NAME} ELSE {CO_MAST.CO_NAME}"
-  },
-  {
-   "name": "CurPag",
-   "ref": "{@CurPag}",
-   "type": "NumberField",
-   "text": "PageNumber"
-  },
-  {
-   "name": "for",
-   "ref": "{@for}",
-   "type": "StringField",
-   "text": "'For : ' + {CO_MAST.CO_NAME}"
-  },
-  {
-   "name": "InVoiceType",
-   "ref": "{@InVoiceType}",
-   "type": "StringField",
-   "text": "'ORIGINAL'"
-  },
-  {
-   "name": "ItemName",
-   "ref": "{@ItemName}",
-   "type": "UnknownField",
-   "text": "{ITEM_MAST.IT_NAME} + ' Dsgn : ' + {SL_ORD_DETL.DESIGN}"
-  },
-  {
-   "name": "OldItem",
-   "ref": "{@OldItem}",
-   "type": "StringField",
-   "text": "'N'"
-  },
-  {
-   "name": "OpAmt",
-   "ref": "{@OpAmt}",
-   "type": "NumberField",
-   "text": "0"
-  },
-  {
-   "name": "OpAmtCrDr",
-   "ref": "{@OpAmtCrDr}",
-   "type": "StringField",
-   "text": "if {@OpAmt} > 0 then 'Cr' else 'Dr'"
-  },
-  {
-   "name": "RptTitle",
-   "ref": "{@RptTitle}",
-   "type": "StringField",
-   "text": "{BOOK_DATA.BOOK_NAME}"
-  },
-  {
-   "name": "Tax",
-   "ref": "{@Tax}",
-   "type": "StringField",
-   "text": "'Tax : ' & {SL_ORD_DATA.TAX_PRC} & '% :'"
-  },
-  {
-   "name": "TotalRecAmt",
-   "ref": "{@TotalRecAmt}",
-   "type": "NumberField",
-   "text": "{SL_ORD_DATA.CASH_AMT} +{SL_ORD_DATA.CARD_AMT}+{SL_ORD_DATA.CHQ_AMT}"
-  },
-  {
-   "name": "VchGroup",
-   "ref": "{@VchGroup}",
-   "type": "StringField",
-   "text": "{SL_ORD_DATA.CO_YEAR}+{SL_ORD_DATA.CO_BOOK}+{SL_ORD_DATA.VCH_NO}"
-  },
-  {
-   "name": "WordRuppes",
-   "ref": "{@WordRuppes}",
-   "type": "StringField",
-   "text": "if {SL_ORD_DATA.ADV_AMT} <> 0 then ucase(ToWords ({SL_ORD_DATA.ADV_AMT},0 ))"
-  }
- ],
- "sectionCount": 3,
- "objectCount": 18,
- "formulaCount": 22
 }

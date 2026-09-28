@@ -1,0 +1,54 @@
+{
+  "kind": "staged-session-read-snapshot-handoff",
+  "capturedAtUtc": "2026-09-11T22:56:51.681052+00:00",
+  "status": "source-and-tests-staged-unexecuted",
+  "scope": "four new integration files; no active-tree mutations",
+  "declaredUnitCases": 57,
+  "declaredDatabaseCases": 14,
+  "executedChecks": [
+    {
+      "kind": "formatting-parser-only",
+      "command": "node node_modules/prettier/bin/prettier.cjs --config .prettierrc.json --write <three staged TypeScript files>",
+      "exitCode": 0
+    }
+  ],
+  "runtimeTestsExecuted": false,
+  "typecheckExecuted": false,
+  "databaseExecuted": false,
+  "browserExecuted": false,
+  "contractInputsUnchanged": true,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "746902a38be29e7334b317e1d8ef7f5d176f2270a6e6dfbe700d0b6cbea6d3fe"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "642c34cd604ce0d19242f54a112bc962ef18394393645dddab0af0aa32e5dd33"
+    },
+    {
+      "path": "contract-inputs.json",
+      "sha256": "43b9b128d13bb42b1858fd377638a5118f9808050fbeac8543672e0faa911632"
+    },
+    {
+      "path": "sessionReadSnapshot.independent.json",
+      "sha256": "45c0faa998fc1463cd08f9218487fc5c84ac3ba93b2c641f1fb45ead9aa71bad"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextReadSnapshot.db.test.ts",
+      "sha256": "fb6192e427ab5a85878f6df4261225603b94ffd7075ce6c4a25945ef17244614"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextReadSnapshot.test.ts",
+      "sha256": "717ce22141eff365fea9f5fbb0fbd923b3c167b1133bc1c60dca00d923b854fe"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionReadSnapshot.independent.json",
+      "sha256": "45c0faa998fc1463cd08f9218487fc5c84ac3ba93b2c641f1fb45ead9aa71bad"
+    }
+  ]
+}

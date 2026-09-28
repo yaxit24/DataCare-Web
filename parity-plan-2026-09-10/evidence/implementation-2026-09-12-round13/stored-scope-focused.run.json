@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/storedScope.test.ts",
+    "test/sessionContext.extraction.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T20:02:11.179739+00:00",
+  "finishedAtUtc": "2026-09-11T20:02:15.154164+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/stored-scope-focused.txt",
+  "logSha256": "8f068be5df6c7c2ed52621ce9407c4450444e944b9c179d18858b5e101093f42",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/stored-scope-focused.inputs.json",
+  "inputManifestSha256": "850402b93cdee4f41d4dd9aa9582549d35ef80da245e9cdd7ff8d003eef654a5",
+  "inputCount": 1758,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

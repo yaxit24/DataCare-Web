@@ -1,0 +1,12 @@
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/tourOrderForm.test.ts (8 tests) 6ms
+ ✓ test/tourOrderExactValues.test.ts (19 tests) 11ms
+ ✓ test/salesOrderForm.test.ts (15 tests) 11ms
+
+ Test Files  3 passed (3)
+      Tests  42 passed (42)
+   Start at  04:16:41
+   Duration  419ms (transform 276ms, setup 0ms, collect 503ms, tests 27ms, environment 0ms, prepare 142ms)
+

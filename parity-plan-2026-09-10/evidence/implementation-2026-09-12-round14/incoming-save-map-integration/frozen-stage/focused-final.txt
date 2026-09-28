@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-return-save-map-staged/web/packages/core
+
+ ✓ test/saleReturnIncomingSaveProjection.test.ts (63 tests) 29ms
+
+ Test Files  1 passed (1)
+      Tests  63 passed (63)
+   Start at  05:57:06
+   Duration  232ms (transform 34ms, setup 0ms, collect 34ms, tests 29ms, environment 0ms, prepare 39ms)
+

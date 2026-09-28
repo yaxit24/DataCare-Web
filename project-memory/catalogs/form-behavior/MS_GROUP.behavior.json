@@ -1,0 +1,71 @@
+{
+ "form": "MS_GROUP",
+ "loc": 2350,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_CODE",
+  "SELECT * FROM AC_MAST WHERE AC_CODE = ' ? '",
+  "Please Select Sales and Purchase Account And Try",
+  "DELETE FROM GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT * FROM GROUP_MAST WHERE CO_CODE = ' ? '",
+  "UPDATE ITEM_MAST SET TRAD_TYPE = ' ? ',IT_TYPE = ' ? ', HSN_CODE = ' ? ' WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "Please Select Group For Delete.",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '25' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR AS GroupL FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE <> '00099' AND AC_GR = '25' ORDER BY AC_NAME",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '30' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR AS GroupL FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '30' ORDER BY AC_NAME",
+  "Select * From BAL_GR WHERE CO_CODE = ' ? ' AND TRAD_TYPE = ' ? '",
+  "SELECT TRAD_NAME As TradNameL,TRAD_TYPE as CodeL FROM BAL_GR WHERE CO_CODE = ' ? ' ORDER BY TRAD_NAME"
+ ],
+ "keyboard": {
+  "F1": 2,
+  "Enter": 11,
+  "Esc": 1,
+  "Backspace": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Please Select Sales and Purchase Account And Try",
+   "when": "(Operators.CompareString(tSalesAc.Text, \"\", false) == 0) | (Operators.CompareString(tPurcAc.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Enter Group Detail",
+   "when": "(Operators.CompareString(tGrCode.Text, \"\", false) == 0) | (Operators.CompareString(tGrName.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Group For Delete.",
+   "when": "Operators.CompareString(tGrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Cant Delete Record This Group Code Use in Item Master....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Group now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Group now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Group now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Please Insert Group Name ...",
+   "when": "Operators.CompareString(tGrName.Text, \"\", false) == 0"
+  }
+ ]
+}

@@ -1,12 +1,14 @@
+import { reportFormForSlug } from '../reports/reportAuthorization.js';
 import { getFormEntry } from './formCatalog.js';
 
 export type RouteAction = 'read' | 'create' | 'update' | 'delete' | 'print';
 export type RoutePolicyKind = 'public' | 'system' | 'form';
+export type DynamicPolicyForm = '@master' | '@report';
 
 export interface RoutePolicy {
   kind: RoutePolicyKind;
   action?: RouteAction;
-  form?: string | '@master';
+  form?: string | DynamicPolicyForm;
   adminOnly?: boolean;
   /** Whether request company/location/year/book fields must match or validate against the session. */
   businessScope?: boolean;
@@ -108,13 +110,25 @@ route('Utilities/Voucher Renumber', [
   'POST /utilities/vch-renumber/apply',
 ]);
 route('Utilities/Data Refresh', ['POST /utilities/data-refresh']);
-// Desktop MS_UPDATE maintenance console. Preview and apply rewrite historical data, so they sit behind the
-// same form right as the rest of the utility surface and are additionally admin-gated in the handler.
+// Desktop MS_UPDATE maintenance console. Preview and apply rewrite historical data, so the whole console is
+// admin-only in the registry rather than by handler comment, and the actions are classified for what they do:
+// preview reads, apply deletes/rewrites. See SCOPED_ADMIN_ONLY — unlike the other admin routes these must
+// still validate the requested company/location/year against the session.
 route('Utilities/Data Repair', [
   'GET /utilities/data-repair/operations',
   'POST /utilities/data-repair/:id/preview',
   'POST /utilities/data-repair/:id/apply',
   'GET /utilities/data-repair/runs',
+]);
+route('Utilities/Data Export', [
+  'GET /utilities/data-export/preview',
+  'GET /utilities/data-export/download',
+  'POST /utilities/data-export/mark-exported',
+  'POST /utilities/data-export/reset-flags',
+]);
+route('Utilities/Estimate Reset', [
+  'POST /utilities/estimate-reset/preview',
+  'POST /utilities/estimate-reset/apply',
 ]);
 route('Utilities/Settings', [
   'GET /settings',
@@ -130,6 +144,7 @@ route('Utilities/Integrations & Rates', [
   'GET /integrations/status',
 ]);
 route('Utilities/e-Invoice (IRN)', [
+  'GET /einvoice/export.xlsx',
   'POST /einvoice/:vchNo',
   'POST /einvoice/irn',
   'GET /einvoice/gsp-config',
@@ -137,6 +152,11 @@ route('Utilities/e-Invoice (IRN)', [
   'POST /einvoice/:vchNo/cancel',
 ]);
 route('Utilities/Year-End Close', ['POST /year-end/preview', 'POST /year-end/close']);
+route('Company/Balance TrFr', [
+  'POST /balance-transfer/preview',
+  'POST /balance-transfer/year-close',
+  'POST /balance-transfer/openings',
+]);
 route('Utilities/Reminders', [
   'GET /reminders/overdue',
   'GET /reminders/birthdays',
@@ -174,22 +194,82 @@ route('Sales/Sales Invoice', [
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',
 ]);
+route('Sales/Sales Quotation', [
+  'POST /sales-quotations',
+  'GET /sales-quotations/:vchNo',
+  'PUT /sales-quotations/:vchNo',
+  'DELETE /sales-quotations/:vchNo',
+  'GET /sales-quotations/quotation',
+]);
 route('Sales/Estimate', ['POST /estimate', 'GET /sales/quotation']);
 route('Sales/Sales Return', [
+  'GET /sales-returns/incoming-recent',
+  'GET /sales-returns/source-vouchers',
+  'GET /sales-returns/source-items',
+  'GET /sales-returns/incoming-calculation-configuration',
+  'GET /sales-returns/:vchNo/incoming',
+  'GET /sales-returns/:vchNo/incoming-replay-state',
+  'POST /sales-returns/:vchNo/incoming-replay',
+  'GET /sales-returns/:vchNo/incoming-bill-replay-state',
+  'POST /sales-returns/:vchNo/incoming-bill-replay',
+  'GET /sales-returns/:vchNo/incoming-labour-replay-state',
+  'POST /sales-returns/:vchNo/incoming-labour-observation',
+  'POST /sales-returns/:vchNo/incoming-labour-replay',
+  'PUT /sales-returns/:vchNo/incoming-metadata',
   'POST /sales-returns',
   'GET /sales-returns/import',
+  'GET /sales-returns/:vchNo',
   'DELETE /sales-returns/:vchNo',
   'GET /sales/credit-note',
 ]);
 route('Sales/Sales Order', [
+  'GET /sales-orders/configuration',
+  'GET /sales-orders/designs',
+  'GET /sales-orders/design-image',
+  'PUT /sales-orders/:vchNo',
+  'GET /sales-orders/:vchNo/image',
+  'POST /sales-orders/:vchNo/image',
+  'DELETE /sales-orders/:vchNo/image',
   'POST /sales-orders',
   'GET /sales-orders',
+  'GET /sales-orders/:vchNo',
   'DELETE /sales-orders/:vchNo',
   'GET /sales/order-confirmation',
 ]);
-route('Sales/Order Cancel', ['POST /sales-orders/:vchNo/cancel-refund']);
-route('Sales/Labour Sale', ['POST /labour-invoice', 'DELETE /labour-invoice/:vchNo']);
+route('Karigar/Tour Order', [
+  'GET /tour-orders/:vchNo/image',
+  'POST /tour-orders/:vchNo/image',
+  'DELETE /tour-orders/:vchNo/image',
+  'GET /tour-orders/configuration',
+  'GET /tour-orders/confirmation',
+  'POST /tour-orders',
+  'GET /tour-orders',
+  'GET /tour-orders/:vchNo',
+  'PUT /tour-orders/:vchNo',
+  'DELETE /tour-orders/:vchNo',
+]);
+route('Transaction/E CrntNote', [
+  'GET /e-credit-notes',
+  'GET /e-credit-notes/provider',
+  'GET /e-credit-notes/:vchNo',
+  'POST /einvoice/credit-note/irn',
+]);
+route('Sales/Order Cancel', [
+  'POST /sales-orders/:vchNo/cancel-refund',
+  'GET /sales-orders/:vchNo/adjustment',
+]);
+route('Sales/Labour Sale', [
+  'POST /labour-invoice',
+  'GET /labour-invoice/:vchNo',
+  'DELETE /labour-invoice/:vchNo',
+]);
 route('Sales/Bullion Booking', ['POST /bullion/booking', 'DELETE /bullion/:vchNo']);
+route('Sales/Bul Sales', [
+  'POST /bullion-sales',
+  'GET /bullion-sales/:vchNo',
+  'PUT /bullion-sales/:vchNo',
+  'DELETE /bullion-sales/:vchNo',
+]);
 route('Sales/Tour / Approval Sale', [
   'POST /tour/issue',
   'DELETE /tour/:vchNo',
@@ -217,7 +297,27 @@ route('Purchase/Purchase Invoice', [
   'DELETE /purchases/:vchNo',
   'GET /purchases/invoice',
 ]);
+route('Purchase/Consignment Purchase', [
+  'GET /consignment-purchases/open-receipts',
+  'POST /consignment-purchases',
+  'GET /consignment-purchases/:vchNo',
+  'PUT /consignment-purchases/:vchNo',
+  'DELETE /consignment-purchases/:vchNo',
+]);
+route('Purchase/Purchase Quotation', [
+  'POST /purchase-quotations',
+  'GET /purchase-quotations/:vchNo',
+  'PUT /purchase-quotations/:vchNo',
+  'DELETE /purchase-quotations/:vchNo',
+  'GET /purchase-quotations/quotation',
+]);
 route('Purchase/Other Purchase', ['POST /other-purchase', 'DELETE /other-purchase/:vchNo']);
+route('Purchase/Other Income', [
+  'POST /other-income',
+  'GET /other-income/:vchNo',
+  'PUT /other-income/:vchNo',
+  'DELETE /other-income/:vchNo',
+]);
 route('Purchase/Other Commission / Expense Voucher', [
   'POST /other-commission',
   'GET /other-commission/:vchNo',
@@ -226,8 +326,31 @@ route('Purchase/Other Commission / Expense Voucher', [
 ]);
 route('Purchase/Purchase Return', ['POST /purchase-returns', 'DELETE /purchase-returns/:vchNo']);
 route('Purchase/Fine Settlement', ['POST /fine-sale', 'DELETE /fine-sale/:vchNo']);
+route('ExtraTran/Old Item Sales', [
+  'POST /old-item-sales',
+  'GET /old-item-sales/:vchNo',
+  'PUT /old-item-sales/:vchNo',
+  'DELETE /old-item-sales/:vchNo',
+]);
+route('Transaction/Stock Out', [
+  'POST /stock/out',
+  'GET /stock/out/:vchNo',
+  'PUT /stock/out/:vchNo',
+  'DELETE /stock/out/:vchNo',
+]);
+route('Transaction/Stock In', [
+  'POST /stock/in',
+  'GET /stock/in/:vchNo',
+  'PUT /stock/in/:vchNo',
+  'DELETE /stock/in/:vchNo',
+]);
 
-route('Cash / Bank/Receipt', ['POST /receipts', 'GET /finance/receipt-voucher']);
+route('Cash / Bank/Receipt', [
+  'POST /receipts',
+  'GET /receipts/:vchNo',
+  'DELETE /receipts/:vchNo',
+  'GET /finance/receipt-voucher',
+]);
 route('Cash / Bank/Multi-Party Receipt', [
   'POST /receipts/multi',
   'DELETE /receipts/multi/:vchNo',
@@ -235,20 +358,40 @@ route('Cash / Bank/Multi-Party Receipt', [
 ]);
 route('Cash / Bank/Payment', [
   'POST /payments',
+  'GET /payments/:vchNo',
+  'DELETE /payments/:vchNo',
   'POST /payments/multi',
   'DELETE /payments/multi/:vchNo',
   'GET /finance/payment-voucher',
   'GET /finance/cheque-print',
 ]);
-route('Cash / Bank/Contra', ['POST /contra']);
+route('Cash / Bank/Contra', [
+  'POST /contra',
+  'GET /contra/:vchNo',
+  'PUT /contra/:vchNo',
+  'DELETE /contra/:vchNo',
+]);
 route('Cash / Bank/Journal Voucher', ['POST /journal', 'DELETE /journal/:vchNo']);
 route('Cash / Bank/Account Opening Bal', ['POST /ac-opbl', 'DELETE /ac-opbl/:vchNo']);
-route('Cash / Bank/Fine JV (metal transfer)', ['POST /fine-jv', 'DELETE /fine-jv/:vchNo']);
-route('Cash / Bank/Bill-to-Bill Settle', ['GET /bill-to-bill/open', 'POST /bill-to-bill/settle']);
+route('Cash / Bank/Fine JV (metal transfer)', [
+  'POST /fine-jv',
+  'GET /fine-jv/:vchNo',
+  'DELETE /fine-jv/:vchNo',
+]);
+route('Cash / Bank/Bill-to-Bill Settle', [
+  'GET /bill-to-bill/open',
+  'POST /bill-to-bill/settle',
+  'DELETE /bill-to-bill/:vchNo',
+]);
 route('Cash / Bank/Bank Reconciliation', ['GET /bank-recon', 'POST /bank-recon/clear']);
 route('Cash / Bank/Daily Rate', ['POST /daily-rate', 'GET /daily-rate', 'GET /daily-rate/dates']);
 route('Cash / Bank/Reminders', ['GET /reminders']);
-route('Cash / Bank/Rate Cut (price fixing)', ['POST /rate-cut', 'DELETE /rate-cut/:vchNo']);
+route('Cash / Bank/Rate Cut (price fixing)', [
+  'POST /rate-cut',
+  'GET /rate-cut/:vchNo',
+  'PUT /rate-cut/:vchNo',
+  'DELETE /rate-cut/:vchNo',
+]);
 route('Cash / Bank/Ledger Adjustment', ['POST /ledger-adjust', 'DELETE /ledger-adjust/:vchNo']);
 route('Cash / Bank/Employee Salary JV', ['POST /employee-jv', 'DELETE /employee-jv/:vchNo']);
 
@@ -259,13 +402,25 @@ route('Inventory/Tag Opening', [
   'PUT /stock/tag-opening/:vchNo',
   'DELETE /stock/tag-opening/:vchNo',
 ]);
-route('Masters/Design Book', ['GET /masters/design-book', 'POST /masters/design-book']);
+route('Masters/Design Book', [
+  'GET /masters/design-book/calculation-config',
+  'GET /masters/design-book/component-defaults',
+  'GET /masters/design-book',
+  'POST /masters/design-book',
+  'PUT /masters/design-book',
+  'DELETE /masters/design-book',
+  'GET /masters/design-book/image',
+  'GET /masters/design-book/image/state',
+  'POST /masters/design-book/image',
+  'DELETE /masters/design-book/image',
+]);
 route('Inventory/Tag Print', [
   'GET /stock/tag-print',
   'GET /stock/tag-print/label',
   'POST /stock/tag-print/stage',
   // Tag photographs belong to the same surface: the right that shows a tag governs its image.
   'GET /stock/tag-image',
+  'GET /stock/tag-image/state',
   'GET /stock/tag-image/list',
   'POST /stock/tag-image',
   'DELETE /stock/tag-image',
@@ -289,6 +444,12 @@ route('Inventory/Counter Transfer', [
   'DELETE /stock/counter-transfer/:vchNo',
 ]);
 route('Inventory/Tag Cancel', ['POST /stock/tag-cancel', 'DELETE /stock/tag-cancel/:vchNo']);
+route('Inventory/Tag Adjust', [
+  'POST /stock/tag-adjust',
+  'GET /stock/tag-adjust/:vchNo',
+  'PUT /stock/tag-adjust/:vchNo',
+  'DELETE /stock/tag-adjust/:vchNo',
+]);
 route('Inventory/Tag Weight Diff', [
   'POST /stock/tag-weight-diff',
   'DELETE /stock/tag-weight-diff/:vchNo',
@@ -320,6 +481,13 @@ route('Inventory/Physical Stock', [
   'DELETE /stock/physical-stock/:vchNo',
   'POST /stock/physical-reconcile',
   'GET /stock/physical-list',
+]);
+route('Inventory/Stone/Dm-Cf', [
+  'POST /stock/stone-dm-cf',
+  'GET /stock/stone-dm-cf/source-list',
+  'GET /stock/stone-dm-cf/:vchNo',
+  'PUT /stock/stone-dm-cf/:vchNo',
+  'DELETE /stock/stone-dm-cf/:vchNo',
 ]);
 route('Inventory/Fine In / Out', ['POST /inout/fine', 'DELETE /inout/fine/:vchNo']);
 
@@ -353,6 +521,7 @@ route('Manufacturing/Repair Receipt', [
   'DELETE /repair-customer-issues/:vchNo',
   'GET /repair-images',
   'GET /repair-images/line',
+  'GET /repair-images/state',
   'POST /repair-images',
   'DELETE /repair-images',
 ]);
@@ -375,6 +544,18 @@ route('Manufacturing/MFG Issue', [
   'GET /mfg/issue/:vchNo',
   'PUT /mfg/issue/:vchNo',
   'DELETE /mfg/issue/:vchNo',
+]);
+route('Manufacturing/Setting Isu', [
+  'GET /mfg/lot/issue/settings',
+  'GET /mfg/lot/issue/list',
+  'GET /mfg/lot/issue/sources',
+  'GET /mfg/lot/issue/:vchNo',
+]);
+route('Manufacturing/Setting Rec', [
+  'GET /mfg/lot/receive/settings',
+  'GET /mfg/lot/receive/list',
+  'GET /mfg/lot/receive/sources',
+  'GET /mfg/lot/receive/:vchNo',
 ]);
 route('Manufacturing/MFG Receive', [
   'POST /mfg/receive',
@@ -416,16 +597,27 @@ route('Loans (Dhrn)/Pledge Issue', [
 ]);
 route('Loans (Dhrn)/Pledge Receipt', ['POST /dhrn/receipt', 'GET /dhrn/khata']);
 route('Loans (Dhrn)/Interest Receipt', ['POST /dhrn/interest']);
+route('Loans (Dhrn)/Loan Received', ['POST /loan/received']);
+route('Loans (Dhrn)/Loan Issue', ['POST /loan/issue', 'GET /loan/:isuNo/outstanding']);
 
 route('Membership/Members & Loyalty', ['POST /members', 'POST /members/points', 'GET /members']);
 route('Membership/Saving Schemes', [
   'GET /scheme/passbook',
   'POST /scheme/enroll',
+  'DELETE /scheme/enroll',
   'POST /scheme/installment',
+  'GET /scheme/installment/:vchNo',
+  'DELETE /scheme/installment/:vchNo',
   'POST /scheme/opening',
   'DELETE /scheme/opening/:vchNo',
   'POST /scheme/maturity',
+  'GET /scheme/maturity/:vchNo',
   'DELETE /scheme/maturity/:vchNo',
+]);
+route('Membership/Gold Adjust', [
+  'POST /scheme/gold-adjust',
+  'GET /scheme/gold-adjust/:vchNo',
+  'DELETE /scheme/gold-adjust/:vchNo',
 ]);
 
 route('Masters/Auto Item', ['POST /masters/auto-item']);
@@ -435,6 +627,16 @@ route('Masters/Opening Balance', [
 ]);
 route('Masters/Labour Update', ['GET /labour-update', 'POST /labour-update']);
 route('Masters/Item Weight Slabs', ['GET /labour-slabs', 'POST /labour-slabs']);
+route('Masters/Diamond Sizes', [
+  'GET /masters/diamond-sizes',
+  'POST /masters/diamond-sizes',
+  'DELETE /masters/diamond-sizes',
+]);
+route('Masters/Item Stock Limits', [
+  'GET /masters/item-stock-limits',
+  'POST /masters/item-stock-limits',
+  'DELETE /masters/item-stock-limits',
+]);
 route('Masters/Year Create', [
   'GET /years',
   'POST /years',
@@ -448,15 +650,11 @@ route('Masters/Accounts', [
   'GET /party/:acCode/family',
 ]);
 
-// One XLSX export serves every report (desktop BtnExel, present on 38 forms). It is registered alongside
-// the sales register because the handler resolves the report itself and is print-gated either way.
-route('Reports/Sales Register', [
-  'GET /reports/sales-register',
-  'GET /reports/:report/export.xlsx',
-]);
+route('Reports/Sales Register', ['GET /reports/sales-register']);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
 route('Reports/Day Book', ['GET /reports/day-book']);
 route('Reports/Rojmel', ['GET /reports/rojmel']);
+route('Reports/Final Reports', ['GET /reports/final-reports', 'GET /reports/profit-loss']);
 route('Reports/Trial Balance', ['GET /reports/trial-balance', 'GET /reports/trial-balance-doc']);
 route('Reports/Trial Balance (Full)', ['GET /reports/trial-balance-full']);
 route('Reports/Balance Sheet', ['GET /reports/balance-sheet', 'GET /reports/balance-sheet-doc']);
@@ -502,11 +700,12 @@ route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding']);
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
 route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);
-route('Reports/Tag Estimate', [
-  'GET /reports/tag-estimate',
-  'GET /reports/:report/filters',
-  'GET /reports/:report/export.csv',
-]);
+route('Reports/HuId Report', ['GET /reports/huid']);
+route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
+route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
+route('Reports/Physical Stock', ['GET /reports/physical-stock-verify']);
+route('Reports/Movement', ['GET /reports/size-movement']);
+route('Reports/Tag Estimate', ['GET /reports/tag-estimate']);
 route('Reports/Order Zoom', ['GET /reports/order-lot-zoom']);
 route('Reports/Old Gold / Exchange', ['GET /reports/old-gold-register']);
 route('Reports/Sales by Party', ['GET /reports/sales-by-party']);
@@ -520,10 +719,45 @@ route('Reports/Report Layouts (Crystal)', [
   'GET /reports/render',
 ]);
 route('Reports/Form Layouts (Desktop)', ['GET /forms/layouts', 'GET /forms/layout']);
+route('Reports/Last Visit', ['GET /reports/last-visit']);
+route('Reports/Address Print', ['GET /reports/address-print']);
+route('Reports/Entry Check', [
+  'GET /reports/entry-check',
+  'GET /reports/entry-check/detail',
+  'POST /reports/entry-check/mark-checked',
+]);
+route('Reports/User Report', ['GET /reports/user-report']);
+route('Reports/Dhiran Report', ['GET /reports/dhiran-report']);
+route('Reports/Loan Report', ['GET /reports/loan-report']);
+route('Reports/GST Report', ['GET /reports/gst-report']);
+route('Reports/Delete Data', ['GET /reports/delete-data']);
+route('Reports/Point Report', ['GET /reports/point-report', 'GET /reports/point-report/detail']);
+route('Reports/Approval Report', ['GET /reports/approval-report']);
+route('Reports/VP Report', ['GET /reports/vp-report']);
+route('Reports/Bullion Report', ['GET /reports/bullion-report']);
+route('Reports/Karigar Report', ['GET /reports/karigar-report']);
+route('Reports/Repair Report', ['GET /reports/repair-report']);
+route('Reports/Branch InOut', ['GET /reports/branch-inout']);
+route('Reports/Other Item Report', ['GET /reports/other-item-report']);
+route('Reports/Design Move', ['GET /reports/design-move', 'GET /reports/design-move/detail']);
+route('Reports/Consi Report', ['GET /reports/consi-report', 'GET /reports/consi-report/detail']);
+route('Reports/Old Stock', ['GET /reports/old-stock']);
+route('Reports/Trading Report', ['GET /reports/trading-report']);
+route('Reports/Tour Report', ['GET /reports/tour-report']);
+route('Reports/Tour Tag', ['GET /reports/tour-tag']);
+route('Reports/Order Track', ['GET /reports/order-track']);
+route('Reports/Graph Report', ['GET /reports/graph-report']);
+route('Reports/Mfg InOut', ['GET /reports/mfg-inout']);
+route('Reports/Mfg Lot IsuRec', ['GET /reports/mfg-lot-isurec']);
+route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger/detail']);
+route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /tour-orders/confirmation',
   'GET /sales/invoice',
+  'GET /sales-quotations/quotation',
   'GET /purchases/invoice',
+  'GET /purchase-quotations/quotation',
   'GET /karigar/issue-voucher',
   'GET /repair-receipts/:vchNo/print',
   'GET /repair-karigar-issues/:vchNo/print',
@@ -538,6 +772,9 @@ const PRINT_ROUTES = new Set([
   'GET /dhrn/issue-receipt',
   'GET /scheme/passbook',
   'GET /dhrn/khata',
+  'GET /einvoice/export.xlsx',
+  'POST /einvoice/credit-note/irn',
+  'GET /utilities/data-export/download',
   'GET /stock/tag-print/label',
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
@@ -551,6 +788,10 @@ const PRINT_ROUTES = new Set([
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
+  'POST /stock/tag-image',
+  'POST /sales-orders/:vchNo/image',
+  'POST /tour-orders/:vchNo/image',
+  'POST /masters/design-book/image',
   'POST /repair-images',
   'POST /admin/users/:loginName/rights',
   'POST /admin/users/:loginName/form-rights',
@@ -558,10 +799,14 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /backup/restore',
   'POST /utilities/vch-renumber/apply',
   'POST /utilities/data-refresh',
+  'POST /utilities/data-export/mark-exported',
+  'POST /utilities/data-export/reset-flags',
   'POST /settings',
   'POST /accounts/:acCode/opening',
   'POST /labour-update',
   'POST /labour-slabs',
+  'POST /masters/diamond-sizes',
+  'POST /masters/item-stock-limits',
   'POST /years/:coYear/close',
   'POST /years/:coYear/reopen',
   'POST /years/carry-forward',
@@ -573,10 +818,32 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /einvoice/gsp-test',
   'POST /einvoice/:vchNo/cancel',
   'POST /year-end/close',
+  'POST /balance-transfer/year-close',
+  'POST /balance-transfer/openings',
   'POST /tour/:vchNo/bill',
+  'POST /reports/entry-check/mark-checked',
 ]);
 
-const READ_POST_ROUTES = new Set(['POST /year-end/preview']);
+const READ_POST_ROUTES = new Set([
+  'POST /sales-returns/:vchNo/incoming-labour-observation',
+  'POST /sales-returns/:vchNo/incoming-labour-replay',
+  'POST /sales-returns/:vchNo/incoming-bill-replay',
+  'POST /sales-returns/:vchNo/incoming-replay',
+  'POST /year-end/preview',
+  'POST /balance-transfer/preview',
+  'POST /utilities/estimate-reset/preview',
+  // Reads only: the framework asserts a preview writes nothing, and the diff it returns is what the operator
+  // reviews before any apply exists.
+  'POST /utilities/data-repair/:id/preview',
+]);
+
+// A POST that removes or rewrites historical rows is a delete, not a create. Classifying it honestly means a
+// delegated (non-admin) grant of this form could never apply a repair on View alone, which is what the
+// previous `create` classification allowed.
+const DELETE_POST_ROUTES = new Set([
+  'POST /utilities/data-repair/:id/apply',
+  'POST /utilities/estimate-reset/apply',
+]);
 
 const ADMIN_ONLY = new Set([
   'GET /audit',
@@ -595,6 +862,25 @@ const ADMIN_ONLY = new Set([
   'GET /utilities/vch-renumber/preview',
   'POST /utilities/vch-renumber/apply',
   'POST /utilities/data-refresh',
+  'GET /utilities/data-repair/operations',
+  'POST /utilities/data-repair/:id/preview',
+  'POST /utilities/data-repair/:id/apply',
+  'GET /utilities/data-repair/runs',
+]);
+
+/**
+ * Admin-only routes that must STILL validate the requested business scope.
+ *
+ * Most admin routes are scope-free by nature: a user list or a metrics scrape belongs to no company. A data
+ * repair does the opposite — it rewrites one company's ledger, stock and serials — so dropping scope
+ * validation for it would let an administrator's request name a company/location/year the session never
+ * selected. `NO_BUSINESS_SCOPE` therefore subtracts these rather than inheriting all of `ADMIN_ONLY`.
+ */
+const SCOPED_ADMIN_ONLY = new Set([
+  'GET /utilities/data-repair/operations',
+  'POST /utilities/data-repair/:id/preview',
+  'POST /utilities/data-repair/:id/apply',
+  'GET /utilities/data-repair/runs',
 ]);
 
 const NO_BUSINESS_SCOPE = new Set([
@@ -604,7 +890,7 @@ const NO_BUSINESS_SCOPE = new Set([
   'GET /backup',
   'POST /backup/restore',
   'POST /years',
-  ...ADMIN_ONLY,
+  ...[...ADMIN_ONLY].filter((key) => !SCOPED_ADMIN_ONLY.has(key)),
 ]);
 
 const normalizeMethod = (method: string): string =>
@@ -613,6 +899,7 @@ const normalizeMethod = (method: string): string =>
 function actionFor(key: string, method: string): RouteAction {
   if (PRINT_ROUTES.has(key)) return 'print';
   if (UPDATE_POST_ROUTES.has(key)) return 'update';
+  if (DELETE_POST_ROUTES.has(key)) return 'delete';
   if (READ_POST_ROUTES.has(key)) return 'read';
   switch (method) {
     case 'GET':
@@ -648,6 +935,20 @@ export function routePolicyFor(methodInput: string, path: string): RoutePolicy |
     };
   }
 
+  if (
+    method === 'GET' &&
+    (path === '/reports/:report/filters' ||
+      path === '/reports/:report/export.csv' ||
+      path === '/reports/:report/export.xlsx')
+  ) {
+    return {
+      kind: 'form',
+      form: '@report',
+      action: path === '/reports/:report/filters' ? 'read' : 'print',
+      businessScope: true,
+    };
+  }
+
   const form = formRoutes.get(key);
   if (!form) return undefined;
   return {
@@ -663,9 +964,12 @@ export function resolvePolicyForm(
   policy: RoutePolicy,
   params: Record<string, unknown> | undefined,
 ): string | undefined {
-  if (policy.form !== '@master') return policy.form;
-  const name = String(params?.name ?? '');
-  return MASTER_FORM_BY_NAME[name];
+  if (policy.form === '@master') {
+    const name = String(params?.name ?? '');
+    return MASTER_FORM_BY_NAME[name];
+  }
+  if (policy.form === '@report') return reportFormForSlug(params?.report);
+  return policy.form;
 }
 
 export function isRouteAuthorizedMarker(value: unknown): boolean {

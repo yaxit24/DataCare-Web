@@ -1,0 +1,14 @@
+{
+  "command": [
+    "env",
+    "PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round11",
+    "pnpm",
+    "test:parity:browser"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T15:14:23.553617+00:00",
+  "finishedAtUtc": "2026-09-11T15:15:03.839643+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/browser-real.txt"
+}

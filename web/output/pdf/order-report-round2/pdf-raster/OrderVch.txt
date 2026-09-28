@@ -1,0 +1,38 @@
+Order Advance
+1
+Datagenex Sample Jewellery
+12 Market Road
+Jewellery Centre , West Wing
+Ahmedabad Mo : 9000000000 Ph : 0790000000
+Party Name :
+Meera Shah
+45 Garden Street , Navrangpura
+Ahmedabad , Gujarat
+Mo : 9000000001
+ORIGINAL FOR RECIPIENT
+2026-04-03
+Vch Date :
+Vch No : 00001
+Remarks :
+Confirm delivery after the final fitting.
+Received Item Pcs Weight Touch Rate
+Received gold chain 1 5.125 91.6 6200 31775
+Received silver bracelet 2 8.25 92.5 85 701.25
+Total :
+3
+13.375
+Cash Amount : 1500
+Card Amount : 1000
+Rupees :
+Delevery : 2026-04-09
+TWO THOUSAND FIVE HUNDRED
+Total Advance : 2500
+Ledger Opening Bal :
+Ledger Closing Bal :
+Party signature.
+-500
+2000
+Dr
+Cr
+For : Datagenex Sample Jewellery
+signature.

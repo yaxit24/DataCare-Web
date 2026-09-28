@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+
+ ✓ packages/core/test/sessionLedgerMode.test.ts (104 tests) 2762ms
+   ✓ ledger-mode plain-data envelope containment > refuses an accepted-input boundary whose appended proof would exceed reread limits 2443ms
+
+ Test Files  1 passed (1)
+      Tests  104 passed (104)
+   Start at  22:00:59
+   Duration  5.88s (transform 394ms, setup 0ms, collect 426ms, tests 2.76s, environment 1ms, prepare 358ms)
+

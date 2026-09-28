@@ -1,0 +1,32 @@
+
+> datacare-web-saas@0.0.0 test:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> pnpm --filter @datacare/web test:browser
+
+
+> @datacare/web@0.0.0 test:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> node test/browser.smoke.mjs
+
+Browser smoke failure diagnostics: /var/folders/qp/2x_ztvln36v5xfrz6_8ks2j40000gn/T/datacare-browser-smoke-failure-nsMvdy
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: scope select must become "01"
+
+'' !== '01'
+
+    at expectValue (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:52:10)
+    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:642:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '',
+  expected: '01',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.8.0
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/web@0.0.0 test:browser: `node test/browser.smoke.mjs`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.

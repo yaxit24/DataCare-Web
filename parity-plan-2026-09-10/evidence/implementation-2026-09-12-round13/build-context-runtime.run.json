@@ -1,0 +1,21 @@
+{
+  "command": [
+    "env",
+    "API_ORIGIN=http://127.0.0.1:4410",
+    "pnpm",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:04:53.360737+00:00",
+  "finishedAtUtc": "2026-09-11T21:05:13.905949+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-context-runtime.txt",
+  "logSha256": "b0e82cdf85e577e26de0fdba43a2aeefb18575e05c5f8e3317466fbbe0417832",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-context-runtime.inputs.json",
+  "inputManifestSha256": "b3e37c70cc830d3ec6862be17a548805ee0d94eb9091114ec6904d0a3b984988",
+  "inputCount": 1784,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

@@ -1,0 +1,51 @@
+{
+  "status": "static-checks-complete-not-runtime-validation",
+  "baselines": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/routePolicy.ts",
+      "baseline": "/tmp/datacare-return-labour-preview-api/baseline/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "baseline": "/tmp/datacare-return-labour-preview-api/baseline/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "b78bbed89d97a401227fa1399448b3b56081c07676986621b89e697ef968d953",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/routes/txn.ts",
+      "baseline": "/tmp/datacare-return-labour-preview-api/baseline/apps/api/src/routes/txn.ts",
+      "sha256": "ee608103ab3933bb588d76d48c8166ba2401f67fa29bb8fbd7757ba770bf1149",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/routePolicy.test.ts",
+      "baseline": "/tmp/datacare-return-labour-preview-api/baseline/apps/api/test/routePolicy.test.ts",
+      "sha256": "68e42fb9d20358032f59a67cec6944b337aced29e3773fe074ef46dcc5899ea0",
+      "unchanged": true
+    }
+  ],
+  "billTemplateLiteralsUnchanged": 7,
+  "oldRouteIdentitiesRetained": 553,
+  "newRouteCount": 556,
+  "newUniqueRouteCount": 556,
+  "onlyAddedRoutes": [
+    {
+      "method": "GET",
+      "path": "/sales-returns/:vchNo/incoming-labour-replay-state"
+    },
+    {
+      "method": "POST",
+      "path": "/sales-returns/:vchNo/incoming-labour-observation"
+    },
+    {
+      "method": "POST",
+      "path": "/sales-returns/:vchNo/incoming-labour-replay"
+    }
+  ],
+  "oldReducersAndPreviewAllowlists": "No staged files modify these modules. Final integration must run existing regressions.",
+  "newServiceDirectDatabaseMutationOrNestedTransactionCalls": false,
+  "independentReviewReferencesVerified": 14,
+  "frozenLiteralFixtureSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc"
+}

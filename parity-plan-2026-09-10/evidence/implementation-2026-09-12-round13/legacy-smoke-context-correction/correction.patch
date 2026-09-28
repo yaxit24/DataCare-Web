@@ -1,0 +1,90 @@
+--- a/web/apps/web/test/browser.smoke.mjs
++++ b/web/apps/web/test/browser.smoke.mjs
+@@ -90,6 +90,27 @@
+ let salesEditPath = null;
+ let salesEditBody = null;
+ let salesDeletePath = null;
++// Mock-only protocol compatibility. Business scope/fixtures below remain the same;
++// this descriptor is not a real authenticated session or database observation.
++let smokeContext = {
++  sessionId: '11111111-1111-4111-8111-111111111111',
++  contextEpoch: '1',
++  coCode: '01',
++  lcCode: '01',
++  coYear: '2024-2025',
++};
++const smokeLedgerContext = {
++  version: 'server-session-ledger-context-v1',
++  status: 'unknown',
++  mode: null,
++  reason: 'vendor-authority-unresolved',
++};
++const authJson = (route, status, body) => route.fulfill({
++  status,
++  contentType: 'application/json',
++  headers: { 'cache-control': 'no-store' },
++  body: JSON.stringify(body),
++});
+ try {
+   await waitForServer();
+   browser = await chromium.launch({ headless: true });
+@@ -118,8 +139,15 @@
+     if (path === '/auth/login') {
+       const input = request.postDataJSON();
+       return input.password === 'correct-password'
+-        ? json(route, 200, { forcedReset: false })
+-        : json(route, 401, { error: 'invalid-credentials' });
++        ? authJson(route, 200, {
++            user: 'BROWSER',
++            rights: { view: true, edit: true, delete: true, print: true },
++            forcedReset: false,
++            scope: { coCode: '01', lcCode: '01', coYear: '2024-2025' },
++            context: smokeContext,
++            ledgerContext: smokeLedgerContext,
++          })
++        : authJson(route, 401, { error: 'invalid-credentials' });
+     }
+     // The state route distinguishes an empty photo from a failed read and carries the CAS token.
+     // This remains mock-only UI compatibility coverage; the real-stack journey proves database CAS.
+@@ -132,11 +160,38 @@
+       });
+     if (path === '/stock/tag-image') return json(route, 404, { error: 'tag-image-not-found' });
+     if (path === '/stock/tag-image/list') return json(route, 200, { images: [] });
+-    if (path === '/auth/logout' || path === '/context/select')
+-      return json(route, 200, { ok: true });
++    if (path === '/auth/logout') return json(route, 200, { ok: true });
++    if (path === '/auth/refresh')
++      return authJson(route, 200, {
++        refreshed: true, context: smokeContext, ledgerContext: smokeLedgerContext,
++      });
++    if (path === '/context/select') {
++      const input = request.postDataJSON();
++      // The existing smoke has one deliberate same-scope Open. Require the real
++      // request shape, then model only that successful transition; no retry/CAS credit.
++      assert.deepEqual(Object.keys(input).sort(), [
++        'coCode', 'coYear', 'expectedContextEpoch', 'lcCode', 'selectionId',
++      ]);
++      assert.deepEqual(
++        { coCode: input.coCode, lcCode: input.lcCode, coYear: input.coYear },
++        { coCode: '01', lcCode: '01', coYear: '2024-2025' },
++      );
++      assert.equal(input.expectedContextEpoch, smokeContext.contextEpoch);
++      assert.match(input.selectionId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
++      const headers = request.headers();
++      assert.equal(headers['x-session-context-id'], smokeContext.sessionId);
++      assert.equal(headers['x-session-context-epoch'], smokeContext.contextEpoch);
++      smokeContext = { ...smokeContext, contextEpoch: (BigInt(smokeContext.contextEpoch) + 1n).toString() };
++      return authJson(route, 200, {
++        coCode: '01', lcCode: '01', coYear: '2024-2025', scoped: true, replayed: false,
++        context: smokeContext, ledgerContext: smokeLedgerContext,
++      });
++    }
+     if (path === '/me')
+-      return json(route, 200, {
++      return authJson(route, 200, {
+         user: 'BROWSER',
++        context: smokeContext,
++        ledgerContext: smokeLedgerContext,
+         coCode: '01',
+         lcCode: '01',
+         coYear: '2024-2025',

@@ -22,6 +22,18 @@ export class EInvoiceValidationError extends Error {
   }
 }
 
+/**
+ * Raised when the e-invoice configuration is unsafe rather than merely absent — specifically when production
+ * would otherwise fall back to `FakeIrnTransport` and persist a fabricated IRN onto a real invoice, or when
+ * GSP credentials are supplied without stating sandbox vs production.
+ */
+export class EInvoiceConfigError extends Error {
+  constructor(msg: string) {
+    super(msg);
+    this.name = 'EInvoiceConfigError';
+  }
+}
+
 export interface IrnParty {
   gstin: string;
   lglNm: string;
@@ -45,11 +57,15 @@ export interface IrnItemInput {
   sgst?: number;
 }
 
+export type IrnDocType = 'INV' | 'CRN';
+
 export interface SaleForIrn {
   billNo: string;
   vchDate: Date | string;
   interState: boolean;
   roundOff?: number;
+  /** TR_SL_EBILL.JsonGen: E CRNT sends CRN, every other e-bill path sends INV. */
+  docType?: IrnDocType;
 }
 
 const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -132,7 +148,7 @@ export function buildIrnPayload(args: {
   return {
     Version: '1.1',
     TranDtls: { TaxSch: 'GST', SupTyp: 'B2B', RegRev: 'N', IgstOnIntra: 'N' },
-    DocDtls: { Typ: 'INV', No: sale.billNo, Dt: fmtIrnDate(sale.vchDate) },
+    DocDtls: { Typ: sale.docType ?? 'INV', No: sale.billNo, Dt: fmtIrnDate(sale.vchDate) },
     SellerDtls: partyDtls(seller),
     BuyerDtls: { ...partyDtls(buyer), Pos: buyer.stcd },
     ItemList: itemList,
@@ -156,6 +172,7 @@ export function validateIrnPayload(p: IrnPayload): string[] {
   if (!p.BuyerDtls?.Gstin) missing.push('BuyerDtls.Gstin');
   if (!p.DocDtls?.No) missing.push('DocDtls.No');
   if (!p.DocDtls?.Dt) missing.push('DocDtls.Dt');
+  if (!['INV', 'CRN'].includes(String(p.DocDtls?.Typ ?? ''))) missing.push('DocDtls.Typ');
   if (!p.ItemList?.length) missing.push('ItemList');
   if (!((p.ValDtls?.TotInvVal ?? 0) > 0)) missing.push('ValDtls.TotInvVal');
   return missing;
@@ -213,6 +230,48 @@ type VoucherScope = {
   coBook?: string;
 };
 
+type IrnBookInfo = { coBook: string; mainBook: string; bookSrName: string };
+
+const text = (v: unknown): string => String(v ?? '').trim();
+
+async function resolveIrnBookTx(
+  tx: any,
+  scope: VoucherScope,
+  coBook: string,
+  expectedMainBook?: string,
+): Promise<IrnBookInfo> {
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT "CO_BOOK","MAIN_BOOK","BOOK_SR_NAME"
+       FROM "BOOK_DATA"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+      LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    coBook,
+  );
+  const row = rows[0];
+  if (!row) throw new EInvoiceValidationError(`e-invoice book configuration not found: ${coBook}`);
+  const mainBook = text(row.MAIN_BOOK).toUpperCase();
+  if (expectedMainBook && mainBook !== expectedMainBook.toUpperCase()) {
+    throw new EInvoiceValidationError(
+      `expected BOOK_DATA.MAIN_BOOK='${expectedMainBook}' for book ${coBook}, got ${mainBook || 'blank'}`,
+    );
+  }
+  return { coBook, mainBook, bookSrName: text(row.BOOK_SR_NAME) };
+}
+
+function scopedWhere(scope: VoucherScope, coBook: string, vchNo: number | string): unknown[] {
+  return [
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear ?? '',
+    coBook,
+    formatVoucherNo(vchNo),
+  ];
+}
+
 /**
  * Submit a built IRN payload via the injected transport, then persist IRN/ACK to SL_DATA and E_DATA
  * within one tenant transaction. Returns the IRN result.
@@ -229,13 +288,22 @@ export async function submitIrn(
   const res = await args.transport.generateIRN(args.payload);
 
   await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const coBook = scope.coBook ?? 'SAL';
+    const vchNo = formatVoucherNo(args.vchNo);
+    const ackDate = new Date();
     await tx.$executeRawUnsafe(
-      `UPDATE "SL_DATA" SET "IRN_NO"=$1, "ACK_NO"=$2, "ACK_DATE"=$3 WHERE "CO_CODE"=$4 AND "VCH_NO"=$5`,
+      `UPDATE "SL_DATA"
+          SET "IRN_NO"=$1, "ACK_NO"=$2, "ACK_DATE"=$3
+        WHERE tenant_id=$4 AND "CO_CODE"=$5 AND "LC_CODE"=$6 AND "CO_YEAR"=$7 AND "CO_BOOK"=$8 AND "VCH_NO"=$9`,
       res.Irn,
       res.AckNo,
-      new Date(),
+      ackDate,
+      scope.tenantId,
       scope.coCode,
-      formatVoucherNo(args.vchNo),
+      scope.lcCode,
+      scope.coYear ?? '',
+      coBook,
+      vchNo,
     );
     await tx.$executeRawUnsafe(
       `INSERT INTO "E_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","IRN_NO","ACK_NO","ACK_DATE","QR_DATA")
@@ -244,11 +312,11 @@ export async function submitIrn(
       scope.coCode,
       scope.lcCode,
       scope.coYear ?? '',
-      scope.coBook ?? 'SAL',
-      formatVoucherNo(args.vchNo),
+      coBook,
+      vchNo,
       res.Irn,
       res.AckNo,
-      new Date(),
+      ackDate,
       Buffer.from(res.SignedQRCode, 'utf8'),
     );
   });
@@ -487,6 +555,16 @@ export function irnTransportFromEnv(env: NodeJS.ProcessEnv = process.env): {
   mode: string;
 } {
   if (env.GSP_ASPID && env.GSP_PASSWORD && env.GSP_GSTIN && env.GSP_USER && env.GSP_EINV_PWD) {
+    if (env.GSP_SANDBOX === undefined || env.GSP_SANDBOX.trim() === '') {
+      // Refuse to guess. Sandbox IRNs are not legally valid and production IRNs cannot be undone, so the
+      // operator must state which one they mean. The old code defaulted to sandbox, which meant a complete
+      // set of production credentials still silently produced invalid IRNs.
+      throw new EInvoiceConfigError(
+        'GSP_SANDBOX must be set explicitly to 1 (sandbox) or 0 (production) when GSP credentials are ' +
+          'supplied. Sandbox IRNs are not legally valid; refusing to assume.',
+      );
+    }
+    const sandbox = env.GSP_SANDBOX !== '0';
     return {
       transport: new CharteredInfoIrnTransport({
         aspId: env.GSP_ASPID,
@@ -494,12 +572,29 @@ export function irnTransportFromEnv(env: NodeJS.ProcessEnv = process.env): {
         gstin: env.GSP_GSTIN,
         userId: env.GSP_USER,
         eInvPwd: env.GSP_EINV_PWD,
-        sandbox: env.GSP_SANDBOX !== '0',
+        sandbox,
       }),
-      mode: env.GSP_SANDBOX !== '0' ? 'chartered-info-sandbox' : 'chartered-info-prod',
+      mode: sandbox ? 'chartered-info-sandbox' : 'chartered-info-prod',
     };
   }
-  return { transport: new FakeIrnTransport(), mode: 'fake' };
+
+  // FAIL CLOSED IN PRODUCTION.
+  //
+  // `FakeIrnTransport` returns a 64-character IRN, a 12-digit AckNo, a QR string and Status 'ACT' — it is
+  // indistinguishable from a government-issued IRN, and `submitIrn` persists it into SL_DATA.IRN_NO and
+  // E_DATA. Under GST e-invoicing rules an invoice carrying an invalid IRN is not valid tax documentation,
+  // so silently substituting a fake makes the business non-compliant while telling it that it is compliant.
+  //
+  // Every deployment path sets NODE_ENV=production (docker-compose.yml, deploy/docker-compose.prod.yml, and
+  // ENV in Dockerfile.api), so this guard is reachable wherever it matters. A shop that does not e-invoice at
+  // all is unaffected: this throws only when an IRN is actually requested, not at startup.
+  if (env.NODE_ENV === 'production') {
+    throw new EInvoiceConfigError(
+      'refusing to issue a fake IRN in production. Set GSP_ASPID, GSP_PASSWORD, GSP_GSTIN, GSP_USER, ' +
+        'GSP_EINV_PWD and GSP_SANDBOX to reach the GSP, or do not call the e-invoice routes.',
+    );
+  }
+  return { transport: new FakeIrnTransport(), mode: 'fake-development' };
 }
 
 /** Masked GSP configuration status (never returns secret values). */
@@ -521,9 +616,21 @@ export function gspStatus(env: NodeJS.ProcessEnv = process.env): GspStatus {
     env.GSP_EINV_PWD
   );
   const sandbox = env.GSP_SANDBOX !== '0';
+  const sandboxDeclared = !(env.GSP_SANDBOX === undefined || env.GSP_SANDBOX.trim() === '');
   const mask = (v?: string) => (v ? v.slice(0, 2) + '••••' + v.slice(-2) : null);
+  // Report the state the write path will actually take, so the readiness endpoint cannot claim a working
+  // 'fake' mode where an IRN request is in fact going to be refused.
+  const mode = configured
+    ? sandboxDeclared
+      ? sandbox
+        ? 'chartered-info-sandbox'
+        : 'chartered-info-prod'
+      : 'blocked-sandbox-undeclared'
+    : env.NODE_ENV === 'production'
+      ? 'blocked-production-no-credentials'
+      : 'fake-development';
   return {
-    mode: configured ? (sandbox ? 'chartered-info-sandbox' : 'chartered-info-prod') : 'fake',
+    mode,
     provider: 'Chartered Info GSP (charteredinfo.com)',
     host: sandbox ? 'gstsandbox.charteredinfo.com' : 'einvapi.charteredinfo.com',
     sandbox,
@@ -582,15 +689,15 @@ export async function testGspAuth(
 export async function cancelIrnForSale(
   prisma: any,
   scope: VoucherScope,
-  args: { coBook: string; vchNo: number | string; reason?: string; remark?: string },
+  args: { coBook: string; vchNo: number | string; reason?: string; remark?: string; expectedMainBook?: string },
 ): Promise<{ irn: string; cancelDate: string; mode: string }> {
-  const coBook = args.coBook || 'SAL';
+  const coBook = args.coBook || scope.coBook || 'SAL';
   const irn = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    if (args.expectedMainBook) await resolveIrnBookTx(tx, scope, coBook, args.expectedMainBook);
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT "IRN_NO" FROM "SL_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
-      scope.coCode,
-      coBook,
-      formatVoucherNo(args.vchNo),
+      `SELECT "IRN_NO" FROM "SL_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+      ...scopedWhere(scope, coBook, args.vchNo),
     );
     const v = String(rows[0]?.IRN_NO ?? '').trim();
     if (!v) throw new EInvoiceValidationError(`no IRN on ${coBook}/${args.vchNo} to cancel`);
@@ -602,16 +709,14 @@ export async function cancelIrnForSale(
     : { Irn: irn, CancelDate: new Date().toISOString().slice(0, 10), Status: 'CNL' };
   await withTenant(prisma, scope.tenantId, async (tx: any) => {
     await tx.$executeRawUnsafe(
-      `UPDATE "SL_DATA" SET "IRN_NO"=NULL,"ACK_NO"=NULL,"ACK_DATE"=NULL WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
-      scope.coCode,
-      coBook,
-      formatVoucherNo(args.vchNo),
+      `UPDATE "SL_DATA" SET "IRN_NO"=NULL,"ACK_NO"=NULL,"ACK_DATE"=NULL
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      ...scopedWhere(scope, coBook, args.vchNo),
     );
     await tx.$executeRawUnsafe(
-      `DELETE FROM "E_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
-      scope.coCode,
-      coBook,
-      formatVoucherNo(args.vchNo),
+      `DELETE FROM "E_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      ...scopedWhere(scope, coBook, args.vchNo),
     );
   });
   return { irn: res.Irn, cancelDate: res.CancelDate, mode };
@@ -621,34 +726,35 @@ export async function cancelIrnForSale(
 export async function submitIrnForSale(
   prisma: any,
   scope: VoucherScope,
-  args: { coBook: string; vchNo: number | string },
+  args: { coBook?: string; vchNo: number | string; docType?: IrnDocType; expectedMainBook?: string },
 ): Promise<IrnResult & { mode: string }> {
+  const coBook = args.coBook || scope.coBook || 'SAL';
   const data = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const book = await resolveIrnBookTx(tx, scope, coBook, args.expectedMainBook);
     const hdrRows: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "SL_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
-      scope.coCode,
-      args.coBook,
-      formatVoucherNo(args.vchNo),
+      `SELECT * FROM "SL_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+      ...scopedWhere(scope, coBook, args.vchNo),
     );
     const hdr = hdrRows[0];
-    if (!hdr) throw new EInvoiceValidationError(`sale not found: ${args.coBook}/${args.vchNo}`);
+    if (!hdr) throw new EInvoiceValidationError(`sale not found: ${coBook}/${args.vchNo}`);
     const co =
       (
-        await tx.$queryRawUnsafe(`SELECT * FROM "CO_MAST" WHERE "CO_CODE"=$1 LIMIT 1`, scope.coCode)
+        await tx.$queryRawUnsafe(`SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`, scope.tenantId, scope.coCode)
       )[0] ?? {};
     const party =
       (
         await tx.$queryRawUnsafe(
-          `SELECT * FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"::text=$2::text LIMIT 1`,
+          `SELECT * FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"::text=$3::text LIMIT 1`,
+          scope.tenantId,
           scope.coCode,
           String(hdr.AC_CODE),
         )
       )[0] ?? {};
     const detl: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "SL_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
-      scope.coCode,
-      args.coBook,
-      formatVoucherNo(args.vchNo),
+      `SELECT * FROM "SL_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      ...scopedWhere(scope, coBook, args.vchNo),
     );
     // De-hardcode HSN/unit: read them from ITEM_MAST per line item (desktop master-driven), fallback 7113/GMS.
     const itCodes = Array.from(
@@ -656,7 +762,8 @@ export async function submitIrnForSale(
     );
     const itemRows: any[] = itCodes.length
       ? await tx.$queryRawUnsafe(
-          `SELECT "IT_CODE","HSN_CODE","UNIT_NAME" FROM "ITEM_MAST" WHERE "CO_CODE"=$1 AND "IT_CODE"::text = ANY($2::text[])`,
+          `SELECT "IT_CODE","HSN_CODE","UNIT_NAME" FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"::text = ANY($3::text[])`,
+          scope.tenantId,
           scope.coCode,
           itCodes,
         )
@@ -664,10 +771,10 @@ export async function submitIrnForSale(
     const itemMap: Record<string, any> = Object.fromEntries(
       itemRows.map((r: any) => [String(r.IT_CODE).trim(), r]),
     );
-    return { hdr, co, party, detl, itemMap };
+    return { hdr, co, party, detl, itemMap, book };
   });
   const N = (v: unknown): number => Number(v ?? 0) || 0;
-  const { hdr, co, party, detl, itemMap } = data;
+  const { hdr, co, party, detl, itemMap, book } = data;
   const interState = String(hdr.AC_GST_TYPE ?? '') === 'I' || N(hdr.IGST_TAX) > 0;
   const seller: IrnParty = {
     gstin: co.CO_GST_NO || '24AAAAA0000A1Z5',
@@ -694,21 +801,47 @@ export async function submitIrnForSale(
       qty: N(d.ITM_NWT) || 1,
       unit,
       unitPrice: N(d.ITM_RATE),
-      assAmt: N(d.NET_AMT) || N(hdr.NET_AMT),
-      gstRt: N(d.TAX_PRC) || N(hdr.TAX_PRC),
+      // A stored zero is a real line value (for example a no-charge component), not a
+      // missing field. Falling back on falsiness duplicated the header amount on zero lines.
+      assAmt: N(d.NET_AMT ?? hdr.NET_AMT),
+      gstRt: N(d.TAX_PRC ?? hdr.TAX_PRC),
       cgst: N(d.ITM_CGST_AMT),
       sgst: N(d.ITM_SGST_AMT),
       igst: N(d.ITM_IGST_AMT),
     };
   });
+  const vchNo = formatVoucherNo(args.vchNo);
   const sale: SaleForIrn = {
-    billNo: hdr.BILL_NO || formatVoucherNo(args.vchNo),
+    billNo: book.bookSrName ? `${book.bookSrName}/${vchNo}` : hdr.BILL_NO || vchNo,
     vchDate: hdr.VCH_DATE,
     interState,
     roundOff: N(hdr.ROF_AMT),
+    docType: args.docType ?? 'INV',
   };
   const payload = buildIrnPayload({ seller, buyer, sale, items });
   const { transport, mode } = irnTransportFromEnv();
-  const res = await submitIrn(prisma, scope, { vchNo: args.vchNo, payload, transport });
+  const res = await submitIrn(prisma, { ...scope, coBook }, { vchNo: args.vchNo, payload, transport });
   return { ...res, mode };
+}
+
+export function buildCreditNoteIrnPayload(args: {
+  seller: IrnParty;
+  buyer: IrnParty;
+  sale: Omit<SaleForIrn, 'docType'>;
+  items: IrnItemInput[];
+}): IrnPayload {
+  return buildIrnPayload({ ...args, sale: { ...args.sale, docType: 'CRN' } });
+}
+
+export async function submitIrnForCreditNote(
+  prisma: any,
+  scope: VoucherScope,
+  args: { coBook?: string; vchNo: number | string },
+): Promise<IrnResult & { mode: string }> {
+  return submitIrnForSale(prisma, scope, {
+    ...args,
+    coBook: args.coBook || scope.coBook || '146',
+    docType: 'CRN',
+    expectedMainBook: 'E CRNT',
+  });
 }

@@ -1,0 +1,20 @@
+{
+  "fixtureSha256": "719f298df0a0f1e18b0c10f7fabc57933b682f0916f6140cd26ac0724ff68486",
+  "authoredBeforeNewImplementation": true,
+  "corrections": [
+    {
+      "id": "S26",
+      "scenario": "company-forbidden",
+      "originalExpected": {
+        "code": "company-forbidden",
+        "statusCode": 403
+      },
+      "expected": {
+        "code": "company-unavailable",
+        "statusCode": 409
+      },
+      "source": "apps/api/src/modules/auth/businessScope.ts:15-24,65",
+      "reason": "companyTx uses company-unavailable with default ScopeError409 for allowed=false; preserve existing decision. All other frozen expected outcomes unchanged."
+    }
+  ]
+}

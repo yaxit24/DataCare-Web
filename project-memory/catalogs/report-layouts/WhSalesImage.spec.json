@@ -1,0 +1,301 @@
+{
+ "report": "WhSalesImage",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 226,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 1425,
+     "objects": [
+      {
+       "type": "BlobFieldObject",
+       "name": "Field6",
+       "left": 102,
+       "top": 30,
+       "width": 1818,
+       "height": 1365
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "UnknownField",
+   "text": "'Gst No : ' + {AC_MAST.AC_LSTNO}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_MOBILE} <> '' then 'Mo : ' + {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then 'Ph : ' + {AC_MAST.AC_MOBILE} else 'Mo : ' + {AC_MAST.AC_MOBILE2}"
+  },
+  {
+   "name": "ClAmt",
+   "ref": "{@ClAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "ClAmtCrDr",
+   "ref": "{@ClAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@ClAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "ClGold",
+   "ref": "{@ClGold}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "ClGoldCrDr",
+   "ref": "{@ClGoldCrDr}",
+   "type": "StringField",
+   "text": "if {@ClGold} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "ClSilver",
+   "ref": "{@ClSilver}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "ClSilverCrDr",
+   "ref": "{@ClSilverCrDr}",
+   "type": "StringField",
+   "text": "if {@ClSilver} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_CITY} + ' Mo : ' + {CO_MAST.CO_MOBILE} + ' Ph : ' + {CO_MAST.CO_PHONE}"
+  },
+  {
+   "name": "CrTot",
+   "ref": "{@CrTot}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.CR_AMT} +{RATE_CUT_DATA.PR_LBR_AMT}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DrownBank",
+   "ref": "{@DrownBank}",
+   "type": "StringField",
+   "text": "if {RATE_CUT_DATA.CHQ_NO} <> '' Then {RATE_CUT_DATA.BANK_NAME} + ' Chq No : ' + {RATE_CUT_DATA.CHQ_NO} else {RATE_CUT_DATA.BANK_NAME}"
+  },
+  {
+   "name": "DrTot",
+   "ref": "{@DrTot}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.DR_AMT}+{RATE_CUT_DATA.SL_LBR_AMT}"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "InVoiceType",
+   "ref": "{@InVoiceType}",
+   "type": "StringField",
+   "text": "'ESTIMATE'"
+  },
+  {
+   "name": "Issue_Rec_Type",
+   "ref": "{@Issue_Rec_Type}",
+   "type": "StringField",
+   "text": "if {RATE_CUT_ISU_REC.ENTRY_TYPE} = 'I' then 'Issue Item' else 'Received Item'"
+  },
+  {
+   "name": "IsuFine",
+   "ref": "{@IsuFine}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.TOT_FINE_DR}-({RATE_CUT_DATA.KSR_FINE_DR}+{RATE_CUT_DATA.DR_FINE})"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "StringField",
+   "text": "IF {RATE_CUT_ISU_REC.IT_DESC} <> '' THEN {RATE_CUT_ISU_REC.IT_DESC} ELSE {ITEM_MAST.IT_NAME}"
+  },
+  {
+   "name": "OpAmt",
+   "ref": "{@OpAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpAmtCrDr",
+   "ref": "{@OpAmtCrDr}",
+   "type": "StringField",
+   "text": "if {@OpAmt} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "OpGodCrDr",
+   "ref": "{@OpGodCrDr}",
+   "type": "StringField",
+   "text": "if {@OpGold} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "OpGold",
+   "ref": "{@OpGold}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpSilver",
+   "ref": "{@OpSilver}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpSilverCrd",
+   "ref": "{@OpSilverCrd}",
+   "type": "StringField",
+   "text": "if {@OpSilver} > 0 then 'Cr' else 'Dr'"
+  },
+  {
+   "name": "PurcAmt",
+   "ref": "{@PurcAmt}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.PR_NET_AMT}-{RATE_CUT_DATA.CR_AMT}"
+  },
+  {
+   "name": "RCutCr",
+   "ref": "{@RCutCr}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.CR_AMT}"
+  },
+  {
+   "name": "RCutDr",
+   "ref": "{@RCutDr}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.DR_AMT}"
+  },
+  {
+   "name": "RecFine",
+   "ref": "{@RecFine}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.TOT_FINE_CR}-({RATE_CUT_DATA.KSR_FINE_CR}+{RATE_CUT_DATA.CR_FINE})"
+  },
+  {
+   "name": "RefNo",
+   "ref": "{@RefNo}",
+   "type": "StringField",
+   "text": "'Ref No : ' & {RATE_CUT_DATA.BILL_NO}"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "SlAmt",
+   "ref": "{@SlAmt}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.SL_NET_AMT}-{RATE_CUT_DATA.DR_AMT}"
+  },
+  {
+   "name": "SrNo",
+   "ref": "{@SrNo}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar SrNo := SrNo + 1; SrNo"
+  },
+  {
+   "name": "Tax",
+   "ref": "{@Tax}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.SL_CASH_AMT} +{RATE_CUT_DATA.SL_CARD_AMT}+{RATE_CUT_DATA.SL_CHQ_AMT}"
+  },
+  {
+   "name": "TotIsuFine",
+   "ref": "{@TotIsuFine}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.TOT_FINE_DR}-{@TotRecFine}"
+  },
+  {
+   "name": "TotRecFine",
+   "ref": "{@TotRecFine}",
+   "type": "NumberField",
+   "text": "{RATE_CUT_DATA.TOT_FINE_CR}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{RATE_CUT_DATA.CO_YEAR}+{RATE_CUT_DATA.CO_BOOK}+{RATE_CUT_DATA.VCH_NO}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "StringField",
+   "text": "if {RATE_CUT_DATA.DR_AMT} <> 0 then ToWords ({RATE_CUT_DATA.DR_AMT},0 )"
+  }
+ ],
+ "sectionCount": 3,
+ "objectCount": 1,
+ "formulaCount": 41
+}

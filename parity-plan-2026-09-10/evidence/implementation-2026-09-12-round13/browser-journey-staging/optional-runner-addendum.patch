@@ -1,0 +1,72 @@
+--- session-context.real-stack.mjs (frozen staged base)
++++ session-context.real-stack.additive.mjs (new staged runner)
+@@ -12,6 +12,10 @@
+   cleanupSessionContext,
+   exerciseSessionContext,
+ } from './session-context.journey.mjs';
++import {
++  exerciseSessionContextLifecycle,
++  sessionContextLifecycleRequiredChecks,
++} from './session-context-lifecycle.journey.mjs';
+ 
+ // OPTIONAL separate runner. It never imports or modifies the sixteen-journey parity harness.
+ // Execute only under scripts/parity-test-env.mjs with the scheduled disposable DB lease.
+@@ -50,7 +54,7 @@
+ );
+ const artifacts = resolve(
+   process.env.SESSION_CONTEXT_ARTIFACT_DIR ||
+-    resolve(root, 'test-results/session-context-real-stack'),
++    resolve(root, 'test-results/session-context-real-stack-lifecycle'),
+ );
+ mkdirSync(artifacts, { recursive: true });
+ const { buildApp } = await import(resolve(root, 'apps/api/dist/app.js'));
+@@ -65,7 +69,7 @@
+ const result = {
+   status: 'running',
+   startedAt: new Date().toISOString(),
+-  requiredChecks: sessionContextRequiredChecks,
++  requiredChecks: [...sessionContextRequiredChecks, ...sessionContextLifecycleRequiredChecks],
+   provenance:
+     'Real Chromium -> production Next -> Fastify -> PostgreSQL app_user/RLS; explicitly injected upstream response transport faults',
+   releaseSha: process.env.RELEASE_SHA || null,
+@@ -143,20 +147,34 @@
+       result.sessionContext = progress;
+     },
+   });
++  result.sessionContextLifecycle = await exerciseSessionContextLifecycle(page, {
++    owner,
++    tenantId,
++    checkpoint,
++    onProgress: (progress) => {
++      result.sessionContextLifecycle = progress;
++    },
++  });
+   assert.equal(
+     registrations,
+-    3,
+-    'Only the three declared real-response transport fault registrations are allowed',
+-  );
+-  assert.equal(result.sessionContext.transportFaultInjections.length, registrations);
++    5,
++    'Only the original three plus additive two declared transport registrations are allowed',
++  );
++  assert.equal(
++    result.sessionContext.transportFaultInjections.length +
++      result.sessionContextLifecycle.transportFaultInjections.length,
++    registrations,
++  );
+   result.actualInterceptionRegistrations = registrations;
+   result.status = 'passed';
+   process.stdout.write(
+-    'SESSION_CONTEXT_REAL_STACK_PASSED: 12 checks, real responses with 3 declared transport injections; no synthetic business response\n',
++    'SESSION_CONTEXT_REAL_STACK_PASSED: 14 checks (original12 + additive2), real responses with 5 declared transport injections; no synthetic business response\n',
+   );
+ } catch (error) {
+   result.status = 'failed';
+-  if (result.sessionContext) result.sessionContext.status = 'failed';
++  if (result.sessionContext)
++    result.sessionContext.status = result.sessionContext.status === 'passed' ? 'passed' : 'failed';
++  if (result.sessionContextLifecycle) result.sessionContextLifecycle.status = 'failed';
+   result.error = error instanceof Error ? error.message : String(error);
+   process.exitCode = 1;
+   await page

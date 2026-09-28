@@ -1,0 +1,55 @@
+{
+  "source": "/tmp/datacare-return-save-effects-analysis/expected-before-after.inventory.json",
+  "sha256": "461cd378334806592661c141e72ecc4b5597cebad6609145e9878890a7e14cbc",
+  "profile": "P1-T-split-zero-tax-other-one-prospective",
+  "entriesByFinancialRow": [
+    {
+      "role": "incoming-customer-ledger",
+      "table": "AC_DATA",
+      "before": 29,
+      "after": 29
+    },
+    {
+      "role": "incoming-sale-account-ledger",
+      "table": "AC_DATA",
+      "before": 29,
+      "after": 29
+    },
+    {
+      "role": "incoming-stock",
+      "table": "MAIN_STOCK",
+      "before": 49,
+      "after": 49
+    },
+    {
+      "role": "return-outstanding-rojmel",
+      "table": "ROJ_MEL_DATA",
+      "before": 34,
+      "after": 34
+    },
+    {
+      "role": "return-taxbook-summary-rojmel",
+      "table": "ROJ_MEL_DATA",
+      "before": 34,
+      "after": 34
+    },
+    {
+      "role": "return-tax-sr1",
+      "table": "TAX_DATA",
+      "before": 23,
+      "after": 23
+    },
+    {
+      "role": "return-tax-sr2",
+      "table": "TAX_DATA",
+      "before": 23,
+      "after": 23
+    }
+  ],
+  "beforeTotal": 221,
+  "afterTotal": 221,
+  "financialEffectRows": 7,
+  "principalRows": 2,
+  "conditionalNumericDeltaRows": 9,
+  "qualification": "Source-owned entries per phase; not unique columns or full current-schema raw rows. Symbolic metadata remains unresolved; no runtime result generated."
+}

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTenant, type Tx } from '@datacare/db';
 import type { FastifyRequest } from 'fastify';
 
 export interface BusinessScope {
@@ -45,46 +45,40 @@ interface YearRow {
   year?: string | null;
 }
 
-async function company(
-  prisma: any,
-  tenantId: string,
+async function companyTx(
+  tx: Tx,
   coCode: string,
   access?: { loginName: string; isAdmin: boolean },
 ): Promise<CompanyRow> {
-  const rows: CompanyRow[] = await withTenant(prisma, tenantId, (tx: any) =>
-    tx.$queryRawUnsafe(
-      `SELECT c."CO_CODE",c."CO_NAME",c."LC_CODE",
+  const rows = await tx.$queryRawUnsafe<CompanyRow[]>(
+    `SELECT c."CO_CODE",c."CO_NAME",c."LC_CODE",
               ($3::boolean OR EXISTS(
                 SELECT 1 FROM "LOGIN_MAST" l
                  WHERE l."CO_CODE"=c."CO_CODE" AND l."LOGIN_NAME"=$2
               )) AS allowed
          FROM "CO_MAST" c WHERE c."CO_CODE"=$1 LIMIT 1`,
-      coCode,
-      access?.loginName ?? '',
-      access?.isAdmin ?? true,
-    ),
+    coCode,
+    access?.loginName ?? '',
+    access?.isAdmin ?? true,
   );
   const row = rows[0];
   if (!row?.CO_CODE || row.allowed === false) throw new ScopeError('company-unavailable');
   return row;
 }
 
-async function location(
-  prisma: any,
-  tenantId: string,
+async function locationTx(
+  tx: Tx,
   coCode: string,
   requested: string | undefined,
   companyDefault: string | undefined,
 ): Promise<string> {
-  const rows: LocationRow[] = await withTenant(prisma, tenantId, (tx: any) =>
-    tx.$queryRawUnsafe(
-      `SELECT "LC_CODE","LC_NAME" FROM "LOCT_MAST"
+  const rows = await tx.$queryRawUnsafe<LocationRow[]>(
+    `SELECT "LC_CODE","LC_NAME" FROM "LOCT_MAST"
         WHERE "CO_CODE"=$1 AND "LC_CODE" IS NOT NULL AND "LC_CODE"<>''
         ORDER BY CASE WHEN "LC_CODE"=$2 THEN 0 WHEN "LC_CODE"=$3 THEN 1 ELSE 2 END,"LC_CODE"`,
-      coCode,
-      requested ?? '',
-      companyDefault ?? '',
-    ),
+    coCode,
+    requested ?? '',
+    companyDefault ?? '',
   );
   if (requested) {
     const exact = rows.find((row) => String(row.LC_CODE ?? '') === requested);
@@ -96,24 +90,17 @@ async function location(
   return selected;
 }
 
-async function year(
-  prisma: any,
-  tenantId: string,
-  coCode: string,
-  requested?: string,
-): Promise<string | undefined> {
-  const rows: YearRow[] = await withTenant(prisma, tenantId, (tx: any) =>
-    tx.$queryRawUnsafe(
-      `SELECT COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) AS year
+async function yearTx(tx: Tx, coCode: string, requested?: string): Promise<string | undefined> {
+  const rows = await tx.$queryRawUnsafe<YearRow[]>(
+    `SELECT COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) AS year
          FROM "YEAR_MAST"
         WHERE "CO_CODE"=$1
           AND COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) IS NOT NULL
         ORDER BY CASE WHEN COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4))=$2
                       THEN 0 ELSE 1 END,
                  COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) DESC`,
-      coCode,
-      requested ?? '',
-    ),
+    coCode,
+    requested ?? '',
   );
   if (requested) {
     if (!rows.some((row) => text(row.year) === requested)) throw new ScopeError('year-unavailable');
@@ -122,47 +109,82 @@ async function year(
   return text(rows[0]?.year);
 }
 
+interface LoginScopeInput {
+  tenantId: string;
+  coCode: string;
+  lcCode?: string;
+  coYear?: string;
+}
+
+interface SelectedScopeInput extends LoginScopeInput {
+  loginName: string;
+  isAdmin: boolean;
+}
+
+interface StoredScopeInput extends SelectedScopeInput {
+  lcCode: string;
+}
+
+/**
+ * Validate a persisted scope without selecting a new default. The caller owns the transaction
+ * and must already bind input.tenantId through withTenant. SQL NULL year must be projected
+ * to undefined by the caller; a present invalid/empty year is refused.
+ */
+export async function validateStoredScopeTx(tx: Tx, input: StoredScopeInput): Promise<BusinessScope> {
+  if (typeof input.coCode !== 'string' || input.coCode.length === 0) {
+    throw new ScopeError('company-unavailable');
+  }
+  if (typeof input.lcCode !== 'string' || input.lcCode.length === 0) {
+    throw new ScopeError('location-unavailable');
+  }
+  if (
+    input.coYear !== undefined &&
+    (typeof input.coYear !== 'string' || input.coYear.length === 0)
+  ) {
+    throw new ScopeError('year-unavailable');
+  }
+  await companyTx(tx, input.coCode, { loginName: input.loginName, isAdmin: input.isAdmin });
+  const lcCode = await locationTx(tx, input.coCode, input.lcCode, undefined);
+  const coYear =
+    input.coYear === undefined ? undefined : await yearTx(tx, input.coCode, input.coYear);
+  return { tenantId: input.tenantId, coCode: input.coCode, lcCode, coYear };
+}
+
+/** The caller owns the transaction and must already bind input.tenantId through withTenant. */
+export async function resolveLoginScopeTx(tx: Tx, input: LoginScopeInput): Promise<BusinessScope> {
+  const co = await companyTx(tx, input.coCode);
+  const lcCode = await locationTx(tx, input.coCode, input.lcCode, text(co.LC_CODE));
+  const coYear = await yearTx(tx, input.coCode, input.coYear);
+  return { tenantId: input.tenantId, coCode: input.coCode, lcCode, coYear };
+}
+
 export async function resolveLoginScope(
   prisma: any,
-  input: { tenantId: string; coCode: string; lcCode?: string; coYear?: string },
+  input: LoginScopeInput,
 ): Promise<BusinessScope> {
-  const co = await company(prisma, input.tenantId, input.coCode);
-  const lcCode = await location(
-    prisma,
-    input.tenantId,
-    input.coCode,
-    input.lcCode,
-    text(co.LC_CODE),
-  );
-  const coYear = await year(prisma, input.tenantId, input.coCode, input.coYear);
+  return withTenant(prisma, input.tenantId, (tx) => resolveLoginScopeTx(tx, input));
+}
+
+/** The caller owns the transaction and must already bind input.tenantId through withTenant. */
+export async function resolveSelectedScopeTx(
+  tx: Tx,
+  input: SelectedScopeInput,
+): Promise<BusinessScope> {
+  const co = await companyTx(tx, input.coCode, {
+    loginName: input.loginName,
+    isAdmin: input.isAdmin,
+  });
+  const lcCode = await locationTx(tx, input.coCode, input.lcCode, text(co.LC_CODE));
+  const coYear = await yearTx(tx, input.coCode, input.coYear);
+  if (!coYear) throw new ScopeError('year-unavailable');
   return { tenantId: input.tenantId, coCode: input.coCode, lcCode, coYear };
 }
 
 export async function resolveSelectedScope(
   prisma: any,
-  input: {
-    tenantId: string;
-    loginName: string;
-    isAdmin: boolean;
-    coCode: string;
-    lcCode?: string;
-    coYear?: string;
-  },
+  input: SelectedScopeInput,
 ): Promise<BusinessScope> {
-  const co = await company(prisma, input.tenantId, input.coCode, {
-    loginName: input.loginName,
-    isAdmin: input.isAdmin,
-  });
-  const lcCode = await location(
-    prisma,
-    input.tenantId,
-    input.coCode,
-    input.lcCode,
-    text(co.LC_CODE),
-  );
-  const coYear = await year(prisma, input.tenantId, input.coCode, input.coYear);
-  if (!coYear) throw new ScopeError('year-unavailable');
-  return { tenantId: input.tenantId, coCode: input.coCode, lcCode, coYear };
+  return withTenant(prisma, input.tenantId, (tx) => resolveSelectedScopeTx(tx, input));
 }
 
 export async function listScopeCompanies(

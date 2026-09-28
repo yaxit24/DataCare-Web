@@ -1,0 +1,61 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "salesOrderRound4.db.test.ts" "salesFamilyLifecycle.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/salesFamilyLifecycle.db.test.ts (29 tests) 8498ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance 1340ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a sales order and its adjustment with balanced ledgers 403ms
+   ✓ database-backed sales-family voucher lifecycles > an opening entry writes no Rojmel row at all (no money moves) 316ms
+   ✓ database-backed sales-family voucher lifecycles > AD_DATA matches the desktop instalment shape (TOT_AMT is 0 on all 8160 real rows) 343ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a scheme installment while preserving identity and balance 342ms
+   ✓ database-backed sales-family voucher lifecycles > deletes with exactly the desktop-shaped sales return, order and member-entry audit rows 528ms
+   ✓ database-backed sales-family voucher lifecycles > round-trips labour-invoice and scheme-maturity edits with preserved identity 334ms
+   ✓ database-backed sales-family voucher lifecycles > a sale return writes exactly its declared set of tables 381ms
+   ✓ database-backed sales-family voucher lifecycles > the order footprint is an exact SET, so an extra write cannot pass unnoticed 344ms
+   ✓ database-backed sales-family voucher lifecycles > a sales order posts the ledger only when it carries an advance 618ms
+ ✓ test/salesOrderRound4.db.test.ts (8 tests) 1412ms
+   ✓ Sales ordinary saved state and ordered design source replay > preserves complete imported business rows, six-digit clock, nullable values and exact large decimals on unchanged edit 497ms
+
+ Test Files  2 passed (2)
+      Tests  37 passed (37)
+   Start at  05:11:59
+   Duration  13.70s (transform 1.19s, setup 0ms, collect 2.26s, tests 9.91s, environment 0ms, prepare 164ms)
+

@@ -1,0 +1,541 @@
+{
+ "form": "RP_TAG_ESTMATE",
+ "controlCount": 51,
+ "byKind": {
+  "other": 5,
+  "button": 17,
+  "panel": 2,
+  "label": 11,
+  "grid": 3,
+  "date": 2,
+  "combo": 1,
+  "textbox": 10
+ },
+ "grids": [
+  "DGV",
+  "DGV_DETL",
+  "DGV_IDTL"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "BtnSumm",
+   "btnImgUpload",
+   "Cr",
+   "BtnOldSoftImagImport"
+  ],
+  "Panel1": [
+   "btnSvrImgConvert",
+   "BtnSLImageDelete",
+   "BtnImprt",
+   "BtnImgCapture",
+   "BtnImgSelect",
+   "BtnImgDel",
+   "Label6",
+   "nTotAmt",
+   "Label7",
+   "nTaxAmt",
+   "Label8",
+   "nNetAmt",
+   "Label5",
+   "nLbrPrc",
+   "Label4",
+   "nLbrRate",
+   "DGV_IDTL",
+   "Label2",
+   "DGV_DETL",
+   "tTagNo",
+   "PicImage",
+   "DGV"
+  ],
+  "this": [
+   "PicSmall",
+   "Label1",
+   "tGrName",
+   "Label10",
+   "tGrCode",
+   "tPrName",
+   "Label9",
+   "tPrCode",
+   "PicZoom",
+   "Panel1",
+   "cboItemTyp",
+   "Label3",
+   "BtnIn",
+   "BtnOut",
+   "BtnStock",
+   "mToDt",
+   "mFromDt",
+   "tSerchAll",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "tSerchAll",
+   "type": "SearchControl",
+   "location": "685,42",
+   "size": "120,22",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Tag Stock Report",
+   "kind": "label"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "DGV",
+   "type": "GridControl",
+   "location": "21,12",
+   "size": "793,249",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "mFromDt",
+   "type": "DateEdit",
+   "location": "35,42",
+   "size": "101,22",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "date"
+  },
+  {
+   "name": "mToDt",
+   "type": "DateEdit",
+   "location": "142,42",
+   "size": "101,22",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "date"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "558,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnSumm",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "11",
+   "text": "&Summ",
+   "kind": "button"
+  },
+  {
+   "name": "BtnStock",
+   "type": "QButton",
+   "location": "399,75",
+   "size": "143,37",
+   "tabIndex": "116",
+   "text": "&Stock Tag",
+   "kind": "button"
+  },
+  {
+   "name": "BtnOut",
+   "type": "QButton",
+   "location": "214,75",
+   "size": "143,37",
+   "tabIndex": "117",
+   "text": "&Out Tag",
+   "kind": "button"
+  },
+  {
+   "name": "BtnIn",
+   "type": "QButton",
+   "location": "35,75",
+   "size": "143,37",
+   "tabIndex": "118",
+   "text": "&In Tag",
+   "kind": "button"
+  },
+  {
+   "name": "cboItemTyp",
+   "type": "ComboBox",
+   "location": "685,75",
+   "size": "120,22",
+   "tabIndex": "123",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "601,75",
+   "size": "74,20",
+   "tabIndex": "124",
+   "text": "Item Type",
+   "kind": "label"
+  },
+  {
+   "name": "tTagNo",
+   "type": "TextBox",
+   "location": "893,355",
+   "size": "97,22",
+   "tabIndex": "127",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "832,357",
+   "size": "55,20",
+   "tabIndex": "128",
+   "text": "TagNo",
+   "kind": "label"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "-10,108",
+   "size": "1319,458",
+   "tabIndex": "129",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "DGV_DETL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "21,267",
+   "size": "1164,76",
+   "tabIndex": "1140",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "DGV_IDTL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "21,349",
+   "size": "793,94",
+   "tabIndex": "1141",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "nLbrRate",
+   "type": "TextBox",
+   "location": "893,383",
+   "size": "97,22",
+   "tabIndex": "1142",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "819,385",
+   "size": "68,20",
+   "tabIndex": "1143",
+   "text": "Lbr Rate",
+   "kind": "label"
+  },
+  {
+   "name": "nLbrPrc",
+   "type": "TextBox",
+   "location": "893,411",
+   "size": "97,22",
+   "tabIndex": "1144",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "819,413",
+   "size": "68,20",
+   "tabIndex": "1145",
+   "text": "Lbr %",
+   "kind": "label"
+  },
+  {
+   "name": "nNetAmt",
+   "type": "TextBox",
+   "location": "1078,355",
+   "size": "107,22",
+   "tabIndex": "1146",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "996,357",
+   "size": "76,20",
+   "tabIndex": "1147",
+   "text": "Net Amt",
+   "kind": "label"
+  },
+  {
+   "name": "nTaxAmt",
+   "type": "TextBox",
+   "location": "1078,383",
+   "size": "107,22",
+   "tabIndex": "1148",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "1004,385",
+   "size": "68,20",
+   "tabIndex": "1149",
+   "text": "Tax",
+   "kind": "label"
+  },
+  {
+   "name": "nTotAmt",
+   "type": "TextBox",
+   "location": "1050,411",
+   "size": "135,33",
+   "tabIndex": "1150",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "999,418",
+   "size": "44,20",
+   "tabIndex": "1151",
+   "text": "Total",
+   "kind": "label"
+  },
+  {
+   "name": "BtnImgDel",
+   "type": "QButton",
+   "location": "1146,223",
+   "size": "39,37",
+   "tabIndex": "1152",
+   "text": "D",
+   "kind": "button"
+  },
+  {
+   "name": "BtnImgSelect",
+   "type": "QButton",
+   "location": "1146,177",
+   "size": "39,37",
+   "tabIndex": "1153",
+   "text": "S",
+   "kind": "button"
+  },
+  {
+   "name": "BtnImgCapture",
+   "type": "QButton",
+   "location": "1146,131",
+   "size": "39,37",
+   "tabIndex": "1154",
+   "text": "C",
+   "kind": "button"
+  },
+  {
+   "name": "BtnImprt",
+   "type": "SimpleButton",
+   "location": "1146,12",
+   "size": "39,29",
+   "tabIndex": "1157",
+   "text": "MI",
+   "kind": "button"
+  },
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "881,41",
+   "size": "55,22",
+   "tabIndex": "1157",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSLImageDelete",
+   "type": "SimpleButton",
+   "location": "1146,47",
+   "size": "39,29",
+   "tabIndex": "1158",
+   "text": "SD",
+   "kind": "button"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "815,42",
+   "size": "60,20",
+   "tabIndex": "1158",
+   "text": "Pr Code",
+   "kind": "label"
+  },
+  {
+   "name": "btnSvrImgConvert",
+   "type": "SimpleButton",
+   "location": "1146,82",
+   "size": "39,29",
+   "tabIndex": "1159",
+   "text": "IC",
+   "kind": "button"
+  },
+  {
+   "name": "tPrName",
+   "type": "TextBox",
+   "location": "942,42",
+   "size": "234,22",
+   "tabIndex": "1159",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "881,75",
+   "size": "55,22",
+   "tabIndex": "1160",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "811,76",
+   "size": "64,20",
+   "tabIndex": "1161",
+   "text": "Gr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tGrName",
+   "type": "TextBox",
+   "location": "942,75",
+   "size": "234,22",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "601,42",
+   "size": "74,20",
+   "tabIndex": "1163",
+   "text": "Tag Filter",
+   "kind": "label"
+  },
+  {
+   "name": "BtnOldSoftImagImport",
+   "type": "SimpleButton",
+   "location": "392,3",
+   "size": "160,35",
+   "tabIndex": "1169",
+   "text": "&Old Soft Image Imp",
+   "kind": "button"
+  },
+  {
+   "name": "btnImgUpload",
+   "type": "SimpleButton",
+   "location": "592,3",
+   "size": "132,35",
+   "tabIndex": "1170",
+   "text": "&Export to Server",
+   "kind": "button"
+  },
+  {
+   "name": "PicImage",
+   "type": "PictureBox",
+   "location": "826,12",
+   "size": "310,249",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PicZoom",
+   "type": "PictureBox",
+   "location": "12,70",
+   "size": "12,32",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "PicSmall",
+   "type": "PictureBox",
+   "location": "1244,41",
+   "size": "53,33",
+   "tabIndex": "",
+   "text": "",
+   "kind": "other"
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "form": "MS_MEMB",
+ "tables": [
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MAST",
+  "AD_MEMB",
+  "EMP_MAST",
+  "IMAGE_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "AD_MEMB",
+   "IMAGE_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MAST",
+  "AD_MEMB",
+  "EMP_MAST",
+  "IMAGE_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 15,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 5566
+}

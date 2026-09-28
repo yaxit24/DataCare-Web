@@ -1,0 +1,10 @@
+{
+  "verifiedAtUtc": "2026-09-11T16:59:09.530968+00:00",
+  "capturedInputs": 1368,
+  "changedInputs": [],
+  "addedInputs": [],
+  "changedExternalObservations": [],
+  "status": "passed",
+  "snapshot": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/api-input-snapshot-audited.json",
+  "snapshotSha256": "9770e4bd2532fd67fbfc0f5d3448f16b64c18ee232c68ef772ef421d289a57b3"
+}

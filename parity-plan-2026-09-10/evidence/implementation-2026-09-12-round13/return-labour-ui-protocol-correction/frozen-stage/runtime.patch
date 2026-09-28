@@ -1,0 +1,16 @@
+--- a/apps/web/lib/salesReturnLabourReplay.ts
++++ b/apps/web/lib/salesReturnLabourReplay.ts
+@@ -298,7 +298,12 @@
+   if (!keys(v, [...identityKeys, 'billReplay', 'semanticVersions', 'rows', 'capabilities'])) fail();
+   identity(v, {
+     context,
+-    scope: document.scope,
++    scope: {
++      coCode: document.scope.coCode,
++      lcCode: document.scope.lcCode,
++      coYear: document.scope.coYear,
++      coBook: document.scope.coBook,
++    },
+     voucherNo: document.voucherNo,
+     documentVersion: document.version,
+   });

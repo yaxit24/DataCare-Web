@@ -1,0 +1,28 @@
+{
+  "kind": "staged-return-clock-independent-read-review/1.0",
+  "capturedAtUtc": "2026-09-11T17:47:31.965231+00:00",
+  "status": "source-reviewed-tests-unexecuted",
+  "plannedDbTestCases": 8,
+  "databaseExecuted": false,
+  "compilerExecuted": false,
+  "repositoryModified": false,
+  "files": [
+    {
+      "path": "/tmp/datacare-return-clock-round13-review/review.md",
+      "sha256": "dc28633407bb40c1182ad1a333e3198ae3d0bff5f6ac62ea6ff440607b4aebe6"
+    },
+    {
+      "path": "/tmp/datacare-return-clock-round13-review/README.md",
+      "sha256": "1556869fbda8a6900444568e38d7a0d4e00d2fa2ca7a8280c15d8f399dee9220"
+    },
+    {
+      "path": "/tmp/datacare-return-clock-round13-review/savedSaleReturnClock.db.test.ts",
+      "sha256": "05d173146209829f8d2ba2638df20fc1026be4238267b9e74dfc5633edd85e21"
+    }
+  ],
+  "coordinatedIndependentVectors": {
+    "path": "/tmp/datacare-return-clock-round13-vectors/saved-sale-return-clock.v1.json",
+    "sha256": "d360162bc731cb383e33146c29265586358413821fca0cf5d94c4bdf753cdd78",
+    "scope": "Spot-read ready R01\u2013R12 calendar/clock cases only; not a complete vector review or execution."
+  }
+}

@@ -1,0 +1,391 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/salesFamilyLifecycle.db.test.ts (29 tests) 1772ms
+ ✓ test/repairReceipt.db.test.ts (9 tests) 668ms
+ ❯ test/releaseCertification.test.ts (73 tests | 1 failed) 35ms
+   × release certification: exact real-browser journeys > pins the 16 production-stack journeys and keeps them frozen and unique 5ms
+     → expected [ 'column-settings', …(16) ] to deeply equal [ 'column-settings', …(15) ]
+ ✓ test/purchase.lifecycle.db.test.ts (18 tests) 1073ms
+ ✓ test/mfgLifecycle.db.test.ts (9 tests) 483ms
+ ✓ test/sales.lifecycle.db.test.ts (18 tests) 959ms
+ ✓ test/rojmel.test.ts (66 tests) 7ms
+ ✓ test/salesOrderSessionCommand.db.test.ts (15 tests) 2008ms
+ ✓ test/routePolicy.test.ts (54 tests) 13ms
+ ✓ test/rateCutSettlement.db.test.ts (19 tests) 1001ms
+ ✓ test/orderSessionCommands.db.test.ts (34 tests) 3419ms
+ ✓ test/sessionContextRefresh.db.test.ts (34 tests) 5064ms
+   ✓ internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during signer; no rotation or revocation survives 2067ms
+   ✓ internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during after-final-sample; no rotation or revocation survives 2134ms
+ ✓ test/operatorDepth.roundtrip.db.test.ts (3 tests) 627ms
+   ✓ operator depth — lossless round trips > purchase preserves every supplied field across an unchanged save 333ms
+ ✓ test/savedSaleReturn.db.test.ts (26 tests) 1483ms
+ ✓ test/columnSettings.db.test.ts (21 tests) 807ms
+ ✓ test/tourOrderHydration.db.test.ts (14 tests) 1334ms
+ ✓ test/entityImageConcurrency.routes.db.test.ts (17 tests) 1850ms
+ ✓ test/sessionContextHttp.db.test.ts (24 tests) 1595ms
+ ✓ test/dataRepair.db.test.ts (15 tests) 614ms
+ ✓ test/backupRestore.db.test.ts (13 tests) 12656ms
+   ✓ WP-02A company logical backup/restore > classifies the complete live schema and seals a lossless v2 document 567ms
+   ✓ WP-02A company logical backup/restore > exports every row beyond the former 100000-row ceiling 1948ms
+   ✓ WP-02A company logical backup/restore > round-trips exact rows while preserving the other company, tenant, shared data, and sequences 3254ms
+   ✓ WP-02A company logical backup/restore > rejects a tampered checksum before deleting any target row 313ms
+   ✓ WP-02A company logical backup/restore > rolls back every delete when a validly sealed row overflows its database type 826ms
+   ✓ WP-02A company logical backup/restore > rolls back when persisted values do not match the sealed SHA-256 checksum 1165ms
+   ✓ WP-02A company logical backup/restore > rolls back the whole replace transaction on a primary-key conflict 1805ms
+   ✓ WP-02A company logical backup/restore > rejects wrong authenticated tenant or company scope before mutation 570ms
+   ✓ WP-02A company logical backup/restore > rejects a self-consistent but non-live schema manifest before deletion 466ms
+   ✓ WP-02A company logical backup/restore > preflights internal company and external tenant-shared foreign keys before live replacement 1369ms
+ ✓ test/sessionContextSerializableCommand.db.test.ts (17 tests) 1910ms
+   ✓ Serializable Return command schedules on isolated PostgreSQL > D04 clock is sampled after a real lock wait even when the MVCC row itself never changed 554ms
+   ✓ Serializable Return command schedules on isolated PostgreSQL > D09 final SQL clock refuses a naturally expired session after callback reads 534ms
+ ✓ test/transaction.integrity.db.test.ts (5 tests) 653ms
+ ✓ test/settingsBehavior.db.test.ts (12 tests) 421ms
+ ✓ test/dataRepairBatch2.db.test.ts (12 tests) 309ms
+ ✓ test/saleReturnIncomingReplay.db.test.ts (43 tests) 2523ms
+ ✓ test/saleReturnBillReplay.db.test.ts (34 tests) 2309ms
+ ✓ test/sessionContextSerializableCommand.test.ts (78 tests) 16ms
+ ✓ test/saleReturnSource.db.test.ts (41 tests) 1045ms
+ ✓ test/wholesaleSaleReturn.db.test.ts (4 tests) 387ms
+ ✓ test/vpParcel.db.test.ts (1 test) 218ms
+ ✓ test/stockLifecycle.db.test.ts (5 tests) 305ms
+ ✓ test/sessionContextSelection.test.ts (74 tests) 11ms
+ ✓ test/goldBookLoctAmt.db.test.ts (2 tests) 205ms
+ ✓ test/sessionContextReadSnapshot.db.test.ts (14 tests) 1651ms
+   ✓ session read snapshot schedules on isolated PostgreSQL > D04 clock is sampled after a real lock wait even when the MVCC row itself never changed 551ms
+   ✓ session read snapshot schedules on isolated PostgreSQL > D09 final SQL clock refuses a naturally expired session after callback reads 527ms
+ ✓ test/documents.test.ts (17 tests) 37ms
+ ✓ test/mfgLotRead.db.test.ts (8 tests) 299ms
+ ✓ test/sessionContextLogin.db.test.ts (13 tests) 616ms
+ ✓ test/saleReturnIncomingReplay.routes.db.test.ts (12 tests) 1399ms
+ ✓ test/repairImageConcurrency.routes.db.test.ts (9 tests) 1293ms
+ ✓ test/saleReturnIncomingConfiguration.review.test.ts (69 tests) 40ms
+ ✓ test/sessionContextCommand.db.test.ts (13 tests) 1039ms
+   ✓ session command lock schedules on isolated PostgreSQL > samples expiry after an actual session-row lock wait, before invoking work 540ms
+stdout | test/reportContract.test.ts > Crystal report data-source contracts > classifies every token and resolves every non-allowlisted database field to Prisma
+REPORT_CONTRACT_TOTALS {"specs":254,"distinctTokens":2407,"database":1223,"formula":408,"special":776,"unresolvable":0,"resolvedDatabase":1133,"allowlistedDatabaseGaps":90}
+
+ ✓ test/reportContract.test.ts (1 test) 86ms
+ ✓ test/desktopAccountBalance.db.test.ts (54 tests) 1279ms
+ ✓ test/salesOrderRound4.db.test.ts (10 tests) 602ms
+ ✓ test/sessionContextReadSnapshot.test.ts (57 tests) 14ms
+ ✓ test/saleReturnBillReplay.routes.db.test.ts (10 tests) 1718ms
+   ✓ authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text 323ms
+ ✓ test/stockInout.db.test.ts (3 tests) 178ms
+ ✓ test/sessionContextCommand.test.ts (54 tests) 14ms
+ ✓ test/financeLifecycle.db.test.ts (4 tests) 302ms
+ ✓ test/orderReport.db.test.ts (9 tests) 309ms
+ ✓ test/saleReturnLabourReplay.routes.db.test.ts (10 tests) 1804ms
+ ✓ test/physicalStock.db.test.ts (5 tests) 259ms
+ ✓ test/goldenVectors.test.ts (27 tests) 5ms
+ ✓ test/tagCancelIdentity.db.test.ts (10 tests) 1415ms
+   ✓ tag cancel resolves one live serial identity > cancels a live tag and records the out-movement against the resolved instance 319ms
+ ✓ test/saleReturnIncomingConfiguration.db.test.ts (26 tests) 553ms
+ ✓ test/otherCommission.db.test.ts (1 test) 213ms
+ ✓ test/releaseCertificationRecord.test.mjs (8 tests) 25ms
+ ✓ test/sessionContextSelection.db.test.ts (15 tests) 4777ms
+   ✓ atomic session company selection on real PostgreSQL > rolls back tentative last-lock changes when signing crosses absolute expiry 2192ms
+   ✓ atomic session company selection on real PostgreSQL > checks fresh expiry after a real session-row lock wait 2246ms
+ ✓ test/dhrnReceipt.db.test.ts (5 tests) 254ms
+ ✓ test/saleReturnLabourReplay.db.test.ts (17 tests) 1973ms
+ ✓ test/salesOrderLifecycle.routes.db.test.ts (13 tests) 976ms
+ ✓ test/sessionContextAccess.db.test.ts (27 tests) 276ms
+ ✓ test/cashReceiptLegs.db.test.ts (7 tests) 1053ms
+ ✓ test/saleReturnIncomingConfiguration.routes.db.test.ts (9 tests) 679ms
+ ✓ test/reopenVoucher.db.test.ts (8 tests) 302ms
+ ✓ test/app.security.db.test.ts (5 tests) 564ms
+ ✓ test/orderImageWrite.db.test.ts (11 tests) 281ms
+ ✓ test/releaseTemplateBundleIdentity.test.mjs (13 tests) 6ms
+ ✓ test/reportChildren.db.test.ts (12 tests) 293ms
+ ✓ test/savedSaleReturn.routes.db.test.ts (9 tests) 965ms
+ ✓ test/settingsEffect.db.test.ts (7 tests) 1056ms
+ ✓ test/saleReturnSource.routes.db.test.ts (7 tests) 683ms
+ ✓ test/tourOrderPrint.routes.db.test.ts (5 tests) 654ms
+ ✓ test/savedSaleReturnEmpty.db.test.ts (6 tests) 788ms
+ ✓ test/settingsBehavior.test.ts (93 tests) 6ms
+ ✓ test/releaseCandidateIdentity.test.mjs (16 tests) 20ms
+ ✓ test/vpLifecycle.db.test.ts (1 test) 172ms
+ ✓ test/karigarDayBook.db.test.ts (5 tests) 280ms
+ ✓ test/reportAuthorization.test.ts (12 tests) 166ms
+ ✓ test/estimateReset.db.test.ts (1 test) 449ms
+   ✓ UT_IMPORT Estimate Reset utility > previews and applies reset-book estimate, tag-cancel and wholesale cleanup 363ms
+ ✓ test/meltingPro.db.test.ts (3 tests) 253ms
+ ✓ test/lineComponentRounding.db.test.ts (4 tests) 677ms
+ ✓ test/parityBundleDiff.test.ts (24 tests) 4ms
+ ✓ test/conditionalRules.test.ts (25 tests) 4ms
+ ✓ test/orderImageReport.db.test.ts (5 tests) 563ms
+ ✓ test/integrationWireContract.test.ts (14 tests) 4ms
+ ✓ test/kernelConformance.test.ts (13 tests) 18ms
+ ✓ test/sessionContext.extraction.test.ts (72 tests) 18ms
+ ✓ test/oldItemSales.db.test.ts (2 tests) 534ms
+   ✓ old item sales workflow over KR_DATA/KR_DETL > creates, reads, edits, and deletes OLD ITEM SALES as KR-family rows with old-gold fine 477ms
+ ✓ test/otherIncome.db.test.ts (2 tests) 499ms
+ ✓ test/yearEndCarry.db.test.ts (11 tests) 172ms
+ ✓ test/orderDesignSelection.db.test.ts (12 tests) 674ms
+ ✓ test/tagInvariants.db.test.ts (14 tests) 147ms
+ ✓ test/correctionWorkflow.db.test.ts (4 tests) 513ms
+ ✓ test/p9Reports.db.test.ts (8 tests) 883ms
+ ✓ test/utilities.db.test.ts (4 tests) 141ms
+ ✓ test/tagOpeningRoundTrip.db.test.ts (4 tests) 581ms
+ ✓ test/saleReturnIncomingLabour.db.test.ts (15 tests) 252ms
+ ✓ test/designBook.routes.db.test.ts (5 tests) 488ms
+ ✓ test/tourOrderExactValues.db.test.ts (8 tests) 859ms
+ ✓ test/consignmentPurchase.db.test.ts (1 test) 249ms
+ ✓ test/ledgerStaging.db.test.ts (6 tests) 115ms
+ ✓ test/designComponents.db.test.ts (9 tests) 275ms
+ ✓ test/entityImage.db.test.ts (18 tests) 160ms
+ ✓ test/contraDelete.db.test.ts (4 tests) 271ms
+ ✓ test/stoneDmCf.db.test.ts (2 tests) 165ms
+ ✓ test/reportDateFilter.db.test.ts (10 tests) 64ms
+ ✓ test/contractIntegrity.test.ts (17 tests) 5ms
+ ✓ test/savedSaleReturnClock.db.test.ts (8 tests) 383ms
+ ✓ test/labourDesktop.test.ts (22 tests) 3ms
+ ✓ test/mfgLotRoutes.db.test.ts (5 tests) 677ms
+ ✓ test/bullionSale.db.test.ts (2 tests) 172ms
+ ✓ test/designCalculations.db.test.ts (7 tests) 177ms
+ ✓ test/dataRepairAuthority.test.ts (7 tests) 116ms
+ ✓ test/manufacturingReports.db.test.ts (5 tests) 134ms
+ ✓ test/tourIdtl.db.test.ts (3 tests) 290ms
+ ✓ test/companySettings.db.test.ts (7 tests) 285ms
+ ✓ test/designRepeat.db.test.ts (6 tests) 254ms
+ ✓ test/reportFiltersApplied.db.test.ts (6 tests) 111ms
+ ✓ test/billToBillDelete.db.test.ts (4 tests) 288ms
+ ✓ test/orderTagReports.db.test.ts (7 tests) 96ms
+ ✓ test/orderDocumentScope.db.test.ts (6 tests) 176ms
+ ✓ test/orderSessionCommands.test.ts (24 tests) 9ms
+ ✓ test/tagAdjust.db.test.ts (2 tests) 426ms
+ ✓ test/reportDiff.test.ts (19 tests) 4ms
+ ✓ test/fineInoutGrid.db.test.ts (3 tests) 543ms
+ ✓ test/parityRatchet.test.ts (17 tests) 4ms
+ ✓ test/salesQuotation.db.test.ts (1 test) 216ms
+ ✓ test/closingStock.db.test.ts (6 tests) 115ms
+ ✓ test/settings.db.test.ts (14 tests) 66ms
+ ✓ test/releaseCandidateExpectedIdentity.test.mjs (10 tests) 4ms
+ ✓ test/reportFamilyReports.db.test.ts (5 tests) 658ms
+ ✓ test/purchase.test.ts (16 tests) 4ms
+ ✓ test/orderReport.test.ts (14 tests) 33ms
+ ✓ test/saleReturnIncomingConfiguration.test.ts (37 tests) 20ms
+ ✓ test/sessionContextValue.test.ts (84 tests) 7ms
+ ✓ test/purchaseQuotation.db.test.ts (1 test) 174ms
+ ✓ test/saleReturnLabourReplay.test.ts (30 tests) 13ms
+ ✓ test/completionRegister.test.ts (11 tests) 6ms
+ ✓ test/reportRender.db.test.ts (5 tests) 141ms
+ ✓ test/tourOrder.db.test.ts (2 tests) 199ms
+ ✓ test/dhrnLoanLifecycle.db.test.ts (2 tests) 169ms
+ ✓ test/schemeGoldAdjust.db.test.ts (1 test) 328ms
+ ✓ test/desktopMessages.db.test.ts (8 tests) 310ms
+ ✓ test/postingAccountLiterals.test.ts (5 tests) 251ms
+ ✓ test/configTables.db.test.ts (6 tests) 111ms
+ ✓ test/postingAccountFailClosed.db.test.ts (3 tests) 513ms
+ ✓ test/reportXlsx.test.ts (10 tests) 18ms
+ ✓ test/tourReports.db.test.ts (3 tests) 112ms
+ ✓ test/orderImageReport.test.ts (7 tests) 19ms
+ ✓ test/provisioning.db.test.ts (10 tests) 133ms
+ ✓ test/schemeLedgerLegs.db.test.ts (2 tests) 373ms
+ ✓ test/rateCut.test.ts (12 tests) 3ms
+ ✓ test/settlement.test.ts (20 tests) 3ms
+ ✓ test/tagPrintStaging.db.test.ts (3 tests) 118ms
+ ✓ test/reportFilterGuard.test.ts (9 tests) 321ms
+ ✓ test/workflows.test.ts (19 tests) 3ms
+ ✓ test/graphReport.db.test.ts (5 tests) 131ms
+ ✓ test/orderTrackReport.db.test.ts (2 tests) 156ms
+ ✓ test/creditNoteRead.db.test.ts (3 tests) 166ms
+ ✓ test/taxMasterGst.db.test.ts (5 tests) 46ms
+ ✓ test/integrationReadiness.test.ts (13 tests) 3ms
+ ✓ test/messageLogIsolation.db.test.ts (4 tests) 71ms
+ ✓ test/cutover.test.ts (4 tests) 4ms
+ ✓ test/sessionContextJwt.test.ts (63 tests) 10ms
+ ✓ test/einvoiceProductionGuard.test.ts (10 tests) 4ms
+ ✓ test/ecreditNoteIrn.db.test.ts (2 tests) 88ms
+ ✓ test/masterFormFields.test.ts (5 tests) 3ms
+ ✓ test/bundleDiffPairing.test.ts (5 tests) 3ms
+ ✓ test/routeInputForwarding.test.ts (5 tests) 3ms
+ ✓ test/designBook.db.test.ts (5 tests) 74ms
+ ✓ test/stockLimitMaster.db.test.ts (5 tests) 123ms
+ ✓ test/saleReturnIncomingLabour.test.ts (16 tests) 5ms
+ ✓ test/reportGridStaging.db.test.ts (4 tests) 111ms
+ ✓ test/billProfit.test.ts (13 tests) 2ms
+ ✓ test/storedScope.test.ts (18 tests) 7ms
+ ✓ test/reportFilters.test.ts (11 tests) 2ms
+ ✓ test/ledgerKeyFormat.db.test.ts (1 test) 32ms
+ ✓ test/billProfitInputs.db.test.ts (7 tests) 76ms
+ ✓ test/repairKarigarReceipt.test.ts (10 tests) 3ms
+ ✓ test/entryCheckReport.db.test.ts (3 tests) 570ms
+ ✓ test/einvoice_gsp.test.ts (5 tests) 2ms
+ ✓ test/tradingReport.db.test.ts (2 tests) 82ms
+ ✓ test/einvoiceExport.db.test.ts (2 tests) 392ms
+ ✓ test/orderReports.db.test.ts (2 tests) 73ms
+ ✓ test/auth.session.test.ts (3 tests) 3ms
+ ✓ test/userWorkReport.db.test.ts (2 tests) 432ms
+ ✓ test/seedCompleteness.db.test.ts (4 tests) 327ms
+ ✓ test/provenance.test.ts (9 tests) 2ms
+ ✓ test/parityStrictSettings.test.ts (7 tests) 2ms
+ ✓ test/creditNoteIrnAmounts.test.ts (8 tests) 5ms
+ ✓ test/dhrnLoanReports.db.test.ts (2 tests) 356ms
+ ✓ test/designMoveReport.db.test.ts (2 tests) 57ms
+ ✓ test/sales.test.ts (12 tests) 3ms
+ ✓ test/oldStockReport.db.test.ts (2 tests) 71ms
+ ✓ test/meltingParity.test.ts (5 tests) 3ms
+ ✓ test/tagLabelSkip.db.test.ts (6 tests) 51ms
+ ✓ test/messaging.db.test.ts (4 tests) 108ms
+ ✓ test/consiReport.db.test.ts (2 tests) 74ms
+ ✓ test/otherItemReport.db.test.ts (2 tests) 66ms
+ ✓ test/dataExport.db.test.ts (1 test) 640ms
+   ✓ UT_EXPORT data export utility > previews scoped DATA_TRFR rows, packages them, marks exported, and resets flags 531ms
+ ✓ test/pageEndpointFamily.test.ts (7 tests) 4ms
+ ✓ test/health.test.ts (7 tests) 89ms
+ ✓ test/footprintLoud.db.test.ts (4 tests) 70ms
+ ✓ test/purchaseRojmel.test.ts (4 tests) 2ms
+ ✓ test/customerAccountReports.db.test.ts (2 tests) 355ms
+ ✓ test/columnSettings.test.ts (37 tests) 4ms
+ ✓ test/windowTiles.db.test.ts (5 tests) 95ms
+ ✓ test/schemeMonthlyReport.db.test.ts (2 tests) 66ms
+ ✓ test/reportBind.test.ts (34 tests) 26ms
+ ✓ test/opsInvariants.db.test.ts (2 tests) 125ms
+ ✓ test/settingsRealValues.test.ts (5 tests) 2ms
+ ✓ test/parityContainmentRoutes.test.ts (3 tests) 128ms
+ ✓ test/finalReports.db.test.ts (1 test) 302ms
+ ✓ test/saleReturnHeaderFloat.db.test.ts (12 tests) 61ms
+ ✓ test/branchInoutReport.db.test.ts (2 tests) 65ms
+ ✓ test/finePolicy.test.ts (13 tests) 2ms
+ ✓ test/clearanceDateBooks.test.ts (26 tests) 2ms
+ ✓ test/ledgerTimestamp.db.test.ts (1 test) 103ms
+ ✓ test/rbac.authorization.test.ts (5 tests) 3ms
+ ✓ test/scheme.test.ts (8 tests) 2ms
+ ✓ test/metrics.test.ts (3 tests) 14ms
+ ✓ test/repairImage.test.ts (5 tests) 7ms
+ ✓ test/roundingPolicy.test.ts (14 tests) 3ms
+ ✓ test/saleReturnIncomingReplay.test.ts (31 tests) 4ms
+ ✓ test/scaleProtocol.test.ts (10 tests) 2ms
+ ✓ test/repairReceipt.test.ts (6 tests) 2ms
+ ✓ test/typeParityInput.test.mjs (8 tests) 2ms
+ ✓ test/security.test.ts (8 tests) 203ms
+ ✓ test/runtimeConfig.test.ts (9 tests) 2ms
+ ✓ test/barcode.test.ts (3 tests) 11ms
+ ✓ test/app.runtime.test.ts (1 test) 115ms
+ ✓ test/gst.test.ts (6 tests) 8ms
+ ✓ test/posting.test.ts (5 tests) 3ms
+ ✓ test/bookPolicy.test.ts (9 tests) 2ms
+ ✓ test/whatsapp.test.ts (3 tests) 2ms
+ ✓ test/finance.test.ts (4 tests) 2ms
+ ✓ test/masters.test.ts (6 tests) 2ms
+ ✓ test/integrationReadiness.db.test.ts (2 tests) 54ms
+ ✓ test/businessScope.test.ts (5 tests) 3ms
+ ✓ test/auth.jwt.test.ts (5 tests) 4ms
+ ✓ test/einvoice.test.ts (6 tests) 2ms
+ ✓ test/dhrn.test.ts (6 tests) 1ms
+ ✓ test/integrations.test.ts (8 tests) 2ms
+ ✓ test/auth.service.test.ts (5 tests) 56ms
+ ✓ test/financeWriters.test.ts (7 tests) 2ms
+ ✓ test/requestContext.test.ts (6 tests) 2ms
+ ✓ test/signAlphabet.test.ts (3 tests) 1ms
+ ✓ test/render.test.ts (5 tests) 11ms
+ ✓ test/rbac.policy.test.ts (5 tests) 2ms
+ ✓ test/rates.test.ts (4 tests) 2ms
+ ✓ test/registry.test.ts (3 tests) 2ms
+ ✓ test/audit.test.ts (2 tests) 2ms
+ ✓ test/taxPolicy.test.ts (2 tests) 2ms
+ ✓ test/voucherLifecycle.test.ts (4 tests) 3ms
+ ✓ test/deviceBridge.test.ts (5 tests) 2ms
+ ✓ test/salesReturn.test.ts (2 tests) 1ms
+ ✓ test/crystalFormula.test.ts (6 tests) 2ms
+ ✓ test/reportEngine.test.ts (4 tests) 6ms
+ ✓ test/chequePrint.test.ts (3 tests) 11ms
+ ✓ test/auth.password.test.ts (4 tests) 70ms
+ ✓ test/purchaseReturn.test.ts (1 test) 1ms
+ ✓ test/accounting.test.ts (3 tests) 1ms
+ ✓ test/numbering.test.ts (3 tests) 1ms
+ ✓ test/formLayoutEngine.test.ts (3 tests) 30ms
+ ✓ test/karigar.test.ts (4 tests) 1ms
+ ✓ test/reports.test.ts (2 tests) 1ms
+ ✓ test/migrationManifest.test.ts (1 test) 14ms
+ ✓ test/stock.test.ts (3 tests) 1ms
+ ✓ test/melting.test.ts (3 tests) 1ms
+ ✓ test/parity.test.ts (1 test) 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/releaseCertification.test.ts > release certification: exact real-browser journeys > pins the 16 production-stack journeys and keeps them frozen and unique
+AssertionError: expected [ 'column-settings', …(16) ] to deeply equal [ 'column-settings', …(15) ]
+
+- Expected
++ Received
+
+  Array [
+    "column-settings",
+    "credit-note",
+    "design-book",
+    "design-calculations",
+    "design-repeat",
+    "generic-image-conflict",
+    "image-conflict",
+    "manufacturing-lot",
+    "order-images",
+    "repair-image-conflict",
+    "sales-order",
+    "sales-order-design",
+    "sales-return-bill-replay",
++   "sales-return-labour-replay",
+    "sales-return-replay",
+    "sales-return-saved",
+    "tour-order",
+  ]
+
+ ❯ test/releaseCertification.test.ts:701:31
+    699|       (match) => match[1]!,
+    700|     );
+    701|     expect(emittedIds.sort()).toEqual([...REQUIRED_REAL_BROWSER_JOURNE…
+       |                               ^
+    702|   });
+    703| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 270 passed (271)
+      Tests  1 failed | 3156 passed (3157)
+   Start at  00:52:21
+   Duration  160.23s (transform 2.28s, setup 0ms, collect 17.12s, tests 103.41s, environment 21ms, prepare 6.55s)
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 test: `vitest run`
+Exit status 1
+PARITY_TEST_FAILED pnpm exited 1

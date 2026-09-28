@@ -1,0 +1,42 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T22:15:34.212420+00:00",
+  "finishedAtUtc": "2026-09-11T22:15:35.177690+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-compose-build.txt",
+  "logSha256": "79da90d454c83eb7b7c76d1548b439a13925b548ccc7911efbe41f4e31f94aa5",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-compose-build.inputs.json",
+  "inputManifestSha256": "f9323d8dbb4fd905ca2e8e3643a923fd1ee6c7b1613f834693a5a68e431d73c9",
+  "inputCount": 1805,
+  "changedInputs": [
+    {
+      "path": "web/packages/core/dist/index.d.ts",
+      "beforeSha256": "27d64c3ccadea39f7cdfc2c706309355b4cd572522c4748b89cf96f870a4b22d",
+      "afterSha256": "bdb04aa90892583fa4530a083f3df90e9f3aa276b2eea6b7e5909708ef77cb56"
+    },
+    {
+      "path": "web/packages/core/dist/index.js",
+      "beforeSha256": "6fc4b40302b89111ed4012873b550d588a59258c83ef2299c3bf6bfc52d249f2",
+      "afterSha256": "5dfce4ff14dc3a3d405832563963c6bd8cded95630e47fe36c11eeed065b9f52"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnIncomingLabourCompose.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "b9b7debd8c957fc632ff04cb73a7a18fc0c48d2826f62b92fb92281beb96f2d7"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnIncomingLabourCompose.js",
+      "beforeSha256": null,
+      "afterSha256": "eea2d8441b46684b9d4997cfc2f38ee66ca03b008c096284291e4f4771f863d3"
+    }
+  ],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

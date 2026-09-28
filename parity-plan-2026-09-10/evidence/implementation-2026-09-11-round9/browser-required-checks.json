@@ -1,0 +1,23 @@
+{
+  "status": "prospective-required-checks",
+  "source": "web/apps/web/test/sales-return-replay.journey.mjs",
+  "sourceSha256": "1e55f286cbae4a2191e86fa6774b279f66a74556c1d2c5bad1edc07fd3efdaf9",
+  "checks": [
+    "trusted bootstrap matches full saved identity/version, exact raw fallback and unchanged no-event values",
+    "all12 stable field IDs use server captions while metadata, local book and document replacement are frozen",
+    "each explicit completed field replays the entire ordered journal, retaining a repeated same-value event",
+    "invalid numeric draft is retained without dispatch, journal mutation or destruction of the prior preview",
+    "Enter appends once, Tab/blur does not submit, and a deliberate blank commit retains original text with source zero semantics",
+    "row-only outputs and saved voucher amounts remain separate, with exact unchanged business-table snapshots",
+    "explicit close discards transient values and returns focus; selecting SR42 uses its own saved baseline and OLD58",
+    "a real second-client saved change causes409, retains the draft and requires deliberate reload and explicit fresh replay",
+    "a real second-client configuration change invalidates the composite token and refreshes captions only after explicit reload",
+    "a real delayed state read cannot restore closed context through configured-book A→B→A; fresh load has an empty journal",
+    "oversized saved editor text remains exact, unchanged commit is refused, and a deliberate shorter preview replacement preserves the saved baseline",
+    "same voucher in another configured book keeps a distinct row identity; tagged history remains inspectable without numeric preview",
+    "a valid saved header without incoming rows renders a clear empty message without undefined identity or editable controls",
+    "fresh owning View permission permits a real nonpersisting preview while metadata and numeric save remain unavailable",
+    "all real replay requests carry exact query scope and strict event-only bodies, with no browser exceptions"
+  ],
+  "preExecutionAdjustment": "Exact saved raw Float header assertion; required15check strings unchanged; first browser run not yet started."
+}

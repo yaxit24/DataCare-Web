@@ -1,0 +1,151 @@
+{
+  "stage": "round15-proof-helpers",
+  "frozenAtUtc": "2026-09-12T02:45:09.580254+00:00",
+  "priorCheckpoint": "41-implementation-checkpoint-round14.json",
+  "priorSha256": "643bf89ad0ac50729c7feff06c28dfa6bf8cca7d6318e498397cd5c57bf9ebea",
+  "currentCoreFiles": 26,
+  "currentCoreCount": 0,
+  "coreCountStatus": "pending-root-final-count-no-sealing",
+  "syntheticControls": 20,
+  "syntheticControlsExitCode": 0,
+  "changedActiveBaselines": [],
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "39c5455cb82dae9b6403631f0738648bf8eeb375506d4b8d478ed7fcd068c83b"
+    },
+    {
+      "path": "audit-derivative.py",
+      "sha256": "9caee735dca68915a62e54cbfeae66e48bc1ed5464bfbfede60d3b29dc13c112"
+    },
+    {
+      "path": "baseline/capture_implementation_checkpoint_round12_isolated.py",
+      "sha256": "df513d5538f6ca0594b9c6f352fa7008ac7985dcebb0be8f89b482aa51b1207a"
+    },
+    {
+      "path": "baseline/capture_implementation_checkpoint_round14.py",
+      "sha256": "c8dacc06036ba64438e66588916584c039b8293f3fa4e79779f6ef022f62503b"
+    },
+    {
+      "path": "baseline/checkpoint_recipe_round14.py",
+      "sha256": "8970cc6e9e75811bf2005c43d1a73aa01d87e798fbc1d5a9d0d650ea63d36661"
+    },
+    {
+      "path": "baseline/round14_runtime_inputs.py",
+      "sha256": "3ca576335fe99e1987b2ccca97227856a1b92a0f8a36f86ab15924a6704f4243"
+    },
+    {
+      "path": "baseline/run_check_round15.py",
+      "sha256": "8eb78f138266ebc827b69f3377bffb4b3e21a1b48adfea11384f62745f135246"
+    },
+    {
+      "path": "baseline/test_checkpoint_recipe_round14.py",
+      "sha256": "bff4c2d0428a6494124fff0137c84c6592f7715707ed5363755afb330469c0ee"
+    },
+    {
+      "path": "baseline/validate_current_review.py",
+      "sha256": "7f6f73b5dd33dcfc09080b020c0166152cc57a00c22dea86e4880683850584c2"
+    },
+    {
+      "path": "baseline-inputs.json",
+      "sha256": "f5ba518f68bf383285cd763f22b1c736d412ab80800a38330d2681b65306d728"
+    },
+    {
+      "path": "capture_implementation_checkpoint_round15.py.diff",
+      "sha256": "bacb9fd220e2053b6d6513f487a01459f328e16245b04653c75a02847c61798a"
+    },
+    {
+      "path": "checkpoint_recipe_round15.py.diff",
+      "sha256": "a418dba6ba30599b2f27bc95c73ce5b287552d517c8125292f2e1fd51cfa52e8"
+    },
+    {
+      "path": "controls-final.inputs.json",
+      "sha256": "7d4ba0143d06fd211eaeee6994fa3283ec517e2147cae3394ffae928108d703b"
+    },
+    {
+      "path": "controls-final.run.json",
+      "sha256": "c0171097466dce3d2a293e77f5c40a770d2d443f8d7047f18eeaa6293b8d1fa4"
+    },
+    {
+      "path": "controls.inputs.json",
+      "sha256": "ac4bf76ceaf64c7f5a6df2dc5f0b98bd2f3570a92dca996bdf7d58acae772b90"
+    },
+    {
+      "path": "controls.run.json",
+      "sha256": "98942f34c35b572ac145a7a656c962ad30160a7d6b008cdbb045b16262e2b96b"
+    },
+    {
+      "path": "derivative-audit.json",
+      "sha256": "6c4c7d282634b9603f55dad3135d1502e4a7524d043ba086d662564ff3718a1d"
+    },
+    {
+      "path": "prepare.py",
+      "sha256": "0a67bdf249a44e632064e5cdfab420d808908c80162184230b59c934105e6a28"
+    },
+    {
+      "path": "recipe-controls-final.txt",
+      "sha256": "3414b42aec4e6f26dd391e6426e69bfbf2de90a0b5d0dd5f9ffa5a84ba2720e5"
+    },
+    {
+      "path": "recipe-controls.txt",
+      "sha256": "79895885a0149b6716ba3312bb9e60ae81e89454ee5fe84fa9e3f04be10791f3"
+    },
+    {
+      "path": "run-controls-final.py",
+      "sha256": "b7050a2331184d9608633843306b66d916f380914d71fbecc53bff0febf3f824"
+    },
+    {
+      "path": "run-controls.py",
+      "sha256": "b374c43692b13a2f68a739a9e751eda9b120a037d62d48d5459e755a7807e791"
+    },
+    {
+      "path": "run_check_round15-seeds.patch",
+      "sha256": "61108d1976528d1acd54041df74deff74f87c20aaf00d13cc5119716d344b9d4"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/capture_implementation_checkpoint_round12_isolated.py",
+      "sha256": "df513d5538f6ca0594b9c6f352fa7008ac7985dcebb0be8f89b482aa51b1207a"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/capture_implementation_checkpoint_round15.py",
+      "sha256": "394994e2f4aab6cc49adca5a684f07486402616e02b5a31fb63657e786e1c0a9"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/checkpoint_recipe_round15.py",
+      "sha256": "49582d251d83dd9efbcc61184da247a109ae61edb4b92cbaff8b571cc83f1b47"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/round14_runtime_inputs.py",
+      "sha256": "3ca576335fe99e1987b2ccca97227856a1b92a0f8a36f86ab15924a6704f4243"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/test_checkpoint_recipe_round15.py",
+      "sha256": "88ba9ea8328ce583fc07465446c28cf61b9c98a7cd7f3359b43ac89b9b9110f7"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/validate_current_review.py",
+      "sha256": "854ff62cf531a832e719acae98d5e2e1b23392c1dabaf98a411b4f3bf5b59862"
+    },
+    {
+      "path": "syntax-final.json",
+      "sha256": "4b16f7ad97b75069402b767976e4efebf76ecb600132dff0997e0114c41a477f"
+    },
+    {
+      "path": "syntax.json",
+      "sha256": "4b16f7ad97b75069402b767976e4efebf76ecb600132dff0997e0114c41a477f"
+    },
+    {
+      "path": "test_checkpoint_recipe_round15.py.diff",
+      "sha256": "7b8974e14135a4bd84bbc9178b2375925e508791b298e7e551aec983351ab3c9"
+    },
+    {
+      "path": "validate_current_review.patch",
+      "sha256": "4a3865198903a91430cae667a6bc852281fd8b39852d8b69dedda33a0d92322a"
+    },
+    {
+      "path": "validate_current_review.py.diff",
+      "sha256": "ad8c2d87311462f32a62168a99255a7af0ce6727830c603f43bd20361eb94c1b"
+    }
+  ],
+  "limits": "Only in-memory Python syntax and synthetic20 recipe controls. No active changes, runtime application checks, database, browser, build, compiler or checkpoint publication."
+}

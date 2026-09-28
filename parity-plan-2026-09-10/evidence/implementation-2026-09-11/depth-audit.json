@@ -1,0 +1,50 @@
+{
+ "desktop": {
+  "forms": 204,
+  "inputControls": 1599,
+  "gridNamedCols": 3508,
+  "operatorSurface": 5107,
+  "distinctValidationMessages": 631,
+  "gridCellEvents": 416
+ },
+ "web": {
+  "pages": 123,
+  "txnPages": 82,
+  "txnPagesWithLineGrid": 72,
+  "txnPagesWithEditableGrid": 63,
+  "inputControls": 1492,
+  "gridColumns": 2157,
+  "operatorSurface": 3649,
+  "pagesWithGridKeyboard": 62,
+  "txnPagesWithGridKeyboard": 61,
+  "txnGridPagesWithKeyboard": 61,
+  "txnEditableGridPagesWithKeyboard": 61,
+  "pagesWithLookupPicker": 83,
+  "pagesWithLineRecalc": 0,
+  "pagesWithSubDetailGrid": 16,
+  "apiValidationMessages": 725
+ },
+ "ratios": {
+  "operatorSurfacePct": 71.5,
+  "gridColumnPct": 61.5,
+  "inputControlPct": 93.3,
+  "operatorSurfacePerPagePct": 96.8
+ },
+ "settings": {
+  "inventory": 130,
+  "honoured": 45,
+  "inert": 82
+ },
+ "reachability": {
+  "apiInputFields": 2364,
+  "reachableFromUi": 2263,
+  "apiOnlyUnreachable": 101
+ },
+ "containment": {
+  "operations": 6,
+  "blockedRoutes": 9
+ },
+ "reports": {
+  "runnableSlugs": 78
+ }
+}

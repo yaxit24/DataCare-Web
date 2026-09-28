@@ -1,0 +1,18 @@
+{
+  "command": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "--project",
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-tsconfig-corrected.json",
+    "--pretty",
+    "false"
+  ],
+  "cwd": "web/apps/api",
+  "startedAtUtc": "2026-09-11T17:18:36.786487+00:00",
+  "finishedAtUtc": "2026-09-11T17:18:41.924576+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "scope": "One test file plus imported dependencies; extends unchanged complete strict test options, with the actual API Node types explicitly resolved from this external config. Not the full API test project.",
+  "configSha256": "c35e12eea55e8e2f2737cabe07fcec1ace5afe361855729e7c61e355fd780472",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-strict-corrected.txt"
+}

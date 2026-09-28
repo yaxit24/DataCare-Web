@@ -1,0 +1,2842 @@
+{
+  "kind": "source-derived-static-index-no-runtime-execution",
+  "queries": [
+    {
+      "id": "incoming-customer-ledger",
+      "table": "AC_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+        "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+        "line": 1324
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "LEDR_KEY",
+          "expression": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'+STR(A.SR_NO)"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "BILL_NO",
+          "expression": "''"
+        },
+        {
+          "column": "BILL_DATE",
+          "expression": "Null"
+        },
+        {
+          "column": "CHQ_NO",
+          "expression": "''"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "LD_CODE",
+          "expression": "D.SALE_AC"
+        },
+        {
+          "column": "CR_AMT",
+          "expression": "A.NET_AMT"
+        },
+        {
+          "column": "DR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "IT_TYPE",
+          "expression": "'A'"
+        },
+        {
+          "column": "SIGN",
+          "expression": "''"
+        },
+        {
+          "column": "FINE_WT",
+          "expression": "0"
+        },
+        {
+          "column": "IT_DESC",
+          "expression": "''"
+        },
+        {
+          "column": "ENTRY_TIME",
+          "expression": "A.VCH_TIME"
+        },
+        {
+          "column": "HD_VCH_NO",
+          "expression": "A.HD_VCH_NO"
+        },
+        {
+          "column": "CLR_DATE",
+          "expression": "Null"
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "B.DATA_TYPE"
+        },
+        {
+          "column": "DATA_TRFR",
+          "expression": "'N'"
+        },
+        {
+          "column": "MAIN_USER",
+          "expression": "A.MAIN_USER"
+        },
+        {
+          "column": "FINE_RATE",
+          "expression": "0"
+        },
+        {
+          "column": "PARTY_AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "LDR_NAME",
+          "expression": "''"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',A.AC_CODE,D.SALE_AC,A.NET_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM (((SL_DATA AS E LEFT JOIN SL_DETL_RTN AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO)LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\"  AND A.NET_AMT <> 0 AND E.RATE_UNFIX <> 'Y' \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "incoming-sale-account-ledger",
+      "table": "AC_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+        "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+        "line": 1326
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "LEDR_KEY",
+          "expression": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO)"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "BILL_NO",
+          "expression": "''"
+        },
+        {
+          "column": "BILL_DATE",
+          "expression": "Null"
+        },
+        {
+          "column": "CHQ_NO",
+          "expression": "''"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "D.SALE_AC"
+        },
+        {
+          "column": "LD_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "CR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "DR_AMT",
+          "expression": "A.NET_AMT"
+        },
+        {
+          "column": "IT_TYPE",
+          "expression": "'A'"
+        },
+        {
+          "column": "SIGN",
+          "expression": "''"
+        },
+        {
+          "column": "FINE_WT",
+          "expression": "0"
+        },
+        {
+          "column": "IT_DESC",
+          "expression": "''"
+        },
+        {
+          "column": "ENTRY_TIME",
+          "expression": "A.VCH_TIME"
+        },
+        {
+          "column": "HD_VCH_NO",
+          "expression": "A.HD_VCH_NO"
+        },
+        {
+          "column": "CLR_DATE",
+          "expression": "Null"
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "B.DATA_TYPE"
+        },
+        {
+          "column": "DATA_TRFR",
+          "expression": "'N'"
+        },
+        {
+          "column": "MAIN_USER",
+          "expression": "A.MAIN_USER"
+        },
+        {
+          "column": "FINE_RATE",
+          "expression": "0"
+        },
+        {
+          "column": "PARTY_AC_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "LDR_NAME",
+          "expression": "''"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',D.SALE_AC,A.AC_CODE,0,A.NET_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (((SL_DATA AS E LEFT JOIN SL_DETL_RTN AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE   WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I'  \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\" AND A.NET_AMT <> 0 AND E.RATE_UNFIX <> 'Y' \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "incoming-stock",
+      "table": "MAIN_STOCK",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+        "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+        "line": 247
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "SR_NO",
+          "expression": "2"
+        },
+        {
+          "column": "ISR_NO",
+          "expression": "A.SR_NO"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "STK_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "A.IT_CODE"
+        },
+        {
+          "column": "TAG_NO",
+          "expression": "A.TAG_NO"
+        },
+        {
+          "column": "VCH_SRNO",
+          "expression": "A.VCH_SRNO"
+        },
+        {
+          "column": "TBL_CODE",
+          "expression": "A.TBL_CODE"
+        },
+        {
+          "column": "TR_TYPE",
+          "expression": "'I'"
+        },
+        {
+          "column": "ITM_SIGN",
+          "expression": "'+'"
+        },
+        {
+          "column": "ITM_QTY",
+          "expression": "1"
+        },
+        {
+          "column": "ITM_PCS",
+          "expression": "A.ITM_PCS"
+        },
+        {
+          "column": "ITM_GWT",
+          "expression": "A.ITM_GWT"
+        },
+        {
+          "column": "ITM_NWT",
+          "expression": "A.ITM_NWT"
+        },
+        {
+          "column": "ITM_TOUCH",
+          "expression": "A.ITM_TOUCH"
+        },
+        {
+          "column": "ITM_WEST",
+          "expression": "A.ITM_WEST_PRC"
+        },
+        {
+          "column": "ITM_FINE",
+          "expression": "A.ITM_FINE"
+        },
+        {
+          "column": "ITM_RATE",
+          "expression": "A.ITM_RATE"
+        },
+        {
+          "column": "ITM_AMT",
+          "expression": "A.ITM_AMT"
+        },
+        {
+          "column": "LBR_RATE",
+          "expression": "A.LBR_RATE"
+        },
+        {
+          "column": "LBR_AMT",
+          "expression": "A.LBR_AMT"
+        },
+        {
+          "column": "OTH_AMT",
+          "expression": "A.OTH_AMT"
+        },
+        {
+          "column": "ITM_MRP",
+          "expression": "0"
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "A.NET_AMT"
+        },
+        {
+          "column": "KR_NWT",
+          "expression": "A.ITM_NWT"
+        },
+        {
+          "column": "KR_TOUCH",
+          "expression": "A.ITM_TOUCH"
+        },
+        {
+          "column": "KR_WEST",
+          "expression": "A.ITM_WEST_PRC"
+        },
+        {
+          "column": "KR_FINE",
+          "expression": "A.ITM_FINE"
+        },
+        {
+          "column": "KR_LBR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "KR_OTH_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "KR_COST",
+          "expression": "A.TAG_COST"
+        },
+        {
+          "column": "EMP_CODE",
+          "expression": "A.EMP_CODE"
+        },
+        {
+          "column": "ENTRY_TIME",
+          "expression": "A.VCH_TIME"
+        },
+        {
+          "column": "MAIN_USER",
+          "expression": "A.MAIN_USER"
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "A.DATA_TYPE"
+        },
+        {
+          "column": "DESIGN_NO",
+          "expression": "A.DESIGN_NO"
+        },
+        {
+          "column": "ITM_SIZE",
+          "expression": "A.ITM_SIZE"
+        },
+        {
+          "column": "ITM_DESC",
+          "expression": "''"
+        },
+        {
+          "column": "GHT_PRC",
+          "expression": "A.ITM_GHT_PRC"
+        },
+        {
+          "column": "ITM_LOT",
+          "expression": "''"
+        },
+        {
+          "column": "ITM_DISC",
+          "expression": "0"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO MAIN_STOCK (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE,STK_DATE,VCH_TYPE,BOOK_NAME,AC_CODE,IT_CODE,TAG_NO,VCH_SRNO,TBL_CODE,TR_TYPE,ITM_SIGN,  ITM_QTY,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,ITM_MRP,NET_AMT,  KR_NWT,KR_TOUCH,KR_WEST,KR_FINE,KR_LBR_AMT,KR_OTH_AMT,KR_COST,EMP_CODE,ENTRY_TIME,MAIN_USER,DATA_TYPE,DESIGN_NO,ITM_SIZE,ITM_DESC,GHT_PRC,ITM_LOT,ITM_DISC)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,2,A.SR_NO,A.VCH_DATE,A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,A.AC_CODE,A.IT_CODE,A.TAG_NO,A.VCH_SRNO,A.TBL_CODE,'I','+',  1,A.ITM_PCS,A.ITM_GWT,A.ITM_NWT,A.ITM_TOUCH,A.ITM_WEST_PRC,A.ITM_FINE,A.ITM_RATE,A.ITM_AMT,A.LBR_RATE,A.LBR_AMT,A.OTH_AMT,0,A.NET_AMT,  A.ITM_NWT,A.ITM_TOUCH,A.ITM_WEST_PRC,A.ITM_FINE,0,0,A.TAG_COST,A.EMP_CODE,A.VCH_TIME,A.MAIN_USER,A.DATA_TYPE,A.DESIGN_NO,A.ITM_SIZE,'',A.ITM_GHT_PRC,'',0  FROM  SL_DETL_RTN AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' \"), Interaction.IIf(Operators.CompareString(StkBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + StkBook + \"'\"))), Interaction.IIf(Operators.CompareString(StkVchNo, \"\", false) == 0, (object)DC_Main.MsPostingDate, (object)(\" AND A.VCH_NO ='\" + StkVchNo + \"'\"))), (object)\" \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "return-outstanding-rojmel",
+      "table": "ROJ_MEL_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+        "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+        "line": 586
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "LEDR_KEY",
+          "expression": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "LD_CODE",
+          "expression": "B.AC_CODE"
+        },
+        {
+          "column": "CR_AMT",
+          "expression": "A.RTN_BILL_OS"
+        },
+        {
+          "column": "DR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "AC_NAME",
+          "expression": "''"
+        },
+        {
+          "column": "IT_TYPE",
+          "expression": "'A'"
+        },
+        {
+          "column": "SIGN",
+          "expression": "''"
+        },
+        {
+          "column": "ITM_PCS",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_GWT",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_NWT",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_TOUCH",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_WEST",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_FINE",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_RATE",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "LBR_RATE",
+          "expression": "0"
+        },
+        {
+          "column": "LBR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "OTH_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "IT_DESC",
+          "expression": "A.VCH_DESC"
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "MEMB_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "SCHM_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "REF_NO",
+          "expression": "''"
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "B.DATA_TYPE"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.AC_CODE,B.AC_CODE,A.RTN_BILL_OS,0,'','A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND A.VCH_DATE >= '\" + Strings.Format((object)DC_Main.MOp_dt, \"MM/dd/yyyy\") + \"' AND B.MAIN_BOOK IN ('SALES RETURNE') \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\" AND B.SR_NO = 1 AND A.RTN_BILL_OS  <> 0  \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "return-taxbook-summary-rojmel",
+      "table": "ROJ_MEL_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+        "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+        "line": 588
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "LEDR_KEY",
+          "expression": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "LD_CODE",
+          "expression": "B.AC_CODE"
+        },
+        {
+          "column": "CR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "DR_AMT",
+          "expression": "A.RTN_NET_AMT"
+        },
+        {
+          "column": "AC_NAME",
+          "expression": "'RTN' + ' - ' + A.AC_NAME"
+        },
+        {
+          "column": "IT_TYPE",
+          "expression": "'A'"
+        },
+        {
+          "column": "SIGN",
+          "expression": "''"
+        },
+        {
+          "column": "ITM_PCS",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_GWT",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_NWT",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_TOUCH",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_WEST",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_FINE",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_RATE",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "LBR_RATE",
+          "expression": "0"
+        },
+        {
+          "column": "LBR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "OTH_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "IT_DESC",
+          "expression": "A.VCH_DESC"
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "MEMB_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "SCHM_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "REF_NO",
+          "expression": "''"
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "B.DATA_TYPE"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.AC_CODE,B.AC_CODE,0,A.RTN_NET_AMT,'RTN' + ' - ' + A.AC_NAME,'A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.BOOK_TYPE = 'T' AND A.VCH_DATE >= '\" + Strings.Format((object)DC_Main.MOp_dt, \"MM/dd/yyyy\") + \"' AND B.MAIN_BOOK IN ('SALES RETURNE') \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\" AND B.SR_NO = 1 AND A.RTN_NET_AMT <> 0 \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "return-nontaxbook-detail-rojmel",
+      "table": "ROJ_MEL_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+        "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+        "line": 590
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "LEDR_KEY",
+          "expression": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO)"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "D.SALE_AC"
+        },
+        {
+          "column": "LD_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "CR_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "DR_AMT",
+          "expression": "A.NET_AMT"
+        },
+        {
+          "column": "AC_NAME",
+          "expression": "F.AC_NAME"
+        },
+        {
+          "column": "IT_TYPE",
+          "expression": "A.IT_TYPE"
+        },
+        {
+          "column": "SIGN",
+          "expression": "'-'"
+        },
+        {
+          "column": "ITM_PCS",
+          "expression": "A.ITM_PCS"
+        },
+        {
+          "column": "ITM_GWT",
+          "expression": "A.ITM_GWT"
+        },
+        {
+          "column": "ITM_NWT",
+          "expression": "A.ITM_NWT"
+        },
+        {
+          "column": "ITM_TOUCH",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_WEST",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_FINE",
+          "expression": "0"
+        },
+        {
+          "column": "ITM_RATE",
+          "expression": "A.ITM_RATE"
+        },
+        {
+          "column": "ITM_AMT",
+          "expression": "A.ITM_AMT"
+        },
+        {
+          "column": "LBR_RATE",
+          "expression": "A.LBR_RATE"
+        },
+        {
+          "column": "LBR_AMT",
+          "expression": "A.LBR_AMT"
+        },
+        {
+          "column": "OTH_AMT",
+          "expression": "A.OTH_AMT"
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "A.NET_AMT"
+        },
+        {
+          "column": "IT_DESC",
+          "expression": "C.IT_NAME"
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "A.IT_CODE"
+        },
+        {
+          "column": "MEMB_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "SCHM_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "REF_NO",
+          "expression": "''"
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "B.DATA_TYPE"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO),A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  D.SALE_AC,A.AC_CODE,0,A.NET_AMT,F.AC_NAME,A.IT_TYPE,'-',A.ITM_PCS,A.ITM_GWT,A.ITM_NWT,0,0,0,A.ITM_RATE,A.ITM_AMT,A.LBR_RATE,A.LBR_AMT,A.OTH_AMT,A.NET_AMT,  C.IT_NAME,A.IT_CODE,'','','',B.DATA_TYPE FROM ((((SL_DATA AS F LEFT JOIN SL_DETL_RTN AS A ON F.CO_CODE = A.CO_CODE AND F.LC_CODE = A.LC_CODE AND F.CO_YEAR = A.CO_YEAR AND F.CO_BOOK = A.CO_BOOK AND F.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)  LEFT JOIN  GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE)LEFT JOIN AC_MAST AS E ON A.CO_CODE = E.CO_CODE AND A.AC_CODE = E.AC_CODE WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND A.VCH_DATE >= '\" + Strings.Format((object)DC_Main.MOp_dt, \"MM/dd/yyyy\") + \"' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE <> 'T' \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\" AND B.SR_NO = 1 AND A.NET_AMT <> 0 \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "return-tax-sr1",
+      "table": "TAX_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+        "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+        "line": 191
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "VCH_NO"
+        },
+        {
+          "column": "SR_NO",
+          "expression": "1"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "TRAN_TYPE",
+          "expression": "'S'"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "TAX_CODE",
+          "expression": "A.TAX_CODE"
+        },
+        {
+          "column": "TAX_TYPE",
+          "expression": "C.TAX_GROUP"
+        },
+        {
+          "column": "TAX_PRC",
+          "expression": "C.TAX_PRC"
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "A.RTN_NET_AMT"
+        },
+        {
+          "column": "TAX_AMT",
+          "expression": "A.TAX_AMT/2"
+        },
+        {
+          "column": "DISC_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "TOT_AMT",
+          "expression": "A.RTN_TOT_AMT"
+        },
+        {
+          "column": "TAX_SIGN",
+          "expression": "'-'"
+        },
+        {
+          "column": "PARTY_NAME",
+          "expression": "A.AC_NAME"
+        },
+        {
+          "column": "R_CHARG",
+          "expression": "'N'"
+        },
+        {
+          "column": "ISR_NO",
+          "expression": "0"
+        },
+        {
+          "column": "TAX_FREE_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "ZERO_RATED_AMT",
+          "expression": "0"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,1,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.RTN_NET_AMT,A.TAX_AMT/2,0,A.RTN_TOT_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE = 'T'  AND A.RTN_NET_AMT <> 0 AND C.SR_NO = 1 AND D.AC_GST_TYPE <> 'I' \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\"\"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "return-tax-sr2",
+      "table": "TAX_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+        "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+        "line": 193
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "VCH_NO"
+        },
+        {
+          "column": "SR_NO",
+          "expression": "2"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "TRAN_TYPE",
+          "expression": "'S'"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "TAX_CODE",
+          "expression": "A.TAX_CODE"
+        },
+        {
+          "column": "TAX_TYPE",
+          "expression": "C.TAX_GROUP"
+        },
+        {
+          "column": "TAX_PRC",
+          "expression": "C.TAX_PRC"
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "A.RTN_NET_AMT"
+        },
+        {
+          "column": "TAX_AMT",
+          "expression": "A.TAX_AMT/2"
+        },
+        {
+          "column": "DISC_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "TOT_AMT",
+          "expression": "A.RTN_TOT_AMT"
+        },
+        {
+          "column": "TAX_SIGN",
+          "expression": "'-'"
+        },
+        {
+          "column": "PARTY_NAME",
+          "expression": "A.AC_NAME"
+        },
+        {
+          "column": "R_CHARG",
+          "expression": "'N'"
+        },
+        {
+          "column": "ISR_NO",
+          "expression": "0"
+        },
+        {
+          "column": "TAX_FREE_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "ZERO_RATED_AMT",
+          "expression": "0"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,2,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.RTN_NET_AMT,A.TAX_AMT/2,0,A.RTN_TOT_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE = 'T' AND A.RTN_NET_AMT <> 0 AND C.SR_NO = 2 AND D.AC_GST_TYPE <> 'I' \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\"\"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "return-interstate-tax-sr3",
+      "table": "TAX_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+        "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+        "line": 195
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "VCH_NO"
+        },
+        {
+          "column": "SR_NO",
+          "expression": "3"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.MAIN_BOOK"
+        },
+        {
+          "column": "TRAN_TYPE",
+          "expression": "'S'"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "TAX_CODE",
+          "expression": "A.TAX_CODE"
+        },
+        {
+          "column": "TAX_TYPE",
+          "expression": "C.TAX_GROUP"
+        },
+        {
+          "column": "TAX_PRC",
+          "expression": "C.TAX_PRC"
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "A.RTN_NET_AMT"
+        },
+        {
+          "column": "TAX_AMT",
+          "expression": "A.TAX_AMT"
+        },
+        {
+          "column": "DISC_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "TOT_AMT",
+          "expression": "A.RTN_TOT_AMT"
+        },
+        {
+          "column": "TAX_SIGN",
+          "expression": "'-'"
+        },
+        {
+          "column": "PARTY_NAME",
+          "expression": "A.AC_NAME"
+        },
+        {
+          "column": "R_CHARG",
+          "expression": "'N'"
+        },
+        {
+          "column": "ISR_NO",
+          "expression": "0"
+        },
+        {
+          "column": "TAX_FREE_AMT",
+          "expression": "0"
+        },
+        {
+          "column": "ZERO_RATED_AMT",
+          "expression": "0"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,3,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.RTN_NET_AMT,A.TAX_AMT,0,A.RTN_TOT_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE = 'T' AND A.RTN_NET_AMT <> 0 AND C.SR_NO = 3 AND D.AC_GST_TYPE = 'I'  \"), Interaction.IIf(Operators.CompareString(MsBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + MsBook + \"'\"))), Interaction.IIf(Operators.CompareString(MsVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + MsVchNo + \"'\"))), (object)\"\"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "outgoing-diamond",
+      "table": "DM_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+        "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+        "line": 806
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "MAIN_SRNO",
+          "expression": "1"
+        },
+        {
+          "column": "SR_NO",
+          "expression": "A.SR_NO"
+        },
+        {
+          "column": "ISR_NO",
+          "expression": "A.ISR_NO"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "ENTRY_TYPE",
+          "expression": "'S'"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "A.IT_CODE"
+        },
+        {
+          "column": "DM_CODE",
+          "expression": "A.DM_CODE"
+        },
+        {
+          "column": "DM_ORIGIN",
+          "expression": "A.DM_ORIGIN"
+        },
+        {
+          "column": "DM_REMARK",
+          "expression": "A.DM_REMARK"
+        },
+        {
+          "column": "DM_SIZE",
+          "expression": "A.DM_SIZE"
+        },
+        {
+          "column": "DM_COLOR",
+          "expression": "A.DM_COLOR"
+        },
+        {
+          "column": "DM_LOT_NO",
+          "expression": "''"
+        },
+        {
+          "column": "DM_PCS",
+          "expression": "A.IT_PCS"
+        },
+        {
+          "column": "DM_WT",
+          "expression": "A.IT_GWT"
+        },
+        {
+          "column": "DM_SIGN",
+          "expression": "'-'"
+        },
+        {
+          "column": "DM_RATE",
+          "expression": "IT_RATE"
+        },
+        {
+          "column": "DM_AMT",
+          "expression": "IT_AMT"
+        },
+        {
+          "column": "EMP_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "TAG_NO",
+          "expression": "CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END"
+        },
+        {
+          "column": "VCH_SRNO",
+          "expression": "A.VCH_SRNO"
+        },
+        {
+          "column": "MAIN_IT_CODE",
+          "expression": "D.IT_CODE"
+        },
+        {
+          "column": "INOUT_TYPE",
+          "expression": "'S'"
+        },
+        {
+          "column": "TBL_CODE",
+          "expression": "D.TBL_CODE"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO DM_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,MAIN_SRNO,SR_NO,ISR_NO,VCH_DATE,ENTRY_TYPE,BOOK_NAME,AC_CODE,IT_CODE,  DM_CODE,DM_ORIGIN,DM_REMARK,DM_SIZE,DM_COLOR,DM_LOT_NO,DM_PCS,DM_WT,DM_SIGN,DM_RATE,DM_AMT,EMP_CODE,TAG_NO,VCH_SRNO,MAIN_IT_CODE,INOUT_TYPE,TBL_CODE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,1,A.SR_NO,A.ISR_NO,A.VCH_DATE,'S',B.BOOK_SNAME,A.AC_CODE,A.IT_CODE,  A.DM_CODE,A.DM_ORIGIN,A.DM_REMARK,A.DM_SIZE,A.DM_COLOR,'',A.IT_PCS,A.IT_GWT,'-',IT_RATE,IT_AMT,'',CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END,A.VCH_SRNO,D.IT_CODE,'S',D.TBL_CODE FROM ((SL_DETL AS D INNER JOIN SL_IDTL AS A ON D.CO_CODE = A.CO_CODE AND D.LC_CODE = A.LC_CODE AND D.CO_YEAR = A.CO_YEAR AND D.CO_BOOK = A.CO_BOOK AND D.VCH_NO = A.VCH_NO AND D.OLD_SRNO = A.SR_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK IN ('SALES RETURNE') \"), Interaction.IIf(Operators.CompareString(StkBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + StkBook + \"'\"))), Interaction.IIf(Operators.CompareString(StkVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + StkVchNo + \"'\"))), (object)\" AND C.OTH_DETL_POSTING = 'Y' \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    },
+    {
+      "id": "incoming-diamond",
+      "table": "DM_DATA",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+        "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+        "line": 808
+      },
+      "fields": [
+        {
+          "column": "CO_CODE",
+          "expression": "A.CO_CODE"
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "A.LC_CODE"
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "A.CO_YEAR"
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "A.CO_BOOK"
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "A.VCH_NO"
+        },
+        {
+          "column": "MAIN_SRNO",
+          "expression": "2"
+        },
+        {
+          "column": "SR_NO",
+          "expression": "A.SR_NO"
+        },
+        {
+          "column": "ISR_NO",
+          "expression": "A.ISR_NO"
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "A.VCH_DATE"
+        },
+        {
+          "column": "ENTRY_TYPE",
+          "expression": "'S'"
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "B.BOOK_SNAME"
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "A.AC_CODE"
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "A.IT_CODE"
+        },
+        {
+          "column": "DM_CODE",
+          "expression": "A.DM_CODE"
+        },
+        {
+          "column": "DM_ORIGIN",
+          "expression": "A.DM_ORIGIN"
+        },
+        {
+          "column": "DM_REMARK",
+          "expression": "A.DM_REMARK"
+        },
+        {
+          "column": "DM_SIZE",
+          "expression": "A.DM_SIZE"
+        },
+        {
+          "column": "DM_COLOR",
+          "expression": "A.DM_COLOR"
+        },
+        {
+          "column": "DM_LOT_NO",
+          "expression": "''"
+        },
+        {
+          "column": "DM_PCS",
+          "expression": "A.IT_PCS"
+        },
+        {
+          "column": "DM_WT",
+          "expression": "A.IT_GWT"
+        },
+        {
+          "column": "DM_SIGN",
+          "expression": "'+'"
+        },
+        {
+          "column": "DM_RATE",
+          "expression": "IT_RATE"
+        },
+        {
+          "column": "DM_AMT",
+          "expression": "IT_AMT"
+        },
+        {
+          "column": "EMP_CODE",
+          "expression": "''"
+        },
+        {
+          "column": "TAG_NO",
+          "expression": "A.TAG_NO"
+        },
+        {
+          "column": "VCH_SRNO",
+          "expression": "A.VCH_SRNO"
+        },
+        {
+          "column": "MAIN_IT_CODE",
+          "expression": "D.IT_CODE"
+        },
+        {
+          "column": "INOUT_TYPE",
+          "expression": "'I'"
+        },
+        {
+          "column": "TBL_CODE",
+          "expression": "D.TBL_CODE"
+        }
+      ],
+      "fullSourceStatement": "DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)(\"INSERT INTO DM_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,MAIN_SRNO,SR_NO,ISR_NO,VCH_DATE,ENTRY_TYPE,BOOK_NAME,AC_CODE,IT_CODE,  DM_CODE,DM_ORIGIN,DM_REMARK,DM_SIZE,DM_COLOR,DM_LOT_NO,DM_PCS,DM_WT,DM_SIGN,DM_RATE,DM_AMT,EMP_CODE,TAG_NO,VCH_SRNO,MAIN_IT_CODE,INOUT_TYPE,TBL_CODE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,2,A.SR_NO,A.ISR_NO,A.VCH_DATE,'S',B.BOOK_SNAME,A.AC_CODE,A.IT_CODE,  A.DM_CODE,A.DM_ORIGIN,A.DM_REMARK,A.DM_SIZE,A.DM_COLOR,'',A.IT_PCS,A.IT_GWT,'+',IT_RATE,IT_AMT,'',A.TAG_NO,A.VCH_SRNO,D.IT_CODE,'I',D.TBL_CODE FROM ((BAR_DETL AS D INNER JOIN BAR_IDTL AS A ON D.CO_CODE = A.CO_CODE AND D.LC_CODE = A.LC_CODE AND D.CO_YEAR = A.CO_YEAR AND D.CO_BOOK = A.CO_BOOK AND D.VCH_NO = A.VCH_NO AND D.OLD_SRNO = A.SR_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE  WHERE A.CO_CODE = '\" + DC_Main.MCo_code + \"' AND A.LC_CODE = '\" + DC_Main.MLc_code + \"' AND A.CO_YEAR = '\" + DC_Main.MCo_year + \"' AND B.MAIN_BOOK IN ('SALES RETURNE') \"), Interaction.IIf(Operators.CompareString(StkBook, \"\", false) == 0, (object)\"\", (object)(\" AND A.CO_BOOK ='\" + StkBook + \"'\"))), Interaction.IIf(Operators.CompareString(StkVchNo, \"\", false) == 0, (object)\"\", (object)(\" AND A.VCH_NO ='\" + StkVchNo + \"'\"))), (object)\" AND C.OTH_DETL_POSTING = 'Y' \"));",
+      "qualification": "Source expression index only. Database/locale-dependent results and missing configuration are not invented values."
+    }
+  ],
+  "dataRowAssignments": [
+    {
+      "id": "temp-header",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+        "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+        "line": 12520
+      },
+      "range": [
+        12520,
+        12574
+      ],
+      "assignments": [
+        {
+          "column": "CO_CODE",
+          "expression": "DC_Main.MCo_code",
+          "line": 12535
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "DC_Main.MLc_code",
+          "line": 12539
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "DC_Main.MCo_Book",
+          "line": 12543
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "tHdVchNo.Text",
+          "line": 12547
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "FormName",
+          "line": 12551
+        }
+      ],
+      "qualification": "Ordered assignments; conditional alternatives and subsequent overrides must be resolved from the cited method, not merged as unconditional rows."
+    },
+    {
+      "id": "saved-header",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+        "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+        "line": 12575
+      },
+      "range": [
+        12575,
+        12944
+      ],
+      "assignments": [
+        {
+          "column": "CO_CODE",
+          "expression": "DC_Main.MCo_code",
+          "line": 12583
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "DC_Main.MLc_code",
+          "line": 12587
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "DC_Main.MCo_year",
+          "line": 12591
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "DC_Main.MCo_Book",
+          "line": 12595
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "tVchNo.Text",
+          "line": 12599
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "tAcCode.Text",
+          "line": 12603
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "mVchDate.Text",
+          "line": 12607
+        },
+        {
+          "column": "HD_VCH_NO",
+          "expression": "tHdVchNo.Text",
+          "line": 12611
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "tAcCode.Text",
+          "line": 12615
+        },
+        {
+          "column": "AC_NAME",
+          "expression": "tAcName.Text",
+          "line": 12619
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "Conversion.Val(nAcDrAmt.Text)",
+          "line": 12623
+        },
+        {
+          "column": "DISC_PRC",
+          "expression": "0",
+          "line": 12627
+        },
+        {
+          "column": "DISC_AMT",
+          "expression": "0",
+          "line": 12631
+        },
+        {
+          "column": "ROF_AMT",
+          "expression": "0",
+          "line": 12635
+        },
+        {
+          "column": "ADV_AMT",
+          "expression": "0",
+          "line": 12639
+        },
+        {
+          "column": "CRNT_ADJ_AMT",
+          "expression": "0",
+          "line": 12643
+        },
+        {
+          "column": "OLD_GL_AMT",
+          "expression": "0",
+          "line": 12647
+        },
+        {
+          "column": "OLD_SL_AMT",
+          "expression": "0",
+          "line": 12651
+        },
+        {
+          "column": "SCHM_AMT",
+          "expression": "0",
+          "line": 12655
+        },
+        {
+          "column": "OLD_GL",
+          "expression": "0",
+          "line": 12659
+        },
+        {
+          "column": "OLD_SL",
+          "expression": "0",
+          "line": 12663
+        },
+        {
+          "column": "AC_GST_TYPE",
+          "expression": "AcGstType",
+          "line": 12667
+        },
+        {
+          "column": "LBR_AMT",
+          "expression": "Conversion.Val(MSG_TOT[0, 21])",
+          "line": 12671
+        },
+        {
+          "column": "OTH_AMT",
+          "expression": "Conversion.Val(MSG_TOT[0, 22])",
+          "line": 12675
+        },
+        {
+          "column": "TOT_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[3, 4])",
+          "line": 12679
+        },
+        {
+          "column": "CHQ_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[4, 4])",
+          "line": 12683
+        },
+        {
+          "column": "CARD_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[5, 4])",
+          "line": 12687
+        },
+        {
+          "column": "CARD_COM_AMT",
+          "expression": "0",
+          "line": 12691
+        },
+        {
+          "column": "CASH_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[6, 4])",
+          "line": 12695
+        },
+        {
+          "column": "KASAR_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[7, 4])",
+          "line": 12699
+        },
+        {
+          "column": "BILL_OS",
+          "expression": "Conversion.Val(MSG2_TOTAL[8, 4])",
+          "line": 12703
+        },
+        {
+          "column": "RTN_NET_AMT",
+          "expression": "Conversion.Val(nAcCrAmt.Text)",
+          "line": 12707
+        },
+        {
+          "column": "TAX_CODE",
+          "expression": "Conversion.Val(MSG2_TOTAL[2, 5])",
+          "line": 12711
+        },
+        {
+          "column": "TAX_PRC",
+          "expression": "Conversion.Val(MSG2_TOTAL[2, 2])",
+          "line": 12715
+        },
+        {
+          "column": "TAX_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[2, 3])",
+          "line": 12719
+        },
+        {
+          "column": "IGST_TAX",
+          "expression": "Conversion.Val(MSG2_TOTAL[2, 3])",
+          "line": 12737
+        },
+        {
+          "column": "SGST_TAX",
+          "expression": "0",
+          "line": 12741
+        },
+        {
+          "column": "CGST_TAX",
+          "expression": "0",
+          "line": 12745
+        },
+        {
+          "column": "IGST_TAX",
+          "expression": "0",
+          "line": 12749
+        },
+        {
+          "column": "SGST_TAX",
+          "expression": "Conversion.Val(MSG2_TOTAL[2, 3]) / 2.0",
+          "line": 12753
+        },
+        {
+          "column": "CGST_TAX",
+          "expression": "Conversion.Val(MSG2_TOTAL[2, 3]) / 2.0",
+          "line": 12757
+        },
+        {
+          "column": "IGST_TAX",
+          "expression": "0",
+          "line": 12761
+        },
+        {
+          "column": "SGST_TAX",
+          "expression": "0",
+          "line": 12765
+        },
+        {
+          "column": "CGST_TAX",
+          "expression": "0",
+          "line": 12769
+        },
+        {
+          "column": "HM_AMT",
+          "expression": "0",
+          "line": 12773
+        },
+        {
+          "column": "HM_TAX_CODE",
+          "expression": "\"\"",
+          "line": 12777
+        },
+        {
+          "column": "HM_TAX_PRC",
+          "expression": "0",
+          "line": 12781
+        },
+        {
+          "column": "HM_TAX_AMT",
+          "expression": "0",
+          "line": 12785
+        },
+        {
+          "column": "RTN_TOT_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[3, 3])",
+          "line": 12789
+        },
+        {
+          "column": "RTN_CHQ_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[4, 3])",
+          "line": 12793
+        },
+        {
+          "column": "RTN_CARD_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[5, 3])",
+          "line": 12797
+        },
+        {
+          "column": "RTN_CASH_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[6, 3])",
+          "line": 12801
+        },
+        {
+          "column": "RTN_KASAR_AMT",
+          "expression": "Conversion.Val(MSG2_TOTAL[7, 3])",
+          "line": 12805
+        },
+        {
+          "column": "RTN_BILL_OS",
+          "expression": "Conversion.Val(MSG2_TOTAL[8, 3])",
+          "line": 12809
+        },
+        {
+          "column": "CARD_AC",
+          "expression": "MSG2_TOTAL[5, 5]",
+          "line": 12813
+        },
+        {
+          "column": "BANK_AC",
+          "expression": "MSG2_TOTAL[4, 5]",
+          "line": 12817
+        },
+        {
+          "column": "CHQ_NO",
+          "expression": "MSG2_TOTAL[4, 2]",
+          "line": 12821
+        },
+        {
+          "column": "ISU_NO",
+          "expression": "tIsuNo.Text",
+          "line": 12825
+        },
+        {
+          "column": "ISU_LC_CODE",
+          "expression": "DC_Main.MLc_code",
+          "line": 12829
+        },
+        {
+          "column": "ISU_YRCD",
+          "expression": "tIsuYrCd.Text",
+          "line": 12833
+        },
+        {
+          "column": "ISU_DBCD",
+          "expression": "tIsuDbCd.Text",
+          "line": 12837
+        },
+        {
+          "column": "BILL_NO",
+          "expression": "\"\"",
+          "line": 12841
+        },
+        {
+          "column": "CARD_ADJ",
+          "expression": "\"N\"",
+          "line": 12845
+        },
+        {
+          "column": "ADD1",
+          "expression": "\"\"",
+          "line": 12849
+        },
+        {
+          "column": "ADD2",
+          "expression": "\"\"",
+          "line": 12853
+        },
+        {
+          "column": "ADD3",
+          "expression": "\"\"",
+          "line": 12857
+        },
+        {
+          "column": "CITY",
+          "expression": "\"\"",
+          "line": 12861
+        },
+        {
+          "column": "MOBILE",
+          "expression": "\"\"",
+          "line": 12865
+        },
+        {
+          "column": "BANK_NAME",
+          "expression": "\"\"",
+          "line": 12869
+        },
+        {
+          "column": "SCHM_AC",
+          "expression": "\"\"",
+          "line": 12873
+        },
+        {
+          "column": "EMP_CODE",
+          "expression": "tEmpCode.Text",
+          "line": 12877
+        },
+        {
+          "column": "VCH_DESC",
+          "expression": "tVchDesc.Text",
+          "line": 12881
+        },
+        {
+          "column": "VCH_TIME",
+          "expression": "mVchDate.Text + \" \" + mTime.Text",
+          "line": 12885
+        },
+        {
+          "column": "DATA_TRFR",
+          "expression": "\"N\"",
+          "line": 12889
+        },
+        {
+          "column": "RE_TRFR",
+          "expression": "\"Y\"",
+          "line": 12900
+        },
+        {
+          "column": "RE_TRFR",
+          "expression": "\"N\"",
+          "line": 12904
+        },
+        {
+          "column": "MAIN_USER",
+          "expression": "MainUser",
+          "line": 12908
+        },
+        {
+          "column": "USER_UPDATE",
+          "expression": "\"N\"",
+          "line": 12912
+        },
+        {
+          "column": "USER_DELETE",
+          "expression": "\"N\"",
+          "line": 12916
+        },
+        {
+          "column": "MOB_ENTRY_SAVE",
+          "expression": "\"Y\"",
+          "line": 12920
+        },
+        {
+          "column": "RATE_UNFIX",
+          "expression": "\"N\"",
+          "line": 12924
+        },
+        {
+          "column": "OZ_RATE",
+          "expression": "0",
+          "line": 12928
+        },
+        {
+          "column": "OZ_CONV",
+          "expression": "0",
+          "line": 12932
+        },
+        {
+          "column": "FX_RATE",
+          "expression": "0",
+          "line": 12936
+        },
+        {
+          "column": "FX_CODE",
+          "expression": "\"\"",
+          "line": 12940
+        },
+        {
+          "column": "MTL_RATE",
+          "expression": "0",
+          "line": 12944
+        }
+      ],
+      "qualification": "Ordered assignments; conditional alternatives and subsequent overrides must be resolved from the cited method, not merged as unconditional rows."
+    },
+    {
+      "id": "bar-header",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+        "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+        "line": 13072
+      },
+      "range": [
+        13072,
+        13140
+      ],
+      "assignments": [
+        {
+          "column": "CO_CODE",
+          "expression": "DC_Main.MCo_code",
+          "line": 13080
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "DC_Main.MLc_code",
+          "line": 13084
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "DC_Main.MCo_year",
+          "line": 13088
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "DC_Main.MCo_Book",
+          "line": 13092
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "tVchNo.Text",
+          "line": 13096
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "mVchDate.Text",
+          "line": 13100
+        },
+        {
+          "column": "STK_IT_CODE",
+          "expression": "\"\"",
+          "line": 13104
+        },
+        {
+          "column": "VCH_TIME",
+          "expression": "mVchDate.Text + \" \" + mTime.Text",
+          "line": 13108
+        },
+        {
+          "column": "EMP_CODE",
+          "expression": "tEmpCode.Text",
+          "line": 13112
+        },
+        {
+          "column": "VCH_DESC",
+          "expression": "tVchDesc.Text",
+          "line": 13116
+        },
+        {
+          "column": "DATA_TRFR",
+          "expression": "\"N\"",
+          "line": 13120
+        },
+        {
+          "column": "MAIN_USER",
+          "expression": "MainUser",
+          "line": 13124
+        }
+      ],
+      "qualification": "Ordered assignments; conditional alternatives and subsequent overrides must be resolved from the cited method, not merged as unconditional rows."
+    },
+    {
+      "id": "bar-parent",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+        "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+        "line": 13901
+      },
+      "range": [
+        13901,
+        14225
+      ],
+      "assignments": [
+        {
+          "column": "CO_CODE",
+          "expression": "DC_Main.MCo_code",
+          "line": 13908
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "DC_Main.MLc_code",
+          "line": 13912
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "DC_Main.MCo_year",
+          "line": 13916
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "DC_Main.MCo_Book",
+          "line": 13920
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "tVchNo.Text",
+          "line": 13924
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "mVchDate.Text",
+          "line": 13928
+        },
+        {
+          "column": "STK_DATE",
+          "expression": "mVchDate.Text",
+          "line": 13932
+        },
+        {
+          "column": "HD_VCH_NO",
+          "expression": "tHdVchNo.Text",
+          "line": 13936
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "tAcCode.Text",
+          "line": 13940
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "FormBookSname",
+          "line": 13944
+        },
+        {
+          "column": "INOUT_TYPE",
+          "expression": "FormBookInOut",
+          "line": 13948
+        },
+        {
+          "column": "ENTRY_TYPE",
+          "expression": "\"P\"",
+          "line": 13952
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "FormMainBook",
+          "line": 13956
+        },
+        {
+          "column": "SR_NO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 0])",
+          "line": 13960
+        },
+        {
+          "column": "OLD_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 51])",
+          "line": 13964
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "val2[DC_Main.i, 1]",
+          "line": 13968
+        },
+        {
+          "column": "TAG_NO",
+          "expression": "\"N\"",
+          "line": 13979
+        },
+        {
+          "column": "TAG_NO",
+          "expression": "val2[DC_Main.i, 2]",
+          "line": 13983
+        },
+        {
+          "column": "TBL_CODE",
+          "expression": "val2[DC_Main.i, 4]",
+          "line": 13987
+        },
+        {
+          "column": "DESIGN_NO",
+          "expression": "val2[DC_Main.i, 5]",
+          "line": 13991
+        },
+        {
+          "column": "ITM_STYLE",
+          "expression": "val2[DC_Main.i, 6]",
+          "line": 13995
+        },
+        {
+          "column": "ITM_SIZE",
+          "expression": "val2[DC_Main.i, 7]",
+          "line": 13999
+        },
+        {
+          "column": "HM_ID",
+          "expression": "val2[DC_Main.i, 8]",
+          "line": 14003
+        },
+        {
+          "column": "ITM_PCS",
+          "expression": "Conversion.Val(val2[DC_Main.i, 9])",
+          "line": 14007
+        },
+        {
+          "column": "ITM_GWT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 10])",
+          "line": 14011
+        },
+        {
+          "column": "ITM_OTH_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 11])",
+          "line": 14015
+        },
+        {
+          "column": "ITM_NWT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 12])",
+          "line": 14019
+        },
+        {
+          "column": "ITM_GHT_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 14])",
+          "line": 14023
+        },
+        {
+          "column": "ITM_GHT_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 15])",
+          "line": 14027
+        },
+        {
+          "column": "ITM_TOUCH",
+          "expression": "Conversion.Val(val2[DC_Main.i, 16])",
+          "line": 14031
+        },
+        {
+          "column": "ITM_WEST_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 17])",
+          "line": 14035
+        },
+        {
+          "column": "ITM_FINE",
+          "expression": "Conversion.Val(val2[DC_Main.i, 18])",
+          "line": 14039
+        },
+        {
+          "column": "KR_GHT_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 15])",
+          "line": 14043
+        },
+        {
+          "column": "KR_TOUCH",
+          "expression": "Conversion.Val(val2[DC_Main.i, 16])",
+          "line": 14047
+        },
+        {
+          "column": "KR_WEST_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 17])",
+          "line": 14051
+        },
+        {
+          "column": "KR_FINE",
+          "expression": "Conversion.Val(val2[DC_Main.i, 18])",
+          "line": 14055
+        },
+        {
+          "column": "ITM_RATE",
+          "expression": "0",
+          "line": 14059
+        },
+        {
+          "column": "ITM_AMT",
+          "expression": "0",
+          "line": 14063
+        },
+        {
+          "column": "LBR_TYPE",
+          "expression": "val2[DC_Main.i, 22]",
+          "line": 14067
+        },
+        {
+          "column": "LBR_CODE",
+          "expression": "val2[DC_Main.i, 29]",
+          "line": 14071
+        },
+        {
+          "column": "LBR_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 30])",
+          "line": 14075
+        },
+        {
+          "column": "LBR_RATE",
+          "expression": "Conversion.Val(val2[DC_Main.i, 31])",
+          "line": 14079
+        },
+        {
+          "column": "LBR_AMT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 32])",
+          "line": 14083
+        },
+        {
+          "column": "OTH_AMT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 33])",
+          "line": 14087
+        },
+        {
+          "column": "KR_COST",
+          "expression": "Conversion.Val(val2[DC_Main.i, 34])",
+          "line": 14091
+        },
+        {
+          "column": "TAG_COST",
+          "expression": "Conversion.Val(val2[DC_Main.i, 34])",
+          "line": 14095
+        },
+        {
+          "column": "ITM_MRP",
+          "expression": "Conversion.Val(val2[DC_Main.i, 35])",
+          "line": 14099
+        },
+        {
+          "column": "KR_NAME",
+          "expression": "val2[DC_Main.i, 39]",
+          "line": 14103
+        },
+        {
+          "column": "RATE_TYPE",
+          "expression": "val2[DC_Main.i, 44]",
+          "line": 14107
+        },
+        {
+          "column": "IT_TYPE",
+          "expression": "val2[DC_Main.i, 43]",
+          "line": 14111
+        },
+        {
+          "column": "VCH_TIME",
+          "expression": "mVchDate.Text + \" \" + mTime.Text",
+          "line": 14115
+        },
+        {
+          "column": "PR_CODE",
+          "expression": "val2[DC_Main.i, 52]",
+          "line": 14119
+        },
+        {
+          "column": "TAG_TYPE",
+          "expression": "val2[DC_Main.i, 54]",
+          "line": 14123
+        },
+        {
+          "column": "KR_LBR_RATE",
+          "expression": "0",
+          "line": 14127
+        },
+        {
+          "column": "KR_LBR_AMT",
+          "expression": "0",
+          "line": 14131
+        },
+        {
+          "column": "KR_OTH_AMT",
+          "expression": "0",
+          "line": 14135
+        },
+        {
+          "column": "TAG_SRNO",
+          "expression": "0",
+          "line": 14139
+        },
+        {
+          "column": "VCH_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 40])",
+          "line": 14154
+        },
+        {
+          "column": "VCH_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 40])",
+          "line": 14158
+        },
+        {
+          "column": "TAG_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 56])",
+          "line": 14162
+        },
+        {
+          "column": "APR_ISU",
+          "expression": "val2[DC_Main.i, 50]",
+          "line": 14166
+        },
+        {
+          "column": "EMP_ISU",
+          "expression": "val2[DC_Main.i, 68]",
+          "line": 14170
+        },
+        {
+          "column": "DESIGN_IMG_ID",
+          "expression": "val2[DC_Main.i, 69]",
+          "line": 14174
+        },
+        {
+          "column": "HM_ID2",
+          "expression": "val2[DC_Main.i, 59]",
+          "line": 14178
+        },
+        {
+          "column": "HM_ID3",
+          "expression": "val2[DC_Main.i, 60]",
+          "line": 14182
+        },
+        {
+          "column": "HM_ID4",
+          "expression": "val2[DC_Main.i, 61]",
+          "line": 14186
+        },
+        {
+          "column": "HM_ID_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 62])",
+          "line": 14190
+        },
+        {
+          "column": "HM_ID2_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 63])",
+          "line": 14194
+        },
+        {
+          "column": "HM_ID3_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 64])",
+          "line": 14198
+        },
+        {
+          "column": "HM_ID4_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 65])",
+          "line": 14202
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "\"A\"",
+          "line": 14213
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "val2[DC_Main.i, 70]",
+          "line": 14217
+        },
+        {
+          "column": "DATA_TRFR",
+          "expression": "\"N\"",
+          "line": 14221
+        },
+        {
+          "column": "MAIN_USER",
+          "expression": "MainUser",
+          "line": 14225
+        }
+      ],
+      "qualification": "Ordered assignments; conditional alternatives and subsequent overrides must be resolved from the cited method, not merged as unconditional rows."
+    },
+    {
+      "id": "incoming-parent",
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+        "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+        "line": 14252
+      },
+      "range": [
+        14252,
+        14584
+      ],
+      "assignments": [
+        {
+          "column": "CO_CODE",
+          "expression": "DC_Main.MCo_code",
+          "line": 14259
+        },
+        {
+          "column": "LC_CODE",
+          "expression": "DC_Main.MLc_code",
+          "line": 14263
+        },
+        {
+          "column": "CO_YEAR",
+          "expression": "DC_Main.MCo_year",
+          "line": 14267
+        },
+        {
+          "column": "CO_BOOK",
+          "expression": "DC_Main.MCo_Book",
+          "line": 14271
+        },
+        {
+          "column": "VCH_NO",
+          "expression": "tVchNo.Text",
+          "line": 14275
+        },
+        {
+          "column": "VCH_DATE",
+          "expression": "mVchDate.Text",
+          "line": 14279
+        },
+        {
+          "column": "HD_VCH_NO",
+          "expression": "tHdVchNo.Text",
+          "line": 14283
+        },
+        {
+          "column": "AC_CODE",
+          "expression": "tAcCode.Text",
+          "line": 14287
+        },
+        {
+          "column": "VCH_TYPE",
+          "expression": "FormBookSname",
+          "line": 14291
+        },
+        {
+          "column": "INOUT_TYPE",
+          "expression": "FormBookInOut",
+          "line": 14295
+        },
+        {
+          "column": "ENTRY_TYPE",
+          "expression": "\"P\"",
+          "line": 14299
+        },
+        {
+          "column": "BOOK_NAME",
+          "expression": "FormMainBook",
+          "line": 14303
+        },
+        {
+          "column": "SR_NO",
+          "expression": "Conversion.Val(val3[DC_Main.i, 0])",
+          "line": 14307
+        },
+        {
+          "column": "OLD_SRNO",
+          "expression": "Conversion.Val(val3[DC_Main.i, 51])",
+          "line": 14311
+        },
+        {
+          "column": "IT_CODE",
+          "expression": "val3[DC_Main.i, 1]",
+          "line": 14315
+        },
+        {
+          "column": "ITM_REMARK",
+          "expression": "val3[DC_Main.i, 3]",
+          "line": 14319
+        },
+        {
+          "column": "TAG_NO",
+          "expression": "\"N\"",
+          "line": 14330
+        },
+        {
+          "column": "TAG_NO",
+          "expression": "val3[DC_Main.i, 2]",
+          "line": 14334
+        },
+        {
+          "column": "TBL_CODE",
+          "expression": "val3[DC_Main.i, 4]",
+          "line": 14338
+        },
+        {
+          "column": "DESIGN_NO",
+          "expression": "val3[DC_Main.i, 5]",
+          "line": 14342
+        },
+        {
+          "column": "ITM_STYLE",
+          "expression": "val3[DC_Main.i, 6]",
+          "line": 14346
+        },
+        {
+          "column": "ITM_SIZE",
+          "expression": "val3[DC_Main.i, 7]",
+          "line": 14350
+        },
+        {
+          "column": "HM_ID",
+          "expression": "val3[DC_Main.i, 8]",
+          "line": 14354
+        },
+        {
+          "column": "ITM_PCS",
+          "expression": "Conversion.Val(val3[DC_Main.i, 9])",
+          "line": 14358
+        },
+        {
+          "column": "ITM_GWT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 10])",
+          "line": 14362
+        },
+        {
+          "column": "ITM_OTH_WT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 11])",
+          "line": 14366
+        },
+        {
+          "column": "ITM_NWT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 12])",
+          "line": 14370
+        },
+        {
+          "column": "ITM_GHT_PRC",
+          "expression": "Conversion.Val(val3[DC_Main.i, 14])",
+          "line": 14374
+        },
+        {
+          "column": "ITM_GHT_WT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 15])",
+          "line": 14378
+        },
+        {
+          "column": "ITM_TOUCH",
+          "expression": "Conversion.Val(val3[DC_Main.i, 16])",
+          "line": 14382
+        },
+        {
+          "column": "ITM_WEST_PRC",
+          "expression": "Conversion.Val(val3[DC_Main.i, 17])",
+          "line": 14386
+        },
+        {
+          "column": "ITM_FINE",
+          "expression": "Conversion.Val(val3[DC_Main.i, 18])",
+          "line": 14390
+        },
+        {
+          "column": "ITM_RATE",
+          "expression": "Conversion.Val(val3[DC_Main.i, 19])",
+          "line": 14394
+        },
+        {
+          "column": "ITM_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 20])",
+          "line": 14398
+        },
+        {
+          "column": "LBR_CODE",
+          "expression": "val3[DC_Main.i, 13]",
+          "line": 14402
+        },
+        {
+          "column": "LBR_PRC",
+          "expression": "Conversion.Val(val3[DC_Main.i, 21])",
+          "line": 14406
+        },
+        {
+          "column": "LBR_TYPE",
+          "expression": "val3[DC_Main.i, 22]",
+          "line": 14410
+        },
+        {
+          "column": "LBR_RATE",
+          "expression": "Conversion.Val(val3[DC_Main.i, 23])",
+          "line": 14414
+        },
+        {
+          "column": "LBR_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 24])",
+          "line": 14418
+        },
+        {
+          "column": "DISC_PRC",
+          "expression": "Conversion.Val(val3[DC_Main.i, 25])",
+          "line": 14422
+        },
+        {
+          "column": "DISC_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 26])",
+          "line": 14426
+        },
+        {
+          "column": "OTH_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 27])",
+          "line": 14430
+        },
+        {
+          "column": "ITM_MRP",
+          "expression": "Conversion.Val(val3[DC_Main.i, 28])",
+          "line": 14434
+        },
+        {
+          "column": "TAG_LBR_CODE",
+          "expression": "val3[DC_Main.i, 29]",
+          "line": 14438
+        },
+        {
+          "column": "TAG_LBR_PRC",
+          "expression": "Conversion.Val(val3[DC_Main.i, 30])",
+          "line": 14442
+        },
+        {
+          "column": "TAG_LBR_RATE",
+          "expression": "Conversion.Val(val3[DC_Main.i, 31])",
+          "line": 14446
+        },
+        {
+          "column": "TAG_LBR_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 32])",
+          "line": 14450
+        },
+        {
+          "column": "TAG_OTH_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 33])",
+          "line": 14454
+        },
+        {
+          "column": "TAG_COST",
+          "expression": "Conversion.Val(val3[DC_Main.i, 34])",
+          "line": 14458
+        },
+        {
+          "column": "TAG_MRP",
+          "expression": "Conversion.Val(val3[DC_Main.i, 35])",
+          "line": 14462
+        },
+        {
+          "column": "TOT_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 36])",
+          "line": 14466
+        },
+        {
+          "column": "TAX_PRC",
+          "expression": "Conversion.Val(val3[DC_Main.i, 37])",
+          "line": 14470
+        },
+        {
+          "column": "NET_AMT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 38])",
+          "line": 14474
+        },
+        {
+          "column": "KR_NAME",
+          "expression": "val3[DC_Main.i, 39]",
+          "line": 14478
+        },
+        {
+          "column": "VCH_SRNO",
+          "expression": "Conversion.Val(val3[DC_Main.i, 40])",
+          "line": 14493
+        },
+        {
+          "column": "VCH_SRNO",
+          "expression": "Conversion.Val(val3[DC_Main.i, 40])",
+          "line": 14497
+        },
+        {
+          "column": "RATE_TYPE",
+          "expression": "val3[DC_Main.i, 44]",
+          "line": 14501
+        },
+        {
+          "column": "PR_CODE",
+          "expression": "val3[DC_Main.i, 52]",
+          "line": 14505
+        },
+        {
+          "column": "TAG_TYPE",
+          "expression": "val3[DC_Main.i, 54]",
+          "line": 14509
+        },
+        {
+          "column": "TAG_SRNO",
+          "expression": "Conversion.Val(val3[DC_Main.i, 56])",
+          "line": 14513
+        },
+        {
+          "column": "HM_ID2",
+          "expression": "val3[DC_Main.i, 59]",
+          "line": 14517
+        },
+        {
+          "column": "HM_ID3",
+          "expression": "val3[DC_Main.i, 60]",
+          "line": 14521
+        },
+        {
+          "column": "HM_ID4",
+          "expression": "val3[DC_Main.i, 61]",
+          "line": 14525
+        },
+        {
+          "column": "HM_ID_WT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 62])",
+          "line": 14529
+        },
+        {
+          "column": "HM_ID2_WT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 63])",
+          "line": 14533
+        },
+        {
+          "column": "HM_ID3_WT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 64])",
+          "line": 14537
+        },
+        {
+          "column": "HM_ID4_WT",
+          "expression": "Conversion.Val(val3[DC_Main.i, 65])",
+          "line": 14541
+        },
+        {
+          "column": "APR_ISU",
+          "expression": "val3[DC_Main.i, 50]",
+          "line": 14545
+        },
+        {
+          "column": "EMP_ISU",
+          "expression": "val3[DC_Main.i, 68]",
+          "line": 14549
+        },
+        {
+          "column": "IT_TYPE",
+          "expression": "val3[DC_Main.i, 43]",
+          "line": 14553
+        },
+        {
+          "column": "VCH_TIME",
+          "expression": "mVchDate.Text + \" \" + mTime.Text",
+          "line": 14557
+        },
+        {
+          "column": "MAIN_USER",
+          "expression": "MainUser",
+          "line": 14561
+        },
+        {
+          "column": "EMP_CODE",
+          "expression": "tEmpCode.Text",
+          "line": 14565
+        },
+        {
+          "column": "DESIGN_IMG_ID",
+          "expression": "val3[DC_Main.i, 69]",
+          "line": 14569
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "\"A\"",
+          "line": 14580
+        },
+        {
+          "column": "DATA_TYPE",
+          "expression": "val3[DC_Main.i, 70]",
+          "line": 14584
+        }
+      ],
+      "qualification": "Ordered assignments; conditional alternatives and subsequent overrides must be resolved from the cited method, not merged as unconditional rows."
+    }
+  ]
+}

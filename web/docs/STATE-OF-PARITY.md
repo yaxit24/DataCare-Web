@@ -1,5 +1,9 @@
 # Where the web stands against the desktop
 
+> Current status supersedes this dated narrative: [Round15 in-progress status and all remaining gaps](../../parity-plan-2026-09-10/42-implementation-progress-round15.md); [sealed Round14 progress](../../parity-plan-2026-09-10/40-implementation-progress-round14.md) and [latest sealed checkpoint41](../../parity-plan-2026-09-10/41-implementation-checkpoint-round14.json). Round 15 adds pure saved Other-amount replay, strict effect-storage context qualification, a seven-row financial effect planner and an ordered Save-guard evaluator, plus six shared composition cases. They preserve the prior Save map, exact header Float qualifier, N BAR matcher and internal Serializable coordinator. No new API route, UI Save flow or writer is enabled; numeric Return saves and known closing remain disabled. Implementation is paused for this status review. Round 15 is an in-progress snapshot: the recorded core run passed 26 files / 1,613 tests and strict compilation of the five new core test files passed; the remaining 16 checks in the 18-check recipe have not run. Checkpoint 43 is not sealed. Checkpoint 41 remains the latest sealed verification record and applies to the earlier Round 14 inputs. All34 cards,83 packages and198 complete menu acceptances remain open. 100% menu mapping and0% verified menu closure do not measure functional implementation; that percentage remains unmeasured.
+
+The dated claims below are historical and are superseded by that current progress record. In particular, they do not certify complete schema or end-to-end workflow parity for all supported business variants.
+
 Measured 2026-08-01. Every figure here has the command that produced it. Nothing is asserted from memory.
 
 The short version: **the foundations are complete and the transaction engine covers essentially all real

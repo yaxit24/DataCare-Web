@@ -1,0 +1,66 @@
+# HANDOFF — START HERE every new session
+
+> Read this first, then the todo list (authoritative task graph) + `state.json`. Verify against reality before trusting it.
+
+## ⚙️ STANDING DIRECTIVE (user, reaffirmed 2026-06-28)
+**Run CONTINUOUSLY, NON-STOP, until EVERY item in the implementation plan is complete (scorecard ≈100% — all 204 forms, 255 reports, full frontend+backend+DB, parity-certified).** Do NOT stop after a phase/slice or wait for permission (all permissions granted). Each turn: complete ≥1 verified vertical slice, keep the gate green + trial balance tied, checkpoint JOURNAL/HANDOFF, then immediately continue. Only pause for a real external blocker (GSP/WhatsApp/payment creds) or a genuine ambiguity. The agentic loop re-prompts automatically — keep going every iteration.
+
+## Active plan
+**Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
+
+## Where we are (session 4)
+- **T1 DONE** — schema is source-of-truth. `web-postgres-1` :5433 has **163 tables / 5878 cols**. `prisma db pull` regenerated `packages/db/prisma/schema.prisma` (162 models, **0 @@ignore** — all PKs present). Gate green; live auth+sales PASS. Backup `/tmp/schema.prisma.bak`.
+- **T4 DONE + most of T5** — **a REAL Next.js 15 / React 19 frontend now exists in `apps/web`** and is wired to the live API. Builds clean on Node 25; monorepo gate green (typecheck 10/10, test 10/10, build 7/7).
+- **Frontend is the big new thing.** Structure:
+  - `app/login` → POST `/api/auth/login`; `app/select` → company+year (`/context/*`); `app/(app)/layout.tsx` auth-guards via `GET /me`.
+  - `components/Shell.tsx` → topbar (co/year/user/logout) + sidebar `NAV` mirroring the desktop menu (Masters/Sales/Purchase/Cash-Bank/Inventory/Manufacturing/Loans/Reports/Utilities; unbuilt items tagged "soon").
+  - `app/(app)/dashboard` (live KPIs), `masters/[name]` (generic CRUD grid), `reports/[report]` (generic viewer), `txn/sales` (voucher entry), `soon` (placeholder).
+  - `lib/api.ts` (fetch `/api/*`, credentials:include), `lib/nav.ts`. `next.config.mjs` proxies `/api/*` → `http://localhost:3000` so httpOnly cookies stay same-origin (no CORS).
+- **API additions:** `GET /me`, `GET /masters/:name/meta` (in `apps/api/src/app.ts`).
+- **VERIFIED end-to-end through the proxy:** login → select FY2024 → create account CUST900 → create sale (**₹77,250** = 75000 + 3% GST 2250; cgst/sgst 1125) → appears in sales-register. Trial balance balanced.
+
+## How to RUN it (visual test)
+```
+# API (terminal 1) from web/
+DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare PORT=3000 JWT_SECRET=dev-secret node apps/api/dist/server.js
+# Web (terminal 2) from web/
+pnpm --filter @datacare/web start      # next start on :3001 (or `dev`)
+# Browser: http://localhost:3001  → login admin / Secret#1 / Company 01 → FY 2024
+```
+(API also still serves the legacy vanilla harness at `http://localhost:3000/`.)
+
+### Real data + tests caveat (RESOLVED)
+- The web demo runs on the **real DHAKAN JEWELLERS data** imported into tenant `default` (918 accounts, 190 invoices ₹5.48M, 5150 ledger). Restore/refresh anytime with:
+  `DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/import_real.mjs` (needs SQL Edge `dceparity` up).
+- ✅ FIXED (session 5i): all live integration scripts now use a dedicated **`e2e`** tenant (was `default`), so running the full 20/20 suite leaves the demo data + login **completely untouched** (verified SL_DATA/AC_MAST/LOGIN unchanged before/after). auth.live already used `t-auth`.
+
+## Exact next steps
+**Working screens now (~50 + 16 reports):** login/select/dashboard · 20 masters (CSV import+export each) · **Sales:** invoice, return, labour, order, hallmark(HUID), wholesale + invoice-PDF · **Purchase:** invoice, return · receipt, payment, contra · dhrn issue/receipt · karigar/MFG/job-work issue+receive · stock/tags, physical-stock · membership(loyalty) · **Reports(16, all CSV+PDF export):** sales/purchase registers, day-book, trial-balance, balance-sheet, account-ledger, account-balances, outstanding, monthly-sales, sales-by-party/item, pledge-outstanding, karigar-balances, stock-valuation, GSTR-1, GSTR-3B · **Utilities:** settings(CO_SET), audit-log, backup, integrations · **3rd-party:** live rates(LIVE), WhatsApp/SMS/e-invoice(real adapters, ready-for-creds), barcode/QR, PDF(Chromium). All on real DHAKAN JEWELLERS data; certified 20/20 live + 190/190 compute parity.
+1. **Sale variants:** TR_SALE_LBR (labour), TR_SALE_HM (hallmark), TR_SALE_ORD (order) — reuse `sales.ts`/`computeLine`; new books; add UI + parity. TR_SALE_RTN return is DONE (pattern in `salesReturn.ts`).
+2. **More inventory (Phase E):** TR_PHYSTK physical-stock reconcile, TR_TAG_SPLIT, TR_ITM_LOT — extend stock.ts.
+3. **Reports (Phase K, biggest bucket):** expand beyond the 6 — add dataset builders for stock valuation, GST 3B/HSN, dhrn outstanding list, karigar ledger, day-book variants; field-parity to `all_rpt_fields`.
+4. **Finish T5 UI kit:** lookups, F-key grid, PDF preview, barcode/QR.
+5. Then Phases F–O per todo graph. Keep `state.json`+JOURNAL+this file current each task.
+
+## Established port pattern (proven on sale-return)
+read form `.cs`/spec → check real PG columns (`docker exec web-postgres-1 psql -U datacare -d datacare -tAc "...information_schema.columns..."`) → port module (reuse posting/calc/numbering) → REST in routes/txn.ts → UI screen + nav `ready:true` → Tier-1 test → live smoke (verify trial balance still balances) → `pnpm typecheck` (catch TS; build emits despite errors). DB errors now auto-map to 400 in `run()`.
+
+## Established patterns (reuse)
+- Backend module = pure core (Tier-1) + tx-aware composition via `withTenant`/`atomic`; post via `posting.ts`; number via `vouchers/numbering.ts`; RBAC `assertRight`. Expose REST in `routes/txn.ts`. Live test `apps/api/integration/<x>.live.mjs` run as `DATABASE_URL=<app_user> node ...` after `pnpm --filter @datacare/api build`.
+- Masters are config-driven (`configs.ts` MASTERS registry). UI master screen is fully generic — new master = new config + nav entry.
+- Frontend screen = client component in `app/(app)/...`, calls `lib/api.ts` get/post/del. Add nav entry in `lib/nav.ts` with `ready:true`.
+
+## Environment
+- Docker UP. Postgres `web-postgres-1` :5433. Owner URL `postgresql://datacare:datacare@127.0.0.1:5433/datacare`; **runtime (RLS) `postgresql://app_user:app@127.0.0.1:5433/datacare`** (app MUST use app_user). DDL via `docker exec web-postgres-1 psql -U datacare -d datacare`.
+- Golden-master parity (Tier-4): Azure SQL Edge (arm64) image pulled; restore Next24 from `unified/database/backups/`; query via JS `mssql`/`tedious`. Tools: `apps/api/integration/xdb_diff.mjs` (data-fidelity matrix), `compute_parity.live.mjs` (invoice recompute). Proven: 141/141 cols, 371/372 Σ, 190/190 compute.
+- Node v25.8.0, pnpm 9.15.4. Next.js 15.1.6 confirmed working on Node 25.
+
+## Reference assets
+- Decompiled spec: `unified/src/csharp/DataCareNext/*.cs` (204 forms / 969K LOC). Reports: `unified/reports/*.rpt` (255). Form specs: `project-memory/catalogs/forms/*.md`. Data model: `catalogs/data-model.json`. Module map: `catalogs/module-map.json`.
+
+## Blockers / external deps (only pause for these)
+Third-party integrations are RESEARCHED + WIRED (real adapters behind interfaces). **Live now, no creds:** live gold/silver/forex rates (gold-api.com+frankfurter.app), barcode/QR, PDF(Playwright). **Wired — go live by setting env (no code change):**
+- WhatsApp Cloud API: `WA_PHONE_ID`, `WA_TOKEN` (Meta Graph v22) — desktop UT_WAPP_WITH_API.
+- SMS gateway: `SMS_URL_TEMPLATE` (with {key}{sender}{mobile}{text}), `SMS_KEY`, `SMS_SENDER` — desktop used tripadasmsbox/ping4sms/mobileadz.
+- E-invoice GSP: Chartered Info (`einvapi.charteredinfo.com`) aspid/password/Gstin/User_Name/eInvPwd — desktop TR_SL_EBILL/UT_E_INVOICE; behind IrnTransport (Fake until set).
+- Payment gateway / UAE Planet Payment / OLocker insurance — adapters TBD when needed.

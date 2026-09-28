@@ -1,0 +1,19 @@
+{
+  "command": [
+    "pnpm",
+    "typecheck"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:04:29.306283+00:00",
+  "finishedAtUtc": "2026-09-11T21:04:37.349274+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-runtime-workspace-types-corrected.txt",
+  "logSha256": "847598518261f7187d59424739d1206a964cc192f73ae536f1b62e3a3b62131c",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-runtime-workspace-types-corrected.inputs.json",
+  "inputManifestSha256": "c89eb7a1034e6fe18b7d2c87fa4d909531bee1011512a71c98282a60cb6f9eca",
+  "inputCount": 1784,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

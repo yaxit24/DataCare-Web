@@ -1,0 +1,26 @@
+{
+  "atUtc": "2026-09-11T20:18:03.449819+00:00",
+  "files": [
+    {
+      "path": "web/apps/api/test/sessionContextSelection.test.ts",
+      "sha256": "d9e9c8e0702838fec5acb2cf6bee0375d80af20f58e7b40f3b189440368cd86a"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionContextSelection.independent.json",
+      "sha256": "e46adeb02f8ddbf9fe2fc601f816386e09af5c88dd7ba8a2b6a16dbe5c565299"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextRefresh.db.test.ts",
+      "sha256": "9f7be2ed11f7e2a04e0c1651cecd00bde8fe6096979973c66454f5f750ce7df8"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionContextRefresh.independent.json",
+      "sha256": "c7a7d68f63ef0bca93024dab1030b7c918a6c0bf22928c0de42499f02aa4bc61"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionContextRefresh.qualifications.json",
+      "sha256": "dbe3861a31b738739719878e8d1dd68f0fa3fb66ff3ea0826ae0d6b463083fef"
+    }
+  ],
+  "status": "integrated-not-yet-executed"
+}

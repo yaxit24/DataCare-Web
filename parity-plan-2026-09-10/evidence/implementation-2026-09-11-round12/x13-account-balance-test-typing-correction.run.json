@@ -1,0 +1,71 @@
+{
+  "kind": "datacare.scoped-test-typing-correction/1.0",
+  "capturedAtUtc": "2026-09-11T17:19:18.436349+00:00",
+  "status": "bounded-strict-passed-runtime-erasure-identical",
+  "beforeSourceSha256": "da57beda30df821c8178f423a2b2f6142381348e1033ca386a56617322ca017c",
+  "afterSourceSha256": "3cad287d96b7039a24162d9c7ac7a21ab78836aee0b52f16fbebb0b35377fa74",
+  "erasedJavaScriptSha256": "fc7f7f10253a0b610337d0aaa5f02f7a6cc35df4797717bd1eb68a2202961450",
+  "fullApiRegressionAfterCorrection": "pending-root",
+  "files": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-after.json",
+      "sha256": "2d105156f8f4e9996996f321b253aea8a6047b22d804e7a80fbf5778df24e760"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-before.js.txt",
+      "sha256": "fc7f7f10253a0b610337d0aaa5f02f7a6cc35df4797717bd1eb68a2202961450"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-before.json",
+      "sha256": "5b8a23167291037525ff3d0ebb22ae6438ea1babb799dc8817c2f5621d53178a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-strict-corrected.run.json",
+      "sha256": "d6047567b979a3030500a7d77722a192d4c2eeb995f1776709f99d0f092e98b8"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-strict-corrected.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-strict.run.json",
+      "sha256": "fc5a249f4e6f13c39183a4cde6fab6d8c15cef12350ab4f9fcb0a48ce341a1fb"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-strict.txt",
+      "sha256": "22d754e33e5e414d820e237c9e477c81ec8db495c45ab51f7665351a89a3c783"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-tsconfig-corrected.json",
+      "sha256": "c35e12eea55e8e2f2737cabe07fcec1ace5afe361855729e7c61e355fd780472"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/account-balance-test-typing-tsconfig.json",
+      "sha256": "8c475c7459982ee0e259bfffb207218aa17451adb9032f173307e16348700410"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-test-typing-correction.md",
+      "sha256": "e283192f65510677b55d702fa6144a7c803498ccf948abc996e86aec7b95d055"
+    },
+    {
+      "path": "web/apps/api/test/desktopAccountBalance.db.test.ts",
+      "sha256": "3cad287d96b7039a24162d9c7ac7a21ab78836aee0b52f16fbebb0b35377fa74"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/desktopAccountBalance.independent.json",
+      "sha256": "32f1d4533a01923972f650ed06c4825f0c4f567d2a44e383f609ed059018e6c7"
+    },
+    {
+      "path": "web/apps/api/tsconfig.json",
+      "sha256": "0b9f34bdc22816f91107b36a6fef112243dabb973d4859e4bdf4481622e0ac0c"
+    },
+    {
+      "path": "web/apps/api/tsconfig.test.json",
+      "sha256": "1693e10c70e86942d399f67439157c014808919e5b57bc3024660e800073e762"
+    },
+    {
+      "path": "web/tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    }
+  ]
+}

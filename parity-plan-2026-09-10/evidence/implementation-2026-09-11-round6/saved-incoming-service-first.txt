@@ -1,0 +1,82 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/savedSaleReturn.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/savedSaleReturn.db.test.ts (21 tests | 1 failed) 1280ms
+   × saved incoming Sales Return metadata preservation > denies employee when diamond ledger effects cannot be proved 34ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `23502`. Message: `Failing row contains (return-saved-round6, 01, 01, 2024-2025, R71, 00001, null, 99, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 001, null, null, null, null, null).`
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/savedSaleReturn.db.test.ts > saved incoming Sales Return metadata preservation > denies employee when diamond ledger effects cannot be proved
+PrismaClientKnownRequestError: 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `23502`. Message: `Failing row contains (return-saved-round6, 01, 01, 2024-2025, R71, 00001, null, 99, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 001, null, null, null, null, null).`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ insert test/savedSaleReturn.db.test.ts:62:5
+     60|       .map((column) => `"${column}"`)
+     61|       .join(',');
+     62|     await sql(
+       |     ^
+     63|       `INSERT INTO "${table}" (${columns}) SELECT ${columns} FROM json…
+     64|       JSON.stringify(values),
+ ❯ test/savedSaleReturn.db.test.ts:483:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  08:05:12
+   Duration  1.64s (transform 68ms, setup 0ms, collect 88ms, tests 1.28s, environment 0ms, prepare 30ms)
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 test: `vitest run "test/savedSaleReturn.db.test.ts"`
+Exit status 1
+PARITY_TEST_FAILED pnpm exited 1

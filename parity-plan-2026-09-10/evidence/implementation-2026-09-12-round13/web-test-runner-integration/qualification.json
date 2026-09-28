@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-09-11T22:05:39.851622+00:00",
+  "cause": "The web evidence .test.mjs uses node:test. Bare Vitest sees no registered suite; the old package passWithNoTests option masks this runner mismatch, and importing native tests does not give Vitest lifecycle ownership.",
+  "change": "Mandatory Vitest .test.ts suite followed by native Node .test.mjs suite. Any child signal/error/nonzero status fails; no passWithNoTests.",
+  "actualCurrentPass": {
+    "vitestFiles": 33,
+    "vitestTests": 428,
+    "nodeFiles": 1,
+    "nodeTests": 6,
+    "skipped": 0
+  },
+  "priorCountQualification": "Earlier recorded34-file/428 Vitest output includes the native0-test file; it is not34 Vitest test suites or434 framework-owned assertions. Original logs are retained.",
+  "verification": "web-unit-runners-separated.run.json"
+}

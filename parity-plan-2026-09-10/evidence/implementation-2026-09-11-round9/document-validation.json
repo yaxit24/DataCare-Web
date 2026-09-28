@@ -1,0 +1,278 @@
+{
+  "validatedAt": "2026-09-11T13:21:46.289508+00:00",
+  "status": "passed",
+  "workPackages": 83,
+  "executionCards": 34,
+  "scenarioAnchors": 128,
+  "localLinksChecked": 1305,
+  "reviewedImplementationFilesUnchanged": 625,
+  "implementationChangesSinceReview": [
+    "web/apps/api/src/app.ts",
+    "web/apps/api/src/modules/einvoice/einvoice.ts",
+    "web/apps/api/src/modules/images/entityImage.ts",
+    "web/apps/api/src/modules/masters/configs.ts",
+    "web/apps/api/src/modules/masters/designBook.ts",
+    "web/apps/api/src/modules/masters/master.service.ts",
+    "web/apps/api/src/modules/ops/migrationManifest.ts",
+    "web/apps/api/src/modules/posting/posting.ts",
+    "web/apps/api/src/modules/rbac/formCatalog.ts",
+    "web/apps/api/src/modules/rbac/routePolicy.ts",
+    "web/apps/api/src/modules/repair/repairImage.ts",
+    "web/apps/api/src/modules/reports/render.ts",
+    "web/apps/api/src/modules/reports/reportBind.ts",
+    "web/apps/api/src/modules/reports/reportEngine.ts",
+    "web/apps/api/src/modules/sales/orderDoc.ts",
+    "web/apps/api/src/modules/sales/salesOrder.ts",
+    "web/apps/api/src/modules/shared/bookPolicy.ts",
+    "web/apps/api/src/routes/txn.ts",
+    "web/apps/api/test/backupRestore.db.test.ts",
+    "web/apps/api/test/dataExport.db.test.ts",
+    "web/apps/api/test/entityImage.db.test.ts",
+    "web/apps/api/test/reportBind.test.ts",
+    "web/apps/api/test/reportRender.db.test.ts",
+    "web/apps/api/test/routePolicy.test.ts",
+    "web/apps/api/test/salesFamilyLifecycle.db.test.ts",
+    "web/apps/api/test/vpParcel.db.test.ts",
+    "web/apps/web/app/(app)/masters/design-book/page.tsx",
+    "web/apps/web/app/(app)/txn/e-crnt-note/page.tsx",
+    "web/apps/web/app/(app)/txn/repair-receipt/page.tsx",
+    "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+    "web/apps/web/app/(app)/txn/sales/page.tsx",
+    "web/apps/web/app/(app)/txn/sales-order/page.tsx",
+    "web/apps/web/app/(app)/txn/sales-quotation/page.tsx",
+    "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+    "web/apps/web/components/CameraCapture.tsx",
+    "web/apps/web/components/EntityImagePanel.tsx",
+    "web/apps/web/components/LookupPicker.tsx",
+    "web/apps/web/components/RepairImagePanel.tsx",
+    "web/apps/web/lib/nav.ts",
+    "web/apps/web/test/browser.smoke.mjs",
+    "web/apps/web/test/designBookPage.test.ts",
+    "web/packages/core/src/index.ts",
+    "web/packages/core/src/money.ts",
+    "web/packages/db/prisma/schema.prisma",
+    "web/scripts/check-dead-cells.mjs",
+    "web/scripts/check-depth.mjs"
+  ],
+  "implementationCheckpoint": "31-implementation-checkpoint-round9.json",
+  "priorCheckpoint": "29-implementation-checkpoint-round8.json",
+  "priorCheckpointSha256": "12c69feee320f35e691667d31b37f7ef5e438d56a255e242eaa365e427fc3249",
+  "priorCheckpointCurrentFileDrift": {
+    "sourceFiles": [
+      {
+        "path": "parity-plan-2026-09-10/build_execution_addendum.py",
+        "checkpointSha256": "a6891b5c7a60ed6d04c37c90215879e7e86eaa28f069cf99a4db524fb6327e11",
+        "currentSha256": "ed90766e71553dc762cc090291b3d45d5d4de28b86afe867455c13bc3ee99efb"
+      },
+      {
+        "path": "parity-plan-2026-09-10/execution-addendum-intro.md",
+        "checkpointSha256": "ef1a944d748b50b5a76a06292180ef2b1dff9dfd127d89dd7bebe124f44b36ac",
+        "currentSha256": "f806d1d79798f44825763539dfcff12d397d57e9065f5adb223aa44ed50d09ca"
+      },
+      {
+        "path": "parity-plan-2026-09-10/validate_current_review.py",
+        "checkpointSha256": "5ccbade6cc2102ea09ad7662c93ec96722999ab16f30c514e66f8b591543909c",
+        "currentSha256": "a0187198549c7550eb26e7f64d5944a14f16d89203b583301ce00112647c12b3"
+      },
+      {
+        "path": "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "checkpointSha256": "29fa1fcd3c997f997784bcaaf881d15151629e63c2fb826281f28cf2c66da3c0",
+        "currentSha256": "9baf3e75355b6653e12cbe6944d94c0c519f88ab6922af1a67bd2ccc1710361b"
+      },
+      {
+        "path": "web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+        "checkpointSha256": "f7161a49c156621f048f7105f9648018f5726c017938f9e2bb356d74905f9308",
+        "currentSha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+      },
+      {
+        "path": "web/apps/api/src/modules/sales/savedSaleReturn.ts",
+        "checkpointSha256": "05c2218ad69b0c0cd8cf1a4e542816a9fcae5c48057ed8c1b27dc1596ba94a06",
+        "currentSha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+      },
+      {
+        "path": "web/apps/api/src/routes/txn.ts",
+        "checkpointSha256": "f25ed8e03c74921a13da00e57150482e1d0181e63828d544d6c05d5380c8beb7",
+        "currentSha256": "a925b7fe7a43207e53deee7f34eaee179a3bf9341bea9b3f8b15874d7fda4669"
+      },
+      {
+        "path": "web/apps/api/test/routePolicy.test.ts",
+        "checkpointSha256": "112592f88f5806f040c2c13d552ec53de56d2414914f082c88904ab1987775f2",
+        "currentSha256": "7bba72ffae4b5c29399b05a294268f7cbc0c21f6559968df4190f67258d11b14"
+      },
+      {
+        "path": "web/apps/web/components/SaleReturnSavedPanel.tsx",
+        "checkpointSha256": "353b0e92f8859acc5f15e1a42b0c0216555fac0c987588d0cf8185cfc46ab99b",
+        "currentSha256": "d3d14b9bfec0c3af802447d3f2c4c289cbfea3978695c8fc67d4691d5ae5011a"
+      },
+      {
+        "path": "web/apps/web/lib/salesReturnForm.ts",
+        "checkpointSha256": "062386988f070b3a828238a594272407a8d3de49be24dc17de9703b0c244aeda",
+        "currentSha256": "45e1f06c642a3fee536972baf6dfaa3592bd0176f6b6018fabb6e7da151c0e1f"
+      },
+      {
+        "path": "web/apps/web/test/parity.real-stack.mjs",
+        "checkpointSha256": "902b97991b7dff5019f0ec64dde1068f7a04c9874f9fe8dd136e097f485fb3d4",
+        "currentSha256": "ea26d481e675ed7db89052bd197710434a7c4bb843fe75908f1715836d6a437e"
+      },
+      {
+        "path": "web/docs/HANDOFF.md",
+        "checkpointSha256": "00133baad4560b2ee2af5eddd544d142fa2500af38756865908899ade0d05171",
+        "currentSha256": "a7862f4628842db97a895dc2d40df92086dda91f088fab6c74d9f2404278361e"
+      },
+      {
+        "path": "web/docs/STATE-OF-PARITY.md",
+        "checkpointSha256": "df38ed56d06658f588b59a8123cbb500cb3b55136c647509eb30be2b1254430c",
+        "currentSha256": "3f7c57597cb28f2a8314c6adf0c017b67a60cbcfd63f441821393c56b46fa811"
+      },
+      {
+        "path": "web/docs/TECHNICAL-REFERENCE.md",
+        "checkpointSha256": "844209d8ce9df2caaf0d8bd7b41e07db9a3c02a281d8fbd5d54665eb0afc93ce",
+        "currentSha256": "526c72d9faed8e6074bddd06c03cf6997b548993c52f2671f1ab62138113adf8"
+      },
+      {
+        "path": "web/packages/core/dist/index.d.ts",
+        "checkpointSha256": "cba0e26549aeec71c48f9487f38684d5a5a57ddabdbc609695ce70e6d3b7d379",
+        "currentSha256": "a9849178cd6fb9719a9f165135b82403d685d38ce9e56943f5535691bd59b34b"
+      },
+      {
+        "path": "web/packages/core/dist/index.js",
+        "checkpointSha256": "a96c29c8224ad5bc0ef50f8b08048bf77894f7794ea2ca352f2b3369b3fff6b3",
+        "currentSha256": "5c27e90bba67bc3342c0192e29b60d387f3d4e21bc705b14177ac25f2d510d41"
+      },
+      {
+        "path": "web/packages/core/src/index.ts",
+        "checkpointSha256": "19bfd8bd214c746e4cc5b4d37ede26bf923a0e5dced6aff50a611b5eaccdb301",
+        "currentSha256": "bd4b076761469c477cc69d6484afcb7a8964f95536a2517b2a177d976963a2d3"
+      }
+    ],
+    "verificationArtifacts": [],
+    "artifactFiles": [
+      {
+        "path": "parity-plan-2026-09-10/02-implementation-plan.md",
+        "checkpointSha256": "2a90fc9e9a6a9a0dd947b39165b10c07e651c2fe9d7b48989497c8b8229b1fe1",
+        "currentSha256": "b24a1d031150752edc4431810fe72193380162dd8d1481a0def9ad2734866cb3"
+      },
+      {
+        "path": "parity-plan-2026-09-10/12-execution-addendum.md",
+        "checkpointSha256": "4a1f1326ee7d834bcbeed75f113b8b61aa3868186d7f3df48eca9c7edaf88d0e",
+        "currentSha256": "595f5965cc8416a5d0f82c86fc09c01c205fa54a6d73fbe1c8babb954097f8d2"
+      },
+      {
+        "path": "parity-plan-2026-09-10/13-execution-backlog.json",
+        "checkpointSha256": "7d7b7fdfb2ad26d4454d3a47f908b69a3f50b6f6a4d8becf65ca31de851dc358",
+        "currentSha256": "bf5d0861b12b422757de51dfb2436b3716167b06b53ccdc6336a78cd3e8af7d5"
+      },
+      {
+        "path": "parity-plan-2026-09-10/README.md",
+        "checkpointSha256": "9edc090a955448fd3ab667b890fb3662566b74a8246f94a9c91549bff0f176ce",
+        "currentSha256": "a7ca4de809671526a4f05538e5c4980e4b3c7c22547544940d5c34904059faf6"
+      }
+    ]
+  },
+  "historicalSourceDrift": [
+    "web/apps/api/src/routes/txn.ts",
+    "web/docs/STATE-OF-PARITY.md",
+    "web/docs/HANDOFF.md",
+    "web/docs/TECHNICAL-REFERENCE.md",
+    "web/apps/api/src/modules/reports/reportBind.ts",
+    "web/apps/api/src/modules/reports/render.ts",
+    "web/apps/api/src/modules/reports/reportEngine.ts",
+    "web/apps/api/src/modules/reports/reportFilters.ts",
+    "web/apps/api/src/modules/reports/stockLevel.ts",
+    "web/apps/api/src/modules/reports/orderTagReports.ts",
+    "web/apps/api/src/modules/reports/reports.ts",
+    "web/apps/api/src/modules/reports/reportAuthorization.ts",
+    "web/apps/api/src/modules/membership/scheme.ts",
+    "web/apps/api/src/modules/posting/posting.ts",
+    "web/docs/COMPLETION-REGISTER.json",
+    "web/package.json",
+    "web/apps/api/src/modules/repair/repairImage.ts",
+    "web/turbo.json",
+    "web/packages/core/src/index.ts",
+    "web/packages/core/src/money.ts",
+    "web/apps/api/test/rateCutSettlement.db.test.ts",
+    "web/apps/api/test/salesFamilyLifecycle.db.test.ts",
+    "web/apps/api/test/releaseCertification.test.ts",
+    "web/apps/api/test/reopenVoucher.db.test.ts",
+    "web/apps/api/test/vpParcel.db.test.ts",
+    "web/apps/api/test/completionRegister.test.ts",
+    "web/apps/api/test/transaction.integrity.db.test.ts",
+    "web/apps/api/test/bookPolicy.test.ts",
+    "web/apps/api/test/entityImage.db.test.ts",
+    "web/apps/api/test/routePolicy.test.ts",
+    "web/apps/api/test/dhrnReceipt.db.test.ts",
+    "web/apps/api/test/routeInputForwarding.test.ts",
+    "web/apps/api/test/reportFiltersApplied.db.test.ts",
+    "web/apps/api/test/einvoice.test.ts",
+    "web/apps/api/test/backupRestore.db.test.ts",
+    "web/apps/api/test/reportRender.db.test.ts",
+    "web/apps/api/test/reportAuthorization.test.ts",
+    "web/apps/api/test/kernelConformance.test.ts",
+    "web/apps/api/test/rateCut.test.ts",
+    "web/pnpm-lock.yaml",
+    "web/apps/api/src/app.ts",
+    "web/apps/api/src/modules/masters/configs.ts",
+    "web/apps/api/src/modules/masters/lookup.ts",
+    "web/apps/api/src/modules/masters/master.service.ts",
+    "web/apps/api/src/modules/masters/designBook.ts",
+    "web/apps/api/src/modules/finance/chequePrint.ts",
+    "web/apps/api/src/modules/finance/lifecycle.ts",
+    "web/apps/api/src/modules/sales/salesOrder.ts",
+    "web/apps/api/src/modules/sales/sales.ts",
+    "web/apps/api/src/modules/sales/orderDoc.ts",
+    "web/apps/api/src/modules/sales/rateCut.ts",
+    "web/apps/api/src/modules/ops/migrationManifest.ts",
+    "web/apps/api/src/modules/ops/releaseCertification.ts",
+    "web/scripts/check-depth.mjs",
+    "web/scripts/check-dead-cells.mjs",
+    "web/apps/api/src/modules/purchase/purchase.ts",
+    "web/apps/api/src/modules/purchase/purchaseBill.ts",
+    "web/apps/api/src/modules/dhrn/dhrn.ts",
+    "web/apps/api/report-specs/OrderVch.spec.json",
+    "web/apps/api/report-specs/report-layouts-index.json",
+    "web/apps/api/report-specs/TourOrdImg.spec.json",
+    "web/apps/api/report-specs/OrdVchImg.spec.json",
+    "web/apps/api/report-specs/OrderBill.spec.json",
+    "web/apps/api/report-specs/TourOrdVch.spec.json",
+    "web/apps/api/package.json",
+    "web/apps/web/lib/nav.ts",
+    "web/apps/web/components/Shell.tsx",
+    "web/apps/api/src/modules/einvoice/einvoice.ts",
+    "web/apps/web/components/PaymentForm.tsx",
+    "web/apps/web/components/CameraCapture.tsx",
+    "web/apps/web/components/LookupPicker.tsx",
+    "web/apps/web/components/EntityImagePanel.tsx",
+    "web/apps/web/components/RepairImagePanel.tsx",
+    "web/apps/web/components/KarigarForm.tsx",
+    "web/apps/api/src/modules/rbac/formCatalog.ts",
+    "web/apps/api/src/modules/rbac/routePolicy.ts",
+    "web/apps/api/src/modules/shared/bookPolicy.ts",
+    "web/apps/api/src/modules/images/entityImage.ts",
+    "web/apps/web/test/browser.smoke.mjs",
+    "web/apps/web/test/route-coverage.mjs",
+    "web/apps/api/src/modules/manufacturing/karigar.ts",
+    "web/apps/web/app/(app)/reports/[report]/page.tsx",
+    "web/apps/web/app/(app)/utilities/e-invoice/page.tsx",
+    "web/apps/web/app/(app)/txn/repair-receipt/page.tsx",
+    "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+    "web/apps/web/app/(app)/txn/sales-order/page.tsx",
+    "web/apps/web/app/(app)/txn/rate-cut/page.tsx",
+    "web/apps/web/app/(app)/txn/sales/page.tsx",
+    "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx",
+    "web/apps/web/app/(app)/txn/scheme/page.tsx"
+  ],
+  "negativeControls": [
+    "missing-card",
+    "duplicate-card",
+    "dependency-cycle",
+    "omitted-implementation-source",
+    "stale-implementation-source",
+    "omitted-prior-source",
+    "missing-prior-checkpoint",
+    "tampered-prior-checkpoint",
+    "stale-verification-artifact",
+    "stale-implementation-artifact"
+  ],
+  "errors": [],
+  "limits": "Documentation, planning coverage, links, counts and source-identity checks only. The latest checkpoint validates current files and the exact bytes of its predecessor. Historical source and artifact changes are informational drift, never rewritten. Not application, desktop, DB, browser or release certification."
+}

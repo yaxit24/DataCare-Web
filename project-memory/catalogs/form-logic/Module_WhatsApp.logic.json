@@ -1,0 +1,21 @@
+{
+ "form": "Module_WhatsApp",
+ "tables": [
+  "WIN32_PROCESS"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "WIN32_PROCESS"
+ ],
+ "fKeys": [],
+ "messageBoxes": 0,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 4524
+}

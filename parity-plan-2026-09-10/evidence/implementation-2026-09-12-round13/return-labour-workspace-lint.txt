@@ -1,0 +1,12 @@
+
+> datacare-web-saas@0.0.0 lint /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/lint-workspace.mjs && eslint . && turbo run typecheck
+
+Workspace lint passed: 894 source files parsed, 8 manifests checked, 0 policy violations.
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnLabourReplayPanel.tsx
+  290:13  error  The ref value 'lease.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'lease.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+✖ 1 problem (1 error, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

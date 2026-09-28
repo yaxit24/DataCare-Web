@@ -1,0 +1,27 @@
+{
+ "form": "RP_MFG_LEDR",
+ "tables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "MFG_ISU_REC",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "MFG_ISU_REC",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 2,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 3433
+}

@@ -1,0 +1,24 @@
+{
+  "kind": "static-source-preservation-only",
+  "checks": [
+    {
+      "path": "apps/api/src/modules/auth/businessScope.ts",
+      "baselineSha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e",
+      "stagedSha256": "c864e5e3aaa7319537ef31fab2861d0a776b9347efa0eb958af2373b8764c3f3",
+      "repositoryStillMatchesBaseline": true,
+      "allTemplateLiteralsIdentical": true,
+      "templateLiteralCount": 8
+    },
+    {
+      "path": "apps/api/src/modules/rbac/authorization.ts",
+      "baselineSha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34",
+      "stagedSha256": "ee079f09d0076f2339dd1307a3912c249624786566d216b1f17466af134b3acd",
+      "repositoryStillMatchesBaseline": true,
+      "allTemplateLiteralsIdentical": true,
+      "templateLiteralCount": 6
+    }
+  ],
+  "testExecution": "not-run",
+  "compiler": "not-run",
+  "database": "not-run"
+}

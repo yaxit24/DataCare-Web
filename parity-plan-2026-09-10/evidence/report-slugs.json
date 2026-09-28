@@ -1,0 +1,214 @@
+[
+  {
+    "slug": "huid",
+    "form": "Reports/HuId Report"
+  },
+  {
+    "slug": "item-weight-levels",
+    "form": "Reports/ItStk Level"
+  },
+  {
+    "slug": "bill-profit",
+    "form": "Reports/Bill Wise Profit"
+  },
+  {
+    "slug": "physical-stock-verify",
+    "form": "Reports/Physical Stock"
+  },
+  {
+    "slug": "size-movement",
+    "form": "Reports/Movement"
+  },
+  {
+    "slug": "tag-estimate",
+    "form": "Reports/Tag Estimate"
+  },
+  {
+    "slug": "order-lot-zoom",
+    "form": "Reports/Order Zoom"
+  },
+  {
+    "slug": "account-balances",
+    "form": "Reports/Account Balances"
+  },
+  {
+    "slug": "area-outstanding",
+    "form": "Reports/Area-wise Outstanding"
+  },
+  {
+    "slug": "area-wise-sales",
+    "form": "Reports/Area-wise Sales"
+  },
+  {
+    "slug": "bill-aging",
+    "form": "Reports/Bill Aging"
+  },
+  {
+    "slug": "bill-outstanding",
+    "form": "Reports/Bill-wise Outstanding"
+  },
+  {
+    "slug": "cash-book",
+    "form": "Reports/Cash / Bank Book"
+  },
+  {
+    "slug": "cash-day-summary",
+    "form": "Reports/Cash Day Summary"
+  },
+  {
+    "slug": "contra-register",
+    "form": "Reports/Contra Register"
+  },
+  {
+    "slug": "customer-crm",
+    "form": "Reports/Customer CRM"
+  },
+  {
+    "slug": "daily-sales",
+    "form": "Reports/Daily Sales Summary"
+  },
+  {
+    "slug": "day-book",
+    "form": "Reports/Day Book"
+  },
+  {
+    "slug": "dhrn-outstanding",
+    "form": "Reports/Pledge Outstanding"
+  },
+  {
+    "slug": "rojmel",
+    "form": "Reports/Rojmel"
+  },
+  {
+    "slug": "employee-sales",
+    "form": "Reports/Employee Sales"
+  },
+  {
+    "slug": "group-summary",
+    "form": "Reports/Group Trial Balance"
+  },
+  {
+    "slug": "gst-input-register",
+    "form": "Reports/GST Input Register"
+  },
+  {
+    "slug": "gstr2",
+    "form": "Reports/GSTR-2 (Purchase)"
+  },
+  {
+    "slug": "gstr3b",
+    "form": "Reports/GSTR-3B"
+  },
+  {
+    "slug": "hsn-summary",
+    "form": "Reports/HSN Tax Summary"
+  },
+  {
+    "slug": "item-group-stock",
+    "form": "Reports/Item-Group Stock"
+  },
+  {
+    "slug": "item-stock-ledger",
+    "form": "Reports/Item Stock Ledger"
+  },
+  {
+    "slug": "karigar-balances",
+    "form": "Reports/Karigar Balances"
+  },
+  {
+    "slug": "karigar-statement",
+    "form": "Reports/Karigar Statement"
+  },
+  {
+    "slug": "location-wise-sales",
+    "form": "Reports/Location-wise Sales"
+  },
+  {
+    "slug": "monthly-purchase",
+    "form": "Reports/Monthly Purchase"
+  },
+  {
+    "slug": "monthly-sales",
+    "form": "Reports/Monthly Sales"
+  },
+  {
+    "slug": "old-gold-register",
+    "form": "Reports/Old Gold / Exchange"
+  },
+  {
+    "slug": "outstanding",
+    "form": "Reports/Outstanding (Debtors/Creditors)"
+  },
+  {
+    "slug": "party-statement",
+    "form": "Reports/Party Statement"
+  },
+  {
+    "slug": "purchase-by-item",
+    "form": "Reports/Purchase by Item"
+  },
+  {
+    "slug": "purchase-by-party",
+    "form": "Reports/Purchase by Party"
+  },
+  {
+    "slug": "purchase-register",
+    "form": "Reports/Purchase Register"
+  },
+  {
+    "slug": "purchase-return-register",
+    "form": "Reports/Purchase Return Register"
+  },
+  {
+    "slug": "rate-list",
+    "form": "Reports/Rate List"
+  },
+  {
+    "slug": "sales-by-group",
+    "form": "Reports/Sales by Group"
+  },
+  {
+    "slug": "sales-by-item",
+    "form": "Reports/Sales by Item"
+  },
+  {
+    "slug": "sales-by-party",
+    "form": "Reports/Sales by Party"
+  },
+  {
+    "slug": "sales-gst-monthly",
+    "form": "Reports/Sales GST (Monthly)"
+  },
+  {
+    "slug": "sales-register",
+    "form": "Reports/Sales Register"
+  },
+  {
+    "slug": "sales-return-register",
+    "form": "Reports/Sales Return Register"
+  },
+  {
+    "slug": "scheme-adjustments",
+    "form": "Reports/Scheme / Member Adjustments"
+  },
+  {
+    "slug": "stock-by-location",
+    "form": "Reports/Stock by Location"
+  },
+  {
+    "slug": "stock-valuation",
+    "form": "Reports/Stock Valuation"
+  },
+  {
+    "slug": "top-items",
+    "form": "Reports/Top Items"
+  },
+  {
+    "slug": "trial-balance",
+    "form": "Reports/Trial Balance"
+  },
+  {
+    "slug": "trial-balance-full",
+    "form": "Reports/Trial Balance (Full)"
+  }
+]

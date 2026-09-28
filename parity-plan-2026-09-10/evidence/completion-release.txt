@@ -1,0 +1,22 @@
+completion register: 198 desktop menu item(s)
+   145  implemented-unverified
+    53  absent
+  ordering signal only: form referenced in web 152, never 34, label unresolved 12
+REGISTER_RED 198 of 198 item(s) cannot be released (--release)
+     145  implemented-unverified
+      53  absent
+    53 entries have no web surface at all:
+      Analysis/Delete Data
+      Analysis/Last Visit
+      Analysis/Stock Move
+      Company/Balance TrFr
+      Dhiran/Dhiran Report
+      Dhiran/Loan Issue
+      Dhiran/Loan Received
+      Dhiran/Loan Report
+      ExtraTran/Consi Purc
+      ExtraTran/Old Item Sales
+      ExtraTran/Other Income
+      Karigar/Kr Report
+      … and 41 more
+    of those, 2 are hidden on the desktop and need an owner-signed exclusion rather than an implementation: Master/Dm Size, Other/E-Excel

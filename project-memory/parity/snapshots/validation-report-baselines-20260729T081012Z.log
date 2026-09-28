@@ -1,0 +1,5 @@
+
+> datacare-web-saas@0.0.0 report-baselines /private/tmp/imodule-parity-snapshot-20260729T081012Z/web
+> node scripts/report-baselines.mjs
+
+REPORT_BASELINES_OK 254 layouts unchanged

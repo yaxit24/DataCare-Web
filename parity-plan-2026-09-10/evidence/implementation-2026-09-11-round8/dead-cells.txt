@@ -1,0 +1,10 @@
+dead-cell audit: 708 extended columns checked across 21 pages (23 mapped pages)
+  x sale-return: 33 dead of 48 -> ordNo, ordYrcd, ordDbcd, ordSrno, isuNo, isuYrcd, isuDbcd, isuSrno, huid, lessWt, bagWt, tagGrossWt, tagNetWt, ghtPct, itemLot, remark, discountPct, ghatAmount, rateWith, karigarNetWt, karigarTouch, karigarWestPct, karigarFine, employeeCode, orderTagStockAdd, designImageId, hallmarkId2, hallmarkId3, hallmarkId4, hallmarkIdWt, hallmarkId2Wt, hallmarkId3Wt, hallmarkId4Wt
+  nested wholesale-sale.issueYear: POST /rate-cut lines[].isuRef.yrcd -> postRateCut -> ISU_YRCD (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:826)
+  nested wholesale-sale.issueBook: POST /rate-cut lines[].isuRef.dbcd -> postRateCut -> ISU_DBCD (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:827)
+  nested wholesale-sale.issueNo: POST /rate-cut lines[].isuRef.no -> postRateCut -> ISU_NO (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:828)
+  nested wholesale-sale.issueSrno: POST /rate-cut lines[].isuRef.srno -> postRateCut -> ISU_SRNO (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts:829)
+  33 unresolved fields include unsupported syntax; inspect --json diagnostics. They remain failures, never presumed live.
+
+DEAD CELLS: 33. A column the writer never reads silently discards operator input
+and is counted as parity by the depth metric. Wire it in the writer or remove the column.

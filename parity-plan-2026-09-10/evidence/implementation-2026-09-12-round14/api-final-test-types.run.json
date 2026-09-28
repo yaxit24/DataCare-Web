@@ -1,0 +1,28 @@
+{
+  "command": [
+    "env",
+    "NODE_OPTIONS=--max-old-space-size=4096",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "tsc",
+    "-p",
+    "tsconfig.test.json",
+    "--noEmit"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:18:52.325472+00:00",
+  "finishedAtUtc": "2026-09-12T01:21:25.608288+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-final-test-types.txt",
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-final-test-types.inputs.json",
+  "inputManifestSha256": "003cd19c0c2f06992514350965821f74494b9cb007dc8f7b0f9413688abff67d",
+  "inputCount": 1906,
+  "changedInputs": [],
+  "changedPrivateInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

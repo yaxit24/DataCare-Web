@@ -1,0 +1,13 @@
+{
+  "command": [
+    "python3",
+    "../parity-plan-2026-09-10/validate_plan.py",
+    "--self-test-checkpoint-chain"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T15:09:59.726092+00:00",
+  "finishedAtUtc": "2026-09-11T15:10:03.039578+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/checkpoint-chain.txt"
+}

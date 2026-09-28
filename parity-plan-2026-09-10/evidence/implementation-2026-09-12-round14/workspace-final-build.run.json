@@ -1,0 +1,21 @@
+{
+  "command": [
+    "env",
+    "API_ORIGIN=http://127.0.0.1:4410",
+    "pnpm",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:12:03.694904+00:00",
+  "finishedAtUtc": "2026-09-12T01:12:24.788660+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-build.txt",
+  "logSha256": "bda3aca2dc13839068b254132fa48fd3ed4da1f8f1dd79478e1976695c98914b",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-build.inputs.json",
+  "inputManifestSha256": "88da5a32b5d5109c3eed27a34615c9c666de2e565a599bb2338762a27bd43448",
+  "inputCount": 1883,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

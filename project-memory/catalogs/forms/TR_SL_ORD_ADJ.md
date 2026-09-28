@@ -1,0 +1,40 @@
+# TR_SL_ORD_ADJ
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** BAR_DETL, BAR_IDTL
+- **UPDATE:** SL_ORD_DETL
+
+## Tables deleted / reversed
+- **DELETE:** AC_DATA, APR_DETL, BAR_DETL, BAR_IDTL, MAIN_STOCK, ROJ_MEL_DATA, SL_ORD_ADJ, TEMP_BOOK_DATA
+
+## Tables read
+- SL_ORD_ADJ, AC_MAST, APR_DETL, TEMP_BOOK_DATA, SL_ORD_DETL, EMP_MAST, BAR_DETL, BAR_IDTL, ITEM_MAST, TABLE_MAST, SL_ORD_DATA, AC_DATA, ROJ_MEL_DATA, MAIN_STOCK, USER_SET
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L3506: DELETE SL_ORD_ADJ
+- L3509: DELETE TEMP_BOOK_DATA
+- L3589: DELETE BAR_DETL
+- L3590: DELETE BAR_IDTL
+- L3591: DELETE APR_DETL
+- L3650: INSERT BAR_DETL
+- L3652: INSERT BAR_IDTL
+- L3661: UPDATE SL_ORD_DETL
+- L3663: DELETE AC_DATA
+- L3666: DELETE ROJ_MEL_DATA
+- L3669: DELETE MAIN_STOCK
+- L3743: UPDATE SL_ORD_DETL
+- L3745: DELETE TEMP_BOOK_DATA
+- L3746: DELETE AC_DATA
+- L3747: DELETE ROJ_MEL_DATA
+- L3748: DELETE MAIN_STOCK
+- L3749: DELETE SL_ORD_ADJ
+- L3750: DELETE APR_DETL
+- L3751: DELETE BAR_DETL
+- L3752: DELETE BAR_IDTL
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

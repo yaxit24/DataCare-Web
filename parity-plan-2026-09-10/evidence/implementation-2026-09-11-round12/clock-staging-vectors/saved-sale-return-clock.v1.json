@@ -1,0 +1,3214 @@
+{
+  "formatVersion": 1,
+  "fixtureId": "saved-sale-return-clock-independent-v1",
+  "implementationExport": "projectSavedSaleReturnClock",
+  "expectedVersion": "saved-sale-return-clock-v1",
+  "expectedProfile": "canonical-postgresql-jsonb-local-clock-v1",
+  "expectationMethod": "Literal source-derived cutoff strings and explicit approved-profile refusal cases, authored before implementation inspection. No date arithmetic library, adapter, reducer, compiler, DB, or browser generated an expected outcome.",
+  "expectedDiagnosticComparison": "Compare diagnostic code/sourceField as an unordered complete set; messages must be nonblank but literal prose is not part of this fixture.",
+  "rawObservationAssertions": "For every ready/unsupported result, raw and provenance deep-equal input, missing own raw keys remain absent, and returned data is deeply detached/frozen without mutating or freezing callers.",
+  "authorityLimits": [
+    "Opaque document provenance is retained, not authenticated.",
+    "This is a canonical current PostgreSQL JSONB profile; no Windows locale/SQL Server runtime equivalence is claimed.",
+    "No default date/time/midnight, timezone conversion, rounding, ledger query, live session authority, or bill-closing integration is introduced."
+  ],
+  "sourceReferences": [
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "lines": "10104-10106,10197",
+      "fact": "VCH_DATE supplies displayed day; VCH_TIME supplies formatted HH:mm:ss; concatenate for MsAcBal."
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "lines": "1463-1487",
+      "fact": "Ledger cutoff formatted to seconds; opening < and helper closing <= remain separate later-consumer semantics."
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "lines": "5648-5649",
+      "fact": "Current SL_DATA VCH_DATE is @db.Date and VCH_TIME is @db.Timestamp(6)."
+    }
+  ],
+  "cases": [
+    {
+      "id": "R01",
+      "reason": "Whole seconds remain exact",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-10T12:34:56"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:34:56",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R02",
+      "reason": "Date comes from VCH_DATE when saved timestamp has prior day",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R03",
+      "reason": "Future timestamp date never replaces voucher date",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-01-01",
+          "VCH_TIME": "2025-12-31T23:59:59.999999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-01-01 23:59:59",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R04",
+      "reason": "Midnight fraction does not round or change saved date",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-12-31",
+          "VCH_TIME": "2024-12-31T23:59:59.999999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-12-31 23:59:59",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R05",
+      "reason": "Lower Gregorian boundary",
+      "input": {
+        "raw": {
+          "VCH_DATE": "0001-01-01",
+          "VCH_TIME": "0001-01-01T00:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "0001-01-01 00:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R06",
+      "reason": "Upper Gregorian boundary with no rounding overflow",
+      "input": {
+        "raw": {
+          "VCH_DATE": "9999-12-31",
+          "VCH_TIME": "9999-12-31T23:59:59.999999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "9999-12-31 23:59:59",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R07",
+      "reason": "Timestamp day is independently valid even far from voucher day",
+      "input": {
+        "raw": {
+          "VCH_DATE": "9999-12-31",
+          "VCH_TIME": "0001-01-01T00:00:00.000001"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "9999-12-31 00:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R08",
+      "reason": "Leap year divisible by four",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-02-29",
+          "VCH_TIME": "2024-02-29T01:02:03.000004"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-02-29 01:02:03",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R09",
+      "reason": "Year divisible by 400 is leap",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2000-02-29",
+          "VCH_TIME": "2000-02-29T06:07:08"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2000-02-29 06:07:08",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R10",
+      "reason": "Later 400-year leap boundary",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2400-02-29",
+          "VCH_TIME": "2400-02-29T09:10:11"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2400-02-29 09:10:11",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R11",
+      "reason": "1900 February28 remains valid",
+      "input": {
+        "raw": {
+          "VCH_DATE": "1900-02-28",
+          "VCH_TIME": "1900-02-28T12:13:14"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "1900-02-28 12:13:14",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R12",
+      "reason": "2100 February28 remains valid",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2100-02-28",
+          "VCH_TIME": "2100-02-28T15:16:17"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2100-02-28 15:16:17",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R13",
+      "reason": "One fractional digit discarded",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.9"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R14",
+      "reason": "Two fractional digits discarded",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.99"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R15",
+      "reason": "Three fractional digits discarded",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R16",
+      "reason": "Four fractional digits discarded",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.9999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R17",
+      "reason": "Five fractional digits discarded",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.99999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R18",
+      "reason": "Six fractional digits discarded",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.999999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R19",
+      "reason": "All-zero fraction retained raw",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.000000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 12:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R20",
+      "reason": "Clock at apparent DST gap is a local value without timezone conversion",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-03-10",
+          "VCH_TIME": "2024-03-10T02:30:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-03-10 02:30:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R21",
+      "reason": "Clock at apparent DST overlap is not disambiguated with a timezone",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-11-03",
+          "VCH_TIME": "2024-11-03T01:30:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-11-03 01:30:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R22",
+      "reason": "Gregorian lower-century valid leap year",
+      "input": {
+        "raw": {
+          "VCH_DATE": "0004-02-29",
+          "VCH_TIME": "0004-02-29T23:00:01"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "0004-02-29 23:00:01",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R23",
+      "reason": "Negative UTC-offset-looking day mismatch has no implicit shift",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-11T00:00:00.000001"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2024-07-10 00:00:00",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "R24",
+      "reason": "Timestamp leap date valid while voucher date is ordinary",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2023-03-01",
+          "VCH_TIME": "2024-02-29T23:59:59.999999"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "ready",
+        "cutoffLocalSecond": "2023-03-01 23:59:59",
+        "diagnostics": [],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D01",
+      "reason": "Year zero refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "0000-01-01",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D02",
+      "reason": "Five-digit year refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "10000-01-01",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D03",
+      "reason": "BC/negative year refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "-0001-01-01",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D04",
+      "reason": "Non-leap February29",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2023-02-29",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D05",
+      "reason": "Century not divisible by400",
+      "input": {
+        "raw": {
+          "VCH_DATE": "1900-02-29",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D06",
+      "reason": "Future century not divisible by400",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2100-02-29",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D07",
+      "reason": "Month zero",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-00-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D08",
+      "reason": "Month13",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-13-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D09",
+      "reason": "Day zero",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-01-00",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D10",
+      "reason": "Day32",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-01-32",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D11",
+      "reason": "April31",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-04-31",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D12",
+      "reason": "February30",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-02-30",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D13",
+      "reason": "Unpadded month",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-7-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D14",
+      "reason": "Unpadded day",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-1",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D15",
+      "reason": "Three-digit year",
+      "input": {
+        "raw": {
+          "VCH_DATE": "024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D16",
+      "reason": "Date column cannot contain timestamp",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10T00:00:00",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D17",
+      "reason": "Date column SQL timestamp refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10 00:00:00",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D18",
+      "reason": "Compact date refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "20240710",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D19",
+      "reason": "Locale date refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "07/10/2024",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D20",
+      "reason": "Ambiguous locale date refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "10/07/2024",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D21",
+      "reason": "Date offset suffix refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10Z",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D22",
+      "reason": "No leading trim",
+      "input": {
+        "raw": {
+          "VCH_DATE": " 2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D23",
+      "reason": "No trailing trim",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10 ",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D24",
+      "reason": "Terminal newline is not accepted by regex end anchor",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10\n",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D25",
+      "reason": "Carriage return refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10\r",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D26",
+      "reason": "Unicode line separator refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10\u2028",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D27",
+      "reason": "Unicode nonbreaking space refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "\u00a02024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D28",
+      "reason": "Positive infinity refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "infinity",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D29",
+      "reason": "Negative infinity refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "-infinity",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D30",
+      "reason": "Blank date not defaulted",
+      "input": {
+        "raw": {
+          "VCH_DATE": "",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D31",
+      "reason": "Space-only date not defaulted",
+      "input": {
+        "raw": {
+          "VCH_DATE": " ",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "D32",
+      "reason": "Fullwidth Unicode digits refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "\uff12\uff10\uff12\uff14-\uff10\uff17-\uff11\uff10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T01",
+      "reason": "Timestamp year zero refused although day not used",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "0000-01-01T00:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T02",
+      "reason": "Timestamp year10000 refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "10000-01-01T00:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T03",
+      "reason": "Invalid timestamp leap day refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2023-02-29T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T04",
+      "reason": "Invalid timestamp century leap day refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "1900-02-29T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T05",
+      "reason": "Invalid future timestamp century leap day refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2100-02-29T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T06",
+      "reason": "Timestamp month zero",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-00-10T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T07",
+      "reason": "Timestamp month13",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-13-10T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T08",
+      "reason": "Timestamp day zero",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-00T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T09",
+      "reason": "Timestamp day32",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-32T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T10",
+      "reason": "Timestamp April31",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-04-31T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T11",
+      "reason": "Hour24 not normalized into next day",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T24:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T12",
+      "reason": "Hour25",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T25:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T13",
+      "reason": "Minute60",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:60:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T14",
+      "reason": "Second60 / leap-second normalization refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:60"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T15",
+      "reason": "Negative hour",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T-1:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T16",
+      "reason": "Unpadded hour",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T1:02:03"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T17",
+      "reason": "Unpadded minute",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T01:2:03"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T18",
+      "reason": "Unpadded second",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T01:02:3"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T19",
+      "reason": "Unpadded timestamp month",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-7-09T01:02:03"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T20",
+      "reason": "Unpadded timestamp day",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-9T01:02:03"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T21",
+      "reason": "SQL-space timestamp is outside JSONB profile",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09 12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T22",
+      "reason": "Lowercase separator refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09t12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T23",
+      "reason": "Missing clock refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T24",
+      "reason": "Time-only fallback refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T25",
+      "reason": "Missing seconds refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T26",
+      "reason": "Empty fraction refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00."
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T27",
+      "reason": "More than six fractional digits refused, not truncated",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.1234567"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T28",
+      "reason": "Comma fraction refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00,123"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T29",
+      "reason": "Exponent fraction refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.1e2"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T30",
+      "reason": "UTC suffix refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00Z"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T31",
+      "reason": "Positive offset refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00+05:30"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T32",
+      "reason": "Negative offset refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00-04:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T33",
+      "reason": "Named zone refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00 UTC"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T34",
+      "reason": "No leading trim",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": " 2024-07-09T12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T35",
+      "reason": "No trailing trim",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00 "
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T36",
+      "reason": "Terminal newline refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00\n"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T37",
+      "reason": "Terminal carriage return refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00\r"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T38",
+      "reason": "Unicode line separator refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00\u2028"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T39",
+      "reason": "NUL refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00\u0000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T40",
+      "reason": "Infinite timestamp refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "infinity"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T41",
+      "reason": "Negative infinite timestamp refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "-infinity"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T42",
+      "reason": "Blank time never becomes midnight",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": ""
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "T43",
+      "reason": "Space-only time never becomes midnight",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": " "
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N01",
+      "reason": "SQLNULL date is distinct from missing and blank",
+      "input": {
+        "raw": {
+          "VCH_DATE": null,
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "null-saved-column",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N02",
+      "reason": "SQLNULL time is distinct from missing and blank",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": null
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "null-saved-column",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N03",
+      "reason": "Missing own date key remains missing",
+      "input": {
+        "raw": {
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "missing-saved-column",
+            "sourceField": "VCH_DATE"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N04",
+      "reason": "Missing own time key remains missing",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "missing-saved-column",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N05",
+      "reason": "Both absent columns retained as empty raw",
+      "input": {
+        "raw": {},
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "missing-saved-column",
+            "sourceField": "VCH_DATE"
+          },
+          {
+            "code": "missing-saved-column",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N06",
+      "reason": "BothNULL have independent diagnoses",
+      "input": {
+        "raw": {
+          "VCH_DATE": null,
+          "VCH_TIME": null
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "null-saved-column",
+            "sourceField": "VCH_DATE"
+          },
+          {
+            "code": "null-saved-column",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N07",
+      "reason": "NULL and absent are not collapsed",
+      "input": {
+        "raw": {
+          "VCH_DATE": null
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "null-saved-column",
+            "sourceField": "VCH_DATE"
+          },
+          {
+            "code": "missing-saved-column",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "N08",
+      "reason": "Both malformed source fields diagnosed",
+      "input": {
+        "raw": {
+          "VCH_DATE": "1900-02-29",
+          "VCH_TIME": "2024-07-09T24:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "unsupported",
+        "cutoffLocalSecond": null,
+        "diagnostics": [
+          {
+            "code": "unsupported-saved-date",
+            "sourceField": "VCH_DATE"
+          },
+          {
+            "code": "unsupported-saved-time",
+            "sourceField": "VCH_TIME"
+          }
+        ],
+        "retainsRawAndProvenance": true
+      }
+    },
+    {
+      "id": "E01",
+      "reason": "Null input",
+      "input": null,
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E02",
+      "reason": "Array input",
+      "input": [],
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E03",
+      "reason": "Missing raw and provenance",
+      "input": {},
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E04",
+      "reason": "Missing provenance",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E05",
+      "reason": "Missing raw",
+      "input": {
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E06",
+      "reason": "Null raw envelope",
+      "input": {
+        "raw": null,
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E07",
+      "reason": "Array raw envelope",
+      "input": {
+        "raw": [],
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E08",
+      "reason": "Null provenance",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": null
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E09",
+      "reason": "Array provenance",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": []
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E10",
+      "reason": "Extra wrapper key refused",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        },
+        "representation": "jsonb"
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E11",
+      "reason": "Client cutoff cannot supply a fallback",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000",
+          "CUT_OFF": "2024-07-10 12:00:00"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E12",
+      "reason": "Numeric date is not coerced",
+      "input": {
+        "raw": {
+          "VCH_DATE": 20240710,
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E13",
+      "reason": "Numeric time is not coerced",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": 0
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E14",
+      "reason": "Boolean time is not coerced",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": false
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E15",
+      "reason": "Missing document version",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E16",
+      "reason": "Caller qualification cannot be supplied",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "physical-observation-v1:revision-17",
+          "clockStatus": "qualified"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E17",
+      "reason": "documentIdentity blank",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E18",
+      "reason": "documentIdentity leading space",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": " leading",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E19",
+      "reason": "documentIdentity trailing space",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "trailing ",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E20",
+      "reason": "documentIdentity control character",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "line\nbreak",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E21",
+      "reason": "documentIdentity nonASCII",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "\u00e9",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E22",
+      "reason": "documentIdentity over256",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E23",
+      "reason": "documentIdentity NULL",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": null,
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E24",
+      "reason": "documentIdentity number",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": 42,
+          "documentVersion": "physical-observation-v1:revision-17"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E25",
+      "reason": "documentVersion blank",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": ""
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E26",
+      "reason": "documentVersion leading space",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": " leading"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E27",
+      "reason": "documentVersion trailing space",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "trailing "
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E28",
+      "reason": "documentVersion control character",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "line\nbreak"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E29",
+      "reason": "documentVersion nonASCII",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "\u00e9"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E30",
+      "reason": "documentVersion over256",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E31",
+      "reason": "documentVersion NULL",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": null
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    },
+    {
+      "id": "E32",
+      "reason": "documentVersion number",
+      "input": {
+        "raw": {
+          "VCH_DATE": "2024-07-10",
+          "VCH_TIME": "2024-07-09T12:00:00.900000"
+        },
+        "provenance": {
+          "documentIdentity": "saved-return:tenant-test/01/01/2024/R13/00017",
+          "documentVersion": 42
+        }
+      },
+      "expected": {
+        "status": "invalid-input",
+        "observation": null,
+        "diagnosticCode": "invalid-input"
+      }
+    }
+  ],
+  "nonJsonRuntimeCasesForLaterTests": [
+    {
+      "id": "P01",
+      "construction": "getter on raw.VCH_DATE",
+      "expectation": "invalid-input, observation null, getter invocation count remains0"
+    },
+    {
+      "id": "P02",
+      "construction": "getter on provenance.documentVersion",
+      "expectation": "invalid-input, observation null, getter invocation count remains0"
+    },
+    {
+      "id": "P03",
+      "construction": "inherited raw.VCH_DATE on nonplain custom-prototype object",
+      "expectation": "invalid-input; inherited field cannot stand in for missing own observation"
+    },
+    {
+      "id": "P04",
+      "construction": "cycle in an otherwise malformed wrapper or raw value",
+      "expectation": "invalid-input without throwing"
+    },
+    {
+      "id": "P05",
+      "construction": "own symbol key at wrapper/raw/provenance",
+      "expectation": "invalid-input; exact plain data envelope cannot silently drop a key"
+    },
+    {
+      "id": "P06",
+      "construction": "nonenumerable extra own key at wrapper/raw/provenance",
+      "expectation": "invalid-input; exact plain data envelope cannot silently drop a key"
+    },
+    {
+      "id": "P07",
+      "construction": "NaN/Infinity as raw field or document provenance",
+      "expectation": "invalid-input without coercion"
+    },
+    {
+      "id": "P08",
+      "construction": "mutate caller raw/provenance after result; attempt to mutate nested returned data",
+      "expectation": "returned detached snapshot unchanged, all output containers frozen, caller containers were not frozen"
+    },
+    {
+      "id": "P09",
+      "construction": "same raw with different opaque document identities/versions",
+      "expectation": "same cutoff, each provenance retained exactly; no cross-call mutable state or authority claim"
+    },
+    {
+      "id": "P10",
+      "construction": "provenance values of exactly256 printable ASCII characters and internal printable spaces",
+      "expectation": "ready; only outer whitespace/nonprintable/overlimit are refused"
+    }
+  ]
+}

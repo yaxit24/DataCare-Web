@@ -246,6 +246,8 @@ export function computeLine(
   line: SaleLineInput,
   policy?: RoundingPolicy,
   amountType: LineAmountType = '',
+  /** CO_SET_NEW.LBR_WITH_GHT; defaults to the desktop's blank default of true. */
+  labourWithGhat: boolean = true,
 ): {
   fine: number;
   metal: number;
@@ -274,6 +276,12 @@ export function computeLine(
           pct: line.labourPct,
           metalAmount: metal,
           fixed: line.labourFixed,
+          // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
+          // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
+          // default 'Y' at MS_OPNCOMP.cs:1224-1226). This was omitted entirely, so labour was
+          // understated by ghat x rate on every line carrying ghat weight.
+          ghatWt: line.ghtWt,
+          withGhat: labourWithGhat,
         },
         policy,
       )
@@ -563,6 +571,8 @@ interface WriteSaleContext {
   mainUser: string;
   persistedClock?: unknown;
   isEdit: boolean;
+  /** True only for desktop TR_SALE persisted quotation books (BOOK_DATA.MAIN_BOOK='SL QUOT'). */
+  quoteMode?: boolean;
   /** Persisted header read back before the rewrite, for the USER_DATA per-field edit audit. */
   persistedHeader?: Record<string, unknown>;
   /** User performing the edit (desktop NEW_USER); the original stays in MAIN_USER/USER_NAME. */
@@ -599,6 +609,37 @@ async function configuredSaleBookNameTx(
   return String(rows[0]?.BOOK_NAME ?? '').trim();
 }
 
+async function salesMainBookTx(tx: any, scope: CompleteSaleScope): Promise<string> {
+  const rows: Array<{ MAIN_BOOK: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "MAIN_BOOK" FROM "BOOK_DATA"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+        AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
+      ORDER BY row_id`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+  );
+  if (rows.length !== 1) {
+    throw new SaleValidationError(`sale book configuration is ambiguous: ${scope.coBook}`);
+  }
+  return text(rows[0]?.MAIN_BOOK).toUpperCase();
+}
+
+async function assertSalesMainBookTx(
+  tx: any,
+  scope: CompleteSaleScope,
+  expectedMainBook: string,
+  label: string,
+): Promise<void> {
+  const mainBook = await salesMainBookTx(tx, scope);
+  if (mainBook !== expectedMainBook.toUpperCase()) {
+    throw new SaleValidationError(
+      `${label} requires BOOK_DATA.MAIN_BOOK='${expectedMainBook}' for book ${scope.coBook}`,
+    );
+  }
+}
+
 /**
  * Desktop TR_SALE write core. Main numbering is MAX(SL_DATA.VCH_NO)+1 by company/location/year/book
  * (TR_SALE.cs:15139); hidden numbering is allocated separately from TEMP_BOOK_DATA without year
@@ -622,7 +663,23 @@ async function writeSaleTx(
   const tenantId = input.scope.tenantId;
   const vchNo = ctx.vchNo;
   const key = keyOf(input.scope, vchNo);
-  const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'SALES');
+  const actualMainBook = await salesMainBookTx(tx, input.scope as CompleteSaleScope);
+  const isSalesQuotation = actualMainBook === 'SL QUOT';
+  if (ctx.quoteMode && !isSalesQuotation) {
+    throw new SaleValidationError(
+      `sales quotation requires BOOK_DATA.MAIN_BOOK='SL QUOT' for book ${input.scope.coBook}`,
+    );
+  }
+  if (isSalesQuotation && !ctx.quoteMode) {
+    throw new SaleValidationError(
+      `book ${input.scope.coBook} is SL QUOT; use the sales quotation workflow`,
+    );
+  }
+  const bookPolicy = await resolveBookPolicyTx(
+    tx,
+    input.scope,
+    isSalesQuotation ? 'SALES QUOTATION' : 'SALES',
+  );
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
 
   // TR_PURC.cs:12868 — counter code is mandatory only when CO_SET_NEW.COUNTER_STK='Y'; the flag is read
@@ -674,7 +731,12 @@ async function writeSaleTx(
     const rounded =
       line.rate == null ? line : { ...line, rate: roundingPolicy.roundItemRate(line.rate) };
     const effective = input.rateUnfix ? { ...rounded, metalAmount: 0, rate: undefined } : rounded;
-    const calc = computeLine(effective, roundingPolicy, behavior.saleAmountType);
+    const calc = computeLine(
+      effective,
+      roundingPolicy,
+      behavior.saleAmountType,
+      behavior.labourIncludesGhat,
+    );
     const basis = rounded.labourType === 'per_piece' ? num(rounded.pcs) : num(rounded.netWt);
     const generated = generatedLabourRate(calc.labour, basis, behavior.labourRateGeneration);
     return {
@@ -719,14 +781,22 @@ async function writeSaleTx(
       const metal = String(r.metal ?? '')
         .trim()
         .toUpperCase();
-      if (!item || !account)
+      if (!item) throw new SaleValidationError(`item not found or invalid: ${item || '?'}`);
+      if (!isSalesQuotation && !account)
         throw new SaleValidationError(`missing GROUP_MAST.SALE_AC for item ${item || '?'}`);
-      saleAcByItem[item] = account;
-      if (metal === 'G' || metal === 'S') metalByItem[item] = metal;
+      if (metal !== 'G' && metal !== 'S') {
+        throw new SaleValidationError(`invalid ITEM_MAST.IT_TYPE for item ${item || '?'}`);
+      }
+      if (account) saleAcByItem[item] = account;
+      metalByItem[item] = metal;
       nameByItem[item] = r.iname != null ? String(r.iname) : '';
     }
+    const missingItems = itCodes.filter((item) => !metalByItem[item]);
+    if (missingItems.length) {
+      throw new SaleValidationError(`item configuration missing: ${missingItems.join(', ')}`);
+    }
     const missing = itCodes.filter((item) => !saleAcByItem[item]);
-    if (missing.length)
+    if (!isSalesQuotation && missing.length)
       throw new SaleValidationError(
         `item/group posting configuration missing: ${missing.join(', ')}`,
       );
@@ -750,7 +820,18 @@ async function writeSaleTx(
   // Hallmark charge (TR_SALE_HM): an extra hallmarking fee + its own GST, billed to the customer.
   // 0/absent ⇒ a normal sale, identical to before (no HM legs, TOT_AMT = item total).
   const hmAmt = round2s(num(input.hallmarkAmount));
-  const hmTaxPct = input.hmTaxPct ?? input.taxRatePct;
+  /**
+   * `SALES_WITH_HMTAX` — whether GST applies to the hallmark charge (P4).
+   *
+   * The desktop makes this a company switch and gives HM tax its own total row
+   * (TR_SALE_HM.cs / TR_PURC_HM.cs:9394). The web computed it whenever an `hmAmount` was supplied, so a shop
+   * configured not to charge GST on hallmarking was charging it anyway — a wrong tax figure on every
+   * hallmark bill, invisible because the setting appeared to exist.
+   *
+   * The CHARGE itself still posts; only its tax is gated, which is what the desktop does.
+   */
+  const hmTaxApplies = behavior.salesWithHallmarkTax;
+  const hmTaxPct = hmTaxApplies ? (input.hmTaxPct ?? input.taxRatePct) : 0;
   const hmTax = roundingPolicy.roundTaxAmount((hmAmt * hmTaxPct) / 100);
   const hmCgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax / 2);
   const hmSgst = interState ? 0 : roundingPolicy.roundTaxAmount(hmTax - hmCgst);
@@ -768,6 +849,7 @@ async function writeSaleTx(
   // TR_SALE.cs:15111-15128: taxable sale bill value >= PAN_CARD_VAL blocks save for the generic
   // cash party (00045), or when the selected party's persisted AC_MAST.AC_PANNO is blank.
   if (
+    !isSalesQuotation &&
     tenderThresholdDecision({
       cashAmount: num(input.cashAmt),
       priorCash: 0,
@@ -810,11 +892,11 @@ async function writeSaleTx(
     return configured;
   };
   const controlAc =
-    input.rateUnfix || totals.total === 0
+    isSalesQuotation || input.rateUnfix || totals.total === 0
       ? salesAc
       : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
   let cashAc = input.cashAc ?? 'CASH';
-  if (round2s(num(input.cashAmt)) !== 0) {
+  if (!isSalesQuotation && round2s(num(input.cashAmt)) !== 0) {
     cashAc = validateConfiguredAccount(
       'cash account',
       input.cashAc,
@@ -823,7 +905,7 @@ async function writeSaleTx(
   }
   // DC_Main.cs:2149-2165 + TR_SALE.cs:14978-14988: cumulative party cash strictly above
   // CASH_LIMIT blocks save; the generic cash party 00045 is exempt and limit 0 disables the gate.
-  if (round2s(num(input.cashAmt)) > 0 && input.acCode !== '00045') {
+  if (!isSalesQuotation && round2s(num(input.cashAmt)) > 0 && input.acCode !== '00045') {
     const priorCash = await partyCashReceivedTx(tx, input.scope, input.acCode, cashAc);
     if (
       tenderThresholdDecision({
@@ -870,7 +952,7 @@ async function writeSaleTx(
   // 6 labour income, 7 cash purchase, 8 scheme bonus. The Rojmel's advance row names slot 4.
   let advanceAc = '';
   let kasarAc = input.kasarAc ?? 'KASAR';
-  if (totals.roundOff !== 0 || kasar !== 0) {
+  if (!isSalesQuotation && (totals.roundOff !== 0 || kasar !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
@@ -879,6 +961,7 @@ async function writeSaleTx(
   // Resolve and reserve each exact desktop tag instance inside this voucher transaction.
   const issuedTags = new Map<number, Awaited<ReturnType<typeof issueTagTx>>>();
   for (const [index, line] of lines.entries()) {
+    if (isSalesQuotation) continue;
     if (!line.tagNo) continue;
     issuedTags.set(
       index,
@@ -890,6 +973,54 @@ async function writeSaleTx(
         IT_CODE: line.itCode,
       }),
     );
+  }
+
+  /**
+   * `NEGATIVE_STK_SALE` — refuse a sale that would drive loose stock below zero (P4).
+   *
+   * Tagged lines are already safe: `issueTagTx` reserves the exact instance and fails if it is not
+   * available. LOOSE lines had no check at all — this module writes a signed `MAIN_STOCK` row and
+   * moved on — so a shop could sell metal it did not hold, and the desktop's refusal
+   * ("Negative Stock is Not Allow", TR_SALE.cs:10398 and TR_SALE_HM.cs:7381) had no web equivalent.
+   *
+   * Gated on the setting because both behaviours are legitimate: a wholesale desk that books the
+   * purchase after the sale needs to go negative, which is exactly why the desktop made it a
+   * company switch rather than a rule.
+   *
+   * Balance is measured from `MAIN_STOCK` alone, which is the same ledger the movement is written
+   * to, so the check and the write cannot disagree about what stock is.
+   */
+  if (!isSalesQuotation && !behavior.negativeStockSale) {
+    const looseByItem = new Map<string, number>();
+    for (const line of lines) {
+      if (line.tagNo) continue;
+      const itCode = String(line.itCode ?? '').trim();
+      if (!itCode) continue;
+      const weight = num(line.netWt) || num(line.grossWt);
+      looseByItem.set(itCode, (looseByItem.get(itCode) ?? 0) + weight);
+    }
+    for (const [itCode, required] of looseByItem) {
+      if (!(required > 0)) continue;
+      const rows: Array<{ bal: unknown }> = await tx.$queryRawUnsafe(
+        `SELECT coalesce(sum(
+                  CASE WHEN "ITM_SIGN"='-' THEN -coalesce("ITM_NWT",0) ELSE coalesce("ITM_NWT",0) END
+                ),0)::float8 AS bal
+           FROM "MAIN_STOCK"
+          WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "IT_CODE"=$4
+            AND coalesce(nullif(btrim("TAG_NO"::text),''),'N')='N'`,
+        input.scope.tenantId,
+        key.CO_CODE,
+        key.LC_CODE,
+        itCode,
+      );
+      const available = Number(rows[0]?.bal ?? 0);
+      // 1e-6 absorbs the numeric(n,3) representation, not a real shortfall.
+      if (required - available > 1e-6) {
+        throw new SaleValidationError(
+          `negative stock is not allowed: item ${itCode} needs ${required.toFixed(3)} but only ${available.toFixed(3)} is in loose stock (CO_SET_NEW.NEGATIVE_STK_SALE is 'N')`,
+        );
+      }
+    }
   }
 
   const voucherDate = input.vchDate ? new Date(input.vchDate) : new Date();
@@ -1085,7 +1216,7 @@ async function writeSaleTx(
     .map((c, idx) => ({
       ...key,
       VCH_TYPE: bookPolicy.vchType,
-      INOUT_TYPE: 'O',
+      INOUT_TYPE: bookPolicy.inout,
       ENTRY_TYPE: 'S',
       SR_NO: idx + 1,
       ISR_NO: 1,
@@ -1252,27 +1383,29 @@ async function writeSaleTx(
   };
   Object.assign(header, { ACK_DATE: null });
 
-  const ledger = buildSaleLedger({
-    key,
-    acCode: input.acCode,
-    salesAc,
-    taxAc,
-    roundAc,
-    controlAc,
-    rateUnfix: input.rateUnfix,
-    vchType: bookPolicy.vchType,
-    totals,
-    incomeLegs,
-    payments: {
-      cashAc,
-      cashAmt: input.cashAmt,
-      bankAc: input.bankAc,
-      bankAmt: round2s(num(input.cardAmt) + num(input.upiAmt) + num(input.chequeAmt)),
-      oldGoldAc: input.oldGoldAc,
-      oldGoldAmt: round2s(oldGoldAmount + oldSilverAmount),
-    },
-  });
-  if (hmAmt > 0) {
+  const ledger = isSalesQuotation
+    ? []
+    : buildSaleLedger({
+        key,
+        acCode: input.acCode,
+        salesAc,
+        taxAc,
+        roundAc,
+        controlAc,
+        rateUnfix: input.rateUnfix,
+        vchType: bookPolicy.vchType,
+        totals,
+        incomeLegs,
+        payments: {
+          cashAc,
+          cashAmt: input.cashAmt,
+          bankAc: input.bankAc,
+          bankAmt: round2s(num(input.cardAmt) + num(input.upiAmt) + num(input.chequeAmt)),
+          oldGoldAc: input.oldGoldAc,
+          oldGoldAmt: round2s(oldGoldAmount + oldSilverAmount),
+        },
+      });
+  if (!isSalesQuotation && hmAmt > 0) {
     const hb = { ...key, VCH_TYPE: bookPolicy.vchType };
     ledger.push({
       ...hb,
@@ -1300,7 +1433,7 @@ async function writeSaleTx(
       SIGN: 'D',
     }); // billed to customer
   }
-  if (tcs > 0) {
+  if (!isSalesQuotation && tcs > 0) {
     // TCS collected on the bill: Cr TCS-payable, billed to the customer
     const tb = { ...key, VCH_TYPE: bookPolicy.vchType };
     ledger.push({
@@ -1320,7 +1453,7 @@ async function writeSaleTx(
       SIGN: 'D',
     });
   }
-  if (kasar > 0) {
+  if (!isSalesQuotation && kasar > 0) {
     // Kasar write-off: Dr KASAR, reduces what the customer owes
     const kb = { ...key, VCH_TYPE: bookPolicy.vchType };
     ledger.push({
@@ -1340,20 +1473,22 @@ async function writeSaleTx(
       SIGN: 'C',
     });
   }
-  ledger.push(
-    ...buildSaleFineLedger({
-      key,
-      acCode: input.acCode,
-      vchType: bookPolicy.vchType,
-      rateUnfix: input.rateUnfix,
-      lines: computed.map((c) => ({
-        metal: metalByItem[String(c.in.itCode).trim()] ?? 'G',
-        saleAc: saleAcByItem[String(c.in.itCode).trim()] ?? salesAc,
-        fine: c.calc.fine,
-      })),
-    }),
-  );
-  assertBalanced(ledger);
+  if (!isSalesQuotation) {
+    ledger.push(
+      ...buildSaleFineLedger({
+        key,
+        acCode: input.acCode,
+        vchType: bookPolicy.vchType,
+        rateUnfix: input.rateUnfix,
+        lines: computed.map((c) => ({
+          metal: metalByItem[String(c.in.itCode).trim()] ?? 'G',
+          saleAc: saleAcByItem[String(c.in.itCode).trim()] ?? salesAc,
+          fine: c.calc.fine,
+        })),
+      }),
+    );
+    assertBalanced(ledger);
+  }
 
   const cashAmt = round2s(num(input.cashAmt));
   const cardAmt = round2s(num(input.cardAmt));
@@ -1364,7 +1499,7 @@ async function writeSaleTx(
   // Sales-Order advance consumed into this bill (P0-3): the order's advance (already Cr customer)
   // settles part of this receivable → reduces BILL_OS. Clamped to the available advance + bill balance.
   let orderAdjust = 0;
-  if (input.orderRef?.ordNo != null) {
+  if (!isSalesQuotation && input.orderRef?.ordNo != null) {
     const av = await orderAdvanceAvailableTx(
       tx,
       input.scope,
@@ -1381,7 +1516,7 @@ async function writeSaleTx(
   const billOS = round2s(grandWithTcs - paidNow - kasar - orderAdjust);
   // TR_SALE.cs: MsDefaulterAc = 'Y' AND outstanding > 0 -> credit to a flagged party is blocked.
   // The flag is read from the persisted account (AC_MAST.DEFAULTER_AC), never from the request.
-  if (round2s(billOS) > 0) {
+  if (!isSalesQuotation && round2s(billOS) > 0) {
     const flagged: Array<{ d: string | null }> = await tx.$queryRawUnsafe(
       `SELECT "DEFAULTER_AC" AS d FROM "AC_MAST"
         WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "AC_CODE"::text=$3::text LIMIT 1`,
@@ -1612,6 +1747,10 @@ async function writeSaleTx(
 
   Object.assign(osRow, { LD_CODE: null });
 
+  // Built once and shared: the SL_DETL write set and the Rojmel projection must agree, and computing
+  // them twice is how they drift.
+  const detailRows = computed.map((c, idx) => buildSaleDetailRow(c, idx));
+
   // TR_SALE.cs:14209,15151: hidden book numbering is a separate TEMP_BOOK_DATA sequence.
   await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
     CO_CODE: input.scope.coCode,
@@ -1643,6 +1782,18 @@ async function writeSaleTx(
     });
   }
 
+  if (isSalesQuotation) {
+    await assertPeriodOpen(tx, tenantId, {
+      ledger: { table: 'AC_DATA', lines: [] },
+      writes: [{ table: 'SL_DATA', rows: [header] }],
+    });
+    await insertRowTx(tx, 'SL_DATA', tenantId, header);
+    for (const row of detailRows) await insertRowTx(tx, 'SL_DETL', tenantId, row);
+    for (const row of idtl) await insertRowTx(tx, 'SL_IDTL', tenantId, row);
+    for (const row of oldGoldDetl) await insertRowTx(tx, 'SL_PR_DETL', tenantId, row);
+    return { vchNo, totals };
+  }
+
   // The Rojmel — the day book the desktop binds to F11. A second projection of this sale showing metal
   // movement beside money, which AC_DATA cannot carry. Verified against the real desktop database:
   // 3179 rows, and a sale's three ledger legs become one metal row per detail line (the revenue leg
@@ -1653,9 +1804,6 @@ async function writeSaleTx(
   if (orderAdjust !== 0) {
     advanceAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 4);
   }
-  // Built once and shared: the SL_DETL write set and the Rojmel projection must agree, and computing
-  // them twice is how they drift.
-  const detailRows = computed.map((c, idx) => buildSaleDetailRow(c, idx));
   const rojmelRows = buildSaleRojmel(
     {
       scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
@@ -1859,11 +2007,48 @@ export async function createSale(
   });
 }
 
+/** Create a persisted TR_SALE `SL QUOT` voucher without ledger, tax, stock, rojmel, bill-OS or order postings. */
+export async function createSalesQuotation(
+  prisma: any,
+  input: SaleInput,
+  lines: SaleLineInput[],
+): Promise<SaleResult> {
+  completeSaleScope(input.scope);
+  const scope = input.scope;
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
+    const vchNo = await nextVoucherNoTx(tx, scope);
+    const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
+    return writeSaleTx(tx, input, lines, {
+      vchNo,
+      hdVchNo,
+      mainUser: String(input.mainUser ?? '').trim(),
+      persistedClock: undefined,
+      isEdit: false,
+      quoteMode: true,
+    });
+  });
+}
+
+export async function getSalesQuotation(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<Record<string, unknown>> {
+  completeSaleScope(scope);
+  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
+  });
+  return getSale(prisma, scope, requestedVoucherNo);
+}
+
 export interface DeleteSaleInput {
   scope: VoucherScope;
   vchNo: number | string;
   deleteUser?: string;
 }
+
+const SALES_QUOTATION_WRITE_TABLES = ['SL_DATA', 'SL_DETL', 'SL_IDTL', 'SL_PR_DETL'] as const;
 
 const SALE_WRITE_TABLES = [
   'SL_DATA',
@@ -1962,7 +2147,10 @@ async function releaseSaleReferencesTx(
         LC_CODE: scope.lcCode,
         TAG_NO: text(tag.TAG_NO),
         VCH_SRNO: Number(tag.VCH_SRNO ?? 0),
-        IT_CODE: text(tag.IT_CODE),
+        // NO IT_CODE: TAG_STOCK does not have that column (it carries IT_TYPE), and insertTagTx
+        // deliberately THROWS on an undeclared column rather than ignoring it. Including it aborted the
+        // entire reversal with `unknown TAG_STOCK column(s) IT_CODE` for any tag that lived only in
+        // TAG_STOCK — i.e. imported/legacy stock, which is exactly the case this restore path exists for.
         ITM_PCS: tag.ITM_PCS,
         ITM_GWT: tag.ITM_GWT,
         ITM_NWT: tag.ITM_NWT,
@@ -2267,6 +2455,54 @@ export async function getSale(
   });
 }
 
+/** Replace a sales quotation in-place, preserving the desktop hidden voucher identity. */
+export async function editSalesQuotation(
+  prisma: any,
+  input: SaleInput,
+  lines: SaleLineInput[],
+  requestedVoucherNo: number | string,
+): Promise<SaleResult> {
+  completeSaleScope(input.scope);
+  const scope = input.scope;
+  const voucherNo = formatVoucherNo(requestedVoucherNo);
+  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
+    const persisted = await persistedSaleHeaderTx(tx, scope, voucherNo);
+    const priorHeaderRow: Record<string, unknown> | undefined = (
+      await tx.$queryRawUnsafe(
+        `SELECT * FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+           AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+        ...saleParams(scope, voucherNo),
+      )
+    )[0];
+    await assertPeriodOpen(tx, scope.tenantId, {
+      ledger: {
+        table: 'AC_DATA',
+        lines: [{ CO_CODE: scope.coCode, VCH_DATE: persisted.VCH_DATE }],
+      },
+    });
+    await assertPeriodOpen(tx, scope.tenantId, {
+      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: requestedDate }] },
+    });
+    await deleteVoucherWriteSetTx(tx, {
+      tables: SALES_QUOTATION_WRITE_TABLES,
+      key: { scope, voucherNo },
+      tempBook: { voucherNo: formatVoucherNo(text(persisted.HD_VCH_NO)) },
+    });
+    return writeSaleTx(tx, input, lines, {
+      vchNo: Number(voucherNo),
+      hdVchNo: formatVoucherNo(text(persisted.HD_VCH_NO)),
+      mainUser: text(persisted.MAIN_USER),
+      persistedClock: persisted.VCH_CLOCK,
+      isEdit: true,
+      persistedHeader: priorHeaderRow,
+      editingUser: input.mainUser ?? null,
+      quoteMode: true,
+    });
+  });
+}
+
 /** Replace a sale in-place, preserving the desktop header identity and audit-free edit semantics. */
 export async function editSale(
   prisma: any,
@@ -2426,6 +2662,102 @@ export async function deleteSale(prisma: any, input: DeleteSaleInput): Promise<{
       });
     }
     for (const tag of legacyRestores) await restoreTagTx(tx, tenantId, tag);
+    return { reversed: true };
+  });
+}
+
+/** Delete a TR_SALE `SL QUOT` voucher and preserve the desktop delete audit trail. */
+export async function deleteSalesQuotation(
+  prisma: any,
+  input: DeleteSaleInput,
+): Promise<{ reversed: true }> {
+  completeSaleScope(input.scope);
+  const scope = input.scope;
+  const tenantId = scope.tenantId;
+  const voucherNo = formatVoucherNo(input.vchNo);
+  const key = keyOf(scope, voucherNo);
+  return withTenant(prisma, tenantId, async (tx: any) => {
+    await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
+    const bookPolicy = await resolveBookPolicyTx(tx, scope, 'SALES QUOTATION');
+    const configuredBookName = await configuredSaleBookNameTx(tx, scope);
+    const header = await persistedSaleHeaderTx(tx, scope, voucherNo, [
+      'AC_CODE',
+      'AC_NAME',
+      'TOT_AMT',
+      'OLD_GL_AMT',
+      'OLD_SL_AMT',
+      'CASH_AMT',
+      'CARD_AMT',
+      'CHQ_AMT',
+      'CASH_PAID',
+      'KASAR_AMT',
+      'VCH_DESC',
+    ]);
+    const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","IT_CODE","TAG_NO","NET_AMT","IT_TYPE","ITM_NWT"
+         FROM "SL_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
+      ...saleParams(scope, voucherNo),
+    );
+    await reverseVoucherTx(tx, tenantId, {
+      tables: [...SALES_QUOTATION_WRITE_TABLES],
+      key,
+    });
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+        AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coBook,
+      text(header.HD_VCH_NO),
+    );
+    const deletedAt = new Date();
+    const common = {
+      ...key,
+      VCH_DATE: header.VCH_DATE,
+      VCH_TIME: header.VCH_TIME,
+      DELETE_DATE: deletedAt,
+      DELETE_TIME: deletedAt,
+      VCH_TYPE: bookPolicy.vchType,
+      BOOK_NAME: configuredBookName,
+      AC_CODE: header.AC_CODE,
+      AC_NAME: header.AC_NAME,
+      HD_VCH_NO: header.HD_VCH_NO,
+      MAIN_USER: header.MAIN_USER,
+      DELETE_USER: input.deleteUser ?? 'system',
+    };
+    await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+      ...common,
+      SR_NO: 0,
+      VCH_VAL_DR: num(header.TOT_AMT),
+      VCH_VAL_CR: round2s(
+        num(header.OLD_GL_AMT) +
+          num(header.OLD_SL_AMT) +
+          num(header.CASH_AMT) +
+          num(header.CARD_AMT) +
+          num(header.CHQ_AMT) -
+          num(header.CASH_PAID) +
+          num(header.KASAR_AMT),
+      ),
+      FINE_TYPE: 'A',
+      VCH_FINE_DR: 0,
+      VCH_FINE_CR: 0,
+      VCH_DESC: text(header.VCH_DESC).slice(0, 150),
+    });
+    for (const detail of details) {
+      await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+        ...common,
+        SR_NO: num(detail.SR_NO),
+        VCH_VAL_DR: num(detail.NET_AMT),
+        VCH_VAL_CR: 0,
+        FINE_TYPE: text(detail.IT_TYPE),
+        VCH_FINE_DR: 0,
+        VCH_FINE_CR: num(detail.ITM_NWT),
+        VCH_DESC: `ItCode / ${text(detail.IT_CODE)}   TagNo / ${text(detail.TAG_NO)}`.slice(0, 150),
+      });
+    }
     return { reversed: true };
   });
 }

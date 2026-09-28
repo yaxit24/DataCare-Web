@@ -15,8 +15,8 @@ import { withTenant } from '@datacare/db';
  * would diverge from the desktop (it would also silently re-lock historical data on every write),
  * so the web mirrors the desktop placement: apply on company open, then read LOCK_DATE only.
  *
- * The lock only ever moves forward: a company already locked to a later date is left untouched,
- * matching the desktop's single UPDATE followed by its in-memory MsLockDt assignment.
+ * Existing web preservation rule: the lock only moves forward. The primary desktop assignment is
+ * unconditional; this monotonic protection is an explicit web difference, not claimed source equality.
  */
 export class LastDayLockConfigurationError extends Error {
   constructor(message: string) {
@@ -44,7 +44,7 @@ export async function applyLastDayLockTx(
               (current_date - INTERVAL '1 day')::date::text AS yesterday
          FROM "CO_SET"
         WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text
-        ORDER BY row_id`,
+        ORDER BY row_id FOR UPDATE`,
       tenantId,
       coCode,
     );

@@ -1,0 +1,98 @@
+{
+ "form": "MS_ACCT",
+ "tables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "AC_MAST_SRNO",
+  "ADD_MAST",
+  "AD_MEMB",
+  "CO_MAST",
+  "OP_DATA",
+  "STATE_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "AC_MAST": [
+    "AC_ADD1",
+    "AC_ADD2",
+    "AC_ADD3",
+    "AC_ADHAR_NO",
+    "AC_AREA",
+    "AC_CITY",
+    "AC_CODE",
+    "AC_COUNTRY",
+    "AC_CR_DAYS",
+    "AC_DISTRICT",
+    "AC_EMAIL",
+    "AC_GR",
+    "AC_GSTNO",
+    "AC_GST_TYPE",
+    "AC_INT_PRC",
+    "AC_KHATA_NO",
+    "AC_MAIN_GR",
+    "AC_MOBILE",
+    "AC_MOBILE2",
+    "AC_NAME",
+    "AC_PANNO",
+    "AC_PERSON",
+    "AC_PHONE",
+    "AC_PHONE2",
+    "AC_PIN",
+    "AC_REF_CODE",
+    "AC_REF_NAME",
+    "AC_SHORT",
+    "AC_STATE",
+    "AC_TYPE",
+    "AN_DATE",
+    "APP_TRFR",
+    "BANK_AC_NO",
+    "BANK_AREA",
+    "BANK_DETL",
+    "BANK_NAME",
+    "BANK_RTGS_NO",
+    "BR_DATE",
+    "CO_CODE",
+    "DATA_TRFR",
+    "DPC_PRC",
+    "LAST_DATE",
+    "LAST_VISIT",
+    "LC_CODE",
+    "L_BR_DATE",
+    "MAIN_USER",
+    "VISIT_TRAN"
+   ]
+  },
+  "UPDATE": [
+   "AC_MAST"
+  ],
+  "DELETE": [
+   "AC_DATA",
+   "AC_MAST",
+   "AC_MAST_SRNO",
+   "OP_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "AC_MAST_SRNO",
+  "ADD_MAST",
+  "AD_MEMB",
+  "CO_MAST",
+  "OP_DATA",
+  "STATE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 38,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 9652
+}

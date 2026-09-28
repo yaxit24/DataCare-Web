@@ -1,0 +1,296 @@
+{
+ "report": "JmUdAmt",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section6",
+     "kind": "ReportHeader",
+     "height": 320,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 90,
+       "top": 15,
+       "width": 1005,
+       "height": 240,
+       "text": "Jama"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 1245,
+       "top": 15,
+       "width": 735,
+       "height": 230,
+       "text": "VchDt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 2040,
+       "top": 15,
+       "width": 570,
+       "height": 230,
+       "text": "VchNo"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 2640,
+       "top": 15,
+       "width": 630,
+       "height": 230,
+       "text": "Type"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 3300,
+       "top": 15,
+       "width": 1980,
+       "height": 240,
+       "text": "Account Name"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 360,
+       "top": 285,
+       "width": 4920,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 260,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 90,
+       "top": 30,
+       "width": 1005,
+       "height": 188,
+       "dataSource": "{AC_DATA.CR_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 1245,
+       "top": 30,
+       "width": 825,
+       "height": 188,
+       "dataSource": "{AC_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 2040,
+       "top": 30,
+       "width": 570,
+       "height": 230,
+       "dataSource": "{AC_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 2640,
+       "top": 30,
+       "width": 630,
+       "height": 230,
+       "dataSource": "{AC_DATA.VCH_TYPE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 3300,
+       "top": 30,
+       "width": 1980,
+       "height": 230,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 657,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "NumberField",
+   "text": "{AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.DESCR}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{AC_DATA.CO_YEAR}+{AC_DATA.CO_BOOK}+{AC_DATA.VCH_NO}"
+  },
+  {
+   "name": "FineWt",
+   "ref": "{@FineWt}",
+   "type": "UnknownField",
+   "text": "if {MAIN_STOCK.SIGN} = '-' then {MAIN_STOCK.ITM_FINE} else -{MAIN_STOCK.ITM_FINE}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "Remarks",
+   "ref": "{@Remarks}",
+   "type": "UnknownField",
+   "text": "{AC_DATA.DESCR}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{AC_DATA.CO_YEAR}+{AC_DATA.CO_BOOK}+{AC_DATA.VCH_NO}"
+  },
+  {
+   "name": "AcName",
+   "ref": "{@AcName}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_CITY} <>\"\" then {AC_MAST.AC_NAME} & \" ,\" &{AC_MAST.AC_CITY} else {AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "BalCrDr",
+   "ref": "{@BalCrDr}",
+   "type": "StringField",
+   "text": "if {@ClBal} > 0 then 'Jama' else 'Udhar';"
+  },
+  {
+   "name": "ClBal",
+   "ref": "{@ClBal}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3} + {CO_MAST.CO_CITY}+' '+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CompanyAcGroup",
+   "ref": "{@CompanyAcGroup}",
+   "type": "StringField",
+   "text": "{AC_DATA.AC_CODE}"
+  },
+  {
+   "name": "CrAmt",
+   "ref": "{@CrAmt}",
+   "type": "NumberField",
+   "text": "if {AC_DATA.CR_AMT} <> 0 THEN {AC_DATA.CR_AMT}"
+  },
+  {
+   "name": "CustName",
+   "ref": "{@CustName}",
+   "type": "StringField",
+   "text": "''"
+  },
+  {
+   "name": "DrAmt",
+   "ref": "{@DrAmt}",
+   "type": "NumberField",
+   "text": "if {AC_DATA.DR_AMT} <> 0 THEN {AC_DATA.DR_AMT}"
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "date(2000,03,01)"
+  },
+  {
+   "name": "OpBal",
+   "ref": "{@OpBal}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "PartyNewPage",
+   "ref": "{@PartyNewPage}",
+   "type": "StringField",
+   "text": "'N'"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "\"LEDGER REPORT\""
+  },
+  {
+   "name": "ToDate",
+   "ref": "{@ToDate}",
+   "type": "DateField",
+   "text": "date(2001,03,31)"
+  },
+  {
+   "name": "VchDate",
+   "ref": "{@VchDate}",
+   "type": "DateField",
+   "text": "{AC_DATA.VCH_DATE}"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 11,
+ "formulaCount": 23
+}

@@ -1,0 +1,2293 @@
+{
+  "generatedAt": "2026-09-28",
+  "proves": "Each high-severity Crystal layout renders, binds and positions reproducibly; any engine or spec change alters the checksum.",
+  "doesNotProve": "Pixel equality with desktop output. That requires the desktop runtime and is tracked as G5.",
+  "reports": [
+    {
+      "report": "AcCrList",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 24,
+      "htmlBytes": 5767,
+      "sha256": "69eb0fd836157b16b8dcf5d28f249a7f3ba566c63f34024f70c4dd743aecf711"
+    },
+    {
+      "report": "AcDrList",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 14,
+      "objects": 27,
+      "htmlBytes": 6382,
+      "sha256": "afff3a0276ab1199d576349ed2f79693e67b2443d299b87941f0cf14322ed909"
+    },
+    {
+      "report": "AcFineGold",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 31,
+      "htmlBytes": 6815,
+      "sha256": "7b4f0a7af965a2b19a1f7b1fb86da1e75bb8f81b04861665705de41ada7f8086"
+    },
+    {
+      "report": "AcFineSilver",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 31,
+      "htmlBytes": 6823,
+      "sha256": "525928445117a46d37019bbce14fc3b0f9bdaddfd560727c53f70624db5fe3c6"
+    },
+    {
+      "report": "AcGroupRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 44,
+      "htmlBytes": 9043,
+      "sha256": "3a1d800606577878598cdfb0083fea01107d72757f98ddbb07dcacbf6501e9aa"
+    },
+    {
+      "report": "AcLastVisit",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 7,
+      "objects": 15,
+      "htmlBytes": 4717,
+      "sha256": "6ebf5908a45d760040508ee0f8e10fd0170c84c61a19286fa6a96e667584ff03"
+    },
+    {
+      "report": "AcLedger",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 11,
+      "objects": 41,
+      "htmlBytes": 9184,
+      "sha256": "ad47877680fb10b0c76c1e2cf8afeddafe6b16ded53727f978ac26fdaec5d562"
+    },
+    {
+      "report": "AcLedgerSelected",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 16,
+      "objects": 47,
+      "htmlBytes": 10475,
+      "sha256": "580b852fe565661d71a65c2374d64bddde5a4478b3497796995f4b9559dd5e80"
+    },
+    {
+      "report": "AcOsArea",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 14,
+      "objects": 46,
+      "htmlBytes": 9372,
+      "sha256": "79b8b9289175dd42a16250989a269267be7df697eb4b92e410c7bd76ebed7c5e"
+    },
+    {
+      "report": "AcOsWithAdd",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 43,
+      "htmlBytes": 8247,
+      "sha256": "75e9520f9dbe2483bc1c9c9249f0010537c6f11e3ffdcc2f3956e187bc33f7f3"
+    },
+    {
+      "report": "AcPurcRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 76,
+      "htmlBytes": 14741,
+      "sha256": "f48954261ef7ed71f92a5b1de67e7f8bfa4a51c0cb39e6ad16ef2ee23e0a6203"
+    },
+    {
+      "report": "AcPurcSummRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 76,
+      "htmlBytes": 14749,
+      "sha256": "f78a2579c92065623f55cfba2ce2c7c28e341470f0d764eef9ea2b54e0952d5f"
+    },
+    {
+      "report": "AcPurcWhRpt",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 11,
+      "objects": 65,
+      "htmlBytes": 13482,
+      "sha256": "88eece29f6bf0359b5613bc28849a952a73a654bf489dc63700d8da7179e8f2f"
+    },
+    {
+      "report": "AcSaleWhRpt",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 11,
+      "objects": 65,
+      "htmlBytes": 13482,
+      "sha256": "4cf988323a4026b58656b8878177adff42a64a36892b218c78e13cde60d40c92"
+    },
+    {
+      "report": "AcSumm",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 52,
+      "htmlBytes": 10047,
+      "sha256": "eb1a7059c15a6b8368fcdba1063f5dc55d42569d6052de5f47287cfffb93c90a"
+    },
+    {
+      "report": "AcSummLdr",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 40,
+      "htmlBytes": 8474,
+      "sha256": "091e70149d5d77a8e233eb977c1335ef51348785a82acbbcb1425f68967f0fe1"
+    },
+    {
+      "report": "AcWithWt",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 44,
+      "htmlBytes": 9246,
+      "sha256": "a207d2c69dbdf7018162c93d0fd5b1bcb991885a0facafd4c41ca10fc8ccccc6"
+    },
+    {
+      "report": "AcWithWtGold",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 18,
+      "objects": 81,
+      "htmlBytes": 17083,
+      "sha256": "44429965f031d56db288d1808993598033e90e71dd053d99149ec17f5295640f"
+    },
+    {
+      "report": "AcWithWtSumm",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 18,
+      "objects": 81,
+      "htmlBytes": 15740,
+      "sha256": "82f30d37da9a3551aedbf4602aa161b4ffeb5e3b8d57ed63e6b5b03605961569"
+    },
+    {
+      "report": "AngdiyaIsuRpt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 29,
+      "htmlBytes": 6911,
+      "sha256": "c219e383a3325b29bcc89a14afe000e2b18ebaa0d02f33a2637357443e5472b3"
+    },
+    {
+      "report": "AprBill",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 72,
+      "htmlBytes": 11852,
+      "sha256": "b70f004dd7a68ea7a91c24546b5b04aec832ed557d52fb04a734533b43d2b110"
+    },
+    {
+      "report": "AprInOut",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 65,
+      "htmlBytes": 11912,
+      "sha256": "e93b468c0f4365b0b2d722f8e8473f8d3005b595728577e47433a6d9c80271dd"
+    },
+    {
+      "report": "AprPan",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 60,
+      "htmlBytes": 10900,
+      "sha256": "5af4fc1474c822076ae9e1ec116d8ef08e9823cabd0daf848d90719610664bc7"
+    },
+    {
+      "report": "AprPartyWise",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 49,
+      "htmlBytes": 10115,
+      "sha256": "dfebfc535805584d195e2e7108646750c79faa0cf18deb15476536344f60ca35"
+    },
+    {
+      "report": "B2BPurcBillA4Tax",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 21,
+      "objects": 148,
+      "htmlBytes": 22106,
+      "sha256": "df692f4038fc993cb4b537e5388e6c1626a96700aa8525e6aaae116c8f3af654"
+    },
+    {
+      "report": "B2BPurcImgVch",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 3,
+      "objects": 17,
+      "htmlBytes": 4629,
+      "sha256": "285397bec48420b139c7ef12d08d329e3a4ce310d2eb8477bd763ba618258fa0"
+    },
+    {
+      "report": "B2BSaleBillA4Tax",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 21,
+      "objects": 148,
+      "htmlBytes": 22106,
+      "sha256": "8b60b0ed7d2d63d7c8cd706658cf13bedde7bcd39a8ca9fd2d47089861899d1f"
+    },
+    {
+      "report": "B2BSaleImgVch",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 3,
+      "objects": 17,
+      "htmlBytes": 4629,
+      "sha256": "9d0d1dd491755679176051ffd68dd797d507001b86eb232ece376ef343951334"
+    },
+    {
+      "report": "BalanceHz",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 12,
+      "htmlBytes": 3945,
+      "sha256": "c2f585c1426d2f6792d808b87e0a382ef6f1f7ef5e1dfc5fb3eb984c98bf0c50"
+    },
+    {
+      "report": "BarPrint10",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 1,
+      "htmlBytes": 2275,
+      "sha256": "bc34dc1205494315f8f24dbc4c0cb07686ed2b5b7cd7d9b03be01583a2d0932a"
+    },
+    {
+      "report": "BarPrint13",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 5,
+      "objects": 11,
+      "htmlBytes": 4526,
+      "sha256": "6bcc1dbab6acd9f9dc2575d657c2555471abf98d848947b1fba48b2601743c0c"
+    },
+    {
+      "report": "BillRecVch",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 17,
+      "htmlBytes": 5009,
+      "sha256": "b84aeca7f395638eecfbb0eff5c552c50477f84d15691b74ea32daa5012d3a30"
+    },
+    {
+      "report": "BillWiseOrderAdjust",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 25,
+      "htmlBytes": 6254,
+      "sha256": "e5ca24ec61cf78cb55a1a7dcd32a12fc9c1e5bda1a66caac4f28b892c32e270a"
+    },
+    {
+      "report": "BulCustAdjust",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 41,
+      "htmlBytes": 8897,
+      "sha256": "33f1e090002e4bdd9975024c3a7e48bc97d01e40f9dcfd33e90ad324b53fa3b1"
+    },
+    {
+      "report": "BulCustBooking",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 49,
+      "htmlBytes": 10487,
+      "sha256": "7e1cd5f7150dd9477905a9ecfa89de3a4e5d6371d4b2f517127c3df897430854"
+    },
+    {
+      "report": "BullBookBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 38,
+      "htmlBytes": 7617,
+      "sha256": "278b7fb2de46ea27ab9c11042cfe06b0b3a3b1542b4dce93f09a845185868c46"
+    },
+    {
+      "report": "CashBankBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 40,
+      "htmlBytes": 7876,
+      "sha256": "b6b707796ba929fd5b6916d6d15fb87f6299a0eae880ec6ab6fc16c1e13cb776"
+    },
+    {
+      "report": "CashBankBillAc",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 40,
+      "htmlBytes": 7880,
+      "sha256": "21b647e3db4e2101a6257d2ec6d291469998fd3078da45690d45c7203859066f"
+    },
+    {
+      "report": "ChqPrint010",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 6,
+      "htmlBytes": 3104,
+      "sha256": "5acc4890de10747bb2cdd0c09fb0ed8b616dfcbd12b760ee01eaef06fc89fa4d"
+    },
+    {
+      "report": "ChqPrint011",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 6,
+      "htmlBytes": 3106,
+      "sha256": "14054e545db50e12144bdd6f31bf56647a9edda8a185d0c2b1d4735d8e8293da"
+    },
+    {
+      "report": "ChqPrint012",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 6,
+      "htmlBytes": 3107,
+      "sha256": "4dfcadf5ff47c8ada8e97940119696c9697fa25d926248727adcb90eebde78a6"
+    },
+    {
+      "report": "ChqPrint013",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 6,
+      "htmlBytes": 3108,
+      "sha256": "0b39394d4258674e0d064f668e5a4c06432e28477f5ea9f26b8dde2d6625092c"
+    },
+    {
+      "report": "ChqPrint014",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 6,
+      "htmlBytes": 3103,
+      "sha256": "c49fc8037fd9dfac9ee23d60c31c42defb3146758bcbf670890d741bc791ddf2"
+    },
+    {
+      "report": "ChqPrint135",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 6,
+      "htmlBytes": 3095,
+      "sha256": "4eb12ebbc034ad9a7c8d9dbffa3359f2fff978515be324a62a9d2ff2a9af074d"
+    },
+    {
+      "report": "CntrTagStkRpt",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 48,
+      "htmlBytes": 10176,
+      "sha256": "d3879ddfd05f053d4b68b597394071be6147613861ca60b5914db491b1fda689"
+    },
+    {
+      "report": "CntrTagSumRpt",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 46,
+      "htmlBytes": 9934,
+      "sha256": "b0ae0b12f43c31483d609af520e49396a4c1a4c02fdd59d9ba2b8288546284f9"
+    },
+    {
+      "report": "Company",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 5,
+      "objects": 14,
+      "htmlBytes": 4376,
+      "sha256": "7f3a936e13f34a76756746e7bcc1d9748d55c2e6569fb8ce93e801b02b49c1f2"
+    },
+    {
+      "report": "ConsiBill",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 75,
+      "htmlBytes": 12204,
+      "sha256": "60a011aa1afe953644d8ac7757e5204f51369e951ad24c65c285175f362e7ffa"
+    },
+    {
+      "report": "ContraBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 32,
+      "htmlBytes": 6974,
+      "sha256": "a3a1a2d757356b58283eaae575d7212cb80aa698537807d6ff03845cdb3e8b00"
+    },
+    {
+      "report": "CounterSale",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 65,
+      "htmlBytes": 12981,
+      "sha256": "c90499fe718bed98b09bc8be86cb8ab4f6880167e11709de78645ea818af0338"
+    },
+    {
+      "report": "CounterTrfr",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 32,
+      "htmlBytes": 7690,
+      "sha256": "3dbd39f53c827fcff744b33d763d78a418648ad284ee4398847a33d806e0d189"
+    },
+    {
+      "report": "CustRepIsu",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 48,
+      "htmlBytes": 10099,
+      "sha256": "ed44ee4d0396a2fde689de2b5f005ec0f9ffa9b5a8cde14dfe6720328e2c8c94"
+    },
+    {
+      "report": "CustRepRec",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 36,
+      "htmlBytes": 7952,
+      "sha256": "c426f3a03a55cf42208aef69a4792f2e00ac57e2467f57f795212c9eb27c45ae"
+    },
+    {
+      "report": "CustRepRecBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 77,
+      "htmlBytes": 12652,
+      "sha256": "f17921670669f093a058b80733103f2e7af360ee063606b52a56344c935e8e06"
+    },
+    {
+      "report": "DharnDue",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 6,
+      "objects": 36,
+      "htmlBytes": 10514,
+      "sha256": "08f5b9ce5ce2524b04dda6f18af6fea9c885d7df2e5e1512143f1465f0fc306f"
+    },
+    {
+      "report": "DhiranIssuRec",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 30,
+      "htmlBytes": 7207,
+      "sha256": "47cf6e5789e57f808c6fca4819cb826e697b30d81a0ac6669d72ef2f9fe9aab8"
+    },
+    {
+      "report": "DhiranReg",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 28,
+      "htmlBytes": 6844,
+      "sha256": "6cfc0bf079589f5c9b390376da35794e28caad2ae6beead518dc9967d8ebae3d"
+    },
+    {
+      "report": "DhiranStock",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 26,
+      "htmlBytes": 6496,
+      "sha256": "89ac77bd46e3d3e56924801d7f87e554421a2aef77b99a0ff3dca3e795c58b27"
+    },
+    {
+      "report": "DhiranitemRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 43,
+      "htmlBytes": 9532,
+      "sha256": "0d5096374bbfc601c7ad693dec6dbc36e06803734ff82d1c2f34ed11be6df3ce"
+    },
+    {
+      "report": "DhrnIntRec",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 6,
+      "objects": 68,
+      "htmlBytes": 10624,
+      "sha256": "775ae2f386064139c6dcb1687dd57bade2ac0dd67cc86b080e32d0222fc9d01e"
+    },
+    {
+      "report": "DhrnIssue",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 6,
+      "objects": 47,
+      "htmlBytes": 8368,
+      "sha256": "34e295c9c3fdcc09e94b76ab4466f2dcaa0ff8741ae3056e36ad7dc93f7f7f81"
+    },
+    {
+      "report": "DhrnIssueImg",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 55,
+      "htmlBytes": 10860,
+      "sha256": "fe6265e9f3e54cd40fb3333ddf27326c91b3c04bf34b2afbb38aff09613f04d0"
+    },
+    {
+      "report": "DhrnKhataVahi",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 66,
+      "htmlBytes": 12793,
+      "sha256": "03d9165da8adc9851313512f88b6379bbfa898cad730a08328f31abfd5e71941"
+    },
+    {
+      "report": "DhrnKhataVahiSumm",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 60,
+      "htmlBytes": 11351,
+      "sha256": "b2018a239748e6a0b90204c2f253ad03e77fb90c61b774e0f856a2e3e5690787"
+    },
+    {
+      "report": "DhrnOsLetter",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 10,
+      "objects": 30,
+      "htmlBytes": 7167,
+      "sha256": "26225ff63f2a9da760b2db69999e8324d09d3c3e9599269ceae8ce246405c681"
+    },
+    {
+      "report": "DhrnReceivedSumm",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 34,
+      "htmlBytes": 8052,
+      "sha256": "7448da7be1cdf4bae95f4188e8101d07f18ebb2e49f3ec69078dc40447bade11"
+    },
+    {
+      "report": "DiamondSf",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 5,
+      "objects": 9,
+      "htmlBytes": 4375,
+      "sha256": "e6980081afdd57b83f6d8183657219430e7e1c20c93aa17b581880e2eb425c9a"
+    },
+    {
+      "report": "EInvOthIncom",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 11,
+      "htmlBytes": 4042,
+      "sha256": "21a9292765a838ecfe68cb5a7eac044e115cb838977c77376c2fcdc86ef6e9a5"
+    },
+    {
+      "report": "EInvoice",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 11,
+      "htmlBytes": 4034,
+      "sha256": "3978cade9279793060f5e824698fb040ba649cdfb14604fdb4d70127ba6075fe"
+    },
+    {
+      "report": "EmpIsuRecVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 11,
+      "objects": 69,
+      "htmlBytes": 11480,
+      "sha256": "5a4382ffc32cefcec3060bbe110f39fdde30198278ab430b60815434a522bdf0"
+    },
+    {
+      "report": "EmpSaleReport",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 15,
+      "objects": 44,
+      "htmlBytes": 9018,
+      "sha256": "550e0e9348e3a3563dd9cf4ae63b09cecf82f595c1acdfff0d08cecd5d672436"
+    },
+    {
+      "report": "FineJvBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 32,
+      "htmlBytes": 6968,
+      "sha256": "f50e4cee02d9174c97a0e8db51a48076256ce42829c5f18b011c0256178d2f88"
+    },
+    {
+      "report": "FineSalesGstBill",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 27,
+      "objects": 137,
+      "htmlBytes": 21667,
+      "sha256": "dd8ef877eb3af9a41b79c566c42001cb5616cd4865dfbb42da1db10875765447"
+    },
+    {
+      "report": "Form12",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 12,
+      "objects": 63,
+      "htmlBytes": 11898,
+      "sha256": "df0a756b02a3c6ab12dd50d3024dd43de653c45a9fdbae76e6a82195b7e7ab68"
+    },
+    {
+      "report": "Form8",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 10,
+      "objects": 45,
+      "htmlBytes": 8488,
+      "sha256": "e2300fabc63f764788e88cb277f7a9d76819dde97cf2673dbb67f6fe618796e0"
+    },
+    {
+      "report": "GhatDesignIsu",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 3,
+      "objects": 17,
+      "htmlBytes": 4629,
+      "sha256": "28eac8d5d5cb1ceac82962b43d790614745ab1713b32815d8601efb24341c5f8"
+    },
+    {
+      "report": "GhatTagPrnt",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 1,
+      "htmlBytes": 2277,
+      "sha256": "6ddce0170f86fdedbc4f75954d0610768e0da75100828afd7c93187eae7dc48c"
+    },
+    {
+      "report": "GoldInterest",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 48,
+      "htmlBytes": 11542,
+      "sha256": "7bcc212ea759b4f9286b57528ef57c866153eff358c6cf7e0a7a4b7e2ae6bddc"
+    },
+    {
+      "report": "GroupStkRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 15,
+      "objects": 78,
+      "htmlBytes": 14474,
+      "sha256": "7e2f35f93e7244b5c2363f27a536c761e80815cda46819bbdd4edfd916c8755a"
+    },
+    {
+      "report": "Gstr_1",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 13,
+      "objects": 104,
+      "htmlBytes": 14925,
+      "sha256": "7c9fdd3cd5e86f9d39c123a725e3ef356d6579d6e3fde0594a5a579bfa1c43e3"
+    },
+    {
+      "report": "Gstr_2",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 13,
+      "objects": 97,
+      "htmlBytes": 14293,
+      "sha256": "8f6c8595b7504c981219fecd46d1f19c3bba15904a5feb0303d2865ad41ec319"
+    },
+    {
+      "report": "Gstr_3",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 13,
+      "objects": 87,
+      "htmlBytes": 13322,
+      "sha256": "6ad7e70618d553e4d60ddc3dcf2fefffaa48ef2c0954d6e8f84a682332f055a6"
+    },
+    {
+      "report": "HedgingFixVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 15,
+      "objects": 78,
+      "htmlBytes": 13272,
+      "sha256": "1668a619ce20cf4c5fed08ce7a3d8caeaba0e44e1c98b8b0eaf1515a4a2acd28"
+    },
+    {
+      "report": "InTax_PurcRpt",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 14,
+      "objects": 75,
+      "htmlBytes": 12385,
+      "sha256": "369d6ab6331f599bc09c1732e6afd1e11f133a8cb096b91888061a62e5591512"
+    },
+    {
+      "report": "ItemInOut",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 53,
+      "htmlBytes": 11183,
+      "sha256": "e13436cf16d3e5e511bbaeaaeb1fb01d7c7798070529da52b0376b4a9a95c1f2"
+    },
+    {
+      "report": "ItemInOutSumm",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 52,
+      "htmlBytes": 11058,
+      "sha256": "b497cff0171286f0a4a446ed174fdb700ddfd188b1f3fac5338c4782d167bd4d"
+    },
+    {
+      "report": "ItemInword",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 65,
+      "htmlBytes": 12829,
+      "sha256": "cc973508de4a99346a83845f766524debdc8a0bd590366ae84279713db9742eb"
+    },
+    {
+      "report": "ItemLedger",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 43,
+      "htmlBytes": 9570,
+      "sha256": "2ca063f12e706f55775787471f22c9a796f224aa159514946fec438d62589e9c"
+    },
+    {
+      "report": "ItemOutword",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 66,
+      "htmlBytes": 13036,
+      "sha256": "928479fa587d9d9a5c580e7a785d53fe33121fd486076d922666190256fdaa70"
+    },
+    {
+      "report": "ItemPurcVch",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 11,
+      "htmlBytes": 4040,
+      "sha256": "da804a586be9652a4e166d03ac1a233d6db72b9ad49934b572ba601e916136ec"
+    },
+    {
+      "report": "ItemSalesVch",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 11,
+      "htmlBytes": 4042,
+      "sha256": "1a65674a6bfa53fdd71902eae46b0a40bbc42d8d57c04f24aa8493e63432b619"
+    },
+    {
+      "report": "ItemSalesVchWithQr",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 11,
+      "htmlBytes": 4054,
+      "sha256": "534361acbe351d05f63136dd01f6d57ae9a7b7c44415bcb468e8162e57131a43"
+    },
+    {
+      "report": "ItemStkRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 15,
+      "objects": 89,
+      "htmlBytes": 16024,
+      "sha256": "0ebb65f6736eab414e9d6a6041bc94369f321f0921e734e5a9e6458bf24ce31e"
+    },
+    {
+      "report": "ItmLotPrint",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 5,
+      "objects": 10,
+      "htmlBytes": 4475,
+      "sha256": "dc37de7616e858fa8462ff39dd933c458020ef902369e1a602d6a2c2602840ca"
+    },
+    {
+      "report": "ItmStkBalance",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 6,
+      "objects": 45,
+      "htmlBytes": 10199,
+      "sha256": "4bf952e8e8409b8428066b9daab8d8d29cc3d4461cb699ca11b81e4f71d72a15"
+    },
+    {
+      "report": "ItmStkWithGrid",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 6,
+      "objects": 45,
+      "htmlBytes": 9920,
+      "sha256": "aa05befc3b8dd47b6fde4c05ee8eafd51fde68c912d6f10089416d0ce2eaf450"
+    },
+    {
+      "report": "ItmStkWithOthWt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 70,
+      "htmlBytes": 13477,
+      "sha256": "8be38da97eee27210abfd8651091c526c90f092049a4081ab90ea8227036c11d"
+    },
+    {
+      "report": "JadtarInOut",
+      "status": "rendered",
+      "areas": 15,
+      "sections": 17,
+      "objects": 71,
+      "htmlBytes": 13000,
+      "sha256": "1bada1b865e2761bf66d19e7e5827bc8b3c650577eb8b62a518d54c751a64429"
+    },
+    {
+      "report": "JadtarIssue",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 47,
+      "htmlBytes": 9760,
+      "sha256": "1ee3c317648461b1402f091825cd44f348e03464b712bf457b697a3c25e94826"
+    },
+    {
+      "report": "JadtarRec",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 54,
+      "htmlBytes": 11101,
+      "sha256": "99009f9f3b311b08e4e7cc4eaea4bec9c1c0649489b969d6796c05fc5d1c5960"
+    },
+    {
+      "report": "JdtProcessRec",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 60,
+      "htmlBytes": 12480,
+      "sha256": "78e1ab9a6d667766ae83ff9229517e9e1e7fa8dcad808c1e7eb3dadb74646b46"
+    },
+    {
+      "report": "JmUdAmt",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 11,
+      "htmlBytes": 3902,
+      "sha256": "0b211a61232f30998eaa0c3c0e3eded5fdf0c6f0446e2b437be504c7d3a75d7c"
+    },
+    {
+      "report": "JmUdFine",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 97,
+      "htmlBytes": 15025,
+      "sha256": "8d8d2688a90acea01c936f3fc798d101455bc2b673f54e9699fc8e1937a3965a"
+    },
+    {
+      "report": "JmUdFineHz",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 30,
+      "htmlBytes": 7956,
+      "sha256": "9f7b1fe06bd26e74e178f32cbf2ca00c6c2fb0283cf871bb6e7d2b54b9f70fec"
+    },
+    {
+      "report": "JmUdFineHzSumm",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 30,
+      "htmlBytes": 7873,
+      "sha256": "99eabd0af5e32e13938f0692dc481643ead14da7f9417fe56ac644c7813d71ae"
+    },
+    {
+      "report": "JmUdFineHzSummVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 27,
+      "htmlBytes": 7422,
+      "sha256": "b5a18bd3abd2425d9d94b733115ee6b0d0a946b67590e0492f05385ee385d005"
+    },
+    {
+      "report": "JmUdFineSl",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 97,
+      "htmlBytes": 15032,
+      "sha256": "34d94c80d8b6c4ec7646d6526a6d3c2ce8a0e2d6daed464d29138e9691ba59c5"
+    },
+    {
+      "report": "JmUdFineSlHz",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 29,
+      "htmlBytes": 7667,
+      "sha256": "d5c573ced783051f4c2569b4b638bab81c95beca684b5ef7fb4fef92f4781334"
+    },
+    {
+      "report": "JmUdFineSlSum",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 11,
+      "objects": 80,
+      "htmlBytes": 13658,
+      "sha256": "73e8fea878cc343285a71a5a8475cfaaa8d99cc5fb727577d2a0776014bdecaa"
+    },
+    {
+      "report": "KrDesignIsuImg",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 3,
+      "objects": 17,
+      "htmlBytes": 4631,
+      "sha256": "aff032c1efc37c60603035cc0bc900ef000434b27b0bbeb48514454dd43af5ba"
+    },
+    {
+      "report": "KrDesignIsuVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 71,
+      "htmlBytes": 11728,
+      "sha256": "23341c264fae90af7a2820ea1a01c5fb2e03ac75583aca6eb4bfb30e45253d9a"
+    },
+    {
+      "report": "KrDmIsuRec",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 31,
+      "htmlBytes": 7582,
+      "sha256": "c890ba19400fdf617231ede6268c4ebcddac328cdc39a7b5d7e37787a37c5982"
+    },
+    {
+      "report": "KrDmWtInOut",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 43,
+      "htmlBytes": 8640,
+      "sha256": "414f0f35561dd62b59001843e4e35ab17abad6c9e13a891de8d43d7962284fc6"
+    },
+    {
+      "report": "KrIsuBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15285,
+      "sha256": "121b647b5ee504b8a13451f0fab80e6f5e10be5256722dd26a7aa50a70c09c2b"
+    },
+    {
+      "report": "KrIsuBillGst",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15291,
+      "sha256": "2513d9f8c0e29b3c8495fa10a6b9edae353f8c0e6013df2fe0bcf5cf0cc56ee5"
+    },
+    {
+      "report": "KrRecVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15269,
+      "sha256": "e462d6414cef49fa449110b0c8966e7e83575b223e7ecce9ecdeb449d00dbfc9"
+    },
+    {
+      "report": "KrRecVchGst",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 21,
+      "objects": 148,
+      "htmlBytes": 22096,
+      "sha256": "7ba9422fcbcbe590f5745446457a6576ced76efb8c41310eff85a9900d5cbc7a"
+    },
+    {
+      "report": "KrRepRec",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 48,
+      "htmlBytes": 10065,
+      "sha256": "9dea7b2983a43440602fd5fc0b46c7699ca7fc26235156a16ed137ab8823274e"
+    },
+    {
+      "report": "LabourBill",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 18,
+      "objects": 117,
+      "htmlBytes": 17890,
+      "sha256": "7659c431086d5abccc347eb12f9e01c8e346987a578e09aa6ec543d1db401c68"
+    },
+    {
+      "report": "LabourBillGst",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 29,
+      "objects": 169,
+      "htmlBytes": 25316,
+      "sha256": "efffb6bbe93f05959b46e60505b6c7bd2389368e3606c13019ccd39eeb5eb9d9"
+    },
+    {
+      "report": "LabourWorkVch",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 18,
+      "objects": 118,
+      "htmlBytes": 18186,
+      "sha256": "bbc43f7e030520d7713029bdca1995e350c33ab62a0e7dc1e57ab0b88875a9dc"
+    },
+    {
+      "report": "LbrWorkRpt",
+      "status": "rendered",
+      "areas": 15,
+      "sections": 15,
+      "objects": 54,
+      "htmlBytes": 11726,
+      "sha256": "2de93574378d566b0a88fa48714b94fd060282dafc6a80b6d5b9d6c724b0f00f"
+    },
+    {
+      "report": "LedrAdjVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 45,
+      "htmlBytes": 8659,
+      "sha256": "fa9372b71ca3d41eb60ab57b330ac47fd7b298472b6747c103f0d1027ae9e436"
+    },
+    {
+      "report": "LedrInOut",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 11,
+      "objects": 30,
+      "htmlBytes": 7835,
+      "sha256": "d2186624db36b58c40c9904435e84267a7c2fb82fdafcd9aa2ad2d6277cb4dc1"
+    },
+    {
+      "report": "LedrInOutWh",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 11,
+      "objects": 30,
+      "htmlBytes": 7839,
+      "sha256": "2183f40fd7b6d4098dfb23889894722a622ffaae0f12b392b77ccb55721c24a5"
+    },
+    {
+      "report": "LoanStock",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 28,
+      "htmlBytes": 6884,
+      "sha256": "320e213e3d3399024e5663104cdd4e5e5efa9e0463015924f8fc2d05053cccff"
+    },
+    {
+      "report": "LoanWisePacket",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 5,
+      "htmlBytes": 3321,
+      "sha256": "ac0ff3993d6f3219c75db330904ef7105456d30bab68923423f62320c027c060"
+    },
+    {
+      "report": "MembBonus",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 39,
+      "htmlBytes": 7883,
+      "sha256": "2f080dbc15f02d8d3d672d0596267d7b992c53b4288e4a189a9a251097e20a69"
+    },
+    {
+      "report": "MembCommRpt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 33,
+      "htmlBytes": 7551,
+      "sha256": "612d8c9bb468ad2ef3d02a3b3f5e9b916c8ccdc1f19cf6e5cfb0bfb79c4928f2"
+    },
+    {
+      "report": "MembDailyRecRpt",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 31,
+      "htmlBytes": 7076,
+      "sha256": "ba40e8c4ae7501622383d422dc6979105e0962bc482c319f35a5db4a7fea0205"
+    },
+    {
+      "report": "MembGoldRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 41,
+      "htmlBytes": 8454,
+      "sha256": "0887d45fabe02d0eba06a2c61908e4fabf43723162acba4b9ce0e66b252f8edb"
+    },
+    {
+      "report": "MembOpenNew",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 24,
+      "htmlBytes": 6210,
+      "sha256": "bb2500fcc49d9e36e6d3bd2fcf3040b831d4920b1754bab96f469d0516f6cda3"
+    },
+    {
+      "report": "MembQr",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 7,
+      "htmlBytes": 3282,
+      "sha256": "60eaf4b55ca3a122404bf324de18aa59fb87cba91fc1e3baf03bed058598f11a"
+    },
+    {
+      "report": "MembRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 38,
+      "htmlBytes": 7852,
+      "sha256": "3fbab5780454d83a6f6dba69b5ccf1d105d617b7ce81e14bcc75dc91d471bacd"
+    },
+    {
+      "report": "MembRptAdd",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 41,
+      "htmlBytes": 8491,
+      "sha256": "d324ce7e43f3ff2a725a6440ee23dc6083fecce92e4c213611159763cc57ba3e"
+    },
+    {
+      "report": "MembSumm",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 39,
+      "htmlBytes": 7855,
+      "sha256": "62cca45801e6566c6cb630fac759c913403ea9d27f3d44cdcba3415ec766af19"
+    },
+    {
+      "report": "MembVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 21,
+      "htmlBytes": 4917,
+      "sha256": "061959d94364ae28a9dac132ba158d43848e519fc96abb0ab627da0ae1f15ec7"
+    },
+    {
+      "report": "MfgGhatIsu",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 90,
+      "htmlBytes": 14401,
+      "sha256": "8a27eff8cf303f9ea59c46ba4f4a47a6cef5ced209f3508ebf3e6bc925349a28"
+    },
+    {
+      "report": "MfgGhatRec",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 97,
+      "htmlBytes": 15406,
+      "sha256": "5955729f1ddc192c32e1a0c46fa74204099f4cea17960d40992bf3c116b5e0d3"
+    },
+    {
+      "report": "MfgLedger",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 98,
+      "htmlBytes": 16993,
+      "sha256": "2bf395eba177f3b81eebfa0bc7ff44787daccd13f6e8eb2716d10c635a8a6beb"
+    },
+    {
+      "report": "MfgMinoIsuRec",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 97,
+      "htmlBytes": 15412,
+      "sha256": "ce8b5f01e565d8944ba9d0ceae5d26828e2fe76bdc9b32861867970751f141cf"
+    },
+    {
+      "report": "MfgVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15316,
+      "sha256": "34d960251744c345ec9bf8e99b246a3a2c3a4056e5a1449a259d0e444693e9d7"
+    },
+    {
+      "report": "MtlIsu",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15279,
+      "sha256": "59196859b7beae6d8cd3aae84ddfa995ce9d66c9be243aff0c0a5a0eb2289bb1"
+    },
+    {
+      "report": "OldItmSaleVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15279,
+      "sha256": "e627d2175b6c45c9d4dc26c3399f8d3aabae2daec37ec86dd1d17239f1bf13f1"
+    },
+    {
+      "report": "OrdAdjBillWise",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 26,
+      "htmlBytes": 6831,
+      "sha256": "05de7eca60c27e952fb0ab40adff4bbe20f5f6bfee0d33b06b93e18d0a8fec82"
+    },
+    {
+      "report": "OrdAdvAdj",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 26,
+      "htmlBytes": 5890,
+      "sha256": "f59e636ff7ba2a0f8f1bd23173d3423ad06d3258a7ea3544bfa37e75246b38ac"
+    },
+    {
+      "report": "OrdAdvRpt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 26,
+      "htmlBytes": 6672,
+      "sha256": "ebe5823749e761e1777413880ba4ce5c9767410377d1b53c08b17952df1ef001"
+    },
+    {
+      "report": "OrdDesignSumm",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 32,
+      "htmlBytes": 7711,
+      "sha256": "71b0217e4360670306946a6f8b9f879250c1e437402b0fd1432f2d46fa858c08"
+    },
+    {
+      "report": "OrdDetlPanding",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 32,
+      "htmlBytes": 7246,
+      "sha256": "e459ad53c3ed66e1579a74bb01aba1d098953a5df50530836e442e9b0c9a0f60"
+    },
+    {
+      "report": "OrdDetlRpt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 47,
+      "htmlBytes": 9727,
+      "sha256": "4642081a6b498fb886e3d5fee56197a81cf36fd3b4a782d3516b76b9b057a723"
+    },
+    {
+      "report": "OrdVchImg",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 16,
+      "objects": 93,
+      "htmlBytes": 24236,
+      "sha256": "39f6a39462088e7acdd361c496c903d8ae0aa22184d5c557852fe4b42c969d4a"
+    },
+    {
+      "report": "OrderBill",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 16,
+      "objects": 93,
+      "htmlBytes": 23466,
+      "sha256": "d4e7918952a983174ffaebb7e0a2fe59ba9671d1f3d7d3a51865ddb865343706"
+    },
+    {
+      "report": "OrderCancelVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 39,
+      "htmlBytes": 7763,
+      "sha256": "1e3aec5cf4e6d755fb944913a78355236ebce697b792ade966603dbc3d91b038"
+    },
+    {
+      "report": "OrderVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 11,
+      "objects": 58,
+      "htmlBytes": 12962,
+      "sha256": "4ede664af63fa04dd5bad74207fcd9ceea9a7938746824ff79e1d827941af565"
+    },
+    {
+      "report": "OthCommVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 22,
+      "objects": 115,
+      "htmlBytes": 18891,
+      "sha256": "3edf73c84bf2f18c0e55c17e63c944591093cdef300bd94a52ef2b4d5ef9c01f"
+    },
+    {
+      "report": "OthExpUae",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 18,
+      "objects": 94,
+      "htmlBytes": 15246,
+      "sha256": "694dc4ac06079bb9de6982d4a1d0dc5ad19bf08e28289c6fa26c7e143c40048b"
+    },
+    {
+      "report": "OthItmLoose",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 40,
+      "htmlBytes": 8696,
+      "sha256": "124e9d80f6290589924a3a5d88199c1142cd3f19d5d3852ef039896f61f5d6c9"
+    },
+    {
+      "report": "OthItmStud",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 40,
+      "htmlBytes": 8694,
+      "sha256": "e2af62f5df95d639600d316d2d2cab33f08a09f556cbf02556bb5c0c5280ae38"
+    },
+    {
+      "report": "OutTax_SaleRpt",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 14,
+      "objects": 75,
+      "htmlBytes": 12385,
+      "sha256": "5e26d4c6716ee2ca12c2e28aa002ad78bf8b92ef91bd43b2eb640987c39cb240"
+    },
+    {
+      "report": "PartyIntSumm",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 45,
+      "htmlBytes": 11009,
+      "sha256": "67e8a3769ce30ff3d853ba6a755930bdbdcfdef65ca212dfe419085ad993ebe4"
+    },
+    {
+      "report": "PartyInterest",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 48,
+      "htmlBytes": 11526,
+      "sha256": "23c383912df4b044d8bff9089bedd94f17619a71e63479540bf30a8a97a9b7d0"
+    },
+    {
+      "report": "PaymentVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 20,
+      "objects": 109,
+      "htmlBytes": 17597,
+      "sha256": "594c2b07e71e5a7e6c9eba5f60ff214c907a74fe7ebb47843a4aae03e56052d9"
+    },
+    {
+      "report": "PrRtnBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15271,
+      "sha256": "fdb1e34a3f8909cf1714f353fe0152d76f13bf705c2345664b93f2918f4ce5ed"
+    },
+    {
+      "report": "PrRtnBillGst",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 21,
+      "objects": 156,
+      "htmlBytes": 23064,
+      "sha256": "3f1a6af88b3129e6330a446f225b5f7c1188991e1577ced8dc2ed299fe019d69"
+    },
+    {
+      "report": "PrTaxRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 16,
+      "objects": 61,
+      "htmlBytes": 10659,
+      "sha256": "563645bed5e5933482efa48284cc95378fbe9b1b40561206bf48345684cd72a5"
+    },
+    {
+      "report": "ProdStkRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 15,
+      "objects": 78,
+      "htmlBytes": 14492,
+      "sha256": "6a3dadeb1afc3ce58a1a43ddef08bc0d1a2a5f7652c8464c1e256c522a216c09"
+    },
+    {
+      "report": "ProfitLossHz",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 10,
+      "objects": 11,
+      "htmlBytes": 3920,
+      "sha256": "ce1cbe92efc5eeb64621228f0ae11c1a5884b3b71e9c28c75f3434f3774f76b1"
+    },
+    {
+      "report": "PurcBillA4",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 97,
+      "htmlBytes": 15273,
+      "sha256": "4c51331bae4088e6d6325db74f93e56f94b5f0db84b90c7978cbeaaa9f4373bf"
+    },
+    {
+      "report": "PurcBillA4Gst",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 21,
+      "objects": 148,
+      "htmlBytes": 22100,
+      "sha256": "f4877c5743cfe83c059a4eedb1850c76e6710e14b535fdd7046a88b8a689a8ca"
+    },
+    {
+      "report": "PurcBillHalfGst",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 21,
+      "objects": 148,
+      "htmlBytes": 22104,
+      "sha256": "99ff5f1b18e2e42add65b7d90346dc238b189fef7d48eb01b98fef2fd73ebe52"
+    },
+    {
+      "report": "PurcGroupWise",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 59,
+      "htmlBytes": 11939,
+      "sha256": "e2eb3a3f11cdc186644a0a9140d6b18455fb8a6900498ed27a1508d825410993"
+    },
+    {
+      "report": "PurcItem",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 48,
+      "htmlBytes": 10203,
+      "sha256": "cceabbfc731cf9140e65ea8a1df7354fe4b2e7d2131afe9c111c949e65e1b7bf"
+    },
+    {
+      "report": "PurcReport",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 14,
+      "objects": 55,
+      "htmlBytes": 10309,
+      "sha256": "9c5e4c5f8292992c65bb48e9a9edd34b79b0536b6fcace0bcfc4b0191a6ff8cf"
+    },
+    {
+      "report": "PurcSumm",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 39,
+      "htmlBytes": 8462,
+      "sha256": "c1d415bfa6ff4dd25ebaa195b224a243d53eca8b65a0959777c2c69fde841b41"
+    },
+    {
+      "report": "PurcToSalesFixingVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 16,
+      "objects": 122,
+      "htmlBytes": 18546,
+      "sha256": "42e19e579965af0a68a91bb1dffa6468e0bda1ad814696ba83f790c241e606d0"
+    },
+    {
+      "report": "QrPrint10",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 1,
+      "htmlBytes": 2281,
+      "sha256": "dc8e01dd38d1e2bf861caf35f3f397a9cd4d4967272d9c6123568c1481f2c7fd"
+    },
+    {
+      "report": "RateCutBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 22,
+      "objects": 93,
+      "htmlBytes": 15003,
+      "sha256": "0a2457f826a1f94954cc582fc6b164a85af7cc8ea14aef6bf66031cff5f34cbc"
+    },
+    {
+      "report": "RateCutItmBill",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 24,
+      "objects": 127,
+      "htmlBytes": 20186,
+      "sha256": "f140cc29aaf4f219b1e1da7172855bdb4679913eda0f49d963aad5fcf70a164d"
+    },
+    {
+      "report": "RateRpt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 12,
+      "htmlBytes": 3874,
+      "sha256": "821ef78218b67a9ce88bb2c6ec427bc3c345643a8e4ecca62002da0bc652bba9"
+    },
+    {
+      "report": "ReminderAll",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 6,
+      "objects": 30,
+      "htmlBytes": 8761,
+      "sha256": "12cfbe8c8c7a8663d5ea05a200baf46b9591f82afd1506b0f49a49bab171263c"
+    },
+    {
+      "report": "ReparingCustIsu",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 87,
+      "htmlBytes": 14220,
+      "sha256": "8b03766048c1ceea656f8a0a74c2a3e74a41a83739e9d02756d344cd1f6e42d9"
+    },
+    {
+      "report": "ReparingKrRec",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 99,
+      "htmlBytes": 15655,
+      "sha256": "409ff1ad04c5819eec880f77430ba121f98fd1f4d108bcdab8348ac19b79e3ca"
+    },
+    {
+      "report": "ReparingRec",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 96,
+      "htmlBytes": 15154,
+      "sha256": "627881f5322d82971d8d5219a394f79bcbeda689ccc6066b0a9b2386e91060db"
+    },
+    {
+      "report": "RojMel",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 14,
+      "objects": 16,
+      "htmlBytes": 5518,
+      "sha256": "8ddbc4c1234fbac6d230c4d436ca67444e3aa30c825c6fd669b32559ab44ccf7"
+    },
+    {
+      "report": "RojMelCash",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 6,
+      "objects": 10,
+      "htmlBytes": 3897,
+      "sha256": "9aa91950753b683a7faabd02c7a6b86c1cc43ca8bc430edbe2a865e93cc7f746"
+    },
+    {
+      "report": "RojMelCrDr",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 21,
+      "htmlBytes": 5694,
+      "sha256": "0acc85e2418dec0e34f8d246a597541f51fc16af79c0d3ad71d7cb369b2b3537"
+    },
+    {
+      "report": "RojMelEstmat",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 12,
+      "objects": 15,
+      "htmlBytes": 5140,
+      "sha256": "511707070884301a6979acd1de2de32b4e7402d8c13a4eff908ac7684ce0ddd1"
+    },
+    {
+      "report": "RojMelGr",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 14,
+      "objects": 15,
+      "htmlBytes": 5366,
+      "sha256": "b19a4e8cf5e104fb848e61bfa00afe534310bd4a0445e5f86545b39ab15badf0"
+    },
+    {
+      "report": "RojMelItem",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 7,
+      "objects": 23,
+      "htmlBytes": 6080,
+      "sha256": "d5294714610f41b154250d4e290d1a8a8bdd3478edf0092c33df94895d68872f"
+    },
+    {
+      "report": "RojMelJmaUdhar",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 12,
+      "objects": 65,
+      "htmlBytes": 14478,
+      "sha256": "0e97bb0014235f5afe4d487bfd32ef9ba469d359d8a9f1cd4d60786dad318f99"
+    },
+    {
+      "report": "RtlHuidPrint",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 62,
+      "htmlBytes": 9663,
+      "sha256": "1e9d2985496a27df0f0916dad4ce0defdefd2d28f7b8f89144ff1417dd2507ef"
+    },
+    {
+      "report": "SafeStkSumm",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 57,
+      "htmlBytes": 11112,
+      "sha256": "9cf5adfcaa52909040be48b4228a3e2ee142a1892b6479bbbc1ba7636c5a4cd7"
+    },
+    {
+      "report": "SalarySlip",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 10,
+      "objects": 43,
+      "htmlBytes": 9714,
+      "sha256": "a90bc2aa059ba7bd0d5cbe22880fdc18f1ed4831032deeb79c65172007faee5e"
+    },
+    {
+      "report": "SaleOrnaIsu",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 6,
+      "htmlBytes": 3147,
+      "sha256": "b02c0a6cececae569ee52ad259ef00f339f77c9c0c6ada06f45e264267249a67"
+    },
+    {
+      "report": "SaleReport",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 14,
+      "objects": 55,
+      "htmlBytes": 10309,
+      "sha256": "5324a902804535d2a6aafd75eab68654f68857b3d7b463c362472fe3e4f3930c"
+    },
+    {
+      "report": "SaleRtnReport",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 13,
+      "objects": 52,
+      "htmlBytes": 9877,
+      "sha256": "2ad910408a20f3625b670f5ab4cf3be9815f2a8a117b74317d492f2966596802"
+    },
+    {
+      "report": "SalesBillA4",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 26,
+      "objects": 163,
+      "htmlBytes": 24379,
+      "sha256": "4933b629f3ad602fb01b9f49554b3e4b8aed1d90bff735939b0511f63eafac56"
+    },
+    {
+      "report": "SalesBillA4Gst",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 26,
+      "objects": 163,
+      "htmlBytes": 24394,
+      "sha256": "764e947d475061b22cdf192af99e69e59a4d78b36292d69537332a17e3f8bb80"
+    },
+    {
+      "report": "SalesBillA4_WithImage",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 27,
+      "objects": 164,
+      "htmlBytes": 24619,
+      "sha256": "5fff9db57e91f2d2350bd13c4a8b92132c4e62b1ba9aa983c412113562dd1050"
+    },
+    {
+      "report": "SalesBillHz",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 22,
+      "objects": 113,
+      "htmlBytes": 17845,
+      "sha256": "a3537edc5090b636a598e2393e4facd1e6663c9711aeed84f2bda905c4035900"
+    },
+    {
+      "report": "SalesBillHzGst",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 26,
+      "objects": 163,
+      "htmlBytes": 24386,
+      "sha256": "7b1dd11ba744ad6a0004e3a4b0916a63f229e56de504177cb0926c6ad55ea9b2"
+    },
+    {
+      "report": "SalesBillOrgDup",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 16,
+      "objects": 106,
+      "htmlBytes": 16069,
+      "sha256": "4e0b902bbdae62b97e3911d82841ff434c937a668d75aacb54a0f371db614ac7"
+    },
+    {
+      "report": "SalesBillOs",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 3,
+      "objects": 3,
+      "htmlBytes": 2507,
+      "sha256": "ecccd5d1bcbf584c638156a06ef40875b37f19bc539e0788eb44fdd0d1e9ad5d"
+    },
+    {
+      "report": "SalesBillVr",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 5,
+      "objects": 10,
+      "htmlBytes": 3775,
+      "sha256": "3f97af7bb9b243950ea2e3f9a954fabd11cf6c3470ca0b8ce7c9c66864c6aef2"
+    },
+    {
+      "report": "SalesGroupWise",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 59,
+      "htmlBytes": 11983,
+      "sha256": "f62938b13152cc41996bf0f4351c9651ab80d02e785ccb834b30d5fbd4989852"
+    },
+    {
+      "report": "SalesItem",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 59,
+      "htmlBytes": 11873,
+      "sha256": "a0ed56a0e6bc94e857c785d95f044fea54b63b839d550196bfe9a44e4b6835ba"
+    },
+    {
+      "report": "SalesQuotation",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 30,
+      "objects": 155,
+      "htmlBytes": 23840,
+      "sha256": "deb68ecc86f9a5184d1c3a665da8d9df3991ea7551d773075e265ec087b107e5"
+    },
+    {
+      "report": "SalesRtnA4",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 17,
+      "objects": 105,
+      "htmlBytes": 16262,
+      "sha256": "35c6145a2158befda951db4e60c9ff2b2a1109c0b78aff704f85caadb441b848"
+    },
+    {
+      "report": "SalesRtnA4Gst",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 21,
+      "objects": 152,
+      "htmlBytes": 22715,
+      "sha256": "542ec6223eb36abc9dafcd2dce75e6a4676f9d947a250d5b81b85128ddc26177"
+    },
+    {
+      "report": "SalesRtnBillUae",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 19,
+      "objects": 142,
+      "htmlBytes": 21219,
+      "sha256": "e43ed8fa5f0367ec383008fd9af94cf9218fdb62908221f2d2c4c89f8814ff5d"
+    },
+    {
+      "report": "SalesRtnItem",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 59,
+      "htmlBytes": 12041,
+      "sha256": "d938d4c81ce18aecf12d91ca5378f1b1a822f544ffc9537bd05281aea0826d7e"
+    },
+    {
+      "report": "SalesRtnSumm",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 43,
+      "htmlBytes": 9185,
+      "sha256": "180d640d128fe4bc36acd2b5677c6eb24fcfaeee699105229f0bd4ee02acb622"
+    },
+    {
+      "report": "SalesSumm",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 75,
+      "htmlBytes": 12460,
+      "sha256": "6601e4ff1670cb168188214a557ea237dc90dbfc56f29adb51d286b9b004b339"
+    },
+    {
+      "report": "SalesToPurcFixingVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 16,
+      "objects": 122,
+      "htmlBytes": 18546,
+      "sha256": "b665135a37f453dc86d7adbb2ad39d71b43ec5f710c139d354034be006abedd9"
+    },
+    {
+      "report": "SalesWithOrder",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 39,
+      "htmlBytes": 8690,
+      "sha256": "2e1140e7e7b40a86596b72330027dde046642b6ae0d734aafd755aa562a3a935"
+    },
+    {
+      "report": "SchmAdj",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 38,
+      "htmlBytes": 7619,
+      "sha256": "1619d26e03c1ec1c3eeba4b41b45367669030061e706615de8e7cb86fb8d2ff1"
+    },
+    {
+      "report": "SchmMonthRpt",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 5,
+      "objects": 5,
+      "htmlBytes": 2646,
+      "sha256": "1b8b88efcdb2c0fa9fdf91264ca73add1395bfecb4274fdbfb32bf497c44a6e5"
+    },
+    {
+      "report": "SchmPassBook",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 5,
+      "objects": 11,
+      "htmlBytes": 4783,
+      "sha256": "16fa9ec15c907c2a148a9e0163d3b30005636923823d1d84ab2314e17e4dc232"
+    },
+    {
+      "report": "SchmRecVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 7,
+      "objects": 38,
+      "htmlBytes": 7152,
+      "sha256": "9be365c4661225279abe906cd3336155b8ec05c1c472b5c07efff34fb232e56b"
+    },
+    {
+      "report": "SlBillWapp",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 26,
+      "objects": 163,
+      "htmlBytes": 24389,
+      "sha256": "df578ac53d53b89498ee480747a5df960ed8d86868f27c0c96842e8fa52b1151"
+    },
+    {
+      "report": "SlTaxRpt",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 18,
+      "objects": 62,
+      "htmlBytes": 11009,
+      "sha256": "75e8936f894de15ec5493bd8e78fb99082a7e1eeeb71b415b4bd5c4017e3cbb1"
+    },
+    {
+      "report": "StkInOutVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 70,
+      "htmlBytes": 11641,
+      "sha256": "e2f197cce8e410e89e1f2b89a12fadc288480b55719a88684f463fdbde79abf4"
+    },
+    {
+      "report": "StngIsuRec",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 16,
+      "objects": 103,
+      "htmlBytes": 15746,
+      "sha256": "9186dd800fff8cfb3d874a2c2193a16cb3345e359b441c7ae046436813d80fd6"
+    },
+    {
+      "report": "TRialBalHz",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 11,
+      "objects": 10,
+      "htmlBytes": 3932,
+      "sha256": "cee756463fdce90d162e0b9aa070dcaba9b2ae4ce31b5990224ca419474e6f92"
+    },
+    {
+      "report": "TableStkGwtRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 14,
+      "objects": 98,
+      "htmlBytes": 17516,
+      "sha256": "42921b83dca57506af8032f8d830d768385cc54d7f2f35c5f321af788ad99ca0"
+    },
+    {
+      "report": "TagCanBill",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 70,
+      "htmlBytes": 11683,
+      "sha256": "745ac29199b7e1a37c64614ec0565ee17317db14cbe0bb39664f702b694a7dea"
+    },
+    {
+      "report": "TagHuIdRpt",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 61,
+      "htmlBytes": 12026,
+      "sha256": "36c7338c4b2b590560edea5db3b812068764429eca99d740cc25fb2a2bc6334a"
+    },
+    {
+      "report": "TagItmSumm",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 33,
+      "htmlBytes": 7557,
+      "sha256": "fa93b3377dfee714258b1ace5c1cdb79681632bc193161dca00cb61ca0f9fdb5"
+    },
+    {
+      "report": "TagReNumberVch",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 36,
+      "htmlBytes": 8011,
+      "sha256": "30aff87f02ac86f453606bd44d17c5dbfb6761dbabd48e8e9fe3d97308a7a0b8"
+    },
+    {
+      "report": "TagSplitVch",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 19,
+      "objects": 109,
+      "htmlBytes": 16973,
+      "sha256": "b43feceff2a69e59ed881d92936396decf56e30ef1d684b7d6e8e58409b5d676"
+    },
+    {
+      "report": "TagStkItemSumRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 44,
+      "htmlBytes": 9283,
+      "sha256": "ec2ea2d034b7cc48daabdfa7e7055ca90d46a5ee78ced6c40d218cf9cf1fe37c"
+    },
+    {
+      "report": "TagStkRpt",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 42,
+      "htmlBytes": 9230,
+      "sha256": "a88f0157512c9cb289e6e5df8cbb041f4d533bc8d3a31d0d164fa6f37a615819"
+    },
+    {
+      "report": "TagStkRptDmSum",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 71,
+      "htmlBytes": 11581,
+      "sha256": "29184347d3503cfa1e42a6d32567c6cc818f027ac8e8f3e1955be614b0a1c626"
+    },
+    {
+      "report": "TagStkSummRpt",
+      "status": "rendered",
+      "areas": 13,
+      "sections": 14,
+      "objects": 50,
+      "htmlBytes": 10352,
+      "sha256": "cfda4206eaf18bdb642fe0df37a9d5d301c6fce90fc1efde3425f4390119dd82"
+    },
+    {
+      "report": "TagWtChangSplit",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 12,
+      "objects": 56,
+      "htmlBytes": 11387,
+      "sha256": "4cff7995e4fb269cbd09ae541f727583f1797f6e0dbab14bde7e9e64f30a83a0"
+    },
+    {
+      "report": "TagWtChangeVch",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 23,
+      "objects": 121,
+      "htmlBytes": 19023,
+      "sha256": "529119513714938928dc94dac99a235bc69b9b970461cdd2d6e4623bd2405caa"
+    },
+    {
+      "report": "TaxInOutRpt",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 16,
+      "objects": 77,
+      "htmlBytes": 13376,
+      "sha256": "146cc8928ca297cf3c37d0bfd42fd3e875d4e83e693c6be9c50a896ce064cf2d"
+    },
+    {
+      "report": "TaxSummUae",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 16,
+      "objects": 77,
+      "htmlBytes": 13374,
+      "sha256": "e675972bd8b7aeeb01e8aae4fdb5d422a0ef272ea329cedddd8ebd63b187b3f4"
+    },
+    {
+      "report": "TempAdd2",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 12,
+      "objects": 8,
+      "htmlBytes": 5474,
+      "sha256": "af3389484c25e06eb8eaad26178e8369a3ce4dd490791871fb01bc730e28b368"
+    },
+    {
+      "report": "TempAdd3",
+      "status": "rendered",
+      "areas": 5,
+      "sections": 12,
+      "objects": 8,
+      "htmlBytes": 5476,
+      "sha256": "90c26fa7376c1aa3bc3997bb9b2427bb99dec0a219b8f6b27d9d07c76eb025cb"
+    },
+    {
+      "report": "TempPhone",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 11,
+      "objects": 17,
+      "htmlBytes": 4688,
+      "sha256": "46dde524636cf7466ab71cb6962a97bc232da7a79d4884130b3e267814a0e23e"
+    },
+    {
+      "report": "TourOrdImg",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 16,
+      "objects": 93,
+      "htmlBytes": 24238,
+      "sha256": "0b5461eb45c0c333b83c0bbc59724c2053012882cb81ac9028242a12180a2749"
+    },
+    {
+      "report": "TourOrdVch",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 15,
+      "objects": 92,
+      "htmlBytes": 22689,
+      "sha256": "7ffba43d50b7c1ed701f369896ac7a8b2df1aa21f4ffc862d910384b7c9dc531"
+    },
+    {
+      "report": "UserDtlRpt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 47,
+      "htmlBytes": 13059,
+      "sha256": "a7704d1171e20c05ac3d4f6c0d35f10a9e60e4dffba096debf105195f66de0db"
+    },
+    {
+      "report": "VpAdjustBill",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 9,
+      "objects": 40,
+      "htmlBytes": 7909,
+      "sha256": "55955d778f30b2249e658efedef9e6943ae362b11417f09dac3b3f3b6544a167"
+    },
+    {
+      "report": "VpIsuRpt",
+      "status": "rendered",
+      "areas": 7,
+      "sections": 8,
+      "objects": 28,
+      "htmlBytes": 6756,
+      "sha256": "f589d1ee9e896362c56986b0c01b0f8903dfe46d1a8e2d9f956dd28c81f5d4ab"
+    },
+    {
+      "report": "WhHuidPrint",
+      "status": "rendered",
+      "areas": 9,
+      "sections": 10,
+      "objects": 62,
+      "htmlBytes": 9735,
+      "sha256": "c4edcd1a411249c26f70a32ad185d74b76d672bb007b45953764a1350c845caa"
+    },
+    {
+      "report": "WhSalesBill",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 24,
+      "objects": 128,
+      "htmlBytes": 20359,
+      "sha256": "2d1c0bb21577e4684e89900d43b5e090dbb4f5a488f6ca992446d527516e0cad"
+    },
+    {
+      "report": "WhSalesBillSumm",
+      "status": "rendered",
+      "areas": 15,
+      "sections": 15,
+      "objects": 54,
+      "htmlBytes": 11736,
+      "sha256": "5d5e077c53d75dff0b9aa1c2733943fcfb4943ef3a95b012df90b57beacd888d"
+    },
+    {
+      "report": "WhSalesEmp",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 11,
+      "objects": 46,
+      "htmlBytes": 9777,
+      "sha256": "d26ac0661351b5892aee7678587db0bf66fa6368f1d45f814bdda9c543778978"
+    },
+    {
+      "report": "WhSalesImage",
+      "status": "rendered",
+      "areas": 3,
+      "sections": 3,
+      "objects": 1,
+      "htmlBytes": 1903,
+      "sha256": "16a63de705d48707bab73b7be1f79d89b21889a51396306f63852b9e4a6ecb60"
+    },
+    {
+      "report": "WhSalesIsuRec",
+      "status": "rendered",
+      "areas": 15,
+      "sections": 15,
+      "objects": 54,
+      "htmlBytes": 11732,
+      "sha256": "db0569444130ae66cc76d40be35c038c31d1ff6384f20a7c04a83d485e70c654"
+    },
+    {
+      "report": "WhSalesRtnBill",
+      "status": "rendered",
+      "areas": 11,
+      "sections": 24,
+      "objects": 125,
+      "htmlBytes": 19967,
+      "sha256": "8b7ef9babd7c661851391e81385bc23873129d823fda7eb0351231f34626f1a7"
+    },
+    {
+      "report": "WhSalesSumm",
+      "status": "rendered",
+      "areas": 15,
+      "sections": 15,
+      "objects": 54,
+      "htmlBytes": 11728,
+      "sha256": "681b145ad592a4a138a15b1e165fbf53b42bf0a7de7ae6b91d405e05cfb14560"
+    }
+  ]
+}

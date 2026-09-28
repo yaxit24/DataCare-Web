@@ -1,0 +1,64 @@
+{
+ "descriptorSurface": {
+  "discoveredPages": 123,
+  "pagesWithDescriptorCandidates": 19,
+  "distinctDescriptorCandidates": 589,
+  "gridCandidates": 48,
+  "inputCandidates": 589,
+  "identityCandidates": 3,
+  "editableInputCandidates": 586,
+  "conditionalCandidates": 132,
+  "unsupportedConsumers": 103,
+  "basis": "Additive static descriptor candidates reached from returned JSX maps; historical heuristic counters and budgets unchanged",
+  "limits": "Candidate field origins only. Conditional configuration, generic props, indirect/re-exported factories and unsupported expressions require further tracing. No route, writer, reader, persistence, runtime visibility or functional parity is certified. Do not add these candidates to the historical totals: overlap is intentional and un-reconciled.",
+  "detailedAudit": "node scripts/measure-ui-descriptors.mjs"
+ },
+ "desktop": {
+  "forms": 204,
+  "inputControls": 1599,
+  "gridNamedCols": 3508,
+  "operatorSurface": 5107,
+  "distinctValidationMessages": 631,
+  "gridCellEvents": 416
+ },
+ "web": {
+  "pages": 123,
+  "txnPages": 82,
+  "txnPagesWithLineGrid": 73,
+  "txnPagesWithEditableGrid": 63,
+  "inputControls": 1494,
+  "gridColumns": 2159,
+  "operatorSurface": 3653,
+  "pagesWithGridKeyboard": 62,
+  "txnPagesWithGridKeyboard": 61,
+  "txnGridPagesWithKeyboard": 61,
+  "txnEditableGridPagesWithKeyboard": 61,
+  "pagesWithLookupPicker": 83,
+  "pagesWithLineRecalc": 0,
+  "pagesWithSubDetailGrid": 16,
+  "apiValidationMessages": 751
+ },
+ "ratios": {
+  "operatorSurfacePct": 71.5,
+  "gridColumnPct": 61.5,
+  "inputControlPct": 93.4,
+  "operatorSurfacePerPagePct": 96.8
+ },
+ "settings": {
+  "inventory": 130,
+  "honoured": 46,
+  "inert": 81
+ },
+ "reachability": {
+  "apiInputFields": 2370,
+  "reachableFromUi": 2269,
+  "apiOnlyUnreachable": 101
+ },
+ "containment": {
+  "operations": 6,
+  "blockedRoutes": 9
+ },
+ "reports": {
+  "runnableSlugs": 78
+ }
+}

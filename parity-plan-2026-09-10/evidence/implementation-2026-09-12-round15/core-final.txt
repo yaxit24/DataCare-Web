@@ -1,0 +1,40 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnIncoming.review.test.ts (33 tests) 61ms
+ ✓ test/saleReturnBillProjection.test.ts (84 tests) 84ms
+ ✓ test/saleReturnIncoming.test.ts (72 tests) 139ms
+ ✓ test/saleReturnIncomingLabour.test.ts (73 tests) 213ms
+ ✓ test/saleReturnIncomingAggregate.test.ts (62 tests) 296ms
+ ✓ test/saleReturnIncomingLabourCompose.test.ts (53 tests) 507ms
+ ✓ test/saleReturnIncomingProjection.test.ts (53 tests) 76ms
+ ✓ test/designCalc.test.ts (36 tests) 43ms
+ ✓ test/saleReturnBillTaxPolicy.test.ts (89 tests) 70ms
+ ✓ test/saleReturnIncomingSaveProjection.test.ts (63 tests) 208ms
+ ✓ test/saleReturnNBarCompanions.test.ts (61 tests) 203ms
+ ✓ test/designRepeat.test.ts (11 tests) 15ms
+ ✓ test/savedSaleReturnClock.test.ts (159 tests) 211ms
+ ✓ test/sessionLedgerMode.test.ts (104 tests) 2486ms
+   ✓ ledger-mode plain-data envelope containment > refuses an accepted-input boundary whose appended proof would exceed reread limits 2122ms
+ ✓ test/saleReturnSaveGuards.test.ts (123 tests) 256ms
+ ✓ test/saleReturnEffectContext.test.ts (89 tests) 115ms
+ ✓ test/saleReturnOtherAmountReplay.test.ts (45 tests) 432ms
+ ✓ test/saleReturnHeaderFloat.test.ts (47 tests) 23ms
+ ✓ test/salesOrderDesign.test.ts (8 tests) 26ms
+ ✓ test/orderLabour.test.ts (23 tests) 15ms
+ ✓ test/orderLabourWithCache.test.ts (11 tests) 15ms
+ ✓ test/saleReturnSaveComposition.test.ts (6 tests) 291ms
+ ✓ test/saleReturnFinancialEffects.test.ts (291 tests) 2758ms
+ ✓ test/containment.test.ts (4 tests) 12ms
+ ✓ test/calc.test.ts (10 tests) 32ms
+ ✓ test/money.test.ts (3 tests) 16ms
+
+ Test Files  26 passed (26)
+      Tests  1613 passed (1613)
+   Start at  08:23:45
+   Duration  5.45s (transform 1.64s, setup 0ms, collect 4.07s, tests 8.60s, environment 21ms, prepare 5.47s)
+

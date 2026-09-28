@@ -1,0 +1,6 @@
+{
+  "reason": "Expose the existing exact plain-record/false-capability validation as a TypeScript type predicate, preserving its runtime body. Fixes unknown capabilities at lines309-310.",
+  "beforeSha256": "33aa5e913b5eaa41cc948fa755e860fbfe64bc707379bde0e6e9f2f1f77a3752",
+  "afterSha256": "a5c5b4c21bf630d9fc99c86294660a2465c0d1392ee45f09f9b65cbd57139ae8",
+  "failedCheck": "return-labour-workspace-lint-corrected"
+}

@@ -1,0 +1,127 @@
+{
+  "forms": 204,
+  "transactionForms": 61,
+  "writeTableCoverage": {
+    "allFormsAvgPct": 33.6,
+    "transactionAvgPct": 52.2,
+    "transactionFormsFullyCovered": 1,
+    "transactionFormsZeroCovered": 2
+  },
+  "gridColumnCoverage": {
+    "transactionAvgPct": 4.5
+  },
+  "controlCoverage": {
+    "transactionAvgPct": 25.3
+  },
+  "validationCoverage": {
+    "transactionAvgPct": 61.7
+  },
+  "desktopTotals": {
+    "calcExpressions": 3309,
+    "validations": 1849,
+    "inlineSql": 5128,
+    "handlers": 377
+  },
+  "mostMissingWriteTables": [
+    [
+      "ROJ_MEL_DATA",
+      41
+    ],
+    [
+      "REMARK_DATA",
+      39
+    ],
+    [
+      "TEMP_BOOK_DATA",
+      33
+    ],
+    [
+      "BAR_DETL",
+      31
+    ],
+    [
+      "DM_DATA",
+      25
+    ],
+    [
+      "BAR_IDTL",
+      21
+    ],
+    [
+      "MAIN_STOCK",
+      21
+    ],
+    [
+      "TAX_DATA",
+      17
+    ],
+    [
+      "BAR_DATA",
+      16
+    ],
+    [
+      "SL_ORD_ADJ",
+      16
+    ],
+    [
+      "APR_DETL",
+      16
+    ],
+    [
+      "TAG_PRINT_DATA",
+      16
+    ],
+    [
+      "DELETE_DATA",
+      15
+    ],
+    [
+      "SL_PR_DETL",
+      15
+    ],
+    [
+      "TAG_IMAGE_DATA",
+      15
+    ],
+    [
+      "USER_DATA",
+      15
+    ],
+    [
+      "MENU_DATA",
+      14
+    ],
+    [
+      "PR_DATA",
+      14
+    ],
+    [
+      "LOT_DETL",
+      14
+    ],
+    [
+      "RATE_CUT_ISU_REC",
+      14
+    ],
+    [
+      "LEDR_AC_DATA",
+      13
+    ],
+    [
+      "GROUP_MAST",
+      13
+    ],
+    [
+      "PR_DETL",
+      13
+    ],
+    [
+      "SL_DATA",
+      13
+    ],
+    [
+      "SL_DETL",
+      13
+    ]
+  ]
+}

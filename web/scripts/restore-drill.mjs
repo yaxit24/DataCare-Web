@@ -4,7 +4,13 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '../apps/api/node_modules/@prisma/client/default.js';
 import { backupCompany, restoreCompany } from '../apps/api/dist/modules/ops/backup.js';
-import { verifyCompanyRestore } from '../apps/api/dist/modules/ops/restoreVerification.js';
+import { parityContainmentProblem } from '../packages/core/containment.mjs';
+
+const containment = parityContainmentProblem('logical-restore');
+if (containment) {
+  process.stdout.write(`${JSON.stringify(containment.body, null, 2)}\n`);
+  process.exit(1);
+}
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
@@ -20,9 +26,12 @@ const source = {
   companyCode: process.env.DR_SOURCE_COMPANY ?? '01',
 };
 const target = {
-  tenantId: process.env.DR_SCRATCH_TENANT ?? 'restore-drill-scratch',
-  companyCode: source.companyCode,
+  tenantId: process.env.DR_TARGET_TENANT ?? source.tenantId,
+  companyCode: process.env.DR_TARGET_COMPANY ?? source.companyCode,
 };
+if (target.tenantId !== source.tenantId || target.companyCode !== source.companyCode) {
+  throw new Error('v2 company restore drill requires the same source and target tenant/company');
+}
 const reportPath = resolve(
   root,
   process.env.DR_REPORT_PATH ?? '../project-memory/parity/restore-drill-result.json',
@@ -76,12 +85,46 @@ async function main() {
   const backup = await backupCompany(prisma, source.tenantId, source.companyCode);
   const backupMs = elapsedMs(backupStarted);
 
+  await prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe("SELECT set_config('app.tenant_id', $1, true)", target.tenantId);
+    await tx.$executeRawUnsafe(
+      `UPDATE "AC_MAST" SET "AC_NAME"='Restore Drill Mutation'
+        WHERE "CO_CODE"::text=$1::text AND "AC_CODE"='DRLCASH'`,
+      target.companyCode,
+    );
+  });
+
   const restoreStarted = performance.now();
-  const restore = await restoreCompany(prisma, target.tenantId, backup, { clear: true });
+  const restore = await restoreCompany(prisma, target, backup, { mode: 'replace' });
   const restoreMs = elapsedMs(restoreStarted);
 
   const verifyStarted = performance.now();
-  const verification = await verifyCompanyRestore(prisma, source, target);
+  const restoredBackup = await backupCompany(prisma, target.tenantId, target.companyCode);
+  const verificationTables = Object.keys(backup.tables)
+    .sort()
+    .map((table) => ({
+      table,
+      sourceRows: backup.tables[table].rowCount,
+      restoredRows: restoredBackup.tables[table]?.rowCount ?? -1,
+      sourceChecksum: backup.tables[table].checksum,
+      restoredChecksum: restoredBackup.tables[table]?.checksum ?? '',
+      matches:
+        backup.tables[table].rowCount === restoredBackup.tables[table]?.rowCount &&
+        backup.tables[table].checksum === restoredBackup.tables[table]?.checksum,
+    }));
+  const mismatches = verificationTables
+    .filter((table) => !table.matches)
+    .map((table) => table.table);
+  const verification = {
+    verified: mismatches.length === 0,
+    source,
+    target,
+    sourceRows: backup.totals.rows,
+    restoredRows: restoredBackup.totals.rows,
+    tablesChecked: verificationTables.length,
+    mismatches,
+    tables: verificationTables,
+  };
   const verifyMs = elapsedMs(verifyStarted);
   const completedAt = new Date();
   const recoveryPointAgeMs = Math.max(0, completedAt.getTime() - Date.parse(backup.generatedAt));
@@ -96,7 +139,7 @@ async function main() {
     },
     source,
     target,
-    backup: { generatedAt: backup.generatedAt, rows: backup.rowCount, durationMs: backupMs },
+    backup: { generatedAt: backup.generatedAt, rows: backup.totals.rows, durationMs: backupMs },
     restore: { ...restore, durationMs: restoreMs },
     verification,
     measured: {

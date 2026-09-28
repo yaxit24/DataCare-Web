@@ -1,0 +1,38 @@
+# TR_KR_ISU
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_KR_ISU.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** DELETE_DATA
+- **UPDATE:** —
+
+## Tables deleted / reversed
+- **DELETE:** AC_DATA, BAR_DETL, BAR_IDTL, DM_DATA, DM_KR_DATA, MAIN_STOCK, MFG_ISU_REC, REMARK_DATA, ROJ_MEL_DATA, TAX_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- AC_MAST, TEMP_BOOK_DATA, MAIN_STOCK, ITEM_MAST, TAX_MAST, EMP_MAST, BAR_DETL, AC_DATA, ROJ_MEL_DATA, TAX_DATA, DM_DATA, TAG_IMAGE_DATA, TOUCH_MAST, USER_SET, DM_KR_DATA, MFG_ISU_REC, REMARK_DATA, BAR_IDTL, KR_DATA, PR_DETL, APR_DETL
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L5038: DELETE TEMP_BOOK_DATA
+- L5237: DELETE AC_DATA
+- L5251: DELETE ROJ_MEL_DATA
+- L5265: DELETE TAX_DATA
+- L5271: DELETE MAIN_STOCK
+- L5273: DELETE DM_KR_DATA
+- L5275: DELETE DM_DATA
+- L5289: DELETE MFG_ISU_REC
+- L5373: INSERT DELETE_DATA
+- L5375: DELETE REMARK_DATA
+- L5376: DELETE TEMP_BOOK_DATA
+- L5377: DELETE MAIN_STOCK
+- L5378: DELETE AC_DATA
+- L5379: DELETE ROJ_MEL_DATA
+- L5380: DELETE TAX_DATA
+- L5381: DELETE DM_DATA
+- L5386: DELETE BAR_DETL
+- L5387: DELETE BAR_IDTL
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

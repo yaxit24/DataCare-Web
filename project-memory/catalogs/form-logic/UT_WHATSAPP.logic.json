@@ -1,0 +1,84 @@
+{
+ "form": "UT_WHATSAPP",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MAST",
+  "AD_MEMB",
+  "CO_SET_NEW",
+  "LEDR_AC_DATA",
+  "LOGIN_MAST",
+  "MSG_MAST",
+  "POINT_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "MSG_MAST": [
+    "CO_CODE",
+    "MSG_DETL",
+    "MSG_TYPE",
+    "MSG_TYPING"
+   ],
+   "LEDR_AC_DATA": [
+    "AC_CODE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "CR_FINE_WT",
+    "CR_SL_FINE",
+    "DATA_TYPE",
+    "DR_AMT",
+    "DR_FINE_WT",
+    "DR_SL_FINE",
+    "LC_CODE",
+    "VCH_DT"
+   ],
+   "POINT_MAST": [
+    "CO_CODE",
+    "MAIN_USER",
+    "POINT_CODE",
+    "POINT_NAME",
+    "POINT_TYPE",
+    "SR_NO"
+   ]
+  },
+  "UPDATE": [
+   "CO_SET_NEW",
+   "POINT_MAST"
+  ],
+  "DELETE": [
+   "LEDR_AC_DATA",
+   "MSG_MAST",
+   "POINT_MAST"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "ADD_MAST",
+  "AD_DATA",
+  "AD_MAST",
+  "AD_MEMB",
+  "CO_SET_NEW",
+  "LEDR_AC_DATA",
+  "LOGIN_MAST",
+  "MSG_MAST",
+  "POINT_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 40,
+ "timers": 5,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 6774
+}

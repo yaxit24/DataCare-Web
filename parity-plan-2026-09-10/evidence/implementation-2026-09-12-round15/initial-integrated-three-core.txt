@@ -1,0 +1,12 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnEffectContext.test.ts (89 tests) 37ms
+ ✓ test/saleReturnSaveGuards.test.ts (123 tests) 77ms
+ ✓ test/saleReturnOtherAmountReplay.test.ts (45 tests) 105ms
+
+ Test Files  3 passed (3)
+      Tests  257 passed (257)
+   Start at  08:21:00
+   Duration  1.01s (transform 416ms, setup 0ms, collect 524ms, tests 219ms, environment 1ms, prepare 368ms)
+

@@ -1,0 +1,17 @@
+{
+  "kind": "round12-ledger-mode-vector-authorship/1",
+  "authoredAtUtc": "2026-09-11T16:00:54.828447+00:00",
+  "implementationExistedAtFreeze": false,
+  "implementationInspected": false,
+  "bootstrapCases": 24,
+  "commandCases": 28,
+  "portable": {
+    "path": "web/packages/core/test/fixtures/session-ledger-mode.v1.json",
+    "sha256": "f6974c2f079073bba1cfb04305d824fb72c9e651c308999a72c01ea1962645f5"
+  },
+  "evidence": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-independent-vectors.v1.json",
+    "sha256": "f6974c2f079073bba1cfb04305d824fb72c9e651c308999a72c01ea1962645f5"
+  },
+  "priorCheckpointSha256": "fd3ab768e85c7a0936ae06c72580e7d170b6adf32b74a105df880e43f806a489"
+}

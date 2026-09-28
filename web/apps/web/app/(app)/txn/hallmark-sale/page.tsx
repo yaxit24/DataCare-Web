@@ -4,6 +4,13 @@ import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { fineFor, labourCharge } from '@datacare/core';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 interface Line {
   itCode: string;
@@ -15,6 +22,55 @@ interface Line {
   touch: string;
   rate: string;
   making: string;
+  lessWt: string;
+  ghtPct: string;
+  ghtWt: string;
+  westPct: string;
+  fineWt: string;
+  rateWith: string;
+  rateType: string;
+  metalAmount: string;
+  labourType: string;
+  labourPct: string;
+  labourFixed: string;
+  otherAmount: string;
+  discountPct: string;
+  ghatAmount: string;
+  mrp: string;
+  designNo: string;
+  itmSize: string;
+  style: string;
+  itemLot: string;
+  bagWt: string;
+  remark: string;
+  tblCode: string;
+  tagGrossWt: string;
+  tagNetWt: string;
+  tagCost: string;
+  karigarName: string;
+  karigarNetWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
+  employeeCode: string;
+  prCode: string;
+  ordNo: string;
+  ordYrcd: string;
+  ordDbcd: string;
+  ordSrno: string;
+  isuNo: string;
+  isuYrcd: string;
+  isuDbcd: string;
+  isuSrno: string;
+  designImageId: string;
+  orderTagStockAdd: string;
+  hallmarkId2: string;
+  hallmarkId3: string;
+  hallmarkId4: string;
+  hallmarkIdWt: string;
+  hallmarkId2Wt: string;
+  hallmarkId3Wt: string;
+  hallmarkId4Wt: string;
 }
 interface Totals {
   net: number;
@@ -27,6 +83,101 @@ interface Totals {
   roundOff: number;
   total: number;
 }
+/**
+ * P7: fields deliberately NOT exposed on this grid, having been checked against the writer.
+ *
+ * Five have NO COLUMN IN SL_DETL at all despite the interface carrying a column comment
+ * (ITM_MARGIN, TAG_LBR_PRC, TAG_LBR_RATE, TAG_LBR_AMT, TAG_OTH_AMT) — verified against
+ * information_schema. Four more are declared on the contract but never read by the writer
+ * (otherWt, itType, tagType, dataTransfer). Three are internal serials the server assigns
+ * (tagSrNo, oldSrNo, vchSrno). `margin` is additionally server-derived on purpose: sales.ts:1866
+ * notes a client-supplied cost would let the margin be manipulated.
+ *
+ * Exposing any of them would give the operator a cell that silently discards what they type, which is
+ * worse than not showing the column — and it would inflate the depth metric with dead surface.
+ * fineWt, metalAmount and labourFixed ARE exposed, because the writer honours each as an override.
+ */
+const NUMERIC_EXTENDED = new Set<string>([
+  'lessWt',
+  'ghtPct',
+  'ghtWt',
+  'westPct',
+  'fineWt',
+  'metalAmount',
+  'labourPct',
+  'labourFixed',
+  'otherAmount',
+  'discountPct',
+  'ghatAmount',
+  'mrp',
+  'bagWt',
+  'tagGrossWt',
+  'tagNetWt',
+  'tagCost',
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+  'hallmarkIdWt',
+  'hallmarkId2Wt',
+  'hallmarkId3Wt',
+  'hallmarkId4Wt',
+  'ordSrno',
+  'isuSrno',
+]);
+
+const extendedLineFields: Array<[keyof Line, string]> = [
+  ['lessWt', 'Ls Wt'],
+  ['ghtPct', 'Ght%'],
+  ['ghtWt', 'GhtWt'],
+  ['westPct', 'West%'],
+  ['fineWt', 'Fine'],
+  ['rateWith', 'RtWith'],
+  ['rateType', 'RateType'],
+  ['metalAmount', 'ItAmt'],
+  ['labourType', 'LType'],
+  ['labourPct', 'Lbr%'],
+  ['labourFixed', 'LbrFix'],
+  ['otherAmount', 'OthAmt'],
+  ['discountPct', 'LDisc%'],
+  ['ghatAmount', 'GhtAmt'],
+  ['mrp', 'Mrp'],
+  ['designNo', 'Design'],
+  ['itmSize', 'Size'],
+  ['style', 'Style'],
+  ['itemLot', 'ItmLot'],
+  ['bagWt', 'BagWt'],
+  ['remark', 'Remark'],
+  ['tblCode', 'TblCode'],
+  ['tagGrossWt', 'TagGwt'],
+  ['tagNetWt', 'TagNwt'],
+  ['tagCost', 'TagCost'],
+  ['karigarName', 'KrCode'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
+  ['employeeCode', 'EmpCod'],
+  ['prCode', 'PrCost'],
+  ['ordNo', 'OrdNo'],
+  ['ordYrcd', 'OrdYr'],
+  ['ordDbcd', 'OrdBk'],
+  ['ordSrno', 'OrdSr'],
+  ['isuNo', 'IsuNo'],
+  ['isuYrcd', 'IsuYr'],
+  ['isuDbcd', 'IsuBk'],
+  ['isuSrno', 'IsuSr'],
+  ['designImageId', 'Image'],
+  ['orderTagStockAdd', 'OrdStk'],
+  ['hallmarkId2', 'HmId2'],
+  ['hallmarkId3', 'HmId3'],
+  ['hallmarkId4', 'HmId4'],
+  ['hallmarkIdWt', 'HmIdWt'],
+  ['hallmarkId2Wt', 'HmId2Wt'],
+  ['hallmarkId3Wt', 'HmId3Wt'],
+  ['hallmarkId4Wt', 'HmId4Wt'],
+];
+
 const blank = (): Line => ({
   itCode: 'GOLD',
   tagNo: '',
@@ -37,6 +188,55 @@ const blank = (): Line => ({
   touch: '',
   rate: '',
   making: '',
+  lessWt: '',
+  ghtPct: '',
+  ghtWt: '',
+  westPct: '',
+  fineWt: '',
+  rateWith: '',
+  rateType: '',
+  metalAmount: '',
+  labourType: '',
+  labourPct: '',
+  labourFixed: '',
+  otherAmount: '',
+  discountPct: '',
+  ghatAmount: '',
+  mrp: '',
+  designNo: '',
+  itmSize: '',
+  style: '',
+  itemLot: '',
+  bagWt: '',
+  remark: '',
+  tblCode: '',
+  tagGrossWt: '',
+  tagNetWt: '',
+  tagCost: '',
+  karigarName: '',
+  karigarNetWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
+  employeeCode: '',
+  prCode: '',
+  ordNo: '',
+  ordYrcd: '',
+  ordDbcd: '',
+  ordSrno: '',
+  isuNo: '',
+  isuYrcd: '',
+  isuDbcd: '',
+  isuSrno: '',
+  designImageId: '',
+  orderTagStockAdd: '',
+  hallmarkId2: '',
+  hallmarkId3: '',
+  hallmarkId4: '',
+  hallmarkIdWt: '',
+  hallmarkId2Wt: '',
+  hallmarkId3Wt: '',
+  hallmarkId4Wt: '',
 });
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
@@ -58,6 +258,20 @@ export default function HallmarkSalePage() {
   const [oldGoldTouch, setOldGoldTouch] = useState('');
   const [oldGoldRate, setOldGoldRate] = useState('');
   const [lines, setLines] = useState<Line[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [result, setResult] = useState<{ vchNo: number; totals: Totals } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -67,9 +281,22 @@ export default function HallmarkSalePage() {
 
   // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
   const calc = (l: Line) => {
-    const fine = r2((n(l.netWt) * n(l.touch)) / 100);
+    const fine = fineFor('sale', {
+      netWt: n(l.netWt),
+      touch: n(l.touch),
+      ghtWt: n(l.ghtWt),
+      westPct: n(l.westPct),
+    });
     const metal = r2(fine * n(l.rate));
-    const mk = r2(n(l.netWt) * n(l.making));
+    // P5/P7: this page now carries ghat, and per-gram labour is (net + ghat) x rate unless the
+    // company switches ghat off (LBR_WITH_GHT, blank default 'Y'). The structural guard in
+    // derivedValueSources.test.ts caught this the moment ghtWt was added to the grid.
+    const mk = labourCharge('per_gram', {
+      netWt: n(l.netWt),
+      ghatWt: n(l.ghtWt),
+      withGhat: true,
+      rate: n(l.making),
+    });
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
@@ -128,6 +355,17 @@ export default function HallmarkSalePage() {
             rate: n(l.rate),
             huid: l.huid || undefined,
             ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
+            // P7: extended columns. A blank cell is OMITTED, never sent as 0 — an explicit zero is
+            // an override at the writer and would defeat the server's own derivation.
+            ...Object.fromEntries(
+              extendedLineFields
+                .map(([key]) => [
+                  key,
+                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                ])
+                .filter(([, v]) => v !== '')
+                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+            ),
           })),
       };
       setResult(await post('/sales', body));
@@ -241,7 +479,13 @@ export default function HallmarkSalePage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Hallmarked Items</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="hallmark-sale-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -255,6 +499,7 @@ export default function HallmarkSalePage() {
                 <th className="num">Making/g</th>
                 <th className="num">Fine</th>
                 <th className="num">Amount</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -348,6 +593,14 @@ export default function HallmarkSalePage() {
                     </td>
                     <td className="num">{c.fine.toLocaleString('en-IN')}</td>
                     <td className="num">{c.net.toLocaleString('en-IN')}</td>
+                    <ExtendedBodyCells
+                      full={fullGrid}
+                      fields={extendedLineFields}
+                      line={l}
+                      row={i}
+                      baseColumns={11}
+                      setValue={(row, key, value) => setLine(row, key, value)}
+                    />
                     <td>
                       <button
                         type="button"

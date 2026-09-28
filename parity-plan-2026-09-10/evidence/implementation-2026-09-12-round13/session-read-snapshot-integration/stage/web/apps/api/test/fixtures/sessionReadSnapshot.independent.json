@@ -1,0 +1,487 @@
+{
+  "profile": "session-read-repeatable-snapshot-v1",
+  "authoredBeforeNewImplementation": true,
+  "identity": {
+    "tenantId": "read-snapshot-unit",
+    "sessionId": "11111111-1111-4111-8111-111111111111",
+    "loginName": "operator",
+    "loginCoCode": "01",
+    "coCode": "01",
+    "lcCode": "01",
+    "coYear": "2024-2025",
+    "contextEpoch": "7"
+  },
+  "policy": {
+    "form": "Sales/Sales Return",
+    "scope": {
+      "tenantId": "read-snapshot-unit",
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "R13"
+    }
+  },
+  "unitCases": [
+    {
+      "id": "S01",
+      "scenario": "ready",
+      "given": "one RR snapshot, View Y/Edit N",
+      "expected": {
+        "code": "success",
+        "statusCode": 200
+      }
+    },
+    {
+      "id": "S02",
+      "scenario": "numeric-epoch",
+      "given": "retained epoch numeric7",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S03",
+      "scenario": "leading-zero-epoch",
+      "given": "retained epoch07",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S04",
+      "scenario": "overflow-epoch",
+      "given": "retained epoch9223372036854775808",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S05",
+      "scenario": "authority-extra",
+      "given": "retained isAdmin supplied",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S06",
+      "scenario": "missing-year",
+      "given": "trusted coYear own undefined",
+      "expected": {
+        "code": "scope-incomplete",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S07",
+      "scenario": "scope-mismatch",
+      "given": "fixed scope other company",
+      "expected": {
+        "code": "scope-mismatch",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S08",
+      "scenario": "mutable-action",
+      "given": "policy action supplied",
+      "expected": {
+        "code": "invalid-read-snapshot-policy",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S09",
+      "scenario": "wrong-tenant",
+      "given": "transaction binding wrong tenant",
+      "expected": {
+        "code": "invalid-transaction-context",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S10",
+      "scenario": "wrong-isolation",
+      "given": "transaction isolation read committed",
+      "expected": {
+        "code": "invalid-transaction-context",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S11",
+      "scenario": "missing-session",
+      "given": "locking SELECT no row",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S12",
+      "scenario": "foreign-subject",
+      "given": "locked loginCoCode different",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S13",
+      "scenario": "stale-epoch",
+      "given": "locked epoch8 bearer7",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S14",
+      "scenario": "scope-aba",
+      "given": "selected scope equal but locked epoch9",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S15",
+      "scenario": "malformed-ledger",
+      "given": "locked mode A claimed",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S16",
+      "scenario": "revoked",
+      "given": "after-lock revoked true",
+      "expected": {
+        "code": "session-revoked",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S17",
+      "scenario": "expired",
+      "given": "after-lock unexpired false",
+      "expected": {
+        "code": "session-expired",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S18",
+      "scenario": "principal-missing",
+      "given": "snapshot LOGIN no row",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S19",
+      "scenario": "forced-reset",
+      "given": "snapshot selected principal resetY",
+      "expected": {
+        "code": "password-reset-required",
+        "statusCode": 403
+      }
+    },
+    {
+      "id": "S20",
+      "scenario": "view-denied",
+      "given": "snapshot USER_SET ViewN/EditY",
+      "expected": {
+        "code": "forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "id": "S21",
+      "scenario": "final-expiry",
+      "given": "work read succeeds then final clock expired",
+      "expected": {
+        "code": "session-expired",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S22",
+      "scenario": "final-epoch",
+      "given": "same-Tx injected epoch8 after work",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S23",
+      "scenario": "final-ledger",
+      "given": "same-Tx injected valid other unknown reason",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S24",
+      "scenario": "raw-serialization",
+      "given": "locking read throws40001",
+      "expected": {
+        "code": "preview-snapshot-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S25",
+      "scenario": "prisma-conflict",
+      "given": "transaction commit throwsP2034",
+      "expected": {
+        "code": "preview-snapshot-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S26",
+      "scenario": "wrapped-serialization",
+      "given": "locking read P2010 meta40001",
+      "expected": {
+        "code": "preview-snapshot-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S27",
+      "scenario": "raw-deadlock",
+      "given": "locking read40P01",
+      "expected": {
+        "code": "preview-snapshot-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S28",
+      "scenario": "wrapped-deadlock",
+      "given": "locking readP2010 meta40P01",
+      "expected": {
+        "code": "preview-snapshot-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S29",
+      "scenario": "connection-failure",
+      "given": "locking read08006",
+      "expected": {
+        "code": "propagate-original",
+        "statusCode": null
+      }
+    },
+    {
+      "id": "S30",
+      "scenario": "unknown-commit",
+      "given": "commitunknown Error",
+      "expected": {
+        "code": "propagate-original",
+        "statusCode": null
+      }
+    }
+  ],
+  "databaseSchedules": [
+    {
+      "id": "D01",
+      "schedule": [
+        "read SHARE acquired",
+        "read callback SELECT",
+        "final live check",
+        "commit"
+      ],
+      "expected": {
+        "result": "before-preview",
+        "allBusinessAndSessionRawXminCtid": "unchanged",
+        "authWrites": 0
+      }
+    },
+    {
+      "id": "D02",
+      "schedule": [
+        "read SHARE acquired",
+        "selection UPDATE waits",
+        "read finishes",
+        "selection commits"
+      ],
+      "expected": {
+        "readEpoch": "7",
+        "selectionEpoch": "8",
+        "selectionCompany": "02"
+      }
+    },
+    {
+      "id": "D03",
+      "schedule": [
+        "selection UPDATE acquired",
+        "RR snapshot starts",
+        "read SHARE waits",
+        "selection commits"
+      ],
+      "expected": {
+        "error": "preview-snapshot-conflict",
+        "statusCode": 409,
+        "callbackCalls": 0,
+        "automaticRetries": 0
+      }
+    },
+    {
+      "id": "D04",
+      "schedule": [
+        "owner lock acquired without row update",
+        "expiry passes while read SHARE waits",
+        "owner releases"
+      ],
+      "expected": {
+        "error": "session-expired",
+        "callbackCalls": 0,
+        "allRawXminCtid": "unchanged"
+      }
+    },
+    {
+      "id": "D05",
+      "schedule": [
+        "read snapshot first business read",
+        "independent business actor commits change",
+        "second business read same Tx"
+      ],
+      "expected": {
+        "reads": [
+          "before-preview",
+          "before-preview"
+        ],
+        "afterActor": "actor-change",
+        "sessionRawXminCtid": "unchanged"
+      }
+    },
+    {
+      "id": "D06",
+      "schedule": [
+        "read SHARE acquired",
+        "refresh UPDATE waits",
+        "read commits",
+        "refresh commits"
+      ],
+      "expected": {
+        "readEpoch": "7",
+        "finalEpoch": "7",
+        "ledger": "unchanged",
+        "refreshRotated": true
+      }
+    },
+    {
+      "id": "D07",
+      "schedule": [
+        "read SHARE acquired",
+        "logout UPDATE waits",
+        "read commits",
+        "logout commits"
+      ],
+      "expected": {
+        "readEpoch": "7",
+        "revokedAfterRead": true
+      }
+    },
+    {
+      "id": "D08",
+      "schedule": [
+        "read SHARE acquired",
+        "password reset LOGIN lock then session UPDATE waits",
+        "read commits",
+        "reset commits"
+      ],
+      "expected": {
+        "readEpoch": "7",
+        "revokedAfterRead": true,
+        "deadlock": false
+      }
+    },
+    {
+      "id": "D09",
+      "schedule": [
+        "read callback started",
+        "expiry passes naturally",
+        "final live check"
+      ],
+      "expected": {
+        "error": "session-expired",
+        "allRawXminCtid": "unchanged"
+      }
+    },
+    {
+      "id": "D10",
+      "schedule": [
+        "selected company02 credential",
+        "immutable login company01",
+        "admit read"
+      ],
+      "expected": {
+        "contextLoginCoCode": "01",
+        "principalLoginCoCode": "02",
+        "allRawXminCtid": "unchanged"
+      }
+    },
+    {
+      "id": "D11",
+      "schedule": [
+        "before admission View revoked",
+        "admit read"
+      ],
+      "expected": {
+        "error": "forbidden",
+        "callbackCalls": 0,
+        "allRawXminCtid": "unchanged"
+      }
+    },
+    {
+      "id": "D12",
+      "schedule": [
+        "read snapshot established and authorized",
+        "actor revokes View",
+        "callback continues within same RR"
+      ],
+      "expected": {
+        "currentReadAllowed": true,
+        "nextReadError": "forbidden",
+        "claim": "as-of-snapshot authority only"
+      }
+    },
+    {
+      "id": "D13",
+      "schedule": [
+        "read callback starts",
+        "controlled callback DML sentinel then throw"
+      ],
+      "expected": {
+        "error": "same injected error",
+        "allRawXminCtid": "unchanged",
+        "qualification": "rollback test only; callbacks must not normally write"
+      }
+    },
+    {
+      "id": "D14",
+      "schedule": [
+        "read callback starts",
+        "controlled callback session epoch mutation",
+        "final full session check"
+      ],
+      "expected": {
+        "error": "context-stale",
+        "allRawXminCtid": "unchanged",
+        "qualification": "same-Tx fault injection, not external actor bypassing SHARE"
+      }
+    }
+  ]
+}

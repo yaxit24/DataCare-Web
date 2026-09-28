@@ -1,0 +1,4309 @@
+{
+  "summary": {
+    "generatedAt": "2026-06-28T00:55:43",
+    "formsCataloged": 204,
+    "byModule": {
+      "other": 43,
+      "master": 33,
+      "report": 45,
+      "transaction": 61,
+      "utility": 22
+    },
+    "transactionFormsWithPosting": [
+      "TR_AC_OPBL",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_CARD_REC",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_FINE_SL_PR",
+      "TR_FN_INOUT",
+      "TR_GOLD_BOOK",
+      "TR_INOUT",
+      "TR_ITM_LOT",
+      "TR_JDT_REC",
+      "TR_KR_ISU",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ADJ",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_MLT_PRO",
+      "TR_OTH_COMM",
+      "TR_OTH_PURC",
+      "TR_PHYSTK",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_VP",
+      "TR_VP_ADJ",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN"
+    ]
+  },
+  "forms": {
+    "Ac_Final": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Ac_Final.cs",
+      "tablesInserted": [
+        "AC_DATA",
+        "LEDR_AC_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "LEDR_AC_DATA"
+      ],
+      "writeOps": 4,
+      "validations": 0
+    },
+    "Ac_Image": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Ac_Image.cs",
+      "tablesInserted": [
+        "COL_MAST",
+        "CO_SET_NEW",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST"
+      ],
+      "tablesUpdated": [
+        "CO_SET",
+        "CO_SET_NEW",
+        "GROUP_MAST",
+        "INOUT_DETL",
+        "ITEM_MAST",
+        "ITM_WT_MAST",
+        "LOCT_MAST",
+        "MENU_DATA",
+        "PRODUCT_MAST"
+      ],
+      "tablesDeleted": [
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST"
+      ],
+      "writeOps": 37,
+      "validations": 0
+    },
+    "Ac_Ledr": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Ac_Ledr.cs",
+      "tablesInserted": [
+        "AC_DATA"
+      ],
+      "tablesUpdated": [
+        "PR_DATA",
+        "PR_DETL",
+        "SL_DATA"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 14,
+      "validations": 0
+    },
+    "Ac_Rojmel": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Ac_Rojmel.cs",
+      "tablesInserted": [
+        "ROJ_MEL_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "Ac_Stock": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Ac_Stock.cs",
+      "tablesInserted": [
+        "DM_DATA",
+        "DM_KR_DATA",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "TAG_SUM_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "INOUT_DETL",
+        "MAIN_STOCK"
+      ],
+      "tablesDeleted": [
+        "TAG_SUM_DATA"
+      ],
+      "writeOps": 15,
+      "validations": 0
+    },
+    "Ac_Tax": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Ac_Tax.cs",
+      "tablesInserted": [
+        "AD_OS",
+        "DHRN_DATA",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "SL_ORD_ADJ",
+        "TAX_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DATA"
+      ],
+      "tablesDeleted": [
+        "REMARK_DATA"
+      ],
+      "writeOps": 9,
+      "validations": 0
+    },
+    "AuthClass": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/AuthClass.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "AuthError": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/AuthError.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "BtmSchm": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/BtmSchm.cs",
+      "tablesInserted": [
+        "AC_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "ITM_OPBL",
+        "LOT_DETL",
+        "OP_DATA",
+        "OP_LDR",
+        "PRODUCT_MAST",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "TABLE_MAST"
+      ],
+      "tablesUpdated": [
+        "AC_DATA",
+        "AC_MAST",
+        "APR_DETL",
+        "BAR_DETL"
+      ],
+      "tablesDeleted": [
+        "AD_ADJ",
+        "AD_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "BUL_DATA",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "ITM_OPBL",
+        "LOT_DETL",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "OP_DATA",
+        "OP_LDR",
+        "RATE_CUT_DATA",
+        "REP_DETL",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL"
+      ],
+      "writeOps": 75,
+      "validations": 0
+    },
+    "ClassTagList": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClassTagList.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsAddlDocDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsAddlDocDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsAttribDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsAttribDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsBchDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsBchDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsBuyerDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsBuyerDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsContrDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsContrDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsDispDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsDispDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsDocDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsDocDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsDocPerdDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsDocPerdDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsExpDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsExpDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsItemList": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsItemList.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsPayDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsPayDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsPrecDocDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsPrecDocDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsRefDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsRefDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsSellerDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsSellerDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsShipDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsShipDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsTranDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsTranDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ClsValDtls": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ClsValDtls.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "DC_Main": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/DC_Main.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "BAL_GR",
+        "GROUP_MAST",
+        "ITEM_MAST"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 14,
+      "validations": 0
+    },
+    "Data": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Data.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "DcClass": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/DcClass.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "DcPrintClass": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/DcPrintClass.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "ErrorResp": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/ErrorResp.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "IRNClass": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/IRNClass.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "IRNData": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/IRNData.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "MDI_FORM": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/MDI_FORM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "CONV_MAST",
+        "CO_SET"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 2,
+      "validations": 4
+    },
+    "MS_ACCT": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_ACCT.cs",
+      "tablesInserted": [
+        "AC_MAST"
+      ],
+      "tablesUpdated": [
+        "AC_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AC_MAST",
+        "AC_MAST_SRNO",
+        "OP_DATA"
+      ],
+      "writeOps": 9,
+      "validations": 0
+    },
+    "MS_AC_GROUP": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_AC_GROUP.cs",
+      "tablesInserted": [
+        "AC_GROUP",
+        "BOOK_IDTL"
+      ],
+      "tablesUpdated": [
+        "BOOK_IDTL"
+      ],
+      "tablesDeleted": [
+        "AC_GROUP"
+      ],
+      "writeOps": 5,
+      "validations": 0
+    },
+    "MS_ADD_MAST": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_ADD_MAST.cs",
+      "tablesInserted": [
+        "ADD_MAST"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "ADD_MAST",
+        "OP_DATA"
+      ],
+      "writeOps": 4,
+      "validations": 0
+    },
+    "MS_AUTO_ITEM": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_AUTO_ITEM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "BAR_IDTL",
+        "CO_SET_NEW",
+        "ITEM_MAST"
+      ],
+      "tablesDeleted": [
+        "TOUCH_MAST"
+      ],
+      "writeOps": 7,
+      "validations": 0
+    },
+    "MS_BOOK": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_BOOK.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "BOOK_DATA",
+        "BOOK_DETL"
+      ],
+      "tablesDeleted": [
+        "BOOK_DATA",
+        "BOOK_DETL"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "MS_BOOKLIST": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_BOOKLIST.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "MS_COMPANY": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_COMPANY.cs",
+      "tablesInserted": [
+        "COL_MAST",
+        "CONV_MAST",
+        "CO_MAST",
+        "FAN_AC_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST"
+      ],
+      "tablesUpdated": [
+        "AC_GROUP",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BOOK_IDTL",
+        "CONV_MAST",
+        "CO_MAST",
+        "CO_SET",
+        "CO_SET_NEW",
+        "HDD_MAST",
+        "LOCT_MAST",
+        "MENU_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "AC_MAST_SRNO",
+        "ADD_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "AD_OS",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAL_GR",
+        "BANK_RECONCILE",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BUL_DATA",
+        "CARD_DATA",
+        "CASH_DATA",
+        "COL_MAST",
+        "CONTRA_DATA",
+        "CONV_MAST",
+        "CO_MAST",
+        "CO_SET",
+        "CRNT_DATA",
+        "CUT_DATA",
+        "CUT_DETL",
+        "CUT_STK_DETL",
+        "DELETE_DATA",
+        "DESIGN_DETL",
+        "DESIGN_IDTL",
+        "DESIGN_MAST",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "DM_DATA",
+        "DM_KR_DATA",
+        "DM_MAST",
+        "DM_SIZE",
+        "EMP_DATA",
+        "EMP_MAST",
+        "E_DATA",
+        "E_MAST",
+        "FAN_AC_MAST",
+        "FINE_DATA",
+        "GROUP_MAST",
+        "INOUT_DATA",
+        "INOUT_DETL",
+        "INOUT_IDTL",
+        "ITEM_MAST",
+        "ITM_CITY",
+        "ITM_LOT_DETL",
+        "ITM_OPBL",
+        "ITM_WT_MAST",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_MAST",
+        "LBR_REC_DETL",
+        "LDR_ADJ_DATA",
+        "LEDR_AC_DATA",
+        "LOCT_AMT",
+        "LOCT_MAST",
+        "LOGIN_MAST",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "MFG_MAST",
+        "MLT_DATA",
+        "MLT_DETL",
+        "MODEL_MAST",
+        "MSG_MAST",
+        "OP_DATA",
+        "OP_LDR",
+        "PAY_DATA",
+        "PAY_DETL",
+        "POINT_DATA",
+        "POINT_MAST",
+        "POINT_MEMB",
+        "PRINT_MAST",
+        "PRODUCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "RATE_MAST",
+        "REM_DATA",
+        "REPORT_DATA",
+        "REP_DATA",
+        "REP_DETL",
+        "ROJMEL_BAL",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "SRNO_MAST",
+        "TABLE_MAST",
+        "TAG_DATA",
+        "TAG_IMAGE_DATA",
+        "TAG_PRINT_DATA",
+        "TAG_SET",
+        "TAG_STOCK_PRINT",
+        "TAG_SUM_DATA",
+        "TAX_DATA",
+        "TAX_MAST",
+        "TEMP_ADD",
+        "TEMP_AD_DATA",
+        "TEMP_BOOK_DATA",
+        "TOUCH_MAST",
+        "UPI_DATA",
+        "USER_DATA",
+        "USER_REQUEST",
+        "USER_SET",
+        "VP_ADJ_DATA",
+        "WEB_DATA",
+        "YEAR_MAST"
+      ],
+      "writeOps": 292,
+      "validations": 0
+    },
+    "MS_DESIGN_BOOK": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_DESIGN_BOOK.cs",
+      "tablesInserted": [
+        "DESIGN_DETL"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "DESIGN_DETL",
+        "DESIGN_IDTL",
+        "TAG_IMAGE_DATA"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "MS_DM": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_DM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "DM_MAST"
+      ],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "MS_EMP": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_EMP.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "EMP_MAST"
+      ],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "MS_GOLD_MAST": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_GOLD_MAST.cs",
+      "tablesInserted": [
+        "DG_GOLD_MAST"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "DG_GOLD_MAST"
+      ],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "MS_GROUP": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_GROUP.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "ITEM_MAST"
+      ],
+      "tablesDeleted": [
+        "GROUP_MAST"
+      ],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "MS_HELP": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_HELP.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "MS_ITEM": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_ITEM.cs",
+      "tablesInserted": [
+        "GROUP_MAST",
+        "PRODUCT_MAST"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL"
+      ],
+      "tablesDeleted": [
+        "ITEM_MAST"
+      ],
+      "writeOps": 4,
+      "validations": 0
+    },
+    "MS_LBR_TYPE": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_LBR_TYPE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "BAR_DETL"
+      ],
+      "tablesDeleted": [
+        "LBR_MAST"
+      ],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "MS_LOCT": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_LOCT.cs",
+      "tablesInserted": [
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "TABLE_MAST"
+      ],
+      "tablesUpdated": [
+        "MENU_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_OS",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "CASH_DATA",
+        "CONTRA_DATA",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "FINE_DATA",
+        "ITM_OPBL",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "LEDR_AC_DATA",
+        "LOCT_MAST",
+        "MAIN_STOCK",
+        "OP_DATA",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "RATE_MAST",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "SRNO_MAST",
+        "TABLE_MAST",
+        "TAG_PRINT_DATA",
+        "TAG_STOCK_PRINT",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 64,
+      "validations": 0
+    },
+    "MS_LOGIN": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_LOGIN.cs",
+      "tablesInserted": [
+        "AC_MAST_SRNO"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_MAST_SRNO",
+        "CO_MAST"
+      ],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "MS_MEMB": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_MEMB.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AD_MEMB"
+      ],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "MS_MFG_MAST": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_MFG_MAST.cs",
+      "tablesInserted": [
+        "USER_SET"
+      ],
+      "tablesUpdated": [
+        "BOOK_DATA",
+        "MENU_DATA",
+        "MFG_MAST",
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "MENU_DATA",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "MFG_MAST",
+        "TEMP_BOOK_DATA",
+        "USER_SET"
+      ],
+      "writeOps": 19,
+      "validations": 0
+    },
+    "MS_OPNCOMP": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "tablesInserted": [
+        "AC_MAST_SRNO"
+      ],
+      "tablesUpdated": [
+        "BOOK_IDTL",
+        "CO_SET",
+        "MENU_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_MAST_SRNO"
+      ],
+      "writeOps": 5,
+      "validations": 0
+    },
+    "MS_POINT": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_POINT.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "POINT_MAST",
+        "POINT_MEMB"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "MS_PRINT": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_PRINT.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "MS_PRODUCT": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_PRODUCT.cs",
+      "tablesInserted": [
+        "AD_MAST",
+        "BOOK_IDTL",
+        "CO_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST",
+        "TABLE_MAST",
+        "TAG_STOCK"
+      ],
+      "tablesUpdated": [
+        "BOOK_IDTL"
+      ],
+      "tablesDeleted": [
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "AD_OS",
+        "APP_USER_DATA",
+        "CO_MAST",
+        "DG_GOLD_DATA",
+        "ITEM_MAST",
+        "LIKE_DATA",
+        "PRODUCT_MAST",
+        "RATE_MAST",
+        "TABLE_MAST",
+        "TAG_STOCK"
+      ],
+      "writeOps": 30,
+      "validations": 0
+    },
+    "MS_RATE": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_RATE.cs",
+      "tablesInserted": [
+        "RATE_MAST"
+      ],
+      "tablesUpdated": [
+        "GROUP_MAST"
+      ],
+      "tablesDeleted": [
+        "RATE_MAST"
+      ],
+      "writeOps": 7,
+      "validations": 0
+    },
+    "MS_STK_LIMIT": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_STK_LIMIT.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "DM_SIZE",
+        "ITM_WT_MAST"
+      ],
+      "writeOps": 4,
+      "validations": 0
+    },
+    "MS_STYLE": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_STYLE.cs",
+      "tablesInserted": [
+        "DESIGN_MAST",
+        "ITM_CITY",
+        "MODEL_MAST"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "DESIGN_MAST",
+        "ITM_CITY",
+        "MODEL_MAST"
+      ],
+      "writeOps": 9,
+      "validations": 0
+    },
+    "MS_TASTING": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_TASTING.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "MS_TAX": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_TAX.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "AC_MAST"
+      ],
+      "tablesDeleted": [
+        "TAX_MAST"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "MS_TRADE": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_TRADE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "BAL_GR"
+      ],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "MS_UPDATE": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_UPDATE.cs",
+      "tablesInserted": [
+        "AC_MAST",
+        "BANK_RECONCILE",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BOOK_IDTL",
+        "COL_MAST",
+        "DG_GOLD_MAST",
+        "ITEM_MAST",
+        "MENU_DATA",
+        "OP_DATA",
+        "PRINT_MAST",
+        "PRODUCT_MAST",
+        "SRNO_MAST",
+        "TAX_MAST",
+        "TILE_DATA",
+        "USER_MAST",
+        "USER_SET",
+        "WEIGHT_MAST"
+      ],
+      "tablesUpdated": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "AD_MAST",
+        "APR_DETL",
+        "BAL_GR",
+        "BAR_CAN_DETL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BOOK_IDTL",
+        "BUL_DATA",
+        "CASH_DATA",
+        "COL_MAST",
+        "CONTRA_DATA",
+        "CONV_MAST",
+        "CO_MAST",
+        "CO_SET_NEW",
+        "DESIGN_DETL",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "DM_MAST",
+        "EMP_MAST",
+        "GROUP_MAST",
+        "INOUT_DETL",
+        "ITEM_MAST",
+        "ITM_LOT_DETL",
+        "ITM_OPBL",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "MAIN_STOCK",
+        "MENU_DATA",
+        "MFG_MAST",
+        "OP_DATA",
+        "PAY_DATA",
+        "PAY_DETL",
+        "PRINT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_PR_DETL",
+        "SRNO_MAST",
+        "TAG_IMAGE_DATA",
+        "TAX_MAST",
+        "USER_SET"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AD_OS",
+        "BANK_RECONCILE",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BOOK_IDTL",
+        "COL_MAST",
+        "DHRN_DATA",
+        "DM_DATA",
+        "DM_KR_DATA",
+        "ITM_OPBL",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "MFG_ISU_REC",
+        "OP_DATA",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "TAX_DATA",
+        "USER_SET"
+      ],
+      "writeOps": 515,
+      "validations": 0
+    },
+    "MS_USER": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_USER.cs",
+      "tablesInserted": [
+        "BOOK_DATA",
+        "BOOK_IDTL",
+        "LOGIN_MAST",
+        "MENU_DATA",
+        "TILE_DATA",
+        "USER_SET"
+      ],
+      "tablesUpdated": [
+        "MENU_DATA",
+        "TILE_DATA"
+      ],
+      "tablesDeleted": [
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BOOK_IDTL",
+        "LOGIN_MAST",
+        "MENU_DATA",
+        "USER_SET"
+      ],
+      "writeOps": 29,
+      "validations": 0
+    },
+    "MS_WINDOW_SET": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_WINDOW_SET.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "CO_SET_NEW",
+        "TILE_DATA"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "MS_YEAR": {
+      "module": "master",
+      "file": "src/csharp/DataCareNext/MS_YEAR.cs",
+      "tablesInserted": [
+        "AC_GROUP",
+        "AC_MAST",
+        "BAL_GR",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "COL_MAST",
+        "CONV_MAST",
+        "CO_SET",
+        "CO_SET_NEW",
+        "EMP_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "LOCT_MAST",
+        "PRINT_MAST",
+        "PRODUCT_MAST",
+        "TABLE_MAST",
+        "TAX_MAST"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_OS",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAL_GR",
+        "BANK_RECONCILE",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BUL_DATA",
+        "CARD_DATA",
+        "CASH_DATA",
+        "COL_MAST",
+        "CONTRA_DATA",
+        "CONV_MAST",
+        "CO_SET",
+        "CO_SET_NEW",
+        "CRNT_DATA",
+        "CUT_DATA",
+        "CUT_DETL",
+        "CUT_STK_DETL",
+        "DELETE_DATA",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "DM_DATA",
+        "DM_KR_DATA",
+        "EMP_DATA",
+        "EMP_MAST",
+        "E_DATA",
+        "FINE_DATA",
+        "GROUP_MAST",
+        "INOUT_DATA",
+        "INOUT_DETL",
+        "INOUT_IDTL",
+        "ITEM_MAST",
+        "ITM_LOT_DETL",
+        "ITM_OPBL",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "LDR_ADJ_DATA",
+        "LEDR_AC_DATA",
+        "LOCT_AMT",
+        "LOCT_MAST",
+        "LOGIN_MAST",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "MLT_DATA",
+        "MLT_DETL",
+        "OP_DATA",
+        "OP_LDR",
+        "PAY_DATA",
+        "PAY_DETL",
+        "PRINT_MAST",
+        "PRODUCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "RATE_MAST",
+        "REP_DATA",
+        "REP_DETL",
+        "ROJMEL_BAL",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "TABLE_MAST",
+        "TAG_PRINT_DATA",
+        "TAG_STOCK_PRINT",
+        "TAG_SUM_DATA",
+        "TAX_DATA",
+        "TAX_MAST",
+        "TEMP_ADD",
+        "TEMP_AD_DATA",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA",
+        "USER_DATA",
+        "USER_REQUEST",
+        "USER_SET",
+        "VP_ADJ_DATA",
+        "WEB_DATA",
+        "YEAR_MAST"
+      ],
+      "writeOps": 171,
+      "validations": 0
+    },
+    "Mfg_Module": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Mfg_Module.cs",
+      "tablesInserted": [
+        "AC_MAST",
+        "BOOK_DATA",
+        "BOOK_IDTL",
+        "ITEM_MAST",
+        "MENU_DATA",
+        "MFG_MAST",
+        "PRODUCT_MAST",
+        "STATE_MAST"
+      ],
+      "tablesUpdated": [
+        "BOOK_DATA",
+        "BOOK_IDTL",
+        "CO_SET",
+        "CO_SET_NEW",
+        "MENU_DATA",
+        "TAX_MAST",
+        "YEAR_MAST"
+      ],
+      "tablesDeleted": [
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BOOK_IDTL",
+        "MENU_DATA",
+        "MFG_MAST",
+        "STATE_MAST"
+      ],
+      "writeOps": 97,
+      "validations": 0
+    },
+    "Module_Save": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Module_Save.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 2
+    },
+    "Module_Schm": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Module_Schm.cs",
+      "tablesInserted": [
+        "AC_MAST",
+        "AC_MAST_SRNO",
+        "AD_DATA",
+        "AD_MEMB",
+        "DG_GOLD_DATA",
+        "MAIN_STOCK"
+      ],
+      "tablesUpdated": [
+        "AC_GROUP",
+        "AD_DATA",
+        "AD_MEMB",
+        "APP_USER_DATA",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "BOOK_IDTL",
+        "CONV_MAST",
+        "CO_MAST",
+        "CO_SET",
+        "DG_GOLD_DATA",
+        "LOCT_MAST",
+        "OP_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AC_MAST",
+        "AC_MAST_SRNO",
+        "ADD_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "AD_OS",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAL_GR",
+        "BANK_RECONCILE",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "BUL_DATA",
+        "CARD_DATA",
+        "CASH_DATA",
+        "COL_MAST",
+        "CONTRA_DATA",
+        "CO_MAST",
+        "CRNT_DATA",
+        "CUT_DATA",
+        "CUT_DETL",
+        "CUT_STK_DETL",
+        "DELETE_DATA",
+        "DESIGN_DETL",
+        "DESIGN_IDTL",
+        "DESIGN_MAST",
+        "DG_GOLD_DATA",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "DM_DATA",
+        "DM_KR_DATA",
+        "DM_MAST",
+        "DM_SIZE",
+        "EMP_DATA",
+        "EMP_MAST",
+        "FINE_DATA",
+        "GROUP_MAST",
+        "INOUT_DATA",
+        "INOUT_DETL",
+        "INOUT_IDTL",
+        "ITEM_MAST",
+        "ITM_CITY",
+        "ITM_LOT_DETL",
+        "ITM_OPBL",
+        "ITM_WT_MAST",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_MAST",
+        "LBR_REC_DETL",
+        "LDR_ADJ_DATA",
+        "LEDR_AC_DATA",
+        "LOCT_AMT",
+        "LOCT_MAST",
+        "LOGIN_MAST",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "MFG_MAST",
+        "MLT_DATA",
+        "MLT_DETL",
+        "MODEL_MAST",
+        "MSG_MAST",
+        "OP_DATA",
+        "OP_LDR",
+        "PAY_DATA",
+        "PAY_DETL",
+        "POINT_DATA",
+        "POINT_MAST",
+        "POINT_MEMB",
+        "PRODUCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "RATE_MAST",
+        "REM_DATA",
+        "REPORT_DATA",
+        "REP_DATA",
+        "REP_DETL",
+        "ROJMEL_BAL",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "SRNO_MAST",
+        "TABLE_MAST",
+        "TAG_IMAGE_DATA",
+        "TAG_PRINT_DATA",
+        "TAG_SET",
+        "TAG_STOCK_PRINT",
+        "TAX_DATA",
+        "TEMP_ADD",
+        "TEMP_AD_DATA",
+        "TEMP_BOOK_DATA",
+        "TOUCH_MAST",
+        "UPI_DATA",
+        "USER_DATA",
+        "USER_REQUEST",
+        "USER_SET",
+        "VP_ADJ_DATA",
+        "WEB_DATA",
+        "YEAR_MAST"
+      ],
+      "writeOps": 445,
+      "validations": 3
+    },
+    "Module_WhatsApp": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Module_WhatsApp.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "OlockerService": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/OlockerService.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 2
+    },
+    "PolicyModels": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/PolicyModels.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_ADDRESS": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_ADDRESS.cs",
+      "tablesInserted": [
+        "TEMP_ADD"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "TEMP_ADD"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "RP_ALL": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_ALL.cs",
+      "tablesInserted": [
+        "RATE_CUT_ISU_REC"
+      ],
+      "tablesUpdated": [
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "RATE_CUT_ISU_REC"
+      ],
+      "writeOps": 12,
+      "validations": 0
+    },
+    "RP_BALANCE": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_BALANCE.cs",
+      "tablesInserted": [
+        "AC_DATA"
+      ],
+      "tablesUpdated": [
+        "BAL_GR"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "LEDR_AC_DATA"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "RP_BAL_ZOOM": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_BAL_ZOOM.cs",
+      "tablesInserted": [
+        "LEDR_AC_DATA",
+        "REPORT_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "LEDR_AC_DATA",
+        "REPORT_DATA"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "RP_BILL_PROFIT": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_BILL_PROFIT.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_CASH_BANK": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_CASH_BANK.cs",
+      "tablesInserted": [
+        "TEMP_AD_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "TEMP_AD_DATA"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "RP_CONSI_APR": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_CONSI_APR.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_CUST": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_CUST.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "AC_MAST"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "RP_CUST_CRM": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_CUST_CRM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "CUST_DETL"
+      ],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "RP_DAY_WORK": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_DAY_WORK.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_DHRN_LOAN": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_DHRN_LOAN.cs",
+      "tablesInserted": [
+        "DHRN_DATA"
+      ],
+      "tablesUpdated": [
+        "DHRN_ISU_DATA"
+      ],
+      "tablesDeleted": [
+        "DHRN_DATA"
+      ],
+      "writeOps": 3,
+      "validations": 1
+    },
+    "RP_DHRN_OS": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_DHRN_OS.cs",
+      "tablesInserted": [
+        "REPORT_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "REPORT_DATA"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "RP_EMP": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_EMP.cs",
+      "tablesInserted": [
+        "REPORT_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "REPORT_DATA"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "RP_GRAPH": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_GRAPH.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_GST": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_GST.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_HUID": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_HUID.cs",
+      "tablesInserted": [
+        "TAG_STOCK_PRINT"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL"
+      ],
+      "tablesDeleted": [
+        "TAG_STOCK_PRINT"
+      ],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "RP_INOUT": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_INOUT.cs",
+      "tablesInserted": [
+        "REPORT_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "REPORT_DATA"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "RP_JDTR_ZOOM": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_JDTR_ZOOM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_LC_INOUT": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_LC_INOUT.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_LC_SALE": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_LC_SALE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_LEDR": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_LEDR.cs",
+      "tablesInserted": [
+        "FINE_DATA",
+        "LEDR_AC_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "FINE_DATA",
+        "LEDR_AC_DATA"
+      ],
+      "writeOps": 14,
+      "validations": 0
+    },
+    "RP_MFG": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_MFG.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_MFG_LEDR": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_MFG_LEDR.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_MFG_ZOOM": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_MFG_ZOOM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "MFG_MAST"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "RP_MOVEMENT": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_MOVEMENT.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_ORDER": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_ORDER.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_ORD_TRACK": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_ORD_TRACK.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_OS": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_OS.cs",
+      "tablesInserted": [
+        "LEDR_AC_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "LEDR_AC_DATA"
+      ],
+      "writeOps": 8,
+      "validations": 0
+    },
+    "RP_OTH_DETL": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_OTH_DETL.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_PHY_STOCK": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_PHY_STOCK.cs",
+      "tablesInserted": [
+        "TAG_STOCK_PRINT"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "TAG_STOCK_PRINT"
+      ],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "RP_REMINDER": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_REMINDER.cs",
+      "tablesInserted": [
+        "REPORT_DATA"
+      ],
+      "tablesUpdated": [
+        "PR_DATA",
+        "RATE_CUT_DATA",
+        "SL_DATA",
+        "USER_REQUEST"
+      ],
+      "tablesDeleted": [
+        "REPORT_DATA"
+      ],
+      "writeOps": 7,
+      "validations": 0
+    },
+    "RP_ROJMEL": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_ROJMEL.cs",
+      "tablesInserted": [
+        "LEDR_AC_DATA",
+        "ROJMEL_BAL",
+        "TAG_STOCK_PRINT"
+      ],
+      "tablesUpdated": [
+        "GROUP_MAST"
+      ],
+      "tablesDeleted": [
+        "LEDR_AC_DATA",
+        "ROJMEL_BAL",
+        "TAG_STOCK_PRINT"
+      ],
+      "writeOps": 7,
+      "validations": 0
+    },
+    "RP_SLPR_ZOOM": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_SLPR_ZOOM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_STK_LEVEL": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_STK_LEVEL.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_STK_MOVE": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_STK_MOVE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "MAIN_STOCK"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "RP_STOCK": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_STOCK.cs",
+      "tablesInserted": [
+        "REPORT_DATA"
+      ],
+      "tablesUpdated": [
+        "ITEM_MAST",
+        "MAIN_STOCK"
+      ],
+      "tablesDeleted": [
+        "REPORT_DATA"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "RP_STOCK_FINE": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_STOCK_FINE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "BAL_GR",
+        "GROUP_MAST",
+        "ITEM_MAST"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "RP_STOCK_VALUE": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_STOCK_VALUE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_TAG": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_TAG.cs",
+      "tablesInserted": [
+        "TAG_STOCK_PRINT",
+        "TAG_SUM_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "BAR_CAN_DETL",
+        "KR_DETL",
+        "LBR_ISU_DETL",
+        "MAIN_STOCK",
+        "RATE_CUT_ISU",
+        "SL_DETL"
+      ],
+      "tablesDeleted": [
+        "BAR_CAN_DETL",
+        "TAG_STOCK_PRINT",
+        "TAG_SUM_DATA"
+      ],
+      "writeOps": 25,
+      "validations": 0
+    },
+    "RP_TAG_ESTMATE": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_TAG_ESTMATE.cs",
+      "tablesInserted": [
+        "TAG_STOCK_PRINT"
+      ],
+      "tablesUpdated": [
+        "TAG_IMAGE_DATA"
+      ],
+      "tablesDeleted": [
+        "TAG_IMAGE_DATA",
+        "TAG_STOCK_PRINT"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "RP_TAG_IMAGE": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_TAG_IMAGE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "TAG_IMAGE_DATA"
+      ],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "RP_TAX": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_TAX.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_TOUR_ZOOM": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_TOUR_ZOOM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_TRADING": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_TRADING.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "RP_USER": {
+      "module": "report",
+      "file": "src/csharp/DataCareNext/RP_USER.cs",
+      "tablesInserted": [
+        "REPORT_DATA",
+        "TAG_STOCK_PRINT"
+      ],
+      "tablesUpdated": [
+        "USER_DATA"
+      ],
+      "tablesDeleted": [
+        "REPORT_DATA",
+        "TAG_STOCK_PRINT",
+        "USER_DATA"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "TR_AC_OPBL": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_AC_OPBL.cs",
+      "tablesInserted": [
+        "CONTRA_DATA",
+        "DELETE_DATA",
+        "OP_DATA",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "CONTRA_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "OP_DATA"
+      ],
+      "writeOps": 12,
+      "validations": 0
+    },
+    "TR_APR_ISU": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_APR_ISU.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "BAR_DETL",
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 27,
+      "validations": 0
+    },
+    "TR_BILL_TO": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_BILL_TO.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "SL_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BILL_OS_DATA",
+        "CASH_DATA",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_PR_DETL",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 16,
+      "validations": 0
+    },
+    "TR_BUL_BOOKING": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_BUL_BOOKING.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BUL_DATA",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 9,
+      "validations": 0
+    },
+    "TR_BUL_SALE": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_BUL_SALE.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "RATE_CUT_ISU_REC",
+        "TOUCH_MAST"
+      ],
+      "tablesUpdated": [
+        "BUL_DATA",
+        "TOUCH_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_IDTL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 39,
+      "validations": 0
+    },
+    "TR_CARD_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_CARD_REC.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "CARD_DATA",
+        "DHRN_DATA",
+        "DHRN_REC_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 14,
+      "validations": 0
+    },
+    "TR_CASH": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_CASH.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "APR_IDTL",
+        "CASH_DATA",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 11,
+      "validations": 0
+    },
+    "TR_CONTRA": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_CONTRA.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "APR_IDTL",
+        "CONTRA_DATA",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 11,
+      "validations": 0
+    },
+    "TR_DHRN_INTREC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_DHRN_INTREC.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "DHRN_DATA",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 20,
+      "validations": 0
+    },
+    "TR_DHRN_ISU": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_DHRN_ISU.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "DHRN_ISU_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AC_IMAGE",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 23,
+      "validations": 0
+    },
+    "TR_DHRN_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_DHRN_REC.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "DHRN_DATA",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 25,
+      "validations": 0
+    },
+    "TR_EMP_JV": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_EMP_JV.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "APR_IDTL",
+        "EMP_DATA",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 10,
+      "validations": 0
+    },
+    "TR_FINE_SL_PR": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_FINE_SL_PR.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "MAIN_STOCK",
+        "PR_DETL",
+        "RATE_CUT_ISU"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "CUT_DATA",
+        "CUT_DETL",
+        "CUT_STK_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 26,
+      "validations": 0
+    },
+    "TR_FN_INOUT": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_FN_INOUT.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "PRODUCT_MAST"
+      ],
+      "tablesUpdated": [
+        "FAN_DATA",
+        "FAN_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "FAN_DATA",
+        "FAN_DETL",
+        "FAN_IDTL",
+        "MAIN_STOCK",
+        "ROJ_MEL_DATA",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 35,
+      "validations": 0
+    },
+    "TR_GOLD_BOOK": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_GOLD_BOOK.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "DG_GOLD_DATA",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 10,
+      "validations": 0
+    },
+    "TR_INOUT": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_INOUT.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "INOUT_DATA",
+        "INOUT_DETL",
+        "INOUT_IDTL",
+        "ITM_LOT_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TAG_IMAGE_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 29,
+      "validations": 0
+    },
+    "TR_ITM_LOT": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_ITM_LOT.cs",
+      "tablesInserted": [
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "BAR_DATA",
+        "ITM_LOT_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 10,
+      "validations": 0
+    },
+    "TR_ITM_OPBL": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_ITM_OPBL.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "DM_DATA",
+        "ITM_OPBL",
+        "MAIN_STOCK"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "TR_JDT_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_JDT_REC.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "MFG_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "TAG_IMAGE_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 26,
+      "validations": 0
+    },
+    "TR_KR_ISU": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_KR_ISU.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "DM_KR_DATA",
+        "MAIN_STOCK",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 18,
+      "validations": 0
+    },
+    "TR_LEDR_ADJ": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_LEDR_ADJ.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "LDR_ADJ_DATA",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 9,
+      "validations": 0
+    },
+    "TR_LOCT_AMT": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_LOCT_AMT.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "LOCT_AMT",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 15,
+      "validations": 0
+    },
+    "TR_MEMB_ADJ": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MEMB_ADJ.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "AD_MEMB"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AD_ADJ",
+        "AD_OS",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 13,
+      "validations": 0
+    },
+    "TR_MEMB_ENT": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MEMB_ENT.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "TEMP_AD_DATA",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AD_DATA",
+        "AD_OS",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_AD_DATA",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA"
+      ],
+      "writeOps": 17,
+      "validations": 0
+    },
+    "TR_MFG_GHAT_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MFG_GHAT_REC.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "MFG_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 22,
+      "validations": 0
+    },
+    "TR_MFG_ISU_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MFG_ISU_REC.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "MENU_DATA",
+        "MFG_DETL",
+        "MFG_ISU_REC"
+      ],
+      "tablesDeleted": [
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 20,
+      "validations": 0
+    },
+    "TR_MFG_ITEM": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MFG_ITEM.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "MENU_DATA",
+        "MFG_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "ITM_LOT_DETL",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 24,
+      "validations": 0
+    },
+    "TR_MFG_KR_ISU_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MFG_KR_ISU_REC.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "MENU_DATA",
+        "MFG_DETL",
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "MFG_ASMBL_DETL",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 27,
+      "validations": 0
+    },
+    "TR_MFG_ORD_ISU": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MFG_ORD_ISU.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "MAIN_STOCK",
+        "MFG_DETL",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 20,
+      "validations": 0
+    },
+    "TR_MFG_ORD_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MFG_ORD_REC.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "MENU_DATA",
+        "MFG_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 30,
+      "validations": 0
+    },
+    "TR_MFG_WITH_LOT": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MFG_WITH_LOT.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "MENU_DATA",
+        "MFG_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "MFG_ISU_REC",
+        "REMARK_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 22,
+      "validations": 0
+    },
+    "TR_MLT_PRO": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_MLT_PRO.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "SL_DATA"
+      ],
+      "tablesDeleted": [
+        "MAIN_STOCK",
+        "MFG_DETL",
+        "MFG_ISU_REC",
+        "MLT_DATA",
+        "MLT_DETL",
+        "REMARK_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 15,
+      "validations": 0
+    },
+    "TR_OTH_COMM": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_OTH_COMM.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "PAY_DATA",
+        "PAY_DETL",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 15,
+      "validations": 0
+    },
+    "TR_OTH_PURC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_OTH_PURC.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "PAY_DATA",
+        "PAY_DETL",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 15,
+      "validations": 0
+    },
+    "TR_PHYSTK": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_PHYSTK.cs",
+      "tablesInserted": [
+        "BAR_DETL",
+        "BAR_IDTL",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "BAR_DETL",
+        "MAIN_STOCK"
+      ],
+      "tablesDeleted": [
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "TAG_PRINT_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 28,
+      "validations": 0
+    },
+    "TR_PR_SL_HEDG": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_PR_SL_HEDG.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "MAIN_STOCK",
+        "PR_DETL",
+        "RATE_CUT_ISU"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "CUT_DATA",
+        "CUT_DETL",
+        "CUT_STK_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 20,
+      "validations": 0
+    },
+    "TR_PR_SL_UAE": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_PR_SL_UAE.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "TAG_SET",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 24,
+      "validations": 0
+    },
+    "TR_PURC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_PURC.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "SRNO_MAST",
+        "TAG_SET",
+        "TOUCH_MAST",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "SL_ORD_DETL",
+        "TOUCH_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "ITM_LOT_DETL",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_PR_DETL",
+        "SRNO_MAST",
+        "TAG_IMAGE_DATA",
+        "TAG_SET",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 53,
+      "validations": 0
+    },
+    "TR_PURC_HM": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_PURC_HM.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "SRNO_MAST"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "BAR_IDTL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SRNO_MAST",
+        "TAG_SET",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 29,
+      "validations": 0
+    },
+    "TR_REP_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_REP_REC.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "REP_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "REMARK_DATA",
+        "REP_DATA",
+        "REP_DETL",
+        "ROJ_MEL_DATA",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 23,
+      "validations": 0
+    },
+    "TR_SALE": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SALE.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "POINT_MEMB",
+        "PRINT_MAST",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "AC_MAST",
+        "APR_DETL",
+        "BAR_DETL",
+        "BILL_OS_DATA",
+        "MAIN_STOCK",
+        "PRINT_MAST",
+        "PR_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DETL",
+        "SL_PR_DETL",
+        "UPI_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AD_ADJ",
+        "BILL_OS_DATA",
+        "CARD_DATA",
+        "COMM_DATA",
+        "CRNT_DATA",
+        "DM_DATA",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "POINT_DATA",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_PR_DETL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA"
+      ],
+      "writeOps": 85,
+      "validations": 0
+    },
+    "TR_SALE_HM": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SALE_HM.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "PRINT_MAST"
+      ],
+      "tablesUpdated": [
+        "AC_MAST",
+        "APR_DETL",
+        "BAR_DETL",
+        "BILL_OS_DATA",
+        "PRINT_MAST",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DETL",
+        "SL_PR_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BILL_OS_DATA",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_PR_DETL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA"
+      ],
+      "writeOps": 58,
+      "validations": 0
+    },
+    "TR_SALE_LBR": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SALE_LBR.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "RATE_CUT_ISU_REC",
+        "TOUCH_MAST",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "LBR_ISU_DETL",
+        "SL_DETL",
+        "SL_ORD_DETL",
+        "TOUCH_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BILL_OS_DATA",
+        "CARD_DATA",
+        "DM_DATA",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "MAIN_STOCK",
+        "RATE_CUT_ISU_REC",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA"
+      ],
+      "writeOps": 45,
+      "validations": 0
+    },
+    "TR_SALE_ORD": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "AC_DATA",
+        "BAR_DETL",
+        "MAIN_STOCK",
+        "ROJ_MEL_DATA",
+        "SL_ORD_DETL",
+        "UPI_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "TAG_IMAGE_DATA",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA"
+      ],
+      "writeOps": 40,
+      "validations": 0
+    },
+    "TR_SALE_RTN": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "RATE_CUT_ISU_REC",
+        "TAG_SET",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "MAIN_STOCK"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "RATE_CUT_ISU_REC",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SRNO_MAST",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 37,
+      "validations": 0
+    },
+    "TR_SALE_RTN_UAE": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SALE_RTN_UAE.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "PRINT_MAST",
+        "SRNO_MAST"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "BAR_DETL",
+        "PRINT_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "SL_PR_DETL",
+        "SRNO_MAST",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 26,
+      "validations": 0
+    },
+    "TR_SL_EBILL": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SL_EBILL.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "ITEM_MAST",
+        "SL_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "DM_DATA",
+        "E_DATA",
+        "MAIN_STOCK",
+        "REMARK_DATA",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_PR_DETL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 25,
+      "validations": 1
+    },
+    "TR_SL_ORD_ADJ": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs",
+      "tablesInserted": [
+        "BAR_DETL",
+        "BAR_IDTL"
+      ],
+      "tablesUpdated": [
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "APR_DETL",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "MAIN_STOCK",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 20,
+      "validations": 0
+    },
+    "TR_SL_PR_ITEM": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_SL_PR_ITEM.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "PRINT_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "CARD_DATA",
+        "DM_DATA",
+        "E_DATA",
+        "MAIN_STOCK",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "SL_PR_DETL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 23,
+      "validations": 3
+    },
+    "TR_TAG_CAN": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_TAG_CAN.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "MAIN_STOCK"
+      ],
+      "tablesDeleted": [
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "DM_DATA",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 17,
+      "validations": 0
+    },
+    "TR_TAG_OPBL": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_TAG_OPBL.cs",
+      "tablesInserted": [
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DELETE_DATA",
+        "SRNO_MAST",
+        "TAG_PRINT_DATA",
+        "TAG_SET"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "BAR_IDTL",
+        "MFG_DETL",
+        "PRINT_MAST",
+        "SL_ORD_DETL",
+        "TAG_IMAGE_DATA"
+      ],
+      "tablesDeleted": [
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "SRNO_MAST",
+        "TAG_IMAGE_DATA",
+        "TAG_PRINT_DATA",
+        "TAG_SET",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 53,
+      "validations": 2
+    },
+    "TR_TAG_SPLIT": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_TAG_SPLIT.cs",
+      "tablesInserted": [
+        "RATE_CUT_ISU_REC",
+        "TAG_PRINT_DATA",
+        "TAG_SET",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "DM_DATA",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "MAIN_STOCK",
+        "RATE_CUT_ISU_REC",
+        "ROJ_MEL_DATA",
+        "SRNO_MAST",
+        "TAG_IMAGE_DATA",
+        "TAG_PRINT_DATA",
+        "TAG_SET",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 34,
+      "validations": 1
+    },
+    "TR_TAG_WT_DIFF": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_TAG_WT_DIFF.cs",
+      "tablesInserted": [
+        "RATE_CUT_ISU_REC",
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "LBR_ISU_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "MAIN_STOCK",
+        "RATE_CUT_ISU_REC",
+        "ROJ_MEL_DATA",
+        "SRNO_MAST",
+        "TAG_IMAGE_DATA",
+        "TAG_PRINT_DATA",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 36,
+      "validations": 0
+    },
+    "TR_TOUR": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_TOUR.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "BAR_DETL"
+      ],
+      "tablesDeleted": [
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "MAIN_STOCK",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 18,
+      "validations": 0
+    },
+    "TR_TOUR_ORD": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_TOUR_ORD.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "MAIN_STOCK",
+        "SL_ORD_DETL"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "MAIN_STOCK",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "ROJ_MEL_DATA",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 32,
+      "validations": 0
+    },
+    "TR_TOUR_SALE": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_TOUR_SALE.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "RATE_CUT_ISU_REC",
+        "TOUCH_MAST",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "BAR_DETL",
+        "RATE_CUT_DATA",
+        "SL_ORD_DETL",
+        "TOUCH_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "APR_DETL",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "ROJ_MEL_DATA",
+        "SL_IDTL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 42,
+      "validations": 0
+    },
+    "TR_UPI_REC": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_UPI_REC.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "UPI_DATA"
+      ],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "TR_VP": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_VP.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "RATE_CUT_ISU_REC"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "ROJ_MEL_DATA",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_PR_DETL",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 21,
+      "validations": 0
+    },
+    "TR_VP_ADJ": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_VP_ADJ.cs",
+      "tablesInserted": [
+        "DELETE_DATA"
+      ],
+      "tablesUpdated": [
+        "RATE_CUT_DATA"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "ROJ_MEL_DATA",
+        "TEMP_BOOK_DATA",
+        "VP_ADJ_DATA"
+      ],
+      "writeOps": 13,
+      "validations": 0
+    },
+    "TR_WH_SALE": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_WH_SALE.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "PRINT_MAST",
+        "RATE_CUT_ISU_REC",
+        "TOUCH_MAST",
+        "USER_DATA"
+      ],
+      "tablesUpdated": [
+        "APR_DETL",
+        "BAR_DETL",
+        "MAIN_STOCK",
+        "PRINT_MAST",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU_REC",
+        "SL_ORD_DETL",
+        "TOUCH_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "DM_DATA",
+        "LOT_DETL",
+        "MAIN_STOCK",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_ISU_REC",
+        "RATE_CUT_REC",
+        "ROJ_MEL_DATA",
+        "SL_IDTL",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 56,
+      "validations": 0
+    },
+    "TR_WH_SALE_RTN": {
+      "module": "transaction",
+      "file": "src/csharp/DataCareNext/TR_WH_SALE_RTN.cs",
+      "tablesInserted": [
+        "DELETE_DATA",
+        "RATE_CUT_ISU_REC"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "AC_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "DM_DATA",
+        "MAIN_STOCK",
+        "RATE_CUT_ISU_REC",
+        "ROJ_MEL_DATA",
+        "TAG_IMAGE_DATA",
+        "TAG_SET",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 22,
+      "validations": 0
+    },
+    "TagOthDetail": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/TagOthDetail.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "Translator": {
+      "module": "other",
+      "file": "src/csharp/DataCareNext/Translator.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "UT_AI_TRFR": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_AI_TRFR.cs",
+      "tablesInserted": [
+        "BOOK_IDTL",
+        "TAG_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "TAG_DATA"
+      ],
+      "tablesDeleted": [
+        "BOOK_IDTL",
+        "TAG_DATA",
+        "TAG_IMAGE_DATA"
+      ],
+      "writeOps": 8,
+      "validations": 3
+    },
+    "UT_BANK": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_BANK.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "AC_DATA",
+        "CASH_DATA"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 4,
+      "validations": 0
+    },
+    "UT_BKP": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_BKP.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "UT_CUST_ENTRY": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_CUST_ENTRY.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "CUST_DATA",
+        "CUST_DETL"
+      ],
+      "writeOps": 6,
+      "validations": 0
+    },
+    "UT_EXPORT": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_EXPORT.cs",
+      "tablesInserted": [
+        "AC_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "CASH_DATA",
+        "CONTRA_DATA",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "ITM_OPBL",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "OP_DATA",
+        "PRODUCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_REC",
+        "REP_DATA",
+        "REP_DETL",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "TABLE_MAST",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA"
+      ],
+      "tablesUpdated": [
+        "AC_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "BAR_CAN_DATA",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BOOK_DATA",
+        "CARD_DATA",
+        "CASH_DATA",
+        "CONTRA_DATA",
+        "CO_SET",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "ITM_OPBL",
+        "KR_DATA",
+        "LBR_DATA",
+        "OP_DATA",
+        "PAY_DATA",
+        "PRODUCT_MAST",
+        "PR_DATA",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_REC",
+        "REP_DATA",
+        "SL_DATA",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "TABLE_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AC_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "BOOK_DATA",
+        "BOOK_DETL",
+        "CARD_DATA",
+        "CASH_DATA",
+        "CONTRA_DATA",
+        "FINE_DATA",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "ITM_OPBL",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LBR_DATA",
+        "LBR_ISU_DETL",
+        "LBR_REC_DETL",
+        "MAIN_STOCK",
+        "OP_DATA",
+        "PRODUCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_REC",
+        "REP_DATA",
+        "REP_DETL",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_DETL_RTN",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "TABLE_MAST",
+        "TAX_DATA",
+        "TEMP_BOOK_DATA",
+        "UPI_DATA"
+      ],
+      "writeOps": 569,
+      "validations": 0
+    },
+    "UT_E_INVOICE": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_E_INVOICE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "UT_HDD": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_HDD.cs",
+      "tablesInserted": [
+        "HDD_MAST"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "HDD_MAST"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "UT_IMPORT": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_IMPORT.cs",
+      "tablesInserted": [
+        "AC_GROUP",
+        "AC_MAST",
+        "AC_MAST_SRNO",
+        "ADD_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "AD_OS",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "EMP_MAST",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "ITM_OPBL",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "OP_DATA",
+        "OP_LDR",
+        "POINT_DATA",
+        "POINT_MAST",
+        "POINT_MEMB",
+        "PRODUCT_MAST",
+        "REP_DETL",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SRNO_MAST",
+        "TABLE_MAST",
+        "TEMP_BOOK_DATA",
+        "TOUCH_MAST"
+      ],
+      "tablesUpdated": [
+        "AC_MAST",
+        "AD_MEMB",
+        "BAR_DATA",
+        "BAR_DETL",
+        "CASH_DATA",
+        "CO_SET",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "HDD_MAST",
+        "ITEM_MAST",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "LOCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_REC",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "YEAR_MAST"
+      ],
+      "tablesDeleted": [
+        "AC_DATA",
+        "AC_GROUP",
+        "AC_MAST",
+        "AC_MAST_SRNO",
+        "ADD_MAST",
+        "AD_ADJ",
+        "AD_DATA",
+        "AD_MAST",
+        "AD_MEMB",
+        "AD_OS",
+        "APR_DATA",
+        "APR_DETL",
+        "APR_IDTL",
+        "BAR_CAN_DATA",
+        "BAR_CAN_DETL",
+        "BAR_CAN_IDTL",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "CASH_DATA",
+        "DHRN_DATA",
+        "DHRN_ISU_DATA",
+        "DHRN_ISU_DETL",
+        "DHRN_REC_DATA",
+        "DHRN_REC_DETL",
+        "EMP_MAST",
+        "FINE_DATA",
+        "GROUP_MAST",
+        "ITEM_MAST",
+        "ITM_OPBL",
+        "KR_DATA",
+        "KR_DETL",
+        "KR_IDTL",
+        "MAIN_STOCK",
+        "MFG_DATA",
+        "MFG_DETL",
+        "MFG_IDTL",
+        "OP_DATA",
+        "OP_LDR",
+        "POINT_DATA",
+        "POINT_MAST",
+        "POINT_MEMB",
+        "PRODUCT_MAST",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_REC",
+        "REP_DETL",
+        "ROJ_MEL_DATA",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "SL_ORD_DATA",
+        "SL_ORD_DETL",
+        "SL_ORD_IDTL",
+        "SL_PR_DETL",
+        "SRNO_MAST",
+        "TABLE_MAST",
+        "TEMP_BOOK_DATA",
+        "TOUCH_MAST"
+      ],
+      "writeOps": 381,
+      "validations": 0
+    },
+    "UT_PWD_UPDATE": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_PWD_UPDATE.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "LOGIN_MAST"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "UT_REMINDER": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_REMINDER.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "REM_DATA",
+        "TEMP_BOOK_DATA"
+      ],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "UT_REPORT": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_REPORT.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 2
+    },
+    "UT_SETTING": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_SETTING.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "COL_MAST",
+        "CO_SET",
+        "CO_SET_NEW"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 3,
+      "validations": 0
+    },
+    "UT_SETTING_MAIN": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_SETTING_MAIN.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "CO_SET",
+        "CO_SET_NEW",
+        "MENU_DATA"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 20,
+      "validations": 0
+    },
+    "UT_SET_ADMIN": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_SET_ADMIN.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "CO_SET_NEW"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 1,
+      "validations": 0
+    },
+    "UT_SMS": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_SMS.cs",
+      "tablesInserted": [
+        "LEDR_AC_DATA",
+        "MSG_MAST"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "LEDR_AC_DATA",
+        "MSG_MAST"
+      ],
+      "writeOps": 5,
+      "validations": 0
+    },
+    "UT_TAG_PRINT": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_TAG_PRINT.cs",
+      "tablesInserted": [
+        "TAG_PRINT_DATA"
+      ],
+      "tablesUpdated": [
+        "BAR_DETL",
+        "PRINT_MAST"
+      ],
+      "tablesDeleted": [
+        "TAG_PRINT_DATA"
+      ],
+      "writeOps": 4,
+      "validations": 0
+    },
+    "UT_USER_REQUEST": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_USER_REQUEST.cs",
+      "tablesInserted": [
+        "USER_REQUEST"
+      ],
+      "tablesUpdated": [],
+      "tablesDeleted": [
+        "USER_REQUEST"
+      ],
+      "writeOps": 2,
+      "validations": 0
+    },
+    "UT_VCH_RE_NUMBR": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_VCH_RE_NUMBR.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [
+        "AD_ADJ",
+        "BAR_DATA",
+        "BAR_DETL",
+        "BAR_IDTL",
+        "BILL_OS_DATA",
+        "CASH_DATA",
+        "PR_DATA",
+        "PR_DETL",
+        "PR_IDTL",
+        "RATE_CUT_DATA",
+        "RATE_CUT_ISU",
+        "RATE_CUT_REC",
+        "SL_DATA",
+        "SL_DETL",
+        "SL_IDTL",
+        "SL_ORD_ADJ",
+        "SL_PR_DETL",
+        "UPI_DATA"
+      ],
+      "tablesDeleted": [],
+      "writeOps": 52,
+      "validations": 0
+    },
+    "UT_WAPP_WITH_API": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_WAPP_WITH_API.cs",
+      "tablesInserted": [
+        "LEDR_AC_DATA",
+        "POINT_MAST"
+      ],
+      "tablesUpdated": [
+        "POINT_MAST"
+      ],
+      "tablesDeleted": [
+        "LEDR_AC_DATA",
+        "MSG_MAST",
+        "POINT_MAST"
+      ],
+      "writeOps": 6,
+      "validations": 6
+    },
+    "UT_WEB_CAM": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_WEB_CAM.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    },
+    "UT_WHATSAPP": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_WHATSAPP.cs",
+      "tablesInserted": [
+        "LEDR_AC_DATA",
+        "MSG_MAST",
+        "POINT_MAST"
+      ],
+      "tablesUpdated": [
+        "CO_SET_NEW",
+        "POINT_MAST"
+      ],
+      "tablesDeleted": [
+        "LEDR_AC_DATA",
+        "MSG_MAST",
+        "POINT_MAST"
+      ],
+      "writeOps": 9,
+      "validations": 5
+    },
+    "UT_WINDOW": {
+      "module": "utility",
+      "file": "src/csharp/DataCareNext/UT_WINDOW.cs",
+      "tablesInserted": [],
+      "tablesUpdated": [],
+      "tablesDeleted": [],
+      "writeOps": 0,
+      "validations": 0
+    }
+  }
+}

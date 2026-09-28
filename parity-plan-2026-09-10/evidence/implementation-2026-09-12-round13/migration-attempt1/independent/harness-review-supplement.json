@@ -1,0 +1,61 @@
+{
+  "kind": "session-context-migration-final-harness-independent-review-v1",
+  "status": "static-review-complete; execution-pending",
+  "executed": false,
+  "independentCases": 28,
+  "artifactHashesVerified": true,
+  "sourceReferences": [
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/verify-disposable.mjs",
+      "sha256": "b17329aebc403fa343d3879efa70e45509a4fd7fcbf39ea8387e179dfa470662",
+      "bytes": 15077
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/inputs.json",
+      "sha256": "18474e261f9b26dcc42fcc9c4cbfbb8d38dac980a0034b9c334c40f596ceceff",
+      "bytes": 266
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/staging-manifest.json",
+      "sha256": "b4799e61513e6bf78c9c2b3a4fc9ca95a0ac746f20c86c12e487347b8927a742",
+      "bytes": 2516
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/migration.sql",
+      "sha256": "6f495c3b4948eba2c4f05449e48afac761ea5af0ce6520b9fde53812a93f6aa8",
+      "bytes": 13006
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/baseline.sql",
+      "sha256": "af35bc5be9c42a92685389473e73f616006ff204df180f3b566a8462f1f081c6",
+      "bytes": 2610
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/migration-independent-cases.json",
+      "sha256": "1d0e891b2e8d56a4b37bd8b08d5d3495b378a3f0f0a779bf7c0527865a622bef",
+      "bytes": 16798
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/review.md",
+      "sha256": "6ea6f4361f09b796a5dbca60552db1423c578ad5600eaf15f6573fe3db9f8085",
+      "bytes": 3488
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/review-inputs.json",
+      "sha256": "b176b1e0aed294ad1289d7d683e21c7baa96711afb6f21d1a5e7daa2a2378e69",
+      "bytes": 2918
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/migration-staged/independent/harness-review-supplement.md",
+      "sha256": "a1e42ccd05f0604f66f63ba442b5b6a2d3a22f9b1ab4b942b301b8bcf5371e3e",
+      "bytes": 1978
+    }
+  ],
+  "remainingConfirmedFindings": [],
+  "notClaimed": [
+    "Actual PostgreSQL migration acceptance",
+    "Live auth/session integration",
+    "Arbitrary custom-schema compatibility",
+    "Cleanup following uncatchable process termination"
+  ]
+}

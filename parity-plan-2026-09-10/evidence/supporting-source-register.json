@@ -1,0 +1,98 @@
+[
+  {
+    "id": "SUP-DataCareNext.My-MyApplication.cs",
+    "path": "unified/src/csharp/DataCareNext.My/MyApplication.cs",
+    "sha256": "14633efd50a599873bb116807e2b5af51cbbac1b573896f0aed16e33a988dd7e",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  },
+  {
+    "id": "SUP-DataCareNext.My-MyComputer.cs",
+    "path": "unified/src/csharp/DataCareNext.My/MyComputer.cs",
+    "sha256": "fd8e8a0bb666a23233521d81131b1519456f1cd6e5d45bdf6568dd086fa08f14",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  },
+  {
+    "id": "SUP-DataCareNext.My-MyProject.cs",
+    "path": "unified/src/csharp/DataCareNext.My/MyProject.cs",
+    "sha256": "a212480ea7d58d40b5d987909f554aa1fb13ed56298501fcb6802cb1bc3fc1e9",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  },
+  {
+    "id": "SUP-DataCareNext.My-MySettings.cs",
+    "path": "unified/src/csharp/DataCareNext.My/MySettings.cs",
+    "sha256": "0d634d6508edb9dde0f6353c5eb64a71f09ddc4b2a37cc60ed514bc4c6990fc9",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  },
+  {
+    "id": "SUP-DataCareNext.My-MySettingsProperty.cs",
+    "path": "unified/src/csharp/DataCareNext.My/MySettingsProperty.cs",
+    "sha256": "2afd61855b93bf495ea2cd72c897da9ef73603d4eaf6f5c45de8cd44bda6a620",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  },
+  {
+    "id": "SUP-DataCareNext.My.Resources-Resources.cs",
+    "path": "unified/src/csharp/DataCareNext.My.Resources/Resources.cs",
+    "sha256": "9277006e3432b5eaa7191172b2cd5b29c364612316a94aa58b3b1472a030c29c",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  },
+  {
+    "id": "SUP-Properties-AssemblyInfo.cs",
+    "path": "unified/src/csharp/Properties/AssemblyInfo.cs",
+    "sha256": "502160f3c2729e9b176f6ec011e712d5e77e81c82be426965e78ce1f362cbe70",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  },
+  {
+    "id": "SUP-VB-AnonymousDelegate_0.cs",
+    "path": "unified/src/csharp/VB-AnonymousDelegate_0.cs",
+    "sha256": "d2dd432244faf64a997fa305597f6c3042148499aea703871f970de2e5487f36",
+    "status": "unverified",
+    "requiredDisposition": "Trace startup/resource/settings/assembly effect or prove compiler-only with source/caller evidence",
+    "workItems": [
+      "P00-01",
+      "P00-05",
+      "P13-02"
+    ]
+  }
+]

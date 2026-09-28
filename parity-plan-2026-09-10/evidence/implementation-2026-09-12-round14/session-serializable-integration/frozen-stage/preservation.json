@@ -1,0 +1,90 @@
+{
+  "allPreimplementationInputsUnchanged": true,
+  "fixtureUnchanged": true,
+  "sources": [
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8",
+      "currentSha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b",
+      "currentSha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c",
+      "currentSha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe",
+      "currentSha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c",
+      "currentSha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextAccess.ts",
+      "sha256": "4caa701a9c7fb82a43ddaf1c5da01ce04be6a7f1028add2049ef64231ab6ea28",
+      "currentSha256": "4caa701a9c7fb82a43ddaf1c5da01ce04be6a7f1028add2049ef64231ab6ea28",
+      "unchanged": true
+    },
+    {
+      "path": "web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32",
+      "currentSha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/test/sessionContextCommand.test.ts",
+      "sha256": "7293d6bf7d960fc6821714c693942067e88119d83cb8ce9bb15da25ac250913e",
+      "currentSha256": "7293d6bf7d960fc6821714c693942067e88119d83cb8ce9bb15da25ac250913e",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/test/sessionContextCommand.db.test.ts",
+      "sha256": "c64e604c7995d4ca299c94ac2767472be78f89eb7a784cca6cf18341ef2ce0d2",
+      "currentSha256": "c64e604c7995d4ca299c94ac2767472be78f89eb7a784cca6cf18341ef2ce0d2",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/test/sessionContextReadSnapshot.test.ts",
+      "sha256": "717ce22141eff365fea9f5fbb0fbd923b3c167b1133bc1c60dca00d923b854fe",
+      "currentSha256": "717ce22141eff365fea9f5fbb0fbd923b3c167b1133bc1c60dca00d923b854fe",
+      "unchanged": true
+    },
+    {
+      "path": "web/apps/api/test/sessionContextReadSnapshot.db.test.ts",
+      "sha256": "fb6192e427ab5a85878f6df4261225603b94ffd7075ce6c4a25945ef17244614",
+      "currentSha256": "fb6192e427ab5a85878f6df4261225603b94ffd7075ce6c4a25945ef17244614",
+      "unchanged": true
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/implementation-contract.md",
+      "sha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+      "currentSha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+      "unchanged": true
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/review.md",
+      "sha256": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8",
+      "currentSha256": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8",
+      "unchanged": true
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/mandatory-stock-identity-erratum.json",
+      "sha256": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7",
+      "currentSha256": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7",
+      "unchanged": true
+    }
+  ]
+}

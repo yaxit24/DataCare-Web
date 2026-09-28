@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.bin/tsc",
+    "--noEmit",
+    "--strict",
+    "--noUncheckedIndexedAccess",
+    "--isolatedModules",
+    "--skipLibCheck",
+    "--target",
+    "ES2022",
+    "--module",
+    "ESNext",
+    "--moduleResolution",
+    "Bundler",
+    "--types",
+    "node",
+    "src/saleReturnFinancialEffects.ts",
+    "test/saleReturnFinancialEffects.test.ts"
+  ],
+  "cwd": "/tmp/datacare-round15-financial-effects/web/packages/core",
+  "startedAtUtc": "2026-09-12T02:40:23.640528+00:00",
+  "finishedAtUtc": "2026-09-12T02:40:24.198459+00:00",
+  "exitCode": 2,
+  "logSha256": "e045b37bd464f538bdee9a215de28264282040387ce5f23703512d595348cc42"
+}

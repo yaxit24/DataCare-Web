@@ -1,0 +1,151 @@
+{
+  "round": 3,
+  "capturedAtUtc": "2026-09-11T04:13:51.216637+00:00",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "sourceState": "shared dirty development tree; hashes identify the bounded slice, not a release candidate",
+  "observedDesktopExecution": false,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "id": "X02-request-tracing-round3-2026-09-11",
+  "status": "bounded-static-audit-and-fixtures-passed",
+  "x02Verified": false,
+  "files": [
+    {
+      "path": "scripts/check-dead-cells.mjs",
+      "sha256": "39db9fd583f3bdec13db523dc88ea889a146a0d82d8b2f05ac63e8e5ce6d03a5"
+    },
+    {
+      "path": "scripts/lib/request-field-trace.mjs",
+      "sha256": "d8c5f6578dc63cebd7c65285dd74bde453b7854e954262ded2b1207382387b82"
+    },
+    {
+      "path": "scripts/test/request-field-trace.test.mjs",
+      "sha256": "b48165905ee596b53331c23653d50981650624505287b937a2205baf4c1c9a18"
+    },
+    {
+      "path": "docs/parity-evidence/X02-request-tracing-round3-contract-2026-09-11.md",
+      "sha256": "9b871dd98f5924e9f5c72dcff736bbfe1c9028b9b7a4147facea12d0d7e4cffc"
+    }
+  ],
+  "inspectedFlow": [
+    {
+      "path": "apps/web/app/(app)/txn/wholesale-sale/page.tsx",
+      "sha256": "196a583a5e4d80eb186eb60a31ec935866d6f641eea57bfff8b63e82c325b0bd"
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "47d1b0985fa183f39babf25e1ac674838988833f3ff15d377f9114bc326aa14a"
+    },
+    {
+      "path": "apps/api/src/modules/sales/rateCut.ts",
+      "sha256": "a4814f32fc5ab3aada7aeb1085891f096ddb5dfa3cf09b95fc1d85597f116512"
+    }
+  ],
+  "verification": {
+    "fixtureTests": 14,
+    "passed": true,
+    "testLog": {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x02-request-trace-tests.txt",
+      "sha256": "f42ff6e6af7ade56111e4a22b10c2fd4fe4cbf768e42afaea5cf5a6e35a50002"
+    },
+    "audit": {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x02-dead-cell-traces.json",
+      "sha256": "3f7dae69cee57706266fb6536cb80ebc09aecd16993f9e256aec84e3234fdced"
+    },
+    "checkedColumns": 712,
+    "auditedRegistryPages": 21,
+    "configuredPageMappings": 23,
+    "dead": 0,
+    "unmapped": 0,
+    "nestedTraces": 4,
+    "eslint": "focused scanner and test command exited 0",
+    "finalAuditLog": {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/dead-cells-final.txt",
+      "sha256": "51e7caffe2188103df840aef4b62f08651740ad42ceb0d52bbd57d45a3d3a22f"
+    },
+    "combinedScannerFixtures": {
+      "tests": 26,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/scanner-tests.txt",
+        "sha256": "bdd8e8f4c8dec71eb0d85aa3a18fbbce1ad7bf86a80d53919b58e83c119da1b5"
+      },
+      "scope": "Combined scanner fixtures include the 14 dedicated request-tracing fixtures"
+    }
+  },
+  "boundaries": [
+    "Static consumption only; no persisted-value equality or runtime/desktop parity claim",
+    "Direct reads are not anchored to each route; nested fallback is",
+    "Inline registry pattern and first-level relative imports remain bounded",
+    "Unsupported dynamic endpoints/keys/transforms remain diagnostics and never presumed success",
+    "No general JavaScript mutation/control-flow proof; see contract limits"
+  ],
+  "productWriterChanges": false,
+  "baselineRaised": false,
+  "fieldSuppressions": [],
+  "frozenAtUtc": "2026-09-11T04:13:51.216637+00:00",
+  "workspaceIntegration": {
+    "apiSuite": {
+      "files": 216,
+      "tests": 1674,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/api-full.txt",
+        "sha256": "f9e0acea258cbfc1d91c0dc7cd73830e783e9f16f06638100844feb15fb18583"
+      }
+    },
+    "coreSuite": {
+      "files": 6,
+      "tests": 87,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/core-tests.txt",
+        "sha256": "d7e2f6974ca394b9e5d155a8406502852fece3d3d220acfc8881bb266e27cde3"
+      }
+    },
+    "webSuite": {
+      "files": 20,
+      "tests": 99,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/web-tests-toolbar-fixed.txt",
+        "sha256": "b726eb4df15e137d4575f2e867c6e096ce6b42879e1b8da5728140c94ec6b869"
+      }
+    },
+    "workspaceBuild": {
+      "tasks": 7,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/build-toolbar-fixed.txt",
+        "sha256": "2fec727edea2c0845f35acec11deeab650e521dfa16585eb556d74e95046e4d2"
+      }
+    },
+    "workspaceLintAndTypes": {
+      "tasks": 10,
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/lint-and-types-final.txt",
+        "sha256": "2a9eb7a5c2f191a74691cdf8799b84a2dca27c2daa3b9b79c3fb0cde5dc7c446"
+      }
+    },
+    "strictApiTestTypes": {
+      "passed": true,
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/test-types.txt",
+        "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9"
+      }
+    },
+    "combinedBrowser": {
+      "status": "passed",
+      "result": {
+        "path": "test-results/parity-real-stack-round3-verified/result.json",
+        "sha256": "e05791a3ee60cc45223fbb6175585b7eaf9e5e048ad528ec8bdf28aba7b37e93"
+      },
+      "log": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-verified.txt",
+        "sha256": "3b0ae394757b19f263230e447a3cf8272b9564eb6115130d5f628ad889fd3d0e"
+      },
+      "scope": "Product integration context, not runtime proof of every statically checked field"
+    }
+  }
+}

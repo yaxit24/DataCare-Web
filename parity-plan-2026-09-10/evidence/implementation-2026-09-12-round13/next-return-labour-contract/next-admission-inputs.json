@@ -1,0 +1,55 @@
+{
+  "kind": "prospective-return-labour-code-admission-review-v1",
+  "status": "source-exploration-only; no implementation or execution",
+  "literalCandidates": 24,
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_UPDATE.cs",
+      "sha256": "943525d918df85170ee3a4733bdf81cdc1d5b7e61b5efed27add7bc2883d8cb7"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnSource.ts",
+      "sha256": "07f5116677cf88e8c0f879e40f29f811ada866af13f2462cce11f5762fcc7395"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/masters/configs.ts",
+      "sha256": "e3b03858a98a629385e1c0dc3c1071e354a15a590656814f743533445b845a17"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/x13-sale-return-33-next-contract.md",
+      "sha256": "a7a0ffb02944327fe1c9f64d8bc3ff48b92df76f332c35728d312e8deb06e34b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-round12-handoff-and-remaining-acceptance.md",
+      "sha256": "165b9ecedc421727a6f94014bae4b5bc5b6d00d29df2a1c3b82843f6ebb99e5e"
+    },
+    {
+      "path": "/tmp/datacare-return-next-admission/next-admission-contract.md",
+      "sha256": "40c4f718173465275a0396db861c98acf5eee686c48e745d7ff8afa9d45b17ac"
+    },
+    {
+      "path": "/tmp/datacare-return-next-admission/labour-code-independent-candidates.json",
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa"
+    }
+  ]
+}

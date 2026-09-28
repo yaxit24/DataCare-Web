@@ -1,0 +1,235 @@
+{
+ "form": "TR_UPI_REC",
+ "controlCount": 21,
+ "byKind": {
+  "textbox": 8,
+  "grid": 1,
+  "button": 3,
+  "label": 7,
+  "panel": 1,
+  "masked": 1
+ },
+ "grids": [
+  "MSG"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnCancel",
+   "BtnSave"
+  ],
+  "this": [
+   "nbillOsAmt",
+   "Label5",
+   "Label4",
+   "nUpiTotAmt",
+   "tCoBook",
+   "Label3",
+   "tAcCode",
+   "tAcName",
+   "Label1",
+   "mTime",
+   "mVchDate",
+   "lblBDate",
+   "Label2",
+   "tVchNo",
+   "TEXT_ENTRY",
+   "PnlBotam",
+   "MSG",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "TEXT_ENTRY",
+   "type": "TextBox",
+   "location": "554,275",
+   "size": "100,18",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "MSG",
+   "type": "AxMSFlexGrid",
+   "location": "218,150",
+   "size": "748,310",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "784,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "881,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "978,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1072,32",
+   "tabIndex": "101",
+   "text": "Upi Amount Rec",
+   "kind": "label"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,528",
+   "size": "1072,41",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tVchNo",
+   "type": "TextBox",
+   "location": "480,85",
+   "size": "76,23",
+   "tabIndex": "1134",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "412,85",
+   "size": "62,20",
+   "tabIndex": "1135",
+   "text": "Vch No",
+   "kind": "label"
+  },
+  {
+   "name": "mVchDate",
+   "type": "MaskedTextBox",
+   "location": "653,85",
+   "size": "76,23",
+   "tabIndex": "1136",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "lblBDate",
+   "type": "Label",
+   "location": "571,86",
+   "size": "71,20",
+   "tabIndex": "1137",
+   "text": "Vch Date",
+   "kind": "label"
+  },
+  {
+   "name": "mTime",
+   "type": "TextBox",
+   "location": "735,85",
+   "size": "83,23",
+   "tabIndex": "1138",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "315,113",
+   "size": "76,23",
+   "tabIndex": "1158",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "397,113",
+   "size": "421,23",
+   "tabIndex": "1159",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "226,112",
+   "size": "75,20",
+   "tabIndex": "1160",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "tCoBook",
+   "type": "TextBox",
+   "location": "315,82",
+   "size": "76,23",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "225,82",
+   "size": "102,20",
+   "tabIndex": "1162",
+   "text": "Book Code",
+   "kind": "label"
+  },
+  {
+   "name": "nUpiTotAmt",
+   "type": "TextBox",
+   "location": "849,468",
+   "size": "89,23",
+   "tabIndex": "1163",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "736,471",
+   "size": "98,20",
+   "tabIndex": "1164",
+   "text": "Upi Tot Amt",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "824,85",
+   "size": "98,20",
+   "tabIndex": "1165",
+   "text": "Bill Os Amt",
+   "kind": "label"
+  },
+  {
+   "name": "nbillOsAmt",
+   "type": "TextBox",
+   "location": "824,113",
+   "size": "89,23",
+   "tabIndex": "1166",
+   "text": "",
+   "kind": "textbox"
+  }
+ ]
+}

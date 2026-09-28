@@ -1,0 +1,35 @@
+{
+  "kind": "datacare.parity-source-contract/1.0",
+  "capturedAtUtc": "2026-09-10T22:51:37.342186+00:00",
+  "scope": "Static source contracts only; no executable desktop acceptance",
+  "files": [
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SL_EBILL.cs",
+      "sha256": "d4b1ed161a2cc26daa7e40c643eac02fbe8936a18acc8084ee7a3e79d317508c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Ac_Tax.cs",
+      "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Ac_Stock.cs",
+      "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+      "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    }
+  ]
+}

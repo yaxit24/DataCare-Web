@@ -1,0 +1,64 @@
+{
+ "form": "MS_OPNCOMP",
+ "tables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "AC_MAST_SRNO",
+  "BOOK_IDTL",
+  "CO_MAST",
+  "CO_SET",
+  "CO_SET_NEW",
+  "EMP_MAST",
+  "HDD_MAST",
+  "LOCT_MAST",
+  "MENU_DATA",
+  "POINT_MAST",
+  "RATE_MAST",
+  "SL_IDTL",
+  "TAG_IMAGE_DATA",
+  "YEAR_MAST"
+ ],
+ "writes": {
+  "INSERT": {
+   "AC_MAST_SRNO": [
+    "AC_CODE",
+    "AC_GR",
+    "AC_NAME",
+    "CO_CODE",
+    "LC_CODE"
+   ]
+  },
+  "UPDATE": [
+   "BOOK_IDTL",
+   "CO_SET",
+   "MENU_DATA"
+  ],
+  "DELETE": [
+   "AC_MAST_SRNO"
+  ]
+ },
+ "selectTables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "AC_MAST_SRNO",
+  "BOOK_IDTL",
+  "CO_MAST",
+  "CO_SET",
+  "CO_SET_NEW",
+  "EMP_MAST",
+  "HDD_MAST",
+  "LOCT_MAST",
+  "POINT_MAST",
+  "RATE_MAST",
+  "SL_IDTL",
+  "TAG_IMAGE_DATA",
+  "YEAR_MAST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 21,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 1,
+ "calcSample": [],
+ "loc": 5865
+}

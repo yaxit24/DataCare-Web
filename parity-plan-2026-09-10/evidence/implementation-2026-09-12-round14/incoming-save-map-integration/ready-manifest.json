@@ -1,0 +1,94 @@
+{
+  "kind": "round14-incoming-save-map-ready-v1",
+  "stagedAtUtc": "2026-09-12T00:29:00.997136+00:00",
+  "status": "staged-pure-prerequisite-verified-not-integrated",
+  "activeWorkspaceEdits": false,
+  "integrationFiles": [
+    "web/packages/core/src/saleReturnIncomingSaveProjection.ts",
+    "web/packages/core/test/saleReturnIncomingSaveProjection.test.ts",
+    "web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json"
+  ],
+  "canCommit": false,
+  "focusedTests": 63,
+  "strictSourceAndTestTypes": "passed",
+  "unchangedFinalInputs": 5,
+  "unchangedPinnedSourceReferences": 13,
+  "fixtureFrozenBeforeImplementation": true,
+  "limitations": [
+    "No event replay or whole document/effect admission inferred from supplied visible maps",
+    "No DML/endpoints/session/known closing authority",
+    "BAR ownership unresolved even with TAG_NO=N",
+    "All source context fields and unowned raw remain untouched",
+    "No shared or heavy check run"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "23f467b3a1684f1ccac66a91644a2b0b3a082037001c78b31e2ae849a819a89a"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "bfc72c2f37878033fa3627498705cf342f4d5672f1395e678c16d12d4e80f34f"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "91e474f963660210cea252a32e90dde3e4945f64b03119a777640e8cd17928a6"
+    },
+    {
+      "path": "author-fixture.py",
+      "sha256": "615309a22a7aaa60a5730a01df578eafce259e2ccd9992d27cdc64d4ee1f25fc"
+    },
+    {
+      "path": "fixture-authorship.json",
+      "sha256": "c279534b390d8fb6cd7da323ca0e5756e9342fe41ae907cb167dc810751491ae"
+    },
+    {
+      "path": "fixture-freeze.json",
+      "sha256": "0ba5041ac27b261832861a292e20f9c1eab579ee07b6e08306fcfb197cc3adea"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingSaveProjection.ts",
+      "sha256": "96d8f57b32ccdbfb4fa53e68b4d3435059df8b74fa1cb98f7744ff4b57e32ea4"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnIncomingSaveProjection.test.ts",
+      "sha256": "6b49316b2a6ae3a7c4e613f6dfa9977b3441a83d0fd0ce1511d111809c22dc2f"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "sha256": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50"
+    },
+    {
+      "path": "web/packages/core/vitest.config.ts",
+      "sha256": "a28b987604c0ded000ccdbe483b023bea051839173ea3f390defb2d1ec0428f5"
+    },
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "75310bff016b194c22167683f733bcd0991ba7d1d2a288c77763698eafecf4e8"
+    },
+    {
+      "path": "focused-first.txt",
+      "sha256": "a18b8536f7d5a1b7d9bdf38a6d2160dadb83902c404f16d5a015a79fdaf18da4"
+    },
+    {
+      "path": "types-first.txt",
+      "sha256": "f109e9b715bbd56ab813b34b901dceb69b3df757561a18cd6eb9025004257ff8"
+    },
+    {
+      "path": "focused-final.txt",
+      "sha256": "87eaba6a5ffb618359a1f8da9d65c8460cd55265fc687a5de6f0f056e5d5bf69"
+    },
+    {
+      "path": "types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "focused-final.inputs.json",
+      "sha256": "7a4f53c7eff0a55c53f6c64552b87c3fc80cd108ba314b19414b5d3eadb01ef6"
+    },
+    {
+      "path": "focused-final.run.json",
+      "sha256": "885038037140f734d10e637ddcf183a739b908209304c49bae60353a8b89064f"
+    }
+  ]
+}

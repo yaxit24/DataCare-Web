@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start -p 4001",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:browser": "node test/browser.smoke.mjs"
+    "test": "node test/run-unit-tests.mjs",
+    "test:browser": "node test/browser.smoke.mjs",
+    "test:routes": "node test/route-coverage.mjs"
   },
   "dependencies": {
+    "@datacare/core": "workspace:*",
     "next": "15.1.6",
     "react": "19.0.0",
     "react-dom": "19.0.0"

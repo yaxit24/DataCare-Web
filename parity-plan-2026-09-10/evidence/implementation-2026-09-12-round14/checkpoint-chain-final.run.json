@@ -1,0 +1,22 @@
+{
+  "command": [
+    "python3",
+    "../parity-plan-2026-09-10/validate_current_review.py",
+    "--self-test-checkpoint-chain"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:46:07.321450+00:00",
+  "finishedAtUtc": "2026-09-12T01:46:09.854184+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/checkpoint-chain-final.txt",
+  "logSha256": "98d8962b268ffac30234ff3fd40f3ab7f713a55c36f016da20772c671ab02835",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/checkpoint-chain-final.inputs.json",
+  "inputManifestSha256": "c28090e97a0e8ea9b6f721ad2b1f7133072dc772f8d782ee38398cf962ac9b62",
+  "inputCount": 1909,
+  "changedInputs": [],
+  "changedPrivateInputs": [],
+  "changedRuntimeInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

@@ -19,6 +19,8 @@ export default function BullionBookingPage() {
   const [result, setResult] = useState<{ vchNo: number; amount: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  // P3: AMT_TYPE selects whether the booking settles against cash or bank (TR_BUL_BOOKING grid column AmtType).
+  const [amtType, setAmtType] = useState('');
 
   // live preview: amount = fineWt × rate; balance due = amount − advance
   const amount = r2(n(fineWt) * n(rate));
@@ -35,6 +37,7 @@ export default function BullionBookingPage() {
       if (!(n(fineWt) > 0)) throw new Error('fine weight must be positive');
       if (!(n(rate) > 0)) throw new Error('rate must be positive');
       const body = {
+        amtType: amtType.trim() || undefined,
         coBook,
         coYear,
         lcCode,
@@ -62,6 +65,12 @@ export default function BullionBookingPage() {
       <h1>Bullion Booking</h1>
       <form onSubmit={submit}>
         <div className="panel">
+          <div className="row">
+            <div className="field">
+              <label>Amount Type</label>
+              <input value={amtType} onChange={(e) => setAmtType(e.target.value)} />
+            </div>
+          </div>
           <div className="row">
             <div className="field">
               <label>Book</label>

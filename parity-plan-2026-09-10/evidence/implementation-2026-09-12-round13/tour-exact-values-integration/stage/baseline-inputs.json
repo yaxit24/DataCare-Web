@@ -1,0 +1,55 @@
+{
+  "phase": "before exact Tour value change; next-five admission already integrated",
+  "refs": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/salesOrder.ts",
+      "copy": "baseline/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "a3c91053e27cbae2c1fbea06c93ad8cfba9846bcae5562b1a1e37323dc15ddd1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+      "copy": "baseline/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+      "sha256": "a226087e96f0bbb3c4de2d75b3634b0a0b8d39f33f8d5630b98e775de1f05251"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/shared/stoneSubDetail.ts",
+      "copy": "baseline/apps/api/src/modules/shared/stoneSubDetail.ts",
+      "sha256": "e97982d8b1a88c96971de52095773dc4269448bb488881058f8ea58d20cce7a5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/tourOrderForm.ts",
+      "copy": "baseline/apps/web/lib/tourOrderForm.ts",
+      "sha256": "6f0c53cf6e46ec81c9bdff26b16877cfe269a9aa5ebea9756ee6e282ebd0dc8c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesOrderForm.ts",
+      "copy": "baseline/apps/web/lib/salesOrderForm.ts",
+      "sha256": "fad6b74bfe41be5de895922f2f20ae17547dc31f816b16973632723c05319be7"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "copy": "baseline/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "05ee74b06728d71e44d6dcbf7d6bd927a7024bae47557912e536b6f6a70baf1c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SubDetailGrid.tsx",
+      "copy": "baseline/apps/web/components/SubDetailGrid.tsx",
+      "sha256": "0e8b088a003f86cb184d23aebb565281c413d3190d7a48bd4ddd58f377711135"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/tourOrderHydration.db.test.ts",
+      "copy": "baseline/apps/api/test/tourOrderHydration.db.test.ts",
+      "sha256": "1a1ab2dc5162cdd65aa7e60db79d1dc86808a9a5728ba56c2cb1b5985895e485"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/tourOrderForm.test.ts",
+      "copy": "baseline/apps/web/test/tourOrderForm.test.ts",
+      "sha256": "013c527bb07b7e30118c89ba9c083bf12239e19a7d02332f98f3ea3ac3e4fff3"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "copy": "baseline/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    }
+  ]
+}

@@ -1,0 +1,2002 @@
+{
+  "totals": {
+    "rules": 655,
+    "rulesMatched": 451,
+    "coveragePct": 68.9,
+    "prompts": 287,
+    "notices": 901
+  },
+  "forms": {
+    "Ac_Final": {
+      "validations": 1,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Insert Gold And Silver Rate"
+      ]
+    },
+    "Ac_Image": {
+      "validations": 1,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "New Field is Add....Please Reopen Software and Continue...."
+      ]
+    },
+    "BtmSchm": {
+      "validations": 5,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2,
+        "prompt": 2,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "There Are Not Found New Year Please Creat New Year And Try...."
+      ]
+    },
+    "DC_Main": {
+      "validations": 5,
+      "rules": 2,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Database Is Attach Please ReLogin Software...",
+        "Please Create Next Image Data In Database..."
+      ]
+    },
+    "MDI_FORM": {
+      "validations": 10,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 8,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please First Close All Open Form And Try..."
+      ]
+    },
+    "MS_ACCT": {
+      "validations": 24,
+      "rules": 8,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 12,
+        "prompt": 4,
+        "rule": 8
+      },
+      "unmatchedRules": [
+        "Please Insert City Then Try....",
+        "Please Insert Mobile No Because This Ac With Multi Branch Acconut so Mobile No Is Mandatory....",
+        "Please Insert City and Mobile no Then Try....",
+        "Enter Party Name and Account group Detail",
+        "Please Select Group First And try..."
+      ]
+    },
+    "MS_AC_GROUP": {
+      "validations": 13,
+      "rules": 5,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 7,
+        "prompt": 1,
+        "rule": 5
+      },
+      "unmatchedRules": [
+        "Enter Group Code.",
+        "Enter Group Name.",
+        "Please Fild Is Not Blank Alloud..."
+      ]
+    },
+    "MS_ADD_MAST": {
+      "validations": 10,
+      "rules": 3,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 5,
+        "prompt": 2,
+        "rule": 3
+      },
+      "unmatchedRules": []
+    },
+    "MS_AUTO_ITEM": {
+      "validations": 11,
+      "rules": 4,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 4,
+        "prompt": 3,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Please Select Group First And Try ...",
+        "Please First Data Refresh Then Labour Or lbr% Or Mrp Or West%  Value Is Change Re Print Label..",
+        "Please Select AcCode First...And Try"
+      ]
+    },
+    "MS_BOOK": {
+      "validations": 14,
+      "rules": 5,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": [
+        "Error Found : Please Enter Book Name First...",
+        "All Book Data Type A is Set ... Please Restart Sofware Again and Data Will Refresh ..."
+      ]
+    },
+    "MS_BOOKLIST": {
+      "validations": 1,
+      "rules": 1,
+      "rulesMatched": 1,
+      "byKind": {
+        "rule": 1
+      },
+      "unmatchedRules": []
+    },
+    "MS_COMPANY": {
+      "validations": 17,
+      "rules": 4,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 11,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Enter Company Detail"
+      ]
+    },
+    "MS_DESIGN_BOOK": {
+      "validations": 20,
+      "rules": 7,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 8,
+        "prompt": 5,
+        "rule": 7
+      },
+      "unmatchedRules": [
+        "Please Save Voucher Befoure Exit...",
+        "Please Check NextImage Data ...",
+        "Please Select Product First And try..",
+        "Please Select Book Name First And try.."
+      ]
+    },
+    "MS_DM": {
+      "validations": 9,
+      "rules": 3,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Enter Group Detail"
+      ]
+    },
+    "MS_EMP": {
+      "validations": 9,
+      "rules": 3,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Enter Employee Detail"
+      ]
+    },
+    "MS_GOLD_MAST": {
+      "validations": 8,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Enter Detail And Try"
+      ]
+    },
+    "MS_GROUP": {
+      "validations": 10,
+      "rules": 4,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Please Select Sales and Purchase Account And Try",
+        "Enter Group Detail"
+      ]
+    },
+    "MS_ITEM": {
+      "validations": 17,
+      "rules": 6,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 8,
+        "prompt": 3,
+        "rule": 6
+      },
+      "unmatchedRules": [
+        "You Cant Add Other Detail Column More Then 4... Please Remove Old Item Then Try...",
+        "Product Code Is Null Please Create Item Again..",
+        "Group Code Is Null Please Create Item Again..",
+        "Item Code Is Null Please Create Item Again.."
+      ]
+    },
+    "MS_LBR_TYPE": {
+      "validations": 12,
+      "rules": 4,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Enter Labour Code and Labour Value...",
+        "This Lar Code already Exist Please Change Lbr Code..."
+      ]
+    },
+    "MS_LOCT": {
+      "validations": 10,
+      "rules": 4,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Enter Company Detail"
+      ]
+    },
+    "MS_LOGIN": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Check User Name ..."
+      ]
+    },
+    "MS_MEMB": {
+      "validations": 9,
+      "rules": 3,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 4,
+        "prompt": 2,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Enter Membaer Name and Scheme Detail"
+      ]
+    },
+    "MS_MFG_MAST": {
+      "validations": 14,
+      "rules": 9,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 3,
+        "prompt": 2,
+        "rule": 9
+      },
+      "unmatchedRules": [
+        "Please Insert Transection Name First and Try...",
+        "Please Insert BookSName First and Try...",
+        "Please Insert Next Transection Processand Try...",
+        "Please Insert Main book Name and Try...",
+        "Data Are Saved.. Please Save All Mfg Book Reng(301 to 319 book No) In Book Master...",
+        "You Cant Delete Mfg Mast Please Contect Our Tem and Reset It...",
+        "You Cant Reset Mfg Master Because More Then 10 Transection in MFG_DATA First Delete It and Try...",
+        "Delete Success.Please Stock and AcData Refresh..."
+      ]
+    },
+    "MS_OPNCOMP": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Yor Regester Id Is Not Valid Please Contact  9879966455"
+      ]
+    },
+    "MS_POINT": {
+      "validations": 5,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 3,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Error Found : Please Enter code First..."
+      ]
+    },
+    "MS_PRODUCT": {
+      "validations": 26,
+      "rules": 14,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 10,
+        "prompt": 2,
+        "rule": 14
+      },
+      "unmatchedRules": [
+        "Enter Table Name.",
+        "Enter Scheme Name.",
+        "Enter Product Name.",
+        "Please Fild Is Not Blank Alloud...",
+        "Please First Select Scheme Then try....",
+        "Reset..Is Complete...Please Stock Refresh...And AcRefresh..."
+      ]
+    },
+    "MS_RATE": {
+      "validations": 4,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3,
+        "prompt": 1
+      },
+      "unmatchedRules": []
+    },
+    "MS_STK_LIMIT": {
+      "validations": 8,
+      "rules": 3,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 4,
+        "prompt": 1,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Please Insert Lbr Type = G Gross OR N Net OR P Pcs Wise OR F fix OR K Kg Wise Then Try...",
+        "Error Found : Please Enter Item code First..."
+      ]
+    },
+    "MS_STYLE": {
+      "validations": 14,
+      "rules": 10,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 3,
+        "prompt": 1,
+        "rule": 10
+      },
+      "unmatchedRules": [
+        "Enter Design First...",
+        "Enter Style Name First.",
+        "Enter Item City First...."
+      ]
+    },
+    "MS_TAX": {
+      "validations": 9,
+      "rules": 4,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 4,
+        "prompt": 1,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Enter Tax Code.",
+        "Enter Tax Name."
+      ]
+    },
+    "MS_TRADE": {
+      "validations": 5,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 3,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please Insert Trade Type..."
+      ]
+    },
+    "MS_UPDATE": {
+      "validations": 26,
+      "rules": 4,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 15,
+        "prompt": 7,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Field Is Update ok....Please Re open Software",
+        "Old Field Is Update ok....Please Re open Software",
+        "Sales VchSrno Is Update Please Stock Refres and Check....",
+        "Opning Balance is Update Please Data Refresh..."
+      ]
+    },
+    "MS_USER": {
+      "validations": 18,
+      "rules": 10,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 10
+      },
+      "unmatchedRules": [
+        "Password Not Match",
+        "User Name Is Not Selected,Please Select User Name First And Try Again..",
+        "All Menu And ABC User Right Is Update....Please Re open Software",
+        "You Cant Reset Mfg Master Because More Then 10 Transection in MFG_DATA First Delete It and Try...",
+        "Please Insert Reset Passward and Try...",
+        "Your Data Reset Pwd Is Save...Please Take Backup And Check"
+      ]
+    },
+    "MS_WINDOW_SET": {
+      "validations": 4,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 4
+      },
+      "unmatchedRules": []
+    },
+    "MS_YEAR": {
+      "validations": 7,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Year Is Already Exist...Now ReOpen Sofware..."
+      ]
+    },
+    "Module_Save": {
+      "validations": 6,
+      "rules": 3,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 3,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Please check your internet connection"
+      ]
+    },
+    "Module_Schm": {
+      "validations": 3,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3
+      },
+      "unmatchedRules": []
+    },
+    "OlockerService": {
+      "validations": 2,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2
+      },
+      "unmatchedRules": []
+    },
+    "RP_ADDRESS": {
+      "validations": 3,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Select Scheme Code First And Try..."
+      ]
+    },
+    "RP_ALL": {
+      "validations": 8,
+      "rules": 2,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 6,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please Select Scheme Code and Try",
+        "Please Select Book Code First And Try..."
+      ]
+    },
+    "RP_BALANCE": {
+      "validations": 3,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2,
+        "prompt": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_BAL_ZOOM": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_BILL_PROFIT": {
+      "validations": 4,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Insert Todays Gold Fine Rate and Silver Fine Rate in Rate Master...."
+      ]
+    },
+    "RP_CASH_BANK": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please check this entry in Last Year You cant open Last Year Member Adjust Entry.. In Current Year..."
+      ]
+    },
+    "RP_CONSI_APR": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_CUST": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_CUST_CRM": {
+      "validations": 3,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Check Update Detail ... Because Entry Is Not Proper...."
+      ]
+    },
+    "RP_DAY_WORK": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_DHRN_LOAN": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_DHRN_OS": {
+      "validations": 3,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Select Party And Try...."
+      ]
+    },
+    "RP_EMP": {
+      "validations": 4,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3,
+        "prompt": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_GRAPH": {
+      "validations": 2,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2
+      },
+      "unmatchedRules": []
+    },
+    "RP_GST": {
+      "validations": 3,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 1,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please Select Section Type And Try..."
+      ]
+    },
+    "RP_HUID": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_INOUT": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Item Type Select If Yes Then Gold or No Then Silver"
+      ]
+    },
+    "RP_JDTR_ZOOM": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_LC_INOUT": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_LC_SALE": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_LEDR": {
+      "validations": 11,
+      "rules": 2,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 9,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please Select Lc Code and Try...",
+        "Voucher Desc Not found..."
+      ]
+    },
+    "RP_MFG_LEDR": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_MFG_ZOOM": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_MOVEMENT": {
+      "validations": 2,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2
+      },
+      "unmatchedRules": []
+    },
+    "RP_ORDER": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_ORD_TRACK": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_OS": {
+      "validations": 7,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 6,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Insert Intrest Prc Then Try..."
+      ]
+    },
+    "RP_OTH_DETL": {
+      "validations": 2,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2
+      },
+      "unmatchedRules": []
+    },
+    "RP_PHY_STOCK": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_REMINDER": {
+      "validations": 3,
+      "rules": 1,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 2,
+        "rule": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_ROJMEL": {
+      "validations": 4,
+      "rules": 1,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 3,
+        "rule": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_SLPR_ZOOM": {
+      "validations": 4,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 4
+      },
+      "unmatchedRules": []
+    },
+    "RP_STK_LEVEL": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_STK_MOVE": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_STOCK": {
+      "validations": 5,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 5
+      },
+      "unmatchedRules": []
+    },
+    "RP_STOCK_FINE": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Select Stock Type in Setting Average Wise or Net Wise  and Try...."
+      ]
+    },
+    "RP_STOCK_VALUE": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_TAG": {
+      "validations": 12,
+      "rules": 2,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 7,
+        "prompt": 3,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Tag Adjust Ok Please First Data Refresh And Check......",
+        "Please Select Outword Tag List First And Try...."
+      ]
+    },
+    "RP_TAG_ESTMATE": {
+      "validations": 11,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 5,
+        "prompt": 4,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "No Data Found In Data Grid Pleas Select Data First And Try"
+      ]
+    },
+    "RP_TAG_IMAGE": {
+      "validations": 13,
+      "rules": 9,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 3,
+        "prompt": 1,
+        "rule": 9
+      },
+      "unmatchedRules": [
+        "Please Select Item Code or Product Name and Try",
+        "Please Select Mobile No Firt And Try...",
+        "Please First Connect Wapp Then Try...",
+        "Please Connect Whatsapp Firt And Try...",
+        "Please Select Image First And Try...",
+        "Please Select Book First....",
+        "Please Update User Mast Field Update and Try...."
+      ]
+    },
+    "RP_TOUR_ZOOM": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 1,
+        "rule": 1
+      },
+      "unmatchedRules": []
+    },
+    "RP_TRADING": {
+      "validations": 4,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Insert Cr AcCode or Dr AcCode and Try...."
+      ]
+    },
+    "RP_USER": {
+      "validations": 3,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3
+      },
+      "unmatchedRules": []
+    },
+    "TR_AC_OPBL": {
+      "validations": 16,
+      "rules": 8,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 8
+      },
+      "unmatchedRules": [
+        "Plese Select Data Type A or B then Try...",
+        "Please Select Data Type = A or Data Type = B and try You Cant Change in Data Type = C ....",
+        "Please Insert Vch No and Try...",
+        "Please Insert Gold fine or Silver fine or Net Amount and try...",
+        "Please Enter Party First...",
+        "Please Select Account Details.",
+        "Please insert ItmType  G = Gold S = Silver Or A = Amount and try",
+        "Please Enter C or D and Try Again..."
+      ]
+    },
+    "TR_APR_ISU": {
+      "validations": 22,
+      "rules": 8,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 10,
+        "prompt": 4,
+        "rule": 8
+      },
+      "unmatchedRules": []
+    },
+    "TR_BILL_TO": {
+      "validations": 15,
+      "rules": 6,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 6
+      },
+      "unmatchedRules": [
+        "This Bill Record Is Not Found..."
+      ]
+    },
+    "TR_BUL_BOOKING": {
+      "validations": 15,
+      "rules": 6,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 6
+      },
+      "unmatchedRules": [
+        "You Cant Creat Other Branch Account In This Location....Please Set All Branch Account Show In Main Satting In Memb Pwd...And Try...",
+        "Please Insert Transection Type  C = Cash or B = Bank and Try...",
+        "Please First Select Booking Location And try ....."
+      ]
+    },
+    "TR_BUL_SALE": {
+      "validations": 15,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 8,
+        "prompt": 3,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "TR_CARD_REC": {
+      "validations": 10,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "TR_CASH": {
+      "validations": 12,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "TR_CONTRA": {
+      "validations": 13,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "TR_DHRN_INTREC": {
+      "validations": 9,
+      "rules": 3,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1,
+        "rule": 3
+      },
+      "unmatchedRules": []
+    },
+    "TR_DHRN_ISU": {
+      "validations": 14,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 6,
+        "prompt": 4,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "TR_DHRN_REC": {
+      "validations": 13,
+      "rules": 4,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 6,
+        "prompt": 3,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Please Select Dhiran Isu No and Try...."
+      ]
+    },
+    "TR_EMP_JV": {
+      "validations": 11,
+      "rules": 3,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 3
+      },
+      "unmatchedRules": []
+    },
+    "TR_FINE_SL_PR": {
+      "validations": 14,
+      "rules": 5,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": [
+        "Please Enter Less Value form Item Fine...and Try..."
+      ]
+    },
+    "TR_FN_INOUT": {
+      "validations": 21,
+      "rules": 8,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 10,
+        "prompt": 3,
+        "rule": 8
+      },
+      "unmatchedRules": [
+        "Please Select Transfer Franchise And Try....",
+        "Please Save Voucher First Then Cancel... Because Row Wise Entry Is Save But Voucher Is Not Save ....",
+        "Please Select Transfer Franchise Code An Try  ....",
+        "Process Is Ok...Please Data Refresh..then check..."
+      ]
+    },
+    "TR_GOLD_BOOK": {
+      "validations": 13,
+      "rules": 5,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": [
+        "You Cant Creat Other Branch Account In This Location....Please Set All Branch Account Show In Main Satting In Memb Pwd...And Try..."
+      ]
+    },
+    "TR_INOUT": {
+      "validations": 21,
+      "rules": 10,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 9,
+        "prompt": 2,
+        "rule": 10
+      },
+      "unmatchedRules": [
+        "No LabCode Found Please Update Itm Stock Limit Mast and Try..",
+        "This Voucher Stock Recieved In Transfer Branch... You Cant Add New Tag..Please Creat New Voucher",
+        "Please Select Transfer Loction An Try  ...."
+      ]
+    },
+    "TR_ITM_LOT": {
+      "validations": 11,
+      "rules": 5,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 4,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": []
+    },
+    "TR_ITM_OPBL": {
+      "validations": 7,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 4,
+        "prompt": 1,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please Select Metaltype...."
+      ]
+    },
+    "TR_JDT_REC": {
+      "validations": 20,
+      "rules": 10,
+      "rulesMatched": 9,
+      "byKind": {
+        "notice": 7,
+        "prompt": 3,
+        "rule": 10
+      },
+      "unmatchedRules": [
+        "Please First Save Voucher Because Item Row Delete But Voucher Is Not Save..."
+      ]
+    },
+    "TR_KR_ISU": {
+      "validations": 16,
+      "rules": 6,
+      "rulesMatched": 6,
+      "byKind": {
+        "notice": 6,
+        "prompt": 4,
+        "rule": 6
+      },
+      "unmatchedRules": []
+    },
+    "TR_LEDR_ADJ": {
+      "validations": 14,
+      "rules": 5,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": [
+        "Please Select Item Type G or S Then Try..."
+      ]
+    },
+    "TR_LOCT_AMT": {
+      "validations": 13,
+      "rules": 5,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": []
+    },
+    "TR_MEMB_ADJ": {
+      "validations": 11,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 5,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "TR_MEMB_ENT": {
+      "validations": 16,
+      "rules": 7,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 7
+      },
+      "unmatchedRules": [
+        "This Member Scheme Is Close Please Create New Member Code...",
+        "This Member Scheme Adjust Please Check....",
+        "Plese Enter Y or N then Try..."
+      ]
+    },
+    "TR_MFG_GHAT_REC": {
+      "validations": 15,
+      "rules": 7,
+      "rulesMatched": 6,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 7
+      },
+      "unmatchedRules": [
+        "Please Delate This Voucher Because item row > 1 then Row Delete Enable...."
+      ]
+    },
+    "TR_MFG_ISU_REC": {
+      "validations": 17,
+      "rules": 7,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 7,
+        "prompt": 3,
+        "rule": 7
+      },
+      "unmatchedRules": []
+    },
+    "TR_MFG_ITEM": {
+      "validations": 17,
+      "rules": 7,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 7,
+        "prompt": 3,
+        "rule": 7
+      },
+      "unmatchedRules": []
+    },
+    "TR_MFG_KR_ISU_REC": {
+      "validations": 17,
+      "rules": 7,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 7,
+        "prompt": 3,
+        "rule": 7
+      },
+      "unmatchedRules": []
+    },
+    "TR_MFG_ORD_ISU": {
+      "validations": 21,
+      "rules": 9,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 9,
+        "prompt": 3,
+        "rule": 9
+      },
+      "unmatchedRules": [
+        "Please Delate This Voucher Because item row > 1 then Row Delete Enable...."
+      ]
+    },
+    "TR_MFG_ORD_REC": {
+      "validations": 20,
+      "rules": 9,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 7,
+        "prompt": 4,
+        "rule": 9
+      },
+      "unmatchedRules": [
+        "Please Delate This Voucher Because item row > 1 then Row Delete Enable...."
+      ]
+    },
+    "TR_MFG_WITH_LOT": {
+      "validations": 17,
+      "rules": 7,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 7,
+        "prompt": 3,
+        "rule": 7
+      },
+      "unmatchedRules": []
+    },
+    "TR_MLT_PRO": {
+      "validations": 16,
+      "rules": 7,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 7
+      },
+      "unmatchedRules": [
+        "Please Select Emp Trfr Code and Try......",
+        "Please Insert Con It Code for Add Fine And Try.....",
+        "This Bill Record Is Not Found..."
+      ]
+    },
+    "TR_OTH_COMM": {
+      "validations": 13,
+      "rules": 5,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": []
+    },
+    "TR_OTH_PURC": {
+      "validations": 14,
+      "rules": 5,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 6,
+        "prompt": 3,
+        "rule": 5
+      },
+      "unmatchedRules": []
+    },
+    "TR_PHYSTK": {
+      "validations": 19,
+      "rules": 7,
+      "rulesMatched": 6,
+      "byKind": {
+        "notice": 8,
+        "prompt": 4,
+        "rule": 7
+      },
+      "unmatchedRules": [
+        "This Tag is Allrady Scane to Other Voucher Not Alloud Duplicate Tag No"
+      ]
+    },
+    "TR_PR_SL_HEDG": {
+      "validations": 12,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "TR_PR_SL_UAE": {
+      "validations": 22,
+      "rules": 8,
+      "rulesMatched": 6,
+      "byKind": {
+        "notice": 7,
+        "prompt": 7,
+        "rule": 8
+      },
+      "unmatchedRules": [
+        "Record is Deleted....Please Save Voucher.....",
+        "Please Update Gr Rate Touch In  Group Mast... Then Net Wise Rate Is Show...."
+      ]
+    },
+    "TR_PURC": {
+      "validations": 35,
+      "rules": 17,
+      "rulesMatched": 15,
+      "byKind": {
+        "notice": 11,
+        "prompt": 7,
+        "rule": 17
+      },
+      "unmatchedRules": [
+        "Please First Save Voucher And Try Because Tag Row Is Delete But Vch Not Save...",
+        "ThenPlease Insert Fine In Party Fine....."
+      ]
+    },
+    "TR_PURC_HM": {
+      "validations": 20,
+      "rules": 7,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 6,
+        "prompt": 7,
+        "rule": 7
+      },
+      "unmatchedRules": [
+        "Record is Deleted....Please Save Voucher.....",
+        "Please Insert Party fine Value or item Amount Valeu and try...."
+      ]
+    },
+    "TR_REP_REC": {
+      "validations": 18,
+      "rules": 8,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 6,
+        "prompt": 4,
+        "rule": 8
+      },
+      "unmatchedRules": []
+    },
+    "TR_SALE": {
+      "validations": 34,
+      "rules": 16,
+      "rulesMatched": 12,
+      "byKind": {
+        "notice": 13,
+        "prompt": 5,
+        "rule": 16
+      },
+      "unmatchedRules": [
+        "Please Insert Cr Days And Try...",
+        "This Function Not Working in Your Software Virson Please Upgrad Advance or Enterprise Then Try",
+        "New Report is Insert ok...Please This Form Close And Reopen...",
+        "Please First Save Voucher and Reopen Voucher and try..."
+      ]
+    },
+    "TR_SALE_HM": {
+      "validations": 24,
+      "rules": 8,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 12,
+        "prompt": 4,
+        "rule": 8
+      },
+      "unmatchedRules": [
+        "New Report is Insert ok...Please This Form Close And Reopen..."
+      ]
+    },
+    "TR_SALE_LBR": {
+      "validations": 19,
+      "rules": 8,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 8,
+        "prompt": 3,
+        "rule": 8
+      },
+      "unmatchedRules": []
+    },
+    "TR_SALE_ORD": {
+      "validations": 30,
+      "rules": 16,
+      "rulesMatched": 11,
+      "byKind": {
+        "notice": 8,
+        "prompt": 6,
+        "rule": 16
+      },
+      "unmatchedRules": [
+        "Please Insert Rate In Rate Master...and Try....",
+        "Please First Save Upi Entry... Because This Voucher Upi Entery is open...",
+        "Please First Save Voucher... Because Upi Entery is Change In Upi Form...",
+        "Please Insert Delevery Date and Function Date and Try",
+        "Please Select Delevery Date and Try......"
+      ]
+    },
+    "TR_SALE_RTN": {
+      "validations": 22,
+      "rules": 10,
+      "rulesMatched": 9,
+      "byKind": {
+        "notice": 7,
+        "prompt": 5,
+        "rule": 10
+      },
+      "unmatchedRules": [
+        "Please Insert Item Value and try"
+      ]
+    },
+    "TR_SALE_RTN_UAE": {
+      "validations": 21,
+      "rules": 8,
+      "rulesMatched": 7,
+      "byKind": {
+        "notice": 9,
+        "prompt": 4,
+        "rule": 8
+      },
+      "unmatchedRules": [
+        "New Report is Insert ok...Please This Form Close And Reopen..."
+      ]
+    },
+    "TR_SL_EBILL": {
+      "validations": 26,
+      "rules": 11,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 12,
+        "prompt": 3,
+        "rule": 11
+      },
+      "unmatchedRules": [
+        "Please Insert eid and epwd in Company Master... and Try",
+        "Please Insert Salers Mandatary Field In Company Mast fild is (Address 1 , City , Pincod , Gst No , State Code)..  And Try",
+        "Please Insert Buyers Mandatary Field In Party Mast fild is (Address 1 , City , Pincod , Gst No , State )..  And Try"
+      ]
+    },
+    "TR_SL_ORD_ADJ": {
+      "validations": 13,
+      "rules": 5,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": []
+    },
+    "TR_SL_PR_ITEM": {
+      "validations": 27,
+      "rules": 12,
+      "rulesMatched": 8,
+      "byKind": {
+        "notice": 11,
+        "prompt": 4,
+        "rule": 12
+      },
+      "unmatchedRules": [
+        "Please Select Tax Type A = Item Tax Or L = Labour Tax Or F = TaxFree And Try...",
+        "Please Select Tax Reverse Type Y or N Then Try...",
+        "Data Upload Complete..Please Print Data With TaxFree Qr...",
+        "Please insert Client Detail Then Try...."
+      ]
+    },
+    "TR_TAG_CAN": {
+      "validations": 14,
+      "rules": 5,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": []
+    },
+    "TR_TAG_OPBL": {
+      "validations": 42,
+      "rules": 18,
+      "rulesMatched": 10,
+      "byKind": {
+        "notice": 17,
+        "prompt": 7,
+        "rule": 18
+      },
+      "unmatchedRules": [
+        "No LabCode Found Please Update Itm Stock Limit Mast and Try..",
+        "Duplicate Design No",
+        "You Cant Generate New Tag Plese Add Stock First",
+        "Please Save Voucher Befoure Exit...",
+        "Please Change VchNo its Not Valid......",
+        "You Cant Save Entry Because Voucher Date Not Grater Then Closing Date... Please Change Date...",
+        "Please Insert Counter Code and Try Because It is Mandatory...",
+        "Stock item code Insert First..."
+      ]
+    },
+    "TR_TAG_SPLIT": {
+      "validations": 21,
+      "rules": 10,
+      "rulesMatched": 10,
+      "byKind": {
+        "notice": 8,
+        "prompt": 3,
+        "rule": 10
+      },
+      "unmatchedRules": []
+    },
+    "TR_TAG_WT_DIFF": {
+      "validations": 18,
+      "rules": 6,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 8,
+        "prompt": 4,
+        "rule": 6
+      },
+      "unmatchedRules": [
+        "Please Select Received Item Code And Try...."
+      ]
+    },
+    "TR_TOUR": {
+      "validations": 17,
+      "rules": 6,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 8,
+        "prompt": 3,
+        "rule": 6
+      },
+      "unmatchedRules": [
+        "You Have No item Stock....Please Tour Isu First..."
+      ]
+    },
+    "TR_TOUR_ORD": {
+      "validations": 25,
+      "rules": 13,
+      "rulesMatched": 11,
+      "byKind": {
+        "notice": 7,
+        "prompt": 5,
+        "rule": 13
+      },
+      "unmatchedRules": [
+        "This Tag Not In Employee Stock List Please Check...",
+        "Please Select Delevery Date and Try......"
+      ]
+    },
+    "TR_TOUR_SALE": {
+      "validations": 26,
+      "rules": 14,
+      "rulesMatched": 10,
+      "byKind": {
+        "notice": 8,
+        "prompt": 4,
+        "rule": 14
+      },
+      "unmatchedRules": [
+        "This Tag Not In Employee Stock List Please Check...",
+        "You Have No item Stock....Please Tour Isu First...",
+        "Please Save Voucher Becuse Item Row Is Delete",
+        "Please Insert Ref No Then Try...."
+      ]
+    },
+    "TR_UPI_REC": {
+      "validations": 3,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2,
+        "prompt": 1
+      },
+      "unmatchedRules": []
+    },
+    "TR_VP": {
+      "validations": 14,
+      "rules": 5,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 7,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": []
+    },
+    "TR_VP_ADJ": {
+      "validations": 11,
+      "rules": 3,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 3
+      },
+      "unmatchedRules": []
+    },
+    "TR_WH_SALE": {
+      "validations": 30,
+      "rules": 15,
+      "rulesMatched": 10,
+      "byKind": {
+        "notice": 10,
+        "prompt": 5,
+        "rule": 15
+      },
+      "unmatchedRules": [
+        "Please Save Voucher First...Because Apr Adjust Row Is Delete...",
+        "Please Insert CrDays and Try......",
+        "Please Insert Ref No Then Try....",
+        "New Report is Insert ok...Please This Form Close And Reopen...",
+        "Kr Fine Update Please ReOpen Voucher ....."
+      ]
+    },
+    "TR_WH_SALE_RTN": {
+      "validations": 16,
+      "rules": 6,
+      "rulesMatched": 5,
+      "byKind": {
+        "notice": 6,
+        "prompt": 4,
+        "rule": 6
+      },
+      "unmatchedRules": [
+        "Record is Deleted....Please Save Voucher....."
+      ]
+    },
+    "UT_AI_TRFR": {
+      "validations": 6,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 5,
+        "prompt": 1
+      },
+      "unmatchedRules": []
+    },
+    "UT_BANK": {
+      "validations": 5,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 4,
+        "prompt": 1
+      },
+      "unmatchedRules": []
+    },
+    "UT_BKP": {
+      "validations": 4,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Please Select Path and Try"
+      ]
+    },
+    "UT_CUST_ENTRY": {
+      "validations": 11,
+      "rules": 3,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Please Select Employe Code First And Try....",
+        "Item Row Is Not Save... Please Insert AcName Or Remark Or Reminder Date Or ItName..And Try..",
+        "Please Select Employee First and try"
+      ]
+    },
+    "UT_EXPORT": {
+      "validations": 11,
+      "rules": 4,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 2,
+        "prompt": 5,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "Please Insert CoType In Company Master...",
+        "Process Are Complete....Please B Data Refersh And Check Ledger And Stock Then Reset Data",
+        "Please Reset A Type Stock First Then Tag Stock Transfer....",
+        "Process Are Complete....Please A Data Refersh and Check Stock....."
+      ]
+    },
+    "UT_E_INVOICE": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "UT_HDD": {
+      "validations": 1,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 1
+      },
+      "unmatchedRules": []
+    },
+    "UT_IMPORT": {
+      "validations": 22,
+      "rules": 2,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 5,
+        "prompt": 15,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Process are Complite....Please Data Refresh After This Porcess...",
+        "Please Insert Import Data Sql Link And Try..."
+      ]
+    },
+    "UT_PWD_UPDATE": {
+      "validations": 4,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 2,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Password Is Update...Please Re Open Software..."
+      ]
+    },
+    "UT_REMINDER": {
+      "validations": 9,
+      "rules": 2,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 5,
+        "prompt": 2,
+        "rule": 2
+      },
+      "unmatchedRules": []
+    },
+    "UT_REPORT": {
+      "validations": 6,
+      "rules": 3,
+      "rulesMatched": 2,
+      "byKind": {
+        "notice": 3,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Please check your internet connection"
+      ]
+    },
+    "UT_SETTING": {
+      "validations": 28,
+      "rules": 2,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 26,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please insert N OR Y And Try...",
+        "Sales Bill Duplicate Print Set...."
+      ]
+    },
+    "UT_SETTING_MAIN": {
+      "validations": 64,
+      "rules": 3,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 61,
+        "rule": 3
+      },
+      "unmatchedRules": [
+        "Sales Bill Image Print is Set Please Image Set In Bill....",
+        "Order Image Print is Set Please Image Set In Sales Order Voucher....",
+        "Item With Lot Stock Is Set...In Item Master...Please Re Open Software..."
+      ]
+    },
+    "UT_SET_ADMIN": {
+      "validations": 11,
+      "rules": 2,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 9,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Estmate Entry Bank and Card Entry Locked....Set",
+        "If Tag Sales Entry Then Net Wt and Gr Wt Is Locked....Set"
+      ]
+    },
+    "UT_SMS": {
+      "validations": 13,
+      "rules": 5,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 6,
+        "prompt": 2,
+        "rule": 5
+      },
+      "unmatchedRules": [
+        "You Have No SMS Pack...Please By SMS Pack....",
+        "Please Creat Daily Rate Send Detail......"
+      ]
+    },
+    "UT_TAG_PRINT": {
+      "validations": 6,
+      "rules": 2,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 3,
+        "prompt": 1,
+        "rule": 2
+      },
+      "unmatchedRules": [
+        "Please First Update Hmid Data and Then print"
+      ]
+    },
+    "UT_USER_REQUEST": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 1,
+      "byKind": {
+        "notice": 1,
+        "rule": 1
+      },
+      "unmatchedRules": []
+    },
+    "UT_VCH_RE_NUMBR": {
+      "validations": 2,
+      "rules": 1,
+      "rulesMatched": 0,
+      "byKind": {
+        "prompt": 1,
+        "rule": 1
+      },
+      "unmatchedRules": [
+        "Voucher are sucessfully Re Numbering.. Please Data Refresh After Vch No Is Re Numbring....."
+      ]
+    },
+    "UT_WAPP_WITH_API": {
+      "validations": 17,
+      "rules": 4,
+      "rulesMatched": 3,
+      "byKind": {
+        "notice": 11,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": [
+        "All variables fill First..."
+      ]
+    },
+    "UT_WHATSAPP": {
+      "validations": 19,
+      "rules": 4,
+      "rulesMatched": 4,
+      "byKind": {
+        "notice": 13,
+        "prompt": 2,
+        "rule": 4
+      },
+      "unmatchedRules": []
+    },
+    "UT_WINDOW": {
+      "validations": 3,
+      "rules": 0,
+      "rulesMatched": 0,
+      "byKind": {
+        "notice": 3
+      },
+      "unmatchedRules": []
+    }
+  }
+}

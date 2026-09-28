@@ -1,0 +1,33 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/saleReturnLabourReplay.test.ts",
+    "test/saleReturnLabourReplay.db.test.ts",
+    "test/saleReturnLabourReplay.routes.db.test.ts",
+    "test/saleReturnBillReplay.test.ts",
+    "test/saleReturnBillReplay.db.test.ts",
+    "test/saleReturnBillReplay.routes.db.test.ts",
+    "test/routePolicy.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:22:50.033933+00:00",
+  "finishedAtUtc": "2026-09-11T23:23:03.443456+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-api-focused.txt",
+  "logSha256": "2fce082928add9a8ca62f8ac36f16a69e586e760930f1ee5ac47ffd9b3310df1",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-api-focused.inputs.json",
+  "inputManifestSha256": "b2d9a880310cf4f4dd062afa672ea5109293895059611d542cb16c5fe8ea2fcc",
+  "inputCount": 1824,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

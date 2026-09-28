@@ -1,0 +1,16 @@
+[
+  {
+    "path": "auth/businessScope.ts",
+    "originalSha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e",
+    "stagedSha256": "bb1e9421ae38b0e9563911d1f9bcf9c605f78f1872dac6b8b7a630b307fd327c",
+    "templateLiteralCount": 8,
+    "allTemplateLiteralsByteIdenticalInOrder": true
+  },
+  {
+    "path": "rbac/authorization.ts",
+    "originalSha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34",
+    "stagedSha256": "2c7185efa06da8759a2fdb57d79a344779a7897781f4689b9d2812b1bdf72095",
+    "templateLiteralCount": 6,
+    "allTemplateLiteralsByteIdenticalInOrder": true
+  }
+]

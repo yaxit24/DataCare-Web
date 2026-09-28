@@ -1,0 +1,20 @@
+{
+  "command": [
+    "env",
+    "NODE_OPTIONS=--max-old-space-size=4096",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "tsc",
+    "-p",
+    "tsconfig.test.json",
+    "--noEmit"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T15:00:57.869215+00:00",
+  "finishedAtUtc": "2026-09-11T15:07:57.976003+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/test-types.txt"
+}

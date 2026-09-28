@@ -1,0 +1,20 @@
+✔ imported typed .ts tuple alias contributes only descriptors used in returned JSX (13.868125ms)
+✔ unused imports, type-only imports and uncalled helper JSX do not become surface (1.600125ms)
+✔ removing only the rendered map removes the imported candidates (1.127458ms)
+✔ object descriptors recognize labels after key/column and classify identities (2.169667ms)
+✔ factory literal selector and conditional flatMap retain provenance, not current visibility claims (2.487834ms)
+✔ unknown selector reports both conditional branches; unconditional empty filter counts none (1.924042ms)
+✔ false JSX condition is excluded and unknown runtime condition is recorded (1.395833ms)
+✔ unsupported dynamic factories remain explicit and do not invent fields (0.805667ms)
+✔ a flatMap that rewrites field identity is unsupported, not credited as original inputs (1.061875ms)
+✔ read-only mapped controls remain display-only and a type-only binding stays unresolved (1.375ms)
+✔ same-named unused descriptor on another file cannot satisfy the rendered unknown binding (0.912333ms)
+✔ real Design/Tour imported fields are traced without changing wholesale nested mapping (49.372917ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 416.09725

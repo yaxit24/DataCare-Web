@@ -1,0 +1,15 @@
+
+> @datacare/web@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> vitest run --passWithNoTests "test/tourOrderForm.test.ts" "test/derivedValueSources.test.ts"
+
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/derivedValueSources.test.ts (4 tests) 45ms
+ ✓ test/tourOrderForm.test.ts (8 tests) 8ms
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  05:02:29
+   Duration  564ms (transform 225ms, setup 0ms, collect 252ms, tests 53ms, environment 0ms, prepare 173ms)
+

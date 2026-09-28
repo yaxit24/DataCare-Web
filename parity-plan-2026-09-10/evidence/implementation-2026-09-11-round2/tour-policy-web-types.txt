@@ -1,0 +1,4 @@
+
+> @datacare/web@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> tsc --noEmit
+

@@ -47,6 +47,12 @@ if (!url || !runtimeUrl) {
   console.error('REPLAY_SKIP need MIGRATE_DATABASE_URL and DATABASE_URL');
   process.exit(1);
 }
+/**
+ * `--no-wipe` lets this replay run into a tenant the purchase and wholesale replays already seeded, so ONE
+ * extract covers every family. Without it each family lands in its own tenant, the comparison can only see a
+ * reduced case set, and the ratchet rightly refuses it. The shared masters below are guarded accordingly.
+ */
+const keepExisting = process.argv.slice(2).includes('--no-wipe');
 const owner = new PrismaClient({ datasources: { db: { url } } });
 const runtime = new PrismaClient({ datasources: { db: { url: runtimeUrl } } });
 
@@ -70,7 +76,8 @@ async function seed() {
     // the harness had been quietly taking a default for the item-rate precision all along, which is the same
     // class of omission that made TOT_AMT_ROF look like a product defect for two commits.
     `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LBR_TYPE","LBR_ROF","SL_AMT_TYPE","TAX_ROF","ALL_ROF_REMOVE","RATE_PAR","ITM_RATE_ROF")
-     VALUES ($1,$2,'N','2','N','2','N','N','2')`,
+     SELECT $1,$2,'N','2','N','2','N','N','2'
+      WHERE NOT EXISTS (SELECT 1 FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"=$2)`,
     TENANT,
     CO,
   );
@@ -82,24 +89,31 @@ async function seed() {
   // absent the loader keeps its documented 2dp default, so the replay produced 1515.21 against the desktop's
   // 1515.00 and I began writing it up as a missing whole-rupee mode. The mode is implemented.
   await exec(
-    `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF","PR_RATE_ROF") VALUES ($1,$2,0,2)`,
+    `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF","PR_RATE_ROF")
+     SELECT $1,$2,0,2
+      WHERE NOT EXISTS (SELECT 1 FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$2)`,
     TENANT,
     CO,
   );
   await exec(
-    `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME") VALUES ($1,$2,'Parity Replay Co')`,
+    `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME")
+     SELECT $1,$2,'Parity Replay Co'
+      WHERE NOT EXISTS (SELECT 1 FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2)`,
     TENANT,
     CO,
   );
   await exec(
-    `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME") VALUES ($1,$2,$3,'Main')`,
+    `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME")
+     SELECT $1,$2,$3,'Main'
+      WHERE NOT EXISTS (SELECT 1 FROM "LOCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3)`,
     TENANT,
     CO,
     LC,
   );
   await exec(
     `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
-     VALUES ($1,$2,$3,'2024-04-01','2025-03-31')`,
+     SELECT $1,$2,$3,'2024-04-01','2025-03-31'
+      WHERE NOT EXISTS (SELECT 1 FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_YEAR"=$3)`,
     TENANT,
     CO,
     YEAR,
@@ -126,7 +140,8 @@ async function seed() {
   ]) {
     await exec(
       `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
-       VALUES ($1,$2,$3,$4,$5,'L')`,
+       SELECT $1,$2,$3,$4,$5,'L'
+        WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$4)`,
       TENANT,
       CO,
       LC,
@@ -144,7 +159,8 @@ async function seed() {
   ]) {
     await exec(
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
-       VALUES ($1,$2,'10',$3,$4,$5,$6,$7)`,
+       SELECT $1,$2,'10',$3,$4,$5,$6,$7
+        WHERE NOT EXISTS (SELECT 1 FROM "TAX_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "TAX_CODE"='10' AND "SR_NO"=$3)`,
       TENANT,
       CO,
       sr,
@@ -158,7 +174,8 @@ async function seed() {
   // Group carries the income account; items are silver, matching IT_TYPE 'S' on both real lines.
   await exec(
     `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
-     VALUES ($1,$2,'01','SILVER','00004')`,
+     SELECT $1,$2,'01','SILVER','00004'
+      WHERE NOT EXISTS (SELECT 1 FROM "GROUP_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "GR_CODE"='01')`,
     TENANT,
     CO,
   );
@@ -168,7 +185,8 @@ async function seed() {
   ]) {
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
-       VALUES ($1,$2,$3,$4,'S','01')`,
+       SELECT $1,$2,$3,$4,'S','01'
+        WHERE NOT EXISTS (SELECT 1 FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"=$3)`,
       TENANT,
       CO,
       code,
@@ -241,7 +259,7 @@ async function seed() {
 }
 
 async function main() {
-  await wipe();
+  if (!keepExisting) await wipe();
   await seed();
 
   const scope = { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: BOOK };

@@ -1,0 +1,27 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnBillTaxPolicy.test.ts (89 tests) 46ms
+ ✓ test/designCalc.test.ts (36 tests) 21ms
+ ✓ test/saleReturnIncoming.review.test.ts (33 tests) 95ms
+ ✓ test/saleReturnBillProjection.test.ts (84 tests) 166ms
+ ✓ test/saleReturnIncoming.test.ts (72 tests) 164ms
+ ✓ test/saleReturnIncomingProjection.test.ts (53 tests) 225ms
+ ✓ test/saleReturnIncomingAggregate.test.ts (62 tests) 273ms
+ ✓ test/salesOrderDesign.test.ts (8 tests) 8ms
+ ✓ test/designRepeat.test.ts (11 tests) 12ms
+ ✓ test/orderLabourWithCache.test.ts (11 tests) 9ms
+ ✓ test/containment.test.ts (4 tests) 9ms
+ ✓ test/orderLabour.test.ts (23 tests) 23ms
+ ✓ test/calc.test.ts (10 tests) 15ms
+ ✓ test/money.test.ts (3 tests) 5ms
+
+ Test Files  14 passed (14)
+      Tests  499 passed (499)
+   Start at  20:24:11
+   Duration  2.17s (transform 1.47s, setup 0ms, collect 2.40s, tests 1.07s, environment 4ms, prepare 2.08s)
+

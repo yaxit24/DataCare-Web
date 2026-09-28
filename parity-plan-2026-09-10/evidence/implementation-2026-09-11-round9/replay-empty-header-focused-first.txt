@@ -1,0 +1,55 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/savedSaleReturnEmpty.db.test.ts" "test/savedSaleReturn.db.test.ts" "test/savedSaleReturn.routes.db.test.ts" "test/saleReturnIncomingReplay.db.test.ts" "test/saleReturnIncomingReplay.routes.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/savedSaleReturn.db.test.ts (26 tests) 2793ms
+ ✓ test/saleReturnIncomingReplay.db.test.ts (43 tests) 4469ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > hydrates exact raw identities, rawNULL/blank/decimals/microseconds, eight caches and an empty journal without recalculation or business writes 316ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > contains hidden, known unsupported and malformed events without widening the twelve-field profile 446ms
+ ✓ test/saleReturnIncomingReplay.routes.db.test.ts (12 tests) 2531ms
+ ✓ test/savedSaleReturn.routes.db.test.ts (9 tests) 1932ms
+ ✓ test/savedSaleReturnEmpty.db.test.ts (6 tests) 1275ms
+
+ Test Files  5 passed (5)
+      Tests  96 passed (96)
+   Start at  12:59:20
+   Duration  17.59s (transform 1.49s, setup 0ms, collect 3.13s, tests 13.00s, environment 1ms, prepare 222ms)
+

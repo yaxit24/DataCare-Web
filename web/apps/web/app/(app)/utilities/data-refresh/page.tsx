@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { post } from '../../../../lib/api';
 
 interface RefreshResult {
   ranAt: string;
@@ -21,12 +22,7 @@ export default function DataRefreshPage() {
     setErr('');
     setRes(null);
     try {
-      const r = await fetch('/api/utilities/data-refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      setRes(await r.json());
+      setRes(await post<RefreshResult>('/utilities/data-refresh'));
     } catch (e: any) {
       setErr(e.message || 'failed');
     } finally {

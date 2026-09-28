@@ -1,0 +1,45 @@
+{
+  "kind": "preimplementation-independent-contract",
+  "capturedAtUtc": "2026-09-11T22:47:37.393164+00:00",
+  "implementationExists": false,
+  "unitCases": 30,
+  "databaseSchedules": 14,
+  "files": [
+    {
+      "path": "/tmp/datacare-session-read-snapshot-staged/implementation-contract.md",
+      "sha256": "642c34cd604ce0d19242f54a112bc962ef18394393645dddab0af0aa32e5dd33"
+    },
+    {
+      "path": "/tmp/datacare-session-read-snapshot-staged/web/apps/api/test/fixtures/sessionReadSnapshot.independent.json",
+      "sha256": "45c0faa998fc1463cd08f9218487fc5c84ac3ba93b2c641f1fb45ead9aa71bad"
+    },
+    {
+      "path": "/tmp/datacare-session-read-snapshot-staged/sessionReadSnapshot.independent.json",
+      "sha256": "45c0faa998fc1463cd08f9218487fc5c84ac3ba93b2c641f1fb45ead9aa71bad"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/implementation-contract.md",
+      "sha256": "2bbfd5a65f6806f50daf3099a9204743be40024d89359861c52e558eee206ccc"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    }
+  ]
+}

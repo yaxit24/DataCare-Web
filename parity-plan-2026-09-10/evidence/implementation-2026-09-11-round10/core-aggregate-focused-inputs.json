@@ -1,0 +1,49 @@
+{
+  "stage": "Before final focused runtime and strict test-file compilation; scoped input list, not complete global execution capture.",
+  "inputs": [
+    {
+      "path": "packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "41e319bf3984e3efc10c947db5564fe5d49e2f4aa0d96afc03e4ca432bcb0363"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "packages/core/src/index.ts",
+      "sha256": "d398c7c34f10525093d65a2d49af2e82d1ad409a1d7852ea4de9a637592aaa71"
+    },
+    {
+      "path": "packages/core/test/saleReturnIncomingAggregate.test.ts",
+      "sha256": "d49e39375f9fede2a33c894518210af6e935a40f7bb9ddeee7ec410c14dc8738"
+    },
+    {
+      "path": "packages/core/test/fixtures/sale-return-incoming-aggregate.v1.json",
+      "sha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    },
+    {
+      "path": "package.json",
+      "sha256": "88b346ba7597fe1af78ae6151cc6e9ddeeb219f0049df90edbf4d8eaef3731c2"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    }
+  ]
+}

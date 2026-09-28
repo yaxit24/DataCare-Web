@@ -1,0 +1,212 @@
+{
+  "capturedAtUtc": "2026-09-11T06:29:41.734187+00:00",
+  "kind": "round5-read-only-generic-image-client-inventory",
+  "sourceCheckpoint": "../parity-plan-2026-09-10/21-implementation-checkpoint-round4.json",
+  "entityMountSites": 21,
+  "repairMountSites": 2,
+  "expandedRoutes": 32,
+  "consumers": [
+    {
+      "path": "apps/web/app/(app)/masters/[name]/page.tsx",
+      "line": 425,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n          entityType={MASTER_IMAGE_ENTITY[name]!.entity}\n          entityKey={String(editing[MASTER_IMAGE_ENTITY[name]!.keyCol] ?? '')}\n          instance={0}\n          label={MASTER_IMAGE_ENTITY[name]!.label}\n          testId=\"master-image\"\n        />",
+      "sha256": "e9db9de8d262f7877aa8af9c1da1e960f7b9ac46931a386a64fc929e5452eb82"
+    },
+    {
+      "path": "apps/web/app/(app)/masters/design-book/page.tsx",
+      "line": 925,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n          key={String(activeLine.saved.DESIGN_IMG_ID)}\n          endpoint=\"/masters/design-book/image\"\n          entityType=\"DESIGN\"\n          imageType=\"D\"\n          entityKey={String(activeLine.saved.DESIGN_IMG_ID)}\n          label={`Design photo \u2014 ${activeLine.values.designNo}`}\n          disabled={busy}\n        />",
+      "sha256": "6c961fb30edf4ec0179194a24f38607dd11b95e48a3e4852fd497a39a7ec736f"
+    },
+    {
+      "path": "apps/web/app/(app)/reports/tag-stock/page.tsx",
+      "line": 199,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={rep?.rows[imageRow]?.tagNo ?? ''}\n        instance={0}\n        label=\"Tag image\"\n        testId=\"tag-stock-image\"\n      />",
+      "sha256": "377122d25cc963b1b6de781f579822cbad20bd6a28273181fe9566e3efe89565"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/consi-purchase/page.tsx",
+      "line": 1146,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={lines[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"purchase-image\"\n      />",
+      "sha256": "2795303567ee0ae357a9bf486f12ca12fe0a0d157266c8866425516a58349c1f"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/dhrn-issue/page.tsx",
+      "line": 412,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"AC\"\n        entityKey={borrowerAc}\n        instance={0}\n        label=\"Borrower photo\"\n        testId=\"dhrn-issue-image\"\n      />",
+      "sha256": "40804282c266a2d826b16c4abda18003a7ff3287d668afd95759ff5fd34114c6"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/item-lot/page.tsx",
+      "line": 441,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"DESIGN\"\n        entityKey={rows[imageRow]?.designNo ?? ''}\n        instance={0}\n        label=\"Design image\"\n        testId=\"item-lot-image\"\n      />",
+      "sha256": "17c3a51e35eabbf7da360a93a7161c0479010b64636071c68969899c5cee2d91"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/loan-received/page.tsx",
+      "line": 412,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"AC\"\n        entityKey={borrowerAc}\n        instance={0}\n        label=\"Lender photo\"\n        testId=\"loan-received-image\"\n      />",
+      "sha256": "0b415334ea28588cc670686152a4919b0e12429faba659471ad8a639d8a90bf1"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/membership/page.tsx",
+      "line": 305,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"MEMB\"\n        entityKey={enroll.membCode}\n        instance={0}\n        label=\"Member photo\"\n        testId=\"membership-image\"\n      />",
+      "sha256": "edf4bbdb232a9322e890a27226e748e7177bd167a037ddcc4050f2312f878021"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/mfg-issue/page.tsx",
+      "line": 436,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"ITEM\"\n        entityKey={lines[imageRow]?.itCode ?? ''}\n        instance={0}\n        label=\"Item image\"\n        testId=\"mfg-issue-image\"\n      />",
+      "sha256": "76dd735fb7e83aa539f604a0a4157aac29b9e0a474f5c9327d4b53edccbc814f"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/mfg-order-issue/page.tsx",
+      "line": 499,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"DESIGN\"\n        entityKey={rows[imageRow]?.designNo ?? ''}\n        instance={0}\n        label=\"Design image\"\n        testId=\"mfg-order-issue-image\"\n      />",
+      "sha256": "156a18b5bcd7252a96ccc57e6bb1a6f1f230e391de31450578ff70c6dde01c1d"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/mfg-receive/page.tsx",
+      "line": 612,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"ITEM\"\n        entityKey={lines[imageRow]?.itCode ?? ''}\n        instance={0}\n        label=\"Item image\"\n        testId=\"mfg-receive-image\"\n      />",
+      "sha256": "b513325cdafecc7edad3cfed108e604e710ad4fb6568370b2994e2c254877ff0"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/order-cancel/page.tsx",
+      "line": 241,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"AC\"\n        entityKey={orders[imageRow]?.acCode ?? ''}\n        instance={0}\n        label=\"Party photo\"\n        testId=\"order-cancel-image\"\n      />",
+      "sha256": "b7c14e51fbb8a6968c1aa4ca4beacad87c96750b2a506f05b182aa3a5ed04bb2"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/physical-stock/page.tsx",
+      "line": 541,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={rows[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"physical-stock-image\"\n      />",
+      "sha256": "3e3130f25bea52a5b8f7d3928a214e687aa7d7d49f0c8ea6d424a945c3d79a9f"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/purchase/page.tsx",
+      "line": 954,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={lines[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"purchase-image\"\n      />",
+      "sha256": "d924cb30f801ce7c0aaf461d540a227c80bc63b53916fb0b26bae9b74008df09"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/purchase-quotation/page.tsx",
+      "line": 954,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={lines[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"purchase-image\"\n      />",
+      "sha256": "ffcb89933f94fefc9b96297bbe304405bd1779dea23c9142580e0540c08a1f5e"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/purchase-return/page.tsx",
+      "line": 493,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={lines[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"purchase-return-image\"\n      />",
+      "sha256": "1e951d6786519ca4ad44eb86da9ee37e35a834ed625b0caffbacba82236dc374"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/repair-karigar-issue/page.tsx",
+      "line": 558,
+      "component": "RepairImagePanel",
+      "call": "<RepairImagePanel\n        imageBook={imageSource?.coBook ?? ''}\n        imageYear={imageSource?.coYear}\n        vchNo={imageSource?.voucherNo ?? ''}\n        srNo={imageSource?.srNo ?? 0}\n        testId=\"repair-issue-image\"\n      />",
+      "sha256": "0cf5e43da96db2823f300aa91d81d8cf3cbdb23b3928ca6dc11cfb9e70d23758"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/repair-receipt/page.tsx",
+      "line": 648,
+      "component": "RepairImagePanel",
+      "call": "<RepairImagePanel\n        imageBook={coBook}\n        vchNo={loadedVoucherNo || result?.voucherNo || ''}\n        srNo={Math.min(activeImageRow, Math.max(lines.length - 1, 0)) + 1}\n        testId=\"repair-image\"\n      />",
+      "sha256": "b5ac5dcb02f39e5c2b2df5d060960ab618ad2ae696078273aff255b1d0fb3532"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/stone-dm-cf/page.tsx",
+      "line": 461,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={currentImageLine?.tagNo ?? ''}\n        instance={currentImageLine?.vchSrno ?? 0}\n        label=\"Tag image\"\n        testId=\"stone-dm-cf-image\"\n        disabled={!currentImageLine?.tagNo}\n      />",
+      "sha256": "1a09338afb78cf28a4b71cc9f83ebfe68bbb8f0fda505ff5a1436203e17c48c0"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/tag-opening/page.tsx",
+      "line": 669,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n            entityType=\"TAG\"\n            entityKey={lines[imageRow]?.tagNo ?? ''}\n            instance={lines[imageRow]?.vchSrno ?? imageRow + 1}\n            label=\"Tag image\"\n            testId=\"tag-opening-image\"\n          />",
+      "sha256": "1ee463cd987619922b6f4c973917eff297aecc937a5018ba541813be28875c3c"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/tour/page.tsx",
+      "line": 524,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={lines[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"tour-image\"\n      />",
+      "sha256": "2709acb3f32ce62871cf4726c00d9a62d417a399820480f1cf56c138e30bdcf3"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/tour-return/page.tsx",
+      "line": 499,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={rows[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"tour-return-image\"\n      />",
+      "sha256": "988994ebb3400065be6d3f39b185dc21ba215ff3e587f4838a46bbf67d4ef9e9"
+    },
+    {
+      "path": "apps/web/components/KarigarForm.tsx",
+      "line": 737,
+      "component": "EntityImagePanel",
+      "call": "<EntityImagePanel\n        entityType=\"TAG\"\n        entityKey={lines[imageRow]?.tagNo ?? ''}\n        instance={imageRow + 1}\n        label=\"Tag image\"\n        testId=\"karigar-image\"\n      />",
+      "sha256": "2cb16a9e29dd2b5494bc7f8371addc670ac0f2c7e6c851c7e5975f64263ee395"
+    }
+  ],
+  "dynamicExpansion": {
+    "masterRoutes": {
+      "accounts": "AC / AC_CODE",
+      "customers": "AC / AC_CODE",
+      "schemes": "SCHM / SCHM_CODE",
+      "products": "SCHM / PR_CODE",
+      "designs": "DESIGN / DESIGN_NO",
+      "styles": "DESIGN / STYLE_CODE"
+    },
+    "KarigarForm": [
+      "karigar-issue",
+      "karigar-receive",
+      "jobwork-issue",
+      "jobwork-receive",
+      "old-item-sales"
+    ]
+  },
+  "boundedOwners": [
+    "apps/web/components/EntityImagePanel.tsx",
+    "apps/web/components/RepairImagePanel.tsx",
+    "new shared generic image session helper and tests",
+    "apps/web/components/CameraCapture.tsx only if coordinated shared pending-request guard is included"
+  ],
+  "existingGaps": [
+    "Generic mutation has no observed revision precondition",
+    "Generic raw404 absent response cannot initialize an absent-write token",
+    "Generic state and mutation callbacks lack full scope/identity generation guards",
+    "Repair load has an effect active guard but upload/delete and delayed chooser/capture lack equivalent guards",
+    "Generic Camera invokes capture without starting a stream or rendering a video",
+    "Camera start can complete after stop/unmount and attach the late stream"
+  ],
+  "preservedCallerMappingsPendingSeparateParityProof": [
+    "Several generic TAG callers derive instance from array index+1; tag-opening and stone-dm-cf carry saved voucher serial where available",
+    "Dynamic product uses SCHM and style uses DESIGN; this inventory records existing mappings without certifying desktop identity equivalence",
+    "Only Design Book uses its own masters/design-book/image endpoint; generic callers retain their current tag-image authority until separately mapped",
+    "Repair karigar issue follows source imageBook/imageYear/voucher/row identity"
+  ],
+  "notInCurrentGenericScope": [
+    "OrderImagePanel has its own saved-parent CAS contract from round4",
+    "SalesOrderDesignPreview is read-only and resolves the selected saved Design source"
+  ]
+}

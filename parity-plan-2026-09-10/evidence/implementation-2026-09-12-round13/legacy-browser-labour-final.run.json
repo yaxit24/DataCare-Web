@@ -1,0 +1,19 @@
+{
+  "command": [
+    "pnpm",
+    "test:browser"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:57:07.284515+00:00",
+  "finishedAtUtc": "2026-09-11T23:57:16.618475+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/legacy-browser-labour-final.txt",
+  "logSha256": "ffba51d0f9678cd63378c0d3f780157e7a06c31ca46f8098682b8be403b2b9b6",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/legacy-browser-labour-final.inputs.json",
+  "inputManifestSha256": "151278e4bdc3992220ec6f6a05831aa1d2e809f797d581e0afd4c029502becc3",
+  "inputCount": 1835,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

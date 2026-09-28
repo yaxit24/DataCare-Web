@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-06-28T00:41:30",
+  "mode": "dry-run",
+  "searchRoots": [
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted",
+    "/Users/yakshitsavaliya/Desktop/next"
+  ],
+  "summary": {
+    "copied": 0,
+    "conflicts": 0,
+    "stillMissing": 20
+  },
+  "copied": [],
+  "conflicts": [],
+  "stillMissing": [
+    {
+      "report": "aprbillimg.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "balzoom.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "bankadj.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "billwiseos.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "empdaysumm.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "empsumm.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "franchisebill.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "jdterskt.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "jdtvch.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "krisureport.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "krrecreport.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "loctamtvch.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "mainacsumm.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "mltingisu.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "purcquot.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "reminderschm.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "remindervch.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "salesrtna4print.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "vpparcelbill.rpt",
+      "reason": "not found in any Raw_Source root"
+    },
+    {
+      "report": "whquotation.rpt",
+      "reason": "not found in any Raw_Source root"
+    }
+  ]
+}

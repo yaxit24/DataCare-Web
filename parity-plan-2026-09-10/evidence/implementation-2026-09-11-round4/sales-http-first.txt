@@ -1,0 +1,241 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/salesOrderLifecycle.routes.db.test.ts (11 tests | 7 failed) 1599ms
+   × ordinary Sales Order configured HTTP lifecycle > requires owning Sales update/delete rights and preserves data after denied requests 33ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+   × ordinary Sales Order configured HTTP lifecycle > refuses missing or malformed expected versions before editing or deleting 10ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+   × ordinary Sales Order configured HTTP lifecycle > rejects stale versions without changing any order, ledger or numbering row 9ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+   × ordinary Sales Order configured HTTP lifecycle > rejects missing, malformed and impossible dates without allocating or posting anything 8ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+   × ordinary Sales Order configured HTTP lifecycle > separates the unavailable desktop prior-year exception from invalid after-close dates 8ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+   × ordinary Sales Order configured HTTP lifecycle > rejects a different book family and an unknown book instead of falling back to SOR 7ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+   × ordinary Sales Order configured HTTP lifecycle > does not let caller JSON bypass the Design Book source-selection contract 6ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+   ✓ ordinary Sales Order configured HTTP lifecycle > updates through PUT under Sales edit rights and rejects the previous version afterward 320ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > requires owning Sales update/delete rights and preserves data after denied requests
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot test/salesOrderLifecycle.routes.db.test.ts:107:27
+    105|       'DELETE_DATA',
+    106|     ]) {
+    107|       const rows: any[] = await owner.$queryRawUnsafe(
+       |                           ^
+    108|         `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY row_id),'[]'::…
+    109|         tenantId,
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:228:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > refuses missing or malformed expected versions before editing or deleting
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot test/salesOrderLifecycle.routes.db.test.ts:107:27
+    105|       'DELETE_DATA',
+    106|     ]) {
+    107|       const rows: any[] = await owner.$queryRawUnsafe(
+       |                           ^
+    108|         `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY row_id),'[]'::…
+    109|         tenantId,
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:243:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > rejects stale versions without changing any order, ledger or numbering row
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot test/salesOrderLifecycle.routes.db.test.ts:107:27
+    105|       'DELETE_DATA',
+    106|     ]) {
+    107|       const rows: any[] = await owner.$queryRawUnsafe(
+       |                           ^
+    108|         `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY row_id),'[]'::…
+    109|         tenantId,
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:259:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > rejects missing, malformed and impossible dates without allocating or posting anything
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot test/salesOrderLifecycle.routes.db.test.ts:107:27
+    105|       'DELETE_DATA',
+    106|     ]) {
+    107|       const rows: any[] = await owner.$queryRawUnsafe(
+       |                           ^
+    108|         `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY row_id),'[]'::…
+    109|         tenantId,
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:275:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > separates the unavailable desktop prior-year exception from invalid after-close dates
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot test/salesOrderLifecycle.routes.db.test.ts:107:27
+    105|       'DELETE_DATA',
+    106|     ]) {
+    107|       const rows: any[] = await owner.$queryRawUnsafe(
+       |                           ^
+    108|         `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY row_id),'[]'::…
+    109|         tenantId,
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:284:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > rejects a different book family and an unknown book instead of falling back to SOR
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot test/salesOrderLifecycle.routes.db.test.ts:107:27
+    105|       'DELETE_DATA',
+    106|     ]) {
+    107|       const rows: any[] = await owner.$queryRawUnsafe(
+       |                           ^
+    108|         `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY row_id),'[]'::…
+    109|         tenantId,
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:294:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  test/salesOrderLifecycle.routes.db.test.ts > ordinary Sales Order configured HTTP lifecycle > does not let caller JSON bypass the Design Book source-selection contract
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "row_id" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot test/salesOrderLifecycle.routes.db.test.ts:107:27
+    105|       'DELETE_DATA',
+    106|     ]) {
+    107|       const rows: any[] = await owner.$queryRawUnsafe(
+       |                           ^
+    108|         `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY row_id),'[]'::…
+    109|         tenantId,
+ ❯ test/salesOrderLifecycle.routes.db.test.ts:306:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 4 passed (11)
+   Start at  05:04:21
+   Duration  4.24s (transform 1.39s, setup 0ms, collect 2.17s, tests 1.60s, environment 0ms, prepare 54ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/salesOrderLifecycle.routes.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1

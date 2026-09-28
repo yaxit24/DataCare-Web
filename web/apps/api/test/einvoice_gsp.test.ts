@@ -108,9 +108,11 @@ describe('Chartered Info GSP IRN transport', () => {
 });
 
 describe('GSP status + connection test (no secrets leaked)', () => {
-  it('gspStatus reports fake when unconfigured, live+masked when configured', () => {
+  it('gspStatus reports the blocked/fake state when unconfigured, live+masked when configured', () => {
     const off = gspStatus({});
-    expect(off.mode).toBe('fake');
+    // Renamed from 'fake': the mode string now says where a fake is legitimate. With NODE_ENV=production it
+    // reports 'blocked-production-no-credentials' instead — see einvoiceProductionGuard.test.ts.
+    expect(off.mode).toBe('fake-development');
     expect(off.configured).toBe(false);
     const on = gspStatus({
       GSP_ASPID: 'A',
@@ -118,6 +120,9 @@ describe('GSP status + connection test (no secrets leaked)', () => {
       GSP_GSTIN: '24AAAAA0000A1Z5',
       GSP_USER: 'U',
       GSP_EINV_PWD: 'E',
+      // Must now be declared explicitly. Omitting it reports 'blocked-sandbox-undeclared', because
+      // defaulting to sandbox silently produced IRNs that are not legally valid.
+      GSP_SANDBOX: '1',
     });
     expect(on.configured).toBe(true);
     expect(on.mode).toBe('chartered-info-sandbox');

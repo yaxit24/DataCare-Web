@@ -1,0 +1,21 @@
+{
+ "form": "UT_REPORT",
+ "tables": [
+  "CO_MAST"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "CO_MAST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 10,
+ "timers": 1,
+ "serialPort": false,
+ "handlers": 1,
+ "calcSample": [],
+ "loc": 682
+}

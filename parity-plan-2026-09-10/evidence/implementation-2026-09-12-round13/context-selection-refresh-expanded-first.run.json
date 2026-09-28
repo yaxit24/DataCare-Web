@@ -1,0 +1,29 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/sessionContextSelection.test.ts",
+    "test/sessionContextSelection.db.test.ts",
+    "test/sessionContextRefresh.db.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T20:18:38.331887+00:00",
+  "finishedAtUtc": "2026-09-11T20:18:52.191317+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-selection-refresh-expanded-first.txt",
+  "logSha256": "d4b65e819e4d072245a30e35cce9394285d0d15e2e644bb36e15b80f8bfeb9d7",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-selection-refresh-expanded-first.inputs.json",
+  "inputManifestSha256": "cbc35b4c35364ff993080eafce246c4f39a463e00aac5dca721339f7f27da5f1",
+  "inputCount": 1768,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

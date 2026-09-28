@@ -1,0 +1,241 @@
+--- a/web/apps/api/test/sessionContextHttp.db.test.ts
++++ b/web/apps/api/test/sessionContextHttp.db.test.ts
+@@ -30,6 +30,30 @@
+ };
+ type Jar = Record<string, string>;
+ type Raw = Record<string, string | null>;
++type AuditExpectation = {
++  tenantId: string;
++  loginName: string;
++  coCode: string;
++  action: 'POST';
++  path: '/context/select';
++  status: number;
++};
++type AuditObservation = AuditExpectation & {
++  id: string;
++  ts: string;
++  raw: string;
++  revision: string;
++  locator: string;
++};
++const selectionAudit = (context: Context, status: number): AuditExpectation => ({
++  tenantId,
++  loginName: 'operator',
++  // The existing audit hook records the admitted bearer company, not the newly selected company.
++  coCode: context.coCode,
++  action: 'POST',
++  path: '/context/select',
++  status,
++});
+ const setCookies = (response: LightMyRequestResponse): string[] => {
+   const value = response.headers['set-cookie'];
+   return value === undefined ? [] : Array.isArray(value) ? value : [String(value)];
+@@ -73,6 +97,8 @@
+   let app: FastifyInstance;
+   let hashed: string;
+   let requestAddress = 0;
++  let requestNumber = 0;
++  const responseCompleted = new Map<string, () => void>();
+   let ledgerBefore: unknown;
+   const tables = [
+     'auth_session',
+@@ -104,7 +130,8 @@
+   };
+   const exactSnapshot = async () => {
+     const result: Record<string, unknown> = {};
+-    for (const table of ['auth_session', 'CO_SET', 'LOGIN_MAST', 'audit_log'])
++    // Audit has a separate exact append assertion for every request, including refusals.
++    for (const table of ['auth_session', 'CO_SET', 'LOGIN_MAST'])
+       result[table] = await owner.$queryRawUnsafe(
+         `SELECT to_jsonb(t)::text raw,xmin::text revision,ctid::text locator FROM "${table}" t
+        WHERE tenant_id=ANY($1::text[]) ORDER BY to_jsonb(t)::text`,
+@@ -122,20 +149,77 @@
+     expect(rows).toHaveLength(1);
+     return rows[0]!.raw;
+   };
+-  const request = (
++  const auditSnapshot = () =>
++    owner.$queryRawUnsafe<AuditObservation[]>(
++      `SELECT id::text id,ts::text ts,tenant_id AS "tenantId",login_name AS "loginName",
++         co_code AS "coCode",action,path,status,to_jsonb(t)::text raw,
++         xmin::text revision,ctid::text locator
++       FROM audit_log t WHERE tenant_id=ANY($1::text[]) ORDER BY t.id`,
++      tenants,
++    );
++  const assertAuditAppend = async (
++    before: AuditObservation[],
++    expected: readonly AuditExpectation[],
++  ) => {
++    const after = await auditSnapshot();
++    expect(after.slice(0, before.length), 'existing audit rows and physical identities').toEqual(
++      before,
++    );
++    const added = after.slice(before.length);
++    expect(added).toHaveLength(expected.length);
++    for (const [index, entry] of added.entries()) {
++      const { id, ts, raw, revision, locator, ...facts } = entry;
++      expect(facts).toEqual(expected[index]);
++      expect(id).toMatch(/^[1-9][0-9]*$/);
++      expect(before.some((old) => old.id === id)).toBe(false);
++      expect(ts).toMatch(/^\d{4}-\d{2}-\d{2} /);
++      expect(revision).toMatch(/^[0-9]+$/);
++      expect(locator).toMatch(/^\([0-9]+,[0-9]+\)$/);
++      expect(typeof raw).toBe('string');
++    }
++  };
++  const request = async (
+     method: 'GET' | 'POST',
+     url: string,
+     jar: Jar = {},
+     payload?: unknown,
+     headers: Record<string, string> = {},
+-  ) =>
+-    app.inject({
+-      method,
+-      url,
+-      remoteAddress: `127.0.0.${requestAddress}`,
+-      headers: { cookie: cookieHeader(jar), ...headers },
+-      ...(payload === undefined ? {} : { payload: payload as InjectOptions['payload'] }),
++    expectedAudit: readonly AuditExpectation[] = [],
++  ) => {
++    const beforeAudit = await auditSnapshot();
++    const requestId = String(++requestNumber);
++    let complete!: () => void;
++    const completed = new Promise<void>((resolve) => {
++      complete = resolve;
+     });
++    responseCompleted.set(requestId, complete);
++    let timer: ReturnType<typeof setTimeout> | undefined;
++    try {
++      const response = await app.inject({
++        method,
++        url,
++        remoteAddress: `127.0.0.${requestAddress}`,
++        headers: { cookie: cookieHeader(jar), ...headers, 'x-context-test-request': requestId },
++        ...(payload === undefined ? {} : { payload: payload as InjectOptions['payload'] }),
++      });
++      // inject can resolve before the async onResponse audit insert commits. This final
++      // test-only observer awaits that real hook; it does not replace any audit or DB work.
++      await Promise.race([
++        completed,
++        new Promise<never>((_, reject) => {
++          timer = setTimeout(
++            () => reject(new Error(`onResponse did not finish for ${method} ${url}`)),
++            5000,
++          );
++        }),
++      ]);
++      await assertAuditAppend(beforeAudit, expectedAudit);
++      return response;
++    } finally {
++      if (timer !== undefined) clearTimeout(timer);
++      responseCompleted.delete(requestId);
++    }
++  };
+   const login = async (payload: Record<string, unknown> = originalScope, tenant = tenantId) => {
+     const response = await request(
+       'POST',
+@@ -152,7 +236,9 @@
+     return { response, body, jar, context: body.context };
+   };
+   const select = async (jar: Jar, context: Context, payload = strictRequest(context)) => {
+-    const response = await request('POST', '/context/select', jar, payload, page(context));
++    const response = await request('POST', '/context/select', jar, payload, page(context), [
++      selectionAudit(context, 200),
++    ]);
+     expect(response.statusCode, response.body).toBe(200);
+     const body = response.json<{ context: Context; ledgerContext: unknown; replayed: boolean }>();
+     return { response, body, jar: jarFrom(response, jar), context: body.context, payload };
+@@ -183,6 +269,11 @@
+     runtime = new PrismaClient();
+     hashed = await hashPassword(password);
+     app = await buildApp({ prisma: runtime, secret, secureCookies: false });
++    // Registered after the application's audit hook and before the first request.
++    app.addHook('onResponse', async (req) => {
++      const id = req.headers['x-context-test-request'];
++      if (typeof id === 'string') responseCompleted.get(id)?.();
++    });
+   });
+   beforeEach(async () => {
+     requestAddress++;
+@@ -336,7 +427,7 @@
+     expect(me.json()).toMatchObject({ context: selected.context, rights: access.rights });
+   });
+ 
+-  it('exact receipt recovery requires the current bearer plus the original body and performs zero additional writes', async () => {
++  it('exact receipt recovery requires the current bearer plus the original body, preserves state, and appends only the expected audit row', async () => {
+     const signed = await login();
+     const selected = await select(signed.jar, signed.context);
+     const old = await request('POST', '/context/select', signed.jar, selected.payload);
+@@ -352,6 +443,7 @@
+       jar,
+       selected.payload,
+       page(selected.context),
++      [selectionAudit(selected.context, 200)],
+     );
+     expect(repeated.statusCode, repeated.body).toBe(200);
+     expect(repeated.json()).toMatchObject({
+@@ -366,6 +458,7 @@
+       jar,
+       { ...selected.payload, coYear: '2024-2025' },
+       page(selected.context),
++      [selectionAudit(selected.context, 409)],
+     );
+     expect(changed.statusCode, changed.body).toBe(409);
+     expect(changed.json()).toEqual({ error: 'context-operation-conflict' });
+@@ -409,6 +502,7 @@
+       second.jar,
+       strictRequest(first.context, originalScope),
+       page(second.context),
++      [selectionAudit(second.context, 409)],
+     );
+     expect(stale.statusCode, stale.body).toBe(409);
+     expect(stale.json()).toEqual({ error: 'context-stale' });
+@@ -503,6 +597,7 @@
+         signed.jar,
+         payload,
+         page(signed.context),
++        [selectionAudit(signed.context, 400)],
+       );
+       expect(response.statusCode, response.body).toBe(400);
+       expect(response.json()).toEqual({ error: 'invalid-context-selection-request' });
+@@ -528,6 +623,7 @@
+       signed.jar,
+       strictRequest(signed.context),
+       page(signed.context),
++      [selectionAudit(signed.context, 403)],
+     );
+     expect(response.statusCode, response.body).toBe(403);
+     expect(response.json()).toEqual({ error: 'target-password-reset-required' });
+@@ -551,6 +647,7 @@
+       signed.jar,
+       strictRequest(signed.context),
+       page(signed.context),
++      [selectionAudit(signed.context, 409)],
+     );
+     expect(response.statusCode, response.body).toBe(409);
+     expect(response.json()).toEqual({ error: 'last-day-lock-invalid' });
+@@ -604,6 +701,7 @@
+       signed.jar,
+       strictRequest(signed.context),
+       { ...page(signed.context), 'x-tenant-id': foreignTenant },
++      [selectionAudit(signed.context, 200)],
+     );
+     expect(response.statusCode, response.body).toBe(200);
+     expect((await verifyAccessToken(jarFrom(response, signed.jar).access!, secret)).tenantId).toBe(
+--- a/web/apps/api/test/sessionContextAccess.db.test.ts
++++ b/web/apps/api/test/sessionContextAccess.db.test.ts
+@@ -163,7 +163,11 @@
+     async (kind) => {
+       if (kind === 'expired')
+         await owner.$executeRawUnsafe(
+-          `UPDATE "auth_session" SET "expires_at"=clock_timestamp()-interval '1 second' WHERE "tenant_id"=$1 AND "session_id"=$2`,
++          // Expired authority must still satisfy the retained expires_at > created_at CHECK.
++          `UPDATE "auth_session" SET "created_at"=clock_timestamp()-interval '2 hours',
++             "last_used_at"=clock_timestamp()-interval '1 hour',
++             "expires_at"=clock_timestamp()-interval '1 second'
++           WHERE "tenant_id"=$1 AND "session_id"=$2`,
+           tenant,
+           sid,
+         );

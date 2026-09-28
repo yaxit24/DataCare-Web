@@ -1,5 +1,12 @@
 import { withTenant } from '@datacare/db';
 import {
+  ColumnSettingsError,
+  createColumnSetting,
+  updateColumnSetting,
+  deleteColumnSetting,
+  listColumnSettings,
+} from './columnSettings.js';
+import {
   accountCodeHasConfiguredLength,
   resolveSettingsBehaviorTx,
 } from '../shared/settingsBehavior.js';
@@ -338,6 +345,7 @@ export async function createMaster(
   config: MasterConfig,
   source: Record<string, unknown>,
 ): Promise<{ created: true }> {
+  if (config.table === 'COL_MAST') return createColumnSetting(prisma, scope, source);
   const data = bindMasterScope(config, scope, source);
   const missing = findMissingRequired(config, data);
   if (missing.length) throw new ValidationError(missing, desktopMessageFor(config, missing));
@@ -370,6 +378,7 @@ export async function updateMaster(
   config: MasterConfig,
   source: Record<string, unknown>,
 ): Promise<{ updated: true }> {
+  if (config.table === 'COL_MAST') return updateColumnSetting(prisma, scope, source);
   const data = bindMasterScope(config, scope, source);
   // The key columns must be present to identify the row.
   const missingKey = config.keyColumns.filter((k) => {
@@ -408,6 +417,7 @@ export async function deleteMaster(
   config: MasterConfig,
   source: Record<string, unknown>,
 ): Promise<{ deleted: true }> {
+  if (config.table === 'COL_MAST') return deleteColumnSetting(prisma, scope, source);
   if (config.deleteSelectionMessage) {
     // Desktop masters check their own key textbox before deleting (MS_PRODUCT.cs etc.).
     const unselected = config.keyColumns.filter(
@@ -440,6 +450,7 @@ export async function listMaster(
   config: MasterConfig,
   limit = 100,
 ): Promise<Record<string, unknown>[]> {
+  if (config.table === 'COL_MAST') return listColumnSettings(prisma, scope, { limit });
   const n = Math.min(Number(limit) || 100, 500);
   const where = masterScopeWhere(config, scope);
   const rows: Record<string, unknown>[] = await withTenant(prisma, scope.tenantId, (tx: any) =>
@@ -600,15 +611,17 @@ export async function importMaster(
     } catch (e) {
       failed++;
       const msg =
-        e instanceof ValidationError
-          ? 'missing: ' + e.missing.join(',')
-          : e instanceof DuplicateKeyError
-            ? 'duplicate key'
-            : e instanceof ReferencedError
-              ? 'referenced'
-              : e instanceof DataError
-                ? e.detail
-                : 'error';
+        e instanceof ColumnSettingsError
+          ? e.message
+          : e instanceof ValidationError
+            ? 'missing: ' + e.missing.join(',')
+            : e instanceof DuplicateKeyError
+              ? 'duplicate key'
+              : e instanceof ReferencedError
+                ? 'referenced'
+                : e instanceof DataError
+                  ? e.detail
+                  : 'error';
       if (errors.length < 20) errors.push({ row: i + 1, error: msg });
     }
   }

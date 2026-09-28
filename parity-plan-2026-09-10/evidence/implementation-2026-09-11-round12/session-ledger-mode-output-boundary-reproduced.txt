@@ -1,0 +1,3 @@
+input { nodes: 75809, text: 8358528 } remaining adjustment 30080
+result applied { nodes: 75813, text: 8358551 } []
+next applied true []

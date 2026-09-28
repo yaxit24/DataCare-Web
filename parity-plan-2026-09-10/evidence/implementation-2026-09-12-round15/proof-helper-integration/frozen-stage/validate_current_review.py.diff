@@ -1,0 +1,44 @@
+--- validate_current_review.py
++++ validate_current_review.py
+@@ -8,17 +8,18 @@
+ 
+ sys.dont_write_bytecode = True
+ from urllib.parse import unquote
+-from checkpoint_recipe_round14 import validate_latest_checkpoint
++from checkpoint_recipe_round15 import validate_latest_checkpoint
+ 
+ OUT = Path(__file__).resolve().parent
+ ROOT = OUT.parent
+ EVIDENCE = OUT / 'evidence/review-2026-09-11'
+-CURRENT_IMPLEMENTATION_EVIDENCE = OUT / 'evidence/implementation-2026-09-12-round14'
+-PRIOR_CHECKPOINT = '39-implementation-checkpoint-round13.json'
+-PRIOR_CHECKPOINT_SHA256 = 'db25b3e107d6e67629f2d445cb2ee191ff9794220cb19dac8cfc7ac9edfababf'
+-LATEST_CHECKPOINT = '41-implementation-checkpoint-round14.json'
++CURRENT_IMPLEMENTATION_EVIDENCE = OUT / 'evidence/implementation-2026-09-12-round15'
++PRIOR_CHECKPOINT = '41-implementation-checkpoint-round14.json'
++PRIOR_CHECKPOINT_SHA256 = '643bf89ad0ac50729c7feff06c28dfa6bf8cca7d6318e498397cd5c57bf9ebea'
++LATEST_CHECKPOINT = '43-implementation-checkpoint-round15.json'
+ HISTORICAL_CHAIN = [
+     (PRIOR_CHECKPOINT, PRIOR_CHECKPOINT_SHA256, 'priorCheckpointSha256'),
++    ('39-implementation-checkpoint-round13.json', 'db25b3e107d6e67629f2d445cb2ee191ff9794220cb19dac8cfc7ac9edfababf', 'priorCheckpointSha256'),
+     ('37-implementation-checkpoint-round12.json', '6ed9623310507f1a563bc98c4f9f130401e058543797d15745b7812b71a64098', 'priorCheckpointSha256'),
+     ('35-implementation-checkpoint-round11.json', 'fd3ab768e85c7a0936ae06c72580e7d170b6adf32b74a105df880e43f806a489', 'priorCheckpointSha256'),
+     ('33-implementation-checkpoint-round10.json', '7a61c80e3aa999b809ea792489b51fee9eee01555ff5898bdae328772e4749f7', 'priorCheckpointSha256'),
+@@ -125,7 +126,7 @@
+         prior = json.loads(prior_bytes)
+     except (ValueError, UnicodeDecodeError):
+         return errors + ['Prior implementation checkpoint is invalid JSON']
+-    # The strict recipe belongs only to actual Round14, not historical predecessors.
++    # The strict recipe belongs only to actual Round15, not historical predecessors.
+     if validate_required_recipe:
+         errors.extend(validate_latest_checkpoint(ROOT, latest))
+     # Validate every immutable predecessor's bytes, metadata, link and source inclusion.
+@@ -207,7 +208,7 @@
+             row['sha256'] = file_digest(row['path'])
+     for run in synthetic['verification']:
+         run['logSha256'] = file_digest(run['log'])
+-    # This synthetic39 tests only the historical chain; recipe-controls-final tests R14.
++    # This synthetic43 tests only the historical chain; recipe-controls-recorded tests R15.
+     errors = validate_checkpoint_chain(synthetic, baseline, prior_bytes, validate_required_recipe=False)
+     controls = checkpoint_negative_controls(synthetic, baseline, prior_bytes, validate_required_recipe=False)
+     errors.extend('Negative control failed: ' + row['name'] for row in controls if not row['rejected'])

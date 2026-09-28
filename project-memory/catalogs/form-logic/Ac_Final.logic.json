@@ -1,0 +1,76 @@
+{
+ "form": "Ac_Final",
+ "tables": [
+  "AC_DATA",
+  "ITEM_MAST",
+  "LEDR_AC_DATA"
+ ],
+ "writes": {
+  "INSERT": {
+   "AC_DATA": [
+    "AC_CODE",
+    "BILL_DATE",
+    "BILL_NO",
+    "BOOK_NAME",
+    "CHQ_NO",
+    "CLR_DATE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "DATA_TRFR",
+    "DATA_TYPE",
+    "DR_AMT",
+    "ENTRY_TIME",
+    "FINE_RATE",
+    "FINE_WT",
+    "HD_VCH_NO",
+    "IT_DESC",
+    "IT_TYPE",
+    "LC_CODE",
+    "LD_CODE",
+    "LEDR_KEY",
+    "MAIN_USER",
+    "PARTY_AC_CODE",
+    "SIGN",
+    "VCH_DATE",
+    "VCH_NO",
+    "VCH_TYPE"
+   ],
+   "LEDR_AC_DATA": [
+    "AC_CODE",
+    "AC_GR",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "CR_FINE_WT",
+    "CR_SL_FINE",
+    "DATA_TYPE",
+    "DR_AMT",
+    "DR_FINE_WT",
+    "DR_SL_FINE",
+    "LC_CODE",
+    "MAIN_USER",
+    "VCH_DT"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "AC_DATA",
+   "LEDR_AC_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "ITEM_MAST",
+  "LEDR_AC_DATA"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 219
+}

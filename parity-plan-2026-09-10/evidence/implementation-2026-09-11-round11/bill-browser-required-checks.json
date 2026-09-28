@@ -1,0 +1,22 @@
+{
+  "version": "round11-bill-browser-required-checks-v1",
+  "status": "frozen-before-first-browser-run",
+  "independentVectorSha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410",
+  "checks": [
+    "Trusted saved header and both full parent identities preserve raw NULL, blank, large decimal and microsecond values.",
+    "Loaded, opened and initial preview matrices match the full source matrix; all14 incoming totals and exact saved amount cells match independent goldens.",
+    "Bill preview exclusively owns the editor, exposes all12 stable fields, and locks metadata, configured book, load and save.",
+    "Ordered Other1 then Other0 preserves every phase and produces manual7/open167, tax16.10/177 then tax16.00/176 with both incoming parents.",
+    "Repeated, invalid, blank, Enter and Tab interactions preserve original event text, the accepted journal and expected bill values.",
+    "Closing remains unavailable and numeric save absent; initial interactions preserve all27 raw and physical business-table snapshots.",
+    "Close restores focus and metadata; selecting SR42/OLD58 previews its own row55 with full incoming165 and payment182.",
+    "Row-only preview and bill preview cannot own the same saved editor concurrently.",
+    "A real same-value tax-setting update causes409, retains the last accepted bill/draft, and requires reload plus explicit fresh replay.",
+    "A held real saved read cannot restore a closed bill preview through configured-book A-to-B-to-A; explicit reload starts an empty journal.",
+    "The duplicate voucher in R12 retains its own document and opaque row identities with the same correct numeric bill.",
+    "An unsupported tagged sibling prevents a partial aggregate even while the selected first parent is untagged.",
+    "A valid empty saved header is readable with a clear empty bill-preview message and no undefined row editor.",
+    "A fresh View-only user can run the same real bill preview while metadata and numeric saving remain unavailable.",
+    "All real requests retain strict event-only bodies and explicit scope; remaining operations preserve27 business tables and emit no browser exceptions."
+  ]
+}

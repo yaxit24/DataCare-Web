@@ -1,0 +1,27 @@
+--- frozen/verify_retain_browsers.py
++++ bound/verify_retain_browsers.py
+@@ -145,18 +145,18 @@
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--root', type=Path, default=Path('/Users/yakshitsavaliya/Desktop/imodule-extracted'))
+-    parser.add_argument('--baseline-label', default='browser-qualified')
+-    parser.add_argument('--context-label', default='browser-context-qualified')
+-    parser.add_argument('--labour-label', default='browser-labour-qualified')
++    parser.add_argument('--baseline-label', default='browser-bound')
++    parser.add_argument('--context-label', default='browser-context-bound')
++    parser.add_argument('--labour-label', default='browser-labour-bound')
+     parser.add_argument('--retain', action='store_true')
+     args = parser.parse_args()
+     root, contract = args.root.resolve(), load(STAGE / 'contract.json')
+     for ref in contract['sources']:
+         require(digest(path_at(root, ref['path'])) == ref['sha256'], 'Frozen contract source changed: ' + ref['path'])
+     specifications = [
+-        ('baseline', args.baseline_label, 'parity-real-stack-round14-qualified', 'PARITY_ARTIFACT_DIR', 'parity.real-stack.mjs'),
+-        ('context', args.context_label, 'session-context-round14-qualified', 'SESSION_CONTEXT_ARTIFACT_DIR', 'session-context.real-stack.additive.mjs'),
+-        ('labour', args.labour_label, 'labour-preview-lifecycle-round14-qualified', 'LABOUR_PREVIEW_ARTIFACT_DIR', 'labour-preview-lifecycle.real-stack.mjs'),
++        ('baseline', args.baseline_label, 'parity-real-stack-round14-bound', 'PARITY_ARTIFACT_DIR', 'parity.real-stack.mjs'),
++        ('context', args.context_label, 'session-context-round14-bound', 'SESSION_CONTEXT_ARTIFACT_DIR', 'session-context.real-stack.additive.mjs'),
++        ('labour', args.labour_label, 'labour-preview-lifecycle-round14-bound', 'LABOUR_PREVIEW_ARTIFACT_DIR', 'labour-preview-lifecycle.real-stack.mjs'),
+     ]
+     runs, files = [], []
+     for kind, label, folder, variable, runner in specifications:

@@ -1,0 +1,20 @@
+{
+  "reviewedAtUtc": "2026-09-11T05:58:01.692086+00:00",
+  "reviewer": "root",
+  "kind": "bounded-browser-visual-review",
+  "screenshots": [
+    {
+      "path": "web/test-results/parity-real-stack-round4-blank-source/order-image-concurrent-change-refused.png",
+      "sha256": "a39c9356e23de7511dc39b6c2a172043972b7b4fb2d380eac6981e35436d07ea"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round4-blank-source/sales-design-blank-existing-round4.png",
+      "sha256": "696e888fa552be0d6fa7a85ec18f9a6cb564c8d816a4a70acda6c50bf96df051"
+    }
+  ],
+  "observations": [
+    "The photo conflict view shows saved Z10/00021 parent66 identity, a readable conflict/reload diagnostic, contained portrait and complete image action controls. The stale displayed preview is retained until explicit reload; actual newer server bytes and retry were verified by the real browser journey.",
+    "The saved Sales blank-Design image case shows configured S41 identity, date/customer/parent controls and totals inside the viewport with no overlap. Image/detail bands below this viewport are not credited as visually inspected."
+  ],
+  "limits": "Viewport screenshots only. No physical camera/printer/desktop acceptance; absence and complete child/value preservation rely on actual DOM/API assertions in the passed journey."
+}

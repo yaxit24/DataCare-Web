@@ -1,6 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  get,
+  capturePageContextTicket,
+  assertPageContextTicket,
+  subscribePageContext,
+  PageContextError,
+  type PageContextTicket,
+} from '../lib/api';
+import { DeviceContextGuard, DeviceCaptureCancelled } from '../lib/deviceContextLease';
 
 /**
  * Weighing-scale capture over WebSerial, replicating the desktop reader in `TR_TAG_OPBL.cs`.
@@ -55,8 +64,14 @@ interface SerialPortLike {
   }): Promise<void>;
   close(): Promise<void>;
   readable: {
-    getReader(): { read(): Promise<{ value?: Uint8Array; done: boolean }>; releaseLock(): void };
+    getReader(): SerialReaderLike;
   };
+}
+
+interface SerialReaderLike {
+  read(): Promise<{ value?: Uint8Array; done: boolean }>;
+  releaseLock(): void;
+  cancel?(): Promise<void>;
 }
 
 /**
@@ -98,14 +113,61 @@ export function useScaleCapture(onReading: (text: string) => void) {
   const [lastReading, setLastReading] = useState('');
   const [message, setMessage] = useState('');
   const portRef = useRef<SerialPortLike | null>(null);
+  const readerRef = useRef<SerialReaderLike | null>(null);
   const stopRef = useRef(false);
+  const mountedRef = useRef(true);
+  const settingsContextRef = useRef<PageContextTicket | null>(null);
+  const captureGuard = useRef(new DeviceContextGuard(assertPageContextTicket));
+  const onReadingRef = useRef(onReading);
+  onReadingRef.current = onReading;
+
+  const cancelCapture = useCallback(async () => {
+    captureGuard.current.cancel();
+    stopRef.current = true;
+    const reader = readerRef.current;
+    if (reader) {
+      try {
+        await reader.cancel?.();
+      } catch {
+        /* detached device */
+      }
+      // The owning read loop releases its lock and closes its own port in finally.
+    } else {
+      const port = portRef.current;
+      if (port) {
+        if (portRef.current === port) portRef.current = null;
+        try {
+          await port.close();
+        } catch {
+          /* detached device */
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/integrations/device-settings', { credentials: 'include' })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
+    mountedRef.current = true;
+    const unsubscribe = subscribePageContext(() => {
+      const ticket = settingsContextRef.current;
+      if (!ticket) return;
+      try {
+        assertPageContextTicket(ticket);
+      } catch (error) {
+        void cancelCapture();
+        if (!cancelled) {
+          setStatus('error');
+          setMessage(error instanceof Error ? error.message : 'Reload before using the scale.');
+        }
+      }
+    });
+    (async () => {
+      try {
+        const ticket = capturePageContextTicket();
+        settingsContextRef.current = ticket;
+        const data = await get<ScaleSettings>('/integrations/device-settings');
         if (cancelled || !data) return;
+        assertPageContextTicket(ticket);
         setSettings(data);
         if (!data.enabled) {
           setStatus('disabled');
@@ -117,30 +179,40 @@ export function useScaleCapture(onReading: (text: string) => void) {
           setStatus('unsupported');
           setMessage('This browser has no WebSerial. Use the loopback agent, or type the weight.');
         }
-      })
-      .catch(() => {
+      } catch (error) {
         if (!cancelled) {
           setStatus('error');
-          setMessage('Could not load device settings.');
+          setMessage(
+            error instanceof PageContextError ? error.message : 'Could not load device settings.',
+          );
         }
-      });
+      }
+    })();
     return () => {
       cancelled = true;
+      mountedRef.current = false;
+      unsubscribe();
+      void cancelCapture();
     };
-  }, []);
+  }, [cancelCapture]);
 
   const connect = useCallback(async () => {
     const scale = settings?.scale;
-    if (!settings?.enabled || !scale) return;
+    const context = settingsContextRef.current;
+    if (!settings?.enabled || !scale || !context) return;
     const hardware = navigator as Navigator & { serial?: SerialLike };
     if (!hardware.serial) return;
-
-    setStatus('connecting');
-    setMessage('');
+    let port: SerialPortLike | null = null;
+    let reader: SerialReaderLike | null = null;
+    let opened = false;
     try {
-      const port = await hardware.serial.requestPort();
-      // Desktop order: primary profile, then the configured-port fallback on failure.
-      let opened = false;
+      const lease = captureGuard.current.begin(context);
+      stopRef.current = false;
+      setStatus('connecting');
+      setMessage('');
+      port = await hardware.serial.requestPort();
+      captureGuard.current.assert(lease);
+      // Preserve primary then configured fallback, and the exact server-provided port options.
       for (const profile of [scale.profiles.primary, scale.profiles.fallback]) {
         try {
           await port.open({
@@ -150,11 +222,13 @@ export function useScaleCapture(onReading: (text: string) => void) {
             stopBits: profile.stopBits,
           });
           opened = true;
-          setMessage(`Connected at ${profile.baudRate}/${profile.dataBits}-N-${profile.stopBits}.`);
-          break;
         } catch {
-          // fall through to the next profile, as the desktop does
+          captureGuard.current.assert(lease);
+          continue;
         }
+        captureGuard.current.assert(lease);
+        setMessage(`Connected at ${profile.baudRate}/${profile.dataBits}-N-${profile.stopBits}.`);
+        break;
       }
       if (!opened) {
         setStatus('error');
@@ -162,49 +236,62 @@ export function useScaleCapture(onReading: (text: string) => void) {
         return;
       }
       portRef.current = port;
-      stopRef.current = false;
       setStatus('reading');
-
       const decoder = new TextDecoder();
-      const reader = port.readable.getReader();
-      try {
-        while (!stopRef.current) {
-          const chunk = await reader.read();
-          if (chunk.done) break;
-          if (!chunk.value) continue;
-          const frame = decoder.decode(chunk.value);
-          const parsed = extractScaleReading(frame, {
-            frameScanLimit: scale.frameScanLimit,
-            excludedCharacters: scale.excludedCharacters,
-            decimalPlaces: scale.decimalPlaces,
-          });
-          // An empty extraction is "no reading", not 0.000 — do not overwrite the cell with a zero.
-          if (!parsed.hasReading) continue;
+      reader = port.readable.getReader();
+      readerRef.current = reader;
+      while (!stopRef.current) {
+        const chunk = await reader.read();
+        captureGuard.current.assert(lease);
+        if (chunk.done) break;
+        if (!chunk.value) continue;
+        const parsed = extractScaleReading(decoder.decode(chunk.value), {
+          frameScanLimit: scale.frameScanLimit,
+          excludedCharacters: scale.excludedCharacters,
+          decimalPlaces: scale.decimalPlaces,
+        });
+        if (!parsed.hasReading) continue;
+        captureGuard.current.publish(lease, () => {
           setLastReading(parsed.text);
-          onReading(parsed.text);
-        }
-      } finally {
-        reader.releaseLock();
+          // The page owns the currently focused row; do not retain the Connect-time callback.
+          onReadingRef.current(parsed.text);
+        });
       }
-    } catch {
-      setStatus('error');
-      setMessage('Scale connection was refused or interrupted.');
+      captureGuard.current.assert(lease);
+      if (mountedRef.current) setStatus('idle');
+    } catch (error) {
+      if (!(error instanceof DeviceCaptureCancelled) && mountedRef.current) {
+        setStatus('error');
+        setMessage(
+          error instanceof PageContextError
+            ? error.message
+            : 'Scale connection was refused or interrupted.',
+        );
+      }
+    } finally {
+      if (reader) {
+        if (readerRef.current === reader) readerRef.current = null;
+        try {
+          reader.releaseLock();
+        } catch {
+          /* detached device */
+        }
+      }
+      if (port && opened) {
+        if (portRef.current === port) portRef.current = null;
+        try {
+          await port.close();
+        } catch {
+          /* detached device */
+        }
+      }
     }
-  }, [onReading, settings]);
+  }, [settings]);
 
   const disconnect = useCallback(async () => {
-    stopRef.current = true;
-    const port = portRef.current;
-    portRef.current = null;
-    if (port) {
-      try {
-        await port.close();
-      } catch {
-        // closing a already-detached port is not an error worth surfacing
-      }
-    }
-    setStatus(settings?.enabled ? 'idle' : 'disabled');
-  }, [settings]);
+    await cancelCapture();
+    if (mountedRef.current) setStatus(settings?.enabled ? 'idle' : 'disabled');
+  }, [cancelCapture, settings]);
 
   return { status, settings, lastReading, message, connect, disconnect };
 }

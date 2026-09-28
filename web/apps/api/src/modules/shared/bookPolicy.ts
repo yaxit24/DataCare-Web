@@ -8,7 +8,12 @@ export class BookPolicyValidationError extends Error {
 
 export type BookWorkflow =
   | 'SALES'
+  | 'SALES QUOTATION'
+  | 'SALES ORDER'
+  | 'TOUR ORDER'
   | 'PURCHASE'
+  | 'PURCHASE QUOTATION'
+  | 'CONSIGNMENT PURCHASE'
   | 'SALES RETURN'
   | 'WHOLESALE SALE RETURN'
   | 'PURCHASE RETURN'
@@ -31,7 +36,12 @@ export interface BookPolicy {
  */
 export const workflowPolicy: Record<BookWorkflow, { mainBook: string; inout: 'I' | 'O' }> = {
   SALES: { mainBook: 'SALES', inout: 'O' },
+  'SALES QUOTATION': { mainBook: 'SL QUOT', inout: 'O' },
+  'SALES ORDER': { mainBook: 'SALES ORDER', inout: 'O' },
+  'TOUR ORDER': { mainBook: 'TOUR ORDER', inout: 'I' },
   PURCHASE: { mainBook: 'PURCHASE', inout: 'I' },
+  'PURCHASE QUOTATION': { mainBook: 'PR QUOT', inout: 'O' },
+  'CONSIGNMENT PURCHASE': { mainBook: 'CON PUR', inout: 'I' },
   'SALES RETURN': { mainBook: 'SALES RETURNE', inout: 'I' },
   'WHOLESALE SALE RETURN': { mainBook: 'WH RTN', inout: 'I' },
   'PURCHASE RETURN': { mainBook: 'PURC RETURN', inout: 'O' },
@@ -43,10 +53,11 @@ export async function resolveBookPolicyTx(
   tx: any,
   scope: VoucherScope,
   workflow: BookWorkflow,
+  options: { requireExplicitMainBook?: boolean; expectedTable?: string } = {},
 ): Promise<BookPolicy> {
   const expected = workflowPolicy[workflow];
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-    `SELECT "CO_BOOK","BOOK_SNAME","BOOK_NAME","MAIN_BOOK","BOOK_INOUT"
+    `SELECT "CO_BOOK","BOOK_SNAME","BOOK_NAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME"
        FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
         AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
@@ -67,6 +78,17 @@ export async function resolveBookPolicyTx(
   const configuredMain = String(row.MAIN_BOOK ?? '')
     .trim()
     .toUpperCase();
+  if (options.requireExplicitMainBook && !configuredMain) {
+    throw new BookPolicyValidationError(`book ${scope.coBook} has no configured workflow family`);
+  }
+  const configuredTable = String(row.BOOK_TBL_NAME ?? '')
+    .trim()
+    .toUpperCase();
+  if (options.expectedTable && configuredTable && configuredTable !== options.expectedTable) {
+    throw new BookPolicyValidationError(
+      `book ${scope.coBook} uses ${configuredTable}, expected ${options.expectedTable}`,
+    );
+  }
   if (configuredMain && configuredMain !== expected.mainBook) {
     throw new BookPolicyValidationError(
       `book ${scope.coBook} is ${configuredMain}, expected ${expected.mainBook}`,

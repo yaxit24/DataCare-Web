@@ -1,0 +1,27 @@
+{
+ "form": "UT_HDD",
+ "tables": [
+  "HDD_MAST"
+ ],
+ "writes": {
+  "INSERT": {
+   "HDD_MAST": [
+    "REF_NO"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "HDD_MAST"
+  ]
+ },
+ "selectTables": [
+  "HDD_MAST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 769
+}

@@ -1,0 +1,30 @@
+{
+  "capturedAtUtc": "2026-09-11T07:59:36.334885+00:00",
+  "literal": "ALTER TABLE SL_DETL_RTN ADD TAG_LBR_CODE VARCHAR(4)Not NULL DEFAULT ''",
+  "binary": {
+    "path": "DataCareNext.exe",
+    "sha256": "c85f93fd336853a2a639c6452b47748290a1dddb214e2fdf3fc78f47bc0ca6c8",
+    "encoding": "UTF-16LE",
+    "offsets": [
+      19493447
+    ]
+  },
+  "references": [
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "line": 5844
+    },
+    {
+      "path": "unified/database/schema/01_Schema.sql",
+      "sha256": "1eb684c7e2bec72a330a9038a2da72ffea669b3ae7ef50b85b34e0e3126efa0d",
+      "line": 3033
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911070000_sale_return_tag_labour_code/migration.sql",
+      "sha256": "585051aaa5d30794ff5248f3c370050cada7edfc2632cbd107dacac8353a9218",
+      "line": 3
+    }
+  ],
+  "limits": "Static compiled literal/source/schema agreement; no executable desktop or historical data recovery acceptance."
+}

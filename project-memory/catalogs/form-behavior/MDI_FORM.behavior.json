@@ -1,0 +1,106 @@
+{
+ "form": "MDI_FORM",
+ "loc": 16240,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE USER_NAME = ' ? ' AND SUB_MENU = ' ? ' AND FRM_VIEW = 'Y'",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? ' AND FRM_VIEW = 'Y'",
+  "Year Select ? Please First Close All Open Form And Try...",
+  "Mrp Update ? MRP UPDATE",
+  "SELECT LC_CODE FROM LOCT_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 150",
+  "Select * From MENU_DATA WHERE SM_MAIN_CODE <> '00' AND SM_VIEW = 'Y' AND SM_TYPE IN ('E','A','P','U','S','B','L') ORDER BY BTN_NAME,SM_CODE",
+  "Select * From MENU_DATA WHERE SM_MAIN_CODE <> '00' AND SM_VIEW = 'Y' AND SM_TYPE IN ('A','P','U','S','B','L') ORDER BY BTN_NAME,SM_CODE",
+  "Select * From MENU_DATA WHERE SM_MAIN_CODE <> '00' AND SM_VIEW = 'Y' AND SM_TYPE IN ('P','U','S','B','L') ORDER BY BTN_NAME,SM_CODE",
+  "Select * From MENU_DATA WHERE SM_MAIN_CODE <> '00' AND SM_VIEW = 'Y' AND SM_TYPE IN ('U','S','B','L') ORDER BY BTN_NAME,SM_CODE",
+  "Select * From MENU_DATA WHERE SM_MAIN_CODE <> '00' AND SM_VIEW = 'Y' AND SM_TYPE IN ('S','B','L') ORDER BY BTN_NAME,SM_CODE",
+  "Select * From MENU_DATA WHERE SM_MAIN_CODE <> '00' AND SM_VIEW = 'Y' AND SM_TYPE IN ('B','L') ORDER BY BTN_NAME,SM_CODE",
+  "Select * From MENU_DATA WHERE SM_MAIN_CODE <> '00' AND SM_VIEW = 'Y' AND SM_TYPE = 'L' ORDER BY BTN_NAME,SM_CODE",
+  "SELECT A.GR_CODE,A.GR_RATE,B.GR_NAME FROM RATE_MAST AS A INNER JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.VCH_DATE = ' ? MM/dd/yyyy ? ' AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO",
+  "SELECT B.IT_TYPE,SUM(CASE WHEN ITM_SIGN = '-' THEN ITM_NWT ELSE 0 END) As SlWt FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE)LEFT JOIN BOOK_DATA AS C ON A.CO_CODE = C.CO_CODE AND A.CO_BOOK = C.CO_BOOK WHERE A.CO_CODE = ' ? ' AND C.MAIN_BOOK IN ('WH SALES','SALES','LABOUR WORK','SALES RETURNE','TOUR SALES') AND A.IT_CODE NOT IN ('999','OG','FSL','OS') AND MONTH(VCH_DATE) = ? GROUP BY B.IT_TYPE",
+  "SELECT CON_NAME FROM CONV_MAST WHERE CO_CODE = '01' AND CON_CODE = 'A'",
+  "SELECT CON_CODE FROM CONV_MAST WHERE CO_CODE = '01' AND CON_NAME = ' ? '",
+  "UPDATE CO_SET SET THEME = 1 WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET THEME = 2 WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET THEME = 3 WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET THEME = 4 WHERE CO_CODE = ' ? '",
+  "SELECT * From CONV_MAST WHERE CO_CODE = ' ? ' AND CON_CODE = ' ? '",
+  "UPDATE CONV_MAST SET GOLD_OZ_RATE = ? , SILVER_OZ_RATE = ? , CURRENCY_RATE = ? , GOLD_PR_RATE = ? , SILVER_PR_RATE = ? , RATE_DATE = ' ? MM/dd/yyyy hh:mm ? ' WHERE CO_CODE = ' ? '",
+  "SELECT CO_CODE,LC_CODE,VCH_DATE,SR_NO,GR_CODE,GR_RATE,GR_TOUCH,GR_TAX_RATE FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "SELECT COUNT(*) As UsrQry FROM USER_REQUEST WHERE CO_CODE = ' ? ' AND PARMATION_TYPE = 'P'"
+ ],
+ "keyboard": {
+  "Ctrl+O": 2,
+  "Ctrl+B": 2,
+  "Ctrl+A": 1,
+  "Ctrl+C": 1,
+  "Ctrl+D": 1,
+  "Ctrl+E": 1,
+  "Ctrl+F": 1,
+  "Ctrl+G": 1,
+  "Ctrl+H": 1,
+  "Ctrl+I": 1,
+  "Ctrl+J": 1,
+  "Ctrl+K": 1,
+  "Ctrl+L": 1,
+  "Ctrl+M": 1,
+  "Ctrl+N": 1,
+  "Ctrl+P": 1,
+  "Ctrl+Q": 1,
+  "Ctrl+R": 1,
+  "Ctrl+S": 1,
+  "Ctrl+T": 1,
+  "Ctrl+U": 1,
+  "Ctrl+V": 1,
+  "Ctrl+W": 1,
+  "Ctrl+X": 1,
+  "Ctrl+Y": 1,
+  "Ctrl+Z": 1,
+  "Enter": 1
+ },
+ "calc": [
+  "((ToolStripControlHost)mMainDt).Text = Strings.Mid(((ToolStripControlHost)mMainDt).Text, 1, 2) + \"/\" + Strings.Format((object)Conversion.Val(Strings.Mid(((ToolStripControlHost)mMainDt).Text, 4, 1)), \"00\") + \"/\" + text;"
+ ],
+ "validations": [
+  {
+   "message": "System.Windows.Forms.Timer error:",
+   "when": ""
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "RsRight.Rows.Count == 0"
+  },
+  {
+   "message": "User Cant Open This Form...",
+   "when": "Operators.CompareString(DC_Main.MCo_UserType, \"U\", false) == 0"
+  },
+  {
+   "message": "Please First Close All Open Form And Try...",
+   "when": "((ReadOnlyCollectionBase)(object)((WindowsFormsApplicationBase)MyProject.Application).OpenForms).Count > 2"
+  },
+  {
+   "message": "Do your Want to Take Backup Now",
+   "when": "(int)Interaction.MsgBox((object)\"Do your Want to Take Backup Now\", (MsgBoxStyle)36, (object)null) == 6"
+  },
+  {
+   "message": "No Record Found",
+   "when": ""
+  },
+  {
+   "message": "Error fetching USD\u2192INR rate:",
+   "when": ""
+  },
+  {
+   "message": "Error fetching rate:",
+   "when": ""
+  },
+  {
+   "message": "Error:",
+   "when": ""
+  },
+  {
+   "message": "You Don't Have internet connection...",
+   "when": "!IsInternetConnected()"
+  }
+ ]
+}

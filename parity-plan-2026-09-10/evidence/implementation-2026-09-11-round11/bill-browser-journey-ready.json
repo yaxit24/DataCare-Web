@@ -1,0 +1,25 @@
+{
+  "kind": "x13-bill-browser-ready-before-first-run-v1",
+  "status": "syntax-checked-not-executed",
+  "journeyNumber": 16,
+  "requiredCheckCount": 15,
+  "databaseOrBrowserRun": false,
+  "inputs": [
+    {
+      "path": "web/apps/web/test/sales-return-bill-replay.journey.mjs",
+      "sha256": "e9a06dd4838db208eff6ebb27bd168887d24ebc2a68eeafb91e102b60f9487ab"
+    },
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "170de78b8cd988596622f7c009bc3973c828a99fe3afc6fb10386ef188043d31"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/saleReturnBillReplay.independent.json",
+      "sha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/bill-browser-required-checks.json",
+      "sha256": "2aac326a8124c6baec42f2cad8969337d8c497fb1a836d0edb914e8e38ea997e"
+    }
+  ]
+}

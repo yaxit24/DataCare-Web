@@ -1,0 +1,67 @@
+{
+  "kind": "round14-document-update-stage-v1",
+  "status": "ready-for-root-review-not-applied",
+  "files": [
+    {
+      "path": "40-implementation-progress-round14.md",
+      "sha256": "32a1682dc46f10195f40bd04bc9fff6690b62b31b0b8453f4f8dd155e749a01c"
+    },
+    {
+      "path": "README.md",
+      "sha256": "b411432266ae4a446d1ee7b7707edcc16c94634cf76f569d8c45138d1af16c52"
+    },
+    {
+      "path": "current-status.patch",
+      "sha256": "fc96c97fd2158016d792696ac041122507c01ad81647261a292e4cc8e0102dde"
+    },
+    {
+      "path": "prepare.py",
+      "sha256": "eb8340c742f27e01fef5e18bf5230af95dbaaa9672a2f01714e35202566d8975"
+    },
+    {
+      "path": "read-inputs.json",
+      "sha256": "07214cfacfdad525398b1f0ba371029e634ca3f6b146f083b32990c7c30aebac"
+    },
+    {
+      "path": "replacements.json",
+      "sha256": "0ac5498e91de054824d0b4e812ced9db6f61fb5fd5433fccd0eb671b0c94ef98"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/02-implementation-plan.md",
+      "sha256": "05ab5f4b485d8e8bf101828b5a4982e3c35629a00a743eeff3923cca1eec3089"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/README.md",
+      "sha256": "566ab5b26047afa4da39422594ae61a60964640868520a0ad77e720d59419991"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/build_execution_addendum.py",
+      "sha256": "5d93181447f14d9f969dc0790f986bed65d0f20da2d3d8ffd6c2137475d23127"
+    },
+    {
+      "path": "staged/parity-plan-2026-09-10/execution-addendum-intro.md",
+      "sha256": "013b9de8dbbf573dbe3814a50f36c258ce5ced691534941f4c07802213f7e889"
+    },
+    {
+      "path": "staged/web/docs/HANDOFF.md",
+      "sha256": "ae9cfd72838cd0803e078cad6021418f85b055bd17b9995243037ce59d58d2b2"
+    },
+    {
+      "path": "staged/web/docs/STATE-OF-PARITY.md",
+      "sha256": "cff9f1103e1bf68e7c4ff97f837f1a38401eb0423d97d600708ec5a190c4b6a4"
+    },
+    {
+      "path": "staged/web/docs/TECHNICAL-REFERENCE.md",
+      "sha256": "1ee9df3f9ef141995aa3448422419fa29a549d8552cf70d8587c08ecd43c5fd4"
+    },
+    {
+      "path": "staging-validation.json",
+      "sha256": "1401428e3037cfc973d51a391da177d54f2b2cf20f5bbc6c4f93690c10172e01"
+    }
+  ],
+  "activeInputHashesStillMatch": true,
+  "changesActiveRepository": false,
+  "executesGeneratorOrApplicationChecks": false,
+  "verificationPlaceholderRetained": true,
+  "finalVerificationAndCheckpointOwner": "root"
+}

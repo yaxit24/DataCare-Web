@@ -1,0 +1,88 @@
+{
+  "recordedAt": "2026-09-10T06:42:30.579509+00:00",
+  "note": "Results recorded from tool-observed command completions during this planning review. No DB suite, production build, real-browser journey, device test or desktop replay is claimed.",
+  "checks": [
+    {
+      "name": "api-typecheck",
+      "cwd": "web",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "apps/api/tsconfig.json",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "web-typecheck",
+      "cwd": "web",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "apps/web/tsconfig.json",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "web-unit-tests",
+      "cwd": "web/apps/web",
+      "command": [
+        "pnpm",
+        "test"
+      ],
+      "exitCode": 0,
+      "filesPassed": 8,
+      "testsPassed": 51,
+      "durationSeconds": 0.642,
+      "evidenceKind": "Observed tool stdout; no separate raw log captured"
+    },
+    {
+      "name": "core-unit-tests",
+      "cwd": "web/packages/core",
+      "command": [
+        "pnpm",
+        "test"
+      ],
+      "exitCode": 0,
+      "filesPassed": 3,
+      "testsPassed": 17,
+      "durationSeconds": 0.25,
+      "evidenceKind": "Observed tool stdout; no separate raw log captured"
+    },
+    {
+      "name": "docker-availability",
+      "command": [
+        "docker",
+        "ps",
+        "--format",
+        "{{.Names}} {{.Ports}}"
+      ],
+      "exitCode": 1,
+      "result": "Cannot connect to Docker daemon"
+    }
+  ],
+  "retainedDesktopComparison": {
+    "path": "project-memory/parity/g5/parity-diff-latest.json",
+    "comparedAt": "2026-09-01T02:55:59.344Z",
+    "freshReplay": false,
+    "totals": {
+      "cases": 70,
+      "casesMatched": 0,
+      "tablesCompared": 387,
+      "tablesDesktopOnly": 59,
+      "tablesWebOnly": 76,
+      "rowsMissing": 153,
+      "rowsExtra": 137,
+      "fieldsCompared": 27895,
+      "fieldsExcluded": 1701,
+      "fieldDifferences": 510
+    }
+  }
+}

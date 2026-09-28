@@ -1,0 +1,82 @@
+{
+ "form": "RP_EMP",
+ "loc": 4124,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cEmpName": 1,
+  "cVchType": 2,
+  "cVchNo": 3,
+  "cVchDate": 4,
+  "cItCode": 5,
+  "cItName": 6,
+  "cComPrc": 7,
+  "cPcs": 8,
+  "cGrWt": 9,
+  "cNetWt": 10,
+  "cFine": 11,
+  "cLbrAmt": 12,
+  "cOthAmt": 13,
+  "cMrp": 14,
+  "cNetAmt": 15,
+  "cEmpComm": 16,
+  "cComType": 17,
+  "cComVal": 18,
+  "cSign": 19,
+  "cEmpCode": 20,
+  "cMainBook": 21,
+  "cCoBook": 22
+ },
+ "inlineSql": [
+  "SELECT A.EMP_CODE,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.VCH_DATE,A.BOOK_NAME,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_PCS ELSE - A.ITM_PCS END) AS ITM_PCS,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_GWT ELSE -A.ITM_GWT END) AS ITM_GWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_NWT ELSE -A.ITM_NWT END) AS ITM_NWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_FINE ELSE -A.ITM_FINE END) AS ITM_FINE,SUM(CASE WHEN ITM_SIGN = '-' THEN A.LBR_AMT ELSE -A.LBR_AMT END) AS LBR_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.OTH_AMT ELSE -A.OTH_AMT END) AS OTH_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_MRP ELSE -A.ITM_MRP END) AS ITM_MRP,SUM(CASE WHEN ITM_SIGN = '-' THEN A.NET_AMT ELSE -A.NET_AMT END) AS NET_AMT,B.EMP_NAME FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE) LEFT JOIN EMP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.EMP_CODE = B.EMP_CODE WHERE A.CO_CODE = ' ? ' ? AND C.IT_TYPE = ' ? ' ? AND C.GR_CODE = ' ? ' ? AND A.EMP_CODE = ' ? ' ? AND C.GR_CODE IN ( ? ) ? AND C.GR_CODE IN ( ? ) ? AND A.CO_BOOK = ' ? ' ? AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? And A.EMP_CODE <> '' GROUP BY A.EMP_CODE,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.VCH_DATE,A.BOOK_NAME,B.EMP_NAME ORDER BY A.EMP_CODE,A.CO_BOOK,A.VCH_NO",
+  "SELECT A.EMP_CODE,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.SR_NO,A.ISR_NO,A.VCH_DATE,A.BOOK_NAME,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_PCS ELSE - A.ITM_PCS END) AS ITM_PCS,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_GWT ELSE -A.ITM_GWT END) AS ITM_GWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_NWT ELSE -A.ITM_NWT END) AS ITM_NWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_FINE ELSE -A.ITM_FINE END) AS ITM_FINE,SUM(CASE WHEN ITM_SIGN = '-' THEN A.LBR_AMT ELSE -A.LBR_AMT END) AS LBR_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.OTH_AMT ELSE -A.OTH_AMT END) AS OTH_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_MRP ELSE -A.ITM_MRP END) AS ITM_MRP,SUM(CASE WHEN ITM_SIGN = '-' THEN A.NET_AMT ELSE -A.NET_AMT END) AS NET_AMT,B.EMP_NAME FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE) LEFT JOIN EMP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.EMP_CODE = B.EMP_CODE WHERE A.CO_CODE = ' ? ' ? AND C.IT_TYPE = ' ? ' ? AND C.GR_CODE = ' ? ' ? AND A.EMP_CODE = ' ? ' ? AND A.IT_CODE IN ( ? ) ? AND C.GR_CODE IN ( ? ) ? AND A.CO_BOOK = ' ? ' ? And A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? And A.EMP_CODE <> '' GROUP BY A.EMP_CODE,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.SR_NO,A.ISR_NO,A.VCH_DATE,A.BOOK_NAME,B.EMP_NAME ORDER BY A.VCH_DATE,A.EMP_CODE,A.CO_BOOK,A.VCH_NO",
+  "SELECT A.EMP_CODE,A.IT_CODE,C.IT_NAME,C.EMP_COM_PRC,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.VCH_DATE,A.BOOK_NAME,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_PCS ELSE - A.ITM_PCS END) AS ITM_PCS,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_GWT ELSE -A.ITM_GWT END) AS ITM_GWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_NWT ELSE -A.ITM_NWT END) AS ITM_NWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_FINE ELSE -A.ITM_FINE END) AS ITM_FINE,SUM(CASE WHEN ITM_SIGN = '-' THEN A.LBR_AMT ELSE -A.LBR_AMT END) AS LBR_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.OTH_AMT ELSE -A.OTH_AMT END) AS OTH_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_MRP ELSE -A.ITM_MRP END) AS ITM_MRP,SUM(CASE WHEN ITM_SIGN = '-' THEN A.NET_AMT ELSE -A.NET_AMT END) AS NET_AMT,B.EMP_NAME FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE) LEFT JOIN EMP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.EMP_CODE = B.EMP_CODE WHERE A.CO_CODE = ' ? ' ? AND C.IT_TYPE = ' ? ' ? AND C.GR_CODE = ' ? ' ? AND A.EMP_CODE = ' ? ' ? AND A.IT_CODE IN ( ? ) ? AND A.GR_CODE IN ( ? ) ? AND A.CO_BOOK = ' ? ' ? AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? And A.EMP_CODE <> '' GROUP BY A.EMP_CODE,A.IT_CODE,C.IT_NAME,C.EMP_COM_PRC,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.VCH_DATE,A.BOOK_NAME,B.EMP_NAME ORDER BY A.EMP_CODE,C.IT_NAME",
+  "SELECT A.EMP_CODE,A.IT_CODE,C.IT_NAME,C.EMP_COM_PRC,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.SR_NO,A.ISR_NO,A.VCH_DATE,A.BOOK_NAME,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_PCS ELSE - A.ITM_PCS END) AS ITM_PCS,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_GWT ELSE -A.ITM_GWT END) AS ITM_GWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_NWT ELSE -A.ITM_NWT END) AS ITM_NWT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_FINE ELSE -A.ITM_FINE END) AS ITM_FINE,SUM(CASE WHEN ITM_SIGN = '-' THEN A.LBR_AMT ELSE -A.LBR_AMT END) AS LBR_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.OTH_AMT ELSE -A.OTH_AMT END) AS OTH_AMT,SUM(CASE WHEN ITM_SIGN = '-' THEN A.ITM_MRP ELSE -A.ITM_MRP END) AS ITM_MRP,SUM(CASE WHEN ITM_SIGN = '-' THEN A.NET_AMT ELSE -A.NET_AMT END) AS NET_AMT,B.EMP_NAME FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE) LEFT JOIN EMP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.EMP_CODE = B.EMP_CODE WHERE A.CO_CODE = ' ? ' ? AND C.IT_TYPE = ' ? ' ? AND C.GR_CODE = ' ? ' ? AND A.EMP_CODE = ' ? ' ? AND A.IT_CODE IN ( ? ) ? AND A.GR_CODE IN ( ? ) ? AND A.CO_BOOK = ' ? ' ? And A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? And A.EMP_CODE <> '' GROUP BY A.EMP_CODE,A.IT_CODE,C.IT_NAME,C.EMP_COM_PRC,A.VCH_TYPE,A.CO_BOOK,A.VCH_NO,A.SR_NO,A.ISR_NO,A.VCH_DATE,A.BOOK_NAME,B.EMP_NAME ORDER BY A.VCH_DATE,A.EMP_CODE,A.CO_BOOK,A.VCH_NO,A.IT_CODE,C.IT_NAME",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT A.EMP_NAME As EmpNameL,A.EMP_CODE As EmpCodeL FROM EMP_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.EMP_CODE",
+  "SELECT BOOK_NAME ,CO_BOOK ,BOOK_TYPE,ITM_TYPE,MAIN_BOOK,BOOK_SNAME,BOOK_INOUT,MENU_NAME FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "Select * From BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT A.BOOK_NAME As BookNameL,A.CO_BOOK As BookL FROM BOOK_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ORDER BY A.BOOK_NAME",
+  "DELETE FROM REPORT_DATA WHERE CO_CODE = ' ? '",
+  "INSERT INTO REPORT_DATA(CO_CODE,LC_CODE,SR_NO,COL_1,COL_2,COL_3,COL_4,COL_5,COL_6,COL_7, COL_8,COL_9,COL_10,COL_11,COL_12,COL_13,COL_14,COL_15) VALUES(' ? ',' ? ',' ? 0000 ? ',' ? ',' ? ',' ? ',' ? ',' ? ',' ? ',' ? ', ? ' ? ',' ? ',' ? ',' ? ',' ? ',' ? ',' ? ',' ? ')",
+  "SELECT * FROM REPORT_DATA WHERE CO_CODE = ' ? ' ORDER BY SR_NO",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME",
+  "SELECT A.IT_CODE,A.IT_NAME FROM ITEM_MAST AS A WHERE A.CO_CODE = ' ? ' ? AND IT_TYPE = ' ? ' ? AND GR_CODE = ? ORDER BY A.IT_NAME",
+  "SELECT A.GR_CODE,A.GR_NAME FROM GROUP_MAST AS A WHERE A.CO_CODE = ' ? ' ? AND GR_TYPE = ' ? ' ? ORDER BY A.GR_NAME"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 4
+ },
+ "calc": [
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[12, DC_Main.R].Value)) * Conversion.Val(nComVal.Text) / 100.0, 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[15, DC_Main.R].Value)) * Conversion.Val(nComVal.Text) / 100.0, 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[9, DC_Main.R].Value)) * Conversion.Val(nComVal.Text), 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[10, DC_Main.R].Value)) * Conversion.Val(nComVal.Text), 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[14, DC_Main.R].Value)) * Conversion.Val(nComVal.Text) / 100.0, 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[12, DC_Main.R].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, DC_Main.R].Value)) / 100.0, 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[15, DC_Main.R].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, DC_Main.R].Value)) / 100.0, 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[9, DC_Main.R].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, DC_Main.R].Value)), 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[10, DC_Main.R].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, DC_Main.R].Value)), 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[16, DC_Main.R].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[14, DC_Main.R].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, DC_Main.R].Value)) / 100.0, 0), \"0.00\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": ""
+  },
+  {
+   "message": "Group Selection Not Done...",
+   "when": "Operators.CompareString(SelectGroup, \"\", false) == 0"
+  },
+  {
+   "message": "Item Selection Not Done...",
+   "when": "Operators.CompareString(SelectIt, \"\", false) == 0"
+  },
+  {
+   "message": "Day Wise Employee Bill..?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Day Wise Employee Bill..?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) == 6"
+  }
+ ]
+}

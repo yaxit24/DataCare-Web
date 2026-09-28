@@ -1,0 +1,226 @@
+{
+  "fixtureSha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a",
+  "comparison": "Independent read of primary assignment expressions and exact small-number literals; no new TypeScript mapper was read/executed; qualified context representations taken as supplied, not established by comparison. Status/diagnostic precedence not inferred from this expression check.",
+  "phases": [
+    {
+      "id": "B01",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B01",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B02",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B02",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B03",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B03",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B04",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B04",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B05",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B05",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B06",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B06",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B07",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B07",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B08",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B08",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B09",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B09",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B10",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B10",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B11",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B11",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B12",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B12",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B13",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B13",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B14",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B14",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B15",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B15",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B16",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B16",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B17",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B17",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B18",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B18",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B19",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B19",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B20",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B20",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B21",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B21",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B22",
+      "phase": "before",
+      "allPredicatesAndCompleteTargetsAgree": true
+    },
+    {
+      "id": "B22",
+      "phase": "after",
+      "allPredicatesAndCompleteTargetsAgree": true
+    }
+  ]
+}

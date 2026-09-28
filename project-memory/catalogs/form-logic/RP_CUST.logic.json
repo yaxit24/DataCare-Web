@@ -1,0 +1,29 @@
+{
+ "form": "RP_CUST",
+ "tables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "AC_MAST"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 1590
+}

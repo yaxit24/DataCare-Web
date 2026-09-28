@@ -1,20 +1,102 @@
+import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
+import { getSaleReturnLabourReplayState, observeSaleReturnLabourReplayCode, previewSaleReturnLabourReplay, SaleReturnLabourReplayError } from '../modules/sales/saleReturnLabourReplay.js';
+import { SessionCommandError } from '../modules/auth/sessionContextCommand.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { withTenant } from '@datacare/db';
+import { loadPrincipal, authorizeForm, FormForbiddenError } from '../modules/rbac/authorization.js';
+import { requireImageVersion, ImageVersionConflictError } from '../modules/images/imageState.js';
+import {
+  getOrderImage,
+  changeOrderImage,
+  OrderImageError,
+  type OrderImageFamily,
+  type OrderImageScope,
+} from '../modules/images/orderImage.js';
+import {
+  getMfgLotSettings,
+  listMfgLots,
+  getMfgLot,
+  listMfgLotSources,
+} from '../modules/manufacturing/mfgLot.js';
 import { PasswordChangeError, resetUserPassword } from '../modules/auth/passwordAccount.js';
 import { PasswordPolicyError } from '../modules/auth/password.js';
-import { createSale, deleteSale, editSale, getSale } from '../modules/sales/sales.js';
+import {
+  createSale,
+  createSalesQuotation,
+  deleteSale,
+  deleteSalesQuotation,
+  editSale,
+  editSalesQuotation,
+  getSale,
+  getSalesQuotation,
+} from '../modules/sales/sales.js';
 import { computeLine as computeSaleLine } from '../modules/sales/sales.js';
 import { billTotals } from '@datacare/core';
-import { createSaleReturn, deleteSaleReturn, saleForReturn } from '../modules/sales/salesReturn.js';
 import {
-  createSalesOrder,
-  listSalesOrders,
-  cancelSalesOrder,
+  parityContainmentProblem,
+  type ParityContainmentOperation,
+} from '@datacare/core/containment';
+import {
+  createSaleReturn,
+  deleteSaleReturn,
+  getSaleReturn,
+  saleForReturn,
+} from '../modules/sales/salesReturn.js';
+import {
+  getSavedSaleReturnIncoming,
+  listSavedSaleReturnIncoming,
+  updateSavedSaleReturnMetadata,
+  SavedSaleReturnError,
+} from '../modules/sales/savedSaleReturn.js';
+import {
+  listSaleReturnSourceVouchers,
+  getSaleReturnSourceItems,
+  SaleReturnSourceError,
+} from '../modules/sales/saleReturnSource.js';
+import {
+  getSaleReturnIncomingConfiguration,
+  SaleReturnIncomingConfigurationError,
+} from '../modules/sales/saleReturnIncomingConfiguration.js';
+import {
+  getSaleReturnIncomingReplayState,
+  previewSaleReturnIncomingReplay,
+  SaleReturnIncomingReplayError,
+} from '../modules/sales/saleReturnIncomingReplay.js';
+import {
+  getSaleReturnBillReplayState,
+  previewSaleReturnBillReplay,
+  SaleReturnBillReplayError,
+} from '../modules/sales/saleReturnBillReplay.js';
+import {
+  cancelSalesOrderInSession,
   cancelSalesOrderAdjust,
+  cancelTourOrderInSession,
+  getTourOrderConfiguration,
+  getSalesOrderConfiguration,
+  editSalesOrderInSession,
+  createSalesOrderInSession,
+  createTourOrderInSession,
+  editTourOrderInSession,
+  getSalesOrder,
+  getSalesOrderAdjustment,
+  getTourOrder,
+  listSalesOrders,
+  listTourOrders,
 } from '../modules/sales/salesOrder.js';
-import { createLabourInvoice, deleteLabourInvoice } from '../modules/sales/labourInvoice.js';
+import {
+  createLabourInvoice,
+  deleteLabourInvoice,
+  getLabourInvoice,
+} from '../modules/sales/labourInvoice.js';
 import { invoiceData, invoiceHtml } from '../modules/sales/invoice.js';
-import { orderData, orderHtml } from '../modules/sales/orderDoc.js';
+import { orderData } from '../modules/sales/orderDoc.js';
+import { SalesOrderWorkflowUnavailableError } from '../modules/sales/orderLifecyclePolicy.js';
+import {
+  listSalesOrderDesigns,
+  getSalesOrderDesignImage,
+  SalesOrderDesignError,
+} from '../modules/sales/orderDesignSelection.js';
+import { ORDER_REPORT_COPIES, type OrderReportCopy } from '../modules/reports/orderReportValues.js';
 import { purchaseBillData, purchaseBillHtml } from '../modules/purchase/purchaseBill.js';
 import { karigarIssueData, karigarIssueHtml } from '../modules/manufacturing/karigarVoucher.js';
 import { financeVoucherData, financeVoucherHtml } from '../modules/finance/financeVoucher.js';
@@ -32,7 +114,7 @@ import {
   renderReportLayout,
   listReportSpecs,
 } from '../modules/reports/reportEngine.js';
-import { bindReport } from '../modules/reports/reportBind.js';
+import { bindReport, UnsupportedReportBindingError } from '../modules/reports/reportBind.js';
 import {
   loadFormLayout,
   renderFormLayout,
@@ -42,24 +124,43 @@ import { dhrnKhataData, dhrnKhataHtml } from '../modules/dhrn/dhrnKhata.js';
 import { getSettings, saveSettings, SETTING_FIELDS } from '../modules/settings/settings.js';
 import {
   createPurchase,
+  createPurchaseQuotation,
   getPurchase,
+  getPurchaseQuotation,
   editPurchase,
+  editPurchaseQuotation,
   deletePurchase,
+  deletePurchaseQuotation,
   createOtherPurchase,
   deleteOtherPurchase,
+  listOpenConsignmentPurchaseReceipts,
 } from '../modules/purchase/purchase.js';
 import { createPurchaseReturn, deletePurchaseReturn } from '../modules/purchase/purchaseReturn.js';
 import {
   postReceipt,
   postPayment,
   postContra,
+  deleteContra,
+  getContra,
+  editContra,
+  getReceipt,
+  getPayment,
+  deleteReceipt,
+  deleteFinance,
   postReceiptLines,
   postPaymentLines,
   deleteReceiptLines,
   deletePaymentLines,
 } from '../modules/finance/finance.js';
 import { renderCheque } from '../modules/finance/chequePrint.js';
-import { issueDhrn, receiveDhrn, outstanding, receiveDhrnInterest } from '../modules/dhrn/dhrn.js';
+import {
+  issueDhrn,
+  receiveDhrn,
+  receiveLoan,
+  issueLoan,
+  outstanding,
+  receiveDhrnInterest,
+} from '../modules/dhrn/dhrn.js';
 import { fineInout, deleteFineInout } from '../modules/inout/fineInout.js';
 import { listUsers, createUser, setUserRights } from '../modules/rbac/users.js';
 import { getFormCatalog } from '../modules/rbac/formCatalog.js';
@@ -70,7 +171,24 @@ import { partyBalance } from '../modules/finance/partyBalance.js';
 import { bankReconList, bankReconClear } from '../modules/finance/bankRecon.js';
 import { postDailyRate, getDailyRate, dailyRateDates } from '../modules/masters/dailyRate.js';
 import { bulkAutoItem } from '../modules/masters/autoItem.js';
-import { listDesignBook, saveDesignBook } from '../modules/masters/designBook.js';
+import {
+  deleteDesignBook,
+  getDesignCalculationConfig,
+  getDesignComponentDefaults,
+  listDesignBook,
+  saveDesignBook,
+} from '../modules/masters/designBook.js';
+import { getCreditNote, listCreditNotes } from '../modules/einvoice/creditNote.js';
+import {
+  deleteDiamondSizes,
+  deleteItemStockLimits,
+  getDiamondSizes,
+  getItemStockLimits,
+  listDiamondSizeSummary,
+  listItemStockLimitSummary,
+  saveDiamondSizes,
+  saveItemStockLimits,
+} from '../modules/masters/stockLimit.js';
 import {
   integrationReadiness,
   readinessSummary,
@@ -114,6 +232,7 @@ import { inferSheet, renderXlsx } from '../modules/reports/xlsx.js';
 import {
   deleteEntityImage,
   getEntityImage,
+  getEntityImageState,
   listEntityImageKeys,
   saveEntityImage,
 } from '../modules/images/entityImage.js';
@@ -131,6 +250,14 @@ import {
 } from '../modules/utilities/reminderEntry.js';
 import { previewRenumber, applyRenumber } from '../modules/utilities/voucherRenumber.js';
 import { dataRefresh } from '../modules/utilities/dataRefresh.js';
+import {
+  dataExportPackage,
+  dataExportPendingOnly,
+  dataExportPreview,
+  markDataTransferFlags,
+  resetDataTransferFlags,
+} from '../modules/utilities/dataExport.js';
+import { applyEstimateReset, estimateResetPreview } from '../modules/utilities/estimateReset.js';
 import {
   deleteHddRegistry,
   getHddRegistry,
@@ -155,9 +282,18 @@ import {
   gstr2Purchase,
 } from '../modules/reports/reports3.js';
 import { postAcOpening, deleteAcOpening } from '../modules/finance/acOpening.js';
-import { postFineJv, deleteFineJv } from '../modules/finance/fineJv.js';
-import { listOpenBills, settleBills } from '../modules/finance/billToBill.js';
-import { postRateCut, deleteRateCut } from '../modules/sales/rateCut.js';
+import { deleteFineJv, getFineJv, postFineJv } from '../modules/finance/fineJv.js';
+import { deleteBillSettlement, listOpenBills, settleBills } from '../modules/finance/billToBill.js';
+import {
+  deleteBullionSale,
+  deleteRateCut,
+  editBullionSale,
+  editRateCut,
+  getBullionSale,
+  getRateCut,
+  postBullionSale,
+  postRateCut,
+} from '../modules/sales/rateCut.js';
 import {
   issueKarigar,
   receiveKarigar,
@@ -165,6 +301,10 @@ import {
   getKarigar,
   editKarigar,
   deleteKarigar,
+  createOldItemSale,
+  getOldItemSale,
+  editOldItemSale,
+  deleteOldItemSale,
 } from '../modules/manufacturing/karigar.js';
 import { issueMfg, receiveMfg, getMfg, editMfg, deleteMfg } from '../modules/manufacturing/mfg.js';
 import {
@@ -218,6 +358,7 @@ import {
 import {
   deleteRepairImage,
   getRepairImage,
+  getRepairImageState,
   listRepairImageKeys,
   saveRepairImage,
 } from '../modules/repair/repairImage.js';
@@ -249,10 +390,26 @@ import {
   StockVoucherValidationError,
 } from '../modules/stock/stock.js';
 import {
+  createStockIn,
+  createStockOut,
+  deleteStockIn,
+  deleteStockOut,
+  editStockIn,
+  editStockOut,
+  getStockIn,
+  getStockOut,
+} from '../modules/stock/stockInout.js';
+import {
   deletePhysicalStock,
   getPhysicalStock,
   savePhysicalStock,
 } from '../modules/stock/physicalStock.js';
+import {
+  deleteStoneDmCf,
+  getStoneDmCf,
+  listStoneDmCfSources,
+  saveStoneDmCf,
+} from '../modules/stock/stoneDmCf.js';
 import { deleteGoldBook, getGoldBook, saveGoldBook } from '../modules/finance/goldBook.js';
 import {
   deleteVpAdjustment,
@@ -276,11 +433,17 @@ import {
   saveOtherCommission,
 } from '../modules/purchase/otherCommission.js';
 import {
+  deleteOtherIncome,
+  getOtherIncome,
+  saveOtherIncome,
+} from '../modules/purchase/otherIncome.js';
+import {
   tagCancel,
   tagWeightDiff,
   deleteTagCancel,
   deleteTagWeightDiff,
 } from '../modules/stock/tagOps.js';
+import { deleteTagAdjust, getTagAdjust, saveTagAdjust } from '../modules/stock/tagAdjust.js';
 import { splitTag, deleteTagSplit } from '../modules/stock/tagSplit.js';
 import { lookup } from '../modules/masters/lookup.js';
 import { postJournal, deleteJournal } from '../modules/finance/journal.js';
@@ -318,6 +481,8 @@ import {
   salesByParty,
   salesByItem,
   balanceSheet,
+  profitAndLoss,
+  finalReports,
   outstandingReport,
   monthlySales,
   oldGoldRegister,
@@ -328,10 +493,12 @@ import {
   submitIrn,
   irnTransportFromEnv,
   submitIrnForSale,
+  submitIrnForCreditNote,
   gspStatus,
   testGspAuth,
   cancelIrnForSale,
 } from '../modules/einvoice/einvoice.js';
+import { eInvoiceExportData, eInvoiceExportSheets } from '../modules/einvoice/einvoiceExport.js';
 import { bullionBooking, deleteBullionBooking } from '../modules/bullion/bullion.js';
 import {
   createFineSalePurchase,
@@ -351,8 +518,14 @@ import {
   schemeInstallment,
   schemeOpening,
   schemeMaturity,
+  schemeGoldAdjust,
   deleteSchemeInstallment,
+  getSchemeInstallment,
+  getSchemeMaturity,
+  getSchemeGoldAdjust,
+  deleteEnrollment,
   deleteSchemeMaturity,
+  deleteSchemeGoldAdjust,
 } from '../modules/membership/scheme.js';
 import {
   salesReturnRegister,
@@ -380,7 +553,15 @@ import { voucherRegister } from '../modules/reports/voucherRegister.js';
 import { trialBalanceFull, salesByGroup, cashDaySummary } from '../modules/reports/reports8.js';
 import { customerCrm, areaWiseSales, locationWiseSales } from '../modules/reports/reports9.js';
 import { gstInputRegister } from '../modules/reports/reports10.js';
-import { orderLotZoom, tagEstimate } from '../modules/reports/orderTagReports.js';
+import { graphReport } from '../modules/reports/graphReport.js';
+import {
+  deleteDataReport,
+  orderLotZoom,
+  orderTrackReport,
+  pointReport,
+  pointReportDetail,
+  tagEstimate,
+} from '../modules/reports/orderTagReports.js';
 import { toCsv } from '../modules/reports/reportCsv.js';
 import { rojmel } from '../modules/reports/rojmelReport.js';
 import {
@@ -388,6 +569,41 @@ import {
   REPORT_FILTER_BINDINGS,
   supportedFilters,
 } from '../modules/reports/reportFilters.js';
+import { isReportSlug, type ReportSlug } from '../modules/reports/reportAuthorization.js';
+import { huidReport } from '../modules/reports/huid.js';
+import { schemeMonthlyReport, stockLevelReport } from '../modules/reports/stockLevel.js';
+import { billProfitReport } from '../modules/reports/billProfitReport.js';
+import { physicalStockReport } from '../modules/reports/physicalStock.js';
+import { movementReport } from '../modules/reports/movement.js';
+import { branchInoutReport } from '../modules/reports/branchInoutReport.js';
+import { otherItemReport } from '../modules/reports/otherItemReport.js';
+import { designMoveDetailReport, designMoveReport } from '../modules/reports/designMoveReport.js';
+import { consiDetailReport, consiReport } from '../modules/reports/consiReport.js';
+import { oldStockReport } from '../modules/reports/oldStockReport.js';
+import { tradingReport } from '../modules/reports/tradingReport.js';
+import { tourReport, tourTagReport } from '../modules/reports/tourReports.js';
+import {
+  mfgInoutReport,
+  mfgLedgerDetailReport,
+  mfgLedgerReport,
+  mfgLotIsuRecReport,
+} from '../modules/reports/manufacturingReports.js';
+import { addressPrintReport, lastVisitReport } from '../modules/reports/customerAccountReports.js';
+import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
+import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
+import {
+  approvalReport,
+  bullionReport,
+  karigarReport,
+  repairReport,
+  vpReport,
+} from '../modules/reports/reportFamilyReports.js';
+import {
+  entryCheckDetailReport,
+  entryCheckReport,
+  markEntryChecked,
+  userWorkReport,
+} from '../modules/reports/userAuditReports.js';
 
 /**
  * HTTP/REST exposure of the verified backend modules for the mobile app to consume. Every route is
@@ -404,6 +620,10 @@ export interface TxnDeps {
     lcCode: string;
     coYear?: string;
     loginCoCode: string;
+    // Optional in this shared dependency for unrelated legacy route harnesses; the guarded PUT
+    // validates both as required authority and refuses missing values without a fallback.
+    sid?: string;
+    contextEpoch?: string;
     rights: any;
   };
   scopeOfRequest: (req: FastifyRequest) => {
@@ -451,6 +671,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     reply.code(403).send({ error: 'forbidden', action });
     return false;
   };
+  const containMutation = (reply: FastifyReply, operation: ParityContainmentOperation): boolean => {
+    const problem = parityContainmentProblem(operation);
+    if (!problem) return false;
+    reply.code(problem.statusCode).send(problem.body);
+    return true;
+  };
   // Map domain errors → HTTP status (validation/balance/tag → 400; everything else rethrows → 500).
   const run = async (reply: FastifyReply, okCode: number, fn: () => Promise<unknown>) => {
     try {
@@ -458,9 +684,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       return reply.code(okCode).send(out as any);
     } catch (e: any) {
       const n: string = e?.name ?? '';
+      if (e instanceof SessionCommandError || e instanceof SessionReadSnapshotError)
+        return reply.code(e.statusCode).send({ error: e.code, message: e.message,
+          ...(e.form === undefined ? {} : { form: e.form, action: e.action }) });
+      if (e instanceof SavedSaleReturnError)
+        return reply.code(e.statusCode).send({ error: e.code, message: e.message });
+      if (e instanceof SaleReturnSourceError)
+        return reply.code(e.statusCode).send({ error: e.code, message: e.message });
+      if (e instanceof SaleReturnIncomingConfigurationError)
+        return reply.code(e.statusCode).send({ error: e.code, message: e.message });
+      if (e instanceof SaleReturnIncomingReplayError || e instanceof SaleReturnBillReplayError || e instanceof SaleReturnLabourReplayError)
+        return reply.code(e.statusCode).send({
+          error: e.code,
+          message: e.message,
+          ...(e.details === undefined ? {} : { details: e.details }),
+        });
+      if (e instanceof ImageVersionConflictError)
+        return reply.code(409).send({ error: 'image-version-conflict', message: e.message });
+      if (e instanceof SalesOrderDesignError)
+        return reply.code(e.statusCode).send({ error: e.name, message: e.message });
+      if (e instanceof SalesOrderWorkflowUnavailableError)
+        return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
+      if (e instanceof OrderImageError)
+        return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
+      if (n === 'DesignBookConflictError' || n === 'SalesOrderConflictError') {
+        return reply.code(409).send({ error: n, message: e?.message });
+      }
       if (n === 'PeriodLockValidationError') metrics.recordPeriodLockRejection();
       if (
-        /(ValidationError|UnbalancedError|TagExistsError|TagNotAvailableError|EInvoiceValidationError|BarcodeError|DhrnValidationError|KarigarValidationError|SaleValidationError|PurchaseValidationError|MembershipError|SettingsError|EntityImageError|RepairError|MeltingError|SchemeError|FineInoutError|PasswordPolicyError|PasswordChangeError|FormRightsValidationError|ReportFilterError)/.test(
+        /(ValidationError|NumberingConfigurationError|UnbalancedError|TagExistsError|TagNotAvailableError|EInvoiceValidationError|BarcodeError|DhrnValidationError|KarigarValidationError|SaleValidationError|PurchaseValidationError|MembershipError|SettingsError|EntityImageError|RepairError|MeltingError|SchemeError|FineInoutError|StockInoutValidationError|PasswordPolicyError|PasswordChangeError|FormRightsValidationError|ReportFilterError|StockLimitValidationError|EstimateResetValidationError|TagAdjustError|StoneDmCfValidationError)/.test(
           n,
         )
       ) {
@@ -486,9 +738,162 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       throw e;
     }
   };
+  const formMutationCapabilities = async (req: FastifyRequest, form: string) => {
+    const s = sess(req);
+    const principal = await loadPrincipal(prisma, {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      loginCoCode: s.loginCoCode,
+      loginName: s.sub,
+    });
+    const may = async (action: 'update' | 'delete') => {
+      try {
+        await authorizeForm(prisma, {
+          tenantId: s.tenantId,
+          lcCode: s.lcCode,
+          principal,
+          form,
+          action,
+        });
+        return true;
+      } catch (error) {
+        if (error instanceof FormForbiddenError) return false;
+        throw error;
+      }
+    };
+    const [canUpdate, canDelete] = await Promise.all([may('update'), may('delete')]);
+    return { canUpdate, canDelete };
+  };
   const body = (req: FastifyRequest) => (req.body ?? {}) as Record<string, any>;
+  const salesOrderInput = (req: FastifyRequest, b = body(req)) => ({
+    scope: scopeOf(req),
+    requireDesignSelection: true,
+    expectedVersion: b.expectedVersion,
+    dirtyFields: b.dirtyFields,
+    acCode: b.acCode,
+    acName: b.acName,
+    billNo: b.billNo,
+    netAmount: b.netAmount,
+    lines: b.lines,
+    taxRatePct: b.taxRatePct ?? 0,
+    interState: !!b.interState,
+    advanceAmount: b.advanceAmount ?? 0,
+    vchDate: b.vchDate,
+    vchTime: b.vchTime,
+    vchDesc: b.vchDesc,
+    cashAc: b.cashAc,
+    mainUser: sess(req).sub,
+    taxCode: b.taxCode,
+    upiAmount: b.upiAmount,
+    bankAc: b.bankAc,
+    chequeNo: b.chequeNo,
+    bankName: b.bankName,
+    cardAc: b.cardAc,
+    cardAdj: b.cardAdj,
+    oldGoldFine: b.oldGoldFine,
+    oldGoldAmount: b.oldGoldAmount,
+    oldSilverFine: b.oldSilverFine,
+    oldSilverAmount: b.oldSilverAmount,
+    schemeAmount: b.schemeAmount,
+    rateCutRate: b.rateCutRate,
+    rateCutFine: b.rateCutFine,
+    rateCutAmount: b.rateCutAmount,
+    adjustGold: b.adjustGold,
+    adjustSilver: b.adjustSilver,
+    orderAdjustAmount: b.orderAdjustAmount,
+    deliveryDate: b.deliveryDate,
+    functionDate: b.functionDate,
+    address1: b.address1,
+    address2: b.address2,
+    address3: b.address3,
+    city: b.city,
+    mobile: b.mobile,
+    empCode: b.empCode,
+  });
+  const rateCutInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    acCode: b.acCode,
+    acName: b.acName,
+    itType: b.itType,
+    lines: b.lines ?? [],
+    receivedLines: b.receivedLines ?? [],
+    pay: b.pay,
+    receivedPay: b.receivedPay,
+    accounts: b.accounts,
+    // These are declared on RateCutInput and written by the desktop on every real voucher, but were
+    // not forwarded here, so the API silently discarded them. Measured over the 15 real Live24
+    // wholesale vouchers (book 034, the same RATE_CUT_DATA family): HD_VCH_NO 15/15, EMP_CODE 15/15,
+    // CONV_PRC 15/15, plus the DR_AMT/CR_AMT/DR_FINE/CR_FINE settlement legs.
+    billNo: b.billNo,
+    hdVchNo: b.hdVchNo,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
+    convRate: b.convRate,
+    convPct: b.convPct,
+    fineRate: b.fineRate,
+    settleDrAmt: b.settleDrAmt,
+    settleCrAmt: b.settleCrAmt,
+    settleDrFine: b.settleDrFine,
+    settleCrFine: b.settleCrFine,
+    // Party contact snapshot (RATE_CUT_DATA carries its own copy, as the desktop form does).
+    add1: b.add1,
+    add2: b.add2,
+    add3: b.add3,
+    city: b.city,
+    mobile: b.mobile,
+    bankName: b.bankName,
+  });
 
   // ---- Desktop utilities (server-derived tenant/company/location/year only) ----
+  app.get('/utilities/data-export/preview', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => dataExportPreview(prisma, readScope(req)));
+  });
+  app.get('/utilities/data-export/download', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const q = (req.query ?? {}) as Record<string, unknown>;
+    const doc = await dataExportPackage(prisma, readScope(req), {
+      pendingOnly: dataExportPendingOnly(q.pendingOnly),
+    });
+    return reply
+      .type('application/json')
+      .header(
+        'content-disposition',
+        `attachment; filename="data-export-${sess(req).coCode}-${sess(req).coYear}.json"`,
+      )
+      .send(Buffer.from(JSON.stringify(doc, null, 2)));
+  });
+  app.post('/utilities/data-export/mark-exported', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      markDataTransferFlags(prisma, readScope(req), {
+        state: 'Y',
+        pendingOnly: b.pendingOnly == null ? true : !!b.pendingOnly,
+      }),
+    );
+  });
+  app.post('/utilities/data-export/reset-flags', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () => resetDataTransferFlags(prisma, readScope(req)));
+  });
+  app.post('/utilities/estimate-reset/preview', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const b = body(req);
+    return run(reply, 200, () => estimateResetPreview(prisma, readScope(req), b.asOfDate));
+  });
+  app.post('/utilities/estimate-reset/apply', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      applyEstimateReset(prisma, readScope(req), {
+        asOfDate: b.asOfDate,
+        confirmed: b.confirmed === true,
+        confirmation: b.confirmation,
+      }),
+    );
+  });
   app.get('/utilities/hdd-registry', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => listHddRegistry(prisma, readScope(req)));
@@ -662,6 +1067,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
 
+  app.post('/sales-quotations', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => createSalesQuotation(prisma, saleInput(req, b), b.lines ?? []));
+  });
+  app.get('/sales-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getSalesQuotation(prisma, scopeOf(req), (req.params as any).vchNo),
+    );
+  });
+  app.put('/sales-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editSalesQuotation(prisma, saleInput(req, b), b.lines ?? [], (req.params as any).vchNo),
+    );
+  });
+  app.delete('/sales-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteSalesQuotation(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+
   // ---- Estimate / quotation (compute only — no ledger, no voucher) ----
   app.post('/estimate', auth, async (req) => {
     const b = body(req);
@@ -687,6 +1121,214 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- Sales return ----
+  // Saved incoming metadata is a bounded patch, separate from the legacy numerical writer.
+  // Query identity is mandatory, so an old editor cannot silently adopt a different session scope.
+  const savedReturnScope = (req: FastifyRequest) => {
+    const q = (req.query ?? {}) as Record<string, unknown>;
+    for (const key of ['coCode', 'lcCode', 'coYear', 'coBook'])
+      if (typeof q[key] !== 'string' || !String(q[key]).trim())
+        throw new SavedSaleReturnError(
+          400,
+          'sale-return-identity-required',
+          'Select the company, branch, year and return book before loading this saved return.',
+        );
+    const scope = scopeOf(req);
+    if (!scope.coYear || !scope.coBook)
+      throw new SavedSaleReturnError(
+        400,
+        'sale-return-identity-required',
+        'The selected return year and book are unavailable. Reload the business scope.',
+      );
+    return { ...scope, coYear: scope.coYear, coBook: scope.coBook };
+  };
+  app.get('/sales-returns/incoming-recent', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, () => listSavedSaleReturnIncoming(prisma, savedReturnScope(req)));
+  });
+  app.get('/sales-returns/incoming-calculation-configuration', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => {
+      const query = (req.query ?? {}) as Record<string, unknown>;
+      const scopeFields = new Set(['coCode', 'lcCode', 'coYear', 'coBook']);
+      if (
+        Object.entries(query).some(
+          ([key, value]) => !scopeFields.has(key) || typeof value !== 'string',
+        )
+      )
+        throw new SaleReturnIncomingConfigurationError(
+          400,
+          'sale-return-configuration-query',
+          'Use only the selected company, branch, year and Return book to load calculation settings.',
+        );
+      return getSaleReturnIncomingConfiguration(prisma, savedReturnScope(req));
+    });
+  });
+  const returnSourceQuery = (
+    req: FastifyRequest,
+    fields: string[],
+    required: string[] = [],
+  ): Record<string, string> => {
+    const query = (req.query ?? {}) as Record<string, unknown>;
+    const allowed = new Set(['coCode', 'lcCode', 'coYear', 'coBook', ...fields]);
+    for (const [key, value] of Object.entries(query))
+      if (!allowed.has(key) || typeof value !== 'string')
+        throw new SaleReturnSourceError(
+          400,
+          'sale-return-source-query',
+          'Use the selected Return scope and explicit original-sale search fields.',
+        );
+    for (const key of required)
+      if (typeof query[key] !== 'string' || !String(query[key]).trim())
+        throw new SaleReturnSourceError(
+          400,
+          'sale-return-source-query',
+          'Select the original sale year, book and voucher before loading its items.',
+        );
+    return query as Record<string, string>;
+  };
+  app.get('/sales-returns/source-vouchers', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => {
+      const scope = savedReturnScope(req);
+      const q = returnSourceQuery(req, ['sourceYear', 'sourceBook', 'search', 'offset', 'limit']);
+      return listSaleReturnSourceVouchers(prisma, scope, {
+        sourceYear: q.sourceYear,
+        sourceBook: q.sourceBook,
+        search: q.search,
+        offset: q.offset,
+        limit: q.limit,
+      });
+    });
+  });
+  app.get('/sales-returns/source-items', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => {
+      const scope = savedReturnScope(req);
+      const fields = ['sourceYear', 'sourceBook', 'sourceVchNo'];
+      const q = returnSourceQuery(req, fields, fields);
+      return getSaleReturnSourceItems(prisma, scope, {
+        sourceYear: q.sourceYear!,
+        sourceBook: q.sourceBook!,
+        sourceVchNo: q.sourceVchNo!,
+      });
+    });
+  });
+  app.get('/sales-returns/:vchNo/incoming', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => ({
+      ...(await getSavedSaleReturnIncoming(
+        prisma,
+        savedReturnScope(req),
+        (req.params as any).vchNo,
+      )),
+      canUpdate: (await formMutationCapabilities(req, 'Sales/Sales Return')).canUpdate,
+    }));
+  });
+  const incomingReplayScope = (req: FastifyRequest) => {
+    const query = (req.query ?? {}) as Record<string, unknown>;
+    const allowed = new Set(['coCode', 'lcCode', 'coYear', 'coBook']);
+    if (
+      Object.entries(query).some(
+        ([key, value]) => !allowed.has(key) || typeof value !== 'string' || value !== value.trim(),
+      )
+    )
+      throw new SaleReturnIncomingReplayError(
+        400,
+        'sale-return-replay-query',
+        'Use only the selected company, branch, year and Return book to preview this saved return.',
+      );
+    return savedReturnScope(req);
+  };
+  app.get('/sales-returns/:vchNo/incoming-replay-state', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, () =>
+      getSaleReturnIncomingReplayState(
+        prisma,
+        incomingReplayScope(req),
+        (req.params as { vchNo: string }).vchNo,
+      ),
+    );
+  });
+  // This POST replays a journal against a fresh read snapshot. It cannot persist a Return.
+  app.post('/sales-returns/:vchNo/incoming-replay', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, () =>
+      previewSaleReturnIncomingReplay(
+        prisma,
+        incomingReplayScope(req),
+        (req.params as { vchNo: string }).vchNo,
+        req.body,
+      ),
+    );
+  });
+  app.get('/sales-returns/:vchNo/incoming-bill-replay-state', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, () =>
+      getSaleReturnBillReplayState(
+        prisma,
+        incomingReplayScope(req),
+        (req.params as { vchNo: string }).vchNo,
+      ),
+    );
+  });
+  // Read-only whole-grid/header simulation; it cannot persist a Return.
+  app.post('/sales-returns/:vchNo/incoming-bill-replay', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, () =>
+      previewSaleReturnBillReplay(
+        prisma,
+        incomingReplayScope(req),
+        (req.params as { vchNo: string }).vchNo,
+        req.body,
+      ),
+    );
+  });
+  // New profile requires an explicitly retained page pair, even though old bootstrap reads allow omission.
+  const labourReplayAuth = {...auth, onRequest: async (_req: FastifyRequest, reply: FastifyReply) => { reply.header('cache-control', 'no-store'); }};
+  const labourReplayIdentity = (req: FastifyRequest) => {
+    const s = sess(req);
+    if (req.headers['x-session-context-id'] !== s.sid || req.headers['x-session-context-epoch'] !== s.contextEpoch)
+      throw new SaleReturnLabourReplayError(409, 'context-stale', 'Reload the page context before previewing labour selections.');
+    return {tenantId:s.tenantId,sessionId:s.sid,loginName:s.sub,loginCoCode:s.loginCoCode,
+      coCode:s.coCode,lcCode:s.lcCode,coYear:s.coYear,contextEpoch:s.contextEpoch};
+  };
+  app.get('/sales-returns/:vchNo/incoming-labour-replay-state', labourReplayAuth, async (req, reply) => {
+    reply.header('cache-control', 'no-store');
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getSaleReturnLabourReplayState(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo));
+  });
+  app.post('/sales-returns/:vchNo/incoming-labour-observation', {...labourReplayAuth,bodyLimit:65536}, async (req, reply) => {
+    reply.header('cache-control', 'no-store');
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => observeSaleReturnLabourReplayCode(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo, req.body));
+  });
+  app.post('/sales-returns/:vchNo/incoming-labour-replay', {...labourReplayAuth,bodyLimit:65536}, async (req, reply) => {
+    reply.header('cache-control', 'no-store');
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => previewSaleReturnLabourReplay(prisma, labourReplayIdentity(req), incomingReplayScope(req), (req.params as {vchNo:string}).vchNo, req.body));
+  });
+  app.put('/sales-returns/:vchNo/incoming-metadata', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => ({
+      ...(await updateSavedSaleReturnMetadata(
+        prisma,
+        savedReturnScope(req),
+        (req.params as any).vchNo,
+        body(req),
+      )),
+      canUpdate: (await formMutationCapabilities(req, 'Sales/Sales Return')).canUpdate,
+    }));
+  });
   app.post('/sales-returns', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -740,31 +1382,121 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- Sales order ----
+  // Retained authenticated request context, never body/query authority or a later cookie.
+  const orderCommandIdentity = (req: FastifyRequest) => ({
+    tenantId: sess(req).tenantId,
+    sessionId: sess(req).sid,
+    loginName: sess(req).sub,
+    loginCoCode: sess(req).loginCoCode,
+    coCode: sess(req).coCode,
+    lcCode: sess(req).lcCode,
+    coYear: sess(req).coYear,
+    contextEpoch: sess(req).contextEpoch,
+  });
+  const requireOrderVersion = (value: unknown): string => {
+    if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) {
+      const error = new Error(
+        'Reload the saved order and submit its version before editing or deleting.',
+      );
+      error.name = 'SalesOrderValidationError';
+      throw error;
+    }
+    return value;
+  };
+  const completeSalesOrderInput = (req: FastifyRequest) => {
+    const input = salesOrderInput(req);
+    if (
+      !Array.isArray(input.lines) ||
+      input.lines.some(
+        (line: any) =>
+          !line ||
+          typeof line !== 'object' ||
+          !Array.isArray(line.components) ||
+          line.components.some((child: any) => !child || typeof child !== 'object'),
+      )
+    ) {
+      const error = new Error(
+        'Submit the complete Sales Order lines and a components array for every item; use an empty array when there are none.',
+      );
+      error.name = 'SalesOrderValidationError';
+      throw error;
+    }
+    return input;
+  };
+  app.get('/sales-orders/configuration', auth, async (req, reply) =>
+    run(reply, 200, () => getSalesOrderConfiguration(prisma, scopeOf(req))),
+  );
+  app.get('/sales-orders/designs', auth, async (req, reply) =>
+    run(reply, 200, () => {
+      const q = req.query as Record<string, string>;
+      return listSalesOrderDesigns(prisma, scopeOf(req) as any, {
+        itCode: q.itCode ?? '',
+        search: q.search,
+        offset: q.offset == null ? undefined : Number(q.offset),
+        limit: q.limit == null ? undefined : Number(q.limit),
+      });
+    }),
+  );
+  app.get('/sales-orders/design-image', auth, async (req, reply) =>
+    run(reply, 200, async () => {
+      const q = req.query as Record<string, string>;
+      const result = await getSalesOrderDesignImage(prisma, scopeOf(req) as any, {
+        itCode: q.itCode ?? '',
+        source: {
+          prCode: q.prCode ?? '',
+          bookName: q.bookName ?? '',
+          srNo: Number(q.srNo),
+          oldSrNo: q.oldSrNo === '' || q.oldSrNo == null ? null : Number(q.oldSrNo),
+          version: q.version ?? '',
+        },
+      });
+      return result.state === 'absent'
+        ? result
+        : {
+            state: 'present',
+            mimeType: result.mimeType,
+            data: result.bytes.toString('base64'),
+            source: result.source,
+          };
+    }),
+  );
   app.post('/sales-orders', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      createSalesOrder(prisma, {
-        scope: scopeOf(req),
-        acCode: b.acCode,
-        acName: b.acName,
-        billNo: b.billNo,
-        netAmount: b.netAmount != null ? Number(b.netAmount) : undefined,
-        lines: b.lines,
-        taxRatePct: Number(b.taxRatePct || 0),
-        interState: !!b.interState,
-        advanceAmount: Number(b.advanceAmount || 0),
+    return run(reply, 201, () => createSalesOrderInSession(prisma, {
+      identity: orderCommandIdentity(req), input: completeSalesOrderInput(req),
+    }));
+  });
+  app.get('/sales-orders', auth, async (req, reply) =>
+    run(reply, 200, () => listSalesOrders(prisma, readScope(req) as any)),
+  );
+  app.put('/sales-orders/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editSalesOrderInSession(prisma, {
+        identity: {
+          tenantId: sess(req).tenantId, sessionId: sess(req).sid, loginName: sess(req).sub,
+          loginCoCode: sess(req).loginCoCode, coCode: sess(req).coCode, lcCode: sess(req).lcCode,
+          coYear: sess(req).coYear, contextEpoch: sess(req).contextEpoch,
+        },
+        input: {
+          ...completeSalesOrderInput(req),
+          expectedVersion: requireOrderVersion(body(req).expectedVersion),
+        },
+        voucherNo: (req.params as any).vchNo,
       }),
     );
   });
-  app.get('/sales-orders', auth, async (req) => listSalesOrders(prisma, readScope(req) as any));
   app.delete('/sales-orders/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
-      cancelSalesOrder(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).tenantId,
+      cancelSalesOrderInSession(prisma, {
+        identity: orderCommandIdentity(req),
+        input: {
+          scope: scopeOf(req),
+          expectedVersion: requireOrderVersion(body(req).expectedVersion),
+          vchNo: (req.params as any).vchNo,
+          deleteUser: sess(req).sub,
+        },
       }),
     );
   });
@@ -780,6 +1512,48 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         kasarAmt: b.kasarAmt != null ? Number(b.kasarAmt) : undefined,
         kasarAc: b.kasarAc,
         itDesc: b.itDesc,
+      }),
+    );
+  });
+
+  // ---- Tour Order (TR_SALE_ORD.cs with MAIN_BOOK='TOUR ORDER') ----
+  app.get('/tour-orders/configuration', auth, async (req, reply) => {
+    return run(reply, 200, () => getTourOrderConfiguration(prisma, scopeOf(req)));
+  });
+  app.post('/tour-orders', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    return run(reply, 201, () => createTourOrderInSession(prisma, {
+      identity: orderCommandIdentity(req), input: salesOrderInput(req),
+    }));
+  });
+  app.get('/tour-orders', auth, async (req, reply) =>
+    run(reply, 200, () => listTourOrders(prisma, readScope(req) as any)),
+  );
+  app.get('/tour-orders/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getTourOrder(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/tour-orders/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editTourOrderInSession(prisma, {
+        identity: orderCommandIdentity(req),
+        input: { ...salesOrderInput(req), expectedVersion: requireOrderVersion(body(req).expectedVersion) },
+        voucherNo: (req.params as any).vchNo,
+      }),
+    );
+  });
+  app.delete('/tour-orders/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      cancelTourOrderInSession(prisma, {
+        identity: orderCommandIdentity(req),
+        input: {
+          scope: scopeOf(req),
+          expectedVersion: requireOrderVersion(body(req).expectedVersion),
+          vchNo: (req.params as any).vchNo,
+          deleteUser: sess(req).sub,
+        },
       }),
     );
   });
@@ -893,6 +1667,49 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .send(pdf);
   });
 
+  app.get('/purchase-quotations/quotation', auth, async (req, reply) => {
+    const q = req.query as any;
+    const s = readScope(req);
+    const scope = {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear,
+      coBook: String(s.coBook ?? ''),
+    };
+    await getPurchaseQuotation(prisma, scope, String(q.vchNo ?? ''));
+    const data = await purchaseBillData(prisma, {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      coYear: s.coYear,
+      coBook: scope.coBook,
+      vchNo: String(q.vchNo ?? ''),
+    });
+    if (!data) return reply.code(404).send({ error: 'quotation-not-found' });
+    const html = purchaseBillHtml(data.header, data.lines, {
+      company: data.company,
+      party: data.party,
+      title: 'Purchase Quotation',
+      partyCaption: 'Supplier',
+      footerText:
+        'Purchase quotation — subject to confirmation, rate finalisation, and stock receipt.',
+    });
+    if (q.format === 'html') return reply.type('text/html').send(html);
+    let pdf: Buffer;
+    try {
+      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+    } catch {
+      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+    }
+    return reply
+      .header('content-type', 'application/pdf')
+      .header(
+        'content-disposition',
+        `inline; filename="purchase-quotation-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
+      )
+      .send(pdf);
+  });
+
   app.get('/karigar/issue-voucher', auth, async (req, reply) => {
     const q = req.query as any;
     const s = readScope(req);
@@ -957,33 +1774,228 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .send(pdf);
   });
 
-  app.get('/sales/order-confirmation', auth, async (req, reply) => {
-    const q = req.query as any;
-    const s = readScope(req);
-    const data = await orderData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'SOR'),
-      vchNo: String(q.vchNo ?? ''),
-    });
-    if (!data) return reply.code(404).send({ error: 'order-not-found' });
-    const html = orderHtml(data.header, data.lines, { company: data.company, party: data.party });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="order-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
-  });
+  const orderConfirmation =
+    (family: 'SALES ORDER' | 'TOUR ORDER') => async (req: FastifyRequest, reply: FastifyReply) => {
+      const q = req.query as any;
+      const s = readScope(req);
+      if (!s.coYear || !s.coBook || !String(q.vchNo ?? '').trim()) {
+        return reply.code(400).send({
+          error: 'OrderDocumentValidationError',
+          message: 'Order confirmation requires year, book and voucher number',
+        });
+      }
+      let data: Awaited<ReturnType<typeof orderData>>;
+      try {
+        data = await orderData(prisma, {
+          family,
+          tenantId: s.tenantId,
+          coCode: s.coCode,
+          lcCode: s.lcCode,
+          coYear: s.coYear ?? '',
+          coBook: String(s.coBook ?? ''),
+          vchNo: String(q.vchNo ?? ''),
+        });
+      } catch (error: any) {
+        if (/ValidationError|NumberingConfigurationError/.test(error?.name ?? '')) {
+          return reply.code(400).send({ error: error.name, message: error.message });
+        }
+        throw error;
+      }
+      if (!data) return reply.code(404).send({ error: 'order-not-found' });
+      const name = data.lines.length
+        ? family === 'TOUR ORDER'
+          ? data.imagePrint
+            ? 'TourOrdImg'
+            : 'TourOrdVch'
+          : data.imagePrint
+            ? 'OrdVchImg'
+            : 'OrderBill'
+        : 'OrderVch';
+      const spec = loadReportSpec(name);
+      if (!spec) return reply.code(503).send({ error: 'order-report-spec-unavailable' });
+      if (q.copy != null && !Object.hasOwn(ORDER_REPORT_COPIES, String(q.copy))) {
+        return reply
+          .code(400)
+          .send({ error: 'OrderDocumentValidationError', message: 'Invalid order document copy.' });
+      }
+      let bound: Awaited<ReturnType<typeof bindReport>>;
+      try {
+        bound = await bindReport(prisma, spec, {
+          tenantId: s.tenantId,
+          coCode: s.coCode,
+          lcCode: s.lcCode,
+          coYear: s.coYear,
+          coBook: String(s.coBook),
+          vchNo: String(q.vchNo),
+          orderFamily: family,
+          copy: q.copy as OrderReportCopy | undefined,
+        });
+      } catch (error) {
+        if (error instanceof UnsupportedReportBindingError) {
+          return reply
+            .code(422)
+            .send({ error: error.code, report: error.report, reason: error.reason });
+        }
+        if (/ValidationError|NumberingConfigurationError/.test((error as Error).name)) {
+          return reply
+            .code(400)
+            .send({ error: (error as Error).name, message: (error as Error).message });
+        }
+        throw error;
+      }
+      if (!bound) return reply.code(404).send({ error: 'order-not-found' });
+      let html: string;
+      try {
+        html = renderReportLayout(spec, {
+          header: bound.header,
+          detailRows: bound.detailRows,
+          parentChild: bound.parentChild,
+          subreports: bound.subreports,
+          company: bound.company,
+          orderImages: bound.orderImages,
+        });
+      } catch (error) {
+        if (error instanceof UnsupportedReportBindingError) {
+          return reply
+            .code(422)
+            .send({ error: error.code, report: error.report, reason: error.reason });
+        }
+        throw error;
+      }
+      if (q.format === 'html') return reply.type('text/html').send(html);
+      let pdf: Buffer;
+      try {
+        pdf = await renderToPdf(html, new PlaywrightPdfRenderer({ preferCSSPageSize: true }));
+      } catch {
+        return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+      }
+      return reply
+        .header('content-type', 'application/pdf')
+        .header(
+          'content-disposition',
+          `inline; filename="order-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
+        )
+        .send(pdf);
+    };
+  app.get('/sales/order-confirmation', auth, orderConfirmation('SALES ORDER'));
+  app.get('/tour-orders/confirmation', auth, orderConfirmation('TOUR ORDER'));
+
+  const savedOrderImage =
+    (family: OrderImageFamily) => async (req: FastifyRequest, reply: FastifyReply) =>
+      run(reply, 200, async () => {
+        const result = await getOrderImage(
+          prisma,
+          scopeOf(req) as OrderImageScope,
+          family,
+          String((req.params as any).vchNo),
+          Number((req.query as any).srNo),
+        );
+        const s = sess(req);
+        const principal = await loadPrincipal(prisma, {
+          tenantId: s.tenantId,
+          coCode: s.coCode,
+          loginCoCode: s.loginCoCode,
+          loginName: s.sub,
+        });
+        const may = async (action: 'update' | 'delete') => {
+          try {
+            await authorizeForm(prisma, {
+              tenantId: s.tenantId,
+              lcCode: s.lcCode,
+              principal,
+              form: family === 'SALES ORDER' ? 'Sales/Sales Order' : 'Karigar/Tour Order',
+              action,
+            });
+            return true;
+          } catch (error) {
+            if (error instanceof FormForbiddenError) return false;
+            throw error;
+          }
+        };
+        const [mayUpdate, mayDelete] = await Promise.all([may('update'), may('delete')]);
+        return {
+          ...result,
+          canUpdate: result.editable && mayUpdate,
+          canDelete: result.editable && result.targetHasImage && mayDelete,
+          image:
+            result.image.state === 'present'
+              ? {
+                  state: 'present',
+                  mimeType: result.image.mimeType,
+                  source: result.image.source,
+                  data: result.image.bytes.toString('base64'),
+                }
+              : result.image,
+        };
+      });
+  const writeOrderImage =
+    (family: OrderImageFamily, remove = false) =>
+    async (req: FastifyRequest, reply: FastifyReply) =>
+      run(reply, 200, () => {
+        const input = remove ? (req.query as any) : (req.body as any);
+        return changeOrderImage(
+          prisma,
+          scopeOf(req) as OrderImageScope,
+          family,
+          String((req.params as any).vchNo),
+          Number((req.query as any).srNo),
+          {
+            version: String(input?.version ?? ''),
+            data: input?.data,
+            mimeType: input?.mimeType,
+            remove,
+            user: sess(req).sub,
+          },
+        );
+      });
+  app.get('/sales-orders/:vchNo/image', auth, savedOrderImage('SALES ORDER'));
+  app.post(
+    '/sales-orders/:vchNo/image',
+    { ...auth, bodyLimit: 6 * 1024 * 1024 },
+    writeOrderImage('SALES ORDER'),
+  );
+  app.delete('/sales-orders/:vchNo/image', auth, writeOrderImage('SALES ORDER', true));
+  app.get('/tour-orders/:vchNo/image', auth, savedOrderImage('TOUR ORDER'));
+  app.post(
+    '/tour-orders/:vchNo/image',
+    { ...auth, bodyLimit: 6 * 1024 * 1024 },
+    writeOrderImage('TOUR ORDER'),
+  );
+  app.delete('/tour-orders/:vchNo/image', auth, writeOrderImage('TOUR ORDER', true));
+
+  const lotSettings =
+    (kind: 'issue' | 'receive') => async (req: FastifyRequest, reply: FastifyReply) =>
+      run(reply, 200, () => getMfgLotSettings(prisma, scopeOf(req), kind));
+  const lotList = (kind: 'issue' | 'receive') => async (req: FastifyRequest, reply: FastifyReply) =>
+    run(reply, 200, () => listMfgLots(prisma, scopeOf(req), kind, req.query as any));
+  const lotSources =
+    (kind: 'issue' | 'receive') => async (req: FastifyRequest, reply: FastifyReply) =>
+      run(reply, 200, () => listMfgLotSources(prisma, scopeOf(req), kind, req.query as any));
+  const lotDocument =
+    (kind: 'issue' | 'receive') => async (req: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const document = await getMfgLot(
+          prisma,
+          scopeOf(req),
+          kind,
+          String((req.params as any).vchNo),
+        );
+        if (!document) return reply.code(404).send({ error: 'lot-voucher-not-found' });
+        return reply.code(200).send(document);
+      } catch (error) {
+        return run(reply, 200, async () => {
+          throw error;
+        });
+      }
+    };
+  app.get('/mfg/lot/issue/settings', auth, lotSettings('issue'));
+  app.get('/mfg/lot/issue/list', auth, lotList('issue'));
+  app.get('/mfg/lot/issue/sources', auth, lotSources('issue'));
+  app.get('/mfg/lot/issue/:vchNo', auth, lotDocument('issue'));
+  app.get('/mfg/lot/receive/settings', auth, lotSettings('receive'));
+  app.get('/mfg/lot/receive/list', auth, lotList('receive'));
+  app.get('/mfg/lot/receive/sources', auth, lotSources('receive'));
+  app.get('/mfg/lot/receive/:vchNo', auth, lotDocument('receive'));
 
   app.get('/sales/quotation', auth, async (req, reply) => {
     const q = req.query as any;
@@ -1014,6 +2026,47 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .header(
         'content-disposition',
         `inline; filename="quotation-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
+      )
+      .send(pdf);
+  });
+
+  app.get('/sales-quotations/quotation', auth, async (req, reply) => {
+    const q = req.query as any;
+    const s = readScope(req);
+    const scope = {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: s.lcCode,
+      coYear: s.coYear,
+      coBook: String(s.coBook ?? ''),
+    };
+    await getSalesQuotation(prisma, scope, String(q.vchNo ?? ''));
+    const data = await invoiceData(prisma, {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      coYear: s.coYear,
+      coBook: scope.coBook,
+      vchNo: String(q.vchNo ?? ''),
+    });
+    if (!data) return reply.code(404).send({ error: 'quotation-not-found' });
+    const html = invoiceHtml(data.header, data.lines, {
+      company: data.company,
+      party: data.party,
+      title: 'Sales Quotation',
+      copy: 'PROFORMA — NOT A TAX INVOICE',
+    });
+    if (q.format === 'html') return reply.type('text/html').send(html);
+    let pdf: Buffer;
+    try {
+      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+    } catch {
+      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+    }
+    return reply
+      .header('content-type', 'application/pdf')
+      .header(
+        'content-disposition',
+        `inline; filename="sales-quotation-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
       )
       .send(pdf);
   });
@@ -1087,12 +2140,39 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     acName: b.acName,
     billNo: b.billNo,
     vchDate: b.vchDate,
+    address1: b.address1,
+    address2: b.address2,
+    address3: b.address3,
+    city: b.city,
+    mobile: b.mobile,
+    bankName: b.bankName,
+    chequeNo: b.chequeNo,
+    cardAc: b.cardAc,
+    creditDays: b.creditDays != null ? Number(b.creditDays) : undefined,
+    discountPct: b.discountPct != null ? Number(b.discountPct) : undefined,
+    tcsCode: b.tcsCode,
+    tcsPct: b.tcsPct != null ? Number(b.tcsPct) : undefined,
+    tcsAmount: b.tcsAmount != null ? Number(b.tcsAmount) : undefined,
+    tdsCode: b.tdsCode,
+    tdsPct: b.tdsPct != null ? Number(b.tdsPct) : undefined,
+    tdsAmount: b.tdsAmount != null ? Number(b.tdsAmount) : undefined,
+    saleBillNo: b.saleBillNo,
+    saleBillLc: b.saleBillLc,
+    saleBillYear: b.saleBillYear,
+    saleBillBook: b.saleBillBook,
+    consiNo: b.consiNo,
+    consiLcCode: b.consiLcCode,
+    consiYrcd: b.consiYrcd,
+    consiDbcd: b.consiDbcd,
     discountAmount: b.discountAmount,
     taxRatePct: b.taxRatePct,
     taxCode: b.taxCode,
     interState: !!b.interState,
     urd: !!b.urd,
     rateUnfix: !!b.rateUnfix,
+    purchaseAc: b.purchaseAc,
+    taxAc: b.taxAc,
+    roundAc: b.roundAc,
     hmAmount: b.hmAmount != null ? Number(b.hmAmount) : undefined,
     hmChargeAc: b.hmChargeAc,
     hmTaxPct: b.hmTaxPct != null ? Number(b.hmTaxPct) : undefined,
@@ -1125,6 +2205,80 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
       deletePurchase(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+
+  app.get('/consignment-purchases/open-receipts', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      listOpenConsignmentPurchaseReceipts(prisma, scopeOf(req), {
+        sourceVchNo: q.sourceVchNo,
+        sourceCoYear: q.sourceCoYear,
+        sourceCoBook: q.sourceCoBook,
+      }),
+    );
+  });
+  app.post('/consignment-purchases', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => createPurchase(prisma, purchaseInput(req, b), b.lines ?? []));
+  });
+  app.get('/consignment-purchases/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getPurchase(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/consignment-purchases/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editPurchase(prisma, purchaseInput(req, b), b.lines ?? [], (req.params as any).vchNo),
+    );
+  });
+  app.delete('/consignment-purchases/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deletePurchase(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+
+  app.post('/purchase-quotations', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () =>
+      createPurchaseQuotation(prisma, purchaseInput(req, b), b.lines ?? []),
+    );
+  });
+  app.get('/purchase-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getPurchaseQuotation(prisma, scopeOf(req), (req.params as any).vchNo),
+    );
+  });
+  app.put('/purchase-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editPurchaseQuotation(
+        prisma,
+        purchaseInput(req, b),
+        b.lines ?? [],
+        (req.params as any).vchNo,
+      ),
+    );
+  });
+  app.delete('/purchase-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deletePurchaseQuotation(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         deleteUser: sess(req).sub,
@@ -1166,6 +2320,54 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         deleteUser: sess(req).tenantId,
       }),
+    );
+  });
+
+  const otherIncomeInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    partyCode: b.partyCode ?? b.acCode,
+    billNo: b.billNo,
+    billDate: b.billDate,
+    ledgerCode: b.ledgerCode ?? b.ledrCode,
+    chequeAmount: b.chequeAmount != null ? Number(b.chequeAmount) : undefined,
+    chequeAccount: b.chequeAccount,
+    chequeNo: b.chequeNo,
+    cardAmount: b.cardAmount != null ? Number(b.cardAmount) : undefined,
+    cardAccount: b.cardAccount,
+    cashAmount: b.cashAmount != null ? Number(b.cashAmount) : undefined,
+    cashAccount: b.cashAccount,
+    kasarAmount: b.kasarAmount != null ? Number(b.kasarAmount) : undefined,
+    kasarAccount: b.kasarAccount,
+    tdsCode: b.tdsCode,
+    employeeCode: b.employeeCode,
+    bankName: b.bankName,
+    description: b.description,
+    lines: b.lines ?? [],
+    mainUser: sess(req).sub,
+  });
+  app.post('/other-income', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => saveOtherIncome(prisma, otherIncomeInput(req, b)));
+  });
+  app.get('/other-income/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getOtherIncome(prisma, readScope(req), String((req.params as any).vchNo)),
+    );
+  });
+  app.put('/other-income/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      saveOtherIncome(prisma, otherIncomeInput(req, b), String((req.params as any).vchNo)),
+    );
+  });
+  app.delete('/other-income/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteOtherIncome(prisma, scopeOf(req), String((req.params as any).vchNo), sess(req).sub),
     );
   });
 
@@ -1273,6 +2475,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         date: qy.date,
         chqNo: qy.chqNo,
         acPayee: qy.acPayee === 'true' || qy.acPayee === '1',
+        autoPrint: qy.autoPrint === 'true' || qy.autoPrint === '1',
       }),
     );
   });
@@ -1302,6 +2505,37 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  /**
+   * Single receipt / payment deletion — plan item F1.3.
+   *
+   * WHY THESE EXIST
+   * ===============
+   * Reversal existed only for the MULTI variants above, yet the single voucher is the common case and the one
+   * the business actually deletes. From `DELETE_DATA` on the real database: **CASH REC 4, CASH PAY 3,
+   * BANK PAY 5, BANK REC 1 — 13 deletions**, against zero rows in `USER_DATA`, the edit audit. Correction here
+   * is delete-and-re-enter, and it was impossible.
+   *
+   * THE TWO SIDES USE DIFFERENT HEADER TABLES — this is easy to get wrong.
+   *   `postReceipt` writes CASH_DATA (finance.ts:249)
+   *   `postPayment` writes PAY_DATA  (finance.ts:512)
+   * A receipt-shaped delete pointed at a payment would silently reverse nothing and still report success.
+   *
+   * The receipt side has a purpose-built `deleteReceipt` (finance.ts:1286) that reads the persisted header
+   * through `editIdentityTx` and reverses RECEIPT_WRITE_TABLES, so it needs no VCH_TYPE from the caller.
+   * The payment side has no equivalent, so it goes through the generic `deleteFinance` and must state both
+   * the header table and the audit classification.
+   */
+  app.delete('/receipts/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteReceipt(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
+        book: body(req).book,
+      }),
+    );
+  });
   app.post('/payments/multi', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -1325,6 +2559,34 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         deleteUser: sess(req).tenantId,
+      }),
+    );
+  });
+  /**
+   * Single payment deletion — plan item F1.3. See the receipt delete above for why the two differ.
+   *
+   * `headerTable: 'PAY_DATA'` is not interchangeable with the receipt's CASH_DATA: `postPayment` writes
+   * PAY_DATA (finance.ts:512). `mode` is required rather than defaulted because the audit's VCH_TYPE is how
+   * the desktop classifies the deletion — CPAY for cash, BPAY for bank (finance.ts:523) — and BANK PAY has
+   * MORE real deletions than CASH PAY (5 against 3), so there is no safe majority to assume.
+   */
+  app.delete('/payments/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const b = body(req);
+    const mode = String(b.mode ?? '')
+      .trim()
+      .toLowerCase();
+    if (mode !== 'cash' && mode !== 'bank') {
+      return reply.code(400).send({ error: "mode must be 'cash' or 'bank'" });
+    }
+    return run(reply, 200, () =>
+      deleteFinance(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        headerTable: 'PAY_DATA',
+        book: String(b.book ?? 'PAY'),
+        vchType: mode === 'cash' ? 'CPAY' : 'BPAY',
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -1419,44 +2681,95 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .send(pdf);
   });
 
+  const dhrnIssuePayload = (req: any, b: any) => ({
+    scope: scopeOf(req),
+    borrowerAc: b.borrowerAc,
+    borrowerName: b.borrowerName,
+    principal: Number(b.principal),
+    intPrc: b.intPrc != null ? Number(b.intPrc) : undefined,
+    intMonths: b.intMonths != null ? Number(b.intMonths) : undefined,
+    loanType: b.loanType,
+    packetNo: b.packetNo,
+    otherCharges: b.otherCharges != null ? Number(b.otherCharges) : undefined,
+    goldWt: b.goldWt != null ? Number(b.goldWt) : undefined,
+    goldAmt: b.goldAmt != null ? Number(b.goldAmt) : undefined,
+    vchDate: b.vchDate,
+    fromDate: b.fromDate,
+    toDate: b.toDate,
+    loanAc: b.loanAc,
+    cashAc: b.cashAc,
+    licenceNo: b.licenceNo,
+    remarks: b.remarks,
+    adjustedDhrn: b.adjustedDhrn != null ? Number(b.adjustedDhrn) : undefined,
+    uncheckedReceipts: b.uncheckedReceipts != null ? Number(b.uncheckedReceipts) : undefined,
+    collateral: b.collateral,
+  });
+  const dhrnReceiptPayload = (req: any, b: any) => ({
+    scope: scopeOf(req),
+    isuNo: b.isuNo,
+    borrowerAc: b.borrowerAc,
+    borrowerName: b.borrowerName,
+    principalRepaid: Number(b.principalRepaid),
+    interest: b.interest != null ? Number(b.interest) : undefined,
+    intPrc: b.intPrc != null ? Number(b.intPrc) : undefined,
+    loanAc: b.loanAc,
+    cashAc: b.cashAc,
+    intIncAc: b.intIncAc,
+    vchDate: b.vchDate,
+    billNo: b.billNo,
+    fromDate: b.fromDate,
+    toDate: b.toDate,
+    packetNo: b.packetNo,
+    dhrnDate: b.dhrnDate,
+    loanType: b.loanType,
+    dhrnAdjustAmount: b.dhrnAdjustAmount != null ? Number(b.dhrnAdjustAmount) : undefined,
+    advanceDhiranReceipt:
+      b.advanceDhiranReceipt != null ? Number(b.advanceDhiranReceipt) : undefined,
+    dhrnMonths: b.dhrnMonths != null ? Number(b.dhrnMonths) : undefined,
+    interestKasar: b.interestKasar != null ? Number(b.interestKasar) : undefined,
+    interestDays: b.interestDays != null ? Number(b.interestDays) : undefined,
+    interestMonths: b.interestMonths != null ? Number(b.interestMonths) : undefined,
+    empCode: b.empCode,
+    goldAmount: b.goldAmount != null ? Number(b.goldAmount) : undefined,
+    goldWeight: b.goldWeight != null ? Number(b.goldWeight) : undefined,
+    vchDesc: b.vchDesc,
+    panAdjustAmount: b.panAdjustAmount != null ? Number(b.panAdjustAmount) : undefined,
+    adjustInterest: b.adjustInterest != null ? Number(b.adjustInterest) : undefined,
+    adjustDhiran: b.adjustDhiran != null ? Number(b.adjustDhiran) : undefined,
+    rateCutRate: b.rateCutRate != null ? Number(b.rateCutRate) : undefined,
+    rateCutAmount: b.rateCutAmount != null ? Number(b.rateCutAmount) : undefined,
+    rateCutPayAmount: b.rateCutPayAmount != null ? Number(b.rateCutPayAmount) : undefined,
+    rateCutOsAmount: b.rateCutOsAmount != null ? Number(b.rateCutOsAmount) : undefined,
+    items: b.items,
+    isuBook: b.isuBook,
+    isuYear: b.isuYear,
+  });
+
   app.post('/dhrn/issue', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      issueDhrn(prisma, {
-        scope: scopeOf(req),
-        borrowerAc: b.borrowerAc,
-        borrowerName: b.borrowerName,
-        principal: b.principal,
-        intPrc: b.intPrc,
-        intMonths: b.intMonths,
-        loanType: b.loanType,
-        packetNo: b.packetNo,
-        otherCharges: b.otherCharges,
-        goldWt: b.goldWt,
-        goldAmt: b.goldAmt,
-        fromDate: b.fromDate,
-        toDate: b.toDate,
-        collateral: b.collateral,
-      }),
-    );
+    return run(reply, 201, () => issueDhrn(prisma, dhrnIssuePayload(req, b)));
   });
   app.post('/dhrn/receipt', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      receiveDhrn(prisma, {
-        scope: scopeOf(req),
-        isuNo: b.isuNo,
-        borrowerAc: b.borrowerAc,
-        principalRepaid: Number(b.principalRepaid),
-        interest: b.interest != null ? Number(b.interest) : undefined,
-        intPrc: b.intPrc,
-        vchDate: b.vchDate,
-      }),
-    );
+    return run(reply, 201, () => receiveDhrn(prisma, dhrnReceiptPayload(req, b)));
+  });
+  app.post('/loan/received', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => receiveLoan(prisma, dhrnIssuePayload(req, b)));
+  });
+  app.post('/loan/issue', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => issueLoan(prisma, dhrnReceiptPayload(req, b)));
   });
   app.get('/dhrn/:isuNo/outstanding', auth, async (req) => ({
+    isuNo: (req.params as any).isuNo,
+    outstanding: await outstanding(prisma, readScope(req) as any, (req.params as any).isuNo),
+  }));
+  app.get('/loan/:isuNo/outstanding', auth, async (req) => ({
     isuNo: (req.params as any).isuNo,
     outstanding: await outstanding(prisma, readScope(req) as any, (req.params as any).isuNo),
   }));
@@ -1942,11 +3255,24 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- Repair line images (desktop TR_REP_REC "ReparingImage" attachments) ----
+  app.get('/repair-images/state', auth, async (req, reply) => {
+    reply.header('cache-control', 'no-store');
+    const q = (req.query ?? {}) as Record<string, unknown>;
+    return run(reply, 200, async () => ({
+      ...(await getRepairImageState(prisma, readScope(req), {
+        coBook: String(q.imageBook ?? q.coBook ?? ''),
+        vchNo: String(q.vchNo ?? ''),
+        srNo: String(q.srNo ?? ''),
+        coYear: q.imageYear ? String(q.imageYear) : undefined,
+      })),
+      ...(await formMutationCapabilities(req, 'Manufacturing/Repair Receipt')),
+    }));
+  });
   app.get('/repair-images', auth, async (req, reply) => {
     const q = (req.query ?? {}) as Record<string, unknown>;
     return run(reply, 200, () =>
       listRepairImageKeys(prisma, readScope(req), {
-        coBook: String(q.coBook ?? ''),
+        coBook: String(q.imageBook ?? q.coBook ?? ''),
         vchNo: String(q.vchNo ?? ''),
         coYear: q.imageYear ? String(q.imageYear) : undefined,
       }),
@@ -1955,7 +3281,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/repair-images/line', auth, async (req, reply) => {
     const q = (req.query ?? {}) as Record<string, unknown>;
     const image = await getRepairImage(prisma, readScope(req), {
-      coBook: String(q.coBook ?? ''),
+      coBook: String(q.imageBook ?? q.coBook ?? ''),
       vchNo: String(q.vchNo ?? ''),
       srNo: String(q.srNo ?? ''),
       coYear: q.imageYear ? String(q.imageYear) : undefined,
@@ -1978,11 +3304,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .header('content-disposition', `inline; filename="${image.imageNo}.${extension}"`)
       .send(image.data);
   });
-  app.post('/repair-images', auth, async (req, reply) => {
+  app.post('/repair-images', { ...auth, bodyLimit: 6 * 1024 * 1024 }, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
     return run(reply, 200, () =>
       saveRepairImage(prisma, {
+        version: requireImageVersion(b.version),
         scope: scopeOf(req),
         key: {
           coBook: b.imageBook ?? b.coBook,
@@ -2001,6 +3328,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const b = body(req);
     return run(reply, 200, () =>
       deleteRepairImage(prisma, {
+        version: requireImageVersion(b.version),
         scope: scopeOf(req),
         key: {
           coBook: b.imageBook ?? b.coBook,
@@ -2013,37 +3341,88 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- Karigar (manufacturing) ----
+  const karigarInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    karigarAc: b.karigarAc,
+    karigarName: b.karigarName,
+    vchDate: b.vchDate,
+    mainUser: sess(req).sub,
+    lines: b.lines ?? [],
+    billNo: b.billNo,
+    itemType: b.itemType,
+    vchDesc: b.vchDesc,
+    empCode: b.empCode,
+    address1: b.address1,
+    address2: b.address2,
+    address3: b.address3,
+    city: b.city,
+    mobile: b.mobile,
+    bankName: b.bankName,
+    bankAc: b.bankAc,
+    chequeNo: b.chequeNo,
+    chequeAmount: b.chequeAmount != null ? Number(b.chequeAmount) : undefined,
+    cardAc: b.cardAc,
+    cardAmount: b.cardAmount != null ? Number(b.cardAmount) : undefined,
+    cashAmount: b.cashAmount != null ? Number(b.cashAmount) : undefined,
+    kasarAmount: b.kasarAmount != null ? Number(b.kasarAmount) : undefined,
+    billOutstanding: b.billOutstanding != null ? Number(b.billOutstanding) : undefined,
+    creditDays: b.creditDays != null ? Number(b.creditDays) : undefined,
+    discountPct: b.discountPct != null ? Number(b.discountPct) : undefined,
+    discountAmount: b.discountAmount != null ? Number(b.discountAmount) : undefined,
+    otherAmount: b.otherAmount != null ? Number(b.otherAmount) : undefined,
+    taxCode: b.taxCode,
+    taxRatePct: b.taxRatePct != null ? Number(b.taxRatePct) : undefined,
+    taxAmount: b.taxAmount != null ? Number(b.taxAmount) : undefined,
+    tcsCode: b.tcsCode,
+    tcsPct: b.tcsPct != null ? Number(b.tcsPct) : undefined,
+    tcsAmount: b.tcsAmount != null ? Number(b.tcsAmount) : undefined,
+    accountGstType: b.accountGstType,
+    saleBillNo: b.saleBillNo,
+    saleBillBook: b.saleBillBook,
+    partyFine: b.partyFine != null ? Number(b.partyFine) : undefined,
+    labourAmt: b.labourAmt != null ? Number(b.labourAmt) : undefined,
+    labourGstPct: b.labourGstPct != null ? Number(b.labourGstPct) : undefined,
+    gstAc: b.gstAc,
+    interState: !!b.interState,
+    labourAc: b.labourAc,
+    tagPrefix: b.tagPrefix,
+  });
   app.post('/karigar/issue', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      issueKarigar(prisma, {
-        scope: scopeOf(req),
-        karigarAc: b.karigarAc,
-        karigarName: b.karigarName,
-        vchDate: b.vchDate,
-        mainUser: sess(req).sub,
-        lines: b.lines ?? [],
-      }),
-    );
+    return run(reply, 201, () => issueKarigar(prisma, karigarInput(req, b)));
   });
   app.post('/karigar/receive', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      receiveKarigar(prisma, {
+    return run(reply, 201, () => receiveKarigar(prisma, karigarInput(req, b)));
+  });
+  app.post('/old-item-sales', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => createOldItemSale(prisma, karigarInput(req, b)));
+  });
+  app.get('/old-item-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getOldItemSale(prisma, readScope(req), (req.params as any).vchNo));
+  });
+  app.put('/old-item-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editOldItemSale(prisma, {
+        ...karigarInput(req, b),
+        vchNo: (req.params as any).vchNo,
+      }),
+    );
+  });
+  app.delete('/old-item-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteOldItemSale(prisma, {
         scope: scopeOf(req),
-        karigarAc: b.karigarAc,
-        karigarName: b.karigarName,
-        vchDate: b.vchDate,
-        mainUser: sess(req).sub,
-        lines: b.lines ?? [],
-        labourAmt: b.labourAmt != null ? Number(b.labourAmt) : undefined,
-        labourGstPct: b.labourGstPct != null ? Number(b.labourGstPct) : undefined,
-        gstAc: b.gstAc,
-        interState: !!b.interState,
-        labourAc: b.labourAc,
-        tagPrefix: b.tagPrefix,
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -2142,13 +3521,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const b = body(req);
     return run(reply, 200, () =>
       editKarigar(prisma, {
-        ...b,
-        scope: scopeOf(req),
+        ...karigarInput(req, b),
         vchNo: (req.params as any).vchNo,
         mode: 'issue',
-        mainUser: sess(req).sub,
         karigarAc: String(b.karigarAc ?? ''),
-        lines: b.lines ?? [],
       }),
     );
   });
@@ -2171,13 +3547,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const b = body(req);
     return run(reply, 200, () =>
       editKarigar(prisma, {
-        ...b,
-        scope: scopeOf(req),
+        ...karigarInput(req, b),
         vchNo: (req.params as any).vchNo,
         mode: 'receive',
-        mainUser: sess(req).sub,
         karigarAc: String(b.karigarAc ?? ''),
-        lines: b.lines ?? [],
       }),
     );
   });
@@ -2450,6 +3823,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       String(qy.q ?? ''),
       s.coCode,
       Number(qy.limit) || 20,
+      {
+        lcCode: s.lcCode,
+        coYear: s.coYear,
+        acCode: qy.acCode == null ? undefined : String(qy.acCode),
+        itType: qy.itType == null ? undefined : String(qy.itType),
+      },
     );
   });
   app.get('/admin/users', auth, async (req, reply) => {
@@ -2477,13 +3856,76 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // the report shows on screen. Rows are re-derived server-side; the client cannot supply them.
   type ReportBuilder = (prisma: unknown, scope: unknown, range?: unknown) => Promise<unknown>;
 
-  const REPORT_BUILDERS: Record<string, ReportBuilder> = {
+  const REPORT_BUILDERS = {
+    'last-visit': lastVisitReport as ReportBuilder,
+    'address-print': addressPrintReport as ReportBuilder,
+    'entry-check': ((prisma: any, scope: any) =>
+      entryCheckReport(prisma, scope, {
+        pendingOnly: true,
+      })) as ReportBuilder,
+    'user-report': ((prisma: any, scope: any) => userWorkReport(prisma, scope)) as ReportBuilder,
+    'dhiran-report': ((prisma: any, scope: any) =>
+      dhrnLoanReport(prisma, scope, { entryType: 'D' })) as ReportBuilder,
+    'loan-report': ((prisma: any, scope: any) =>
+      dhrnLoanReport(prisma, scope, { entryType: 'L' })) as ReportBuilder,
+    'gst-report': gstLauncherReport as ReportBuilder,
+    'delete-data': deleteDataReport as ReportBuilder,
+    'point-report': pointReport as ReportBuilder,
+    'approval-report': ((prisma: any, scope: any) =>
+      approvalReport(prisma, scope)) as ReportBuilder,
+    'vp-report': ((prisma: any, scope: any) => vpReport(prisma, scope)) as ReportBuilder,
+    'bullion-report': ((prisma: any, scope: any) => bullionReport(prisma, scope)) as ReportBuilder,
+    'karigar-report': ((prisma: any, scope: any) => karigarReport(prisma, scope)) as ReportBuilder,
+    'repair-report': ((prisma: any, scope: any) => repairReport(prisma, scope)) as ReportBuilder,
     // Registered so the slug is recognised rather than 404. Their real filters cannot be expressed in the
     // shared builder signature, so the export route below reads them from the query and calls the SAME
     // builder with them — otherwise a lot-zoom export would always be empty, which looks like "no data"
     // instead of "no lot given".
     'tag-estimate': (prisma: any, scope: any) => tagEstimate(prisma, scope, { direction: 'In' }),
     'order-lot-zoom': (prisma: any, scope: any) => orderLotZoom(prisma, scope, ''),
+    // The HUID register needs a tenant + scope shape, so it is adapted to the shared signature here.
+    huid: ((prisma: any, scope: any) =>
+      huidReport(prisma, scope.tenantId, {
+        CO_CODE: scope.coCode,
+        LC_CODE: scope.lcCode,
+      })) as ReportBuilder,
+    'item-weight-levels': ((prisma: any, scope: any) =>
+      stockLevelReport(prisma, scope.tenantId, { CO_CODE: scope.coCode })) as ReportBuilder,
+    'scheme-monthly': ((prisma: any, scope: any) =>
+      schemeMonthlyReport(prisma, scope)) as ReportBuilder,
+    'bill-profit': ((prisma: any, scope: any) =>
+      billProfitReport(prisma, scope.tenantId, {
+        CO_CODE: scope.coCode,
+        LC_CODE: scope.lcCode,
+      })) as ReportBuilder,
+    'physical-stock-verify': ((prisma: any, scope: any) =>
+      physicalStockReport(prisma, scope.tenantId, {
+        CO_CODE: scope.coCode,
+        LC_CODE: scope.lcCode,
+      })) as ReportBuilder,
+    'size-movement': ((prisma: any, scope: any) =>
+      movementReport(prisma, scope.tenantId, {
+        CO_CODE: scope.coCode,
+        LC_CODE: scope.lcCode,
+      })) as ReportBuilder,
+    'branch-inout': ((prisma: any, scope: any) =>
+      branchInoutReport(prisma, scope)) as ReportBuilder,
+    'other-item-report': ((prisma: any, scope: any) =>
+      otherItemReport(prisma, scope)) as ReportBuilder,
+    'design-move': ((prisma: any, scope: any) => designMoveReport(prisma, scope)) as ReportBuilder,
+    'consi-report': consiReport as ReportBuilder,
+    'old-stock': ((prisma: any, scope: any) => oldStockReport(prisma, scope)) as ReportBuilder,
+    'trading-report': ((prisma: any, scope: any) => tradingReport(prisma, scope)) as ReportBuilder,
+    'tour-report': ((prisma: any, scope: any) => tourReport(prisma, scope)) as ReportBuilder,
+    'tour-tag': ((prisma: any, scope: any) => tourTagReport(prisma, scope)) as ReportBuilder,
+    'order-track': ((prisma: any, scope: any) => orderTrackReport(prisma, scope)) as ReportBuilder,
+    'graph-report': ((prisma: any, scope: any) => graphReport(prisma, scope)) as ReportBuilder,
+    'profit-loss': ((prisma: any, scope: any) => profitAndLoss(prisma, scope)) as ReportBuilder,
+    'final-reports': ((prisma: any, scope: any) => finalReports(prisma, scope)) as ReportBuilder,
+    'mfg-inout': ((prisma: any, scope: any) => mfgInoutReport(prisma, scope)) as ReportBuilder,
+    'mfg-lot-isurec': ((prisma: any, scope: any) =>
+      mfgLotIsuRecReport(prisma, scope)) as ReportBuilder,
+    'mfg-ledger': ((prisma: any, scope: any) => mfgLedgerReport(prisma, scope)) as ReportBuilder,
     'account-balances': accountBalances as ReportBuilder,
     'area-outstanding': areaOutstanding as ReportBuilder,
     'area-wise-sales': areaWiseSales as ReportBuilder,
@@ -2531,7 +3973,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     'top-items': topItems as ReportBuilder,
     'trial-balance': trialBalance as ReportBuilder,
     'trial-balance-full': trialBalanceFull as ReportBuilder,
-  };
+  } satisfies Record<ReportSlug, ReportBuilder>;
+
+  const REPORT_FAMILY_BUILDERS = {
+    'approval-report': approvalReport,
+    'vp-report': vpReport,
+    'bullion-report': bullionReport,
+    'karigar-report': karigarReport,
+    'repair-report': repairReport,
+  } as const;
+  const isReportFamilySlug = (slug: ReportSlug): slug is keyof typeof REPORT_FAMILY_BUILDERS =>
+    Object.prototype.hasOwnProperty.call(REPORT_FAMILY_BUILDERS, slug);
   /**
    * Resolve a report to its rows and totals.
    *
@@ -2540,7 +3992,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
    * express — is applied identically to both formats.
    */
   const resolveReport = async (
-    slug: string,
+    slug: ReportSlug,
     req: FastifyRequest,
   ): Promise<{ rows: Record<string, unknown>[]; totals?: Record<string, unknown> }> => {
     const build = REPORT_BUILDERS[slug]!;
@@ -2549,13 +4001,115 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const result: any =
       slug === 'order-lot-zoom'
         ? await orderLotZoom(prisma, scope, q.lotNo ?? '')
-        : slug === 'tag-estimate'
-          ? await tagEstimate(prisma, scope, {
-              ...readFilters(q),
-              tagNo: q.tagNo || undefined,
-              direction: q.direction === 'Out' ? 'Out' : 'In',
+        : slug === 'entry-check'
+          ? await entryCheckReport(prisma, scope, {
+              pendingOnly: q.pendingOnly,
+              userName: q.userName,
             })
-          : await build(prisma, scope, range(req));
+          : slug === 'user-report'
+            ? await userWorkReport(prisma, scope, {
+                userName: q.userName,
+                itemCodes: q.itemCodes,
+              })
+            : slug === 'dhiran-report' || slug === 'loan-report'
+              ? await dhrnLoanReport(prisma, scope, {
+                  entryType: slug === 'loan-report' ? 'L' : 'D',
+                  mode: q.mode === 'pending' ? 'pending' : 'register',
+                  loanType: q.loanType,
+                  packetNo: q.packetNo,
+                  refNo: q.refNo,
+                  refAc: q.refAc,
+                })
+              : isReportFamilySlug(slug)
+                ? await REPORT_FAMILY_BUILDERS[slug](prisma, scope, { mode: q.mode })
+                : slug === 'branch-inout'
+                  ? await branchInoutReport(prisma, scope, { mode: q.mode })
+                  : slug === 'other-item-report'
+                    ? await otherItemReport(prisma, scope, { mode: q.mode, itemCode: q.itemCode })
+                    : slug === 'design-move'
+                      ? await designMoveReport(prisma, scope, {
+                          mode: q.mode,
+                          tagNo: q.tagNo,
+                          designNo: q.designNo,
+                        })
+                      : slug === 'old-stock'
+                        ? await oldStockReport(prisma, scope, { karigarCode: q.karigarCode })
+                        : slug === 'trading-report'
+                          ? await tradingReport(prisma, scope, {
+                              mode: q.mode,
+                              salesAc: q.salesAc,
+                              purchaseAc: q.purchaseAc,
+                              bookCodes: q.bookCodes,
+                            })
+                          : slug === 'tour-report'
+                            ? await tourReport(prisma, scope, {
+                                mode: q.mode,
+                                status: q.status,
+                                employeeCode: q.employeeCode,
+                                onlyTagged: q.onlyTagged,
+                              })
+                            : slug === 'tour-tag'
+                              ? await tourTagReport(prisma, scope, {
+                                  status: q.status,
+                                  employeeCode: q.employeeCode,
+                                  onlyTagged: q.onlyTagged,
+                                  tagNo: q.tagNo,
+                                  issueYear: q.issueYear,
+                                  issueBook: q.issueBook,
+                                  issueNo: q.issueNo,
+                                })
+                              : slug === 'graph-report'
+                                ? await graphReport(prisma, scope, {
+                                    mode: q.mode,
+                                    metric: q.metric,
+                                    transactionType: q.transactionType,
+                                    bookType: q.bookType,
+                                    itemType: q.itemType,
+                                    grCode: q.grCode,
+                                    lcCode: q.lcCode,
+                                    dataType: q.dataType,
+                                  })
+                                : slug === 'order-track'
+                                  ? await orderTrackReport(prisma, scope, {
+                                      orderNo: q.orderNo,
+                                      employeeCode: q.employeeCode,
+                                      lcCode: q.lcCode,
+                                      onlyOrderTagStock: q.onlyOrderTagStock,
+                                      designNo: q.designNo,
+                                      karigarCode: q.karigarCode,
+                                      status: q.status,
+                                    })
+                                  : slug === 'mfg-inout'
+                                    ? await mfgInoutReport(prisma, scope, {
+                                        karigarCode: q.karigarCode,
+                                      })
+                                    : slug === 'mfg-lot-isurec'
+                                      ? await mfgLotIsuRecReport(prisma, scope, {
+                                          partyCode: q.partyCode,
+                                          karigarCode: q.karigarCode,
+                                          lotNo: q.lotNo,
+                                          useItemLot: q.useItemLot,
+                                        })
+                                      : slug === 'mfg-ledger'
+                                        ? await mfgLedgerReport(prisma, scope, {
+                                            lcCode: q.lcCode,
+                                            acGroup: q.acGroup,
+                                            khataNo: q.khataNo,
+                                            includeZero: q.includeZero,
+                                          })
+                                        : slug === 'scheme-monthly'
+                                          ? await schemeMonthlyReport(prisma, scope, {
+                                              schemeCode: q.schemeCode,
+                                              lcCode: q.lcCode,
+                                              withAdjScheme: q.withAdjScheme,
+                                            })
+                                          : slug === 'tag-estimate'
+                                            ? await tagEstimate(prisma, scope, {
+                                                ...readFilters(q),
+                                                tagNo: q.tagNo || undefined,
+                                                direction: q.direction === 'Out' ? 'Out' : 'In',
+                                              })
+                                            : await build(prisma, scope, range(req));
     const rows: Record<string, unknown>[] = Array.isArray(result)
       ? result
       : Array.isArray(result?.rows)
@@ -2578,7 +4132,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/reports/:report/export.csv', auth, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const slug = String((req.params as any).report ?? '');
-    if (!REPORT_BUILDERS[slug]) {
+    if (!isReportSlug(slug)) {
       return reply.code(404).send({ error: 'unknown-report', report: slug });
     }
     const { rows, totals } = await resolveReport(slug, req);
@@ -2591,36 +4145,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/reports/:report/export.xlsx', auth, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const slug = String((req.params as any).report ?? '');
-    const build = REPORT_BUILDERS[slug];
-    if (!build) return reply.code(404).send({ error: 'unknown-report', report: slug });
-    const scope = readScope(req);
-    // The range is always supplied: a builder that does not accept one ignores it, whereas guessing which
-    // reports are date-filtered would silently export an unfiltered report.
-    const q = (req.query ?? {}) as Record<string, string | undefined>;
-    // These two carry filters the shared builder signature cannot express, so the export reproduces exactly
-    // what the screen requested instead of exporting a default view.
-    const result: any =
-      slug === 'order-lot-zoom'
-        ? await orderLotZoom(prisma, scope, q.lotNo ?? '')
-        : slug === 'tag-estimate'
-          ? await tagEstimate(prisma, scope, {
-              prCode: q.prCode || undefined,
-              grCode: q.grCode || undefined,
-              itType: q.itType ? q.itType.slice(0, 1) : undefined,
-              tagNo: q.tagNo || undefined,
-              direction: q.direction === 'Out' ? 'Out' : 'In',
-            })
-          : await build(prisma, scope, range(req));
-    // Report builders return either a bare array or { rows, totals }.
-    const rows: Record<string, unknown>[] = Array.isArray(result)
-      ? result
-      : Array.isArray(result?.rows)
-        ? result.rows
-        : [result];
-    const totals =
-      !Array.isArray(result) && result?.totals && typeof result.totals === 'object'
-        ? (result.totals as Record<string, unknown>)
-        : undefined;
+    if (!isReportSlug(slug)) {
+      return reply.code(404).send({ error: 'unknown-report', report: slug });
+    }
+    const { rows, totals } = await resolveReport(slug, req);
     const out = await renderXlsx([inferSheet(slug, rows, totals)], slug);
     return reply
       .header('content-type', out.contentType)
@@ -2630,9 +4158,23 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // ---- Tag images (desktop BtnImgS / BtnImgC / BtnImgD, 24 forms) ----
   // One shared surface keyed on the tag instance, so every form that shows a tag can attach, replace,
   // enlarge and delete its photograph without repeating the plumbing.
+  app.get('/stock/tag-image/state', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => ({
+      ...(await getEntityImageState(prisma, {
+        ...scopeOf(req),
+        entityType: q.entityType ?? 'TAG',
+        entityKey: String(q.entityKey ?? q.tagNo ?? ''),
+        instance: Number(q.instance ?? q.vchSrno ?? 0),
+        imageType: q.imageType,
+      })),
+      ...(await formMutationCapabilities(req, 'Inventory/Tag Print')),
+    }));
+  });
   app.get('/stock/tag-image', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
-    const s = sess(req);
+    const s = scopeOf(req);
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const rec = await getEntityImage(prisma, {
       tenantId: s.tenantId,
@@ -2653,7 +4195,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.get('/stock/tag-image/list', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
-    const s = sess(req);
+    const s = scopeOf(req);
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const tags = q.tags
       ? String(q.tags)
@@ -2674,9 +4216,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     };
   });
-  app.post('/stock/tag-image', auth, async (req, reply) => {
+  app.post('/stock/tag-image', { ...auth, bodyLimit: 6 * 1024 * 1024 }, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
-    const s = sess(req);
+    const s = scopeOf(req);
     const b = body(req);
     return run(reply, 200, () =>
       saveEntityImage(
@@ -2690,30 +4232,41 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           instance: Number(b.instance ?? b.vchSrno ?? 0),
           imageType: b.imageType ? String(b.imageType) : undefined,
         },
-        { data: b.data, mimeType: b.mimeType, user: s.sub },
+        {
+          data: b.data,
+          mimeType: b.mimeType,
+          user: sess(req).sub,
+          version: requireImageVersion(b.version),
+        },
       ),
     );
   });
   app.delete('/stock/tag-image', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    const s = sess(req);
+    const s = scopeOf(req);
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     return run(reply, 200, () =>
-      deleteEntityImage(prisma, {
-        tenantId: s.tenantId,
-        coCode: s.coCode,
-        lcCode: s.lcCode,
-        entityType: q.entityType ?? 'TAG',
-        entityKey: String(q.entityKey ?? q.tagNo ?? ''),
-        instance: Number(q.instance ?? q.vchSrno ?? 0),
-        imageType: q.imageType,
-      }),
+      deleteEntityImage(
+        prisma,
+        {
+          tenantId: s.tenantId,
+          coCode: s.coCode,
+          lcCode: s.lcCode,
+          entityType: q.entityType ?? 'TAG',
+          entityKey: String(q.entityKey ?? q.tagNo ?? ''),
+          instance: Number(q.instance ?? q.vchSrno ?? 0),
+          imageType: q.imageType,
+        },
+        requireImageVersion(q.version ?? (req.body as any)?.version),
+      ),
     );
   });
 
   // ---- Data repair console (desktop MS_UPDATE) ----
-  // Every operation is preview-then-apply. Listing is view-gated; preview and apply are admin-gated
-  // because they rewrite historical financial and stock data.
+  // The whole console is admin-only in routePolicy.ts (ADMIN_ONLY + SCOPED_ADMIN_ONLY), so central
+  // authorization has already refused a non-administrator before any handler here runs. `guard` re-asserts
+  // that the central hook authorized this request; a destructive apply additionally requires a reason,
+  // re-authentication and a verified recent backup, all enforced inside applyRepair.
   app.get('/utilities/data-repair/operations', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return {
@@ -2728,7 +4281,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     };
   });
   app.post('/utilities/data-repair/:id/preview', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return; // admin-gate
+    if (!guard(req, reply, 'view')) return;
     const s = sess(req);
     return run(reply, 200, () =>
       previewRepair(
@@ -2740,11 +4293,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   app.post('/utilities/data-repair/:id/apply', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return; // admin-gate
+    if (!guard(req, reply, 'delete')) return;
     const s = sess(req);
     const b = body(req);
-    return run(reply, 200, () =>
-      applyRepair(
+    try {
+      const applied = await applyRepair(
         prisma,
         String((req.params as any).id),
         { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear },
@@ -2752,10 +4305,27 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           previewHash: String(b.previewHash ?? ''),
           confirmation: b.confirmation ? String(b.confirmation) : undefined,
           operator: s.sub ?? 'unknown',
+          loginCoCode: s.loginCoCode,
           reason: b.reason ? String(b.reason) : undefined,
+          operatorPassword: b.operatorPassword ? String(b.operatorPassword) : undefined,
+          backupReference: b.backupReference ? String(b.backupReference) : undefined,
         },
-      ),
-    );
+      );
+      return reply.code(200).send(applied);
+    } catch (e: any) {
+      // A failed or missing re-authentication is an authorization outcome, not a bad request: the operator
+      // has not proved they may act, so it must not read as "fix your payload".
+      if (
+        e?.name === 'RepairError' &&
+        (e.code === 'reauthentication-required' || e.code === 'reauthentication-failed')
+      ) {
+        return reply.code(403).send({ error: 'RepairError', code: e.code, message: e.message });
+      }
+      if (e?.name === 'RepairError') {
+        return reply.code(400).send({ error: 'RepairError', code: e.code, message: e.message });
+      }
+      throw e;
+    }
   });
   app.get('/utilities/data-repair/runs', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -2799,9 +4369,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.post('/backup/restore', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return; // admin-gate — HIGH-RISK: replaces this tenant's company data
+    if (containMutation(reply, 'logical-restore')) return;
     const b = body(req);
     return run(reply, 200, () =>
-      restoreCompany(prisma, sess(req).tenantId, b.doc ?? b, { clear: b.clear !== false }),
+      restoreCompany(
+        prisma,
+        { tenantId: sess(req).tenantId, companyCode: sess(req).coCode },
+        b.doc ?? b,
+        { mode: 'replace' },
+      ),
     );
   });
   app.get('/admin/users/:loginName/form-rights', auth, async (req, reply) => {
@@ -3014,6 +4590,84 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     );
   });
+  app.get('/masters/diamond-sizes', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const s = readScope(req);
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      q.itCode
+        ? getDiamondSizes(prisma, { tenantId: s.tenantId, coCode: s.coCode }, q.itCode)
+        : listDiamondSizeSummary(prisma, { tenantId: s.tenantId, coCode: s.coCode }),
+    );
+  });
+  app.post('/masters/diamond-sizes', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const s = readScope(req);
+    const b = body(req);
+    return run(reply, 200, () =>
+      saveDiamondSizes(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode },
+        String(b.itCode ?? ''),
+        Array.isArray(b.rows) ? b.rows : [],
+        sess(req).sub,
+      ),
+    );
+  });
+  app.delete('/masters/diamond-sizes', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const s = readScope(req);
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      deleteDiamondSizes(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode },
+        String(q.itCode ?? ''),
+      ),
+    );
+  });
+  app.get('/masters/item-stock-limits', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const s = readScope(req);
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      q.itCode
+        ? getItemStockLimits(
+            prisma,
+            { tenantId: s.tenantId, coCode: s.coCode },
+            q.itCode,
+            q.itDesign ?? 'N',
+          )
+        : listItemStockLimitSummary(prisma, { tenantId: s.tenantId, coCode: s.coCode }),
+    );
+  });
+  app.post('/masters/item-stock-limits', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const s = readScope(req);
+    const b = body(req);
+    return run(reply, 200, () =>
+      saveItemStockLimits(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode },
+        String(b.itCode ?? ''),
+        String(b.itDesign ?? 'N'),
+        Array.isArray(b.rows) ? b.rows : [],
+      ),
+    );
+  });
+  app.delete('/masters/item-stock-limits', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const s = readScope(req);
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      deleteItemStockLimits(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode },
+        String(q.itCode ?? ''),
+        String(q.itDesign ?? 'N'),
+      ),
+    );
+  });
   app.get('/reminder-entries', auth, async (req) => {
     const s = readScope(req);
     return listReminderEntries(prisma, { tenantId: s.tenantId, coCode: s.coCode });
@@ -3066,6 +4720,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.put('/stock/tag-opening/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
+    // Containment DISCHARGED: the P0-06/WP-08 exit gate is satisfied by
+    // tagOpeningRoundTrip.db.test.ts (symmetric create/get/update across BAR_DETL, BAR_IDTL, tag
+    // identity and stock movement) plus the HUID text fix on the page. See containment.mjs.
     const b = body(req);
     return run(reply, 200, () =>
       editTagOpening(
@@ -3178,6 +4835,73 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  const stockInoutInput = (req: FastifyRequest, b: any) => ({
+    scope: scopeOf(req),
+    mainUser: sess(req).sub,
+    vchDate: b.vchDate,
+    employeeCode: b.employeeCode,
+    description: b.description,
+    fromLcCode: b.fromLcCode,
+    toLcCode: b.toLcCode,
+    fromBook: b.fromBook,
+    fromVchNo: b.fromVchNo,
+    toBook: b.toBook,
+    toVchNo: b.toVchNo,
+    stockTransferred: b.stockTransferred,
+    lines: b.lines ?? [],
+  });
+  app.post('/stock/out', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => createStockOut(prisma, stockInoutInput(req, b)));
+  });
+  app.get('/stock/out/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getStockOut(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/stock/out/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editStockOut(prisma, stockInoutInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/stock/out/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteStockOut(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+  app.post('/stock/in', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => createStockIn(prisma, stockInoutInput(req, b)));
+  });
+  app.get('/stock/in/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getStockIn(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/stock/in/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editStockIn(prisma, stockInoutInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/stock/in/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteStockIn(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
   app.post('/stock/adjust', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -3196,6 +4920,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.post('/stock/tag-transfer', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
+    if (containMutation(reply, 'tag-transfer')) return;
     const b = body(req);
     return run(reply, 201, () =>
       tagTransfer(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
@@ -3203,6 +4928,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.delete('/stock/tag-transfer/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
+    if (containMutation(reply, 'tag-transfer')) return;
     return run(reply, 200, () =>
       deleteTagTransfer(prisma, {
         scope: scopeOf(req),
@@ -3229,6 +4955,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.post('/stock/tag-cancel', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
+    if (containMutation(reply, 'tag-cancel')) return;
     const b = body(req);
     return run(reply, 201, () =>
       tagCancel(prisma, {
@@ -3239,8 +4966,54 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  app.post('/stock/tag-adjust', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () =>
+      saveTagAdjust(prisma, {
+        scope: scopeOf(req),
+        vchDate: b.vchDate,
+        book: b.book,
+        acCode: b.acCode,
+        empCode: b.empCode,
+        vchDesc: b.vchDesc,
+        mainUser: sess(req).sub,
+        lines: b.lines ?? [],
+      }),
+    );
+  });
+  app.get('/stock/tag-adjust/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getTagAdjust(prisma, scopeOf(req), (req.params as any).vchNo, (req.query as any)?.book),
+    );
+  });
+  app.put('/stock/tag-adjust/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      saveTagAdjust(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        vchDate: b.vchDate,
+        book: b.book,
+        acCode: b.acCode,
+        empCode: b.empCode,
+        vchDesc: b.vchDesc,
+        mainUser: sess(req).sub,
+        lines: b.lines ?? [],
+      }),
+    );
+  });
+  app.delete('/stock/tag-adjust/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteTagAdjust(prisma, scopeOf(req), (req.params as any).vchNo, body(req).book),
+    );
+  });
   app.post('/stock/tag-weight-diff', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
+    if (containMutation(reply, 'tag-weight-difference')) return;
     const b = body(req);
     return run(reply, 201, () =>
       tagWeightDiff(prisma, {
@@ -3260,12 +5033,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.delete('/stock/tag-cancel/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
+    if (containMutation(reply, 'tag-cancel')) return;
     return run(reply, 200, () =>
       deleteTagCancel(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
     );
   });
   app.delete('/stock/tag-weight-diff/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
+    if (containMutation(reply, 'tag-weight-difference')) return;
     return run(reply, 200, () =>
       deleteTagWeightDiff(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
     );
@@ -3612,6 +5387,67 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       deletePhysicalStock(prisma, scopeOf(req), String((req.params as any).vchNo)),
     );
   });
+  app.post('/stock/stone-dm-cf', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () =>
+      saveStoneDmCf(prisma, {
+        scope: scopeOf(req),
+        vchDate: b.vchDate,
+        employeeCode: b.employeeCode,
+        description: b.description,
+        lines: b.lines ?? [],
+        mainUser: sess(req).sub,
+      }),
+    );
+  });
+  app.get('/stock/stone-dm-cf/source-list', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const s = scopeOf(req);
+    const qy = (req.query as any) || {};
+    return run(reply, 200, () =>
+      listStoneDmCfSources(
+        prisma,
+        s.tenantId,
+        { CO_CODE: s.coCode, LC_CODE: s.lcCode },
+        {
+          tblCode: qy.tblCode || undefined,
+          itCode: qy.itCode || undefined,
+          tagNo: qy.tagNo || undefined,
+          vchSrno: qy.vchSrno ? Number(qy.vchSrno) : undefined,
+          limit: qy.limit ? Number(qy.limit) : undefined,
+          offset: qy.offset ? Number(qy.offset) : undefined,
+        },
+      ),
+    );
+  });
+  app.get('/stock/stone-dm-cf/:vchNo', auth, async (req, reply) =>
+    run(reply, 200, () => getStoneDmCf(prisma, readScope(req), String((req.params as any).vchNo))),
+  );
+  app.put('/stock/stone-dm-cf/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      saveStoneDmCf(
+        prisma,
+        {
+          scope: scopeOf(req),
+          vchDate: b.vchDate,
+          employeeCode: b.employeeCode,
+          description: b.description,
+          lines: b.lines ?? [],
+          mainUser: sess(req).sub,
+        },
+        String((req.params as any).vchNo),
+      ),
+    );
+  });
+  app.delete('/stock/stone-dm-cf/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteStoneDmCf(prisma, scopeOf(req), String((req.params as any).vchNo)),
+    );
+  });
   app.post('/stock/physical-reconcile', auth, async (req) => {
     const s = scopeOf(req);
     const b = body(req);
@@ -3654,28 +5490,130 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       },
     );
   });
-  app.get('/masters/design-book', auth, async (req) => {
+  app.get('/masters/design-book/component-defaults', auth, async (req, reply) => {
     const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    return listDesignBook(
-      prisma,
-      { tenantId: s.tenantId, coCode: s.coCode },
-      String(qy.bookName ?? ''),
-      String(qy.prCode ?? ''),
+    return run(reply, 200, () =>
+      getDesignComponentDefaults(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode },
+        String((req.query as any).itCode ?? ''),
+      ),
     );
   });
-  app.post('/masters/design-book', auth, async (req) => {
+  app.get('/masters/design-book/calculation-config', auth, async (req, reply) => {
+    const s = scopeOf(req);
+    return run(reply, 200, () =>
+      getDesignCalculationConfig(prisma, { tenantId: s.tenantId, coCode: s.coCode }),
+    );
+  });
+  app.get('/masters/design-book', auth, async (req, reply) => {
+    const s = scopeOf(req);
+    const qy = (req.query as any) || {};
+    return run(reply, 200, () =>
+      listDesignBook(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode },
+        String(qy.bookName ?? ''),
+        String(qy.prCode ?? ''),
+      ),
+    );
+  });
+  const saveDesignBookRequest = async (req: FastifyRequest, reply: FastifyReply) => {
     const s = scopeOf(req);
     const body = (req.body as any) || {};
-    const written = await saveDesignBook(prisma, {
-      scope: { tenantId: s.tenantId, coCode: s.coCode },
-      bookName: String(body.bookName ?? ''),
-      prCode: String(body.prCode ?? ''),
-      vchDate: body.vchDate,
-      mainUser: sess(req).sub,
-      lines: Array.isArray(body.lines) ? body.lines : [],
-    });
-    return { written };
+    if (req.method === 'PUT' && (!body.expectedVersion || body.expectedVersion === 'new')) {
+      return reply.code(400).send({
+        error: 'DesignBookValidationError',
+        message: 'Load the design book before editing it',
+      });
+    }
+    return run(reply, 200, async () => ({
+      written: await saveDesignBook(prisma, {
+        scope: { tenantId: s.tenantId, coCode: s.coCode },
+        bookName: String(body.bookName ?? ''),
+        prCode: String(body.prCode ?? ''),
+        vchDate: body.vchDate,
+        mainUser: sess(req).sub,
+        expectedVersion: req.method === 'POST' ? 'new' : body.expectedVersion,
+        lines: Array.isArray(body.lines) ? body.lines : [],
+      }),
+    }));
+  };
+  app.post('/masters/design-book', auth, saveDesignBookRequest);
+  app.put('/masters/design-book', auth, saveDesignBookRequest);
+  app.delete('/masters/design-book', auth, async (req, reply) => {
+    const s = scopeOf(req);
+    const b = { ...((req.query ?? {}) as Record<string, unknown>), ...body(req) };
+    if (!b.expectedVersion || b.expectedVersion === 'new') {
+      return reply.code(400).send({
+        error: 'DesignBookValidationError',
+        message: 'Load the design book before deleting it',
+      });
+    }
+    return run(reply, 200, async () => ({
+      deleted: await deleteDesignBook(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode },
+        String(b.bookName ?? ''),
+        String(b.prCode ?? ''),
+        b.expectedVersion == null ? undefined : String(b.expectedVersion),
+      ),
+    }));
+  });
+  const designImageKey = (req: FastifyRequest, entityKey: unknown) => {
+    const s = scopeOf(req);
+    return {
+      tenantId: s.tenantId,
+      coCode: s.coCode,
+      lcCode: '',
+      entityType: 'DESIGN',
+      entityKey: String(entityKey ?? ''),
+      instance: 0,
+      imageType: 'D',
+      requireDesignParent: true,
+    };
+  };
+  app.get('/masters/design-book/image/state', auth, async (req, reply) => {
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => ({
+      ...(await getEntityImageState(prisma, designImageKey(req, (req.query as any)?.entityKey))),
+      ...(await formMutationCapabilities(req, 'Masters/Design Book')),
+    }));
+  });
+  app.get('/masters/design-book/image', auth, async (req, reply) => {
+    const key = designImageKey(req, (req.query as any)?.entityKey);
+    if (!key.entityKey.trim()) return reply.code(400).send({ error: 'design-image-key-required' });
+    const rec = await getEntityImage(prisma, key);
+    if (!rec) return reply.code(404).send({ error: 'design-image-not-found' });
+    return reply
+      .type(rec.mimeType)
+      .header('cache-control', 'private, no-cache')
+      .header('x-content-type-options', 'nosniff')
+      .send(rec.bytes);
+  });
+  app.post(
+    '/masters/design-book/image',
+    { ...auth, bodyLimit: 6 * 1024 * 1024 },
+    async (req, reply) => {
+      const b = body(req);
+      return run(reply, 200, () =>
+        saveEntityImage(prisma, designImageKey(req, b.entityKey), {
+          version: requireImageVersion(b.version),
+          data: b.data,
+          mimeType: b.mimeType,
+          user: sess(req).sub,
+        }),
+      );
+    },
+  );
+  app.delete('/masters/design-book/image', auth, async (req, reply) => {
+    return run(reply, 200, () =>
+      deleteEntityImage(
+        prisma,
+        designImageKey(req, (req.query as any)?.entityKey),
+        requireImageVersion((req.query as any)?.version ?? (req.body as any)?.version),
+      ),
+    );
   });
   app.post('/stock/tag-print/stage', auth, async (req) => {
     const s = scopeOf(req);
@@ -3920,10 +5858,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       },
       einvoice: {
         provider: 'Chartered Info GSP (charteredinfo.com)',
-        status:
-          irnTransportFromEnv().mode === 'fake'
-            ? 'wired (Fake) — set GSP_ASPID/GSP_PASSWORD/GSP_GSTIN/GSP_USER/GSP_EINV_PWD to go live'
-            : `live (${irnTransportFromEnv().mode})`,
+        // gspStatus() computes the mode from the environment WITHOUT constructing a transport. Calling
+        // irnTransportFromEnv() here would throw in production once credentials are absent, taking down the
+        // readiness endpoint precisely when an operator needs it to explain why e-invoicing is refusing.
+        status: !gspStatus().configured
+          ? 'wired (Fake) — set GSP_ASPID/GSP_PASSWORD/GSP_GSTIN/GSP_USER/GSP_EINV_PWD and GSP_SANDBOX to go live'
+          : `live (${gspStatus().mode})`,
       },
       weighingScale: {
         port: behavior.weightPort,
@@ -4000,6 +5940,220 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/reports/dhrn-outstanding', auth, async (req) =>
     dhrnOutstandingList(prisma, readScope(req)),
   );
+  app.get('/reports/last-visit', auth, async (req) => lastVisitReport(prisma, readScope(req)));
+  app.get('/reports/address-print', auth, async (req) =>
+    addressPrintReport(prisma, readScope(req)),
+  );
+  app.get('/reports/entry-check', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      entryCheckReport(prisma, readScope(req), {
+        pendingOnly: q.pendingOnly,
+        userName: q.userName,
+      }),
+    );
+  });
+  app.get('/reports/entry-check/detail', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      entryCheckDetailReport(prisma, readScope(req), {
+        coBook: q.coBook ?? '',
+        vchNo: q.vchNo ?? '',
+      }),
+    );
+  });
+  app.post('/reports/entry-check/mark-checked', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    const rows = Array.isArray(b.rows) ? b.rows : [b];
+    return run(reply, 200, () => markEntryChecked(prisma, readScope(req), rows));
+  });
+  app.get('/reports/user-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      userWorkReport(prisma, readScope(req), {
+        userName: q.userName,
+        itemCodes: q.itemCodes,
+      }),
+    );
+  });
+  app.get('/reports/dhiran-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      dhrnLoanReport(prisma, readScope(req), {
+        entryType: 'D',
+        mode: q.mode === 'pending' ? 'pending' : 'register',
+        loanType: q.loanType,
+        packetNo: q.packetNo,
+        refNo: q.refNo,
+        refAc: q.refAc,
+      }),
+    );
+  });
+  app.get('/reports/loan-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      dhrnLoanReport(prisma, readScope(req), {
+        entryType: 'L',
+        mode: q.mode === 'pending' ? 'pending' : 'register',
+        loanType: q.loanType,
+        packetNo: q.packetNo,
+        refNo: q.refNo,
+        refAc: q.refAc,
+      }),
+    );
+  });
+  app.get('/reports/gst-report', auth, async (req) => gstLauncherReport(prisma, readScope(req)));
+  app.get('/reports/delete-data', auth, async (req, reply) => {
+    return run(reply, 200, () => deleteDataReport(prisma, readScope(req)));
+  });
+  app.get('/reports/point-report', auth, async (req, reply) => {
+    return run(reply, 200, () => pointReport(prisma, readScope(req)));
+  });
+  app.get('/reports/point-report/detail', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      pointReportDetail(prisma, readScope(req), String(q.memberCode ?? '')),
+    );
+  });
+  app.get('/reports/approval-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => approvalReport(prisma, readScope(req), { mode: q.mode }));
+  });
+  app.get('/reports/vp-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => vpReport(prisma, readScope(req), { mode: q.mode }));
+  });
+  app.get('/reports/bullion-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => bullionReport(prisma, readScope(req), { mode: q.mode }));
+  });
+  app.get('/reports/karigar-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => karigarReport(prisma, readScope(req), { mode: q.mode }));
+  });
+  app.get('/reports/repair-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => repairReport(prisma, readScope(req), { mode: q.mode }));
+  });
+  app.get('/reports/branch-inout', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => branchInoutReport(prisma, readScope(req), { mode: q.mode }));
+  });
+  app.get('/reports/other-item-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      otherItemReport(prisma, readScope(req), { mode: q.mode, itemCode: q.itemCode }),
+    );
+  });
+  app.get('/reports/design-move', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      designMoveReport(prisma, readScope(req), {
+        mode: q.mode,
+        tagNo: q.tagNo,
+        designNo: q.designNo,
+      }),
+    );
+  });
+  app.get('/reports/design-move/detail', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      designMoveDetailReport(prisma, readScope(req), {
+        mode: q.mode,
+        key: q.key,
+        size: q.size,
+        designNo: q.designNo,
+      }),
+    );
+  });
+  app.get('/reports/consi-report', auth, async (req, reply) => {
+    return run(reply, 200, () => consiReport(prisma, readScope(req)));
+  });
+  app.get('/reports/old-stock', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      oldStockReport(prisma, readScope(req), { karigarCode: q.karigarCode }),
+    );
+  });
+  app.get('/reports/trading-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      tradingReport(prisma, readScope(req), {
+        mode: q.mode,
+        salesAc: q.salesAc,
+        purchaseAc: q.purchaseAc,
+        bookCodes: q.bookCodes,
+      }),
+    );
+  });
+  app.get('/reports/tour-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      tourReport(prisma, readScope(req), {
+        mode: q.mode,
+        status: q.status,
+        employeeCode: q.employeeCode,
+        onlyTagged: q.onlyTagged,
+      }),
+    );
+  });
+  app.get('/reports/tour-tag', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      tourTagReport(prisma, readScope(req), {
+        status: q.status,
+        employeeCode: q.employeeCode,
+        onlyTagged: q.onlyTagged,
+        tagNo: q.tagNo,
+        issueYear: q.issueYear,
+        issueBook: q.issueBook,
+        issueNo: q.issueNo,
+      }),
+    );
+  });
+  app.get('/reports/mfg-inout', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      mfgInoutReport(prisma, readScope(req), { karigarCode: q.karigarCode }),
+    );
+  });
+  app.get('/reports/mfg-lot-isurec', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      mfgLotIsuRecReport(prisma, readScope(req), {
+        partyCode: q.partyCode,
+        karigarCode: q.karigarCode,
+        lotNo: q.lotNo,
+        useItemLot: q.useItemLot,
+      }),
+    );
+  });
+  app.get('/reports/mfg-ledger', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      mfgLedgerReport(prisma, readScope(req), {
+        lcCode: q.lcCode,
+        acGroup: q.acGroup,
+        khataNo: q.khataNo,
+        includeZero: q.includeZero,
+      }),
+    );
+  });
+  app.get('/reports/mfg-ledger/detail', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      mfgLedgerDetailReport(prisma, readScope(req), {
+        acCode: q.acCode,
+        coBook: q.coBook,
+        lcCode: q.lcCode,
+      }),
+    );
+  });
+  app.get('/reports/consi-report/detail', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => consiDetailReport(prisma, readScope(req), q.acCode));
+  });
   app.get('/vouchers/recent', auth, async (req) => {
     const s = scopeOf(req);
     const qy = (req.query as any) || {};
@@ -4115,6 +6269,37 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  // RP_GRAPH — seven desktop graph buttons exposed as one mode-selected report.
+  app.get('/reports/graph-report', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      graphReport(prisma, readScope(req), {
+        mode: q.mode,
+        metric: q.metric,
+        transactionType: q.transactionType,
+        bookType: q.bookType,
+        itemType: q.itemType,
+        grCode: q.grCode,
+        lcCode: q.lcCode,
+        dataType: q.dataType,
+      }),
+    );
+  });
+  // RP_ORD_TRACK — order tracking report with pending/all status filters.
+  app.get('/reports/order-track', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      orderTrackReport(prisma, readScope(req), {
+        orderNo: q.orderNo,
+        employeeCode: q.employeeCode,
+        lcCode: q.lcCode,
+        onlyOrderTagStock: q.onlyOrderTagStock,
+        designNo: q.designNo,
+        karigarCode: q.karigarCode,
+        status: q.status,
+      }),
+    );
+  });
   // Which of the eleven RP_ALL panel dimensions a report can honour. Exposed so the screen does not offer a
   // filter that would have to be refused, and so a filter is never silently dropped.
   app.get('/reports/:report/filters', auth, async (req, reply) => {
@@ -4166,6 +6351,19 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   );
   app.get('/reports/sales-by-party', auth, async (req) => salesByParty(prisma, readScope(req)));
   app.get('/reports/sales-by-item', auth, async (req) => salesByItem(prisma, readScope(req)));
+  app.get('/reports/profit-loss', auth, async (req) => profitAndLoss(prisma, readScope(req)));
+  app.get('/reports/final-reports', auth, async (req) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    const n = (v: string | undefined): number | undefined =>
+      v == null || v === '' ? undefined : Number(v);
+    return finalReports(prisma, readScope(req), {
+      closingDate: q.closingDate || undefined,
+      goldRate: n(q.goldRate),
+      silverRate: n(q.silverRate),
+      ledgerFineGold: n(q.ledgerFineGold),
+      ledgerFineSilver: n(q.ledgerFineSilver),
+    });
+  });
   app.get('/reports/balance-sheet', auth, async (req) => {
     // Desktop RP_BALANCE passes an operator-entered closing date and gold/silver rates into
     // Ac_Final.Trading_Stock; without a rate the metal pass cannot value stock at all.
@@ -4188,6 +6386,16 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/reports/scheme-adjustments', auth, async (req) =>
     schemeAdjustments(prisma, readScope(req)),
   );
+  app.get('/reports/scheme-monthly', auth, async (req, reply) => {
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      schemeMonthlyReport(prisma, readScope(req), {
+        schemeCode: q.schemeCode,
+        lcCode: q.lcCode,
+        withAdjScheme: q.withAdjScheme,
+      }),
+    );
+  });
   app.get('/reports/item-stock-ledger', auth, async (req) =>
     itemStockLedger(prisma, readScope(req)),
   );
@@ -4232,22 +6440,75 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const s = readScope(req);
     const spec = loadReportSpec(String(q.name ?? ''));
     if (!spec) return reply.code(404).send({ error: 'report-spec-not-found' });
-    const bound = await bindReport(prisma, spec, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coBook: String(s.coBook ?? 'SAL'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const missing = [
+      !s.coYear && 'coYear',
+      !s.coBook && 'coBook',
+      !String(q.vchNo ?? '').trim() && 'vchNo',
+    ].filter(Boolean);
+    if (missing.length) return reply.code(400).send({ error: 'scope-required', fields: missing });
+    if (q.orderFamily != null && !['SALES ORDER', 'TOUR ORDER'].includes(String(q.orderFamily))) {
+      return reply.code(400).send({ error: 'invalid-order-family' });
+    }
+    if (q.copy != null && !Object.hasOwn(ORDER_REPORT_COPIES, String(q.copy))) {
+      return reply.code(400).send({ error: 'invalid-order-copy' });
+    }
+    let bound: Awaited<ReturnType<typeof bindReport>>;
+    try {
+      bound = await bindReport(prisma, spec, {
+        tenantId: s.tenantId,
+        coCode: s.coCode,
+        lcCode: s.lcCode,
+        coYear: s.coYear!,
+        coBook: String(s.coBook),
+        vchNo: String(q.vchNo ?? ''),
+        orderFamily: q.orderFamily,
+        copy: q.copy,
+      });
+    } catch (err) {
+      if (err instanceof UnsupportedReportBindingError) {
+        return reply.code(422).send({ error: err.code, report: err.report, reason: err.reason });
+      }
+      if (/ValidationError|NumberingConfigurationError/.test((err as Error)?.name ?? '')) {
+        return reply
+          .code(400)
+          .send({ error: (err as Error).name, message: (err as Error).message });
+      }
+      throw err;
+    }
     if (!bound) return reply.code(404).send({ error: 'voucher-not-found' });
-    const html = renderReportLayout(spec, {
-      header: bound.header,
-      detailRows: bound.detailRows,
-      company: bound.company,
-    });
+    let html: string;
+    try {
+      html = renderReportLayout(spec, {
+        header: bound.header,
+        detailRows: bound.detailRows,
+        parentChild: bound.parentChild,
+        subreports: bound.subreports,
+        company: bound.company,
+        orderImages: bound.orderImages,
+      });
+    } catch (error) {
+      if (error instanceof UnsupportedReportBindingError) {
+        return reply
+          .code(422)
+          .send({ error: error.code, report: error.report, reason: error.reason });
+      }
+      throw error;
+    }
     if (q.format === 'html') return reply.type('text/html').send(html);
     let pdf: Buffer;
     try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+      pdf = await renderToPdf(
+        html,
+        new PlaywrightPdfRenderer({
+          preferCSSPageSize: [
+            'OrderVch',
+            'OrderBill',
+            'TourOrdVch',
+            'OrdVchImg',
+            'TourOrdImg',
+          ].includes(spec.report),
+        }),
+      );
     } catch {
       return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
     }
@@ -4395,6 +6656,21 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         empCode: b.empCode,
         monthCode: b.monthCode,
         withUpi: b.withUpi === true || b.withUpi === 'Y',
+        upiAcCode: b.upiAcCode,
+        upiAcName: b.upiAcName,
+        upiType: b.upiType,
+        upiId: b.upiId,
+        upiAmount: b.upiAmount != null ? Number(b.upiAmount) : undefined,
+        upiLines: Array.isArray(b.upiLines)
+          ? b.upiLines.map((u: Record<string, unknown>) => ({
+              srNo: u.srNo != null ? Number(u.srNo) : undefined,
+              upiAcCode: u.upiAcCode as string | undefined,
+              upiAcName: u.upiAcName as string | undefined,
+              upiType: u.upiType as string | undefined,
+              upiId: u.upiId as string | undefined,
+              amount: Number(u.amount),
+            }))
+          : undefined,
         // The desktop enters a whole collection round as one voucher (812 of 1428 real member-entry
         // vouchers carry more than one member). Amounts are coerced here; the module validates each
         // line and rejects a non-positive one naming its index.
@@ -4409,6 +6685,21 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
               empCode: l.empCode as string | undefined,
               monthCode: l.monthCode as string | undefined,
               withUpi: l.withUpi === true || l.withUpi === 'Y',
+              upiAcCode: l.upiAcCode as string | undefined,
+              upiAcName: l.upiAcName as string | undefined,
+              upiType: l.upiType as string | undefined,
+              upiId: l.upiId as string | undefined,
+              upiAmount: l.upiAmount != null ? Number(l.upiAmount) : undefined,
+              upiLines: Array.isArray(l.upiLines)
+                ? l.upiLines.map((u: Record<string, unknown>) => ({
+                    srNo: u.srNo != null ? Number(u.srNo) : undefined,
+                    upiAcCode: u.upiAcCode as string | undefined,
+                    upiAcName: u.upiAcName as string | undefined,
+                    upiType: u.upiType as string | undefined,
+                    upiId: u.upiId as string | undefined,
+                    amount: Number(u.amount),
+                  }))
+                : undefined,
             }))
           : undefined,
       }),
@@ -4436,6 +6727,21 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         empCode: b.empCode,
         monthCode: b.monthCode,
         withUpi: b.withUpi === true || b.withUpi === 'Y',
+        upiAcCode: b.upiAcCode,
+        upiAcName: b.upiAcName,
+        upiType: b.upiType,
+        upiId: b.upiId,
+        upiAmount: b.upiAmount != null ? Number(b.upiAmount) : undefined,
+        upiLines: Array.isArray(b.upiLines)
+          ? b.upiLines.map((u: Record<string, unknown>) => ({
+              srNo: u.srNo != null ? Number(u.srNo) : undefined,
+              upiAcCode: u.upiAcCode as string | undefined,
+              upiAcName: u.upiAcName as string | undefined,
+              upiType: u.upiType as string | undefined,
+              upiId: u.upiId as string | undefined,
+              amount: Number(u.amount),
+            }))
+          : undefined,
         // The desktop enters a whole collection round as one voucher (812 of 1428 real member-entry
         // vouchers carry more than one member). Amounts are coerced here; the module validates each
         // line and rejects a non-positive one naming its index.
@@ -4450,6 +6756,21 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
               empCode: l.empCode as string | undefined,
               monthCode: l.monthCode as string | undefined,
               withUpi: l.withUpi === true || l.withUpi === 'Y',
+              upiAcCode: l.upiAcCode as string | undefined,
+              upiAcName: l.upiAcName as string | undefined,
+              upiType: l.upiType as string | undefined,
+              upiId: l.upiId as string | undefined,
+              upiAmount: l.upiAmount != null ? Number(l.upiAmount) : undefined,
+              upiLines: Array.isArray(l.upiLines)
+                ? l.upiLines.map((u: Record<string, unknown>) => ({
+                    srNo: u.srNo != null ? Number(u.srNo) : undefined,
+                    upiAcCode: u.upiAcCode as string | undefined,
+                    upiAcName: u.upiAcName as string | undefined,
+                    upiType: u.upiType as string | undefined,
+                    upiId: u.upiId as string | undefined,
+                    amount: Number(u.amount),
+                  }))
+                : undefined,
             }))
           : undefined,
       }),
@@ -4463,6 +6784,57 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: '075',
         vchType: 'MBOP',
+      }),
+    );
+  });
+  /**
+   * Scheme instalment deletion — plan item F1.2.
+   *
+   * WHY THIS IS THE MOST IMPORTANT DELETE IN PHASE F1
+   * ================================================
+   * Scheme is the **highest-volume workflow in the business**: 841 vouchers and 1635 day-book rows in the
+   * reference year — more than sales (189 vouchers, 556 day-book rows). It had no reversal at all, so an
+   * operator who took a wrong instalment could not undo it.
+   *
+   * `deleteSchemeInstallment` already existed (scheme.ts:673) and was already routed — but only for book
+   * **075** (MEMB OPENING, `MBOP`) above. The live instalment book is **074** (MEMB ENTRY, `MBENT`), which
+   * carries all 841 vouchers. Both write AD_DATA (`BOOK_TBL_NAME='AD_DATA'` on both books), so the same
+   * reversal is correct; only the book and the audit's VCH_TYPE differ.
+   *
+   * Book and short name are taken from the real BOOK_DATA rows:
+   *     074 | Member Monthly Entry | MBENT | AD_DATA | MEMB ENTRY
+   *     075 | Member Opening Entry | MBOP  | AD_DATA | MEMB OPENING
+   * VCH_TYPE equals BOOK_SNAME on 39 of 40 real books, which is why 'MBENT' is the audit classification.
+   */
+  app.delete('/scheme/installment/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteSchemeInstallment(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: String(body(req).book ?? '074'),
+        vchType: 'MBENT',
+      }),
+    );
+  });
+  /**
+   * Scheme enrolment removal — plan item F1.2.
+   *
+   * Enrolment is keyed by scheme + member, not by a voucher number: `enrollScheme` creates the AD_MEMB
+   * membership record, and the instalments that follow are the vouchers. So this takes the member identity
+   * rather than a `:vchNo`, and `deleteEnrollment` (scheme.ts:738) removes the AD_MEMB row.
+   *
+   * The desktop shows 3 MEMB ENTRY deletions in DELETE_DATA. Removing an enrolment that still has instalments
+   * would orphan them, so the module guards that; the route surfaces the guard rather than working around it.
+   */
+  app.delete('/scheme/enroll', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      deleteEnrollment(prisma, {
+        scope: scopeOf(req),
+        schmCode: b.schmCode,
+        membCode: b.membCode,
       }),
     );
   });
@@ -4494,6 +6866,54 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
+      }),
+    );
+  });
+  app.post('/scheme/gold-adjust', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    const mapLine = (l: Record<string, unknown>) => ({
+      srNo: l.srNo != null ? Number(l.srNo) : undefined,
+      schmCode: l.schmCode as string,
+      membCode: l.membCode as string,
+      acCode: l.acCode as string | undefined,
+      acName: l.acName as string | undefined,
+      goldWt: l.goldWt != null ? Number(l.goldWt) : undefined,
+      goldRate: l.goldRate != null ? Number(l.goldRate) : undefined,
+      goldAmt: l.goldAmt != null ? Number(l.goldAmt) : undefined,
+      memberAmount: l.memberAmount != null ? Number(l.memberAmount) : undefined,
+      adjustAmount: l.adjustAmount != null ? Number(l.adjustAmount) : undefined,
+      bonus: l.bonus != null ? Number(l.bonus) : undefined,
+      less: l.less != null ? Number(l.less) : undefined,
+      saleBillNo: l.saleBillNo as string | undefined,
+      saleBillLcCode: l.saleBillLcCode as string | undefined,
+      saleBillYear: l.saleBillYear as string | undefined,
+      saleBillBook: l.saleBillBook as string | undefined,
+      saleBillAmount: l.saleBillAmount != null ? Number(l.saleBillAmount) : undefined,
+      saleBillHeaderVoucherNo: l.saleBillHeaderVoucherNo as string | undefined,
+      empCode: l.empCode as string | undefined,
+      vchDesc: l.vchDesc as string | undefined,
+    });
+    return run(reply, 201, () =>
+      schemeGoldAdjust(prisma, {
+        scope: scopeOf(req),
+        vchDate: b.vchDate,
+        mainUser: sess(req).sub,
+        updateExpiry: b.updateExpiry === true || b.updateExpiry === 'Y',
+        ...(Array.isArray(b.lines) && b.lines.length
+          ? { lines: b.lines.map((l: Record<string, unknown>) => mapLine(l)) }
+          : mapLine(b)),
+      }),
+    );
+  });
+  app.delete('/scheme/gold-adjust/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteSchemeGoldAdjust(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -4534,6 +6954,26 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       prisma,
       { tenantId: s.tenantId, coCode: s.coCode, coYear: s.coYear, lcCode: s.lcCode },
       String((req.query as any).acCode ?? ''),
+    );
+  });
+  /**
+   * Reverse a bill-to-bill settlement — plan item F1.4, previously blocked as decision D-4.
+   *
+   * Matches the desktop exactly: it removes the voucher's own rows across BILL_OS_DATA, AC_DATA,
+   * ROJ_MEL_DATA, REMARK_DATA, CASH_DATA and TEMP_BOOK_DATA and writes a DELETE_DATA audit row, and it does
+   * NOT restore the REC_AMT it applied to the bills it paid — `UPDATE BILL_OS_DATA` appears zero times in
+   * TR_BILL_TO.cs's delete path. See deleteBillSettlement for why replicating that is deliberate.
+   */
+  app.delete('/bill-to-bill/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      deleteBillSettlement(prisma, {
+        scope: scopeOf(req) as any,
+        vchNo: (req.params as any).vchNo,
+        book: b.book,
+        deleteUser: sess(req).sub,
+      }),
     );
   });
   app.post('/bill-to-bill/settle', auth, async (req, reply) => {
@@ -4581,23 +7021,41 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.post('/rate-cut', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      postRateCut(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        acCode: b.acCode,
-        acName: b.acName,
-        itType: b.itType,
-        lines: b.lines ?? [],
-        pay: b.pay,
-        accounts: b.accounts,
-      }),
+    return run(reply, 201, () => postRateCut(prisma, rateCutInput(req, b)));
+  });
+  app.put('/rate-cut/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editRateCut(prisma, rateCutInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.post('/bullion-sales', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => postBullionSale(prisma, rateCutInput(req, b)));
+  });
+  app.put('/bullion-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editBullionSale(prisma, rateCutInput(req, b), (req.params as any).vchNo),
     );
   });
   app.delete('/rate-cut/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
       deleteRateCut(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+      }),
+    );
+  });
+  app.delete('/bullion-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteBullionSale(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
@@ -4616,6 +7074,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.post('/stock/tag-split', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
+    if (containMutation(reply, 'tag-split')) return;
     const b = body(req);
     return run(reply, 201, () =>
       splitTag(prisma, {
@@ -4628,6 +7087,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.delete('/stock/tag-split/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
+    if (containMutation(reply, 'tag-split')) return;
     return run(reply, 200, () =>
       deleteTagSplit(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
     );
@@ -4654,6 +7114,168 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       deleteJournal(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+      }),
+    );
+  });
+  /**
+   * Contra deletion (desktop TR_CONTRA).
+   *
+   * WHY THIS EXISTS
+   * ===============
+   * `POST /contra` had no reversal, so a contra voucher could be created and never undone. That matters
+   * because deleting and re-entering is how this business actually corrects a voucher: `USER_DATA` — the
+   * per-column edit audit — holds ZERO rows for the year, while `DELETE_DATA` holds 72 across 17 families,
+   * of which **6 are CONTRA**. It is the fourth most-deleted family in the company's real data.
+   *
+   * `deleteContra` (finance.ts:1409) is the purpose-built reversal: it reads the full CONTRA_DATA detail set
+   * through `editIdentityTx` with the header's `extraColumns`, so the delete audit carries the voucher's own
+   * amounts rather than zeros. An earlier revision of this route delegated to `deleteJournal`, which reverses
+   * the same three tables but does not read those columns.
+   */
+  /**
+   * REOPENING A SAVED VOUCHER — plan item F2.1.
+   *
+   * WHY THESE EXIST
+   * ===============
+   * 13 of the 19 voucher families this business actually uses could be POSTED but never REOPENED. A voucher
+   * became unreachable the moment it was saved: it could not be viewed to check what was entered, and it could
+   * not be reprinted. In the desktop, opening a saved voucher by number is a core interaction — it is what the
+   * F-key lookup is for — so this is the difference between a data-entry screen and an ERP.
+   *
+   * Nothing new was implemented for these. Every `get*` function below already existed in its module and was
+   * simply never routed; a scan of `export async function (get|edit|delete)*` against the route file found
+   * **34 of 120 lifecycle functions unrouted**. The pattern followed is `GET /purchases/:vchNo`
+   * (`getPurchase`, line 1117 above) and every one of these shares its signature:
+   * `(prisma, scope, voucherNo)`.
+   *
+   * Ordered by how much the business uses them, from the AC_DATA/BOOK_DATA census:
+   *   scheme instalment 841 · cash receipt 56 · sales order 39 · contra 37 · scheme maturity 17 ·
+   *   fine JV 14 · labour invoice 3 · sales return 1 · order cancel 1
+   *
+   * Two live families are NOT here because they have no `get*` function to route — `payments` (133 vouchers,
+   * whose header is PAY_DATA rather than the CASH_DATA `getReceipt` reads) and `rate-cut` (40). Those need a
+   * function written, not a route, and are recorded as still-open in the plan rather than faked here.
+   */
+  app.get('/contra/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getContra(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/contra/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editContra(
+        prisma,
+        {
+          scope: scopeOf(req),
+          fromAc: b.fromAc,
+          toAc: b.toAc,
+          amount: Number(b.amount),
+          vchDate: b.vchDate,
+          itDesc: b.itDesc,
+          toAcName: b.toAcName,
+          empCode: b.empCode,
+          itemType: b.itemType,
+          mainUser: sess(req).sub,
+        },
+        (req.params as any).vchNo,
+      ),
+    );
+  });
+  app.get('/receipts/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getReceipt(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  /**
+   * A payment needs its OWN reader: its header is PAY_DATA, not the CASH_DATA a receipt writes, so
+   * `getReceipt` would report every payment as missing. 133 live vouchers — the second most-used family.
+   */
+  app.get('/payments/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getPayment(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  /**
+   * One reader serves rate-cut AND wholesale sale: BOOK_DATA for MAIN_BOOK='WH SALES' carries
+   * BOOK_TBL_NAME='RATE_CUT_DATA', so both families share the header table. 40 live vouchers between them.
+   */
+  app.get('/rate-cut/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getRateCut(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.get('/bullion-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getBullionSale(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.get('/fine-jv/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getFineJv(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.get('/labour-invoice/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getLabourInvoice(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.get('/sales-returns/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getSaleReturn(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.get('/sales-orders/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getSalesOrder(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  /**
+   * The order-cancel / order-adjustment voucher is a SEPARATE family from the order itself (desktop
+   * TR_SL_ORD_ADJ, book 081 ORDER CANCEL), so it gets its own path rather than overloading `/sales-orders`.
+   */
+  app.get('/sales-orders/:vchNo/adjustment', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getSalesOrderAdjustment(prisma, scopeOf(req), (req.params as any).vchNo),
+    );
+  });
+  /**
+   * Scheme reads take the BOOK because one desktop routine serves several books that all write AD_DATA:
+   * 074 MEMB ENTRY (`MBENT`, the 841 live instalments), 075 MEMB OPENING (`MBOP`) and 076 MEMB ADJUST
+   * (`MBADJ`). Defaulting to the module's own default keeps the common call short.
+   */
+  app.get('/scheme/installment/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const book = (req.query as any)?.book;
+    return run(reply, 200, () =>
+      book
+        ? getSchemeInstallment(prisma, scopeOf(req), (req.params as any).vchNo, String(book))
+        : getSchemeInstallment(prisma, scopeOf(req), (req.params as any).vchNo),
+    );
+  });
+  /**
+   * Maturity takes no book override: `MEMB_ADJUST` is a single book (076 `MBADJ`), and the module types the
+   * parameter as that literal. Only the instalment read spans books.
+   */
+  app.get('/scheme/maturity/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getSchemeMaturity(prisma, scopeOf(req), (req.params as any).vchNo),
+    );
+  });
+  app.get('/scheme/gold-adjust/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const book = (req.query as any)?.book;
+    return run(reply, 200, () =>
+      getSchemeGoldAdjust(
+        prisma,
+        scopeOf(req),
+        (req.params as any).vchNo,
+        book ? String(book) : undefined,
+      ),
+    );
+  });
+  app.delete('/contra/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteContra(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
         book: body(req).book,
       }),
     );
@@ -4798,6 +7420,28 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- E-invoice (IRN via Fake transport until GSP creds provided) ----
+  app.get('/einvoice/export.xlsx', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    try {
+      const data = await eInvoiceExportData(prisma, readScope(req), {
+        coBook: q.coBook,
+        fromDate: q.fromDate,
+        toDate: q.toDate,
+      });
+      const out = await renderXlsx(eInvoiceExportSheets(data), 'e-invoice');
+      return reply
+        .header('content-type', out.contentType)
+        .header('content-disposition', `attachment; filename="${out.fileName}"`)
+        .send(out.buffer);
+    } catch (e: any) {
+      if (e?.name === 'EInvoiceValidationError') {
+        return reply.code(400).send({ error: e.name, message: e.message });
+      }
+      throw e;
+    }
+  });
+
   app.post('/einvoice/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const b = body(req);
@@ -4823,6 +7467,42 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 201, async () => {
       const res = await submitIrnForSale(prisma, scopeOf(req) as any, {
         coBook: scopeOf(req).coBook ?? 'SAL',
+        vchNo: b.vchNo,
+      });
+      return { irn: res.Irn, ackNo: res.AckNo, mode: res.mode };
+    });
+  });
+  app.get('/e-credit-notes/provider', auth, async () => gspStatus());
+  app.get('/e-credit-notes', auth, async (req, reply) => {
+    const q = req.query as any;
+    return run(reply, 200, () =>
+      listCreditNotes(prisma, scopeOf(req), {
+        search: q.search,
+        offset: q.offset == null ? undefined : Number(q.offset),
+        limit: q.limit == null ? undefined : Number(q.limit),
+      }),
+    );
+  });
+  app.get('/e-credit-notes/:vchNo', auth, async (req, reply) => {
+    const result = await getCreditNote(prisma, scopeOf(req), (req.params as any).vchNo).catch(
+      (error: Error) => {
+        if (/ValidationError|NumberingConfigurationError/.test(error.name)) {
+          reply.code(400).send({ error: error.name, message: error.message });
+          return undefined;
+        }
+        throw error;
+      },
+    );
+    if (result === undefined) return reply;
+    if (!result) return reply.code(404).send({ error: 'credit-note-not-found' });
+    return result;
+  });
+  app.post('/einvoice/credit-note/irn', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const b = body(req);
+    return run(reply, 201, async () => {
+      const res = await submitIrnForCreditNote(prisma, scopeOf(req) as any, {
+        coBook: scopeOf(req).coBook ?? '146',
         vchNo: b.vchNo,
       });
       return { irn: res.Irn, ackNo: res.AckNo, mode: res.mode };
@@ -4929,6 +7609,42 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         fromYear: b.fromYear ?? s.coYear,
         toYear: b.toYear,
       }),
+    );
+  });
+  app.post('/balance-transfer/preview', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const b = body(req);
+    const s = sess(req);
+    return run(reply, 200, () =>
+      yearEndPreview(prisma, {
+        scope: scopeOf(req) as any,
+        fromYear: b.fromYear ?? s.coYear,
+      }),
+    );
+  });
+  app.post('/balance-transfer/year-close', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    const s = sess(req);
+    return run(reply, 201, () =>
+      yearEndClose(prisma, {
+        scope: scopeOf(req) as any,
+        fromYear: b.fromYear ?? s.coYear,
+        toYear: b.toYear,
+      }),
+    );
+  });
+  app.post('/balance-transfer/openings', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const s = readScope(req);
+    const b = body(req);
+    return run(reply, 200, () =>
+      carryForwardOpenings(
+        prisma,
+        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode },
+        String(b.fromYear),
+        String(b.toYear),
+      ),
     );
   });
   app.delete('/tour/:vchNo', auth, async (req, reply) => {

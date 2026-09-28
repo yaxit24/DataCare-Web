@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "test_checkpoint_recipe_round15.py"
+  ],
+  "cwd": "/tmp/datacare-round15-proof-helpers/staged/parity-plan-2026-09-10",
+  "startedAtUtc": "2026-09-12T02:43:28.782594+00:00",
+  "finishedAtUtc": "2026-09-12T02:43:29.108813+00:00",
+  "exitCode": 0,
+  "log": "recipe-controls-final.txt",
+  "logSha256": "3414b42aec4e6f26dd391e6426e69bfbf2de90a0b5d0dd5f9ffa5a84ba2720e5",
+  "inputManifest": "controls-final.inputs.json",
+  "inputManifestSha256": "7d4ba0143d06fd211eaeee6994fa3283ec517e2147cae3394ffae928108d703b",
+  "changedInputs": [],
+  "limits": "20 synthetic recipe controls only; core0 placeholder is synthetic data, not execution evidence. No active validator/capture/application/DB/browser/compiler run."
+}

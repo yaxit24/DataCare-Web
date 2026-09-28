@@ -1,0 +1,150 @@
+{
+  "capturedAtUtc": "2026-09-11T18:24:19.089948+00:00",
+  "status": "focused-checks-passed",
+  "references": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-core-build.run.json",
+      "sha256": "a017af2b522d2025424561b8bd08e2406f367d95ef010e2cf0d56377147621a6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-core-build.txt",
+      "sha256": "79da90d454c83eb7b7c76d1548b439a13925b548ccc7911efbe41f4e31f94aa5"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-core-first.run.json",
+      "sha256": "b434fc0148b915d968b09deeb0345ecf181dab204db35cdcf835da69b15388be"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-core-first.txt",
+      "sha256": "5a005d3b5875ad0fe0c16c2bdf7fb8fa55de9c8b0fb755bc1988da582862de7b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-db-first.run.json",
+      "sha256": "4c1892de4fa4cb95a47a0b3a834d65a971550b7182f581f98816cefc262ee9e1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-db-first.txt",
+      "sha256": "b0c8462f767a75dd5544c016c885f7b5fdd8cdd491776068309fca7729b23aa5"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-db-strict.run.json",
+      "sha256": "4b16bb9563b8780379d88fdab779bf32f3715b60a3dec3962ad0228231a9cf97"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-db-strict.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-review/README.md",
+      "sha256": "1556869fbda8a6900444568e38d7a0d4e00d2fa2ca7a8280c15d8f399dee9220"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-review/review.md",
+      "sha256": "dc28633407bb40c1182ad1a333e3198ae3d0bff5f6ac62ea6ff440607b4aebe6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-review/savedSaleReturnClock.db.test.ts",
+      "sha256": "05d173146209829f8d2ba2638df20fc1026be4238267b9e74dfc5633edd85e21"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-review/staging.json",
+      "sha256": "3bb631e59cab3dcc483f796aa6115f78753c044b5cee1f1cde02935af4605dac"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-source/contract.md",
+      "sha256": "9d8f19bd79768e4b4610de089a1237b4acb9777a7898e145bf5fe992e4300d6e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-source/savedSaleReturnClock.ts",
+      "sha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-source/source-inputs.json",
+      "sha256": "a1871f74ae2df947cbe5cc8a8def270941e821c4209de9b15d42cd133fb9023f"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-source/source-ready.json",
+      "sha256": "d81e4ce8fefb5dc7a4ac4e3ac0a6c6da4dd1abad78eed1e98cc5baad9b165bba"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-source/source-test-review.md",
+      "sha256": "7d513c680dbad29221df53311ddff77e9972848868bd8f674fa40ada67c2f300"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-vectors/author_vectors.py",
+      "sha256": "7b00e99fe00126a997813a34cd7785d7052c742f7ccac3cf72248f5e422e0c40"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-vectors/independent-clock-vector-review.md",
+      "sha256": "ae9e1fe925597739cd780e9bb60261462eb3519a7e05f6cc1e1fb19ca2520837"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-vectors/saved-sale-return-clock.v1.json",
+      "sha256": "d360162bc731cb383e33146c29265586358413821fca0cf5d94c4bdf753cdd78"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-vectors/savedSaleReturnClock.test.ts",
+      "sha256": "7456860c45e955187f681b13713acd47eb43bb25ca162da258592d89a8c241cf"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-vectors/staged-harness-provenance.json",
+      "sha256": "7eac03acb901506057c1ae2799f09b10b4bd9a9b5dbbf81ffd6b076cd7de976d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-staging-vectors/vector-authorship.json",
+      "sha256": "1ec2709a105a7dec70b694d995c0660b31a013756c63145ce52ad44130072d85"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-strict-first.run.json",
+      "sha256": "567a571e4198d91ae053068070ae22dd812642355e8e43cfad91ab9268de38c9"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-strict-first.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-round12-handoff-and-remaining-acceptance.md",
+      "sha256": "165b9ecedc421727a6f94014bae4b5bc5b6d00d29df2a1c3b82843f6ebb99e5e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-saved-return-clock-implementation.md",
+      "sha256": "2cf56bc018e8d65003065fa2e5488d14d6ba1bac2a1c42ecfc2b41b3924de1a4"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "web/apps/api/test/savedSaleReturnClock.db.test.ts",
+      "sha256": "197a7097a06bc4d699da16f82cbb3b583939b37d8167e90d81a52fe53df1b382"
+    },
+    {
+      "path": "web/packages/core/src/index.ts",
+      "sha256": "9cf3e8c242ea0f28824f086f6dafb0f2ab803a60f285ef94cb448378e67dd415"
+    },
+    {
+      "path": "web/packages/core/src/savedSaleReturnClock.ts",
+      "sha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saved-sale-return-clock.v1.json",
+      "sha256": "d360162bc731cb383e33146c29265586358413821fca0cf5d94c4bdf753cdd78"
+    },
+    {
+      "path": "web/packages/core/test/savedSaleReturnClock.test.ts",
+      "sha256": "c4d8fb873263f895dccfa8428381cbdeebe0e11ecf14ae098cdb279e1077b1a0"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    }
+  ]
+}

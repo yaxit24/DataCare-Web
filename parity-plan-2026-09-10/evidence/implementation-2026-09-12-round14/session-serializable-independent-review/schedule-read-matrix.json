@@ -1,0 +1,125 @@
+{
+  "kind": "static-test-assertion-review",
+  "fixtureUnitOutcomes": 36,
+  "fixtureDatabaseSchedules": 17,
+  "declaredUnitTests": 78,
+  "declaredDatabaseTests": 17,
+  "executedByThisReviewer": 0,
+  "executionStatusAtReview": "Author declares unexecuted; root owns any later execution.",
+  "databaseCases": [
+    {
+      "id": "D01",
+      "testLines": "271-291",
+      "asserted": "Actual transaction settings, fixed action, context and9-table/two-tenant raw text+xmin+ctid equality.",
+      "qualification": "No-op callback only; no financial adopter."
+    },
+    {
+      "id": "D02",
+      "testLines": "292-328",
+      "asserted": "Real selection wait; callback marker commits first; selected epoch8; unrelated-table physical equality.",
+      "qualification": "auth_session and AC_MAST excluded wholesale from equality; target marker/session values checked, not complete collateral columns there."
+    },
+    {
+      "id": "D03",
+      "testLines": "329-359",
+      "asserted": "Selection holds UPDATE before command snapshot, observed lock wait, mapped409 before work; marker unchanged and winning epoch8.",
+      "qualification": "Checks specified target outcomes, not every table physical snapshot."
+    },
+    {
+      "id": "D04",
+      "testLines": "360-397",
+      "asserted": "A nonmutating UPDATE lock delays SHARE through natural expiry; callback never called; complete snapshot equality.",
+      "qualification": "Clock boundary is after lock, not exact COMMIT time; lock xmax itself is not part of snapshot."
+    },
+    {
+      "id": "D05",
+      "testLines": "398-418",
+      "asserted": "External marker change commits; two callback reads retain earlier name; non-AC tables unchanged; foreign marker name retained.",
+      "qualification": "As-of snapshot proof. No complete AC_MAST row/physical equality where external change is allowed."
+    },
+    {
+      "id": "D06",
+      "testLines": "419-479",
+      "asserted": "Actual refresh waits for SHARE; callback completes; target JTI rotates afterward; epoch/ledger retained.",
+      "qualification": "Changed auth/LOGIN tables excluded from full snapshot; no universal no-collateral-session claim from this case."
+    },
+    {
+      "id": "D07",
+      "testLines": "419-479",
+      "asserted": "Actual logout waits for SHARE then target session revokes with logout reason.",
+      "qualification": "Changed auth/LOGIN tables excluded from full snapshot; command does not implement logout."
+    },
+    {
+      "id": "D08",
+      "testLines": "419-479",
+      "asserted": "Actual password reset waits after LOGIN write; command uses no later LOGIN lock; reset completes with target revocation.",
+      "qualification": "One admitted schedule, not proof of arbitrary future callback lock ordering."
+    },
+    {
+      "id": "D09",
+      "testLines": "480-498",
+      "asserted": "Marker DML followed by natural expiry; final guard rejects; callback once; complete raw+xmin+ctid rollback equality.",
+      "qualification": "500ms test setup is timing-sensitive; no deadline changes proposed."
+    },
+    {
+      "id": "D10",
+      "testLines": "499-517",
+      "asserted": "Current selected principal company02 distinct from immutable login company01; full snapshot unchanged.",
+      "qualification": "R13 book exists only in company01 fixture: deliberately no book-membership admission in this helper."
+    },
+    {
+      "id": "D11",
+      "testLines": "518-531",
+      "asserted": "Edit revocation committed before snapshot refuses403 before callback; full physical snapshot unchanged.",
+      "qualification": "Preserves fixed View+Edit requirement."
+    },
+    {
+      "id": "D12",
+      "testLines": "532-550",
+      "asserted": "Edit revocation after snapshot leaves first read atY; next command403; other tables physically unchanged.",
+      "qualification": "As-of authority, not latest-at-response rights fencing."
+    },
+    {
+      "id": "D13",
+      "testLines": "551-564",
+      "asserted": "Marker DML then exact thrown object; full raw+xmin+ctid equality after rejection.",
+      "qualification": "Known callback abort, not ambiguous COMMIT transport proof."
+    },
+    {
+      "id": "D14",
+      "testLines": "565-579",
+      "asserted": "Controlled prohibited same-Tx epoch change plus marker; final context guard409; full snapshot equality.",
+      "qualification": "Illustrates rollback of this misuse, not a DML sandbox."
+    },
+    {
+      "id": "D15",
+      "testLines": "580-646",
+      "asserted": "Two independent transactions read both rows before barrier release, then write disjoint rows; exactly one success, one409, callbacks once, expected surviving names.",
+      "qualification": "Real SSI dependency cycle; no mocked SQLSTATE. Non-AC tables physical equality; losing AC row name retained, not full losing-row physical equality asserted."
+    },
+    {
+      "id": "D16",
+      "testLines": "647-673",
+      "asserted": "External same-row update commits after snapshot; command update rejects409 once; winner and foreign marker names retained, non-AC tables unchanged.",
+      "qualification": "Real concurrent-update refusal, separate from write-skew; complete AC table physical comparison not asserted."
+    },
+    {
+      "id": "D17",
+      "testLines": "674-692",
+      "asserted": "Controlled prohibited same-Tx unknown-ledger reason change plus marker; final409 and full snapshot equality.",
+      "qualification": "No new known ledger mode or general auth-write sandbox."
+    }
+  ],
+  "unitQualification": [
+    {
+      "id": "S26",
+      "status": "Explicit frozen companion qualification",
+      "reason": "Actual existing companyTx allowed=false gives company-unavailable409; original fixture unchanged."
+    },
+    {
+      "id": "S08",
+      "status": "Resolved before execution; historical initial bytes retained",
+      "reason": "Final test supplies extra action read exactly as frozen given. Source/expectation/DB fixture unchanged."
+    }
+  ]
+}

@@ -1,0 +1,358 @@
+{
+  "card": "X13",
+  "state": "next-contract-only; no product change or acceptance",
+  "capturedAtUtc": "2026-09-11T06:16:00.468881+00:00",
+  "pathBase": "web workspace root",
+  "sources": [
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_RTN_UAE.cs",
+      "sha256": "fdaf41bc46469f4a64e95bbd371a315a87135ad81a2d432ae5d7ea13ee3d6e0d",
+      "bytes": 445368
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE.cs",
+      "sha256": "b122837a890d99c370ec60e309b59a5207b65556493ce29f62ca6584e428d690",
+      "bytes": 902963
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "sha256": "da810d40fecbe8c5ef631fc66e458d3bcfeb641c67521a6f29f6c6732b2248d2",
+      "bytes": 261865
+    },
+    {
+      "path": "apps/api/src/modules/sales/salesReturn.ts",
+      "sha256": "612ddcd8f3b0cb8f0368435495125c8b50ed2f8cd03adad11f1cef12cf1d2a70",
+      "bytes": 30772
+    },
+    {
+      "path": "apps/api/src/modules/sales/sales.ts",
+      "sha256": "f9edc60fb957d5efc708bc321b1fd905ff186f1d87519728b874a8af79b62f12",
+      "bytes": 106469
+    },
+    {
+      "path": "apps/web/app/(app)/txn/sale-return/page.tsx",
+      "sha256": "4ef52449c4da2ab5f5b8bf2d12740aef605e086ff24f11b210272f089a963680",
+      "bytes": 19980
+    },
+    {
+      "path": "scripts/check-dead-cells.mjs",
+      "sha256": "2bcf618ac20fbdf2af293b3726d3d39d7ba7ba79f455442b71a088e8512ec0c5",
+      "bytes": 8165
+    },
+    {
+      "path": "scripts/lib/request-field-trace.mjs",
+      "sha256": "a602d4dd51d9ceddc2f9076c105078b235d24b0e655179afb4324fa0c6bfce55",
+      "bytes": 17654
+    }
+  ],
+  "fieldCount": 33,
+  "fields": [
+    {
+      "field": "ordNo",
+      "candidateColumn": "ORD_NO",
+      "classification": "not established for primary return",
+      "evidence": "No corresponding token in primary TR_SALE_RTN. Ordinary TR_SALE:15401-15407 writes outgoing SL_DETL order references;16110/16324 changes linked order TAG_SALE.",
+      "requiredDisposition": "Do not invent an incoming-return line edit. Trace a configured alternate caller and original order/stock reversal before exposing this field; retain as unresolved until then.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "ordYrcd",
+      "candidateColumn": "ORD_YRCD",
+      "classification": "not established for primary return",
+      "evidence": "No corresponding token in primary TR_SALE_RTN. Ordinary TR_SALE:15401-15407 writes outgoing SL_DETL order references;16110/16324 changes linked order TAG_SALE.",
+      "requiredDisposition": "Do not invent an incoming-return line edit. Trace a configured alternate caller and original order/stock reversal before exposing this field; retain as unresolved until then.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "ordDbcd",
+      "candidateColumn": "ORD_DBCD",
+      "classification": "not established for primary return",
+      "evidence": "No corresponding token in primary TR_SALE_RTN. Ordinary TR_SALE:15401-15407 writes outgoing SL_DETL order references;16110/16324 changes linked order TAG_SALE.",
+      "requiredDisposition": "Do not invent an incoming-return line edit. Trace a configured alternate caller and original order/stock reversal before exposing this field; retain as unresolved until then.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "ordSrno",
+      "candidateColumn": "ORD_SRNO",
+      "classification": "not established for primary return",
+      "evidence": "No corresponding token in primary TR_SALE_RTN. Ordinary TR_SALE:15401-15407 writes outgoing SL_DETL order references;16110/16324 changes linked order TAG_SALE.",
+      "requiredDisposition": "Do not invent an incoming-return line edit. Trace a configured alternate caller and original order/stock reversal before exposing this field; retain as unresolved until then.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "isuNo",
+      "candidateColumn": "ISU_NO",
+      "classification": "header identity, not primary incoming line input",
+      "evidence": "TR_SALE_RTN:10178-10180 reopens original bill;12825-12837 writes header ISU_NO/LC_CODE/YRCD/DBCD. UAE:8717-8720 also writes header;11166-11174 copies line references from an original-sale lookup.",
+      "requiredDisposition": "Implement an authoritative original-bill selector with original location/year/book/voucher, party and saved parent identity. Do not map arbitrary line strings to header references or confuse bill label with voucher number.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "isuYrcd",
+      "candidateColumn": "ISU_YRCD",
+      "classification": "header identity, not primary incoming line input",
+      "evidence": "TR_SALE_RTN:10178-10180 reopens original bill;12825-12837 writes header ISU_NO/LC_CODE/YRCD/DBCD. UAE:8717-8720 also writes header;11166-11174 copies line references from an original-sale lookup.",
+      "requiredDisposition": "Implement an authoritative original-bill selector with original location/year/book/voucher, party and saved parent identity. Do not map arbitrary line strings to header references or confuse bill label with voucher number.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "isuDbcd",
+      "candidateColumn": "ISU_DBCD",
+      "classification": "header identity, not primary incoming line input",
+      "evidence": "TR_SALE_RTN:10178-10180 reopens original bill;12825-12837 writes header ISU_NO/LC_CODE/YRCD/DBCD. UAE:8717-8720 also writes header;11166-11174 copies line references from an original-sale lookup.",
+      "requiredDisposition": "Implement an authoritative original-bill selector with original location/year/book/voucher, party and saved parent identity. Do not map arbitrary line strings to header references or confuse bill label with voucher number.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "isuSrno",
+      "candidateColumn": "ISU_SRNO",
+      "classification": "not established for primary return",
+      "evidence": "No token in primary TR_SALE_RTN. TR_SALE:15455 outgoing SL_DETL;16112/16326 updates linked APR_DETL. UAE:11172-11174 reads original-sale identity.",
+      "requiredDisposition": "Prove original-source parent mapping and reversal first; current primary incoming writer uses VCH_SRNO/OLD_SRNO, not a newly invented ISU_SRNO column.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "huid",
+      "candidateColumn": "HM_ID",
+      "classification": "visible incoming input and copied value",
+      "evidence": "TR_SALE_RTN:3610 MSG_PR8 HmId;4620-4628 text commit;3922 source copy;14354 incoming write; outgoing MSG6:5900/14887.",
+      "requiredDisposition": "Use bounded text preserving null/blank distinctly, full source pickup/read/edit and downstream tag identity. Test independently from extra hidden hallmark IDs.",
+      "currentReturnSchema": "String?   @db.VarChar(10)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "lessWt",
+      "candidateColumn": "ITM_OTH_WT",
+      "classification": "possible duplicate alias; exact label mapping unresolved",
+      "evidence": "TR_SALE_RTN:3619 MSG_PR11 OthWt;4653-4661 three-decimal commit;14366 write. Current API salesReturn:376 already consumes otherWt.",
+      "requiredDisposition": "Establish whether LessWt is intended to mean this same cell. Use one authoritative field only after confirmation; do not sum it with otherWt or silently alias two independently editable controls.",
+      "currentReturnSchema": "Decimal?  @db.Decimal(14, 3)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "bagWt",
+      "candidateColumn": "BAG_WT",
+      "classification": "primary outgoing constant; alternate source-copy only observed",
+      "evidence": "TR_SALE_RTN:14895 writes outgoing SL_DETL BAG_WT=0;15196 prints returned side as literal0. UAE:7195/11120 copies BAG_WT into MSG7; UAE return writer8833-8878 omits BAG_WT.",
+      "requiredDisposition": "Do not add arbitrary incoming weight. Recover actual selected mode and calculation/stock effect; keep explicit unsupported disposition until its writer is proven.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "tagGrossWt",
+      "candidateColumn": "TAG_GWT",
+      "classification": "ordinary-sale saved tag basis; primary return mapping unproven",
+      "evidence": "No primary TR_SALE_RTN token. Ordinary TR_SALE:15409-15416 writes tag weights and conditionally replaces them from current gross/net.",
+      "requiredDisposition": "Treat as potential source-owned basis, not an editable return amount. Resolve tagged source instance and relevant variant before any schema addition or UI removal.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "tagNetWt",
+      "candidateColumn": "TAG_NWT",
+      "classification": "ordinary-sale saved tag basis; primary return mapping unproven",
+      "evidence": "No primary TR_SALE_RTN token. Ordinary TR_SALE:15409-15416 writes tag weights and conditionally replaces them from current gross/net.",
+      "requiredDisposition": "Treat as potential source-owned basis, not an editable return amount. Resolve tagged source instance and relevant variant before any schema addition or UI removal.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "ghtPct",
+      "candidateColumn": "ITM_GHT_PRC",
+      "classification": "visible incoming numeric trigger",
+      "evidence": "TR_SALE_RTN:3625 MSG_PR14;4634-4651 two-decimal commit and CommPassTotal_Pr;3929 copy;4869-4871 derives ghat weight from net*pct/100;14374 write.",
+      "requiredDisposition": "Implement source event order, exact decimal/rounding and readback; test manual ghat weight versus percentage and zero/net changes. Current ghtWt write alone does not implement this trigger.",
+      "currentReturnSchema": "Decimal?  @db.Decimal(9, 4)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "itemLot",
+      "candidateColumn": "ITM_LOT",
+      "classification": "schema present; primary return edit/write unproven",
+      "evidence": "No primary TR_SALE_RTN ITM_LOT token. Ordinary TR_SALE:12743-12747 scoped lot lookup;15471 writer.",
+      "requiredDisposition": "Schema presence does not authorize a new return input. Trace applicable lot mode and stock lots/reversal; otherwise contain with a clear unsupported explanation.",
+      "currentReturnSchema": "String?   @db.VarChar(10)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "remark",
+      "candidateColumn": "ITM_REMARK",
+      "classification": "visible incoming item description, not proven generic note",
+      "evidence": "TR_SALE_RTN:3588 MSG_PR3 Receive Item;4620-4628 text commit;14319 saves that same cell as ITM_REMARK. UAE:8869 writes MSG68 remark.",
+      "requiredDisposition": "Define the primary display/description DTO explicitly and preserve it on pickup/reopen. Do not conflate item description with header REMARK_DATA or assume the UAE cell matches the primary label.",
+      "currentReturnSchema": "String?   @db.VarChar(50)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "discountPct",
+      "candidateColumn": "DISC_PRC",
+      "classification": "visible incoming numeric trigger",
+      "evidence": "TR_SALE_RTN:3661 MSG_PR25 LDisc%;4610-4615 two-decimal commit;3942 copy;5022-5024 derives DISC_AMT;5053-5061 MRP branch changes base;14422 write.",
+      "requiredDisposition": "Implement paired percentage/amount source transitions and MRP/tax branches with cached values and ordering; verify line/header/ledger totals and zero/manual amount behavior.",
+      "currentReturnSchema": "Decimal?  @db.Decimal(9, 4)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "ghatAmount",
+      "candidateColumn": "GHT_AMT",
+      "classification": "ordinary-sale mode field; primary return unproven",
+      "evidence": "No primary TR_SALE_RTN token. TR_SALE:15430 writes outgoing ghat amount; UAE:11151 reads it from original-sale lookup but return writer does not persist it.",
+      "requiredDisposition": "Do not confuse ghat weight with money. Require mode-specific source calculation and destination before adding it to incoming return rows.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "rateWith",
+      "candidateColumn": "RATE_WITH",
+      "classification": "alternate UAE return writer exists; primary mapping absent",
+      "evidence": "No primary TR_SALE_RTN token. UAE:7942-7957 selects SL_DETL_RTN except PURC RETURN;8857 writes MSG17 RATE_WITH.",
+      "requiredDisposition": "Explicit alternate-mode/schema gap: current Prisma SL_DETL_RTN lacks RATE_WITH. Recover caller/setting, UAE calculations, source DDL and import columns before separate migration/contract; do not apply UAE semantics globally.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "karigarNetWt",
+      "candidateColumn": "KR_NET_WT",
+      "classification": "hidden outgoing grid source/cache value",
+      "evidence": "TR_SALE_RTN:5975-5987 initially hides outgoing MSG33-37;10279-10282 reopens saved values;14975 writes outgoing SL_DETL MSG34. Incoming writer14478 has KR_NAME only.",
+      "requiredDisposition": "Preserve/replay on the outgoing exchange leg when implemented. Do not blindly append these columns or editable controls to SL_DETL_RTN. Recover copy/calculation rules and counterpart stock/karigar effects.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "karigarTouch",
+      "candidateColumn": "KR_TOUCH",
+      "classification": "hidden outgoing grid source/cache value",
+      "evidence": "TR_SALE_RTN:5975-5987 initially hides outgoing MSG33-37;10279-10282 reopens saved values;14979 writes outgoing SL_DETL MSG35. Incoming writer14478 has KR_NAME only.",
+      "requiredDisposition": "Preserve/replay on the outgoing exchange leg when implemented. Do not blindly append these columns or editable controls to SL_DETL_RTN. Recover copy/calculation rules and counterpart stock/karigar effects.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "karigarWestPct",
+      "candidateColumn": "KR_WEST_PRC",
+      "classification": "hidden outgoing grid source/cache value",
+      "evidence": "TR_SALE_RTN:5975-5987 initially hides outgoing MSG33-37;10279-10282 reopens saved values;14983 writes outgoing SL_DETL MSG36. Incoming writer14478 has KR_NAME only.",
+      "requiredDisposition": "Preserve/replay on the outgoing exchange leg when implemented. Do not blindly append these columns or editable controls to SL_DETL_RTN. Recover copy/calculation rules and counterpart stock/karigar effects.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "karigarFine",
+      "candidateColumn": "KR_FINE",
+      "classification": "hidden outgoing grid source/cache value",
+      "evidence": "TR_SALE_RTN:5975-5987 initially hides outgoing MSG33-37;10279-10282 reopens saved values;14987 writes outgoing SL_DETL MSG37. Incoming writer14478 has KR_NAME only.",
+      "requiredDisposition": "Preserve/replay on the outgoing exchange leg when implemented. Do not blindly append these columns or editable controls to SL_DETL_RTN. Recover copy/calculation rules and counterpart stock/karigar effects.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "employeeCode",
+      "candidateColumn": "EMP_CODE",
+      "classification": "header-owned copied value",
+      "evidence": "TR_SALE_RTN:14565 writes incoming EMP_CODE from tEmpCode.Text;15019 writes same header value on outgoing leg.",
+      "requiredDisposition": "Select/validate employee once in the header with company scope and stamp both legs. Preserve saved historical values; do not accept inconsistent arbitrary per-line employees.",
+      "currentReturnSchema": "String?   @db.VarChar(5)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "orderTagStockAdd",
+      "candidateColumn": "ORD_TAG_STK_ADD",
+      "classification": "primary outgoing constant",
+      "evidence": "TR_SALE_RTN:15023 outgoing SL_DETL ORD_TAG_STK_ADD=\"N\". No primary incoming field.",
+      "requiredDisposition": "Do not expose a free stock-control switch. Any alternative requires source order/tag transition and balanced reversal evidence.",
+      "currentReturnSchema": null,
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "designImageId",
+      "candidateColumn": "DESIGN_IMG_ID",
+      "classification": "hidden source-derived identity",
+      "evidence": "TR_SALE_RTN:3733 hidden MSG_PR69;3973 copies original-sale image;14569 incoming writer;14174 BAR_DETL companion write; outgoing15027 uses MSG47.",
+      "requiredDisposition": "Resolve saved source identity and image ownership; hydrate/copy exactly including null/blank/sentinel. Add actual image resolver/preview tests and scoped tag-generation effects; never allow a caller-selected storage key merely to close this scanner finding.",
+      "currentReturnSchema": "String?   @db.VarChar(50)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "hallmarkId2",
+      "candidateColumn": "HM_ID2",
+      "classification": "hidden copied incoming identity/weight",
+      "evidence": "TR_SALE_RTN:3723-3729 hides MSG_PR59-65;3964-3970 copies source;10427-10433 reopens;14517 writes MSG_PR59;14178-14202 also copies into BAR_DETL.",
+      "requiredDisposition": "Preserve exact saved values and source linkage first. Ordinary direct cell editing is not proven. Locate any dedicated hallmark dialog/edit permission before making these freely editable; test all IDs/weights independently, partial/null inputs and companion tag rows.",
+      "currentReturnSchema": "String?   @db.VarChar(10)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "hallmarkId3",
+      "candidateColumn": "HM_ID3",
+      "classification": "hidden copied incoming identity/weight",
+      "evidence": "TR_SALE_RTN:3723-3729 hides MSG_PR59-65;3964-3970 copies source;10427-10433 reopens;14521 writes MSG_PR60;14178-14202 also copies into BAR_DETL.",
+      "requiredDisposition": "Preserve exact saved values and source linkage first. Ordinary direct cell editing is not proven. Locate any dedicated hallmark dialog/edit permission before making these freely editable; test all IDs/weights independently, partial/null inputs and companion tag rows.",
+      "currentReturnSchema": "String?   @db.VarChar(10)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "hallmarkId4",
+      "candidateColumn": "HM_ID4",
+      "classification": "hidden copied incoming identity/weight",
+      "evidence": "TR_SALE_RTN:3723-3729 hides MSG_PR59-65;3964-3970 copies source;10427-10433 reopens;14525 writes MSG_PR61;14178-14202 also copies into BAR_DETL.",
+      "requiredDisposition": "Preserve exact saved values and source linkage first. Ordinary direct cell editing is not proven. Locate any dedicated hallmark dialog/edit permission before making these freely editable; test all IDs/weights independently, partial/null inputs and companion tag rows.",
+      "currentReturnSchema": "String?   @db.VarChar(10)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "hallmarkIdWt",
+      "candidateColumn": "HM_ID_WT",
+      "classification": "hidden copied incoming identity/weight",
+      "evidence": "TR_SALE_RTN:3723-3729 hides MSG_PR59-65;3964-3970 copies source;10427-10433 reopens;14529 writes MSG_PR62;14178-14202 also copies into BAR_DETL.",
+      "requiredDisposition": "Preserve exact saved values and source linkage first. Ordinary direct cell editing is not proven. Locate any dedicated hallmark dialog/edit permission before making these freely editable; test all IDs/weights independently, partial/null inputs and companion tag rows.",
+      "currentReturnSchema": "Decimal?  @db.Decimal(14, 3)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "hallmarkId2Wt",
+      "candidateColumn": "HM_ID2_WT",
+      "classification": "hidden copied incoming identity/weight",
+      "evidence": "TR_SALE_RTN:3723-3729 hides MSG_PR59-65;3964-3970 copies source;10427-10433 reopens;14533 writes MSG_PR63;14178-14202 also copies into BAR_DETL.",
+      "requiredDisposition": "Preserve exact saved values and source linkage first. Ordinary direct cell editing is not proven. Locate any dedicated hallmark dialog/edit permission before making these freely editable; test all IDs/weights independently, partial/null inputs and companion tag rows.",
+      "currentReturnSchema": "Decimal?  @db.Decimal(14, 3)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "hallmarkId3Wt",
+      "candidateColumn": "HM_ID3_WT",
+      "classification": "hidden copied incoming identity/weight",
+      "evidence": "TR_SALE_RTN:3723-3729 hides MSG_PR59-65;3964-3970 copies source;10427-10433 reopens;14537 writes MSG_PR64;14178-14202 also copies into BAR_DETL.",
+      "requiredDisposition": "Preserve exact saved values and source linkage first. Ordinary direct cell editing is not proven. Locate any dedicated hallmark dialog/edit permission before making these freely editable; test all IDs/weights independently, partial/null inputs and companion tag rows.",
+      "currentReturnSchema": "Decimal?  @db.Decimal(14, 3)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    },
+    {
+      "field": "hallmarkId4Wt",
+      "candidateColumn": "HM_ID4_WT",
+      "classification": "hidden copied incoming identity/weight",
+      "evidence": "TR_SALE_RTN:3723-3729 hides MSG_PR59-65;3964-3970 copies source;10427-10433 reopens;14541 writes MSG_PR65;14178-14202 also copies into BAR_DETL.",
+      "requiredDisposition": "Preserve exact saved values and source linkage first. Ordinary direct cell editing is not proven. Locate any dedicated hallmark dialog/edit permission before making these freely editable; test all IDs/weights independently, partial/null inputs and companion tag rows.",
+      "currentReturnSchema": "Decimal?  @db.Decimal(14, 3)",
+      "currentWriterState": "No confirmed consumption of this exposed key by reachable createSaleReturn/computeLine/buildIncomeLegs; current own write mapping and read DTO omit it."
+    }
+  ],
+  "limitations": [
+    "Recovered source only; no executable desktop observations.",
+    "Primary and UAE modes must remain separate until caller/configuration/schema contracts are proven.",
+    "Dynamic Object.fromEntries serialization remains unsupported by the bounded scanner; this mapping does not reclassify fields as live."
+  ]
+}

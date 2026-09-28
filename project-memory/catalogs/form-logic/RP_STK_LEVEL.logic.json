@@ -1,0 +1,35 @@
+{
+ "form": "RP_STK_LEVEL",
+ "tables": [
+  "AD_DATA",
+  "AD_MAST",
+  "AD_OS",
+  "ITEM_MAST",
+  "ITM_WT_MAST",
+  "LOCT_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AD_DATA",
+  "AD_MAST",
+  "AD_OS",
+  "ITEM_MAST",
+  "ITM_WT_MAST",
+  "LOCT_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2446
+}

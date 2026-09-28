@@ -1,0 +1,27 @@
+{
+  "atUtc": "2026-09-11T22:17:28.363135+00:00",
+  "baselineAndInputsMatched": true,
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "a3c91053e27cbae2c1fbea06c93ad8cfba9846bcae5562b1a1e37323dc15ddd1"
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "sha256": "ee608103ab3933bb588d76d48c8166ba2401f67fa29bb8fbd7757ba770bf1149"
+    },
+    {
+      "path": "web/apps/api/test/orderSessionCommands.db.test.ts",
+      "sha256": "dd2e9d984e2cbf2f73e439da116908db7b5b809a2ab3dac061901d6e91868d5e"
+    },
+    {
+      "path": "web/apps/api/test/orderSessionCommands.test.ts",
+      "sha256": "36884796c08a915ab3e3e31be7ba4fcb2864b47dcf6b2f8166f0cf4b7c123669"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/orderCommand.independent.json",
+      "sha256": "c6f86ef10f4f948c570e417f4f1a0336df196fb1085b2028c1f79a1e432c979e"
+    }
+  ],
+  "status": "Sales and Tour create/edit/delete now use retained session transaction; modern Tour versions required; tests pending"
+}

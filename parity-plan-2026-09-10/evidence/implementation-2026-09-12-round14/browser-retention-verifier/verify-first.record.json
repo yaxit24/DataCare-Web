@@ -1,0 +1,22 @@
+{
+  "status": "failed",
+  "exitCode": 1,
+  "recordedAtUtc": "2026-09-12T01:51:44.773685+00:00",
+  "command": [
+    "python3",
+    "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/verify_retain_browsers.py"
+  ],
+  "cwd": "/Users/yakshitsavaliya/Desktop/imodule-extracted",
+  "verifierSha256": "31c4daedccb7fa4696cf0a09e4c3fbea6f790452b177d1601789952104c51fcc",
+  "contractSha256": "3fc625b7dc3b78fc9b230b06b4478b082881af106c1a527d05c4af10e66043b0",
+  "log": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/verify-first.txt",
+    "sha256": "0412b6a9dfa5de07f206bf616f2e0a734e1aa1232963d8d721b40a4774aee26c"
+  },
+  "diagnostic": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/failed-binding-diagnostic.json",
+    "sha256": "7cb62e2a7b1f1a7041c5b5dee1ccf2f40205d66f00638b22f864c12178922821"
+  },
+  "retentionPerformed": false,
+  "reason": "Baseline browser run input manifest omitted directly read R13 required-checks JSON; no assertion removed and no artifacts retained."
+}

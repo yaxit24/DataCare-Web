@@ -1,0 +1,29 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/tourOrderExactValues.db.test.ts",
+    "test/orderSessionCommands.db.test.ts",
+    "test/tourOrderHydration.db.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T22:47:19.160840+00:00",
+  "finishedAtUtc": "2026-09-11T22:47:28.601313+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/tour-exact-api-focused.txt",
+  "logSha256": "94f214db85eb84b6488e62ea8609d3b90a103f536554e323e1652888578bc683",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/tour-exact-api-focused.inputs.json",
+  "inputManifestSha256": "65acea5c4d2334df3930c29848972a15f534894919619dfe5bfbdd3c5ee1da65",
+  "inputCount": 1814,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

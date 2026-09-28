@@ -1,0 +1,9 @@
+{
+  "status": "literal-amendment-frozen-before-code-change",
+  "originalFixtureSha256": "6af7121c2952c9be055f1e83671d0e1bd0139c80a1d81bc9482c1edb90fd8e78",
+  "amendmentSha256": "87de6652da68f4400389e862edc590cfa4a919d882ddddd7b7ad51bed22790c5",
+  "beforeSourceSha256": "f9e4059ead44f85e72238a2dff82771d042a765f90dc5cbec197c2fbe55701f3",
+  "sourceChanged": false,
+  "caseCount": 7,
+  "replacementCount": 1
+}

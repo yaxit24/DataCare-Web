@@ -1,0 +1,140 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 15ms
+ ❯ test/savedSaleReturn.routes.db.test.ts (9 tests | 4 failed) 907ms
+   × saved incoming Sale Return HTTP lifecycle > patches only explicitly dirty metadata and leaves every other business scalar intact 52ms
+     → {"error":"unsupported-state","message":"period lock configuration is missing for company 01"}: expected 422 to be 200 // Object.is equality
+   × saved incoming Sale Return HTTP lifecycle > rejects stale and cross-book or cross-tenant versions without losing the winning edit 48ms
+     → {"error":"unsupported-state","message":"period lock configuration is missing for company 01"}: expected 422 to be 200 // Object.is equality
+   × saved incoming Sale Return HTTP lifecycle > allows only one winner for two actual equal-token concurrent updates 43ms
+     → expected [ 422, 422 ] to deeply equal [ 200, 409 ]
+   × saved incoming Sale Return HTTP lifecycle > distinguishes an explicit clear from an omitted field 36ms
+     → {"error":"unsupported-state","message":"period lock configuration is missing for company 01"}: expected 422 to be 200 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/savedSaleReturn.routes.db.test.ts > saved incoming Sale Return HTTP lifecycle > patches only explicitly dirty metadata and leaves every other business scalar intact
+AssertionError: {"error":"unsupported-state","message":"period lock configuration is missing for company 01"}: expected 422 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 422
+
+ ❯ test/savedSaleReturn.routes.db.test.ts:259:34
+    257|       patch(dto.version, dto.lines[0].identity, { huid: 'HUID17', desc…
+    258|     );
+    259|     expect(r.statusCode, r.body).toBe(200);
+       |                                  ^
+    260|     expect(r.headers['cache-control']).toBe('no-store');
+    261|     expect(r.json().version).not.toBe(dto.version);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/savedSaleReturn.routes.db.test.ts > saved incoming Sale Return HTTP lifecycle > rejects stale and cross-book or cross-tenant versions without losing the winning edit
+AssertionError: {"error":"unsupported-state","message":"period lock configuration is missing for company 01"}: expected 422 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 422
+
+ ❯ test/savedSaleReturn.routes.db.test.ts:279:46
+    277|       patch(dto.version, dto.lines[0].identity, { huid: 'WINNER' }),
+    278|     );
+    279|     expect(winning.statusCode, winning.body).toBe(200);
+       |                                              ^
+    280|     const before = await businessSnapshot();
+    281|     for (const [url, role] of [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  test/savedSaleReturn.routes.db.test.ts > saved incoming Sale Return HTTP lifecycle > allows only one winner for two actual equal-token concurrent updates
+AssertionError: expected [ 422, 422 ] to deeply equal [ 200, 409 ]
+
+- Expected
++ Received
+
+  Array [
+-   200,
+-   409,
++   422,
++   422,
+  ]
+
+ ❯ test/savedSaleReturn.routes.db.test.ts:307:55
+    305|       ),
+    306|     );
+    307|     expect(responses.map((r) => r.statusCode).sort()).toEqual([200, 40…
+       |                                                       ^
+    308|     expect(['ONE', 'TWO']).toContain((await read()).lines[0].raw.HM_ID…
+    309|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  test/savedSaleReturn.routes.db.test.ts > saved incoming Sale Return HTTP lifecycle > distinguishes an explicit clear from an omitted field
+AssertionError: {"error":"unsupported-state","message":"period lock configuration is missing for company 01"}: expected 422 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 422
+
+ ❯ test/savedSaleReturn.routes.db.test.ts:333:34
+    331|       patch(dto.version, dto.lines[1].identity, { huid: '' }),
+    332|     );
+    333|     expect(r.statusCode, r.body).toBe(200);
+       |                                  ^
+    334|     expect(r.json().lines[1].raw).toMatchObject({
+    335|       HM_ID: '',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 59 passed (63)
+   Start at  07:52:30
+   Duration  2.71s (transform 830ms, setup 0ms, collect 1.33s, tests 922ms, environment 0ms, prepare 77ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/savedSaleReturn.routes.db.test.ts test/routePolicy.test.ts
+PARITY_TEST_FAILED pnpm exited 1

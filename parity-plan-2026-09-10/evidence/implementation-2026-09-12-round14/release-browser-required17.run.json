@@ -1,0 +1,27 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/releaseCertification.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T00:58:50.400871+00:00",
+  "finishedAtUtc": "2026-09-12T00:58:53.597757+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/release-browser-required17.txt",
+  "logSha256": "dcde9bb6aea3823583eca817e16a3188ca6c52f81e08dc8829b927db1fbd8043",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/release-browser-required17.inputs.json",
+  "inputManifestSha256": "fa862f9a7d2a1081795789a8dbc880254abdb8e38fd3af91b03ae59ca65ca415",
+  "inputCount": 1877,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

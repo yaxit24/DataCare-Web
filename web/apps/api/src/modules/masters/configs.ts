@@ -337,8 +337,8 @@ export const ITM_WT_MAST_CONFIG: MasterConfig = {
 };
 export const COL_MAST_CONFIG: MasterConfig = {
   table: 'COL_MAST',
-  keyColumns: ['CO_CODE', 'COL_NAME'],
-  requiredColumns: ['CO_CODE', 'COL_NAME'],
+  keyColumns: ['CO_CODE', 'BOOK_NAME', 'COL_NAME'],
+  requiredColumns: ['CO_CODE', 'BOOK_NAME', 'COL_NAME'],
   references: [],
 };
 export const PRINT_MAST_CONFIG: MasterConfig = {

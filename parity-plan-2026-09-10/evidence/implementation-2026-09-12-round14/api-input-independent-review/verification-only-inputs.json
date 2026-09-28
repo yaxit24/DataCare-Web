@@ -1,0 +1,83 @@
+{
+  "kind": "conditional-standalone-cli-inputs/v1",
+  "entries": [
+    {
+      "script": "web/scripts/check-depth.mjs:36-38,50,63-67",
+      "inputs": [
+        "web/parity/depth-parity-baseline.json",
+        "project-memory/parity/richness_desktop.py",
+        "project-memory/parity/richness_web.py",
+        "project-memory/parity/settings_parity.py",
+        "project-memory/parity/gap_manifest.py",
+        "unified/src/csharp/DataCareNext/*.cs",
+        "web/apps/web/{app,components,lib}/**",
+        "web/scripts/lib/ui-descriptors.mjs"
+      ],
+      "qualification": "Standalone measurement, not invoked by API suite. DataCareNext mode is explicit; NextDm alternate tree only if that other mode is requested."
+    },
+    {
+      "script": "web/scripts/check-settings-parity.mjs:25,27,83-84",
+      "inputs": [
+        "web/parity/settings-baseline.json",
+        "web/apps/api/dist/modules/settings/settingsInventory.js",
+        "web/apps/api/dist/modules/settings/settingsCatalog.js"
+      ],
+      "qualification": "Standalone dynamic dist imports. Capture actual imported dist bytes when this CLI runs; source-only hashes do not substitute."
+    },
+    {
+      "script": "web/scripts/check-schema-readiness.mjs:50-69",
+      "inputs": [
+        "project-memory/parity/DESKTOP-REAL-SCHEMA.json",
+        "project-memory/parity/DESKTOP-INIT-SCHEMA.json",
+        "web/parity/schema-readiness-baseline.json"
+      ],
+      "qualification": "Standalone schema gate and live DB; not imported by API tests."
+    },
+    {
+      "script": "web/scripts/check-type-parity.mjs:55-61,200-218,329",
+      "inputs": [
+        "project-memory/parity/DESKTOP-REAL-SCHEMA.json",
+        "web/scripts/type-parity-baseline.json",
+        "exact process.env.MSSQL_TYPES path when supplied"
+      ],
+      "qualification": "API typeParityInput.test.mjs uses literal synthetic schema/dump text; guarded CLI does not execute on import. For a CLI run record unset MSSQL_TYPES or hash the supplied exact path (even outside repository), not a guessed default."
+    },
+    {
+      "script": "web/scripts/check-doc-references.mjs:40,72-89,109-141",
+      "inputs": [
+        "web/docs/**/*.md",
+        "all resolved citation candidates under web and repository using PREFIXES; include preceding absent alternatives if lookup precedence matters"
+      ],
+      "qualification": "Standalone documentation gate. Current1883 does not include every docs/parity-evidence file. Do not call that gate current-source-qualified from API coverage."
+    },
+    {
+      "script": "web/scripts/check-completion-register.mjs:70,112,144",
+      "inputs": [
+        "web/docs/COMPLETION-REGISTER.json",
+        "every non-null item.evidence resolved relative to web"
+      ],
+      "qualification": "Separate from API completionRegister test, which checks webSurface page existence and does not read evidence documents."
+    },
+    {
+      "script": "web/scripts/lib/release-candidate-identity.mjs:167-185; web/scripts/lib/release-template-bundle-identity.mjs:391-403",
+      "inputs": [
+        "web/pnpm-lock.yaml",
+        "candidate Git commit/tree and full selected schema/template blob membership",
+        "exact worktree selected files"
+      ],
+      "qualification": "API tests use literal virtual trees or test-created temp files, with injected Git. Standalone release CLI requires actual Git/worktree identities."
+    },
+    {
+      "script": "web/scripts/release-certify.mjs:260-265",
+      "inputs": [
+        "every RELEASE_GATES evidence.path for gates actually run, including web/test-results/parity-real-stack/result.json"
+      ],
+      "qualification": "API releaseCertification only reads G5/report/restore retained files plus listed producer/workflow source; other in-test artefacts are supplied objects. Do not infer API reads all release outputs."
+    }
+  ],
+  "notDirectApiInputs": [
+    "web/deploy/backup.sh",
+    "project-memory/catalogs/realdb-schema-full.json (reportContract comment only; no read in that test)",
+    "unified/src/csharp_nextdm/DataCareNext (not selected by the current check-depth DataCareNext invocation)"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+ "form": "MS_STK_LIMIT",
+ "tables": [
+  "DM_SIZE",
+  "ITEM_MAST",
+  "ITM_WT_MAST",
+  "LBR_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "DM_SIZE",
+   "ITM_WT_MAST"
+  ]
+ },
+ "selectTables": [
+  "DM_SIZE",
+  "ITEM_MAST",
+  "ITM_WT_MAST",
+  "LBR_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 10,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [
+  "LBR_CODE = '\" + TEXT_ENTRY.Text + \"'\""
+ ],
+ "loc": 2173
+}

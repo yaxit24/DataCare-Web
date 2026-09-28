@@ -1,0 +1,40 @@
+# TR_PR_SL_HEDG
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_PR_SL_HEDG.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** —
+- **UPDATE:** MAIN_STOCK, PR_DETL, RATE_CUT_ISU
+
+## Tables deleted / reversed
+- **DELETE:** AC_DATA, CUT_DATA, CUT_DETL, CUT_STK_DETL, MAIN_STOCK, REMARK_DATA, ROJ_MEL_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- AC_MAST, CUT_DATA, TEMP_BOOK_DATA, CUT_DETL, CUT_STK_DETL, EMP_MAST, AC_DATA, MAIN_STOCK, PR_DETL, RATE_CUT_ISU, ROJ_MEL_DATA, USER_SET, REMARK_DATA
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L3465: UPDATE PR_DETL
+- L3470: UPDATE RATE_CUT_ISU
+- L3474: DELETE CUT_DATA
+- L3475: DELETE CUT_DETL
+- L3476: DELETE CUT_STK_DETL
+- L3479: DELETE TEMP_BOOK_DATA
+- L3597: DELETE AC_DATA
+- L3600: DELETE ROJ_MEL_DATA
+- L3686: UPDATE PR_DETL
+- L3693: UPDATE MAIN_STOCK
+- L3700: UPDATE RATE_CUT_ISU
+- L3707: UPDATE MAIN_STOCK
+- L3712: DELETE REMARK_DATA
+- L3713: DELETE TEMP_BOOK_DATA
+- L3714: DELETE AC_DATA
+- L3715: DELETE ROJ_MEL_DATA
+- L3716: DELETE MAIN_STOCK
+- L3718: DELETE CUT_DATA
+- L3719: DELETE CUT_DETL
+- L3720: DELETE CUT_STK_DETL
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

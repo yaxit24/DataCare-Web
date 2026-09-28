@@ -1,0 +1,184 @@
+{
+  "startedAt": "2026-09-10T21:53:33.922Z",
+  "database": "disposable localhost:55433 / app_user",
+  "mockedRequests": 0,
+  "status": "passed",
+  "designBook": {
+    "checks": [
+      "browser create/reload",
+      "two components",
+      "style and text page number",
+      "unchanged edit",
+      "saved image upload/read/delete",
+      "changed component",
+      "stale edit409 retains form",
+      "browser deletion"
+    ]
+  },
+  "tourOrder": {
+    "voucherNo": "00001",
+    "scope": {
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "Z09",
+      "acCode": "TOURAC",
+      "itemCode": "GOLD",
+      "componentCode": "STONE"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "POST",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "PUT",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "DELETE",
+        "pathname": "/api/tour-orders/00001",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      },
+      {
+        "method": "GET",
+        "pathname": "/api/tour-orders",
+        "scope": {
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025",
+          "coBook": "Z09"
+        }
+      }
+    ],
+    "checks": [
+      "configured book",
+      "browser create/reopen",
+      "two component rows",
+      "legacy flattened update400 preserves children",
+      "unchanged edit",
+      "changed child",
+      "stale edit409 retains form",
+      "scoped print",
+      "browser deletion"
+    ]
+  },
+  "finishedAt": "2026-09-10T21:53:41.769Z"
+}

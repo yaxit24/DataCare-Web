@@ -1,0 +1,60 @@
+{
+ "form": "UT_WEB_CAM",
+ "controlCount": 4,
+ "byKind": {
+  "panel": 1,
+  "other": 1,
+  "button": 2
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnSave"
+  ],
+  "this": [
+   "CameraControl1",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,271",
+   "size": "355,41",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "CameraControl1",
+   "type": "CameraControl",
+   "location": "0,0",
+   "size": "355,271",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "164,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "261,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  }
+ ]
+}

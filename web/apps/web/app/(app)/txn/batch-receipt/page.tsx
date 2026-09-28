@@ -4,8 +4,18 @@ import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 interface Line {
+  bankCharges: string;
+  chqPrintName: string;
+  clearDate: string;
+  itemDescriptionCode: string;
   partyAc: string;
   partyName: string;
   amount: string;
@@ -15,6 +25,10 @@ interface Line {
   kasar: string;
 }
 const blank = (): Line => ({
+  bankCharges: '',
+  chqPrintName: '',
+  clearDate: '',
+  itemDescriptionCode: '',
   partyAc: '',
   partyName: '',
   amount: '',
@@ -34,11 +48,37 @@ const inr = (x: number) => x.toLocaleString('en-IN');
  * builds the balanced AC_DATA ledger (Dr cash/bank + Dr KASAR; Cr party for amount+kasar) and one
  * CASH_DATA row per line.
  */
+/**
+ * P3: Line fields the server accepted that no screen could send.
+ *
+ * Cheque clearing needs the bank's charge, the name to print on the instrument, the clearing date and the item-description code; without them a batch receipt cannot record what the bank actually did.
+ */
+const extendedP3Fields: Array<[keyof Line, string]> = [
+  ['bankCharges', 'BankChg'],
+  ['chqPrintName', 'ChqName'],
+  ['clearDate', 'ClearDate'],
+  ['itemDescriptionCode', 'ItDescCode'],
+];
+
 export default function BatchReceiptPage() {
   const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [vchDate, setVchDate] = useState('');
   const [lines, setLines] = useState<Line[]>([blank(), blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [result, setResult] = useState<{ vchNo: number; total: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -66,6 +106,10 @@ export default function BatchReceiptPage() {
         lcCode,
         vchDate: vchDate || undefined,
         lines: validLines.map((l) => ({
+          bankCharges: n(l.bankCharges),
+          chqPrintName: l.chqPrintName || undefined,
+          clearDate: l.clearDate || undefined,
+          itemDescriptionCode: l.itemDescriptionCode || undefined,
           partyAc: l.partyAc,
           partyName: l.partyName || undefined,
           amount: Number(l.amount || 0),
@@ -110,7 +154,13 @@ export default function BatchReceiptPage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Collections</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedP3Fields.length}
+            testId="batch-receipt-p3-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Party</th>
@@ -120,6 +170,7 @@ export default function BatchReceiptPage() {
                 <th>Bank A/C</th>
                 <th>Cheque No</th>
                 <th className="num">Kasar</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedP3Fields} />
                 <th></th>
               </tr>
             </thead>

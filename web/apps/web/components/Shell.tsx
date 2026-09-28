@@ -1,12 +1,16 @@
 'use client';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { NAV } from '../lib/nav';
 import { get, post } from '../lib/api';
+import type { BrowserSessionContext } from '../lib/pageContext';
+import { useOperationLease } from './useOperationLease';
+import { createPendingContextSelection, savePendingContextSelection, readPendingContextSelection, submitPendingContextSelection, type PendingContextSelection } from '../lib/contextSelection';
 
 export interface Session {
   user: string;
+  context: BrowserSessionContext;
   coCode: string;
   lcCode: string;
   coYear: string | null;
@@ -19,12 +23,13 @@ export interface Session {
 export default function Shell({
   session,
   children,
+  contextStale = false,
 }: {
   session: Session;
+  contextStale?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   // --- Phase 13: Company / Year switcher ---------------------------------
   // Current coCode/coYear come from the `session` prop (the /me payload the
@@ -35,11 +40,35 @@ export default function Shell({
   const [companies, setCompanies] = useState<{ CO_CODE: string; CO_NAME: string }[]>([]);
   const [locations, setLocations] = useState<{ LC_CODE: string; LC_NAME: string }[]>([]);
   const [years, setYears] = useState<string[]>([]);
-  const [coCode, setCoCode] = useState(session.coCode);
-  const [lcCode, setLcCode] = useState(session.lcCode);
-  const [coYear, setCoYear] = useState(session.coYear ?? '');
+  const [coCode] = useState(session.coCode);
+  const [lcCode] = useState(session.lcCode);
+  const [coYear] = useState(session.coYear ?? '');
   const [ready, setReady] = useState(false);
   const [switching, setSwitching] = useState(false);
+  const operationBusy = useRef(false);
+  const { beginOperation } = useOperationLease(pathname);
+  const [pending, setPending] = useState<PendingContextSelection | null>(null);
+  const [selectionError, setSelectionError] = useState('');
+  useEffect(() => {
+    // Shell survives client navigation. Release the departed route's local UI lock;
+    // its durable pending operation and the document context guard remain intact.
+    operationBusy.current = false;
+    setSwitching(false);
+  }, [pathname]);
+  useEffect(() => {
+    const blockCommands = (event: KeyboardEvent) => {
+      if (operationBusy.current && (event.key === 'Enter' || /^F[0-9]+$/.test(event.key) ||
+          ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's'))) {
+        event.preventDefault(); event.stopImmediatePropagation();
+      }
+    };
+    document.addEventListener('keydown', blockCommands, true);
+    return () => document.removeEventListener('keydown', blockCommands, true);
+  }, []);
+  useEffect(() => {
+    try { setPending(readPendingContextSelection(session.context)); }
+    catch { setSelectionError('Browser recovery storage is unavailable. Company changes are paused.'); }
+  }, [session.context]);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,28 +102,38 @@ export default function Shell({
     nextYear: string,
     deriveCompanyDefaults = false,
   ) {
-    setCoCode(nextCo);
-    setLcCode(nextLc);
-    setCoYear(nextYear);
-    if (!nextCo || switching) return;
+    if (!nextCo || operationBusy.current || pending || contextStale) return;
     if (!deriveCompanyDefaults && (!nextLc || !nextYear)) return;
+    if (!window.confirm('Changing company, branch or year closes this page. Save or copy any unsaved work first. Continue?')) return;
+    const isCurrent = beginOperation();
+    if (!isCurrent()) return;
+    operationBusy.current = true;
     setSwitching(true);
+    setSelectionError('');
     try {
-      await post(
-        '/context/select',
-        deriveCompanyDefaults
-          ? { coCode: nextCo }
-          : { coCode: nextCo, lcCode: nextLc, coYear: nextYear },
-      );
+      const saved = createPendingContextSelection(session.context, deriveCompanyDefaults
+        ? { coCode: nextCo } : { coCode: nextCo, lcCode: nextLc, coYear: nextYear });
+      savePendingContextSelection(saved);
+      setPending(saved);
+      await submitPendingContextSelection(saved, { isCurrent });
+      if (!isCurrent()) return;
       window.location.reload();
-    } catch {
+    } catch (error) {
+      if (!isCurrent()) return;
+      setSelectionError(error instanceof Error ? error.message : 'The company change could not be confirmed.');
+      operationBusy.current = false;
       setSwitching(false);
     }
   }
 
   async function logout() {
+    if (operationBusy.current) return;
+    const isCurrent = beginOperation();
+    if (!isCurrent()) return;
+    operationBusy.current = true;
+    setSwitching(true);
     await post('/auth/logout').catch(() => {});
-    router.push('/login');
+    if (isCurrent()) window.location.assign('/login');
   }
 
   return (
@@ -107,7 +146,7 @@ export default function Shell({
               aria-label="Company"
               title="Switch company"
               value={coCode}
-              disabled={switching}
+              disabled={switching || !!pending || contextStale || !!selectionError}
               onChange={(e) => switchContext(e.target.value, lcCode, coYear, true)}
               style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12, maxWidth: 220 }}
             >
@@ -121,7 +160,7 @@ export default function Shell({
               aria-label="Location"
               title="Switch location"
               value={lcCode}
-              disabled={switching}
+              disabled={switching || !!pending || contextStale || !!selectionError}
               onChange={(e) => switchContext(coCode, e.target.value, coYear)}
               style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12, maxWidth: 180 }}
             >
@@ -135,7 +174,7 @@ export default function Shell({
               aria-label="Financial year"
               title="Switch financial year"
               value={coYear}
-              disabled={switching}
+              disabled={switching || !!pending || contextStale || !!selectionError}
               onChange={(e) => switchContext(coCode, lcCode, e.target.value)}
               style={{ color: 'var(--ink)', padding: '3px 6px', fontSize: 12 }}
             >
@@ -155,16 +194,16 @@ export default function Shell({
         )}
         <span className="spacer" />
         <span className="chip">👤 {session.user}</span>
-        <button onClick={logout}>Logout</button>
+        <button disabled={switching} onClick={logout}>Logout</button>
       </header>
-      <nav className="sidebar">
+      <nav className="sidebar" onClickCapture={(event) => { if (switching) { event.preventDefault(); event.stopPropagation(); } }}>
         {NAV.map((g) => {
           // Only explicit null (server-verified admin) means show all; [] hides every form.
           const allowed = session.allowedForms;
           const items =
             allowed === null
               ? g.items
-              : g.items.filter((it) => allowed.includes(`${g.label}/${it.label}`));
+              : g.items.filter((it) => allowed.includes(it.form ?? `${g.label}/${it.label}`));
           if (!items.length) return null;
           return (
             <div key={g.label}>
@@ -182,7 +221,20 @@ export default function Shell({
           );
         })}
       </nav>
-      <main className="content">{children}</main>
+      <main className="content">
+        {(pending || selectionError) && (
+          <div className="msg err" role="alert" data-testid="pending-context-recovery">
+            {pending && <p>A company change to {pending.request.coCode} is awaiting confirmation.</p>}
+            {selectionError && <p>{selectionError}</p>}
+            {pending && <button disabled={switching} onClick={() => {
+              if (window.confirm('Company selection will close this page. Copy any unsaved work first. Continue?')) window.location.assign('/select');
+            }}>Check company change</button>}
+          </div>
+        )}
+        <fieldset disabled={switching} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }} aria-busy={switching}>
+          {children}
+        </fieldset>
+      </main>
     </div>
   );
 }

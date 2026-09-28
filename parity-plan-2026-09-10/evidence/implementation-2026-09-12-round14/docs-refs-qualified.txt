@@ -1,0 +1,6 @@
+
+> datacare-web-saas@0.0.0 docs:refs /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/check-doc-references.mjs
+
+doc references: 35 document(s), 196 file citation(s), 14 with a line number, 1 verifiable claim(s)
+DOC_REFS_OK every cited path resolves and every pinned claim holds

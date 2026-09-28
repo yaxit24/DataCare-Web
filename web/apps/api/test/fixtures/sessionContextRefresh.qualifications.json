@@ -1,0 +1,340 @@
+{
+  "version": "refresh-matrix-qualification-v1",
+  "status": "literal-unexecuted",
+  "baseMatrix": {
+    "path": "acceptance-matrix.json",
+    "sha256": "c7a7d68f63ef0bca93024dab1030b7c918a6c0bf22928c0de42499f02aa4bc61"
+  },
+  "authorship": "Additive expected outcomes authored from root-approved profile and independent source review; no refresh coordinator source or execution used to derive these values. Q01 overrides proposed-profile credit for R05; frozen historical bytes stay unchanged.",
+  "cases": [
+    {
+      "id": "Q01",
+      "reason": "Strict stored-company membership refuses ordinary USER fallback; historical R05 success is not the new profile",
+      "before": [
+        {
+          "tenant_id": "refresh-matrix",
+          "session_id": "11111111-1111-4111-8111-111111111111",
+          "login_name": "operator",
+          "login_co_code": "01",
+          "co_code": "02",
+          "lc_code": "03",
+          "co_year": "2024-2025",
+          "refresh_jti_hash": "b06ebf2a6ad6e9c10d8757d03361daff3c7bb3d9eda53e2eee576669402bf32c",
+          "created_at": "2026-09-01T12:00:00.000Z",
+          "last_used_at": "2026-09-02T12:00:00.000Z",
+          "expires_at": "2026-09-08T12:00:00.000Z",
+          "revoked_at": null,
+          "revoke_reason": null,
+          "context_epoch": "7",
+          "ledger_context": {
+            "version": "server-session-ledger-context-v1",
+            "status": "unknown",
+            "mode": null,
+            "reason": "legacy-session-uninitialized"
+          },
+          "last_context_selection_id": "22222222-2222-4222-8222-222222222222",
+          "last_context_request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "last_context_from_epoch": "6"
+        }
+      ],
+      "events": [
+        {
+          "operation": "refresh",
+          "presentedJti": "fixture-current-refresh-jti",
+          "clockAfterLock": "2026-09-03T12:00:00.000Z",
+          "principal": {
+            "loginName": "operator",
+            "loginCoCode": "01",
+            "role": "USER",
+            "isAdmin": false,
+            "rights": {
+              "userUpdate": true,
+              "userDelete": false,
+              "userPrint": false
+            },
+            "passwordResetRequired": false
+          },
+          "fault": null,
+          "selectedCompanyCredentialPresent": false,
+          "companyMembershipAllowed": false
+        }
+      ],
+      "expected": {
+        "outcome": "company-unavailable",
+        "sessionRows": [
+          {
+            "tenant_id": "refresh-matrix",
+            "session_id": "11111111-1111-4111-8111-111111111111",
+            "login_name": "operator",
+            "login_co_code": "01",
+            "co_code": "02",
+            "lc_code": "03",
+            "co_year": "2024-2025",
+            "refresh_jti_hash": "b06ebf2a6ad6e9c10d8757d03361daff3c7bb3d9eda53e2eee576669402bf32c",
+            "created_at": "2026-09-01T12:00:00.000Z",
+            "last_used_at": "2026-09-02T12:00:00.000Z",
+            "expires_at": "2026-09-08T12:00:00.000Z",
+            "revoked_at": null,
+            "revoke_reason": null,
+            "context_epoch": "7",
+            "ledger_context": {
+              "version": "server-session-ledger-context-v1",
+              "status": "unknown",
+              "mode": null,
+              "reason": "legacy-session-uninitialized"
+            },
+            "last_context_selection_id": "22222222-2222-4222-8222-222222222222",
+            "last_context_request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "last_context_from_epoch": "6"
+          }
+        ],
+        "businessConfigLedgerWrites": 0,
+        "signerCalls": 0,
+        "setNewCookies": false,
+        "routeResult": {
+          "status": 401,
+          "error": "invalid-refresh",
+          "clearCookies": true,
+          "qualification": "Caught failure with a presented refresh cookie; coordinator has no HTTP/cookie side effects"
+        }
+      },
+      "qualifies": "R05"
+    },
+    {
+      "id": "Q02",
+      "reason": "Admin credential fallback01 may validate selected company02 without a LOGIN_MAST02 row",
+      "before": [
+        {
+          "tenant_id": "refresh-matrix",
+          "session_id": "11111111-1111-4111-8111-111111111111",
+          "login_name": "operator",
+          "login_co_code": "01",
+          "co_code": "02",
+          "lc_code": "03",
+          "co_year": "2024-2025",
+          "refresh_jti_hash": "b06ebf2a6ad6e9c10d8757d03361daff3c7bb3d9eda53e2eee576669402bf32c",
+          "created_at": "2026-09-01T12:00:00.000Z",
+          "last_used_at": "2026-09-02T12:00:00.000Z",
+          "expires_at": "2026-09-08T12:00:00.000Z",
+          "revoked_at": null,
+          "revoke_reason": null,
+          "context_epoch": "7",
+          "ledger_context": {
+            "version": "server-session-ledger-context-v1",
+            "status": "unknown",
+            "mode": null,
+            "reason": "legacy-session-uninitialized"
+          },
+          "last_context_selection_id": "22222222-2222-4222-8222-222222222222",
+          "last_context_request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "last_context_from_epoch": "6"
+        }
+      ],
+      "events": [
+        {
+          "operation": "refresh",
+          "presentedJti": "fixture-current-refresh-jti",
+          "clockAfterLock": "2026-09-03T12:00:00.000Z",
+          "principal": {
+            "loginName": "operator",
+            "loginCoCode": "01",
+            "role": "ADMIN",
+            "isAdmin": true,
+            "rights": {
+              "userUpdate": true,
+              "userDelete": true,
+              "userPrint": true
+            },
+            "passwordResetRequired": false
+          },
+          "fault": null,
+          "selectedCompanyCredentialPresent": false,
+          "companyMembershipAllowed": true
+        }
+      ],
+      "expected": {
+        "outcome": "success",
+        "sessionRows": [
+          {
+            "tenant_id": "refresh-matrix",
+            "session_id": "11111111-1111-4111-8111-111111111111",
+            "login_name": "operator",
+            "login_co_code": "01",
+            "co_code": "02",
+            "lc_code": "03",
+            "co_year": "2024-2025",
+            "refresh_jti_hash": "cc9d0b8c1876d821e28b2b795532b5259f6c0d9fcdc40ab897677b82281da787",
+            "created_at": "2026-09-01T12:00:00.000Z",
+            "last_used_at": "2026-09-03T12:00:00.000Z",
+            "expires_at": "2026-09-08T12:00:00.000Z",
+            "revoked_at": null,
+            "revoke_reason": null,
+            "context_epoch": "7",
+            "ledger_context": {
+              "version": "server-session-ledger-context-v1",
+              "status": "unknown",
+              "mode": null,
+              "reason": "legacy-session-uninitialized"
+            },
+            "last_context_selection_id": "22222222-2222-4222-8222-222222222222",
+            "last_context_request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "last_context_from_epoch": "6"
+          }
+        ],
+        "businessConfigLedgerWrites": 0,
+        "accessClaims": {
+          "tenantId": "refresh-matrix",
+          "sub": "operator",
+          "sid": "11111111-1111-4111-8111-111111111111",
+          "loginCoCode": "01",
+          "coCode": "02",
+          "lcCode": "03",
+          "coYear": "2024-2025",
+          "contextEpoch": "7",
+          "rights": {
+            "userUpdate": true,
+            "userDelete": true,
+            "userPrint": true
+          },
+          "passwordResetRequired": false
+        },
+        "setNewCookies": true
+      }
+    },
+    {
+      "id": "Q03",
+      "reason": "Live after lock but exact final guarded update reaches expiry: rollback, no committed expired revocation",
+      "before": [
+        {
+          "tenant_id": "refresh-matrix",
+          "session_id": "11111111-1111-4111-8111-111111111111",
+          "login_name": "operator",
+          "login_co_code": "01",
+          "co_code": "02",
+          "lc_code": "03",
+          "co_year": "2024-2025",
+          "refresh_jti_hash": "b06ebf2a6ad6e9c10d8757d03361daff3c7bb3d9eda53e2eee576669402bf32c",
+          "created_at": "2026-09-01T12:00:00.000Z",
+          "last_used_at": "2026-09-02T12:00:00.000Z",
+          "expires_at": "2026-09-03T12:00:00.000001Z",
+          "revoked_at": null,
+          "revoke_reason": null,
+          "context_epoch": "7",
+          "ledger_context": {
+            "version": "server-session-ledger-context-v1",
+            "status": "unknown",
+            "mode": null,
+            "reason": "legacy-session-uninitialized"
+          },
+          "last_context_selection_id": "22222222-2222-4222-8222-222222222222",
+          "last_context_request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "last_context_from_epoch": "6"
+        }
+      ],
+      "events": [
+        {
+          "operation": "refresh",
+          "presentedJti": "fixture-current-refresh-jti",
+          "clockAfterLock": "2026-09-03T12:00:00.000000Z",
+          "principal": {
+            "loginName": "operator",
+            "loginCoCode": "02",
+            "role": "USER",
+            "isAdmin": false,
+            "rights": {
+              "userUpdate": false,
+              "userDelete": false,
+              "userPrint": true
+            },
+            "passwordResetRequired": false
+          },
+          "fault": null,
+          "clockBeforeFinalUpdate": "2026-09-03T12:00:00.000001Z",
+          "signerResult": {
+            "accessToken": "local-unpublished-access",
+            "refreshToken": "local-unpublished-refresh"
+          }
+        }
+      ],
+      "expected": {
+        "outcome": "session-expired",
+        "sessionRows": [
+          {
+            "tenant_id": "refresh-matrix",
+            "session_id": "11111111-1111-4111-8111-111111111111",
+            "login_name": "operator",
+            "login_co_code": "01",
+            "co_code": "02",
+            "lc_code": "03",
+            "co_year": "2024-2025",
+            "refresh_jti_hash": "b06ebf2a6ad6e9c10d8757d03361daff3c7bb3d9eda53e2eee576669402bf32c",
+            "created_at": "2026-09-01T12:00:00.000Z",
+            "last_used_at": "2026-09-02T12:00:00.000Z",
+            "expires_at": "2026-09-03T12:00:00.000001Z",
+            "revoked_at": null,
+            "revoke_reason": null,
+            "context_epoch": "7",
+            "ledger_context": {
+              "version": "server-session-ledger-context-v1",
+              "status": "unknown",
+              "mode": null,
+              "reason": "legacy-session-uninitialized"
+            },
+            "last_context_selection_id": "22222222-2222-4222-8222-222222222222",
+            "last_context_request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "last_context_from_epoch": "6"
+          }
+        ],
+        "businessConfigLedgerWrites": 0,
+        "signerCalls": 1,
+        "setNewCookies": false,
+        "commitRejection": false,
+        "rollback": true,
+        "qualification": "Semantic expiry refusal; coordinator error naming must be documented. No revocation writes survive this transaction."
+      }
+    }
+  ],
+  "qualifications": [
+    {
+      "ids": [
+        "R05"
+      ],
+      "text": "Principal fallback alone does not authorize a stored company. Missing LOGIN_MAST02 ordinary user is refused by exact scope membership; historical current refresh allowed fallback without this validation."
+    },
+    {
+      "ids": [
+        "R20",
+        "L08"
+      ],
+      "text": "The injected commit-failure denotes a confirmed database abort. An ambiguous lost COMMIT response may leave committed rotation/new session without published cookies; no automatic safe retry is proved."
+    },
+    {
+      "ids": [
+        "C02",
+        "C03"
+      ],
+      "text": "Synthetic receipt hash models a separately committed session-row transition. It does not prove invocation of selectSessionContext; actual selection tests need a real request fingerprint."
+    },
+    {
+      "ids": [
+        "C09"
+      ],
+      "text": "The retained-session literal alone cannot prove other-session revocation. Real lifecycle tests must seed and assert a noncurrent session sentinel."
+    },
+    {
+      "ids": [
+        "R11",
+        "Q03"
+      ],
+      "text": "Expired after lock commits existing expiry revocation. Crossing expiry only during signing aborts the rotation transaction with original hash/last_used/revocation fields unchanged."
+    },
+    {
+      "ids": [],
+      "text": "Production expiry authority is exact database timestamptz comparison against clock_timestamp after lock and again in final guarded update. Tests may inject trusted clocks only. The new Q03 microsecond boundary must use exact SQL clock values or a real database schedule, never JavaScript Date rounding."
+    },
+    {
+      "ids": [],
+      "text": "Missing refresh cookie currently returns early401 without clearing access. Generic clear-both-cookie statements apply caught failures with a presented refresh token, not every401 path."
+    }
+  ]
+}

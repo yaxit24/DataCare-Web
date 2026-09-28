@@ -1,0 +1,170 @@
+{
+ "form": "MS_PRODUCT",
+ "loc": 3534,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT TABLE_CODE AS PR_CODE, TABLE_NAME AS PR_NAME FROM TABLE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY TABLE_CODE",
+  "SELECT A.SCHM_CODE AS PR_CODE, A.SCHM_NAME AS PR_NAME,A.SCHM_AC,B.AC_NAME,A.SCHM_AMT,A.MAIN_USER,A.SCHM_MONTH,A.SCHM_TYPE,BONUS_MONTH,SCHM_HADING,SCHM_REMARK,SCHM_WITH_APP,BANK_AC FROM AD_MAST AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.SCHM_AC = B.AC_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.SCHM_NAME",
+  "SELECT * FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_CODE",
+  "SELECT SCHM_CODE As CoCode From AD_MAST WHERE CO_CODE = ' ? ' ORDER BY CAST(SCHM_CODE AS INT) DESC",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 150",
+  "DELETE FROM TABLE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TABLE_CODE = ' ? '",
+  "INSERT INTO TABLE_MAST (CO_CODE,LC_CODE,TABLE_CODE,TABLE_NAME,MAIN_USER,DATA_TRFR) VALUES (' ? ',' ? ',' ? ',' ? ',' ? ','N')",
+  "SELECT TABLE_CODE As PR_CODE,TABLE_NAME AS PR_NAME,MAIN_USER FROM TABLE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY TABLE_CODE",
+  "DELETE FROM AD_MAST WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "INSERT INTO AD_MAST (CO_CODE,SCHM_CODE,SCHM_NAME,SCHM_AC,SCHM_AMT,MAIN_USER,SCHM_MONTH,DATA_TRFR,SCHM_TYPE,BONUS_MONTH,SCHM_HADING,SCHM_REMARK,SCHM_WITH_APP,BANK_AC) VALUES (' ? ',' ? ',' ? ',' ? ', ? ,' ? ', ? ,'N',' ? ', ? ,' ? ',' ? ',' ? ',' ? ')",
+  "SELECT A.SCHM_CODE AS PR_CODE, A.SCHM_NAME AS PR_NAME,A.SCHM_AC,B.AC_NAME,A.SCHM_AMT,A.MAIN_USER,A.SCHM_MONTH,SCHM_TYPE,BONUS_MONTH,SCHM_HADING,SCHM_REMARK,SCHM_WITH_APP,BANK_AC FROM AD_MAST AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.SCHM_AC = B.AC_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.SCHM_NAME",
+  "DELETE FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "INSERT INTO PRODUCT_MAST (CO_CODE,PR_CODE,PR_NAME,MAIN_USER,DATA_TRFR) VALUES (' ? ',' ? ',' ? ',' ? ','N')",
+  "DELETE FROM CO_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM CO_MAST WHERE CO_CODE = ' ? '",
+  "INSERT INTO CO_MAST(CO_CODE,CO_NAME,LC_CODE,CO_SNAME,CO_ADD1,CO_ADD2,CO_ADD3, CO_COUNTRY,CO_STATE_CODE,CO_STATE,CO_CITY,CO_PIN,CO_PHONE,CO_PHONE2,CO_MOBILE,CO_MOBILE2,CO_MAIL, CO_JUD,CO_LSTNO,CO_CSTNO,CO_GST_NO,CO_PAN_NO,DHIRAN_NO,BANK_NAME,BANK_AREA,BANK_AC_NO, CO_TYPE,ALTER_YEAR,CO_MSG,REP_ADD_TYPE,MAIN_USER,WORK_TYPE,METAL_TYPE,URL_NAME,URL_ID,URL_PWD,HTTP_NAME,MAIL_API) VALUES(' ? ',' ? CO_NAME ? ',' ? LC_CODE ? ',' ? CO_SNAME ? ',' ? CO_ADD1 ? ',' ? CO_ADD2 ? ',' ? CO_ADD3 ? ', ? ' ? CO_COUNTRY ? ',' ? CO_STATE_CODE ? ',' ? CO_STATE ? ',' ? CO_CITY ? ',' ? CO_PIN ? ',' ? CO_PHONE ? ',' ? CO_PHONE2 ? ',' ? CO_MOBILE ? ',' ? CO_MOBILE2 ? ',' ? CO_MAIL ? ', ? ' ? CO_JUD ? ',' ? CO_LSTNO ? ',' ? CO_CSTNO ? ',' ? CO_GST_NO ? ',' ? CO_PAN_NO ? ',' ? DHIRAN_NO ? ',' ? BANK_NAME ? ',' ? BANK_AREA ? ',' ? BANK_AC_NO ? ', ? ' ? CO_TYPE ? ',' ? ALTER_YEAR ? ',' ? CO_MSG ? ',' ? REP_ADD_TYPE ? ',' ? MAIN_USER ? ',' ? WORK_TYPE ? ',' ? METAL_TYPE ? ',' ? URL_NAME ? ',' ? URL_ID ? ',' ? URL_PWD ? ',' ? HTTP_NAME ? ',' ? MAIL_API ? ')",
+  "SELECT * FROM AD_MAST WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "INSERT INTO AD_MAST(CO_CODE,SCHM_CODE,SCHM_NAME,SCHM_AMT,SCHM_AC,SCHM_TYPE,DATA_TRFR, MAIN_USER,ADD_USER,BONUS_PRC,SCHM_MONTH,GOLD_RATE,BONUS_MONTH,SCHM_WITH_APP,SCHM_HADING,SCHM_REMARK,BANK_AC) VALUES(' ? ',' ? SCHM_CODE ? ',' ? SCHM_NAME ? ', ? SCHM_AMT ? ,' ? SCHM_AC ? ',' ? SCHM_TYPE ? ','N', ? ' ? ',' ? ', ? BONUS_PRC ? , ? SCHM_MONTH ? , ? GOLD_RATE ? , ? BONUS_MONTH ? ,' ? SCHM_WITH_APP ? ',' ? SCHM_HADING ? ',' ? SCHM_REMARK ? ',' ? BANK_AC ? ')",
+  "Please Select Product For Delete.",
+  "SELECT TBL_CODE FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TBL_CODE = ' ? '",
+  "SELECT TABLE_CODE AS PR_CODE,TABLE_NAME AS PR_NAME,MAIN_USER FROM TABLE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY TABLE_CODE",
+  "SELECT * FROM AD_MEMB WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? ' AND AC_GR IN ('04','07')",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL, B.AC_GR_NAME AS GroupL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.AC_GR IN ('04','07') ORDER BY A.AC_NAME",
+  "Select * FROM BOOK_IDTL WHERE SR_NO = 150",
+  "INSERT INTO BOOK_IDTL(MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME,SVR_PWD)VALUES(' ? ',150,'O','',' ? ',' ? ')",
+  "Server Ip is Update....Ok..",
+  "UPDATE BOOK_IDTL SET MAIN_BOOK = ' ? ',INOUT_TYPE = 'O',AC_CODE = '',AC_NAME = ' ? ' ,SVR_PWD = ' ? ' WHERE SR_NO = 150",
+  "Please First Select Scheme Then try....",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? ' AND AC_GR IN ('02','03','19','22','23')",
+  "DELETE FROM TAG_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "WITH StockData AS (SELECT B.PR_CODE,C.CO_CODE,C.LC_CODE,A.TAG_NO, A.IT_CODE,C.DESIGN_NO,C.ITM_SIZE,B.IT_TYPE,B.GR_CODE,D.GR_NAME,E.PR_NAME, C.ITM_PCS,C.ITM_GWT,C.ITM_NWT,C.LBR_RATE, C.LBR_PRC,C.LBR_AMT, C.OTH_AMT,C.ITM_MRP,A.VCH_SRNO,C.STK_DATE,ROW_NUMBER() OVER (PARTITION BY B.PR_CODE, A.TAG_NO ORDER BY C.STK_DATE DESC) AS rnTag FROM MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE AND A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO AND A.IT_CODE = C.IT_CODE LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE LEFT JOIN GROUP_MAST As D On A.IT_CODE = B.IT_CODE LEFT JOIN PRODUCT_MAST As E On B.CO_CODE = E.CO_CODE And B.PR_CODE = E.PR_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND B.APP_ITEM = 'Y'),DistinctTags AS (SELECT *,ROW_NUMBER() OVER (PARTITION BY PR_CODE ORDER BY STK_DATE DESC, TAG_NO) AS rn FROM StockData WHERE rnTag = 1),GroupCount As(Select COUNT(DISTINCT PR_CODE) As TotalGroups FROM DistinctTags),RowLimit As (SELECT d.PR_CODE,CEILING(100 / g.TotalGroups) AS AllowedRows FROM (SELECT DISTINCT PR_CODE FROM DistinctTags) d CROSS JOIN GroupCount g) Select s.* FROM DistinctTags s JOIN RowLimit r On s.PR_CODE = r.PR_CODE WHERE s.rn <= r.AllowedRows ORDER BY s.PR_CODE, s.STK_DATE DESC, s.TAG_NO",
+  "INSERT INTO TAG_STOCK(CO_CODE,LC_CODE,TAG_NO,SR_NO,STK_TYPE,DESIGN_NO,ITM_SIZE,IT_TYPE, GR_CODE,GR_NAME,PR_CODE,PR_NAME,GR_RATE,ITM_PCS,ITM_GWT,ITM_NWT,LBR_PRC,LBR_TYPE, LBR_RATE,LBR_AMT,OTH_AMT,ITM_MRP,VCH_SRNO,DESIGN_IMG_ID,MAIN_USER) VALUES(' ? CO_CODE ? ',' ? LC_CODE ? ',' ? TAG_NO ? ',' ? rn ? 000 ? ','T',' ? DESIGN_NO ? ',' ? ITM_SIZE ? ',' ? IT_TYPE ? ', ? ' ? GR_CODE ? ',' ? GR_NAME ? ',' ? PR_CODE ? ',' ? PR_NAME ? ',0, ? ITM_PCS ? , ? ITM_GWT ? 0.000 ? , ? ITM_NWT ? 0.000 ? , ? LBR_PRC ? ,'G', ? LBR_RATE ? , ? LBR_AMT ? , ? OTH_AMT ? , ? ITM_MRP ? , ? VCH_SRNO ? ,' ? TAG_NO ? _ ? VCH_SRNO ? ',' ? ')",
+  "DELETE FROM ITEM_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? ' ORDER BY IT_CODE",
+  "INSERT INTO ITEM_MAST(CO_CODE,IT_CODE,IT_NAME,IT_TYPE,PR_CODE,GR_CODE,RATE_TYPE, LBR_PRC,IT_TOUCH,IT_WEST,OTH_RATE,IT_LBR_RATE,IT_GHT_PRC) VALUES(' ? CO_CODE ? ',' ? IT_CODE ? ',' ? IT_NAME ? ',' ? IT_TYPE ? ',' ? PR_CODE ? ',' ? GR_CODE ? ',' ? RATE_TYPE ? ', ? LBR_PRC ? , ? IT_TOUCH ? 0.000 ? , ? IT_WEST ? 0.000 ? , ? OTH_RATE ? , ? IT_LBR_RATE ? , ? IT_GHT_PRC ? )",
+  "DELETE FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM AD_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM APP_USER_DATA",
+  "DELETE FROM LIKE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM DG_GOLD_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM AD_OS WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM AD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "F1": 3,
+  "Enter": 8,
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1
+ },
+ "calc": [
+  "tPrCode.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"000\");"
+ ],
+ "validations": [
+  {
+   "message": "Please Insert Table Name ...",
+   "when": "Operators.CompareString(CurMast, \"Counter\", false) == 0"
+  },
+  {
+   "message": "Please Insert Scheme Name ...",
+   "when": "Operators.CompareString(CurMast, \"Scheme Mast\", false) == 0"
+  },
+  {
+   "message": "Please Insert Product Name ...",
+   "when": ""
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Enter Table Code.",
+   "when": "Operators.CompareString(CurMast, \"Counter\", false) == 0"
+  },
+  {
+   "message": "Enter Scheme Code.",
+   "when": "Operators.CompareString(CurMast, \"Scheme Mast\", false) == 0"
+  },
+  {
+   "message": "Enter Product Code.",
+   "when": ""
+  },
+  {
+   "message": "Enter Table Name.",
+   "when": "Operators.CompareString(CurMast, \"Counter\", false) == 0"
+  },
+  {
+   "message": "Enter Scheme Name.",
+   "when": "Operators.CompareString(CurMast, \"Scheme Mast\", false) == 0"
+  },
+  {
+   "message": "Enter Product Name.",
+   "when": ""
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Insert Product Code 2 Digit...",
+   "when": "Strings.Len(tPrCode.Text) == 1"
+  },
+  {
+   "message": "Please Select Product For Delete.",
+   "when": "Operators.CompareString(tPrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Record now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "You Cant Delete Record This Table in Main Stock Use in Transection....",
+   "when": "DC_Main.Tbl.Rows.Count > 0"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "You Cant Delete Record This Scheme Use in Memb Master....",
+   "when": "DC_Main.Tbl.Rows.Count > 0"
+  },
+  {
+   "message": "You Cant Delete Record This Product Use in Itme Master....",
+   "when": "DC_Main.Tbl.Rows.Count > 0"
+  },
+  {
+   "message": "You Cant Delete Record, This Product Is Default Product....",
+   "when": ""
+  },
+  {
+   "message": "Please Fild Is Not Blank Alloud...",
+   "when": "(Operators.CompareString(tServerIp.Text, \"\", false) == 0) | (Operators.CompareString(tDataBaseName.Text, \"\", false) == 0) | (Operators.CompareString(tPwd.Text, "
+  },
+  {
+   "message": "Server Ip is Update....Ok..",
+   "when": "DC_Main.Rshlp.Rows.Count == 0"
+  },
+  {
+   "message": "Please First Select Scheme Then try....",
+   "when": "(cboImgType.SelectedIndex == 0) & (Operators.CompareString(tPrCode.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Stock Is Transfer...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Reset Curent Scheme Data?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Reset Curent Scheme Data?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Reset..Is Complete...Please Stock Refresh...And AcRefresh...",
+   "when": ""
+  },
+  {
+   "message": "This is Not Demo Software You Cant Reset...",
+   "when": ""
+  }
+ ]
+}

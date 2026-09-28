@@ -1,0 +1,204 @@
+{
+ "report": "SaleOrnaIsu",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 160,
+     "objects": []
+    },
+    {
+     "name": "Section6",
+     "kind": "ReportHeader",
+     "height": 238,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 2955,
+       "top": 0,
+       "width": 1170,
+       "height": 209,
+       "dataSource": "{BILL_OS_DATA.REC_AMT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 259,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 180,
+       "top": 21,
+       "width": 3240,
+       "height": 238,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 3354,
+       "top": 21,
+       "width": 1101,
+       "height": 209,
+       "dataSource": "{BILL_OS_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 4665,
+       "top": 26,
+       "width": 1050,
+       "height": 204,
+       "dataSource": "{@AdjAmt}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 290,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 4275,
+       "top": 30,
+       "width": 1440,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 4641,
+       "top": 45,
+       "width": 1074,
+       "height": 216,
+       "dataSource": "Sum ({@AdjAmt})"
+      }
+     ]
+    },
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 241,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AdjAmt",
+   "ref": "{@AdjAmt}",
+   "type": "NumberField",
+   "text": "{BILL_OS_DATA.REC_AMT}+{BILL_OS_DATA.KASAR_AMT}"
+  },
+  {
+   "name": "OsDetail",
+   "ref": "{@OsDetail}",
+   "type": "StringField",
+   "text": "'Y'"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+' '+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DiscAmt",
+   "ref": "{@DiscAmt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.DISC_AMT}"
+  },
+  {
+   "name": "ItmAmt",
+   "ref": "{@ItmAmt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.NET_AMT}"
+  },
+  {
+   "name": "LbrAmt",
+   "ref": "{@LbrAmt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.TOT_AMT}"
+  },
+  {
+   "name": "NetWt",
+   "ref": "{@NetWt}",
+   "type": "NumberField",
+   "text": "{SL_DETL.ITM_NWT}"
+  },
+  {
+   "name": "OsDtl",
+   "ref": "{@OsDtl}",
+   "type": "StringField",
+   "text": "'Y'"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'SALES REPORT'"
+  },
+  {
+   "name": "SaleTax",
+   "ref": "{@SaleTax}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "SrNo",
+   "ref": "{@SrNo}",
+   "type": "NumberField",
+   "text": "{SL_DETL.SR_NO}"
+  },
+  {
+   "name": "TaxAmt",
+   "ref": "{@TaxAmt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.TAX_AMT}"
+  },
+  {
+   "name": "VchAmt",
+   "ref": "{@VchAmt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.TOT_AMT}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{SL_DATA.CO_BOOK}+{SL_DATA.VCH_NO}"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 6,
+ "formulaCount": 15
+}

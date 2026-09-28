@@ -1,0 +1,647 @@
+{
+  "card": "X25",
+  "round": 3,
+  "slice": "source-recovered-order-images-and-saved-form-image-controls",
+  "implementationState": "partial",
+  "engineeringState": "coordinated-tests-build-types-and-real-browser-passed",
+  "desktopAcceptance": null,
+  "physicalPrinterAcceptance": null,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "capturedAtUtc": "2026-09-11T04:22:52.274432+00:00",
+  "sourceState": "shared-dirty-development-tree; listed hashes identify this slice, not a clean release candidate",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "inputFiles": [
+    {
+      "path": "apps/api/src/modules/reports/reportBind.ts",
+      "sha256": "d129d36d19a1f812ce915070a411e31130cdefab4ae2546a7120d856b98e9ed1"
+    },
+    {
+      "path": "apps/api/src/modules/reports/reportBindingContract.ts",
+      "sha256": "13f74480a45f4d3bdbe8f00ef2e30f3e965fd07f4d7e7cf3370322cbbd9d9b6b"
+    },
+    {
+      "path": "apps/api/src/modules/reports/reportEngine.ts",
+      "sha256": "7486db6229f6d397c5ac6e336f7db3607382f1e728023751428a47ef63d04d6e"
+    },
+    {
+      "path": "apps/api/src/modules/reports/orderReportLayout.ts",
+      "sha256": "596acdd5dbadb5426d0287d4ea8ed21ff4771f1d6a48b0a71e4b0440168ef304"
+    },
+    {
+      "path": "apps/api/src/modules/reports/orderReportImages.ts",
+      "sha256": "57185661348a4bf09d6248a537a1cf1920269de41d75834c225868e48fed1b98"
+    },
+    {
+      "path": "apps/api/src/modules/reports/orderReportValues.ts",
+      "sha256": "4923c70f5685db25b8fc88094aeb701ce945408096fde38d35337fac5d4aaefe"
+    },
+    {
+      "path": "apps/api/src/modules/images/orderImage.ts",
+      "sha256": "02c1ec42bf1487f56298589f5d2f13cafe6647e9a0a3b6fb41291f1080f1b7f2"
+    },
+    {
+      "path": "apps/api/src/modules/images/entityImage.ts",
+      "sha256": "696f6673c4d44761ba3423198fed8715edc005c20dde32cf88b4eba7e7c785df"
+    },
+    {
+      "path": "apps/api/src/modules/sales/orderDoc.ts",
+      "sha256": "e51c3a69f278f6e664f6a9076dacbdf49669d30a2955c27ef3f1e91710d3e07a"
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "47d1b0985fa183f39babf25e1ac674838988833f3ff15d377f9114bc326aa14a"
+    },
+    {
+      "path": "apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "57eaf60e3a27facba7c92882de469178af44a9fbec563874f26f2c0f55560e80"
+    },
+    {
+      "path": "packages/db/prisma/migrations/20260911030000_order_image_identity/migration.sql",
+      "sha256": "af42c4466169c9d325249855737870e404398ce69fbda486aaf3eafe307f5129"
+    },
+    {
+      "path": "apps/api/package.json",
+      "sha256": "22145539c871be02e3399fe08d81a45dfcd75e746d3b6a3df4272918edd6cfcf"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    },
+    {
+      "path": "apps/api/report-specs/OrderVch.spec.json",
+      "sha256": "e3e88cd83314e2d650d7311e54647ef72241e70b410802c71bef859703b6d161"
+    },
+    {
+      "path": "apps/api/report-specs/OrderBill.spec.json",
+      "sha256": "9d41fd605ade7c18ed10406d8361df3dca8b12bcaff00e1dbcf41cf4accb9f5c"
+    },
+    {
+      "path": "apps/api/report-specs/TourOrdVch.spec.json",
+      "sha256": "df1b3e3e51b5b1b06c116144c52d2bc1d534ffe207a5ec0eaa61bb73a5c92cc1"
+    },
+    {
+      "path": "apps/api/report-specs/OrdVchImg.spec.json",
+      "sha256": "48d85d0e13ed84851bc28712ec750a2858b21d6bb52c3a66e0453670ede39a13"
+    },
+    {
+      "path": "apps/api/report-specs/TourOrdImg.spec.json",
+      "sha256": "33bc542047628952c6f974f9195bc529d10ba2dcc42228430e34190cf84b694c"
+    },
+    {
+      "path": "apps/api/test/orderImageReport.test.ts",
+      "sha256": "52be2ec78929c7ed862a63f4cbd155076d6c960af11331f5879aa5ad009f909b"
+    },
+    {
+      "path": "apps/api/test/orderImageReport.db.test.ts",
+      "sha256": "4772ff09c950af2230f0e009e35a2c4fb8e7959a8e17f66f0285eb066e24c37c"
+    },
+    {
+      "path": "apps/api/test/orderImageWrite.db.test.ts",
+      "sha256": "bc18faeb49f0ef9b2d6d738aff173aa7de5dfc3a893065a17eab1742226392bb"
+    },
+    {
+      "path": "apps/api/test/tourOrderPrint.routes.db.test.ts",
+      "sha256": "72f4d9fffa0a3a46fa51c5713e18493b0efd49c88169b3670b720abefe5efae5"
+    },
+    {
+      "path": "apps/api/test/orderReport.test.ts",
+      "sha256": "298d770efb1ad311b92c84f8ac9e0e806b2e7a1aa96f8eb2d7a65fe7e279767c"
+    },
+    {
+      "path": "apps/api/test/orderReport.db.test.ts",
+      "sha256": "8360b3b3e3ada64dbacdca11cc9c1a4f5ad81f5fe72724be4004379c5ffdbf6b"
+    },
+    {
+      "path": "apps/api/test/reportBind.test.ts",
+      "sha256": "38440274a7087cb11db5e659da37260794b6e27ba4be1e377a388bd2906f7944"
+    },
+    {
+      "path": "apps/api/test/fixtures/order-design-portrait.png",
+      "sha256": "07483dd16ab2c80e943244713cb5b17028cd9ca04d013dd3ff5e7f66fa9044fd"
+    },
+    {
+      "path": "apps/api/test/fixtures/order-tag-landscape.jpg",
+      "sha256": "a68df11677d3d4b1fa648a43740b46b18b49d02420ae3acb1113941422a765b2"
+    },
+    {
+      "path": "apps/web/components/OrderImagePanel.tsx",
+      "sha256": "aea2ecfcc2fe08573c43f3fa0ffb7c2849a4e40585e708d6069ec48aae2a4054"
+    },
+    {
+      "path": "apps/web/components/SavedSalesOrderImages.tsx",
+      "sha256": "225a9b9652544c33153e1eb42685d36ed972045d6c0a2a0255c514c1cbbfdaed"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/sales-order/page.tsx",
+      "sha256": "9deba4791b6859d2a6707654aeb296416a20266d9776a86da0e30b0b49b207b5"
+    },
+    {
+      "path": "apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "05ee74b06728d71e44d6dcbf7d6bd927a7024bae47557912e536b6f6a70baf1c"
+    },
+    {
+      "path": "apps/web/test/order-image.journey.mjs",
+      "sha256": "260acc347d3dc97537fbe2e924f512dc6ca66a7a6e5859df90308b1854bcafaa"
+    },
+    {
+      "path": "apps/web/test/parity.real-stack.mjs",
+      "sha256": "01c663491932fb0ca3ae1eb7e15506f3169d81cba529e66dc8a3514a6c90ffd0"
+    },
+    {
+      "path": "scripts/extract-order-report-specs.py",
+      "sha256": "074a574276974f7e5902915cf9dc590d28aeeb553affdabb6e8f4bc054901e2f"
+    },
+    {
+      "path": "scripts/render-order-image-report-review.mjs",
+      "sha256": "93d4f534c2ff862a57f0fbd5422c23d557db90c030e7a7d6f5529570638353c8"
+    },
+    {
+      "path": "scripts/rasterize-order-report-review.swift",
+      "sha256": "f7302d61903d2636f0048e344f465896f3f9dca4a0964478ccc0ed61bbd70ac2"
+    },
+    {
+      "path": "../extraction_output/rpt_xml/OrdVchImg.xml",
+      "sha256": "8f7db07d334b21edf4aad1119ac0c4d670b7561080fc56ce554722a227977fc4"
+    },
+    {
+      "path": "../extraction_output/rpt_xml/TourOrdImg.xml",
+      "sha256": "9ac3cc10e8d386338da4b9d625854139b12c7925857ba9b2c3aba9b951d722f0"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/TR_TOUR_ORD.cs",
+      "sha256": "b27ad23a324b837bed8ef7a4d672a7ce82006c51485fb68fa4dced3e6bf49ced"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/MS_DESIGN_BOOK.cs",
+      "sha256": "abde981d2825b4fc621a21c92305d36aea99aa3248d8f02f6d5e8644486cf9e3"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/MS_UPDATE.cs",
+      "sha256": "943525d918df85170ee3a4733bdf81cdc1d5b7e61b5efed27add7bc2883d8cb7"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "f7bec01b23bb63adf1b80b5f6fdc47c93766a5263190030c9dac8a7c438e53c6"
+    },
+    {
+      "path": "apps/web/lib/tourOrderForm.ts",
+      "sha256": "6f0c53cf6e46ec81c9bdff26b16877cfe269a9aa5ebea9756ee6e282ebd0dc8c"
+    },
+    {
+      "path": "apps/api/test/tourOrderHydration.db.test.ts",
+      "sha256": "1a1ab2dc5162cdd65aa7e60db79d1dc86808a9a5728ba56c2cb1b5985895e485"
+    },
+    {
+      "path": "apps/web/test/tourOrderForm.test.ts",
+      "sha256": "013c527bb07b7e30118c89ba9c083bf12239e19a7d02332f98f3ea3ac3e4fff3"
+    }
+  ],
+  "artifactFiles": [
+    {
+      "path": "docs/parity-evidence/X25-order-image-api-build-round3-2026-09-11.txt",
+      "sha256": "1b3c6b51e7a2857ae9a82742c6aabb8621b297775605d4aad7888c0e5308b043"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-focused-round3-2026-09-11.txt",
+      "sha256": "7734d5c3e226bcc95143731506ce14eadc9f7f365017615d429887644989ea1b"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-hooks-round3-2026-09-11.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-pdf-raster-round3-2026-09-11.txt",
+      "sha256": "927a41d8ec7f01d42b6640090c163f941b55ee286fc14870061896dc2364e679"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-pdf-round3-2026-09-11.txt",
+      "sha256": "590bd164288246228039034612b357203beef08a6afc91664beb3bdd26b9a6dc"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-report-round3-2026-09-11.md",
+      "sha256": "575aab71ce6f5ac73591cd4c681f396a49e5fed81b91437394d04d952737e65b"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-report-scope-round3-2026-09-11.json",
+      "sha256": "426b7ec7df05590d9f5d92c171337cf9349a105c31195f908d36590722abbedd"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-unit-round3-2026-09-11.txt",
+      "sha256": "71f766d9c763c022df504fc40fecae87651079120a316d641f6d437559bba3f8"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-image-web-types-round3-2026-09-11.txt",
+      "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/OrdVchImg-page-1.png",
+      "sha256": "3d670fb1a1af644d6a2cd73583028b8d5857538db62ca1808f4b0b7c3175c0de"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/OrdVchImg.html",
+      "sha256": "032362371855b5ac44a90141109a1ff6eb5455cc3ff030b5fb787e2600205ded"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/OrdVchImg.pdf",
+      "sha256": "2d2e4d96e027e81875a13d25d3badcfeab48ea9068980a4965fa2a050ad0b03d"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long-page-1.png",
+      "sha256": "0b0bd8d341e7d9fa72ec003440145093ff336a013688e58794032137a725e190"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long-page-2.png",
+      "sha256": "4cf159d029631643ad916d04dca1def239afe7db441df011f574c1ba45ca2698"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long-page-3.png",
+      "sha256": "b6fb6bb667f024b2ca0f021880a8b7aa037c0a35f129e83abdfdfcbc69a4c14d"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long-page-4.png",
+      "sha256": "37437ebca294af6f8bba3288a12bbb8fce0d48436899c746a9496f3bc15e3fb2"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long-page-5.png",
+      "sha256": "f5d4780a8148ac69a885d02230df0260ec6cf94189165cd27520739c16202be3"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long-page-6.png",
+      "sha256": "5bbf49a6d90036c0cbdcdbfbef147859237aa221fc036575cf36747814a9d6c8"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long.html",
+      "sha256": "4774d6ba749de3d7a65f6bf86d48c40d3478eafc8b21e6ed8c5d36f3cfd84138"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-long.pdf",
+      "sha256": "6cf615cd18efdfb2e7231c59d1fe8e395fa3e90c567c67d18c30a1686d043a57"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-missing-page-1.png",
+      "sha256": "5f9747b3a35ccc664cd9b1744a0880030ea4859a1f1656be0901afc0194c2e31"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-missing.html",
+      "sha256": "395df295d0d2878d8ed6fe89ea9b885d7ebe93dde556a26561bd7b1c2157e28e"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-missing.pdf",
+      "sha256": "c207807bef9cc975e1ffeba01f8fcae2a44865dee61499228816d14955d7e04a"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg-page-1.png",
+      "sha256": "44ba7b4a228b918c681b8e36cf3092e100e409c0c51da31ce0e390c46fb489aa"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg.html",
+      "sha256": "e3109b2a4aa8a323f5cff575d9efe8524d21130deae0f1031fe9bfdc4e53acd5"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/TourOrdImg.pdf",
+      "sha256": "7d66880942c86ba1937ce6586667c5c38df9e500aab1d77cdc4ad174e231b33c"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/OrdVchImg-page-1.png",
+      "sha256": "b2c738d8d5ed5be3eda7e969af520868171258648bce918afee4ca546df765a0"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/OrdVchImg.txt",
+      "sha256": "a933930964ae4db7b776ac5d55297e44d67b22d282e5399ccdb8733d3c8a26f9"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-long-page-1.png",
+      "sha256": "ca55c6b079b3b56bc0c9be5d71b2fc89ecf60bc429e6671a83cba886c745a946"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-long-page-2.png",
+      "sha256": "c6dbee9288791ceb2f39d38edcbb606bc532252872a6521bce13f82f9b55aa96"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-long-page-3.png",
+      "sha256": "ca1e1dc57075a4e8ca42d4cf142128345f614efa373c9423aaa189f897da8eb9"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-long-page-4.png",
+      "sha256": "29dc64ea126d51bb54b6c672fea76903f014a9e61f653d00d27f9611a789edfd"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-long-page-5.png",
+      "sha256": "329fc717a771c0d84d0ee0ce71ef1dcd075db1da94cab8ae9c49e07aa854c298"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-long-page-6.png",
+      "sha256": "9a080d16e4a3a905c12866a06bb02b088e82042018bceb32f806253aa88a2409"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-long.txt",
+      "sha256": "39549a225d967b26c53835bcdbf1fd362b7838e4ba6b0eb8a548b37d2f57f776"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-missing-page-1.png",
+      "sha256": "7696f5085621048e4edda0dd36afd10375181e89f5c7173e290dfc8c08c7a22e"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-missing.txt",
+      "sha256": "61d397cabe488e8247b9c0f6f0fcb5f2219cd4186668c67aafc738cdcc1584b2"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg-page-1.png",
+      "sha256": "40af3293801b0d0d076f9bcc348044d2c9e27b6a47775a28bd633b879fb0b527"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/pdf-raster/TourOrdImg.txt",
+      "sha256": "61d397cabe488e8247b9c0f6f0fcb5f2219cd4186668c67aafc738cdcc1584b2"
+    },
+    {
+      "path": "output/pdf/order-image-report-round3/render-review.json",
+      "sha256": "38a25fea221fb36aafcbd888e2c90cfd70d3be26cc6bea2542a2b5ca1d70a18f"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-tag-image-final-focused-round3-2026-09-11.txt",
+      "sha256": "ee970a73ccf0c7e40043dbc90a437afd1220a756397858e6122a8bb2944b5486"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-tag-hydration-web-unit-round3-2026-09-11.txt",
+      "sha256": "56cbf2de6d60b48f7d309acb00d0105590b4caeab18df475ffc55e563f843270"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-tag-identity-api-types-round3-2026-09-11.txt",
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/api-full.txt",
+      "sha256": "f9e0acea258cbfc1d91c0dc7cd73830e783e9f16f06638100844feb15fb18583"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/core-tests.txt",
+      "sha256": "d7e2f6974ca394b9e5d155a8406502852fece3d3d220acfc8881bb266e27cde3"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/web-tests-toolbar-fixed.txt",
+      "sha256": "b726eb4df15e137d4575f2e867c6e096ce6b42879e1b8da5728140c94ec6b869"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/build-toolbar-fixed.txt",
+      "sha256": "2fec727edea2c0845f35acec11deeab650e521dfa16585eb556d74e95046e4d2"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/lint-and-types-final.txt",
+      "sha256": "2a9eb7a5c2f191a74691cdf8799b84a2dca27c2daa3b9b79c3fb0cde5dc7c446"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/test-types.txt",
+      "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/order-image-routes-schema-focused.txt",
+      "sha256": "bea4fe90c4669e4323fea75ac9de2892c09ec689895e35dcd8a1d9fd4d085238"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-real-stack.txt",
+      "sha256": "673dd00654975ed79d3f6b1683b0aa2ab638bb13a80dc522120b49ad707f6817"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-toolbar-fixed.txt",
+      "sha256": "2c1184cf5ad37cd92e420a294e804adb3078422019428d478ac143888a34e9f1"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-verified.txt",
+      "sha256": "3b0ae394757b19f263230e447a3cf8272b9564eb6115130d5f628ad889fd3d0e"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-verified/result.json",
+      "sha256": "e05791a3ee60cc45223fbb6175585b7eaf9e5e048ad528ec8bdf28aba7b37e93"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-verified/order-image-sales-design-readonly.png",
+      "sha256": "b085784d9cb8dc1f8e3e61931fcb724d4370c972b56f7dfa7f6c6846592dbbb1"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-verified/order-image-tour-custom.png",
+      "sha256": "24bc30cf40e27fe0ffe3de7a307f2ddab144f388556be7034e18c82a7b058e4e"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-verified/order-image-missing-import-recovered.png",
+      "sha256": "74620f3bd2bd99d1582f9eb425557af0a1525279362b313f372965c2ba8f0cd5"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/build-delete-confirmation.txt",
+      "sha256": "b18c75b4075b68a4aa57057013eb0e7302f1a09bca4e32244fe44c36a508d5a2"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/web-tests-delete-confirmation.txt",
+      "sha256": "18c4dd870e8666bcce1fd7d3102287a836882dc3a26d4c2de35712f7e2808aac"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/lint-and-types-delete-confirmation.txt",
+      "sha256": "e864751ad2531372ff6a1cb82d0b32bd0bdcd70be0c85c26f25d5e70e642740c"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-delete-confirmation.txt",
+      "sha256": "3b0ae394757b19f263230e447a3cf8272b9564eb6115130d5f628ad889fd3d0e"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-delete-confirmation/result.json",
+      "sha256": "2609f79eca62c4891979f7ebc973ecf86de230e3f81a66b73c20a0b11ec5b5a9"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-delete-confirmation/order-image-sales-design-readonly.png",
+      "sha256": "b085784d9cb8dc1f8e3e61931fcb724d4370c972b56f7dfa7f6c6846592dbbb1"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-delete-confirmation/order-image-tour-custom.png",
+      "sha256": "d51bafda6f5bc5d489920dd243ce196ec0527e7182f0c4bc3421c3a950e702df"
+    },
+    {
+      "path": "test-results/parity-real-stack-round3-delete-confirmation/order-image-missing-import-recovered.png",
+      "sha256": "03f129eb6c0d3df8d914a861e75160fcc3a9ccfdb29009b9f9ef3327c01b6a37"
+    }
+  ],
+  "focusedRuns": [
+    {
+      "files": 2,
+      "tests": 21,
+      "skipped": 0,
+      "exitCode": 0,
+      "kind": "prior-unit-run; overlaps68"
+    },
+    {
+      "files": 5,
+      "tests": 68,
+      "skipped": 0,
+      "exitCode": 0,
+      "kind": "prior-focused-run-before-final-custom-key-vector"
+    },
+    {
+      "files": 4,
+      "tests": 31,
+      "skipped": 0,
+      "exitCode": 0,
+      "kind": "final-tag-preservation-image-service-report-rights; overlaps full API1674",
+      "log": "docs/parity-evidence/X25-order-tag-image-final-focused-round3-2026-09-11.txt"
+    },
+    {
+      "files": 1,
+      "tests": 8,
+      "skipped": 0,
+      "exitCode": 0,
+      "kind": "Tour form imported-tag hydration; overlaps web99",
+      "log": "docs/parity-evidence/X25-order-tag-hydration-web-unit-round3-2026-09-11.txt"
+    }
+  ],
+  "finalCoordinatedRuns": {
+    "api": {
+      "files": 216,
+      "tests": 1674,
+      "skipped": 0,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/api-full.txt",
+      "sourceNote": "Final API sources unchanged after this run; later changes are web confirmation and harness only."
+    },
+    "core": {
+      "files": 6,
+      "tests": 87,
+      "skipped": 0,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/core-tests.txt"
+    },
+    "web": {
+      "files": 20,
+      "tests": 99,
+      "skipped": 0,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/web-tests-toolbar-fixed.txt"
+    },
+    "build": {
+      "tasks": 7,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/build-toolbar-fixed.txt",
+      "state": "passed before final image-delete confirmation"
+    },
+    "lintAndTypes": {
+      "tasks": 10,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/lint-and-types-final.txt"
+    },
+    "apiTestTypes": {
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/test-types.txt"
+    },
+    "browserPriorVerified": {
+      "status": "passed",
+      "result": "test-results/parity-real-stack-round3-verified/result.json",
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-verified.txt",
+      "mockedResponses": 0,
+      "orderImageChecks": 10,
+      "note": "Before final source delete confirmation added."
+    },
+    "browserConfirmationFinal": {
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-09-11T04:21:11.183Z",
+      "finishedAt": "2026-09-11T04:21:24.831Z",
+      "result": "test-results/parity-real-stack-round3-delete-confirmation/result.json",
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-delete-confirmation.txt",
+      "mockedResponses": 0,
+      "orderImageChecks": [
+        "new Sales row carries the source no-master sentinel N",
+        "long shared Design Book identity is read-only",
+        "saved custom Sales upload/read/delete",
+        "source image delete confirmation cancels without mutation and accepts actual deletion",
+        "Tour exact tag source overrides shared design",
+        "complete byte decode rejects malformed upload",
+        "pending file cannot move to another saved parent",
+        "actual photos print once with component rows",
+        "book switch clears photo and isolates custom identity",
+        "unavailable imported image can be replaced using the saved owner",
+        "Tour fallback master cannot be deleted as an absent custom image"
+      ],
+      "browserImageRequestCount": 19,
+      "confirmationEvidence": "Cancel prompts without DELETE and retains exact stored JPEG bytes; accept returns actual DELETE200 and empty saved-image state."
+    },
+    "confirmationBuild": {
+      "tasks": 7,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/build-delete-confirmation.txt"
+    },
+    "confirmationWeb": {
+      "files": 20,
+      "tests": 99,
+      "skipped": 0,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/web-tests-delete-confirmation.txt"
+    },
+    "confirmationLintAndTypes": {
+      "tasks": 10,
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/lint-and-types-delete-confirmation.txt"
+    }
+  },
+  "pdfReview": {
+    "renderReview": "output/pdf/order-image-report-round3/render-review.json",
+    "pdfCount": 4,
+    "pageCount": 9,
+    "allPdfPagesVisuallyInspected": true,
+    "method": "Chromium PDF; direct native CoreGraphics PDF rasterization, not HTML-only screenshots",
+    "goldenComparison": false,
+    "knownAcceptanceGap": "18-parent fixture final payment section can carry alone to final page; exact Crystal pagination and printer acceptance open",
+    "runtimeHashesMatchFinalApiBuild": true
+  },
+  "inventory": {
+    "catalogNames": 254,
+    "registeredDatasetOrDocumentContracts": 28,
+    "containedPreviouslyInferred": 79,
+    "recordsInNewInventory": 107
+  },
+  "limitations": [
+    "Historical separate Img/MOB_IMAGE and file-store migration not performed.",
+    "Legacy ambiguous bare-design uploads are not remapped.",
+    "Exact Crystal bitmap scale/crop, fonts, locale, pagination and physical devices remain open.",
+    "Shared Design Book image mutation from order is intentionally directed to Design Book rights/workflow.",
+    "Oversized individual parent image groups explicitly fail rather than lose data.",
+    "Production image volume/performance and real camera hardware were not certified.",
+    "Broader Sales saved-document lifecycle remains outside this image slice.",
+    "Assigning/changing real tag identity or removing/remapping a tagged parent is refused; complete tag-stock allocation transitions remain unimplemented.",
+    "Historical ledger timestamps truncated before timestamp preservation still require source reimport."
+  ],
+  "priorFailures": [
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/order-image-routes-schema-focused.txt",
+      "cause": "New test incorrectly expected view=N print=Y to permit print; corrected to existing403 view-and-print contract. Policy unchanged."
+    },
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-real-stack.txt",
+      "cause": "Synthetic DESIGN_NO exceeded source varchar15; fixture corrected without schema change. Separate Design toolbar clipping was corrected before next run."
+    },
+    {
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-toolbar-fixed.txt",
+      "cause": "Malformed-image harness expected400 despite agreed typed422 contract; now verifies422 structuredinvalid-image and unchanged stored/displayed bytes."
+    }
+  ],
+  "browserVisualReview": {
+    "priorVerifiedDirectory": "test-results/parity-real-stack-round3-verified",
+    "screenshots": [
+      "order-image-sales-design-readonly.png",
+      "order-image-tour-custom.png",
+      "order-image-missing-import-recovered.png"
+    ],
+    "allThreeInspected": true,
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    },
+    "finding": "All final image panels show saved owner, source label, decoded portrait/landscape, read-only guidance and visible controls without clipping. Final Sales screenshot byte-identical to prior reviewed image; both changed final Tour screenshots visually reinspected.",
+    "finalDirectory": "test-results/parity-real-stack-round3-delete-confirmation",
+    "finalReviewComplete": true
+  }
+}

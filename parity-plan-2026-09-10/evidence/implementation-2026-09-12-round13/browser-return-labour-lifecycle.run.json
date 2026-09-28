@@ -1,0 +1,24 @@
+{
+  "command": [
+    "env",
+    "LABOUR_PREVIEW_ARTIFACT_DIR=test-results/return-labour-preview-lifecycle-round13",
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "node",
+    "apps/web/test/labour-preview-lifecycle.real-stack.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T23:55:57.398700+00:00",
+  "finishedAtUtc": "2026-09-11T23:56:04.581158+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-return-labour-lifecycle.txt",
+  "logSha256": "c56e5f7d0ace901fcd9452edc8131292d666e55e65a1a6e519d645c314a17c25",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-return-labour-lifecycle.inputs.json",
+  "inputManifestSha256": "550181ea892ba8afca7e7ad4a0e11f82a9baef394e283a1a7e24918eb75a55db",
+  "inputCount": 1835,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

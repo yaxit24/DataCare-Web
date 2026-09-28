@@ -1,0 +1,39 @@
+{
+ "form": "Module_Save",
+ "loc": 647,
+ "gridColumns": {},
+ "inlineSql": [
+  "SELECT CO_MAIL,MAIL_API From CO_MAST WHERE CO_CODE = ' ? ' AND MAIL_API <> ''",
+  "Please Update Company Mail Id and Api Then Try...",
+  "SELECT TAG_NO FROM BAR_DETL WHERE TAG_NO = ' ? '",
+  "SELECT TAG_NO FROM TAG_SET WHERE TAG_NO = ' ? '"
+ ],
+ "keyboard": {},
+ "calc": [],
+ "validations": [
+  {
+   "message": "Email sent successfully.",
+   "when": ""
+  },
+  {
+   "message": "Mail Send Faild...",
+   "when": ""
+  },
+  {
+   "message": "Please Insert e Mail id in Party Master then Try...",
+   "when": ""
+  },
+  {
+   "message": "Please Update Company Mail Id and Api Then Try...",
+   "when": ""
+  },
+  {
+   "message": "Please check your internet connection",
+   "when": ""
+  },
+  {
+   "message": "Mobile No is Not Valid..",
+   "when": "Strings.Len(DC_Main.MsCustWappNo) <= 9"
+  }
+ ]
+}

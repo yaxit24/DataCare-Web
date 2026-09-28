@@ -1,0 +1,57 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/saleReturnSource.db.test.ts" "test/saleReturnSource.routes.db.test.ts" "test/routePolicy.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 40ms
+ ✓ test/saleReturnSource.db.test.ts (41 tests) 4895ms
+   ✓ original sale source observation without Return admission > reads exact original parent OLD ownership and numerically ordered children without any writes 549ms
+   ✓ original sale source observation without Return admission > rejects malformed source query {"sourceVchNo":"00000000"} 438ms
+   ✓ original sale source observation without Return admission > invalidates observations for source/master/config/child/linked Return changes and ABA 323ms
+ ✓ test/saleReturnSource.routes.db.test.ts (7 tests) 5440ms
+   ✓ original Sales source read HTTP boundary > keeps same-number sources separate by configured original book and authenticated tenant 339ms
+   ✓ original Sales source read HTTP boundary > rejects incomplete identities, ambiguous query values and hidden source scope overrides 384ms
+   ✓ original Sales source read HTTP boundary > observes changed source generations without mutating any voucher or business companion 573ms
+
+ Test Files  3 passed (3)
+      Tests  102 passed (102)
+   Start at  09:04:48
+   Duration  17.57s (transform 3.77s, setup 0ms, collect 6.01s, tests 10.37s, environment 1ms, prepare 219ms)
+

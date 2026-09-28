@@ -1,0 +1,474 @@
+{
+  "kind": "primary-desktop-assignment-index-not-complete-write-DTO",
+  "source": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+  "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+  "range": "14307-14584",
+  "assignments": [
+    {
+      "line": 14307,
+      "target": "SR_NO",
+      "sourceColumn": 0,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 0])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14311,
+      "target": "OLD_SRNO",
+      "sourceColumn": 51,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 51])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14315,
+      "target": "IT_CODE",
+      "sourceColumn": 1,
+      "sourceExpression": "val3[DC_Main.i, 1]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14319,
+      "target": "ITM_REMARK",
+      "sourceColumn": 3,
+      "sourceExpression": "val3[DC_Main.i, 3]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14330,
+      "target": "TAG_NO",
+      "sourceColumn": null,
+      "sourceExpression": "\"N\"",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14334,
+      "target": "TAG_NO",
+      "sourceColumn": 2,
+      "sourceExpression": "val3[DC_Main.i, 2]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14338,
+      "target": "TBL_CODE",
+      "sourceColumn": 4,
+      "sourceExpression": "val3[DC_Main.i, 4]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14342,
+      "target": "DESIGN_NO",
+      "sourceColumn": 5,
+      "sourceExpression": "val3[DC_Main.i, 5]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14346,
+      "target": "ITM_STYLE",
+      "sourceColumn": 6,
+      "sourceExpression": "val3[DC_Main.i, 6]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14350,
+      "target": "ITM_SIZE",
+      "sourceColumn": 7,
+      "sourceExpression": "val3[DC_Main.i, 7]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14354,
+      "target": "HM_ID",
+      "sourceColumn": 8,
+      "sourceExpression": "val3[DC_Main.i, 8]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14358,
+      "target": "ITM_PCS",
+      "sourceColumn": 9,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 9])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14362,
+      "target": "ITM_GWT",
+      "sourceColumn": 10,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 10])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14366,
+      "target": "ITM_OTH_WT",
+      "sourceColumn": 11,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 11])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14370,
+      "target": "ITM_NWT",
+      "sourceColumn": 12,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 12])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14374,
+      "target": "ITM_GHT_PRC",
+      "sourceColumn": 14,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 14])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14378,
+      "target": "ITM_GHT_WT",
+      "sourceColumn": 15,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 15])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14382,
+      "target": "ITM_TOUCH",
+      "sourceColumn": 16,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 16])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14386,
+      "target": "ITM_WEST_PRC",
+      "sourceColumn": 17,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 17])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14390,
+      "target": "ITM_FINE",
+      "sourceColumn": 18,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 18])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14394,
+      "target": "ITM_RATE",
+      "sourceColumn": 19,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 19])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14398,
+      "target": "ITM_AMT",
+      "sourceColumn": 20,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 20])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14402,
+      "target": "LBR_CODE",
+      "sourceColumn": 13,
+      "sourceExpression": "val3[DC_Main.i, 13]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14406,
+      "target": "LBR_PRC",
+      "sourceColumn": 21,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 21])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14410,
+      "target": "LBR_TYPE",
+      "sourceColumn": 22,
+      "sourceExpression": "val3[DC_Main.i, 22]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14414,
+      "target": "LBR_RATE",
+      "sourceColumn": 23,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 23])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14418,
+      "target": "LBR_AMT",
+      "sourceColumn": 24,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 24])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14422,
+      "target": "DISC_PRC",
+      "sourceColumn": 25,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 25])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14426,
+      "target": "DISC_AMT",
+      "sourceColumn": 26,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 26])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14430,
+      "target": "OTH_AMT",
+      "sourceColumn": 27,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 27])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14434,
+      "target": "ITM_MRP",
+      "sourceColumn": 28,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 28])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14438,
+      "target": "TAG_LBR_CODE",
+      "sourceColumn": 29,
+      "sourceExpression": "val3[DC_Main.i, 29]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14442,
+      "target": "TAG_LBR_PRC",
+      "sourceColumn": 30,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 30])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14446,
+      "target": "TAG_LBR_RATE",
+      "sourceColumn": 31,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 31])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14450,
+      "target": "TAG_LBR_AMT",
+      "sourceColumn": 32,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 32])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14454,
+      "target": "TAG_OTH_AMT",
+      "sourceColumn": 33,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 33])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14458,
+      "target": "TAG_COST",
+      "sourceColumn": 34,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 34])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14462,
+      "target": "TAG_MRP",
+      "sourceColumn": 35,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 35])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14466,
+      "target": "TOT_AMT",
+      "sourceColumn": 36,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 36])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14470,
+      "target": "TAX_PRC",
+      "sourceColumn": 37,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 37])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14474,
+      "target": "NET_AMT",
+      "sourceColumn": 38,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 38])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14478,
+      "target": "KR_NAME",
+      "sourceColumn": 39,
+      "sourceExpression": "val3[DC_Main.i, 39]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14493,
+      "target": "VCH_SRNO",
+      "sourceColumn": 40,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 40])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14497,
+      "target": "VCH_SRNO",
+      "sourceColumn": 40,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 40])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14501,
+      "target": "RATE_TYPE",
+      "sourceColumn": 44,
+      "sourceExpression": "val3[DC_Main.i, 44]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14505,
+      "target": "PR_CODE",
+      "sourceColumn": 52,
+      "sourceExpression": "val3[DC_Main.i, 52]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14509,
+      "target": "TAG_TYPE",
+      "sourceColumn": 54,
+      "sourceExpression": "val3[DC_Main.i, 54]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14513,
+      "target": "TAG_SRNO",
+      "sourceColumn": 56,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 56])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14517,
+      "target": "HM_ID2",
+      "sourceColumn": 59,
+      "sourceExpression": "val3[DC_Main.i, 59]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14521,
+      "target": "HM_ID3",
+      "sourceColumn": 60,
+      "sourceExpression": "val3[DC_Main.i, 60]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14525,
+      "target": "HM_ID4",
+      "sourceColumn": 61,
+      "sourceExpression": "val3[DC_Main.i, 61]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14529,
+      "target": "HM_ID_WT",
+      "sourceColumn": 62,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 62])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14533,
+      "target": "HM_ID2_WT",
+      "sourceColumn": 63,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 63])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14537,
+      "target": "HM_ID3_WT",
+      "sourceColumn": 64,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 64])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14541,
+      "target": "HM_ID4_WT",
+      "sourceColumn": 65,
+      "sourceExpression": "Conversion.Val(val3[DC_Main.i, 65])",
+      "kind": "numeric-Val"
+    },
+    {
+      "line": 14545,
+      "target": "APR_ISU",
+      "sourceColumn": 50,
+      "sourceExpression": "val3[DC_Main.i, 50]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14549,
+      "target": "EMP_ISU",
+      "sourceColumn": 68,
+      "sourceExpression": "val3[DC_Main.i, 68]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14553,
+      "target": "IT_TYPE",
+      "sourceColumn": 43,
+      "sourceExpression": "val3[DC_Main.i, 43]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14557,
+      "target": "VCH_TIME",
+      "sourceColumn": null,
+      "sourceExpression": "mVchDate.Text + \" \" + mTime.Text",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14561,
+      "target": "MAIN_USER",
+      "sourceColumn": null,
+      "sourceExpression": "MainUser",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14565,
+      "target": "EMP_CODE",
+      "sourceColumn": null,
+      "sourceExpression": "tEmpCode.Text",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14569,
+      "target": "DESIGN_IMG_ID",
+      "sourceColumn": 69,
+      "sourceExpression": "val3[DC_Main.i, 69]",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14580,
+      "target": "DATA_TYPE",
+      "sourceColumn": null,
+      "sourceExpression": "\"A\"",
+      "kind": "text-or-conditional"
+    },
+    {
+      "line": 14584,
+      "target": "DATA_TYPE",
+      "sourceColumn": 70,
+      "sourceExpression": "val3[DC_Main.i, 70]",
+      "kind": "text-or-conditional"
+    }
+  ],
+  "specialBranches": [
+    {
+      "lines": "14252",
+      "rule": "nonblank item and numeric(c12)+numeric(c38)!=0"
+    },
+    {
+      "lines": "14323-14334",
+      "rule": "blank tag becomes N"
+    },
+    {
+      "lines": "14482-14497",
+      "rule": "zero instance allocates from company/location/year/date/current clock/old serial; excluded initial profile"
+    },
+    {
+      "lines": "14573-14584",
+      "rule": "blank row DATA_TYPE becomes A"
+    }
+  ]
+}

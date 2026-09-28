@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "scripts/check-depth.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T13:50:29.808018+00:00",
+  "finishedAtUtc": "2026-09-11T13:50:55.221075+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/depth-gate.txt"
+}

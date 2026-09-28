@@ -1,0 +1,341 @@
+{
+ "form": "RP_MFG_LEDR",
+ "controlCount": 31,
+ "byKind": {
+  "masked": 2,
+  "other": 2,
+  "textbox": 8,
+  "grid": 3,
+  "button": 6,
+  "panel": 3,
+  "label": 6,
+  "check": 1
+ },
+ "grids": [
+  "DGV_AC",
+  "DGV_DETL",
+  "DgvTot"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "BtnJmaUdhar",
+   "FlowLayoutPanel1"
+  ],
+  "PnlAcSumm": [
+   "tKhataNo",
+   "Label1",
+   "chkZero",
+   "tSerchAll",
+   "tSearch",
+   "DgvTot",
+   "Label15",
+   "DGV_AC",
+   "tAcGrCode"
+  ],
+  "this": [
+   "tLcCode",
+   "PnlAcSumm",
+   "Label2",
+   "Cr",
+   "tAcCode",
+   "tAcName",
+   "lblBook",
+   "PnlBotam",
+   "DGV_DETL",
+   "Label4",
+   "mToDt",
+   "mFromDt",
+   "tBookCode",
+   "tBookName",
+   "Label5"
+  ]
+ },
+ "controls": [
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "82,44",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "164,44",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "tSerchAll",
+   "type": "SearchControl",
+   "location": "163,12",
+   "size": "148,24",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "339,45",
+   "size": "78,22",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "DGV_AC",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "15,45",
+   "size": "1160,448",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "tAcGrCode",
+   "type": "TextBox",
+   "location": "395,12",
+   "size": "43,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Mfg Ledger",
+   "kind": "label"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnJmaUdhar",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "10",
+   "text": "&JmUdr",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "421,45",
+   "size": "272,23",
+   "tabIndex": "1129",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "246,46",
+   "size": "83,20",
+   "tabIndex": "1132",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "DGV_DETL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,80",
+   "size": "1159,473",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "317,12",
+   "size": "72,20",
+   "tabIndex": "1136",
+   "text": "Ac Group",
+   "kind": "label"
+  },
+  {
+   "name": "DgvTot",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "15,493",
+   "size": "1160,27",
+   "tabIndex": "1158",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "32,45",
+   "size": "44,20",
+   "tabIndex": "1159",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "tSearch",
+   "type": "TextBox",
+   "location": "16,12",
+   "size": "141,25",
+   "tabIndex": "1159",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "chkZero",
+   "type": "CheckBox",
+   "location": "629,14",
+   "size": "141,19",
+   "tabIndex": "1160",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "tKhataNo",
+   "type": "TextBox",
+   "location": "532,12",
+   "size": "75,22",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tBookCode",
+   "type": "TextBox",
+   "location": "762,46",
+   "size": "68,23",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "445,14",
+   "size": "79,20",
+   "tabIndex": "1162",
+   "text": "Khata No",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "702,46",
+   "size": "50,20",
+   "tabIndex": "1163",
+   "text": "Book",
+   "kind": "label"
+  },
+  {
+   "name": "tBookName",
+   "type": "TextBox",
+   "location": "836,46",
+   "size": "268,23",
+   "tabIndex": "1164",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlAcSumm",
+   "type": "Panel",
+   "location": "1,34",
+   "size": "1196,531",
+   "tabIndex": "1165",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "1141,6",
+   "size": "44,22",
+   "tabIndex": "1166",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "FlowLayoutPanel1",
+   "type": "FlowLayoutPanel",
+   "location": "268,3",
+   "size": "456,33",
+   "tabIndex": "1167",
+   "text": "",
+   "kind": "panel"
+  }
+ ]
+}

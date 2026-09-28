@@ -1,0 +1,523 @@
+--- a/apps/api/src/modules/sales/salesOrder.ts
++++ b/apps/api/src/modules/sales/salesOrder.ts
+@@ -228,7 +228,10 @@
+   }
+ }
+ 
+-function orderRowNumbers(rows: readonly Record<string, any>[], key: 'srNo' | 'isrNo'): number[] {
++function orderRowNumbers(
++  rows: readonly Record<string, any>[],
++  key: 'srNo' | 'isrNo',
++): number[] {
+   const specified = rows.filter((row) => row[key] != null).map((row) => Number(row[key]));
+   if (
+     specified.some((value) => !Number.isSafeInteger(value) || value <= 0) ||
+@@ -313,10 +316,14 @@
+     coBook,
+   );
+   if (rows.length > 1)
+-    throw new SaleValidationError(`${mode.mainBook} book configuration is ambiguous: ${coBook}`);
++    throw new SaleValidationError(
++      `${mode.mainBook} book configuration is ambiguous: ${coBook}`,
++    );
+   const row = rows[0];
+   if (!row)
+-    throw new SaleValidationError(`${mode.mainBook} book configuration not found for ${coBook}`);
++    throw new SaleValidationError(
++      `${mode.mainBook} book configuration not found for ${coBook}`,
++    );
+   const actualMainBook = text(row.MAIN_BOOK).toUpperCase();
+   if (actualMainBook !== mode.mainBook)
+     throw new SaleValidationError(
+@@ -438,7 +445,8 @@
+   if (action != null && !['rate', 'percentage', 'amount'].includes(action))
+     throw new SaleValidationError('invalid order labour action');
+   if (!action) {
+-    if (line.labourAmount != null && next.labourAmount !== previous.labourAmount) action = 'amount';
++    if (line.labourAmount != null && next.labourAmount !== previous.labourAmount)
++      action = 'amount';
+     else if (next.labourRate !== previous.labourRate) action = 'rate';
+     else if (next.labourPct !== previous.labourPct) action = 'percentage';
+   }
+@@ -577,7 +585,12 @@
+ ) {
+   const edits = line.orderEdits;
+   if (!edits) return calculateOrderLine(line, prior, policy);
+-  if (!Array.isArray(edits) || edits.length > 512 || line.labourEdits?.length || line.labourAction)
++  if (
++    !Array.isArray(edits) ||
++    edits.length > 512 ||
++    line.labourEdits?.length ||
++    line.labourAction
++  )
+     throw new SaleValidationError(
+       'Submit one ordered Sales Order journal with at most 512 committed events.',
+     );
+@@ -620,10 +633,16 @@
+     TOT_AMT: cached.total,
+   });
+   let calculationBaseline = rowOf(current);
+-  const selectedTextFields = new Set<'designNo' | 'itmSize' | 'karigarName' | 'designImageId'>();
++  const selectedTextFields = new Set<
++    'designNo' | 'itmSize' | 'karigarName' | 'designImageId'
++  >();
+   const trigger = (_previous: Record<string, any>) => {
+     try {
+-      const result = orderLabourWithCache(persistedLabour(rowOf(current)), triggerCache, policy);
++      const result = orderLabourWithCache(
++        persistedLabour(rowOf(current)),
++        triggerCache,
++        policy,
++      );
+       triggerCache = result.cache;
+       current = {
+         ...current,
+@@ -657,7 +676,11 @@
+       // TR_SALE_ORD:7341–7364 copies cells only. Save9244–9250 copies the cached totals.
+       for (const field of ['designNo', 'itmSize', 'karigarName', 'designImageId'] as const)
+         selectedTextFields.add(field);
+-      cached = { ...cached, labourRate: n(current.labourRate), labourPct: n(current.labourPct) };
++      cached = {
++        ...cached,
++        labourRate: n(current.labourRate),
++        labourPct: n(current.labourPct),
++      };
+     } else if (event.kind === 'clearDesign') {
+       current = clearSalesOrderDesignSelection(current);
+       selectedTextFields.add('designNo');
+@@ -665,7 +688,9 @@
+     } else if (event.kind === 'field') {
+       const numeric = (REPLAY_NUMBERS as readonly string[]).includes(event.field);
+       if (!numeric && !(REPLAY_TEXT as readonly string[]).includes(event.field))
+-        throw new SaleValidationError(`Unsupported Sales Order committed field: ${event.field}`);
++        throw new SaleValidationError(
++          `Unsupported Sales Order committed field: ${event.field}`,
++        );
+       if (
+         (numeric && (typeof event.value !== 'number' || !Number.isFinite(event.value))) ||
+         (!numeric && typeof event.value !== 'string')
+@@ -676,13 +701,22 @@
+         event.value !== 'N' &&
+         event.value !== current.designImageId
+       )
+-        throw new SaleValidationError('Choose a saved design to change its linked image identity.');
++        throw new SaleValidationError(
++          'Choose a saved design to change its linked image identity.',
++        );
+       const previous = rowOf(current);
+       current = { ...current, [event.field]: event.value };
+       if (
+-        ['pcs', 'grossWt', 'netWt', 'ghtWt', 'rate', 'touch', 'westPct', 'otherAmount'].includes(
+-          event.field,
+-        )
++        [
++          'pcs',
++          'grossWt',
++          'netWt',
++          'ghtWt',
++          'rate',
++          'touch',
++          'westPct',
++          'otherAmount',
++        ].includes(event.field)
+       ) {
+         trigger(previous);
+       } else
+@@ -748,11 +782,27 @@
+   previousComponents?: Record<string, any>[];
+ };
+ 
++/** Existing internal compatibility entry; optional lifecycle remains replacement-only. */
+ export async function createSalesOrder(
+   prisma: any,
+   input: SalesOrderInput,
+   lifecycle?: OrderWriteContext,
+ ): Promise<{ vchNo: number; total: number; advance: number }> {
++  const prepared = prepareSalesOrderCreate(input, lifecycle);
++  return lifecycle
++    ? prepared.run(lifecycle.tx)
++    : withTenant(prisma, prepared.tenantId, prepared.run);
++}
++
++/** New allocation and complete order write set in the caller's existing transaction. */
++export async function createSalesOrderTx(
++  tx: Tx,
++  input: SalesOrderInput,
++): Promise<{ vchNo: number; total: number; advance: number }> {
++  return prepareSalesOrderCreate(input).run(tx);
++}
++
++function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteContext) {
+   completeOrderScope(input.scope);
+   const requestedDate =
+     orderDate(input.vchDate, 'vchDate', input.orderMainBook !== 'TOUR ORDER' && !lifecycle) ??
+@@ -1287,7 +1337,7 @@
+     }
+     return { vchNo: no, total: totals.total, advance: adv };
+   };
+-  return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
++  return { tenantId, run };
+ }
+ 
+ type CompleteOrderScope = VoucherScope & { coYear: string; coBook: string };
+@@ -1482,7 +1532,8 @@
+           making:
+             n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0)
+               ? n(r.LBR_AMT) /
+-                (n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0))
++                (n(r.ITM_NWT) +
++                  (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0))
+               : 0,
+           remark: text(r.ITM_REMARK),
+           tblCode: text(r.TBL_CODE),
+@@ -1775,99 +1826,227 @@
+   },
+ ) => cancelSalesOrder(prisma, { ...input, orderMainBook: 'TOUR ORDER' });
+ 
+-export async function cancelSalesOrder(
+-  prisma: any,
+-  input: {
+-    scope: VoucherScope;
+-    vchNo: number | string;
+-    deleteUser?: string;
+-    expectedVersion?: string;
+-    orderMainBook?: OrderMainBook;
+-  },
+-): Promise<{ cancelled: true }> {
++export type SalesOrderCancelInput = {
++  scope: VoucherScope;
++  vchNo: number | string;
++  deleteUser?: string;
++  expectedVersion?: string;
++  orderMainBook?: OrderMainBook;
++};
++
++function prepareSalesOrderCancel(input: SalesOrderCancelInput) {
+   completeOrderScope(input.scope);
+   const scope = input.scope;
+   const tenantId = scope.tenantId;
+   const voucherNo = formatVoucherNo(input.vchNo);
+   const key = keyOf(scope, Number(voucherNo));
+-  return withTenant(prisma, tenantId, async (tx: any) => {
+-    await resolveOrderBookTx(tx, scope, requestedMode(input.orderMainBook));
+-    await lockOrderMutationTx(tx, scope, voucherNo);
+-    const header = await persistedVoucherHeaderTx(tx, {
+-      table: 'SL_ORD_DATA',
++  return { scope, tenantId, voucherNo, key };
++}
++
++/** Existing internal compatibility entry; it does not establish session-context admission. */
++export async function cancelSalesOrder(
++  prisma: any,
++  input: SalesOrderCancelInput,
++): Promise<{ cancelled: true }> {
++  const prepared = prepareSalesOrderCancel(input);
++  return withTenant(prisma, prepared.tenantId, (tx) =>
++    runSalesOrderCancelTx(tx, input, prepared),
++  );
++}
++
++/** Existing reversal, temporary row deletion and cancellation evidence in the caller's transaction. */
++export async function cancelSalesOrderTx(
++  tx: Tx,
++  input: SalesOrderCancelInput,
++): Promise<{ cancelled: true }> {
++  return runSalesOrderCancelTx(tx, input, prepareSalesOrderCancel(input));
++}
++
++async function runSalesOrderCancelTx(
++  tx: Tx,
++  input: SalesOrderCancelInput,
++  prepared: ReturnType<typeof prepareSalesOrderCancel>,
++): Promise<{ cancelled: true }> {
++  const { scope, tenantId, voucherNo, key } = prepared;
++  await resolveOrderBookTx(tx, scope, requestedMode(input.orderMainBook));
++  await lockOrderMutationTx(tx, scope, voucherNo);
++  const header = await persistedVoucherHeaderTx(tx, {
++    table: 'SL_ORD_DATA',
++    scope,
++    voucherNo,
++    extraColumns: [
++      'AC_CODE',
++      'AC_NAME',
++      'ADV_AMT',
++      'CASH_AMT',
++      'CHQ_AMT',
++      'CARD_AMT',
++      'OLD_GL_AMT',
++      'OLD_SL_AMT',
++      'OLD_GL',
++      'OLD_SL',
++    ],
++  });
++  const state = await assertOrderVersionTx(tx, scope, voucherNo, input.expectedVersion);
++  const blocked = unsupportedOrderEdit(state);
++  if (blocked) throw new SaleValidationError(blocked);
++  if (state.SL_ORD_DETL.some((row) => text(row.TAG_NO) && text(row.TAG_NO) !== 'N'))
++    throw new SaleValidationError(
++      'A tagged order cannot be deleted in this editor; its stock allocation must be resolved first.',
++    );
++  await assertPeriodOpen(tx, tenantId, {
++    ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
++  });
++  await assertOrderUnconsumedTx(tx, scope, voucherNo);
++  const books: any[] = await tx.$queryRawUnsafe(
++    `SELECT "BOOK_SNAME","BOOK_NAME" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 LIMIT 1`,
++    tenantId,
++    scope.coCode,
++    scope.lcCode,
++    scope.coBook,
++  );
++  if (books.length !== 1)
++    throw new SaleValidationError('sales order book configuration not found');
++  await reverseVoucherTx(tx, tenantId, { tables: [...ORDER_WRITE_TABLES], key });
++  await tx.$executeRawUnsafe(
++    `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
++    tenantId,
++    scope.coCode,
++    scope.lcCode,
++    scope.coBook,
++    text(header.HD_VCH_NO),
++  );
++  const now = new Date();
++  const desc =
++    `Cash/Bank/Card/Ogl/Osl-${n(header.CASH_AMT)}/${n(header.CHQ_AMT)}/${n(header.CARD_AMT)}/${n(header.OLD_GL_AMT)}/${n(header.OLD_SL_AMT)} OG :${n(header.OLD_GL)} OS :${n(header.OLD_SL)}`.slice(
++      0,
++      150,
++    );
++  await insertRowTx(tx, 'DELETE_DATA', tenantId, {
++    ...key,
++    SR_NO: 0,
++    VCH_DATE: header.VCH_DATE,
++    DELETE_DATE: now,
++    VCH_TYPE: books[0].BOOK_SNAME,
++    VCH_TIME: header.VCH_TIME,
++    DELETE_TIME: now,
++    BOOK_NAME: books[0].BOOK_NAME,
++    AC_CODE: header.AC_CODE,
++    AC_NAME: header.AC_NAME,
++    VCH_VAL_DR: 0,
++    VCH_VAL_CR: n(header.ADV_AMT),
++    FINE_TYPE: 'A',
++    VCH_FINE_DR: 0,
++    VCH_FINE_CR: 0,
++    HD_VCH_NO: header.HD_VCH_NO,
++    MAIN_USER: header.MAIN_USER,
++    DELETE_USER: input.deleteUser ?? 'system',
++    VCH_DESC: desc,
++  });
++  return { cancelled: true };
++}
++
++/** Detach all business values before admission can wait on the retained session row. */
++function detachedOrderCommandInput<
++  T extends { scope: VoucherScope; orderMainBook?: OrderMainBook },
++>(supplied: T, family: OrderMainBook) {
++  if (supplied.orderMainBook !== undefined && supplied.orderMainBook !== family)
++    throw new SaleValidationError('This session command belongs to the ' + family + ' form.');
++  const input = structuredClone(supplied);
++  const scope = Object.freeze({ ...input.scope });
++  completeOrderScope(scope);
++  input.scope = scope;
++  input.orderMainBook = family;
++  return { input, scope };
++}
++
++function requireSessionOrderVersion(value: unknown) {
++  if (typeof value !== 'string' || value.length !== 64 || /[^0-9a-f]/.test(value))
++    throw new SaleValidationError('A valid saved order expectedVersion is required.');
++}
++
++type SessionOrderCreateRequest = { identity: unknown; input: SalesOrderInput };
++type SessionOrderCancelRequest = { identity: unknown; input: SalesOrderCancelInput };
++type SessionOrderEditRequest = SessionOrderCreateRequest & { voucherNo: number | string };
++type OrderCommandPrisma = Parameters<typeof withTenant>[0];
++
++function createOrderInSession(
++  prisma: OrderCommandPrisma,
++  request: SessionOrderCreateRequest,
++  family: OrderMainBook,
++) {
++  const { input, scope } = detachedOrderCommandInput(request.input, family);
++  const prepared = prepareSalesOrderCreate(input);
++  return withSessionContextCommand(
++    prisma,
++    request.identity,
++    {
++      form: family === 'SALES ORDER' ? 'Sales/Sales Order' : 'Karigar/Tour Order',
++      action: 'create',
+       scope,
+-      voucherNo,
+-      extraColumns: [
+-        'AC_CODE',
+-        'AC_NAME',
+-        'ADV_AMT',
+-        'CASH_AMT',
+-        'CHQ_AMT',
+-        'CARD_AMT',
+-        'OLD_GL_AMT',
+-        'OLD_SL_AMT',
+-        'OLD_GL',
+-        'OLD_SL',
+-      ],
+-    });
+-    const state = await assertOrderVersionTx(tx, scope, voucherNo, input.expectedVersion);
+-    const blocked = unsupportedOrderEdit(state);
+-    if (blocked) throw new SaleValidationError(blocked);
+-    if (state.SL_ORD_DETL.some((row) => text(row.TAG_NO) && text(row.TAG_NO) !== 'N'))
+-      throw new SaleValidationError(
+-        'A tagged order cannot be deleted in this editor; its stock allocation must be resolved first.',
+-      );
+-    await assertPeriodOpen(tx, tenantId, {
+-      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
+-    });
+-    await assertOrderUnconsumedTx(tx, scope, voucherNo);
+-    const books: any[] = await tx.$queryRawUnsafe(
+-      `SELECT "BOOK_SNAME","BOOK_NAME" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 LIMIT 1`,
+-      tenantId,
+-      scope.coCode,
+-      scope.lcCode,
+-      scope.coBook,
+-    );
+-    if (books.length !== 1)
+-      throw new SaleValidationError('sales order book configuration not found');
+-    await reverseVoucherTx(tx, tenantId, { tables: [...ORDER_WRITE_TABLES], key });
+-    await tx.$executeRawUnsafe(
+-      `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+-      tenantId,
+-      scope.coCode,
+-      scope.lcCode,
+-      scope.coBook,
+-      text(header.HD_VCH_NO),
+-    );
+-    const now = new Date();
+-    const desc =
+-      `Cash/Bank/Card/Ogl/Osl-${n(header.CASH_AMT)}/${n(header.CHQ_AMT)}/${n(header.CARD_AMT)}/${n(header.OLD_GL_AMT)}/${n(header.OLD_SL_AMT)} OG :${n(header.OLD_GL)} OS :${n(header.OLD_SL)}`.slice(
+-        0,
+-        150,
+-      );
+-    await insertRowTx(tx, 'DELETE_DATA', tenantId, {
+-      ...key,
+-      SR_NO: 0,
+-      VCH_DATE: header.VCH_DATE,
+-      DELETE_DATE: now,
+-      VCH_TYPE: books[0].BOOK_SNAME,
+-      VCH_TIME: header.VCH_TIME,
+-      DELETE_TIME: now,
+-      BOOK_NAME: books[0].BOOK_NAME,
+-      AC_CODE: header.AC_CODE,
+-      AC_NAME: header.AC_NAME,
+-      VCH_VAL_DR: 0,
+-      VCH_VAL_CR: n(header.ADV_AMT),
+-      FINE_TYPE: 'A',
+-      VCH_FINE_DR: 0,
+-      VCH_FINE_CR: 0,
+-      HD_VCH_NO: header.HD_VCH_NO,
+-      MAIN_USER: header.MAIN_USER,
+-      DELETE_USER: input.deleteUser ?? 'system',
+-      VCH_DESC: desc,
+-    });
+-    return { cancelled: true };
+-  });
++    },
++    prepared.run,
++  );
++}
++
++function cancelOrderInSession(
++  prisma: OrderCommandPrisma,
++  request: SessionOrderCancelRequest,
++  family: OrderMainBook,
++) {
++  // Modern HTTP commands require a version; the internal compatibility wrappers remain optional.
++  requireSessionOrderVersion(request.input.expectedVersion);
++  const { input, scope } = detachedOrderCommandInput(request.input, family);
++  const prepared = prepareSalesOrderCancel(input);
++  return withSessionContextCommand(
++    prisma,
++    request.identity,
++    {
++      form: family === 'SALES ORDER' ? 'Sales/Sales Order' : 'Karigar/Tour Order',
++      action: 'delete',
++      scope,
++    },
++    (tx) => runSalesOrderCancelTx(tx, input, prepared),
++  );
++}
++
++export async function createSalesOrderInSession(
++  prisma: OrderCommandPrisma,
++  request: SessionOrderCreateRequest,
++) {
++  return createOrderInSession(prisma, request, 'SALES ORDER');
++}
++export async function createTourOrderInSession(
++  prisma: OrderCommandPrisma,
++  request: SessionOrderCreateRequest,
++) {
++  return createOrderInSession(prisma, request, 'TOUR ORDER');
++}
++export async function cancelSalesOrderInSession(
++  prisma: OrderCommandPrisma,
++  request: SessionOrderCancelRequest,
++) {
++  return cancelOrderInSession(prisma, request, 'SALES ORDER');
++}
++export async function cancelTourOrderInSession(
++  prisma: OrderCommandPrisma,
++  request: SessionOrderCancelRequest,
++) {
++  return cancelOrderInSession(prisma, request, 'TOUR ORDER');
++}
++export async function editTourOrderInSession(
++  prisma: OrderCommandPrisma,
++  request: SessionOrderEditRequest,
++) {
++  requireSessionOrderVersion(request.input.expectedVersion);
++  const { input, scope } = detachedOrderCommandInput(request.input, 'TOUR ORDER');
++  const prepared = prepareSalesOrderEdit(input, request.voucherNo);
++  return withSessionContextCommand(
++    prisma,
++    request.identity,
++    { form: 'Karigar/Tour Order', action: 'update', scope },
++    (tx) => runSalesOrderEditTx(tx, input, prepared),
++  );
+ }
+ 
+ // ───────────────────────── F4 · SL_ORD_ADJ order-adjust helpers ─────────────────────────
+@@ -2004,9 +2183,11 @@
+     const kasar = round2(Number(input.kasarAmt || 0));
+     const paidAc = input.paidAc ?? 'CASH';
+     const kasarAc = input.kasarAc ?? 'KASAR';
+-    const no = lifecycle?.vchNo ?? (await nextVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
++    const no =
++      lifecycle?.vchNo ?? (await nextVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
+     const hdVchNo =
+-      lifecycle?.hdVchNo ?? (await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
++      lifecycle?.hdVchNo ??
++      (await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
+     const mainUser = lifecycle?.mainUser ?? String(input.mainUser ?? '').trim();
+     const key: VoucherKey = {
+       CO_CODE: input.scope.coCode,
+@@ -2100,7 +2281,8 @@
+   'BAR_IDTL',
+ ] as const;
+ function adjustScope(scope: VoucherScope): CompleteOrderScope {
+-  if (!scope.coYear) throw new SaleValidationError('complete voucher scope (coYear) is required');
++  if (!scope.coYear)
++    throw new SaleValidationError('complete voucher scope (coYear) is required');
+   return { ...scope, coYear: scope.coYear, coBook: 'ORC' };
+ }
+ export async function getSalesOrderAdjustment(
+@@ -2194,7 +2376,10 @@
+       extraColumns: [],
+     });
+     await assertPeriodOpen(tx, sc.tenantId, {
+-      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: sc.coCode, VCH_DATE: persisted.VCH_DATE }] },
++      ledger: {
++        table: 'AC_DATA',
++        lines: [{ CO_CODE: sc.coCode, VCH_DATE: persisted.VCH_DATE }],
++      },
+     });
+     await reverseVoucherTx(tx, sc.tenantId, { tables: [...ADJUST_WRITE_TABLES], key });
+     await tx.$executeRawUnsafe(

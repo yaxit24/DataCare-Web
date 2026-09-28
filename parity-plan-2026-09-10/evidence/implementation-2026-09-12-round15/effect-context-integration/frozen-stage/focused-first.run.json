@@ -1,0 +1,48 @@
+{
+  "runs": [
+    {
+      "label": "focused-first",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.config.ts"
+      ],
+      "cwd": "/tmp/datacare-round15-effect-context/web/packages/core",
+      "startedAtUtc": "2026-09-12T02:28:17.486695+00:00",
+      "finishedAtUtc": "2026-09-12T02:28:18.052934+00:00",
+      "exitCode": 0,
+      "logSha256": "630194cfce4f996d58df535c5bbdec2b95bc65b5767677eaf169622937121b51"
+    },
+    {
+      "label": "types-first",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.bin/tsc",
+        "--noEmit",
+        "--strict",
+        "--noUncheckedIndexedAccess",
+        "--isolatedModules",
+        "--skipLibCheck",
+        "--target",
+        "ES2022",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--types",
+        "node",
+        "src/saleReturnEffectContext.ts",
+        "src/savedSaleReturnClock.ts",
+        "test/saleReturnEffectContext.test.ts"
+      ],
+      "cwd": "/tmp/datacare-round15-effect-context/web/packages/core",
+      "startedAtUtc": "2026-09-12T02:28:18.053212+00:00",
+      "finishedAtUtc": "2026-09-12T02:28:18.570541+00:00",
+      "exitCode": 2,
+      "logSha256": "9d0c8afc2f9320afa703c9eec3f60fbb909ff3403dc08f03d795e7736b202cc5"
+    }
+  ],
+  "changedInputs": [],
+  "inputCount": 6,
+  "limits": "Staged new pure qualifier/test + unchanged copied clock only. No active source, DB, browser or global build."
+}

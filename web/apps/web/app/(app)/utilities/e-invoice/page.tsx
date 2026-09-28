@@ -50,9 +50,12 @@ function fmtDate(d: string | null): string {
 
 const bookOf = (row: Row): string => String(row.coBook ?? '').trim();
 const keyOf = (row: Row): string => `${bookOf(row) || 'missing-book'}/${row.vchNo}`;
+const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 export default function EInvoicePage() {
   const { coYear } = useBusinessScope();
+  const [fromDate, setFromDate] = useState(todayIso);
+  const [toDate, setToDate] = useState(todayIso);
   const [reg, setReg] = useState<Register | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
@@ -124,14 +127,17 @@ export default function EInvoicePage() {
     }
   }
 
-  const load = useCallback(async (yr: string) => {
+  const load = useCallback(async (yr: string, from: string, to: string) => {
     if (!yr) return;
     setLoading(true);
     setErr('');
     setReg(null);
     setResults({});
     try {
-      setReg(await get<Register>(`/reports/sales-register?coYear=${encodeURIComponent(yr)}`));
+      const qs = new URLSearchParams({ coYear: yr });
+      if (from) qs.set('fromDate', from);
+      if (to) qs.set('toDate', to);
+      setReg(await get<Register>(`/reports/sales-register?${qs.toString()}`));
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.error || e.message : 'Failed to load sales register');
     } finally {
@@ -141,14 +147,14 @@ export default function EInvoicePage() {
 
   // Load the current scoped register plus provider status and GSP configuration.
   useEffect(() => {
-    load(coYear);
+    load(coYear, fromDate, toDate);
     get('/integrations/status')
       .then((s: any) => setProvider(s?.einvoice ?? null))
       .catch(() => {});
     get('/einvoice/gsp-config')
       .then((c: any) => setGsp(c ?? null))
       .catch(() => {});
-  }, [coYear, load]);
+  }, [coYear, fromDate, toDate, load]);
 
   async function generate(row: Row) {
     const vchNo = row.vchNo;
@@ -227,6 +233,10 @@ export default function EInvoicePage() {
 
   const rows = reg?.rows ?? [];
   const totals = reg?.totals;
+  const exportUrl = `/api/einvoice/export.xlsx?${new URLSearchParams({
+    ...(fromDate ? { fromDate } : {}),
+    ...(toDate ? { toDate } : {}),
+  }).toString()}`;
 
   return (
     <div>
@@ -238,9 +248,30 @@ export default function EInvoicePage() {
             <label>Year</label>
             <input value={coYear} readOnly style={{ width: 90 }} />
           </div>
-          <button className="primary" onClick={() => load(coYear)} disabled={loading}>
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label>From</label>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              style={{ width: 150 }}
+            />
+          </div>
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label>To</label>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              style={{ width: 150 }}
+            />
+          </div>
+          <button className="primary" onClick={() => load(coYear, fromDate, toDate)} disabled={loading}>
             {loading ? 'Loading…' : 'Load Invoices'}
           </button>
+          <a className="button ghost" href={exportUrl}>
+            E-Excel
+          </a>
           <span className="spacer" style={{ flex: 1 }} />
           {provider && (
             <span className="muted">

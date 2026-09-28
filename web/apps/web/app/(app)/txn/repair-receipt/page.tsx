@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -12,6 +12,8 @@ import { RepairImagePanel } from '../../../../components/RepairImagePanel';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 
 interface RepairLine {
+  /** Saved database serial; draft row positions are never photograph identities. */
+  savedSrNo?: number;
   itCode: string;
   itemName: string;
   itmSize: string;
@@ -132,8 +134,19 @@ function text(value: string | number | undefined): string {
 
 export default function RepairReceiptPage() {
   const router = useRouter();
-  const { lcCode, coYear } = useBusinessScope();
+  const { coCode, lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
+  const imageScope = JSON.stringify([coCode, lcCode, coYear, coBook]);
+  const [loadedImageScope, setLoadedImageScope] = useState('');
+  const requestContext = useRef({ scope: imageScope, epoch: 0 });
+  // Invalidate synchronously, including A→B→A before an older request resolves.
+  if (requestContext.current.scope !== imageScope)
+    requestContext.current = { scope: imageScope, epoch: 0 };
+  const beginRequest = () => {
+    const context = requestContext.current;
+    const epoch = ++context.epoch;
+    return () => requestContext.current === context && context.epoch === epoch;
+  };
   const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [billNo, setBillNo] = useState('');
   const [employeeCode, setEmployeeCode] = useState('');
@@ -155,6 +168,16 @@ export default function RepairReceiptPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const chequeRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    setBusy(false);
+    setLoadedImageScope('');
+  }, [imageScope]);
+  useEffect(
+    () => () => {
+      requestContext.current.epoch += 1;
+    },
+    [],
+  );
 
   const setLine = (index: number, field: keyof RepairLine, value: string) =>
     setLines((current) =>
@@ -181,6 +204,8 @@ export default function RepairReceiptPage() {
   const outstanding = estimate === 0 ? 0 : r2(Math.round(estimate) - received);
 
   const reset = () => {
+    requestContext.current.epoch += 1;
+    setBusy(false);
     setBillNo('');
     setEmployeeCode('');
     setBankName('');
@@ -197,11 +222,13 @@ export default function RepairReceiptPage() {
     setActiveImageRow(0);
     setLoadVoucherNo('');
     setLoadedVoucherNo('');
+    setLoadedImageScope('');
     setResult(null);
     setError('');
   };
 
   const requestBody = () => ({
+    coCode,
     coBook,
     coYear,
     lcCode,
@@ -242,10 +269,63 @@ export default function RepairReceiptPage() {
       })),
   });
 
+  function applySavedReceipt(view: RepairReceiptView) {
+    setLoadedVoucherNo(view.voucherNo);
+    setLoadVoucherNo(view.voucherNo);
+    setVchDate(view.vchDate);
+    setBillNo(view.billNo);
+    setEmployeeCode(view.employeeCode);
+    setBankName(view.bankName);
+    setDescription(view.description);
+    setAcCode(view.acCode);
+    setAcName(view.acName);
+    setChequeAmount(text(view.chequeAmount));
+    setChequeAccount(view.chequeAccount);
+    setChequeNo(view.chequeNo);
+    setCardAmount(text(view.cardAmount));
+    setCardAccount(view.cardAccount);
+    setCashAmount(text(view.cashAmount));
+    setLines(
+      view.lines.length
+        ? view.lines.map((line) => ({
+            savedSrNo: line.srNo,
+            itCode: line.itCode,
+            itemName: line.itemName,
+            itmSize: line.itmSize ?? '',
+            description: line.description ?? '',
+            pcs: text(line.pcs),
+            grossWt: text(line.grossWt),
+            otherWt: text(line.otherWt),
+            touch: text(line.touch),
+            labourType: line.labourType || 'N',
+            labourRate: text(line.labourRate),
+            otherAmount: text(line.otherAmount),
+          }))
+        : [blankLine()],
+    );
+    setResult({
+      vchNo: Number(view.voucherNo),
+      voucherNo: view.voucherNo,
+      headerVoucherNo: view.headerVoucherNo,
+      created: false,
+      totals: view.totals,
+    });
+    setLoadedImageScope(imageScope);
+    setActiveImageRow(0);
+  }
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (loadedVoucherNo && loadedImageScope !== imageScope) {
+      setError(
+        'Reload this receipt in the selected company, location, year and book before updating.',
+      );
+      return;
+    }
     setError('');
     setBusy(true);
+    const current = beginRequest();
+    let written: SaveResult | null = null;
     try {
       const saved = loadedVoucherNo
         ? await put<SaveResult>(
@@ -253,17 +333,33 @@ export default function RepairReceiptPage() {
             requestBody(),
           )
         : await post<SaveResult>('/repair-receipts', requestBody());
+      if (!current()) return;
+      written = saved;
       setResult(saved);
       setLoadedVoucherNo(saved.voucherNo);
       setLoadVoucherNo(saved.voucherNo);
+      // The writer can assign fresh serials. Hydrate its saved rows before enabling photographs.
+      setLoadedImageScope('');
+      const query = new URLSearchParams({ coCode, lcCode, coYear, coBook });
+      const view = await get<RepairReceiptView>(
+        `/repair-receipts/${encodeURIComponent(saved.voucherNo)}?${query}`,
+      );
+      if (!current()) return;
+      applySavedReceipt(view);
+      setResult(saved);
     } catch (caught) {
-      setError(
+      if (!current()) return;
+      const reason =
         caught instanceof ApiError
           ? caught.body?.message || caught.body?.error || caught.message
-          : 'repair receipt save failed',
+          : 'repair receipt request failed';
+      setError(
+        written
+          ? `Saved repair receipt ${written.voucherNo}; reload is required: ${reason}`
+          : reason,
       );
     } finally {
-      setBusy(false);
+      if (current()) setBusy(false);
     }
   }
 
@@ -271,75 +367,55 @@ export default function RepairReceiptPage() {
     if (!coBook || !loadVoucherNo.trim()) return;
     setError('');
     setBusy(true);
+    setLoadedImageScope('');
+    const current = beginRequest();
     try {
+      const query = new URLSearchParams({ coCode, lcCode, coYear, coBook });
       const view = await get<RepairReceiptView>(
-        `/repair-receipts/${encodeURIComponent(loadVoucherNo.trim())}?coBook=${encodeURIComponent(coBook)}`,
+        `/repair-receipts/${encodeURIComponent(loadVoucherNo.trim())}?${query}`,
       );
-      setLoadedVoucherNo(view.voucherNo);
-      setLoadVoucherNo(view.voucherNo);
-      setVchDate(view.vchDate);
-      setBillNo(view.billNo);
-      setEmployeeCode(view.employeeCode);
-      setBankName(view.bankName);
-      setDescription(view.description);
-      setAcCode(view.acCode);
-      setAcName(view.acName);
-      setChequeAmount(text(view.chequeAmount));
-      setChequeAccount(view.chequeAccount);
-      setChequeNo(view.chequeNo);
-      setCardAmount(text(view.cardAmount));
-      setCardAccount(view.cardAccount);
-      setCashAmount(text(view.cashAmount));
-      setLines(
-        view.lines.length
-          ? view.lines.map((line) => ({
-              itCode: line.itCode,
-              itemName: line.itemName,
-              itmSize: line.itmSize ?? '',
-              description: line.description ?? '',
-              pcs: text(line.pcs),
-              grossWt: text(line.grossWt),
-              otherWt: text(line.otherWt),
-              touch: text(line.touch),
-              labourType: line.labourType || 'N',
-              labourRate: text(line.labourRate),
-              otherAmount: text(line.otherAmount),
-            }))
-          : [blankLine()],
-      );
-      setResult({
-        vchNo: Number(view.voucherNo),
-        voucherNo: view.voucherNo,
-        headerVoucherNo: view.headerVoucherNo,
-        created: false,
-        totals: view.totals,
-      });
+      if (!current()) return;
+      applySavedReceipt(view);
     } catch (caught) {
+      if (!current()) return;
       setError(
         caught instanceof ApiError
           ? caught.body?.message || caught.body?.error || caught.message
           : 'repair receipt load failed',
       );
     } finally {
-      setBusy(false);
+      if (current()) setBusy(false);
     }
   }
 
   async function removeReceipt() {
+    if (loadedVoucherNo && loadedImageScope !== imageScope) {
+      setError(
+        'Reload this receipt in the selected company, location, year and book before deleting.',
+      );
+      return;
+    }
     if (!loadedVoucherNo || !window.confirm(`Delete repair receipt ${loadedVoucherNo}?`)) return;
     setError('');
     setBusy(true);
+    const current = beginRequest();
     try {
-      await del(`/repair-receipts/${encodeURIComponent(loadedVoucherNo)}`, { coBook });
-      reset();
+      await del(`/repair-receipts/${encodeURIComponent(loadedVoucherNo)}`, {
+        coCode,
+        lcCode,
+        coYear,
+        coBook,
+      });
+      if (current()) reset();
     } catch (caught) {
+      if (!current()) return;
       setError(
         caught instanceof ApiError
           ? caught.body?.message || caught.body?.error || caught.message
           : 'repair receipt delete failed',
       );
     } finally {
-      setBusy(false);
+      if (current()) setBusy(false);
     }
   }
 
@@ -366,10 +442,10 @@ export default function RepairReceiptPage() {
           onDelete={loadedVoucherNo ? removeReceipt : undefined}
           onExit={() => router.back()}
           onPrint={
-            loadedVoucherNo
+            loadedVoucherNo && loadedImageScope === imageScope
               ? () =>
                   window.open(
-                    `/api/repair-receipts/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
+                    `/api/repair-receipts/${encodeURIComponent(loadedVoucherNo)}/print?${new URLSearchParams({ coCode, lcCode, coYear, coBook, format: 'html' })}`,
                     '_blank',
                   )
               : undefined
@@ -647,8 +723,10 @@ export default function RepairReceiptPage() {
 
       <RepairImagePanel
         imageBook={coBook}
+        imageYear={coYear}
+        disabled={busy || loadedImageScope !== imageScope}
         vchNo={loadedVoucherNo || result?.voucherNo || ''}
-        srNo={Math.min(activeImageRow, Math.max(lines.length - 1, 0)) + 1}
+        srNo={lines[Math.min(activeImageRow, Math.max(lines.length - 1, 0))]?.savedSrNo ?? 0}
         testId="repair-image"
       />
 

@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
 import {
@@ -8,7 +9,9 @@ import {
   previewRepair,
   repairHistory,
   RepairError,
+  REPAIR_BACKUP_MAX_AGE_MS,
 } from '../src/modules/utilities/dataRepair.js';
+import { hashPassword } from '../src/modules/auth/password.js';
 import '../src/modules/utilities/dataRepairOps.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -51,8 +54,46 @@ d('data repair console', () => {
     'ROJ_MEL_DATA',
     'YEAR_MAST',
     'BOOK_DATA',
+    'LOGIN_MAST',
+    'company_backup_run',
     'data_repair_run',
   ];
+
+  /**
+   * A destructive (high/danger) repair demands more than a typed confirmation: a written reason, the
+   * operator's own password, and a recent company backup it can be recovered from. These fixtures create the
+   * real rows those checks read, so the tests exercise the same path an operator does rather than a bypass.
+   */
+  const OPERATOR_PASSWORD = 'Repair-Operator-1!';
+  const seedOperatorLogin = (t: string) =>
+    withTenant(prisma, t, async (tx: any) => {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG")
+         VALUES ($1,$2,$3,$4,'ADMIN')`,
+        t,
+        CO,
+        OPERATOR,
+        await hashPassword(OPERATOR_PASSWORD),
+      );
+    });
+
+  /** Record a backup of this company `ageMs` in the past and return the checksum an apply must name. */
+  const seedBackup = async (t: string, ageMs = 0): Promise<string> => {
+    const checksum = createHash('sha256').update(`${t}:${CO}:${ageMs}:${Date.now()}`).digest('hex');
+    await withTenant(prisma, t, async (tx: any) => {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "company_backup_run"
+           (tenant_id,co_code,checksum,document_version,generated_at,table_count,row_count,operator)
+         VALUES ($1,$2,$3,1,now() - ($4 || ' milliseconds')::interval,160,0,$5)`,
+        t,
+        CO,
+        checksum,
+        String(ageMs),
+        OPERATOR,
+      );
+    });
+    return checksum;
+  };
 
   const wipe = (t: string) =>
     withTenant(prisma, t, async (tx: any) => {
@@ -356,6 +397,13 @@ d('data repair console', () => {
     const p = await previewRepair(prisma, 'opening-balance', scope, OPERATOR);
     expect(p.risk).toBe('high');
     expect(p.requiresConfirmation).toBe(`opening-balance ${CO}`);
+    // A destructive operation announces every requirement up front so the console can ask once.
+    expect(p.authority).toEqual({
+      confirmation: `opening-balance ${CO}`,
+      reason: true,
+      reauthentication: true,
+      backupReference: true,
+    });
     // A high-risk operation must refuse to run without the typed confirmation.
     await expect(
       applyRepair(prisma, 'opening-balance', scope, {
@@ -364,10 +412,15 @@ d('data repair console', () => {
       }),
     ).rejects.toMatchObject({ code: 'confirmation-required' });
 
+    await seedOperatorLogin(tenantId);
+    const backupReference = await seedBackup(tenantId);
     await applyRepair(prisma, 'opening-balance', scope, {
       previewHash: p.previewHash,
       operator: OPERATOR,
       confirmation: `opening-balance ${CO}`,
+      reason: 'rebuild opening balances after migration',
+      operatorPassword: OPERATOR_PASSWORD,
+      backupReference,
     });
     const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
       tx.$queryRawUnsafe(
@@ -396,6 +449,159 @@ d('data repair console', () => {
 
     const p2 = await previewRepair(prisma, 'opening-balance', scope, OPERATOR);
     expect(p2.clean).toBe(true);
+  });
+
+  /**
+   * P0-03: authority for a destructive apply.
+   *
+   * The console previously accepted a destructive apply on the strength of a typed confirmation alone, with
+   * the authority comment living in a route handler rather than in the policy or the framework. These
+   * assertions pin the four things that must now hold, each checked against real rows: a written reason, the
+   * operator's own password, a backup that actually exists, and a backup that is recent enough to recover
+   * the rows being rewritten. Every refusal must happen BEFORE any write.
+   */
+  it('refuses a destructive apply without reason, re-authentication and a fresh verified backup', async () => {
+    await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$executeRawUnsafe(
+        `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE")
+         VALUES ($1,$2,$3,'2024-04-01')`,
+        tenantId,
+        CO,
+        YEAR,
+      ),
+    );
+    await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$executeRawUnsafe(
+        `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","AC_CODE","VCH_DATE",
+           "CR_AMT","DR_AMT","IT_TYPE","SIGN","FINE_WT")
+         VALUES ($1,$2,$3,$4,'SL','PARTYA','2024-03-31'::date,5000,1000,'G','+',10)`,
+        tenantId,
+        CO,
+        LC,
+        YEAR,
+      ),
+    );
+    await seedOperatorLogin(tenantId);
+
+    const confirmation = `opening-balance ${CO}`;
+    const preview = await previewRepair(prisma, 'opening-balance', scope, OPERATOR);
+    expect(preview.clean).toBe(false);
+
+    const openingRows = async (): Promise<unknown[]> =>
+      withTenant(prisma, tenantId, (tx: any) =>
+        tx.$queryRawUnsafe(`SELECT 1 FROM "OP_DATA" WHERE tenant_id=$1`, tenantId),
+      );
+    const base = {
+      previewHash: preview.previewHash,
+      operator: OPERATOR,
+      confirmation,
+    };
+
+    // 1. No reason, or one too short to say anything.
+    await expect(applyRepair(prisma, 'opening-balance', scope, base)).rejects.toMatchObject({
+      code: 'reason-required',
+    });
+    await expect(
+      applyRepair(prisma, 'opening-balance', scope, { ...base, reason: 'fix' }),
+    ).rejects.toMatchObject({ code: 'reason-required' });
+
+    const reason = 'rebuild opening balances after migration';
+
+    // 2. No password, and then a wrong one. Both must fail, and neither may reveal which.
+    await expect(
+      applyRepair(prisma, 'opening-balance', scope, { ...base, reason }),
+    ).rejects.toMatchObject({ code: 'reauthentication-required' });
+    await expect(
+      applyRepair(prisma, 'opening-balance', scope, {
+        ...base,
+        reason,
+        operatorPassword: 'not-the-password',
+      }),
+    ).rejects.toMatchObject({ code: 'reauthentication-failed' });
+
+    // 3. No backup reference, then one that names no recorded backup.
+    await expect(
+      applyRepair(prisma, 'opening-balance', scope, {
+        ...base,
+        reason,
+        operatorPassword: OPERATOR_PASSWORD,
+      }),
+    ).rejects.toMatchObject({ code: 'backup-reference-required' });
+    await expect(
+      applyRepair(prisma, 'opening-balance', scope, {
+        ...base,
+        reason,
+        operatorPassword: OPERATOR_PASSWORD,
+        backupReference: 'f'.repeat(64),
+      }),
+    ).rejects.toMatchObject({ code: 'backup-reference-unknown' });
+
+    // 4. A real backup of ANOTHER tenant's company must not count as this company's backup.
+    await seedOperatorLogin(otherTenant);
+    const foreignBackup = await seedBackup(otherTenant);
+    await expect(
+      applyRepair(prisma, 'opening-balance', scope, {
+        ...base,
+        reason,
+        operatorPassword: OPERATOR_PASSWORD,
+        backupReference: foreignBackup,
+      }),
+    ).rejects.toMatchObject({ code: 'backup-reference-unknown' });
+
+    // 5. A real but expired backup cannot cover rows created after it.
+    const staleBackup = await seedBackup(tenantId, REPAIR_BACKUP_MAX_AGE_MS + 60_000);
+    await expect(
+      applyRepair(prisma, 'opening-balance', scope, {
+        ...base,
+        reason,
+        operatorPassword: OPERATOR_PASSWORD,
+        backupReference: staleBackup,
+      }),
+    ).rejects.toMatchObject({ code: 'backup-reference-stale' });
+
+    // Nothing above may have written a single opening row.
+    expect(await openingRows(), 'a refused apply must not write').toEqual([]);
+    const refused = await repairHistory(prisma, { tenantId, coCode: CO });
+    expect(
+      refused.some((r) => r.state === 'applied'),
+      'a refused apply must not record an applied run',
+    ).toBe(false);
+
+    // With every requirement satisfied the same reviewed change set applies, and the run records the
+    // evidence it was allowed on.
+    const backupReference = await seedBackup(tenantId);
+    const applied = await applyRepair(prisma, 'opening-balance', scope, {
+      ...base,
+      reason,
+      operatorPassword: OPERATOR_PASSWORD,
+      backupReference,
+    });
+    expect(applied.deduplicated).toBe(false);
+    expect((await openingRows()).length).toBeGreaterThan(0);
+    const history = await repairHistory(prisma, { tenantId, coCode: CO });
+    const run = history.find((r) => r.state === 'applied');
+    expect(run).toBeTruthy();
+    expect(run!.reason).toBe(reason);
+    expect(run!.backup_reference).toBe(backupReference);
+    expect(run!.reauthenticated_at, 'the re-authentication must be recorded').toBeTruthy();
+  });
+
+  it('does not demand destructive authority from a non-destructive repair', async () => {
+    // karigar-fine is `medium`: it corrects a derived value in place. Requiring a backup and a password for
+    // it would push operators toward avoiding routine repairs, so the threshold must stay at high/danger.
+    await seedKarigar(tenantId);
+    const p = await previewRepair(prisma, 'karigar-fine', scope, OPERATOR);
+    expect(p.authority).toEqual({
+      confirmation: null,
+      reason: false,
+      reauthentication: false,
+      backupReference: false,
+    });
+    const applied = await applyRepair(prisma, 'karigar-fine', scope, {
+      previewHash: p.previewHash,
+      operator: OPERATOR,
+    });
+    expect(applied.applied.find((d) => d.table === 'BAR_DETL')?.update).toBe(1);
   });
 
   it('does nothing when no fiscal opening date is configured', async () => {
@@ -483,10 +689,14 @@ d('data repair console', () => {
     expect(p.diffs.find((d) => d.table === 'SL_DETL')?.update).toBe(1); // GONE only
     expect(p.diffs.some((d) => d.table === 'NOT_A_TABLE')).toBe(false);
 
+    await seedOperatorLogin(tenantId);
     await applyRepair(prisma, 'orphan-tag-refs', scope, {
       previewHash: p.previewHash,
       operator: OPERATOR,
       confirmation: `orphan-tag-refs ${CO}`,
+      reason: 'clear dangling tag references found in audit',
+      operatorPassword: OPERATOR_PASSWORD,
+      backupReference: await seedBackup(tenantId),
     });
     const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
       tx.$queryRawUnsafe(

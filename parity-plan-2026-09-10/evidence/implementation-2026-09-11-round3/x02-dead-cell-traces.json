@@ -1,0 +1,171 @@
+{
+  "checked": 712,
+  "pages": 21,
+  "mappedPages": 23,
+  "dead": 0,
+  "unmapped": 0,
+  "nested": [
+    {
+      "page": "wholesale-sale",
+      "field": "issueYear",
+      "traces": [
+        {
+          "field": "issueYear",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "yrcd"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "yrcd"
+            ],
+            "line": 6557
+          },
+          "read": {
+            "field": "yrcd",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "yrcd"
+            ],
+            "column": "ISU_YRCD",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 826
+          }
+        }
+      ]
+    },
+    {
+      "page": "wholesale-sale",
+      "field": "issueBook",
+      "traces": [
+        {
+          "field": "issueBook",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "dbcd"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "dbcd"
+            ],
+            "line": 6557
+          },
+          "read": {
+            "field": "dbcd",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "dbcd"
+            ],
+            "column": "ISU_DBCD",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 827
+          }
+        }
+      ]
+    },
+    {
+      "page": "wholesale-sale",
+      "field": "issueNo",
+      "traces": [
+        {
+          "field": "issueNo",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "no"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "no"
+            ],
+            "line": 6557
+          },
+          "read": {
+            "field": "no",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "no"
+            ],
+            "column": "ISU_NO",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 828
+          }
+        }
+      ]
+    },
+    {
+      "page": "wholesale-sale",
+      "field": "issueSrno",
+      "traces": [
+        {
+          "field": "issueSrno",
+          "method": "post",
+          "endpoint": "/rate-cut",
+          "path": [
+            "lines",
+            "[]",
+            "isuRef",
+            "srno"
+          ],
+          "line": 304,
+          "forwarding": {
+            "writer": "postRateCut",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "srno"
+            ],
+            "line": 6557
+          },
+          "read": {
+            "field": "srno",
+            "path": [
+              "lines",
+              "[]",
+              "isuRef",
+              "srno"
+            ],
+            "column": "ISU_SRNO",
+            "file": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/rateCut.ts",
+            "line": 829
+          }
+        }
+      ]
+    }
+  ],
+  "unsupported": [],
+  "report": []
+}

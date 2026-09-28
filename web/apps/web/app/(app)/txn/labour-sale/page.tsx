@@ -5,6 +5,12 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { BookSelect } from '../../../../components/BookSelect';
 import { VoucherList } from '../../../../components/VoucherList';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 /** Labour Invoice (TR_MFG_LBR): bill the MAKING when the customer supplied the gold (order-gold).
  *  DUAL GST — metal value @ metalTaxPct (3%) + labour @ labourTaxPct (5%). Posts to /labour-invoice. */
@@ -17,7 +23,103 @@ interface Line {
   pcs: string;
   value: string;
   metalAmount: string;
+  tagNo: string;
+  designNo: string;
+  hallmarkId: string;
+  tblCode: string;
+  itmSize: string;
+  itemLot: string;
+  lotNo: string;
+  itmColor: string;
+  grossWt: string;
+  bagWt: string;
+  ghtPct: string;
+  ghtWt: string;
+  touch: string;
+  westPct: string;
+  fineWt: string;
+  labourPct: string;
+  labourRate: string;
+  otherAmount: string;
+  mrp: string;
+  tagCost: string;
+  rateType: string;
+  karigarName: string;
+  karigarOtherWt: string;
+  karigarNetWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
+  karigarLbrRate: string;
+  karigarLbrAmt: string;
+  employeeCode: string;
+  prCode: string;
+  lbrCode: string;
 }
+/**
+ * P7 extended grid columns: desktop columns this form has and the web did not.
+ *
+ * Every entry was verified against the WRITER, not the API interface — a field present on the
+ * interface is not necessarily persisted (purchase hard-codes ITM_SIZE to blank, and five
+ * SaleLineInput fields have no SL_DETL column at all), and such a cell would silently discard
+ * what the operator types.
+ */
+const extendedLineFields: Array<[keyof Line, string]> = [
+  ['tagNo', 'TagNo'],
+  ['designNo', 'Design'],
+  ['hallmarkId', 'HuId'],
+  ['tblCode', 'Counter'],
+  ['itmSize', 'Size'],
+  ['itemLot', 'ItmLot'],
+  ['lotNo', 'LotNo'],
+  ['itmColor', 'Color'],
+  ['grossWt', 'GrWt'],
+  ['bagWt', 'BagWt'],
+  ['ghtPct', 'Ght%'],
+  ['ghtWt', 'GhtWt'],
+  ['touch', 'Touch'],
+  ['westPct', 'West%'],
+  ['fineWt', 'Fine'],
+  ['labourPct', 'Lbr%'],
+  ['labourRate', 'LbrRate'],
+  ['otherAmount', 'OthAmt'],
+  ['mrp', 'Mrp'],
+  ['tagCost', 'TagCost'],
+  ['rateType', 'RateType'],
+  ['karigarName', 'KrCode'],
+  ['karigarOtherWt', 'KrOthWt'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
+  ['karigarLbrRate', 'KrLRate'],
+  ['karigarLbrAmt', 'KrLAmt'],
+  ['employeeCode', 'EmpCod'],
+  ['prCode', 'PrCost'],
+  ['lbrCode', 'LbrCode'],
+];
+
+/** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
+const NUMERIC_EXTENDED = new Set<string>([
+  'grossWt',
+  'bagWt',
+  'ghtPct',
+  'ghtWt',
+  'westPct',
+  'fineWt',
+  'labourPct',
+  'labourRate',
+  'otherAmount',
+  'tagCost',
+  'karigarOtherWt',
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+  'karigarLbrRate',
+  'karigarLbrAmt',
+]);
+
 const blank = (): Line => ({
   itCode: '',
   desc: '',
@@ -26,6 +128,38 @@ const blank = (): Line => ({
   pcs: '1',
   value: '',
   metalAmount: '',
+  tagNo: '',
+  designNo: '',
+  hallmarkId: '',
+  tblCode: '',
+  itmSize: '',
+  itemLot: '',
+  lotNo: '',
+  itmColor: '',
+  grossWt: '',
+  bagWt: '',
+  ghtPct: '',
+  ghtWt: '',
+  touch: '',
+  westPct: '',
+  fineWt: '',
+  labourPct: '',
+  labourRate: '',
+  otherAmount: '',
+  mrp: '',
+  tagCost: '',
+  rateType: '',
+  karigarName: '',
+  karigarOtherWt: '',
+  karigarNetWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
+  karigarLbrRate: '',
+  karigarLbrAmt: '',
+  employeeCode: '',
+  prCode: '',
+  lbrCode: '',
 });
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
@@ -47,6 +181,20 @@ export default function LabourInvoicePage() {
   const [orderGoldFine, setOrderGoldFine] = useState('');
   const [interState, setInterState] = useState(false);
   const [lines, setLines] = useState<Line[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [result, setResult] = useState<{
     vchNo: number;
     metalTaxable: number;
@@ -86,6 +234,17 @@ export default function LabourInvoicePage() {
           lines: lines
             .filter((l) => l.itCode)
             .map((l) => ({
+              // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+              // explicit zero is an override at the writer and defeats the server's derivation.
+              ...Object.fromEntries(
+                extendedLineFields
+                  .map(([key]) => [
+                    key,
+                    String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                  ])
+                  .filter(([, v]) => v !== '')
+                  .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+              ),
               itCode: l.itCode,
               desc: l.desc || undefined,
               netWt: n(l.netWt),
@@ -161,7 +320,13 @@ export default function LabourInvoicePage() {
         </div>
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Labour Lines</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="labour-sale-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -172,6 +337,7 @@ export default function LabourInvoicePage() {
                 <th className="num">Rate/%/Fixed</th>
                 <th className="num">Metal Amt</th>
                 <th className="num">Making</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -233,6 +399,14 @@ export default function LabourInvoicePage() {
                     />
                   </td>
                   <td className="num">{making(l).toLocaleString('en-IN')}</td>
+                  <ExtendedBodyCells
+                    full={fullGrid}
+                    fields={extendedLineFields}
+                    line={l}
+                    row={i}
+                    baseColumns={8}
+                    setValue={(row, key, value) => setLine(row, key, value)}
+                  />
                   <td>
                     <button
                       type="button"

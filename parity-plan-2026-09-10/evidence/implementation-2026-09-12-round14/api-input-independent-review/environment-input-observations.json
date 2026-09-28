@@ -1,0 +1,48 @@
+{
+  "kind": "private-local-environment-input-identities/v1",
+  "observedAtUtc": "2026-09-12T01:26:32.585309+00:00",
+  "qualification": "Only path/presence/SHA; no values were emitted or copied. Keep contents OUT of public sourceFiles/source archive. Before/after identities must be recorded separately by the run helper.",
+  "files": [
+    {
+      "path": "web/.env.parity-test",
+      "present": true,
+      "sha256": "4327df3a6fa7175dd214b09a6fb896840b6a4672a0d31766dbaf1cd514afd74c",
+      "capturedInObserved1883": false,
+      "sameAsObserved1883": null
+    },
+    {
+      "path": "web/packages/db/.env",
+      "present": true,
+      "sha256": "43b03696b443c597c5cbc6e68e4b9dddb1cfb6a34626d14200a533571337209b",
+      "capturedInObserved1883": false,
+      "sameAsObserved1883": null
+    },
+    {
+      "path": "web/.env",
+      "present": true,
+      "sha256": "671b5686d7b342d58a932f308f27af65b272f524f91f035ee017826107e7920a",
+      "capturedInObserved1883": false,
+      "sameAsObserved1883": null
+    },
+    {
+      "path": "web/packages/db/prisma/.env",
+      "present": false,
+      "sha256": null,
+      "capturedInObserved1883": false,
+      "sameAsObserved1883": null
+    },
+    {
+      "path": "web/apps/api/.env",
+      "present": false,
+      "sha256": null,
+      "capturedInObserved1883": false,
+      "sameAsObserved1883": null
+    }
+  ],
+  "consumers": {
+    "web/.env.parity-test": "Direct wrapper read/create: web/scripts/parity-test-env.mjs:12-29; fixed isolated DSNs override inherited DSNs at32-39.",
+    "web/packages/db/.env": "Generated Prisma client relativeEnvPaths.schemaEnvPath at index.js:6895-6897 and warnEnvConflicts:6945-6947. Also CLI discovery candidate.",
+    "web/.env": "Prisma CLI/discovery and compose working-directory candidate. This audit does not claim Vitest directly imports it.",
+    "absent-candidates": "web/packages/db/prisma/.env and web/apps/api/.env are absent local discovery candidates; record absence, not a fabricated read."
+  }
+}

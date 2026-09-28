@@ -1,0 +1,2 @@
+// Root integration prerequisite only; no existing index was edited in staging.
+export * from './saleReturnIncomingLabour.js';

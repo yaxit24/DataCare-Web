@@ -1,0 +1,56 @@
+{
+ "form": "RP_DHRN_LOAN",
+ "tables": [
+  "AC_MAST",
+  "DHRN_DATA",
+  "DHRN_ISU_DATA",
+  "DHRN_ISU_DETL",
+  "DHRN_REC_DATA",
+  "LOCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DHRN_DATA": [
+    "AC_CODE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "DHRN_AMT",
+    "DHRN_REC_AMT",
+    "INT_AMT",
+    "INT_REC_AMT",
+    "LC_CODE",
+    "LOAN_TYPE",
+    "REC_DATE",
+    "SR_NO",
+    "VCH_DATE",
+    "VCH_NO"
+   ]
+  },
+  "UPDATE": [
+   "DHRN_ISU_DATA"
+  ],
+  "DELETE": [
+   "DHRN_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "DHRN_DATA",
+  "DHRN_ISU_DATA",
+  "DHRN_ISU_DETL",
+  "DHRN_REC_DATA",
+  "LOCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [
+  "DHRN_REC_AMT = 0 WHERE CO_CODE = '\" + DC_Main.MCo_code + \"' AND LC_CODE = '\" + DC_Main.MLc_code + \"' \")"
+ ],
+ "loc": 3337
+}

@@ -3,6 +3,12 @@ import { useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 /** Approval Return (Tour IsuRec): unsold goods taken on approval come back into stock + close the issue lines. */
 interface Row {
@@ -13,7 +19,134 @@ interface Row {
   grossWt: string;
   netWt: string;
   touch: string;
+  lotNo: string;
+  itmColor: string;
+  tagCost: string;
+  hallmarkId2: string;
+  hallmarkId3: string;
+  hallmarkId4: string;
+  hallmarkIdWt: string;
+  hallmarkId2Wt: string;
+  hallmarkId3Wt: string;
+  hallmarkId4Wt: string;
+  adjustGrossWt: string;
+  adjustNetWt: string;
+  lessTouch: string;
+  lossWt: string;
+  fineWt: string;
+  remark: string;
+  isuAcName: string;
+  metalColor: string;
+  isuAcCode: string;
+  tblCode: string;
+  designNo: string;
+  itmSize: string;
+  huid: string;
+  bagWt: string;
+  lessWt: string;
+  ghtWt: string;
+  westPct: string;
+  labourPct: string;
+  labourType: string;
+  labourRate: string;
+  labourAmount: string;
+  otherAmount: string;
+  amount: string;
+  mrp: string;
+  karigarNetWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
+  karigarName: string;
+  rateType: string;
+  prCode: string;
+  isuYrcd: string;
+  isuDbcd: string;
+  isuLcCode: string;
+  designImageId: string;
 }
+/**
+ * P7 extended grid columns: desktop columns this form has and the web did not.
+ *
+ * Every entry was verified against the WRITER, not the API interface — a field present on the
+ * interface is not necessarily persisted (purchase hard-codes ITM_SIZE to blank, and five
+ * SaleLineInput fields have no SL_DETL column at all), and such a cell would silently discard
+ * what the operator types.
+ */
+const extendedLineFields: Array<[keyof Row, string]> = [
+  ['lotNo', 'LotNo'],
+  ['itmColor', 'Color'],
+  ['tagCost', 'TagCost'],
+  ['hallmarkId2', 'HmId2'],
+  ['hallmarkId3', 'HmId3'],
+  ['hallmarkId4', 'HmId4'],
+  ['hallmarkIdWt', 'HmIdWt'],
+  ['hallmarkId2Wt', 'HmId2Wt'],
+  ['hallmarkId3Wt', 'HmId3Wt'],
+  ['hallmarkId4Wt', 'HmId4Wt'],
+  ['adjustGrossWt', 'AdjGwt'],
+  ['adjustNetWt', 'AdjNwt'],
+  ['lessTouch', 'LTouch'],
+  ['lossWt', 'LossWt'],
+  ['fineWt', 'Fine'],
+  ['remark', 'Remark'],
+  ['isuAcName', 'IsuAcName'],
+  ['metalColor', 'MtlColor'],
+  ['isuAcCode', 'IsuAcCode'],
+  ['tblCode', 'Counter'],
+  ['designNo', 'Design'],
+  ['itmSize', 'Size'],
+  ['huid', 'HuId'],
+  ['bagWt', 'BagWt'],
+  ['lessWt', 'LsWt'],
+  ['ghtWt', 'GhtWt'],
+  ['westPct', 'West%'],
+  ['labourPct', 'Lbr%'],
+  ['labourType', 'LType'],
+  ['labourRate', 'LbrRate'],
+  ['labourAmount', 'LbrAmt'],
+  ['otherAmount', 'OthAmt'],
+  ['amount', 'Amount'],
+  ['mrp', 'Mrp'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
+  ['karigarName', 'KrCode'],
+  ['rateType', 'RateType'],
+  ['prCode', 'PrCost'],
+  ['isuYrcd', 'IsuYr'],
+  ['isuDbcd', 'IsuBk'],
+  ['isuLcCode', 'IsuLc'],
+  ['designImageId', 'Image'],
+];
+
+/** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
+const NUMERIC_EXTENDED = new Set<string>([
+  'tagCost',
+  'hallmarkIdWt',
+  'hallmarkId2Wt',
+  'hallmarkId3Wt',
+  'hallmarkId4Wt',
+  'adjustGrossWt',
+  'adjustNetWt',
+  'lessTouch',
+  'lossWt',
+  'fineWt',
+  'bagWt',
+  'lessWt',
+  'ghtWt',
+  'westPct',
+  'labourPct',
+  'labourRate',
+  'labourAmount',
+  'otherAmount',
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+]);
+
 const blank = (): Row => ({
   origSrNo: '',
   itCode: '',
@@ -22,6 +155,51 @@ const blank = (): Row => ({
   grossWt: '',
   netWt: '',
   touch: '',
+  lotNo: '',
+  itmColor: '',
+  tagCost: '',
+  hallmarkId2: '',
+  hallmarkId3: '',
+  hallmarkId4: '',
+  hallmarkIdWt: '',
+  hallmarkId2Wt: '',
+  hallmarkId3Wt: '',
+  hallmarkId4Wt: '',
+  adjustGrossWt: '',
+  adjustNetWt: '',
+  lessTouch: '',
+  lossWt: '',
+  fineWt: '',
+  remark: '',
+  isuAcName: '',
+  metalColor: '',
+  isuAcCode: '',
+  tblCode: '',
+  designNo: '',
+  itmSize: '',
+  huid: '',
+  bagWt: '',
+  lessWt: '',
+  ghtWt: '',
+  westPct: '',
+  labourPct: '',
+  labourType: '',
+  labourRate: '',
+  labourAmount: '',
+  otherAmount: '',
+  amount: '',
+  mrp: '',
+  karigarNetWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
+  karigarName: '',
+  rateType: '',
+  prCode: '',
+  isuYrcd: '',
+  isuDbcd: '',
+  isuLcCode: '',
+  designImageId: '',
 });
 const n = (v: string) => Number(v || 0);
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
@@ -31,6 +209,18 @@ export default function TourReturnPage() {
   const [salesmanAc, setSalesmanAc] = useState('');
   const [vchDate, setVchDate] = useState('');
   const [rows, setRows] = useState<Row[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: rows.length,
+    onAppendRow: () => setRows((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setRows((rows) => (rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row)));
+      return true;
+    },
+    onEscape: () => {},
+  });
   // The desktop's image buttons act on the current grid row.
   const [imageRow, setImageRow] = useState(0);
   const [res, setRes] = useState<{ vchNo: number; fine: number; closedLines: number } | null>(null);
@@ -51,6 +241,9 @@ export default function TourReturnPage() {
       setRows(
         open.length
           ? open.map((l) => ({
+              // Spread blank() so a loaded row carries every field the grid now renders; without it
+              // the extended columns would be absent from the object and TypeScript would reject it.
+              ...blank(),
               origSrNo: String(l.srNo),
               itCode: String(l.itCode || ''),
               tagNo: l.tagNo || '',
@@ -85,6 +278,17 @@ export default function TourReturnPage() {
     const lines = rows
       .filter((r) => r.itCode.trim())
       .map((r) => ({
+        // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+        // explicit zero is an override at the writer and defeats the server's derivation.
+        ...Object.fromEntries(
+          extendedLineFields
+            .map(([key]) => [
+              key,
+              String((r as unknown as Record<string, unknown>)[key] ?? '').trim(),
+            ])
+            .filter(([, v]) => v !== '')
+            .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+        ),
         origSrNo: r.origSrNo ? Number(r.origSrNo) : undefined,
         itCode: r.itCode.trim(),
         tagNo: r.tagNo.trim() || undefined,
@@ -158,7 +362,13 @@ export default function TourReturnPage() {
           </div>
         </div>
         <div className="panel" style={{ overflow: 'auto' }}>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="tour-return-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Orig Sr</th>
@@ -169,6 +379,7 @@ export default function TourReturnPage() {
                 <th className="num">Net</th>
                 <th className="num">Touch</th>
                 <th className="num">Fine</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -227,6 +438,14 @@ export default function TourReturnPage() {
                     />
                   </td>
                   <td className="num">{fine(r).toLocaleString('en-IN')}</td>
+                  <ExtendedBodyCells
+                    full={fullGrid}
+                    fields={extendedLineFields}
+                    line={r}
+                    row={i}
+                    baseColumns={10}
+                    setValue={(row, key, value) => set(row, key, value)}
+                  />
                   <td>
                     <button
                       type="button"

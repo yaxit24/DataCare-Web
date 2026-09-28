@@ -8,15 +8,22 @@ export type Tx = Prisma.TransactionClient;
  * scopes every statement to the tenant (Req 5.x). The app MUST connect as a non-superuser role
  * (e.g. app_user) for RLS to apply. Throws → the whole transaction rolls back (Req 5.5).
  */
+export interface TenantTransactionOptions {
+  maxWait?: number;
+  timeout?: number;
+  isolationLevel?: Prisma.TransactionIsolationLevel;
+}
+
 export async function withTenant<T>(
   prisma: PrismaClient,
   tenantId: string,
   fn: (tx: Tx) => Promise<T>,
+  options?: TenantTransactionOptions,
 ): Promise<T> {
   return prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe("SELECT set_config('app.tenant_id', $1, true)", tenantId);
     return fn(tx);
-  });
+  }, options);
 }
 
 /**

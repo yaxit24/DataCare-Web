@@ -1,0 +1,74 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import {
+  PARITY_CONTAINMENT_CODE,
+  parityContainmentMessage,
+  parityContainmentOperations,
+  parityContainmentProblem,
+  parityContainmentRule,
+} from '../containment.mjs';
+
+const expectedOperations = [
+  'logical-restore',
+  'production-cutover-load',
+  'tag-transfer',
+  'tag-cancel',
+  'tag-weight-difference',
+  'tag-split',
+] as const;
+
+describe('WP-01 parity containment policy', () => {
+  it('fails closed for every reviewed unsafe mutation with no environment bypass', () => {
+    process.env.PARITY_UNSAFE_MUTATIONS = '*';
+    try {
+      expect(parityContainmentOperations).toEqual(expectedOperations);
+      for (const operation of expectedOperations) {
+        const rule = parityContainmentRule(operation);
+        expect(rule).toMatchObject({ operation, blocked: true, workPackage: 'WP-01' });
+        expect(rule.reason).not.toHaveLength(0);
+        expect(rule.safeAlternative).not.toHaveLength(0);
+        expect(rule.exitGate).not.toHaveLength(0);
+      }
+    } finally {
+      delete process.env.PARITY_UNSAFE_MUTATIONS;
+    }
+  });
+
+  it('returns a stable non-retryable HTTP problem without exposing an override', () => {
+    const problem = parityContainmentProblem('tag-split');
+    expect(problem).toEqual({
+      statusCode: 503,
+      body: {
+        error: 'parity-containment',
+        code: PARITY_CONTAINMENT_CODE,
+        operation: 'tag-split',
+        message: parityContainmentMessage('tag-split'),
+        reason: parityContainmentRule('tag-split').reason,
+        safeAlternative: parityContainmentRule('tag-split').safeAlternative,
+        exitGate: parityContainmentRule('tag-split').exitGate,
+        workPackage: 'WP-01',
+        retryable: false,
+      },
+    });
+    expect(Object.isFrozen(problem)).toBe(true);
+    expect(Object.isFrozen(problem?.body)).toBe(true);
+  });
+
+  it('rejects unknown operation names instead of silently allowing them', () => {
+    expect(() => parityContainmentRule('unknown' as never)).toThrow(
+      'Unknown parity containment operation',
+    );
+  });
+
+  it('guards the restore-drill CLI before database configuration or client construction', () => {
+    const script = readFileSync(resolve(process.cwd(), '../../scripts/restore-drill.mjs'), 'utf8');
+    const guard = script.indexOf("parityContainmentProblem('logical-restore')");
+    const databaseConfig = script.indexOf('const databaseUrl = process.env.DATABASE_URL');
+    const client = script.indexOf('const prisma = new PrismaClient');
+    expect(guard).toBeGreaterThan(-1);
+    expect(script).toContain('process.exit(1)');
+    expect(guard).toBeLessThan(databaseConfig);
+    expect(guard).toBeLessThan(client);
+  });
+});

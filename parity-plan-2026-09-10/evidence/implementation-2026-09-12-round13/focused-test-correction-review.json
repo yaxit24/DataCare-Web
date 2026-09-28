@@ -1,0 +1,103 @@
+{
+  "status": "staged test-only correction; unexecuted by independent owner",
+  "historicalRun": {
+    "files": 8,
+    "tests": 152,
+    "passed": 143,
+    "failed": 9,
+    "log": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-runtime-focused-api.txt",
+    "durationSeconds": 6.36
+  },
+  "currentDeclaredCases": {
+    "sessionContextHttp.db.test.ts": 24,
+    "sessionContextAccess.db.test.ts": 27
+  },
+  "diagnoses": [
+    {
+      "file": "sessionContextAccess.db.test.ts",
+      "failures": 1,
+      "case": "expired persisted authority",
+      "logLines": [
+        73,
+        90
+      ],
+      "classification": "invalid fixture before reader invocation",
+      "detail": "Only expires_at was moved before now while created_at remained current, violating the retained expires_at > created_at CHECK (23514).",
+      "correction": "Seed valid past chronology atomically: creation two hours ago, last-used one hour ago, expiry one second ago. Keep the same rejection code and exact no-write physical snapshots around the reader."
+    },
+    {
+      "file": "sessionContextHttp.db.test.ts",
+      "failures": 8,
+      "cases": [
+        "exact receipt recovery then changed-body conflict",
+        "same-scope stale body",
+        "numeric epoch body",
+        "unknown body key",
+        "blank location body",
+        "null year body",
+        "target forced reset",
+        "invalid last-day-lock setting"
+      ],
+      "logLines": [
+        94,
+        496
+      ],
+      "classification": "incorrect no-audit expectation plus incomplete test response observation",
+      "detail": "Observed diff additions are only audit_log rows. Existing app onResponse appends admitted HTTP mutations including failures; the receipt is idempotent for session/business state, not for HTTP audit. Inject response completion may precede the async audit hook, explaining intermittent passes of the same invalid-body table.",
+      "correction": "Await a final test-only onResponse observer after the actual hook; every request compares all existing audit raw/xmin/ctid unchanged and its exact literal expected append count/tenant/user/admitted company/action/path/status. Snapshot auth_session/CO_SET/LOGIN_MAST separately unchanged; existing AC_DATA/SL_DATA/SL_DETL_RTN physical afterEach remains unchanged."
+    }
+  ],
+  "auditContract": {
+    "source": "app.ts:176-220 and ops/audit.ts:3-30",
+    "selectionSuccessAndReplay": "one POST /context/select status200 at admitted bearer company",
+    "authenticatedSelectionRefusal": "one status400/403/409 as individually declared",
+    "beforeAdmissionRefusal": "zero audit rows for old invalid bearer401",
+    "publicLoginRefreshAndReads": "zero audit rows in this existing hook; every request asserts this explicitly",
+    "authorityLimit": "The terminal observer is test synchronization, not a production durability or atomic-audit guarantee. Production logAudit remains a separate best-effort post-response transaction; failure handling is unchanged."
+  },
+  "productionFinding": "None indicated by these nine failures. No runtime source, migration, response, audit rule, rejection, cookie or session authorization was changed.",
+  "preservation": "Original two test inputs copied byte-identically before edits; existing log and original evidence notes/manifests unchanged. Corrected files remain only under http-staged until root integration.",
+  "execution": "Only source/log reads, static patch review and staged Prettier. No DB, compiler, runtime tests or browser were run by this agent. Root must execute corrected stages; no pass claim.",
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-runtime-focused-api.txt",
+      "sha256": "bf4361d512f48f970906fde4375a7dbd4cff873b4b47a341b0fdc0bc66ee4fb9"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/http-staged/web/apps/api/test/sessionContextHttp.db.test.ts",
+      "sha256": "b60bfd7708299b1bb7912d6804e22c8854ed2d1c326926b47d9124712cd9a354"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/http-staged/web/apps/api/test/sessionContextAccess.db.test.ts",
+      "sha256": "c3a72a535ad5001860240bfbdbbef9dc49a842084d0bd7753ca98691f7b45856"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/http-staged/focused-first-failure-inputs/sessionContextHttp.db.test.ts.txt",
+      "sha256": "d25a5df4bc4b9825a2715696328ce03707068c374abfb4eb37c41c3a1e0fc239"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/http-staged/focused-first-failure-inputs/sessionContextAccess.db.test.ts.txt",
+      "sha256": "5c929a0f5746bfc6c217c76e9a0a78db8c204f9c91a188678fe28bfbdbe1343d"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/http-staged/focused-test-correction.patch",
+      "sha256": "8d1df60405468c2c30d7089e3d6b2721b3847a9c4e5cf766ae27c16bb9903146"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/ops/audit.ts",
+      "sha256": "895f45c952213dff81183dadeb30a9005e1bbc12bba40cd886bd5f6eb60657cb"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/migrations/20260715030000_authoritative_scope_rbac_sessions/migration.sql",
+      "sha256": "4d011ad562511873982957325ffc47b62ca5d824a25b312495c531c185ae873c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/migrations/20260912004500_session_context_epoch/migration.sql",
+      "sha256": "b2ebec67672c219db30e547cb1b6b7346f49e94cc3c621a12610e1e54bf35b7d"
+    }
+  ]
+}

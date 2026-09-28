@@ -1,0 +1,5 @@
+test/saleReturnIncomingAggregate.test.ts(223,32): error TS2345: Argument of type 'SaleReturnIncomingEvent | { readonly context: { readonly clearing: true; readonly currentRow: number; readonly editorVisible: boolean; readonly committedColumnWidth: number | null; }; readonly kind: "leaveCell"; readonly rowIdentity: string; readonly column: number; readonly text: string; } | ... 4 more ... | { ...; }' is not assignable to parameter of type 'SaleReturnIncomingEvent'.
+  Object literal may only specify known properties, and 'context' does not exist in type '{ kind: "calculateAfterCopy"; rowIdentity: string; activeColumn: number; editorText: string; cause: "sourceSelection" | "labourCodeSelection" | "tagLabourCodeSelection"; }'.
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 2: tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck test/saleReturnIncomingAggregate.test.ts

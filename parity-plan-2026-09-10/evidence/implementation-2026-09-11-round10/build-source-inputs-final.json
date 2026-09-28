@@ -1,0 +1,3918 @@
+{
+  "capturedAtUtc": "2026-09-11T14:02:54.353141+00:00",
+  "scope": "Production source/configuration inputs from checkpoint31 union both new core modules; test-only inputs captured separately before core checks.",
+  "correctedInputsSinceFirstBuild": [
+    "web/packages/core/src/saleReturnBillTaxPolicy.ts",
+    "web/packages/core/src/saleReturnIncomingAggregate.ts"
+  ],
+  "files": [
+    {
+      "path": "web/.github/workflows/ci.yml",
+      "sha256": "2d9f3a419383a664e86683aba99299bb367d3bbc8030c289c5f32d181ebfe77b"
+    },
+    {
+      "path": "web/.github/workflows/release-certification.yml",
+      "sha256": "e5c1855b56ded004eae418a330897f0a1b85b3430c047ae2ba92058f808a606a"
+    },
+    {
+      "path": "web/.prettierrc.json",
+      "sha256": "17182153c3c918d4c0d3612ad1b6500e6408bdd6b488e29e451ab27f2087891a"
+    },
+    {
+      "path": "web/DEPLOY.md",
+      "sha256": "c6e4164251799d04ad5b2000e6ac03f6d2fa8982e42cba3567b08000dcbf43fb"
+    },
+    {
+      "path": "web/README.md",
+      "sha256": "85bfa46d612a230853da6aa286e602d29eb4f09ac3f38d70cf190e0258f2ddd3"
+    },
+    {
+      "path": "web/apps/api/SECURITY.md",
+      "sha256": "43b9e040d238a7ccec10fbfb718b6dee6bcdb296f0f247e723cab1a6973b6f7e"
+    },
+    {
+      "path": "web/apps/api/form-specs/BtmSchm.initcomp.json",
+      "sha256": "79c87c56399b2e03faad45c4cd8704ecc8d46fac194ac8eb6c90329603408e6b"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_ACCT.layout.json",
+      "sha256": "d17192df10919315db3e2fce61535b90ae2e7a8e6e2beccdcf231622de7c6016"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_AC_GROUP.layout.json",
+      "sha256": "8c62816c2218b571e6104d2899be3a8599e8fe9caaa0678d7ab603dc982e43f6"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_ADD_MAST.layout.json",
+      "sha256": "f793c76f0d251de208fcc5a840e543443d044054d592a27a6c434de864a63964"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_DM.layout.json",
+      "sha256": "747f10093e8e49731aa25c290ff2ff41b1a6dfbf47852650b12547a9b141034a"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_EMP.layout.json",
+      "sha256": "8e219342017e6e5df9f8d01a7ecf86e9e9bff01cd4435e41e8fb90c1a482c33f"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_GOLD_MAST.layout.json",
+      "sha256": "b67c41a6cd83ae63f414bddbb2209f582875a5c6d367caa365b0ce56be166c61"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_GROUP.layout.json",
+      "sha256": "1c9422c70c08b940979dace721d3561fcd070aef0ad10ce03f320db4791b83f7"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_ITEM.layout.json",
+      "sha256": "a9f6929d29d36c1acdb7bcbd4e3f31f58a5863aa8d14f1b015a578299671643d"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_LBR_TYPE.layout.json",
+      "sha256": "dfd357e185ffaaf663225a91ea7b906e422570add04ce512441046a63b8d6936"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_MEMB.layout.json",
+      "sha256": "bde82bdef37201fc92f15c1c661332016ed45f15f89e95607516e3239dac81c5"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_PRODUCT.layout.json",
+      "sha256": "46eb840d01716009fc49e6118769c11e890f515097d47d54c7f994ab7622271b"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_STYLE.layout.json",
+      "sha256": "cb3f02e1feb3daea0cead8006c9f97a01eddda19c1b935703e7ff7190192b6e5"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_TAX.layout.json",
+      "sha256": "2ab8647ee8c1ae4fbfc63323b6086cd812bc6894c11fa0877efe651098117f07"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.MS_TRADE.layout.json",
+      "sha256": "797ef9d24f8336a2768f11b730516a346bc20adb9f5957ddf7dea9893b2f79fd"
+    },
+    {
+      "path": "web/apps/api/form-specs/DataCareNext.UT_REPORT.layout.json",
+      "sha256": "e27806c70abbf449c58ed2646362d75ce44590a8811306d107c3634ad0f0040c"
+    },
+    {
+      "path": "web/apps/api/form-specs/MDI_FORM.initcomp.json",
+      "sha256": "b453a9a56c43b3be10a3ace1a4826647be13cbe15cc3d568e3133b182db881b0"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_ACCT.initcomp.json",
+      "sha256": "4e324b62492293ba7215df818591c7c39452fba8b9e6a5d5c178e40474f68a42"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_AC_GROUP.initcomp.json",
+      "sha256": "16035755aa14ca2de5d9a84590bdb9341122aa8f3f9353c983cdb3eb249e9a77"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_ADD_MAST.initcomp.json",
+      "sha256": "98e3df1b8255baf6f9dc2d7c2aca13b0aa33fd4c680d7539d72a3daf48a69686"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_AUTO_ITEM.initcomp.json",
+      "sha256": "122dff9337ab9b524a432061a074d324d54c8bc1d66b595106126f4f635b19b0"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_BOOK.initcomp.json",
+      "sha256": "d57c0ed70ead16b2cf36a6b78a33129631e1cedceaba15751b40079fa9782da3"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_BOOKLIST.initcomp.json",
+      "sha256": "14a928b5d1f2178bb557fbe3f1115a9d9b8794c07c3beaa5aa713752abb02b25"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_COMPANY.initcomp.json",
+      "sha256": "146d9195b5e52107552e18f7e8056c5d7bb0709e853244cce9e84c8980a5c733"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_DESIGN_BOOK.initcomp.json",
+      "sha256": "4b4f60ace917c2cb60cc1c574d52a38b4962d74c14f63a8ecbd3eee01b604515"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_DM.initcomp.json",
+      "sha256": "23177a9e729a1595775f97240f3f86359ec8c5f4ccaf629394da483aafc1528f"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_EMP.initcomp.json",
+      "sha256": "d10b9d1367cae6856d846cf07b8f70610ea58f2f3398c7abd24e9428f22a056a"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_GROUP.initcomp.json",
+      "sha256": "f88c9c2913b76c38fe649b33a90f37115fabba7971d66f237b4e943e62f765e2"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_HELP.initcomp.json",
+      "sha256": "5ac3d9889cf390d7bb41fd66ab47675bd8e479e0f789ad6a1592ab4d33d6f141"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_ITEM.initcomp.json",
+      "sha256": "58c7420c1873286f00c9aab02139a248c7b7025e1a2f68eb4d5bf7d31aa4c1f2"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_LBR_TYPE.initcomp.json",
+      "sha256": "9d2d0d4297902d8cea88fe6e2b95e57714cc00b36bbd663760b91862e0de8ab5"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_LOCT.initcomp.json",
+      "sha256": "00d4cf557d597e0be7c99705b774e1e59be3f7c92456cfbccc8a20d2abfe410a"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_LOGIN.initcomp.json",
+      "sha256": "ab6d7a400eb2df1c44782b84529b37269ef5763eb0d1d3c5aa4f1dc54a4e4e03"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_MEMB.initcomp.json",
+      "sha256": "17f157575aa96249c1a8a91d5cddf4abc4f2d02344ac3694b07569b7decc721e"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_MFG_MAST.initcomp.json",
+      "sha256": "d87e0e3a3c353f20ed21ba111a7788449c1c744799c8592daac63e35f6319606"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_OPNCOMP.initcomp.json",
+      "sha256": "0fe63d808bb74151d15ae3c866c93a8aab00e58d9c6afe3f6a605eba23b088ec"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_POINT.initcomp.json",
+      "sha256": "b63f657af2c093d47920c9f8f96a2ca0b14dc867ea8caae017e0904e126dc8cd"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_PRINT.initcomp.json",
+      "sha256": "6dd9ca358c7df1ad4da04afb7f214991248b724d834d1276e5bac57ee8cc6836"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_PRODUCT.initcomp.json",
+      "sha256": "eca0758c7f4dd66dcb8c5f289434eb15444e4e22ea54bcefcdbc95b292da6218"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_RATE.initcomp.json",
+      "sha256": "50db6772b73165a98d148e6f0d8731a2384a342fc2bc44bd7660cb3a64f78d4d"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_STK_LIMIT.initcomp.json",
+      "sha256": "efb74496d41db738a0d76607bf4bb540fb8f5e204347671fa75654829622e99e"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_STYLE.initcomp.json",
+      "sha256": "2f0da8104612467bd4edd79c8b4fd29567d7b90d10758002840b2520cbc5ca41"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_TASTING.initcomp.json",
+      "sha256": "a6c9363ac98a53220781bf145f9e6b22f2d1f7bb343074e7cc689f41deb12f97"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_TAX.initcomp.json",
+      "sha256": "f50a4d9a00784e4d81062877b92a563b45dfcc8a1480a352aa0fbad8d0a5f41f"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_UPDATE.initcomp.json",
+      "sha256": "bf7809bf6069fe6a0761eb3aceac02669349eecb647dac52896609ead440ce0b"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_USER.initcomp.json",
+      "sha256": "501ee5c037507ce80b7d095ae8379eb2a8c509570cd3e3cc1d1e498a43c8ec45"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_WINDOW_SET.initcomp.json",
+      "sha256": "a2a986f2d24bc718b3fb05a1f5f763e650e945bdb2563fe2d3e06f37d838dabb"
+    },
+    {
+      "path": "web/apps/api/form-specs/MS_YEAR.initcomp.json",
+      "sha256": "fbd7aece44593b34d0289ae504a5ef19ff06b82869423e1e0b9037300de39586"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_ADDRESS.initcomp.json",
+      "sha256": "20f165982f6073021fe01c5ddd2a0c9158160a8c2cc1c688227dd0b03455edc1"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_ALL.initcomp.json",
+      "sha256": "c8de540b90357dd055620f2018e5fa8c629a4292d4c0258d207f4ac8a487e57c"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_BALANCE.initcomp.json",
+      "sha256": "306666b82377e1c6ccfe75e2b9a8f690795a12554ebaa6a5a9bb58b0af4ac39c"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_BAL_ZOOM.initcomp.json",
+      "sha256": "4b9678e943f25bf0e0f3e078d588ea1cec97decf31c006038d27214976c79d75"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_BILL_PROFIT.initcomp.json",
+      "sha256": "1826926b2c1eff21d78cacf1a853784db68b148e08e2b0b5e3b216e243466a34"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_CASH_BANK.initcomp.json",
+      "sha256": "8e52b2555fca7ece1582cc7bfdd8fd63552eb419c67ce88e6edf60634e7a5dc5"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_CONSI_APR.initcomp.json",
+      "sha256": "47c689bd4f9fde847cd9b89eb6cb371008aac98ddbdab19b29934df71f838599"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_CUST.initcomp.json",
+      "sha256": "94cafa2374502772a2c28ccc8835fd0bef26f55a2037bc78fbe9d1b60017d341"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_CUST_CRM.initcomp.json",
+      "sha256": "4bf6dfc533d81aefd46a56b20f78f2f964cb3c29a7ee4095b971bb0b48ec3cbf"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_DAY_WORK.initcomp.json",
+      "sha256": "0d12488311dc85c6dc9e31e559a590834e6e1027b8cc3eadb444132981599d37"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_DHRN_LOAN.initcomp.json",
+      "sha256": "0455a047ece6baaa0794932426c9d806fd6757e71c7ed21f8daef3e422af7b23"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_DHRN_OS.initcomp.json",
+      "sha256": "6a42ee21ce46da9abf5aa8b681d58b18dbf5bf82835440f2340ce837696ffaf5"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_EMP.initcomp.json",
+      "sha256": "97e50f59170f9382d4f48e534816b954f05e1189e3f41979a8233fe5bb0681c5"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_GRAPH.initcomp.json",
+      "sha256": "b6d50d24bbecc69d625fd70b6723514907fe0901f1ad46a8d44a6f0d71eab9a1"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_GST.initcomp.json",
+      "sha256": "c5c80dffa6bc8534aa4bf2aa8804d10f2d07b6f2ea27a24072372ae4763b26fe"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_HUID.initcomp.json",
+      "sha256": "83c3a4adb8d133e6f68f3ec34475fd67039b5d7f27e1f664cae5dcd349369a87"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_INOUT.initcomp.json",
+      "sha256": "c3a9feab3f310eac39c20cc09c14e0522ccdde77cbbf1d5ed03c71b9c1ecf7cc"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_JDTR_ZOOM.initcomp.json",
+      "sha256": "b00f72471798f5b44cd948bbb08e4f7505dcceecccaa2138a43d7b8724739bb7"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_LC_INOUT.initcomp.json",
+      "sha256": "03769765007b2081a5327e048c70f74206bc4850a74bc5f0f02c90c14bddc5a4"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_LC_SALE.initcomp.json",
+      "sha256": "9d84f8fd25bdeaf7cfad16c4fcfbc08e5d9a6f6614f47d655f40574a9a9b0382"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_LEDR.initcomp.json",
+      "sha256": "ad4d5ce959a7c264a0c680848dfafc204ff2e28a3726099e5a2c34f4ba1d5ed7"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_MFG.initcomp.json",
+      "sha256": "d0e5f63bdca31eea85b1e92d2f150f12dd2b6b036faf6662a79396c5c90a0bea"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_MFG_LEDR.initcomp.json",
+      "sha256": "fc233439b29472b126fb75d7b90a272d2e0f6fdb00a782190ddd5335a99d5de7"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_MFG_ZOOM.initcomp.json",
+      "sha256": "1ba7d8403a03b5fb7883e241681530aa7ed4b13a9fab45f147d826ee76354910"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_MOVEMENT.initcomp.json",
+      "sha256": "6065afa0aebbd75ef63c1bd152c617e9a220129a0c1ad56309bc51bf5a7c4f46"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_ORDER.initcomp.json",
+      "sha256": "e87879788ccf0e03ab348b31ca1aa60f743603f43fb2353509f213cf55b8949c"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_ORD_TRACK.initcomp.json",
+      "sha256": "aa162ab7640038f8069a51667f2142a191cc888c07b4147e27031364e1aeb35a"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_OS.initcomp.json",
+      "sha256": "6c58595f12506074b582cf337ee9fe09ae6265265e2ceb160525de2709a5fa67"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_OTH_DETL.initcomp.json",
+      "sha256": "039665ecd7987c82391b16c37070fa59ab69fff35c69e40de43b975478b683b8"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_PHY_STOCK.initcomp.json",
+      "sha256": "ff444e7c8c9cc37ca3e4769bd94fc54a831a63a7271a5cbe04b3dfc45d13e11b"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_REMINDER.initcomp.json",
+      "sha256": "556677b92a363f8862e17254824d47e1731000c23deab42640e7935365b6aa86"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_ROJMEL.initcomp.json",
+      "sha256": "90a6101cb0e5f854e7f138be1af386b8cfaa4e70c0dbecc923fde782b8dc4320"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_SLPR_ZOOM.initcomp.json",
+      "sha256": "00fb2edfecbf5893d3cbc83044405881ede4b9473d7a5fc700af0cb25a5e430d"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_STK_LEVEL.initcomp.json",
+      "sha256": "f089bea4b316e3980b282fd13f0153fd947809c8791202434d93b875870793a8"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_STK_MOVE.initcomp.json",
+      "sha256": "27b14f3a91148cc299f3c366a744905cae8c057435b3137d271fa8f84da2dc02"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_STOCK.initcomp.json",
+      "sha256": "3e053b03e1d8515e06abfab76d7735946cffc41f34b3ae66ed82dfffc577c5ec"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_STOCK_FINE.initcomp.json",
+      "sha256": "9c0c498607c4f7eff6dfb3695efabd14c8b7fa0094c6066511710fc31b913d5f"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_STOCK_VALUE.initcomp.json",
+      "sha256": "8ec8f9a554563d6a803aa4ce33ccad6347908158946830a6cc568adc735e34fa"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_TAG.initcomp.json",
+      "sha256": "28533e7ad7f971162ad2113942de308d4fb6f47969312e6274846f78380c0229"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_TAG_ESTMATE.initcomp.json",
+      "sha256": "47a3bd9e9493eac62d91d4d859eebe3f9b070a09ef2608a1a15658a3d97a2545"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_TAG_IMAGE.initcomp.json",
+      "sha256": "76e1a4a46b1482a8572651fe021d6de9200a4c37ec3004612089785d907585ea"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_TAX.initcomp.json",
+      "sha256": "86e0082b8387daeb7cb3b1db1f9d4b4dfe65f7da297950ee73c275c3a0dfc5a3"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_TOUR_ZOOM.initcomp.json",
+      "sha256": "d30f5b592febcff5b3f805521327a797f3cec03394553b3a2c1d9d9807ea0b6d"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_TRADING.initcomp.json",
+      "sha256": "e632a364b6db4a5cecb77afcb128a389e2d2cfbceaeb50a04e4994a60d7606ea"
+    },
+    {
+      "path": "web/apps/api/form-specs/RP_USER.initcomp.json",
+      "sha256": "9038a6cb792ab38079c1d9447052a8ba6d2292692cb1b1bac0d0671c38d61ebb"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_AC_OPBL.initcomp.json",
+      "sha256": "f9937957feab4d6fb889b176687b7784963d053d8a257100a5dd519f7f994562"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_APR_ISU.initcomp.json",
+      "sha256": "6b8d8045be5748a2403c8e8e0c4381632f3a7572e316f064f775ac447af7849e"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_BILL_TO.initcomp.json",
+      "sha256": "c9cde9ba26e128f222e99140998d2aa2e3af6c8f1d19e759fe1dcd312b49c8e4"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_BUL_BOOKING.initcomp.json",
+      "sha256": "d85b55f0e4bf29f704ae26db73329a640230cff2960993994f1fe63b36e9d852"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_BUL_SALE.initcomp.json",
+      "sha256": "38b3e3e5f94a3a9db7d0563b50aa709a6998f38bc3108567962388140f606af5"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_CARD_REC.initcomp.json",
+      "sha256": "b67843f7986d36a2d72b8ffeb666e3de8b2c6569ec6ff80aacc7cf26347a16a6"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_CASH.initcomp.json",
+      "sha256": "ee92eca23c374acfedb146edf63db97ea66d8e31aaa5bb05debb666a902f7ac7"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_CONTRA.initcomp.json",
+      "sha256": "f1aadd61d9f24156e60d4ffd1a1ce8eb9afb88ff679c503140b98cf5d8544a60"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_DHRN_INTREC.initcomp.json",
+      "sha256": "ce5c128b240029efb35e69f06f22f1cccf65dd663f39b7cc9ec78036fa1e37c8"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_DHRN_ISU.initcomp.json",
+      "sha256": "5d013e1f0e9e62bfcbc4d5afd40697ff02ff909fdbd65025df1b947966869b7a"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_DHRN_REC.initcomp.json",
+      "sha256": "aa53954995c9113156023d866c1dc4c0087e9c9b2e30f44a34af5b38bdcc378c"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_EMP_JV.initcomp.json",
+      "sha256": "355f3ebbbcce83a4d72623277e54f5607e8b7909557971f4a84764184f1e52d0"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_FINE_SL_PR.initcomp.json",
+      "sha256": "8d9a2ae42e0bcef70522fd639b1103fb996d331598505cfb16d1398d4d15a05a"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_FN_INOUT.initcomp.json",
+      "sha256": "32bccb4689a9503cb4a0ebf2724a2e5a9ebc7b605eb38b8bcbc1b5fd1ac412ce"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_GOLD_BOOK.initcomp.json",
+      "sha256": "f89464f5bfcdf1141f3f326de0c00358f7ac618b789b99116017ae6c16c379a1"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_INOUT.initcomp.json",
+      "sha256": "8d70a4b3ef7a81c9eeeb29897c7cf2060431986a63fd733beec37dfec08110e8"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_ITM_LOT.initcomp.json",
+      "sha256": "cbc2f5efdf61b43296d644a81b105aebede2c00a711fceabc835cab6c36690a7"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_ITM_OPBL.initcomp.json",
+      "sha256": "ebd00cfacb25a2546dda219a29759a80222da4e34b3af1b03118e531dea7f6d2"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_JDT_REC.initcomp.json",
+      "sha256": "b87f423709c564601a5fae0b76b830a6b5ab4e00e6b9fd25a3ce10ecf39125e3"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_KR_ISU.initcomp.json",
+      "sha256": "da34aebf656a300c0b0a3b75b7fe5669663707309c7007bc03c40e67edebf5fe"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_LEDR_ADJ.initcomp.json",
+      "sha256": "530f1598983c91e8054d377aef38f40384803ba0925fc99d2b11ed012cf60094"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_LOCT_AMT.initcomp.json",
+      "sha256": "e95f3e7f06dd2abf34b88f8c08518086802f7a885aa891ac85b7c920c1e7f806"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MEMB_ADJ.initcomp.json",
+      "sha256": "da1ce85ca6b09920baac7f6da64faa0d74ccde30b7c6f11646ba3d1010c069d3"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MEMB_ENT.initcomp.json",
+      "sha256": "0ccd779e5f1ed742af5aaa32d450861908cb2efca150bbc49b98da4dbf12f82c"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MFG_GHAT_REC.initcomp.json",
+      "sha256": "c8ccb653fa5e8bafb2caddc13ec1d29bd5fe2975e120c93412c4b4b0add03e31"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MFG_ISU_REC.initcomp.json",
+      "sha256": "470edc2bc792466232cc2aeb00430dc46623682d8650bf4bedfa6d4e89b0fc16"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MFG_ITEM.initcomp.json",
+      "sha256": "2ed54cda0045ca8bc27bd3923512831cf716c2827af13b3aa7cbceec9afa823e"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MFG_KR_ISU_REC.initcomp.json",
+      "sha256": "7a4fdea4a343636279121cd3160232f8e5a7211e2b30f65e855abe042af0a2bd"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MFG_ORD_ISU.initcomp.json",
+      "sha256": "f0fe0f718edb997c66a44cac55abec859a284c29b58c5de8a407c93f2bef340e"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MFG_ORD_REC.initcomp.json",
+      "sha256": "742e94eecca942e7fc92e767715f87e0c8ba6e06dd88b05eea9499473ddf50f5"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MFG_WITH_LOT.initcomp.json",
+      "sha256": "f87fb621578b4c1000d6894d7f874aaf25cba13a342fa8e99e5358c027c378b5"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_MLT_PRO.initcomp.json",
+      "sha256": "ac6c6ef18797d355d8f3600a8c3099bf51928aac57b468bdd73ed2fa6a0a3b20"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_OTH_COMM.initcomp.json",
+      "sha256": "b394fb3e7547552aa4ecc4f8f5d16139fa6035694fb02541df8f8c5796ac06af"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_OTH_PURC.initcomp.json",
+      "sha256": "67d52307784d51dc4d3ec316f8b893b87b4c82d744684831a98b8ae50603da40"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_PHYSTK.initcomp.json",
+      "sha256": "bde600347d1106c06684b428ea517804c3cb2af411907ae2535836cb63ddd889"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_PR_SL_HEDG.initcomp.json",
+      "sha256": "1cf40cd3ddbade51e498868a14d9659d099220ea9d665fc0ca81fffe8aab3e7b"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_PR_SL_UAE.initcomp.json",
+      "sha256": "a8a43b9195da795e8996e775e67cb9be3d2f911ec8767321f43e47c9c3281296"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_PURC.initcomp.json",
+      "sha256": "badc157102325fa2a4f5f64fdf8998dad7d0cf916953a38f5bde27c09d5a061b"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_PURC_HM.initcomp.json",
+      "sha256": "c7fc8b9586d48ba83f9aaacaf5bb8a63e033e1dfdfeb5ca3eb831f46e7f1b1dd"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_REP_REC.initcomp.json",
+      "sha256": "c370417ed968f62b43fdda6d7f12704cd3fd9f37d3c90b8159d8a08a3f22554f"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SALE.initcomp.json",
+      "sha256": "e9253b5e9708f3a1fee40c8b66305f10c580c1e4c764ea96320156ea30910e50"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SALE_HM.initcomp.json",
+      "sha256": "5f3343602b39b10d58d6b4fab36a550fb5b280ae050568d247ddfc13ea0d7878"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SALE_LBR.initcomp.json",
+      "sha256": "b09c36b550305426c782f5ebb5e06b6b74c8dd348d5515abd7f51fb5b90630aa"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SALE_ORD.initcomp.json",
+      "sha256": "2e268c897f5ad6b21ebe917d4d1507534c359612b5c7e658b223807855b706cf"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SALE_RTN.initcomp.json",
+      "sha256": "c569498349e61bfd4876eb0339adc768a62decfbeee4bc2e180ef39b61ce509e"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SALE_RTN_UAE.initcomp.json",
+      "sha256": "35bb3706cb6e105dd9355335488bf7763a49eaca63a97beb3c64d82b3357ffdd"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SL_EBILL.initcomp.json",
+      "sha256": "21e6944b9bf4949e26ca2ea3c20b120e0efdcd536e02c6dac3167b0aa432c979"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SL_ORD_ADJ.initcomp.json",
+      "sha256": "6389307e4224b22ae48e9ba036cf8240802e5681f17018d513441079564d8c89"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_SL_PR_ITEM.initcomp.json",
+      "sha256": "bdd9f79893384a580a4d3deea5e31fb3a192222e6d0b944efe04d5ee161f92ad"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_TAG_CAN.initcomp.json",
+      "sha256": "98e3b5d58a659453c0afde7ed04b2bd9d88b0158955793ac5a9cfdf31a820e84"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_TAG_OPBL.initcomp.json",
+      "sha256": "6e20815ab1732b576a0763da97c772b74d97de6eb037868fb8caadc97f050dc4"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_TAG_SPLIT.initcomp.json",
+      "sha256": "d1eab011815bf5fefa196d86046c738e2c961dcba0ca0d648e54f05828e668ee"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_TAG_WT_DIFF.initcomp.json",
+      "sha256": "2efeffb1c7129fe80d5d9713dd9671033226799788edcb4a0813883b107bd2f5"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_TOUR.initcomp.json",
+      "sha256": "8f8fff69a0bd2573ac4cb754b1f870314d7cb10e6d9edd71d204eec085e20002"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_TOUR_ORD.initcomp.json",
+      "sha256": "7f1c771b4f62dc337b6e7119ff40baff914b8a9dbaf9f27de7b10507f2ccc345"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_TOUR_SALE.initcomp.json",
+      "sha256": "5d3d558d8ad10c96db439484f7e2c0cf5dbb6ef4a751f424a1fa7e1edbd600e7"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_UPI_REC.initcomp.json",
+      "sha256": "ca10814eea756359cc9f1a848700d2fcced7eeb28ae586d12b5b9f0fcaeb2520"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_VP.initcomp.json",
+      "sha256": "1d98a436c7d07f8a877c02e717377b9966b34064fadf12eb52894d4e53ce599b"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_VP_ADJ.initcomp.json",
+      "sha256": "12bfa897275bc64ca85de65c6b0549567415b95f94bdc00399101f1ed0278aa9"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_WH_SALE.initcomp.json",
+      "sha256": "2f7ab34b18a2d568c8f1e3c3e32c18e44a6bbf698a89c659483410fe1ecacac1"
+    },
+    {
+      "path": "web/apps/api/form-specs/TR_WH_SALE_RTN.initcomp.json",
+      "sha256": "bd0a250e92c0124b5b80afb47e4224e17ee53f54bdc5b4c6d985506fb16e08f1"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_AI_TRFR.initcomp.json",
+      "sha256": "ebf740e3b45c868ab815a677583f010e70e870a090dcd59778faeebba0f14a58"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_BANK.initcomp.json",
+      "sha256": "801eee6a0fd88cfb37b68d5ec0db95eadf78dbfed60f9bfd0746e4a2d88fc007"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_BKP.initcomp.json",
+      "sha256": "2277d2038a41f22ae9093855d5e134485dcf43c2fe961f501ef00992afb18d5d"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_CUST_ENTRY.initcomp.json",
+      "sha256": "0f4b15686ffd222144cc379d853c62361322af7fa6928e695ea3d3f9bff42ee3"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_EXPORT.initcomp.json",
+      "sha256": "ac5e968caa15b56f25c215f5423416968c2d6a749d9d76a1016a676fb193fcb4"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_E_INVOICE.initcomp.json",
+      "sha256": "d95795f70e1e4bed86c022c1f1a71cf6a3a393cfa4975baf0a568177aa59af38"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_HDD.initcomp.json",
+      "sha256": "5fdcb8492b917a30bbf4adf36b98e7b7c9ef7128cec61054de18e5a8020ce8af"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_IMPORT.initcomp.json",
+      "sha256": "edaad88ea52b42a8a12b360f4a3a6affe15faefa70db8087e81dd3271cb6deee"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_PWD_UPDATE.initcomp.json",
+      "sha256": "609d92c1943d532560b12de1cfac57cba816347b67beb7d57c6e24361ad13e7b"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_REMINDER.initcomp.json",
+      "sha256": "4cb74c4a977cd72d3488f88caeada44f7525d396cb9c7cb6bf0b47d13d51c894"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_SETTING.initcomp.json",
+      "sha256": "d1021a4a210c441497fb55cd7506c9d723def4c91d9a80421e8a7e19588b31ef"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_SETTING_MAIN.initcomp.json",
+      "sha256": "90db8d2cbae28652a7b4c5c6719bc51c9b4a2d9765aadaab6ca09e3bd4121ab5"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_SET_ADMIN.initcomp.json",
+      "sha256": "2a5b6fa23cfc0743739c5132a9941a9825d20cc55b42cbf6f22d6fd32273c72f"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_SMS.initcomp.json",
+      "sha256": "679f2edab7e601468d6aa642b6de77c24358fe226f38fee74d37ce31327f7ed4"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_TAG_PRINT.initcomp.json",
+      "sha256": "56ec42cb6e16c22f961bae4e291e74f9b05697e5b63b5786fcf6322ffe6a77d4"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_USER_REQUEST.initcomp.json",
+      "sha256": "5bc7cd8f35d634f4f17181b736efc3bc124fc0fc151a07fd25d6ba8adb19ac5c"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_VCH_RE_NUMBR.initcomp.json",
+      "sha256": "f8fdce3b3d46341c35f116a1720bc6b8cac5d4dcab58dac6a37c73096cbbf1bb"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_WAPP_WITH_API.initcomp.json",
+      "sha256": "388cca4236ddf6373379421d4eaa191fefbcc85f737fa3cbf4fb3040ffc33e5b"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_WEB_CAM.initcomp.json",
+      "sha256": "f7b8100d426ea30b3bbd62f64e4fa68f5a3553c1db9bd8bc0ef25b9708be07f6"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_WHATSAPP.initcomp.json",
+      "sha256": "12837ef4e463ea2572f2f2b49acfd0a79699937122ba7ce56fdc344f305008c3"
+    },
+    {
+      "path": "web/apps/api/form-specs/UT_WINDOW.initcomp.json",
+      "sha256": "b37d3a2dc635c56c3ca01c4ba9709a8f29f0d348f1a8477346fc01767ee2dba3"
+    },
+    {
+      "path": "web/apps/api/form-specs/initcomp-index.json",
+      "sha256": "c320457486e9698bdd46f1cef013e4d8de33425c940c4265649ba98c5b72a41d"
+    },
+    {
+      "path": "web/apps/api/package.json",
+      "sha256": "22145539c871be02e3399fe08d81a45dfcd75e746d3b6a3df4272918edd6cfcf"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcCrList.spec.json",
+      "sha256": "c6717d322c34b2ff2071485bb7a105e76047479630d110bcabd354b10aa2e01b"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcDrList.spec.json",
+      "sha256": "bb1037588026f1f41e90b930a83091aed0e82d9f87ccab07b027a38a9102b9cc"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcFineGold.spec.json",
+      "sha256": "c45627b0c8a9d1d90977b7a4f71504e8019269414185820055544c96d7d5e14c"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcFineSilver.spec.json",
+      "sha256": "85a6641dee32d27eb7cd9ad9d15a237053282e7274fd53f37035a41a3d4e2b24"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcGroupRpt.spec.json",
+      "sha256": "9c6378579d8d5f087afd8aabb7c73cfdf427ef79153fe35a901fadce3ada45e1"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcLastVisit.spec.json",
+      "sha256": "309a72ba64d751da9ac765ffd7dc91792c43dc4bf95e1648745a1db9bc05f920"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcLedger.spec.json",
+      "sha256": "3de6f39365dd3d05c7ca30e54e02adb059ce3fb2750c1e3932c7290238b52020"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcLedgerSelected.spec.json",
+      "sha256": "f0b4457afafcf2fc57eafa92f23226476b2b87dec7f1bd4219212546507aec21"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcOsArea.spec.json",
+      "sha256": "71542295c72d99d36aaf8ad720e90682210a166b14fadcd7d5856b0d8879d706"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcOsWithAdd.spec.json",
+      "sha256": "3ed9f4e94ab0d6836ee5de8a82d77c57de46f1b74a2aa1a8bacf1efe14af3f64"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcPurcRpt.spec.json",
+      "sha256": "6e5ae996b1d92ed894aa830b4f629a22149a87a68df40554e905e16ef5ce4adc"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcPurcSummRpt.spec.json",
+      "sha256": "470dc16af901a0c40eebe3f45d3226c75dbe2ae2f5840de69ecc5eec5f1b3db3"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcPurcWhRpt.spec.json",
+      "sha256": "b1e41c63f652705794e3dcb1d2ae9992af009d0dfd59afcca446efeafeb15619"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcSaleWhRpt.spec.json",
+      "sha256": "3556b9de59577567f94a7427dd3798137a6ed6b975416a5b8ae2a9e33c5b9c0e"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcSumm.spec.json",
+      "sha256": "627ad4b9dd48ffbaadab7f0c2eae6a125b1c0a3a4aa12b708a5fd64483f412e4"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcSummLdr.spec.json",
+      "sha256": "12f9f4f6738aed4ec65089e57ab412d17cc985db8393a4e41d3c646a28dfd925"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcWithWt.spec.json",
+      "sha256": "60485043f38c410ed9eebf410eecd61fdf2fede9b2c4da1d9957dd222df0d8ae"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcWithWtGold.spec.json",
+      "sha256": "33fcfa26744ae1e3ee8ffb1632ca051e442ecb8ef6c1c184e053d28de083a643"
+    },
+    {
+      "path": "web/apps/api/report-specs/AcWithWtSumm.spec.json",
+      "sha256": "4370d13768c74fc463a58cf93ca8bc6c5e3e7c04b32e8c93bfc5a14b6b8d1355"
+    },
+    {
+      "path": "web/apps/api/report-specs/AngdiyaIsuRpt.spec.json",
+      "sha256": "7d53e0c521e7d8b13f478b71048012fccf3cac45b421a15e4b1e521ae798c63e"
+    },
+    {
+      "path": "web/apps/api/report-specs/AprBill.spec.json",
+      "sha256": "f06a64cf10356806c281b76c8f4769fbd7d69d4ab70109340da5c77acbb87385"
+    },
+    {
+      "path": "web/apps/api/report-specs/AprInOut.spec.json",
+      "sha256": "404459c6b06a7492ead2ed09a20a92e8e4e26f920af92f10cd18608089f104b3"
+    },
+    {
+      "path": "web/apps/api/report-specs/AprPan.spec.json",
+      "sha256": "0711369a47fe2f3a2a5a678cc483dc8a5d861bff1893755c5f4b4298a833fa8e"
+    },
+    {
+      "path": "web/apps/api/report-specs/AprPartyWise.spec.json",
+      "sha256": "801134a0eec88daa6794910e7757f20559059f02fa579ada5485e4af7be65a25"
+    },
+    {
+      "path": "web/apps/api/report-specs/B2BPurcBillA4Tax.spec.json",
+      "sha256": "e413c2b14b64659dba16d2db3f394e1cbf3e767a17f4f9363bcc95a7720af425"
+    },
+    {
+      "path": "web/apps/api/report-specs/B2BPurcImgVch.spec.json",
+      "sha256": "c2b5a18c204008751efbbcd4339ef6bc9af2df6db7639ffce8420473ab410295"
+    },
+    {
+      "path": "web/apps/api/report-specs/B2BSaleBillA4Tax.spec.json",
+      "sha256": "30c840023ff251f67f986618e10a69be98459630bc585b7e9864c5ad2d76f78b"
+    },
+    {
+      "path": "web/apps/api/report-specs/B2BSaleImgVch.spec.json",
+      "sha256": "cb78e5aa117676881f3eba10afc585683ade154ef949dc1aaf4f203f0ab2701b"
+    },
+    {
+      "path": "web/apps/api/report-specs/BalanceHz.spec.json",
+      "sha256": "54d4e89d1357cfb72133fe72be58a0807aeaade4c1af7da49b4f7c5824a22a8f"
+    },
+    {
+      "path": "web/apps/api/report-specs/BarPrint10.spec.json",
+      "sha256": "bc60e58665988581838ff84afdbba502ac73dd8c3886a852366410957c3fc653"
+    },
+    {
+      "path": "web/apps/api/report-specs/BarPrint13.spec.json",
+      "sha256": "85840bb09970fb8f1bdac4749fc1bd6d6e8e5a7d02eb709e97b5cd7595520cc8"
+    },
+    {
+      "path": "web/apps/api/report-specs/BillRecVch.spec.json",
+      "sha256": "aa6c76ddb6df781306833fe5051b39ca2d5aa9cb9cb099a4d4bbbfd023740ca0"
+    },
+    {
+      "path": "web/apps/api/report-specs/BillWiseOrderAdjust.spec.json",
+      "sha256": "c007ce6af21a91e76abc380b1fc60c883cf94ddb0db441022a19a97735a43732"
+    },
+    {
+      "path": "web/apps/api/report-specs/BulCustAdjust.spec.json",
+      "sha256": "ef3719ec704e8bc88051d38c216dd055c79b1f533aa667b152d53ef156413fd0"
+    },
+    {
+      "path": "web/apps/api/report-specs/BulCustBooking.spec.json",
+      "sha256": "99869a01dbc159d4f435b4a69eab2387c001179899957886a0fae9ae523a4c42"
+    },
+    {
+      "path": "web/apps/api/report-specs/BullBookBill.spec.json",
+      "sha256": "5ff631474963ec0af8240d0dc2899267cee208a1b40b83aa5a4c68cb4ad9f98d"
+    },
+    {
+      "path": "web/apps/api/report-specs/CashBankBill.spec.json",
+      "sha256": "ca49d65d701395cfc205743024b604254bb9446c79042f6fd305d26b0c24f648"
+    },
+    {
+      "path": "web/apps/api/report-specs/CashBankBillAc.spec.json",
+      "sha256": "618fcf8e6290db18692bf51af03b12566df96ef8be57f60bd8545bd07e846310"
+    },
+    {
+      "path": "web/apps/api/report-specs/ChqPrint010.spec.json",
+      "sha256": "fd1596c7c61b8165471989c852a5f4c101b553a4152f92c7044995a9a1fd4439"
+    },
+    {
+      "path": "web/apps/api/report-specs/ChqPrint011.spec.json",
+      "sha256": "eb3aaf62d4ad1a34ba0b7138eea8ccf10793af0e139a6537dc83d09b393c335a"
+    },
+    {
+      "path": "web/apps/api/report-specs/ChqPrint012.spec.json",
+      "sha256": "cbad5804a46e8302e2c201d12a31a6654b894cfe63c0e6290f7b840a648fb110"
+    },
+    {
+      "path": "web/apps/api/report-specs/ChqPrint013.spec.json",
+      "sha256": "64e1f32f411071320fc55f641cfa87513a729801e68d212e0cc66adfdd85cef9"
+    },
+    {
+      "path": "web/apps/api/report-specs/ChqPrint014.spec.json",
+      "sha256": "d017532d1c739d1f659ce5276db832ab859257e5d2be8aab9695a4e4d7456221"
+    },
+    {
+      "path": "web/apps/api/report-specs/ChqPrint135.spec.json",
+      "sha256": "39a66011157068b57a90ba0e5bcf9249d56bf698efcd5e48389bf63a8bd3394e"
+    },
+    {
+      "path": "web/apps/api/report-specs/CntrTagStkRpt.spec.json",
+      "sha256": "4df1ca21c18e5272cfcf6599907932598e4ac2a1bdd40342c3ded62fe220e158"
+    },
+    {
+      "path": "web/apps/api/report-specs/CntrTagSumRpt.spec.json",
+      "sha256": "81184eb985cf56acab641ebf4158d1ee309d1ce3748158e035fcd2826e016f34"
+    },
+    {
+      "path": "web/apps/api/report-specs/Company.spec.json",
+      "sha256": "4976d073ce39799cb83e682c496ac0c89e22f9fe32302216ba9494e31c80afc4"
+    },
+    {
+      "path": "web/apps/api/report-specs/ConsiBill.spec.json",
+      "sha256": "cc39601a7b69838e43904a08eadf041d23c01fb541165ace9ed6ffc11cfbb186"
+    },
+    {
+      "path": "web/apps/api/report-specs/ContraBill.spec.json",
+      "sha256": "104f2eb433e70629dc67cf6eb74033bb768580e94178099744a6c5f154573b2e"
+    },
+    {
+      "path": "web/apps/api/report-specs/CounterSale.spec.json",
+      "sha256": "13959a9541dbf78c615fb0417a6cda0126e4190725d201dcd28af07ef938bcd5"
+    },
+    {
+      "path": "web/apps/api/report-specs/CounterTrfr.spec.json",
+      "sha256": "1c06547e118b71890fd8fb54c4a4c33c98931604507b7c0da53f59310ad124aa"
+    },
+    {
+      "path": "web/apps/api/report-specs/CustRepIsu.spec.json",
+      "sha256": "131107e774316395be436eadfd256be018896628afb5c54c28133dcc92e4ba58"
+    },
+    {
+      "path": "web/apps/api/report-specs/CustRepRec.spec.json",
+      "sha256": "9f7271469865ccf2f2cfedf9f7842b6c8b6eb8ab0496927e090a6816367d104f"
+    },
+    {
+      "path": "web/apps/api/report-specs/CustRepRecBill.spec.json",
+      "sha256": "60ea88fab3511d02abcabf8b344fa54f0ba38c1dcd1cab197f47487340b14282"
+    },
+    {
+      "path": "web/apps/api/report-specs/DharnDue.spec.json",
+      "sha256": "38e4dbf4de728f4bcf4935a5381249c74087f28051fb27b2eb0fdd2129db387a"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhiranIssuRec.spec.json",
+      "sha256": "6cbb8f847f56f7e99c1b97b32479fba1402d87a9529f721426e08d230da72f38"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhiranReg.spec.json",
+      "sha256": "d1b9eb58c4e65d1e603146fe9d8055f960b46a1be910aa21c4a721c92ebf9045"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhiranStock.spec.json",
+      "sha256": "cb2e0828e56413e96b33a8f5a2d449d9e2982f085b77224980d632812500af2e"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhiranitemRpt.spec.json",
+      "sha256": "b8a49e5309ac25edb387afb41fcb7a8bcb6302f93743fb53c0abbb4eb43c2ac3"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhrnIntRec.spec.json",
+      "sha256": "927ad3855a63ee903cffbdeab40d8d3d29b1b780b8dbe03ce32e707d01cdd9b2"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhrnIssue.spec.json",
+      "sha256": "6bafd6ab1a8d96a319463cfb5c7aae55b22bc3721e948094efd2298cd0cb2374"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhrnIssueImg.spec.json",
+      "sha256": "f9e60a864db90faa2b753941bed2c83aadff822f9f0214c36d900b0d2c404fb5"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhrnKhataVahi.spec.json",
+      "sha256": "10a92c94f35aada634f98ee26c6b9cdadbb72d9ab8ccd484cd2fcea9ced820bb"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhrnKhataVahiSumm.spec.json",
+      "sha256": "af037971f1530c23e9e3ef2e627e743e4f571afcac980535ed17519cd5468397"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhrnOsLetter.spec.json",
+      "sha256": "0fea6689a9e24590292203ea61e4009141cec6b10a524759dee7c208f3b84911"
+    },
+    {
+      "path": "web/apps/api/report-specs/DhrnReceivedSumm.spec.json",
+      "sha256": "8f2d2486b4974b60401f23e6def0ff2459ce3544b1613ebaa9176739a3b7c6fb"
+    },
+    {
+      "path": "web/apps/api/report-specs/DiamondSf.spec.json",
+      "sha256": "2b0307c78f6db8049c990c580063c978ec91cd6bf640588b0a5f432e1e5c5e5c"
+    },
+    {
+      "path": "web/apps/api/report-specs/EInvOthIncom.spec.json",
+      "sha256": "3ab10d998e8b0045874d91ac2ff3247c3af16bcf234d2fab68d4c9109d013ef0"
+    },
+    {
+      "path": "web/apps/api/report-specs/EInvoice.spec.json",
+      "sha256": "6197d88b14d0cefbc2d7cac55bdbed3b8ce818e06d346f8f18062f71a9d89714"
+    },
+    {
+      "path": "web/apps/api/report-specs/EmpIsuRecVch.spec.json",
+      "sha256": "c1ab8199e5722ce19af17126ed13e742babeecdbd5ecbd83c60d7777bd7472dc"
+    },
+    {
+      "path": "web/apps/api/report-specs/EmpSaleReport.spec.json",
+      "sha256": "1905d4a7f1744e66cf5d72432f896a627f6b12440ecb32c4a919ab2a6d84b40f"
+    },
+    {
+      "path": "web/apps/api/report-specs/FineJvBill.spec.json",
+      "sha256": "80e852016380774cb5a1406eabc583074f987b7aa15dad06884c538a005a6c3d"
+    },
+    {
+      "path": "web/apps/api/report-specs/FineSalesGstBill.spec.json",
+      "sha256": "554ffc5b0f93a0f5213233b5d28b9ea7925a4548d7f3f1c25014575ded362bb8"
+    },
+    {
+      "path": "web/apps/api/report-specs/Form12.spec.json",
+      "sha256": "09ff82734903f6e0a5b7a6da9673520a5e078f642eb9c2c9d269edcdd64134c0"
+    },
+    {
+      "path": "web/apps/api/report-specs/Form8.spec.json",
+      "sha256": "4b14f2f346aee9ef6db5538f254e4a8f1a231e2ba49f3a4b29972794f3ee9f23"
+    },
+    {
+      "path": "web/apps/api/report-specs/GhatDesignIsu.spec.json",
+      "sha256": "99eb8103828f7c2678109c89a32dcd7b9535ddbf937eecde5644a91c400c0c6e"
+    },
+    {
+      "path": "web/apps/api/report-specs/GhatTagPrnt.spec.json",
+      "sha256": "81f18cd7c4dc6ac312d51bba0ef645f66691f1c0107d178482beef872ed08f7a"
+    },
+    {
+      "path": "web/apps/api/report-specs/GoldInterest.spec.json",
+      "sha256": "12e48ea08d6197fd8d4b70b599bbfd8b489d9371b1cfce80a55d383079445b62"
+    },
+    {
+      "path": "web/apps/api/report-specs/GroupStkRpt.spec.json",
+      "sha256": "5575890b00009756c526ebe8b95ad774c65ac677c5b2e2146e41829f3ac7eb38"
+    },
+    {
+      "path": "web/apps/api/report-specs/Gstr_1.spec.json",
+      "sha256": "a7604ff136cd90ce63f77d2a70ed3693c72b8759d8aa7d98a88748c5221d395b"
+    },
+    {
+      "path": "web/apps/api/report-specs/Gstr_2.spec.json",
+      "sha256": "95875c082abe76b212d87914a04b978449a721ec4e8b8c4f42b41aa72718ad22"
+    },
+    {
+      "path": "web/apps/api/report-specs/Gstr_3.spec.json",
+      "sha256": "6aefaec1881b995e242f96043c766d0e7bfb32fb8781ef3dbdbc13ce5030512f"
+    },
+    {
+      "path": "web/apps/api/report-specs/HedgingFixVch.spec.json",
+      "sha256": "70bd2de8ec59ab005a963996dcb62a6650610630912fad08c45df2c546b9ada3"
+    },
+    {
+      "path": "web/apps/api/report-specs/InTax_PurcRpt.spec.json",
+      "sha256": "1af8dfc4608674d0e547f62537cb225da1280db0c5897102b5e265c718c5c118"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemInOut.spec.json",
+      "sha256": "512e17eb02f432c14a0d458bfceae0d8dd8afab1289764d80f562544a276d453"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemInOutSumm.spec.json",
+      "sha256": "53ca9e58857d5b17eab4efa8ec3498a556b3a60d677b5152f16eaf2107ebcf7f"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemInword.spec.json",
+      "sha256": "fc25dbf1e396775b4830a3224121f2f1d2bf143754125fe0290f19af4089bd33"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemLedger.spec.json",
+      "sha256": "791a64211766e1a8c86f46d3bdc3ad518c329b57c03b0ae9c762335c8da56f68"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemOutword.spec.json",
+      "sha256": "31d7d4e6622e12e6abf5c85cf509358121e476efb0b82fbaff3a61ced5a29812"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemPurcVch.spec.json",
+      "sha256": "2908289b11c19d08c5df72ff60bcefc0b9c35c00e223ac976fea0e3c755cb438"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemSalesVch.spec.json",
+      "sha256": "8c78bd9c2f2a1888029f71ed93da245b276923106646d6f4464063488d76eb9a"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemSalesVchWithQr.spec.json",
+      "sha256": "d68739ee5e2d7c014393678d1579aab0cf166c1cf00b51a06a745d049b96c189"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItemStkRpt.spec.json",
+      "sha256": "848ee11f82e8f0f558e03f474afa504973f4609301a4952bfa1d0ea374c6e914"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItmLotPrint.spec.json",
+      "sha256": "db9b02ebca9ac71b74f547b9ae1f01d9aa6fd517dc816261790a84f104651c04"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItmStkBalance.spec.json",
+      "sha256": "b38f5a0b313910001c4062e3f7b6d632616ef0a6c09bd4023f870c4bd5fb9101"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItmStkWithGrid.spec.json",
+      "sha256": "924e6d12aec21c91da61086a8ed83d5dcc9e4d7721f70058c09b61fe8f850dba"
+    },
+    {
+      "path": "web/apps/api/report-specs/ItmStkWithOthWt.spec.json",
+      "sha256": "4a261cd221dc420cf8928370e18693b4010c372ed747c44ded2b4664cfa5d4f8"
+    },
+    {
+      "path": "web/apps/api/report-specs/JadtarInOut.spec.json",
+      "sha256": "9d8500578d42b315a3ca111692b34534e854eede3203f2df8886bbc2238a3f27"
+    },
+    {
+      "path": "web/apps/api/report-specs/JadtarIssue.spec.json",
+      "sha256": "1551219896916ee1896c4eaf77104e61a2fdcaa0a68ad54311bb17642588e69d"
+    },
+    {
+      "path": "web/apps/api/report-specs/JadtarRec.spec.json",
+      "sha256": "611932f93dc023b550bb87db293347ef1571be43b1b733dbd4ebf0cd9a40364d"
+    },
+    {
+      "path": "web/apps/api/report-specs/JdtProcessRec.spec.json",
+      "sha256": "9833eb0db03737982e931185537d1b666765c5f9140ac917310723994d4d59e0"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdAmt.spec.json",
+      "sha256": "03234f8fe8a59f25af4a8405165f093fb290482a944bcdf7d7a8967ad4e32f93"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdFine.spec.json",
+      "sha256": "1d6e820f011c112b459649feba5483b4750bfc117c02d7671269053a9cd73e7b"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdFineHz.spec.json",
+      "sha256": "e3364fe4df7ddedc0cf05bac23a9507320f9ee49b832120700bfa775990cb051"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdFineHzSumm.spec.json",
+      "sha256": "e1f5d79cf4a77090da03fe6249ad48f7ac7ff6d1661c2ca76e83b85b40b7bb9f"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdFineHzSummVch.spec.json",
+      "sha256": "304f5c164f49f95759d1d8b20c8cd60cb6ebe6465f4bc18a180cd5ceae3413ec"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdFineSl.spec.json",
+      "sha256": "4d6f76ccea9c72c530e20b4bec92f5b54c2df84dbca6773064e723e5b462b76b"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdFineSlHz.spec.json",
+      "sha256": "f05019a0a2b36aee42d5a9e2ab34b4193dc6aa67319a1d74150641311442bf4c"
+    },
+    {
+      "path": "web/apps/api/report-specs/JmUdFineSlSum.spec.json",
+      "sha256": "842fee18546139b36ea99f30a8f56cfd78e0b4d774d178f24256db18de6ae06e"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrDesignIsuImg.spec.json",
+      "sha256": "1c0b91ec5cf5186219d32fd1d35081d65e798eb81a02d9552383abf4262ac27f"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrDesignIsuVch.spec.json",
+      "sha256": "7b370a7da742fd0b032edb19eabbb95bd23945af96b8d43d3d5e9c648bf465ab"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrDmIsuRec.spec.json",
+      "sha256": "3ff87afa2ba89bd2c111cc213999492b74c053a3c07dc7237926c1a35ffdbbcc"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrDmWtInOut.spec.json",
+      "sha256": "6f48e59c39305f2f4b9cb1bcb01724f7d8e7ae5fce2d6df571c40cdf9d55159e"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrIsuBill.spec.json",
+      "sha256": "d1fb74b203090ccba0d846f2f12c7bbfa0a10de8b5a143482c88821e09b3e2f2"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrIsuBillGst.spec.json",
+      "sha256": "e0c52cc3de223226a9a8060d83642f76a4f189a312de32ba9a74dee3833d10a8"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrRecVch.spec.json",
+      "sha256": "960375b4dc3dc5ab717c4f8df64bae1029d8446560aa3fcbafaa4cfaea7e2536"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrRecVchGst.spec.json",
+      "sha256": "83c9068c9495b209bcfc6b05e5e1d9f6696e91b22033a31548fe7af023e3529c"
+    },
+    {
+      "path": "web/apps/api/report-specs/KrRepRec.spec.json",
+      "sha256": "814106430bef047e02e561283c38f98a0de0ba04f2a021cdc545639403ffdece"
+    },
+    {
+      "path": "web/apps/api/report-specs/LabourBill.spec.json",
+      "sha256": "9b074547d86b308a8a8b36146b1af9c059d386fc787564dfac66f0d29f879cfc"
+    },
+    {
+      "path": "web/apps/api/report-specs/LabourBillGst.spec.json",
+      "sha256": "27ab0afc4d09c02dbbfb7ff84fc24f750423994c62dc5816d5bf1cc4f3275a31"
+    },
+    {
+      "path": "web/apps/api/report-specs/LabourWorkVch.spec.json",
+      "sha256": "2d2790ea356cc215a2b9af16683f29551589e3f0b4f81068abdb33914f50d350"
+    },
+    {
+      "path": "web/apps/api/report-specs/LbrWorkRpt.spec.json",
+      "sha256": "31f7ab51fac4e24d818fd7c0078f210a2881c4174835732689fe622a914aeb3e"
+    },
+    {
+      "path": "web/apps/api/report-specs/LedrAdjVch.spec.json",
+      "sha256": "46eef29fde1c235dbdb771b80f6bbcc857075fd601f3085c8eeb863b7b75dc0d"
+    },
+    {
+      "path": "web/apps/api/report-specs/LedrInOut.spec.json",
+      "sha256": "7f9a56a86364e183f751f57177c214388994cd927c58d5350c036d3f715c5bdc"
+    },
+    {
+      "path": "web/apps/api/report-specs/LedrInOutWh.spec.json",
+      "sha256": "cf3c96668d4517fa97cea5faed874698c82266fac75c3e15cd485398210a9f0a"
+    },
+    {
+      "path": "web/apps/api/report-specs/LoanStock.spec.json",
+      "sha256": "f740d7fe2a25cca9bbf15e86b43574b3e0e8407cf4d707889ed500324aae11fc"
+    },
+    {
+      "path": "web/apps/api/report-specs/LoanWisePacket.spec.json",
+      "sha256": "a1cdf9df7ac3297e028c24c78ba473405861ae17db6a5532233dcd6fba0dee43"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembBonus.spec.json",
+      "sha256": "0ff46882c7a01a10a8187c75d3aa82f3e3155036245374b0e4008dce72313f38"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembCommRpt.spec.json",
+      "sha256": "74085520e8af58adcffdc3d79db40d6c4dec38110722763a9e3274c3e5a3daf7"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembDailyRecRpt.spec.json",
+      "sha256": "067f3d61b78a90be5e3dffa543f262efa89a662f48314a2530e3301fd8f2c341"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembGoldRpt.spec.json",
+      "sha256": "fafd33af8097d5036604ef784285ce2e1b3ca3289bb9a03127974e8b9864404f"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembOpenNew.spec.json",
+      "sha256": "b0415b39536392890b71d4ec98b1d5c24189f1caeb4b2498b2cae1c2876c79f8"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembQr.spec.json",
+      "sha256": "5396de7eb0098704e48fe460846c46377739dee5e6cbdd49ddb30afc453e7964"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembRpt.spec.json",
+      "sha256": "2d2e1562cd098bb30a27b0e46c9f3f2d9730b91a69b96ae2cdea31de0b09eb35"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembRptAdd.spec.json",
+      "sha256": "4200be5dc13816cc98fc1406bd70e9c9695d7973df87387d282093090693468e"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembSumm.spec.json",
+      "sha256": "60dc4c17f29fcb75c7470b3469f6c6222f40b84942934e659e16ae811555ecd6"
+    },
+    {
+      "path": "web/apps/api/report-specs/MembVch.spec.json",
+      "sha256": "1cf401927182fa6fbe596bc6da30012b81d101261780e5266b4ab03e169e19d1"
+    },
+    {
+      "path": "web/apps/api/report-specs/MfgGhatIsu.spec.json",
+      "sha256": "4a294eb7688bc34664a5aec5d939658546e2edc782e5cb60ebd900def5e5ffdd"
+    },
+    {
+      "path": "web/apps/api/report-specs/MfgGhatRec.spec.json",
+      "sha256": "2b0d837238a165f28a13c2422be5bdc9be518e7f2f9c754b7242c5023d2db42c"
+    },
+    {
+      "path": "web/apps/api/report-specs/MfgLedger.spec.json",
+      "sha256": "ba94a61d447084e1eeae30bcc13aa6c87e39d9c5807681be3d2675a5109b966e"
+    },
+    {
+      "path": "web/apps/api/report-specs/MfgMinoIsuRec.spec.json",
+      "sha256": "d7a0d6ff139a8d01e9f36732a4a487063360394f362753eebb03e6a46915fcaa"
+    },
+    {
+      "path": "web/apps/api/report-specs/MfgVch.spec.json",
+      "sha256": "f895f3df64ee51db3eba55810abf33de57eded4882b02c0b947bfcc7364ec279"
+    },
+    {
+      "path": "web/apps/api/report-specs/MtlIsu.spec.json",
+      "sha256": "608bc0e1fc2661c704045161d5b168e9d5717c1f1a1daf5248ccb54df84ed212"
+    },
+    {
+      "path": "web/apps/api/report-specs/OldItmSaleVch.spec.json",
+      "sha256": "3ef1d7bbf320ae35fb2187dd54dbe3c637574a0972a1f61c937b7867376745ef"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrdAdjBillWise.spec.json",
+      "sha256": "a5882a555c1d355da88720336256d0d4a2d26e1f178b94e1f378a17094fe0a46"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrdAdvAdj.spec.json",
+      "sha256": "6ecaaa2946990f9a4104cbac07585c7e1aeeab714321e9500656b835fc5b966e"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrdAdvRpt.spec.json",
+      "sha256": "9e0a5a7181842340b9d27b33cb71db88dae802ab5485ed85b12afea145bc11b9"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrdDesignSumm.spec.json",
+      "sha256": "4691c2a8603e8537b12c90faff2dcc00560a601e80812a2eccc825a857bf3229"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrdDetlPanding.spec.json",
+      "sha256": "ba1d57cf03ce4732f8e02552de4c083a1e3a057b4feff8e5b94189ef38e0e611"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrdDetlRpt.spec.json",
+      "sha256": "16a428cc14a7ddadd9ba384e612232893b621f793d2a4d4e676d4f9eee24ab1e"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrdVchImg.spec.json",
+      "sha256": "48d85d0e13ed84851bc28712ec750a2858b21d6bb52c3a66e0453670ede39a13"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrderBill.spec.json",
+      "sha256": "9d41fd605ade7c18ed10406d8361df3dca8b12bcaff00e1dbcf41cf4accb9f5c"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrderCancelVch.spec.json",
+      "sha256": "b5afe00e9c12ab249fd0b6053f6cf18f7cd4c215f44e9ddc23b754e0fbe5b519"
+    },
+    {
+      "path": "web/apps/api/report-specs/OrderVch.spec.json",
+      "sha256": "e3e88cd83314e2d650d7311e54647ef72241e70b410802c71bef859703b6d161"
+    },
+    {
+      "path": "web/apps/api/report-specs/OthCommVch.spec.json",
+      "sha256": "daefa2553f59d16ef4d11cc3d04db0ed08a8fa4aa5484d0286c8ff3e438dcfcb"
+    },
+    {
+      "path": "web/apps/api/report-specs/OthExpUae.spec.json",
+      "sha256": "590690fcb952faa64042303f88e2a2cf8116b9c486a831425571a7151e6ffb42"
+    },
+    {
+      "path": "web/apps/api/report-specs/OthItmLoose.spec.json",
+      "sha256": "b15116848364764486695499b6a6551c7f559c7ef1ca3605ba2522d05d123aff"
+    },
+    {
+      "path": "web/apps/api/report-specs/OthItmStud.spec.json",
+      "sha256": "8a7d8937a4acde1d4a970c93d70dbb9267b1498ce76eb22eb72268b8b94f4727"
+    },
+    {
+      "path": "web/apps/api/report-specs/OutTax_SaleRpt.spec.json",
+      "sha256": "45f7fa5da7bda06aebbafbcfeb75fff785d25575ccbcaf067f3d137018ac08a5"
+    },
+    {
+      "path": "web/apps/api/report-specs/PartyIntSumm.spec.json",
+      "sha256": "9ba8b42543af4538b5297a442cee0a2f47d2773ea7c56e3b6073b169d5633a44"
+    },
+    {
+      "path": "web/apps/api/report-specs/PartyInterest.spec.json",
+      "sha256": "8f5269769333168f7fc0d8be3e10369fe3f13c2b02bb2bda95a2bf698f8088d8"
+    },
+    {
+      "path": "web/apps/api/report-specs/PaymentVch.spec.json",
+      "sha256": "8a5e51b1e10f9d90ddeaf0df3f120644ac799aa6833271f3ffd5733e77324a20"
+    },
+    {
+      "path": "web/apps/api/report-specs/PrRtnBill.spec.json",
+      "sha256": "187226bcca1f7416cafdadeb69237183b04e0e8768eeb952f623ec6e41d425fe"
+    },
+    {
+      "path": "web/apps/api/report-specs/PrRtnBillGst.spec.json",
+      "sha256": "ee974f520847fe1e26d9c5b144a611a028d609ce900f222c9a527e2931f31d47"
+    },
+    {
+      "path": "web/apps/api/report-specs/PrTaxRpt.spec.json",
+      "sha256": "343d5a51faadfd5ec5c116240ac2479e1192b58a35d531971223817987aa2322"
+    },
+    {
+      "path": "web/apps/api/report-specs/ProdStkRpt.spec.json",
+      "sha256": "1cfd8d6b79c196d477faceaca1ed2e2a61639284679048aa9da57fd1dbf83561"
+    },
+    {
+      "path": "web/apps/api/report-specs/ProfitLossHz.spec.json",
+      "sha256": "c9e4dc3fb74be789a66146ff5adc7926ba20e78d0c5e74172f7a07c3b57184f2"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcBillA4.spec.json",
+      "sha256": "2face1d42acd5f732f18fc32e75d0afade62f5c3bc909f2244dcb3d4ac5a2511"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcBillA4Gst.spec.json",
+      "sha256": "87beb49cd0ac4e5203cebae5dd7bf6c5e1e81656defa7b3ce369f9fba41150d9"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcBillHalfGst.spec.json",
+      "sha256": "a605e7122b95a69a3c120d47a7601bbd69a44f0bd4702dbfdeb39e1c65d82e6e"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcGroupWise.spec.json",
+      "sha256": "b305b915e073a70526ebb8ae8de8d2dbb43184fcab68296b22c611675c02bc24"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcItem.spec.json",
+      "sha256": "eada83dac19483880347adadf7c4394516e3beb062895f91c51572bd6623d6d3"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcReport.spec.json",
+      "sha256": "be9313fe299f2838f6638751b600aa9c7e652b39128bf39f725b38a10c209742"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcSumm.spec.json",
+      "sha256": "3331dd6dd88ad12a72989b61f6307fe08fc4af8c0b51cdf029137de2860fffc7"
+    },
+    {
+      "path": "web/apps/api/report-specs/PurcToSalesFixingVch.spec.json",
+      "sha256": "806f023879abe7c1c6d8a3be428add64fec19ee5a86cd6e7672aeb74bd1a5f07"
+    },
+    {
+      "path": "web/apps/api/report-specs/QrPrint10.spec.json",
+      "sha256": "1ee08c7db59505a34eeafc3abd42391111787ab615e2a08abb6c0b633911c183"
+    },
+    {
+      "path": "web/apps/api/report-specs/RateCutBill.spec.json",
+      "sha256": "b453effbed7469eafc858b3a1f964cefc2ce6caf62076ae22be7abf625f710f1"
+    },
+    {
+      "path": "web/apps/api/report-specs/RateCutItmBill.spec.json",
+      "sha256": "1da5e6452db4d679da9dfa830bd9aa97c151e44294c2a8973612ffa634eb5bd0"
+    },
+    {
+      "path": "web/apps/api/report-specs/RateRpt.spec.json",
+      "sha256": "ece49f9fb386697581dde93f71bd8705895ffab97bf78393663811c96eba7a78"
+    },
+    {
+      "path": "web/apps/api/report-specs/ReminderAll.spec.json",
+      "sha256": "a849807554d8398baa96acfea7bad9edf57795688322e7eeb565bfafd57919a4"
+    },
+    {
+      "path": "web/apps/api/report-specs/ReparingCustIsu.spec.json",
+      "sha256": "20740f3795cb701ea1fd30750abb14bfc639f51643aaaaefaa21c4dcee52aef0"
+    },
+    {
+      "path": "web/apps/api/report-specs/ReparingKrRec.spec.json",
+      "sha256": "fde758ef404973137d9ddeec927f70d26200e45914bf09fc4070dc48f82d53e2"
+    },
+    {
+      "path": "web/apps/api/report-specs/ReparingRec.spec.json",
+      "sha256": "ac340d15fc1e6cccb057f6fa058d3b35fbf32e652c77f167fe9f8d9db16d8280"
+    },
+    {
+      "path": "web/apps/api/report-specs/RojMel.spec.json",
+      "sha256": "fc35fc7373f9f843bea5d8d4df5a81c31a9a4e5b511a780fb5a39c111c4c6370"
+    },
+    {
+      "path": "web/apps/api/report-specs/RojMelCash.spec.json",
+      "sha256": "d86b69e961df2bf02ebb61092c3fdb0061ad7aedf5a97a13c793476ff6ae9a28"
+    },
+    {
+      "path": "web/apps/api/report-specs/RojMelCrDr.spec.json",
+      "sha256": "2777d176be948fb29bae74778f8bd631ffe7a2bd91c6a46b47fa6e0c8c26b149"
+    },
+    {
+      "path": "web/apps/api/report-specs/RojMelEstmat.spec.json",
+      "sha256": "3c5800b013b5d80f9fcd7bcdb5459f80141c7612ffec509396d88c00157054a8"
+    },
+    {
+      "path": "web/apps/api/report-specs/RojMelGr.spec.json",
+      "sha256": "855a04b3c253cda3aeaede35d9069c24683a7217bab29ccd697bb2ff1fb04d4d"
+    },
+    {
+      "path": "web/apps/api/report-specs/RojMelItem.spec.json",
+      "sha256": "33fe0e7ff2d1c6264d1264ef5ba74fa21a713ef0e5ad139f0ad1e38468ee3063"
+    },
+    {
+      "path": "web/apps/api/report-specs/RojMelJmaUdhar.spec.json",
+      "sha256": "dba36ad726ee7d84fa028ef87283be7ab1823b6c40ccdd620710e94ccd86db39"
+    },
+    {
+      "path": "web/apps/api/report-specs/RtlHuidPrint.spec.json",
+      "sha256": "36b1eda1b8f821e373dbaabe628f8ba30e2c6d3242609d758e32668748b4ed06"
+    },
+    {
+      "path": "web/apps/api/report-specs/SafeStkSumm.spec.json",
+      "sha256": "c238c5291edb543d07521d0458dda5489e2094be1c216f999b39238dc2aed746"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalarySlip.spec.json",
+      "sha256": "b31057be1a5868bf1255526cb3381feb313f53fd08aa2011c19070fa1ebc7887"
+    },
+    {
+      "path": "web/apps/api/report-specs/SaleOrnaIsu.spec.json",
+      "sha256": "42c1689c1344aa22ecc4518961ad9d0a64f4759385b8c7401953107f30c6f556"
+    },
+    {
+      "path": "web/apps/api/report-specs/SaleReport.spec.json",
+      "sha256": "90b94ca75492c1270919adecab8d5790880d4412daeab27712a78be430880cf1"
+    },
+    {
+      "path": "web/apps/api/report-specs/SaleRtnReport.spec.json",
+      "sha256": "3cc519bd8a8f23b6c627a5d1d87ae40b088d65e9223b949d04980ab7a3cd7ec5"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillA4.spec.json",
+      "sha256": "10e32d140ac82e3025446d1db01df019fa726b2ff1ff5a396acbc58314838e45"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillA4Gst.spec.json",
+      "sha256": "135178cf0557d17f8a7e99205902e825b7a1fe76d406d749c0b0c4f85627df34"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillA4_WithImage.spec.json",
+      "sha256": "6c0cee36f789fce95ff210ef33698bc4d2ef5f0b42139806fef128d4ceab4699"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillHz.spec.json",
+      "sha256": "296e585a7b5bf0947d12f40bc57e045af1e9e99b323cad92e978a589529920b8"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillHzGst.spec.json",
+      "sha256": "f53f93c963e03415c735809d5354cefec544cd22a7251e423f56c7dfde603d11"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillOrgDup.spec.json",
+      "sha256": "c6fd91d458cb87053da86a495e9cd3681796ca9243a185cb173e0e8c06a11159"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillOs.spec.json",
+      "sha256": "a50e6b7f44c830adb3f83f00ac4024bb68ab79042d90df34c7602c811daa3369"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesBillVr.spec.json",
+      "sha256": "ff926bcb2f52aef457259c1444dea1af5ccb165ac32d4abb4629706a763a2d07"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesGroupWise.spec.json",
+      "sha256": "455e27ec29ecd31148df921d650e05e2a2ac412003e25149e053835834e063a8"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesItem.spec.json",
+      "sha256": "494f9c3d5c9d528e21b40d437d4893c8f7f62eb72df496a5e3a03e7b73864ef6"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesQuotation.spec.json",
+      "sha256": "bf84aa7129a41733611c0b29d62643269a731d4f3e3d132d3a473c0513bd1018"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesRtnA4.spec.json",
+      "sha256": "6eebeb1b6f3dea905d32957af100a5a04f5ef59c6c2d331006eb5e692637b997"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesRtnA4Gst.spec.json",
+      "sha256": "3881fab7d27ef6d4afc2b3342f6b09c521a53ad74dff6272379644f3acfc65ef"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesRtnBillUae.spec.json",
+      "sha256": "7775506ad173d362b5e80216a716839b64e47f7244c0e0efcd150d02754312d1"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesRtnItem.spec.json",
+      "sha256": "b0b786b4f94dfaa62e6e56f80df6cc76072ba24d1da0867368a7fbee0aad64de"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesRtnSumm.spec.json",
+      "sha256": "0d0e0b6e804d74bd3ee0d5ab5a6a316a56557bd66bbd9e6532f9a3e79bd065fa"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesSumm.spec.json",
+      "sha256": "e71c8afc763009cb50eaa7d0f737ea7c77a2f5f3d73c45ce2fe92922ce9b5319"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesToPurcFixingVch.spec.json",
+      "sha256": "afa15d9202bad2ff804232b3fa755506e8a1d3645658104a3b658894ec3b5628"
+    },
+    {
+      "path": "web/apps/api/report-specs/SalesWithOrder.spec.json",
+      "sha256": "405679444b61386f21bf37fdb83ab832d1e04ccf04dd5b6364e3455958464a1b"
+    },
+    {
+      "path": "web/apps/api/report-specs/SchmAdj.spec.json",
+      "sha256": "8c19d6c1c3a27c720383978b9f4b1cbc901fb922ce514c5dcccf9205314d691b"
+    },
+    {
+      "path": "web/apps/api/report-specs/SchmMonthRpt.spec.json",
+      "sha256": "16089c0a8a6e376bf2ecfc4469bfc8c10d36367eab776b6480a27d4b5bf7ee2b"
+    },
+    {
+      "path": "web/apps/api/report-specs/SchmPassBook.spec.json",
+      "sha256": "18bc2128ab0154e1ca4b5f06aab157d7c38bde7b5be5dc0449570ca4f4f479cd"
+    },
+    {
+      "path": "web/apps/api/report-specs/SchmRecVch.spec.json",
+      "sha256": "5f2b7bbde7af8cf60e3e60a20c475ffc0fb57687b609d674207fe4571c249e85"
+    },
+    {
+      "path": "web/apps/api/report-specs/SlBillWapp.spec.json",
+      "sha256": "004d6ffdc4007fb6bd9cbadb74fa8737f3e67adfc546ed9c49c3d1295415dd12"
+    },
+    {
+      "path": "web/apps/api/report-specs/SlTaxRpt.spec.json",
+      "sha256": "a0bfea84d56f9d7a109dafead2f907832312db8931a296143c06c7a00745f9ed"
+    },
+    {
+      "path": "web/apps/api/report-specs/StkInOutVch.spec.json",
+      "sha256": "e485291f0c540a42d54b6b041693b70d54605642ab5cec43d66674183f5f14e3"
+    },
+    {
+      "path": "web/apps/api/report-specs/StngIsuRec.spec.json",
+      "sha256": "41f71455373888caf4d6eff5e1e309a89db82b765bc0aef77cdbb19db4584d4d"
+    },
+    {
+      "path": "web/apps/api/report-specs/TRialBalHz.spec.json",
+      "sha256": "91516ce06e82c6078b8d0aca8647c80b6497d5f8f49758d1bfaa138921866eef"
+    },
+    {
+      "path": "web/apps/api/report-specs/TableStkGwtRpt.spec.json",
+      "sha256": "cae41a9fd0308006530dee2aabed60a939113a9653adccc5648189ad99a5d808"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagCanBill.spec.json",
+      "sha256": "9dbf02ba56682f92256593822793e068570f691f73617401fb42a48ca3ad417f"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagHuIdRpt.spec.json",
+      "sha256": "3ca0cedaddc318cb9caef01448bd2874e1a2b86f0877a99d30976176294f3566"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagItmSumm.spec.json",
+      "sha256": "219bbb23e7dbf274d29112fbf863d6db9112813d184e00a4a1db1aeca5b533b5"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagReNumberVch.spec.json",
+      "sha256": "42b3bb038dec60f640bcbb5d8a03bd35f36159fba161b6ed14d8937895738a7b"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagSplitVch.spec.json",
+      "sha256": "5b35dba42315e4fceaa2d91e66d0af977d3bc1ab57e54e4d7faf8dae976aafcc"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagStkItemSumRpt.spec.json",
+      "sha256": "7ffbe86d2169d3070af9921eef6ef56c0959e3234f5b6afef4e1952efef4b49d"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagStkRpt.spec.json",
+      "sha256": "15e76337b4b061a5d1b5670cf68fd500b2727cbf52f55745924d56978442eaf6"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagStkRptDmSum.spec.json",
+      "sha256": "7dbf03174e55d654c94f635b295f4e2645256965acb4a973ada69232f750a6e0"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagStkSummRpt.spec.json",
+      "sha256": "6862198d5572687a52c3e34f2cc2b35eb2f0d2e39b20c87e3d3d1fd6802fa663"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagWtChangSplit.spec.json",
+      "sha256": "bcfb00754becfeb22fdaf71fbdbd0bd0f6d0976047dacc19c97d7b19a9c0ca27"
+    },
+    {
+      "path": "web/apps/api/report-specs/TagWtChangeVch.spec.json",
+      "sha256": "3deec630654c9176669da8a979ef1579d8da53d8fc65cf4901c776620528f707"
+    },
+    {
+      "path": "web/apps/api/report-specs/TaxInOutRpt.spec.json",
+      "sha256": "d51e70c5d91fa0f1394fb53d23e7f9dbf9743c71cac6c6956e9e41fb7700578c"
+    },
+    {
+      "path": "web/apps/api/report-specs/TaxSummUae.spec.json",
+      "sha256": "70ca2412cfb0b51ee4eabad9f2f411a19cac56c7c5cbe27fcb81053eaf15b1e0"
+    },
+    {
+      "path": "web/apps/api/report-specs/TempAdd2.spec.json",
+      "sha256": "2ffa14d2ed49ae8becd67a5b05eaf064c871088fa70fd0f581ae70112b4f63cc"
+    },
+    {
+      "path": "web/apps/api/report-specs/TempAdd3.spec.json",
+      "sha256": "4cd830c6362a77d3c156f3e3b192e7a9d4fd5ea76dfefac4dffec6e3f4528ddb"
+    },
+    {
+      "path": "web/apps/api/report-specs/TempPhone.spec.json",
+      "sha256": "dd1603b055d3e0efe262e0b0927d04039143970f3dbb4ad3fa2b73a84f01ed07"
+    },
+    {
+      "path": "web/apps/api/report-specs/TourOrdImg.spec.json",
+      "sha256": "33bc542047628952c6f974f9195bc529d10ba2dcc42228430e34190cf84b694c"
+    },
+    {
+      "path": "web/apps/api/report-specs/TourOrdVch.spec.json",
+      "sha256": "df1b3e3e51b5b1b06c116144c52d2bc1d534ffe207a5ec0eaa61bb73a5c92cc1"
+    },
+    {
+      "path": "web/apps/api/report-specs/UserDtlRpt.spec.json",
+      "sha256": "b8a59266d4e18429a98449ecb5e6ddec4dee667d0af39d8295985a79439c6758"
+    },
+    {
+      "path": "web/apps/api/report-specs/VpAdjustBill.spec.json",
+      "sha256": "aa2572e47415958af74142dbd22985f612ea9ffbe4264848c521ca629a7a9565"
+    },
+    {
+      "path": "web/apps/api/report-specs/VpIsuRpt.spec.json",
+      "sha256": "50acfbc153e9472762e46e6d17509f2b005fe7db377ee568b3027af37cc94968"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhHuidPrint.spec.json",
+      "sha256": "6874298965666fe69b75dd2630f51df1d3e7d8c5357cd9e57fd6f9be852bb1cf"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhSalesBill.spec.json",
+      "sha256": "024884c68f6e8ee1bb3c770e31c6ae577267ac9c3b56034daf09f1bcdc497faf"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhSalesBillSumm.spec.json",
+      "sha256": "ae303199f34ea47218238fbb366c8af42b419b7ad9c25db0241544186be3b4b3"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhSalesEmp.spec.json",
+      "sha256": "4729602ad2e3db087131942e67b5790af4aa52ba410e08d96bd3e31eb5b965b7"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhSalesImage.spec.json",
+      "sha256": "ad86f6c21c388513b5db18efa39c6aaecce52d34fb1db8659674c9c0173d3d6a"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhSalesIsuRec.spec.json",
+      "sha256": "23fbb4d9ee43725dae294f194dc051cf7633f6fa7c999d79192de09a1498d21d"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhSalesRtnBill.spec.json",
+      "sha256": "dfac2ace0dac4b09617d4f46bff46d2f75a68ca09ae59caf7f3c65214692c53a"
+    },
+    {
+      "path": "web/apps/api/report-specs/WhSalesSumm.spec.json",
+      "sha256": "5a9bfa263b8e5b915c459571e890ddaa6e19854df45ecdb7e870fc9d7af3fdd1"
+    },
+    {
+      "path": "web/apps/api/report-specs/report-layouts-index.json",
+      "sha256": "5b503e847e5cd066b2e755b9a255292cb945255eb5dd2ee8a932d9ebae39d6f1"
+    },
+    {
+      "path": "web/apps/api/src/app.ts",
+      "sha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a"
+    },
+    {
+      "path": "web/apps/api/src/health.ts",
+      "sha256": "7f696beaef929ace0d5364fef49dee96bdb09495a90173eec0b1697a29a3c908"
+    },
+    {
+      "path": "web/apps/api/src/modules/accounting/accounting.ts",
+      "sha256": "c87af89174059e6e27df6e3074aa201fb764dec3e3fed3302805037512d28c63"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/auth.service.ts",
+      "sha256": "cb6269a6b3793d9dc7163bbd1f144336f12da461cdec7177e620b5f5f74f026e"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/jwt.ts",
+      "sha256": "4bd2d709bcd6ec64d3734822972932aed4bcd1797422815caf4a8eaa90de3169"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/password.ts",
+      "sha256": "d30b92fbb64891f7ba1f2eed000a341e3039dbcb5aeef81da52f920780e178b2"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/passwordAccount.ts",
+      "sha256": "f566af63d2048bd64f69c7e04aaede8102a5a789a11750a8450d7016cda5ce56"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/session.ts",
+      "sha256": "17765f43964137139d582695cc0d10e3713227b8e118070e6f3e4a07fdb63bf0"
+    },
+    {
+      "path": "web/apps/api/src/modules/bullion/bullion.ts",
+      "sha256": "332f77ed0dbd4b6662f23ffc713464da9db383a18d224dbdfeaa19161dac243c"
+    },
+    {
+      "path": "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "sha256": "c959ea4e4872631775d50074a4d0873e25c48d4d47ce8ea8d9cc2d4c4495045d"
+    },
+    {
+      "path": "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "sha256": "bbc9617aaf4ed0d795b6140187858a0b79c3dfe16513d94f823504c46f3e24cd"
+    },
+    {
+      "path": "web/apps/api/src/modules/dhrn/dhrnKhata.ts",
+      "sha256": "310443fdc7507dcbf57620b7c53d8ff1d756b471508e5554b9903d90af041686"
+    },
+    {
+      "path": "web/apps/api/src/modules/dhrn/dhrnReceipt.ts",
+      "sha256": "7cb4b6264ad7a6fe14bd94c58968930f60230e2ed49913f776e53c1c00f21220"
+    },
+    {
+      "path": "web/apps/api/src/modules/documents/docChrome.ts",
+      "sha256": "e094c883dbece4e3b89f3d7f90d098051de46cb7f4b86b2e1bcc532ecf54f0c2"
+    },
+    {
+      "path": "web/apps/api/src/modules/einvoice/creditNote.ts",
+      "sha256": "ccf7f6355f0b87e7bd14ccc3d5f5f59847eab5d6d2dfdbbb9ea5f6ee5d935162"
+    },
+    {
+      "path": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "sha256": "93af2f8dd282458cf2519594e3ed6013073862d068a39c74381e7b527fb06268"
+    },
+    {
+      "path": "web/apps/api/src/modules/einvoice/einvoiceExport.ts",
+      "sha256": "14e421f89f5ca82430f2146236560078fc3e78f5a4f249bdc794163744c3abd3"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/acOpening.ts",
+      "sha256": "4b49c10c25ecd377067b24d7e52e744ed3277536b61aa6633a45191d456f5fa3"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/bankRecon.ts",
+      "sha256": "379a20aef3db34019d69a7d9c25fdd621b1de82d6a5cac44543de1826a5cd878"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "sha256": "f0c2b7318060bff6c905bea56adc6320d0ad319186995eb7a6fb1de2e71c9a7d"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/billToBill.ts",
+      "sha256": "2430c46091260bda36db7da7dbc8c99aff913e007547515598fbbb218bb6c0f0"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/chequePrint.ts",
+      "sha256": "c9b49b670b672075ea7f4271d0e8d4c9be1618401a5954acce2e234ba43e3907"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/employeeJv.ts",
+      "sha256": "94c8055d3ad5af127d9a8246bc79e45c9ca54b083f84ff4227ff17388fa4b183"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/finance.ts",
+      "sha256": "06427aba114841906afb51bf639ea75944b27aed7ea25959ee54821f3e9e418d"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/financeVoucher.ts",
+      "sha256": "258ae25be1859d07efc55fd8a0c8f23d7bfd017edf2813a40876e0fc4be8bc6c"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/fineJv.ts",
+      "sha256": "4c382bd09c437035f45ff7c0bbfc5725ee16aeabfdaea1eede0a69257dfd419c"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/goldBook.ts",
+      "sha256": "b8186e413b9768de43ded215e8f11f32edd66f6363daa3d507c808af32ffcf0e"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/journal.ts",
+      "sha256": "ea8955a41a9bd570f20e0032017f0e7cc8b8beee0484f256935465d9de152631"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/ledgerAdjust.ts",
+      "sha256": "37d6496ac3b522ed6229fa1765593f548d71125525ca4e85384086a00122974f"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/lifecycle.ts",
+      "sha256": "6b3ba75121ed65dcab4ccad9e4cdaa61e27d698a3b07f4bf489130461b8269c5"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/locationAmount.ts",
+      "sha256": "0e2385e8e4be6e2528681858b492ea14a8b2598a1e6de78070fe0226c2ed3881"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/partyBalance.ts",
+      "sha256": "285f05f901160b38560cb01d962acc765483098adfe9f3269bae78ec4ec9b752"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/reminders.ts",
+      "sha256": "d8b802b4914f9269be673b20a5dc7947f035b4aed6e7e43ab1fb07c18f73e389"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/tender.ts",
+      "sha256": "735461574161f83de3bf5c175c6c5e8dd0a5979564d34d42e52fae0cc41ed1ba"
+    },
+    {
+      "path": "web/apps/api/src/modules/finance/vpAdjustment.ts",
+      "sha256": "222d8e03f78ba48a31afa6d0bbc10431c9d997d81c56a1bad0b4bbf26b936b3a"
+    },
+    {
+      "path": "web/apps/api/src/modules/forms/formLayoutEngine.ts",
+      "sha256": "7dec2626ad6e9b48565db2cc177c4adfa98a541aeb6982e68b077ce60797808e"
+    },
+    {
+      "path": "web/apps/api/src/modules/gst/gst.ts",
+      "sha256": "33c33ff02dbae1f030196a74d6caa1379b6426cc212d9a07685ac411a62c7f55"
+    },
+    {
+      "path": "web/apps/api/src/modules/gst/gstr1Doc.ts",
+      "sha256": "32b931047dd884a3385930efca15e582b4e51f9f1aa1620260012ddcfc54feac"
+    },
+    {
+      "path": "web/apps/api/src/modules/images/entityImage.ts",
+      "sha256": "65d0691f06bc7ef45571aff4f2ec17f01a512b4fa2f96a3d07f71f9b057ffa34"
+    },
+    {
+      "path": "web/apps/api/src/modules/images/imageRevision.ts",
+      "sha256": "b542e244cbab9b0ff8d0b89403446a457aeae34c14c4911d5c3441ed0e7bdff5"
+    },
+    {
+      "path": "web/apps/api/src/modules/images/imageState.ts",
+      "sha256": "d00ea6c503805f78ea6f5983aae921dcaae9bc50fe2110fdc69718d2656966ef"
+    },
+    {
+      "path": "web/apps/api/src/modules/images/orderImage.ts",
+      "sha256": "92860333cc6949457710be45c4fb32ae3812ba9ee482c7006bd257da77543643"
+    },
+    {
+      "path": "web/apps/api/src/modules/inout/fineInout.ts",
+      "sha256": "3c1939286c7841ca953f87a9ec2018ca2db53e0d0b1e857fad899fb6677e9dd1"
+    },
+    {
+      "path": "web/apps/api/src/modules/integrations/barcode.ts",
+      "sha256": "9f4326fdc9946efb754cf36837dcb492b84a94ab9f3a3f23702d15c03cca0a99"
+    },
+    {
+      "path": "web/apps/api/src/modules/integrations/deviceBridge.ts",
+      "sha256": "e8270355bab2fb921ff34d713c1c8d1b85f4d72c695c52a20e4b5fd32e674f97"
+    },
+    {
+      "path": "web/apps/api/src/modules/integrations/messaging.ts",
+      "sha256": "49976fbc14c2c85e8e9582fd2cc3889686dd0a7686a6d9c76d1cb23651ce5997"
+    },
+    {
+      "path": "web/apps/api/src/modules/integrations/rates.ts",
+      "sha256": "264a40ec1d5593a6aacfcc6ab0427c03d8f3ffd36b6f8966a042e6e668266e1c"
+    },
+    {
+      "path": "web/apps/api/src/modules/integrations/readiness.ts",
+      "sha256": "4ab78cf086cf391815cf16a1361589a65736bf7ff4028c3ab093f293e2e12acb"
+    },
+    {
+      "path": "web/apps/api/src/modules/integrations/scaleProtocol.ts",
+      "sha256": "eb855714358b41c1ec63e67f7f8534e487e3dff1d4851ccb71e67d9617adb7dd"
+    },
+    {
+      "path": "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "sha256": "954cd53b5d81c0a1b5bd60f9095f6564d735c4d0310e60b6f05d00ed1c4fe0d7"
+    },
+    {
+      "path": "web/apps/api/src/modules/manufacturing/karigarVoucher.ts",
+      "sha256": "eac3bfc4b7fe07fa874b9afcc5d91bc728240471128d1bd61b1ddcfb8bd06b3d"
+    },
+    {
+      "path": "web/apps/api/src/modules/manufacturing/melting.ts",
+      "sha256": "08723eaf200c4271b58bc2637d5d5d6ba199c0873871e61712fda89d3cec10e4"
+    },
+    {
+      "path": "web/apps/api/src/modules/manufacturing/meltingParity.ts",
+      "sha256": "a61570ec808e93ed29f935f925e1100b6239430854de65d105e3bd2e69f9ed06"
+    },
+    {
+      "path": "web/apps/api/src/modules/manufacturing/meltingPro.ts",
+      "sha256": "b2b249290af5ea798a3399340b54999309f1e89ba878e0abfac4f32d0e512bc5"
+    },
+    {
+      "path": "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "sha256": "cb8341e1674e6a13386a3f1690e9617775e9e2272032238098836795aee35d49"
+    },
+    {
+      "path": "web/apps/api/src/modules/manufacturing/mfgLot.ts",
+      "sha256": "52b0898404ffeae728f5fc8fa93bbd58bd9c8a99807f7ca5835b51e559875e66"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/autoItem.ts",
+      "sha256": "4715efbcf9e6b5370674eae0dd37a6cda4eb2ab95c0a9b536469ddc1584556b4"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/columnSettings.ts",
+      "sha256": "1750f378429fef09e22e1b85386811e9f6b6e9213de7403479d14b541a5be0a1"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/companyClone.ts",
+      "sha256": "0b30d053b0eabe2b9ff31dc2c2f4beca071292dc87d3a8a65ba580ec63aa5046"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/companySettings.ts",
+      "sha256": "7ebe23ad85ab2ee8164bab30dd6a897e386bd391c99c4e272520832bd226c3c5"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/configTables.ts",
+      "sha256": "b2c12b8b4559507e0a6b6d7f2825c121d198a629f40de4f979cfeaf8f12109dd"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/configs.ts",
+      "sha256": "e3b03858a98a629385e1c0dc3c1071e354a15a590656814f743533445b845a17"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/dailyRate.ts",
+      "sha256": "1916a2940d7c2aa3f07598baa155010421c0b9736bfc6560ad36b9bced0afe88"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/designBook.ts",
+      "sha256": "9ad5c8f700d97d2749dccc6c145181f697cbe099128b0267b086ba3adca54e40"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/generated-formfields.ts",
+      "sha256": "d90419cc15a9f267f3f59cbe607cd319431e79a120d230f8fc22c8512aa59efe"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/labourUpdate.ts",
+      "sha256": "21869f2ac231d61bc8328eb71bcd15cfe458a637c57c82bfaa4aa96685394870"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/lookup.ts",
+      "sha256": "a5d3c896216d036c6ac7c7d39e07dc974b2d3820311343c978ad9f0d2aed8378"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/master.service.ts",
+      "sha256": "dc81d25fa3b53a17c6998007f8a14d96da57d238cac70a11023525341953156c"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/openingBalance.ts",
+      "sha256": "67a2a4f81647a5d090de171511c8fa783791e44fe13374c41f812ee8c4f1754c"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/party.ts",
+      "sha256": "6e61c7b995bedfa4dea31b369d61edaf88f215b19b5a36cf2c2b0088e4c1495b"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/rate.ts",
+      "sha256": "f31e91f610ad9bed2aa1c0ba92db43fe2162a7af700e4b1a7551696cf519cc58"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/stockLimit.ts",
+      "sha256": "d4a6d4d6fab04839284c09d4867bdad0a16cb016de1f23f44e722760531f78b8"
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/year.ts",
+      "sha256": "b53b9a870957d3b9d8cfbca38c7497c91101e5c34a8b39ab6561ed7aefe5b2ef"
+    },
+    {
+      "path": "web/apps/api/src/modules/membership/membership.ts",
+      "sha256": "b6da5453ef3b9c7c4ae52ad064c4d247fe3ca931bc052d1f8e05cc715dcfba50"
+    },
+    {
+      "path": "web/apps/api/src/modules/membership/scheme.ts",
+      "sha256": "5ec714d2c38c4534076a04c92cd82549dfd2d50b1169386ca97b57c7fa51a0f3"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/audit.ts",
+      "sha256": "895f45c952213dff81183dadeb30a9005e1bbc12bba40cd886bd5f6eb60657cb"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/backup.ts",
+      "sha256": "22e1570994b9894df37bc81be7fad231b00119684c13bfd312a3690f415259b6"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/backupManifest.ts",
+      "sha256": "e88534986cc8b678bb1a72d2ae2cbd85d7895606668813a1bc6acb72d49fbdbc"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/contractIntegrity.ts",
+      "sha256": "027368b5942e4f880ea3c3f82d455ae0214ff6fe7ea02cf604aca9c8a6ac6f37"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/health.ts",
+      "sha256": "60138238453c127c4254b3fee9d47ff83432acef45b792cb8d4fc60d3c13fea5"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/invariants.ts",
+      "sha256": "14d682953a19eeef3f2c14af848bb8eb86e53fe648bd6d21cd5939b2bfb1f54b"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/kernelConformance.ts",
+      "sha256": "e93a0e71393ae6ebf0cf046fc9f93e182c72ba157ea4f2c07b824b4e9e9dc45b"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/metrics.ts",
+      "sha256": "ddb7abfb992a64378e50da638eb1eb9159b716837ce5ee3953eac12171f6e8f9"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/migrationManifest.ts",
+      "sha256": "bb1809a144d883898878665f506eac8a0ad4d9c5e4afa98435a16fb4fc67dd51"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/parityRatchet.ts",
+      "sha256": "2e6e2cc488c4ed3a417ab37c482ffe31253c4c8bd79112b240c047cfe7729c38"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/releaseCertification.ts",
+      "sha256": "890dc7cb1f614f4540bff41f9c8aa89cd19f9ac11d31c8c6829fb3dfbb2fe3a9"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/reminders.ts",
+      "sha256": "e1d2c826eecb0299e416f7009b353d82d128290eff8c92630e5cc0024f62ba87"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/requestContext.ts",
+      "sha256": "d79fda8dc537b75f4bb8ab76de8573b9ad06682cd6e93fc3772d300aef560b5c"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/restoreVerification.ts",
+      "sha256": "41c1ebf8f4fca6f2e8c06ee46981c309fb1c7f5e6bb9f21c8fe5f6d0f2def77b"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/runtimeConfig.ts",
+      "sha256": "def9b52cd526f9eedaa43261ff7f693468f909693029ed743c51c79737010f79"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/seedCompany.ts",
+      "sha256": "6521be9b3849f90f218e8ba3948e01d33722ed70dcca203ec5e40c4a6a05842f"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/yearEnd.ts",
+      "sha256": "8933c5cecd109d03bbcb4413e1fe1d5bb491edf1a80f3f90130c4d1ab9db7fb4"
+    },
+    {
+      "path": "web/apps/api/src/modules/parity/bundle.ts",
+      "sha256": "9c8e3ba4c2daa89157c215444059ba2124e57b4e74e469fd526e4b1f6f328b5d"
+    },
+    {
+      "path": "web/apps/api/src/modules/parity/bundleDiff.ts",
+      "sha256": "67b9ad7f21fb0b10afe9b791d080220a60568cd47d9ba1b800ac2a5510c6b60d"
+    },
+    {
+      "path": "web/apps/api/src/modules/parity/golden.ts",
+      "sha256": "df8955449bf99ac413a92cb3cb55e1e4802ddbd5979298a83fe79bbb92ecfdbb"
+    },
+    {
+      "path": "web/apps/api/src/modules/posting/desktopColumnDefaults.ts",
+      "sha256": "2590a7f882be8cf941964d327014095f8390c0cd4f1e2e2e20cf544d7d8ac684"
+    },
+    {
+      "path": "web/apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e"
+    },
+    {
+      "path": "web/apps/api/src/modules/purchase/otherCommission.ts",
+      "sha256": "91d9f5e72d4870e7b9e4f806b9b29f2c97c17030aa0a74a295597d8e8699973f"
+    },
+    {
+      "path": "web/apps/api/src/modules/purchase/otherIncome.ts",
+      "sha256": "24ff78fa23029a2999f3beacfd318d3e9a0b07d082bf9bb5cc54b37df527c733"
+    },
+    {
+      "path": "web/apps/api/src/modules/purchase/purchase.ts",
+      "sha256": "75ff5bc0d2c2e7a5bed2d5e2ae992f49bf96cb4496286ca49c154ebdec0e2310"
+    },
+    {
+      "path": "web/apps/api/src/modules/purchase/purchaseBill.ts",
+      "sha256": "f2ea8ba53ce0a025c0655052a6c542092cc144a16f7d3ab65dbf2a5448ef670c"
+    },
+    {
+      "path": "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+      "sha256": "e37b2391b35865c811341ed4a4846354ac238d059733b651c5e45525a9e147bd"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/formCatalog.ts",
+      "sha256": "6bacd8a39c670795528c694c961fc5a583abe0334148f8864a1ccf2d0afc8712"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/formRights.ts",
+      "sha256": "a65d249274d56053edc9efa3a3c0618c4dcd65e61d9f46b18782c26856224861"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/policy.ts",
+      "sha256": "327b6587716c2d311161526ddd348ba0e3d007992db04122fd0586d6fe5f9211"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "9baf3e75355b6653e12cbe6944d94c0c519f88ab6922af1a67bd2ccc1710361b"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/users.ts",
+      "sha256": "1072646d6abdc352f477b63e0b6d1b76e02ec99a40d0901cddff42ef6652efc3"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairCustomerIssue.ts",
+      "sha256": "c8fde3b082e5822ef02ad96f4d9e6eae014de7698c8373d5cababe93cd9fd58e"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairCustomerIssueDoc.ts",
+      "sha256": "0fe1e770ce27df467ba83665c02bca0e4c981fca3471af7f05796655096dee3c"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairImage.ts",
+      "sha256": "3799aaa1eb60212ac06388a4a247c4a5bce57e542d95f8a4a5aeace7cc071a37"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairKarigarIssue.ts",
+      "sha256": "5c33a6b269ddd6a236c8f2bf85a63f6ad9f35ee7c19f12a6bf626652e85ec78c"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairKarigarIssueDoc.ts",
+      "sha256": "ceae3bcbd935c51c4135a57e770c49d127e46ce34b175e120b48284cf1cdd63a"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairKarigarReceipt.ts",
+      "sha256": "6f8e28090e8769191532731bc282b6452e3cd02db63ffc47271bef67f6de54d0"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairKarigarReceiptDoc.ts",
+      "sha256": "5dd1a13606a05344a4465e1334d0ae2b6cf5c1baa367cee0cd8e060f39f9f9b3"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairReceipt.ts",
+      "sha256": "8c156828d5bd12ab43d3f14b55428be6f70d6d5b19d7f15c3eaeebe88446a01c"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairReceiptDoc.ts",
+      "sha256": "f4dd99c0b304dfdcb096691e9bb282be99f71a218f41b5961df44949419c26ed"
+    },
+    {
+      "path": "web/apps/api/src/modules/repair/repairWorkflowCommon.ts",
+      "sha256": "be5304082bb426b0a96bd17c0ebe662ff8ce961ec1ca0974ad29f6227cfdb6ee"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/billProfitReport.ts",
+      "sha256": "11aff4c64915d67af4ef4378ec16f9c4d950b4bff259a09616d533eb738260ae"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/branchInoutReport.ts",
+      "sha256": "9d896fa2210589aaebcc52e9e82851e81cbd04d4c643862f469ed8b85bc673f1"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/closingStock.ts",
+      "sha256": "75f3880200ce8aaab781df96ce3c54ad5adfa875b7b58ae9bef93246c5fdbc51"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/consiReport.ts",
+      "sha256": "367a5ed07e9870edcb519b27c02e7bbcc0497dc77a2e41cac1dd606f8cf0155f"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/crystalFormula.ts",
+      "sha256": "2f98310109855c45dfa184ca1ce6c8eee962572059f6c7458af0761bd4f61729"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/customerAccountReports.ts",
+      "sha256": "048340519ee46b9bb56872fb13e1a941a1bcbd9494e13b8f445551bf5dc24f42"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/designMoveReport.ts",
+      "sha256": "605266263f0aa0611d5478d11e5b9e01823967b82b00c1b4db213baec9dbf4e3"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/dhrnLoanReports.ts",
+      "sha256": "f68fc2762519e599479e90dc46abd9c2ad68d619fabb995ff28d8bf6f21f85b0"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/graphReport.ts",
+      "sha256": "813a50fc1ee570f441e7dd855bed430fe218d6c1fa10ebb00e6ac81aebc6ba48"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/gstLauncherReport.ts",
+      "sha256": "d6fe86ecb2171b48478047d5c2b59e8d1ee5abd6c143cb27d35b36649fe616dd"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/huid.ts",
+      "sha256": "a7a2807499d6483d0488c6b11a10e98705274948ce713043043b5fcff17f100f"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/ledgerStaging.ts",
+      "sha256": "9f84032fcbe8d9ff10fc834fb1d88eb0037042a905961ec2cfd83620756efc1f"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/manufacturingReports.ts",
+      "sha256": "556b53c3efca71c1693f39d395f781eb0f462a2e374c772605a1ca70819032a0"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/movement.ts",
+      "sha256": "2605b6b5589c9f24cb654a4f6d948294e06b2b61d4eec89cb7bd3e19b15c7db8"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/oldStockReport.ts",
+      "sha256": "abfcb501176fed65421e1afdc882124b7d46ac4b269fcc9f23b54eccdf426d87"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/orderReportImages.ts",
+      "sha256": "57185661348a4bf09d6248a537a1cf1920269de41d75834c225868e48fed1b98"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/orderReportLayout.ts",
+      "sha256": "596acdd5dbadb5426d0287d4ea8ed21ff4771f1d6a48b0a71e4b0440168ef304"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/orderReportValues.ts",
+      "sha256": "4923c70f5685db25b8fc88094aeb701ce945408096fde38d35337fac5d4aaefe"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/orderTagReports.ts",
+      "sha256": "2a7f2e3cab42c2f79f9bbe53a3f3d1e0fa491f51fe4235ff4772c76cba7b0e7d"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/otherItemReport.ts",
+      "sha256": "a58fcc34db93798e33ddd860775cdd965b393207402a4eb4fea63cdb20b94f7f"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/physicalStock.ts",
+      "sha256": "c36137ba2584df0c1d203ebeae376315d3f68590ceb10b612f63b6c711d9d6aa"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/render.ts",
+      "sha256": "c01e8621a32cbdfba85b8101dfbcbade7f9d29f561a4ca1e98dba16f90611c94"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportAuthorization.ts",
+      "sha256": "2607110e8cbe8981d030271af31926bf21eb80be8cd5bcba71343e7eb6cd0fc3"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportBind.ts",
+      "sha256": "d129d36d19a1f812ce915070a411e31130cdefab4ae2546a7120d856b98e9ed1"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportBindingContract.ts",
+      "sha256": "13f74480a45f4d3bdbe8f00ef2e30f3e965fd07f4d7e7cf3370322cbbd9d9b6b"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportCsv.ts",
+      "sha256": "006be45409b613ca5c13af7d115266bb6b216d6568a5442f470369e6471e45f9"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportDiff.ts",
+      "sha256": "0cb53ed2bf2eb990e944982e55d5b728fd416a223239695c8f92023172ef8c2e"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportEngine.ts",
+      "sha256": "7486db6229f6d397c5ac6e336f7db3607382f1e728023751428a47ef63d04d6e"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportFamilyReports.ts",
+      "sha256": "0ed86d6623494b0f4f7bcdb8939455a841ee1cec1940b86e7ff8d5e978d4e634"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportFilters.ts",
+      "sha256": "a7bdbdad771bed7a7b58d446a901f84a5d733d67587264b4110cb9c3a9d20453"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reportGridStaging.ts",
+      "sha256": "0ccf1f46a8c5917fdf749214cf8f3aed0ef2cc15788f24583f1bd14acb76b073"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports.ts",
+      "sha256": "e337cee0edcf88d02c1c36c366811911b0b15ea4303adcc0f29d6bb58747a01d"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports10.ts",
+      "sha256": "656c60a980f085a9dee27b5a0b45e709e96d04337dcc26dafa0f069e2cacff40"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports2.ts",
+      "sha256": "20b3f5347e9bcd91c879f1a8c9ba02df7ce7c6fb540357c5b980cfa8ec75fdb8"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports3.ts",
+      "sha256": "a3a0d3225301d04ee2123f724a321552b632109165e0bd67886c19d170c7d150"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports4.ts",
+      "sha256": "79d8b5349f9a7577d5319ed8b6198a631cade8a04b5baa506db8146b54593ec8"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports5.ts",
+      "sha256": "2954f26c7dff13c4610d30e6d81745f008abedaf2df8afa3af45182ce2e007ff"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports6.ts",
+      "sha256": "a24cfb460013aa33c64262a7eb7cf8e531488b50868768d655f72ff5428534bb"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports7.ts",
+      "sha256": "dc9c29ea431f265d38afd9313065fbc4e36f503d3c987f755b905ded6b0f8fb4"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports8.ts",
+      "sha256": "d1f9b1634d1a6ea95315efeba41eac7aff1645befd08d226b13627b4198f0a85"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/reports9.ts",
+      "sha256": "fb11ad0e191a5158ce13a3bd63dafa5d4fada29803e13b66f663d02476bd4d36"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/rojmelReport.ts",
+      "sha256": "cb85a22c7e70b3a273e9db0e2568b9c6cb1ceeb83f62e594c705b15e97e662f3"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/statementDocs.ts",
+      "sha256": "f7c390d6fc2fb84cb3d83977756d8c1f56754bf377161a2fccdd7e735b1e838a"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/stockLevel.ts",
+      "sha256": "452ceead06a1e21bfb0b3064d2c0fce17c49233989ae44a142a15c4fd13ff68b"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/tagStock.ts",
+      "sha256": "41569e40a788eae8cfbc37733631ff318b328127630ba5269a4f88899f0fbd20"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/tourReports.ts",
+      "sha256": "829e4143c0d5c26cc84f38e47d69b1c9e64fcafd6ef20bdfa641f8c0126856a0"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/tradingReport.ts",
+      "sha256": "39eaae1a2003e46c03246770f6f559b2e8160e0e8d19a1fa1e6e5ae6553e13f1"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/userAuditReports.ts",
+      "sha256": "617c4728d0308c6285394dffa75ec12ee0e918429ef5741b59fb38184746f0f5"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/voucherRegister.ts",
+      "sha256": "7ec58fb2d51a331bd327873249a1c097e5429980c6f3bfdff528514736c4b3e9"
+    },
+    {
+      "path": "web/apps/api/src/modules/reports/xlsx.ts",
+      "sha256": "6983cd2180c77523bb29bb4154481963f93ae1e47bbdb11dcb925af5dcb5a903"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/billProfit.ts",
+      "sha256": "bac0b31273fa03a18dee67c1c486e89e84629a4764127a87657019d76e63dc34"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/invoice.ts",
+      "sha256": "119b54d775c33f7c6444f17e793e702639e037232476217c6340cb0b6f2ab0ab"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "sha256": "971d54ee2951da61f22831673191d0ccd596ad5ed6f7fe38dc8497951175bf1a"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/oldGoldValuation.ts",
+      "sha256": "33115cb391693ecca74749d05e2bf39cffc6452984df6d0ae4c7aabba684085c"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/orderDesignSelection.ts",
+      "sha256": "c4d7ee655c8ebd26193dac07411bde9ee95ebd0cbc40bc160a2223f2450caa82"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/orderDoc.ts",
+      "sha256": "e51c3a69f278f6e664f6a9076dacbdf49669d30a2955c27ef3f1e91710d3e07a"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+      "sha256": "a226087e96f0bbb3c4de2d75b3634b0a0b8d39f33f8d5630b98e775de1f05251"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/rateCut.ts",
+      "sha256": "a4814f32fc5ab3aada7aeb1085891f096ddb5dfa3cf09b95fc1d85597f116512"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "69a8e90c32258e756e8294dd3c8ebb5aeb185d64fb567e1fcf03b74f7e8f4190"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnSource.ts",
+      "sha256": "07f5116677cf88e8c0f879e40f29f811ada866af13f2462cce11f5762fcc7395"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/sales.ts",
+      "sha256": "f9edc60fb957d5efc708bc321b1fd905ff186f1d87519728b874a8af79b62f12"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "556d87d9eb73974f4a06eec64a0f6a6fe0096b90e59b14522176021ea10fc8d9"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/salesReturn.ts",
+      "sha256": "612ddcd8f3b0cb8f0368435495125c8b50ed2f8cd03adad11f1cef12cf1d2a70"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/settlement.ts",
+      "sha256": "a22db5a66507f8178bfcca8ba221ac615ef190496dea9c4a6e16627f9f4b55d1"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/vpParcel.ts",
+      "sha256": "0e7b7dd0a770aa9bdf5c93dfc68db9b6f33e39789e39ea51b17dc4b4f01945fd"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/wholesaleSaleReturn.ts",
+      "sha256": "00cd4d138987b8d8c988dbcb737abd395cc9124be09ccd8c075985273cf0c6f0"
+    },
+    {
+      "path": "web/apps/api/src/modules/scheme/passbook.ts",
+      "sha256": "c2c5105c11687da9dabe8bf81d8b4f843705a40cf4a8796a0d274dff1cddcd81"
+    },
+    {
+      "path": "web/apps/api/src/modules/security/sql.ts",
+      "sha256": "c93d64713353710fde75950e304900d6d4a505650a8562ca443b962fec7f7d25"
+    },
+    {
+      "path": "web/apps/api/src/modules/settings/settings.ts",
+      "sha256": "cd0da2dd6c61d61bc5953cb16b3d15f1ad41d400d1a6c7329e311dc1a5532ff0"
+    },
+    {
+      "path": "web/apps/api/src/modules/settings/settingsCatalog.ts",
+      "sha256": "84dc19721f0e3822b3fe3d7a77f451e83ac8b2285fd6eeef3065fd695adb8b12"
+    },
+    {
+      "path": "web/apps/api/src/modules/settings/settingsInventory.ts",
+      "sha256": "44883f74107a9aa32e78599d06f688ea2c08814da6d1b6ce7f1658aaf2f5eae3"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/bookPolicy.ts",
+      "sha256": "e5a9a6c75f2c4ccb66f7c2504253876ca9b9b3687e5003de8bf4c9362c03ed74"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/counterStockPolicy.ts",
+      "sha256": "8126b8cc7e261dcfd91fc58dd92f342aa425dd36f2d46545f07d2cf0df2c3552"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/desktopMessages.ts",
+      "sha256": "21702a5797f36b5a0c015f8a8a6423bdc0f53ae4b4a647bbbfeda8c9932da608"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/fine.ts",
+      "sha256": "18d5b941e799e43dfb20acd22789acc3f80431c54292cb7486fb67940bcc6a89"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/finePolicy.ts",
+      "sha256": "737f0e810a99ac1096001bb2d813e559277d89a811330a8653444fee7c4b26b5"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/labourDesktop.ts",
+      "sha256": "510fc85ffef78976d4f85b8325c343c878b7c5abb9c31e08bfc7fba116529903"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/lastDayLock.ts",
+      "sha256": "d7fa20f7c174b2c8ac1fba41a6e38a23cd219295242e4621379cc25f1c8bd096"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/postingAccounts.ts",
+      "sha256": "5c1892324f2d13328c33f627d6c3a9a094cf855e7df6dc0beb7876b484f2b0f1"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/rojmel.ts",
+      "sha256": "ff63789408f8d23b8908f9ed2070100724187ce42c2b9f8f5ea16abd21131a1e"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/roundingPolicy.ts",
+      "sha256": "835a7253b5061dc8206117684c69499a0a294cfadd3fb17de7d04cd83dbea650"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/roundingPolicyLoader.ts",
+      "sha256": "9cb5cb855e9d918b1a186d64f2fb0e9f3a77d8a2b6340db2766784c4c7436f3b"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/settingsBehavior.ts",
+      "sha256": "fb6fb19777b888dfd6ade3cbcc3f5ccf809ad265d018296c6b14bb1d1732bc16"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/stockSql.ts",
+      "sha256": "1017752e6694db4bf60c993c52c938ac49a1cdfdc53c1c2855215fccf4bc454a"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/stoneSubDetail.ts",
+      "sha256": "e97982d8b1a88c96971de52095773dc4269448bb488881058f8ea58d20cce7a5"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/taxPolicy.ts",
+      "sha256": "7f869518d9945001eaf62dcba7983b6b3bf2b4998b3003014f2c78ba7cc60ff5"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/lotRegister.ts",
+      "sha256": "b4b87f7efcda5cfb944a2bd7aaf5d38da1b70d30448268f13030c70a3d4795a4"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/physicalStock.ts",
+      "sha256": "8e3cb3671a55d3ab1bc113ec9bfd7cfaa5eab09415a39391562cec24f8b398a0"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/stock.ts",
+      "sha256": "41fb3cb97e302de2ef165a42cee961984fb7231b9479daca60da19e0d11f0a76"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/stockInout.ts",
+      "sha256": "f84043ace2bcf5b68768cc13b9a84043bf4e6fc8deca6cc4561901f782d74a99"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+      "sha256": "dd25a2cca5b4bb651221658db041b39aa9165c65f96ed73154c89ab7cb42db13"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/stoneDmCf.ts",
+      "sha256": "8109efe432c8aec55869bb546f8b463b836110b7164120e0a65878718ec28862"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/tagAdjust.ts",
+      "sha256": "907b6f7d0c3a318918160f22d2b95e24ede16e81adcb53320b50d1e13b868488"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/tagImageTransfer.ts",
+      "sha256": "c77c97bf4cbbbbf2f1878cf2def045e63df7bd55d17f6273e8ca3a77dd12b378"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/tagInvariants.ts",
+      "sha256": "5b82825baa214164841f1573ee4d2bbc4dca4e874f231e1cad136c0c0af87c99"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/tagOps.ts",
+      "sha256": "da0a48fbb9b99efbb61bf42ba0585565d700eb7b31d06af507d32c228f370251"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/tagPrint.ts",
+      "sha256": "5a2a17dd12cd64ab9f9bdf71224576db03bb77b53bbaef1ac62e9325c3c37530"
+    },
+    {
+      "path": "web/apps/api/src/modules/stock/tagSplit.ts",
+      "sha256": "e7f59ba549ac675bb6def1bdab96f14f0282f0bc7f5a69653ee08662c67c3186"
+    },
+    {
+      "path": "web/apps/api/src/modules/tour/tour.ts",
+      "sha256": "86a78ac66146c41429721b5a17e69f502f216043d0dddfe16ba09d3814f6485e"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/dataExport.ts",
+      "sha256": "71a1d39dc135a4ac44dc219f466782591139a749fe7a252669daf02f452119df"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/dataRefresh.ts",
+      "sha256": "a71aadac31ce6bd8eb77b32268915f0cf0cecf85c0d726941c3fc7b5b70e43de"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/dataRepair.ts",
+      "sha256": "d93211fbd6e9ad3428cf4db3171fc4c7f14668f26b676e0e6b0b984347e96319"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/dataRepairOps.ts",
+      "sha256": "836a0315f331ba4bae0b75614c403a623f6a6c7f443fb59113abd93fed4e5a8c"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/estimateReset.ts",
+      "sha256": "9c62d163689dd8580acef0cd8373a2b67286a37958f65594ee73acdcd702f7b2"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/hddRegistry.ts",
+      "sha256": "69e84bb16962f74a60c37553e3038136ead86d35ce783d1820ed01335a752ada"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/reminderEntry.ts",
+      "sha256": "85ce26c36ddaba627e99bc8029dbd9f354059e7a6759cdce48bdc6a554c625ca"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/userRequest.ts",
+      "sha256": "e252839b9bebb0a892306a30225fa61468a60d2659285fe23ad9c13a29eed2ea"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/voucherRenumber.ts",
+      "sha256": "eabf6ce246524b20e96012fe1e2493df0a42046d63dd0092f5b23600ca4d2ddc"
+    },
+    {
+      "path": "web/apps/api/src/modules/utilities/windowTiles.ts",
+      "sha256": "2bdf84eb2ba0b43076cb7e7c2457d569850af1c72f304ff08c2c449be4964218"
+    },
+    {
+      "path": "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "sha256": "110507c56cd1145fca709292ae7fedda2bfe5bece637e1b39c32ea28fe94feb1"
+    },
+    {
+      "path": "web/apps/api/src/modules/vouchers/lifecycle.ts",
+      "sha256": "346f7d64fb293666a6b430414844c5fba5ca635a71946244df46b383136a0c8b"
+    },
+    {
+      "path": "web/apps/api/src/modules/vouchers/list.ts",
+      "sha256": "fea1b9c6187136d1bb3273280758d264cf3e8ec165fae1fffa26c73f56f28b0a"
+    },
+    {
+      "path": "web/apps/api/src/modules/vouchers/numbering.ts",
+      "sha256": "ccf924ae90087c682e8ea915dcaa018cc59e250e9c1825b68600dc20fb2f09db"
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "sha256": "a925b7fe7a43207e53deee7f34eaee179a3bf9341bea9b3f8b15874d7fda4669"
+    },
+    {
+      "path": "web/apps/api/src/server.ts",
+      "sha256": "90e7a4d7dd67a8e0139572c0decfb97c2d0a3d69305cda5efb66e07a0d206e58"
+    },
+    {
+      "path": "web/apps/api/tsconfig.json",
+      "sha256": "0b9f34bdc22816f91107b36a6fef112243dabb973d4859e4bdf4481622e0ac0c"
+    },
+    {
+      "path": "web/apps/api/tsconfig.test.json",
+      "sha256": "1693e10c70e86942d399f67439157c014808919e5b57bc3024660e800073e762"
+    },
+    {
+      "path": "web/apps/api/vitest.config.ts",
+      "sha256": "8a33367566ecf1e5188c717d8248ce0de817f3faecd3c38d2fb23164520893ba"
+    },
+    {
+      "path": "web/apps/web/README.md",
+      "sha256": "3c5c233bd68daaf3a66da9616ff0346d8a1fc5b766acc61d1674ec28e838285c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/admin/provision/page.tsx",
+      "sha256": "fd76c892777c274ea79c2661eb5647c9189d19612c657b1869db24df7ef1df18"
+    },
+    {
+      "path": "web/apps/web/app/(app)/admin/users/page.tsx",
+      "sha256": "a1108fc5eee92b3260d2d8162ee4a2bf07c6cdb8c3739b2285b988d515494e80"
+    },
+    {
+      "path": "web/apps/web/app/(app)/audit/page.tsx",
+      "sha256": "7157730f8dc6226b68296ca4d4262e3b41149269eaa9c3c8f57b9eceedc497a7"
+    },
+    {
+      "path": "web/apps/web/app/(app)/backup/page.tsx",
+      "sha256": "8f8a70032002e433b90d21b8e9b6cbebdee94d3463c8540d2f4888a4ea5158ec"
+    },
+    {
+      "path": "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+      "sha256": "cba3016e984dc01d09cbe6236e4d009fe4b63e5240d8b8dab97628b602fae43b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/dashboard/page.tsx",
+      "sha256": "429be25942f53f39f99cee40289d8060a7ad1f5604a3ec90785ec30a951a9f75"
+    },
+    {
+      "path": "web/apps/web/app/(app)/forms/form-layouts/page.tsx",
+      "sha256": "2c8aebd4641e306389f140544a6b628922804668ed07573435d1885583f17eb7"
+    },
+    {
+      "path": "web/apps/web/app/(app)/integrations/page.tsx",
+      "sha256": "ab85c376b4513d0b5c315c94b90a8603f0e7715f0733040fc678407e8ebcb1c1"
+    },
+    {
+      "path": "web/apps/web/app/(app)/layout.tsx",
+      "sha256": "2e652cbd457a1ca86eddd937d87ac7456937dc0ffa04d137f4ba4103e78631e1"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/[name]/page.tsx",
+      "sha256": "e9db9de8d262f7877aa8af9c1da1e960f7b9ac46931a386a64fc929e5452eb82"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/auto-item/page.tsx",
+      "sha256": "c84314853f80847c061cc30d10815dc745ea575c1d8b451d80e5b277983e9d53"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/design-book/page.tsx",
+      "sha256": "54c1e7df99173c733fde69e6a9b6861f5ee9a3d4b34b04a1a6e9a98001620cda"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/diamond-sizes/page.tsx",
+      "sha256": "313a5552445cf2b04632b4eff670a537b5499e347aa41e32ff0891daa4dcea10"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/item-stock-limits/page.tsx",
+      "sha256": "217b5c6c7c8922ef80e46dfb87bd4fe1cbd0b11a81d921ff5181bcd523279b6c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/labour-update/page.tsx",
+      "sha256": "861b3d5d4844a74831826e7670469fac84bf9b01136afcd8ace80339a83bfb3a"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/opening-balance/page.tsx",
+      "sha256": "b9a339a0fb6dffcbb24def76bfed07886511cb23ea7eeb5518d8ea896a6d22b2"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/party/page.tsx",
+      "sha256": "20b7172480ab6680d7497177d285c06665dc83e550a7e36dd31eccf36dd1b26b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/styles/page.tsx",
+      "sha256": "aeef839016dba838c16013249dceccc4a5460962d83970c73f98380e24a36dcc"
+    },
+    {
+      "path": "web/apps/web/app/(app)/masters/year-create/page.tsx",
+      "sha256": "47b96c0ff3fb5d55f793bff264fe2285415d19b06d5190dc9f37755a8a9a5e55"
+    },
+    {
+      "path": "web/apps/web/app/(app)/reports/[report]/page.tsx",
+      "sha256": "c1808115600a6c1dae35102fc3c1ed1ca33bdf7fbeb01879dc0ac436850ef466"
+    },
+    {
+      "path": "web/apps/web/app/(app)/reports/karigar-ledger/page.tsx",
+      "sha256": "8e365872ce0358e95af19f38d1575a983fa52306342f24d58bc00240ded00033"
+    },
+    {
+      "path": "web/apps/web/app/(app)/reports/report-layouts/page.tsx",
+      "sha256": "41ffe5da223872947951e499edfdaef227ce1fcafe02cfabea08bce548a85ae3"
+    },
+    {
+      "path": "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
+      "sha256": "377122d25cc963b1b6de781f579822cbad20bd6a28273181fe9566e3efe89565"
+    },
+    {
+      "path": "web/apps/web/app/(app)/reports/voucher-register/page.tsx",
+      "sha256": "c63d7103706c2aad3e016dfd40da956b8d23ffb6ee78a499168d59bf4eacafe5"
+    },
+    {
+      "path": "web/apps/web/app/(app)/settings/page.tsx",
+      "sha256": "b2a2b5d880bcf5c7696a9859c453f977c8f4ad1a478fe25755e5d07fa2065e40"
+    },
+    {
+      "path": "web/apps/web/app/(app)/soon/page.tsx",
+      "sha256": "ff9b6e2a8a7a07cf0a12228b37953666bb4e983785fa80669556fe3a8ae0887f"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
+      "sha256": "4d289b7f2f066ef189c32f94465a04ea67c0733d23067af2e98df20b5c83c1cb"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/bank-recon/page.tsx",
+      "sha256": "1189cd3f652dfdad44432776d55754d11128843f04417b9634054b0b4efbbd99"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/batch-receipt/page.tsx",
+      "sha256": "ea3d1f460072fff6bd5ae5befdf849bcdfcac0fa13abe22027b93cd588e2ab1f"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/bill-to-bill/page.tsx",
+      "sha256": "880da282c3b311dfd3bdbbabb23438d1f68e90c80c39df92d7a978003b46c7af"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/bullion/page.tsx",
+      "sha256": "c375b0bb0051f63ed7e852fa4172be450b688aa00e1eb944171c6af83313c715"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/bullion-sale/page.tsx",
+      "sha256": "2e231200651b79db4cffcc95888ecff4c5abfdc3be602382f003b1e7e2c461c6"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/cheque-print/page.tsx",
+      "sha256": "f61b6412b4047aeb9f493147f2e852fe5f5ffc19f96b6a5845ffc2cfda41b949"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/consi-purchase/page.tsx",
+      "sha256": "2795303567ee0ae357a9bf486f12ca12fe0a0d157266c8866425516a58349c1f"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/contra/page.tsx",
+      "sha256": "11a0463a06c27ebf9d3af05a6b92ef7e6ca5be21a276f9fdc86fbce4a46e4bb8"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/counter-transfer/page.tsx",
+      "sha256": "e8e65c5efea8f018d70ea4c5e8f7125b0fc13de02315ec420fcf7b3d9425ff3b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/daily-rate/page.tsx",
+      "sha256": "3bdd190fb4fdbcd2320971555e90e5de530856e5efea1af8da761069cfe2fde4"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/dhrn-interest/page.tsx",
+      "sha256": "ed9f10e1b799aff8c3c0f05461d15b3c42c477c52ef205dd0d697fe2bbe69e83"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/dhrn-issue/page.tsx",
+      "sha256": "40804282c266a2d826b16c4abda18003a7ff3287d668afd95759ff5fd34114c6"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx",
+      "sha256": "6d359a87305dfef1b1d9f20f7e30d28e2c1bae76018c4ed68df02d0050a5dd2a"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/e-crnt-note/page.tsx",
+      "sha256": "a53c1160b53a0b3448ffe9eccdca601a6a15a66ea8e962715624b46709a98d8b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/employee-jv/page.tsx",
+      "sha256": "42c248b3096c5ca29f18f17896172288f2d4e98fea4c87adfa4a4fe528d357f0"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/estimate/page.tsx",
+      "sha256": "c53dc749d7bb2e7d15632c7bfec50ceda4a2d1b1443b42013ec3455231b49b9d"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/fine-inout/page.tsx",
+      "sha256": "d149b61c2be4ffbf2bf2e12a3e1d89f339567448956944a0e7f145967474f9f1"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/fine-jv/page.tsx",
+      "sha256": "921ec75d20e90b81cf75ae8ef91c0c7dc76f111380fbfc79aca35669ef937f72"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/fine-sale/page.tsx",
+      "sha256": "bbe18ff334a1d7283328fbdbec655fe5fd5800cced9c5bec1cde385822475cab"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/gold-book/page.tsx",
+      "sha256": "9454b8610731c73ef9f78c766e6d4361ee55170d89cd77fea8d97a34cccdc5d4"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/hallmark-sale/page.tsx",
+      "sha256": "2e9e5f4712c8e607915c0277fc0e542737f80ac58d24567671c39d44e61aba7e"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/item-lot/page.tsx",
+      "sha256": "17c3a51e35eabbf7da360a93a7161c0479010b64636071c68969899c5cee2d91"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/item-opening/page.tsx",
+      "sha256": "84c09a7169b34b8c61e8a414edf25d2b8abf24d4d570e7c07e5838ed3ed7fadd"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/jobwork-issue/page.tsx",
+      "sha256": "78a829cfea718e890c5b8fcd20c389f1c7248020d697d8f2f0fc7ab4f353459c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/jobwork-receive/page.tsx",
+      "sha256": "0acbd9042f8b9320227bec254fde5b6120622a41a9f8401885159aad7a86efa2"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/journal/page.tsx",
+      "sha256": "4eef18bee43ac50bd2596763e5ef2dcc65be09eabc3de2f2fce72b5c82db047c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/karigar-issue/page.tsx",
+      "sha256": "549909df3514e41d8a797e0b12a8b0a0c7fd17ab76eca248a48eb7f7fd5a81f6"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/karigar-receive/page.tsx",
+      "sha256": "86587da8f476211cd96baa7416928951ced6e978b4b9613cc08f255cc2e17ccc"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/labour-sale/page.tsx",
+      "sha256": "073757ee8804694d64327dfcd6cc11146d4811feb50950d3ab3d37b4612383e0"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/ledger-adjust/page.tsx",
+      "sha256": "5ef99d7dddae988af45cd5de86a695801125c65aff990915d8d1117132f64448"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/loan-issue/page.tsx",
+      "sha256": "8c7a552a1c2ca6cf090352e8b4f13a6ca857fa0a24d4f670165b874a07f0a462"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/loan-received/page.tsx",
+      "sha256": "0b415334ea28588cc670686152a4919b0e12429faba659471ad8a639d8a90bf1"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/location-amount/page.tsx",
+      "sha256": "36a81000e0d7a9cfe7febd1961256eac50a0edfb834d1debc5e9a6eb9b87c335"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/melting/page.tsx",
+      "sha256": "6c57c9ec31772de9b6a4dbc6cab480b85b529a509845183d3635a2794e504386"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/membership/page.tsx",
+      "sha256": "edf4bbdb232a9322e890a27226e748e7177bd167a037ddcc4050f2312f878021"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/mfg-issue/page.tsx",
+      "sha256": "76dd735fb7e83aa539f604a0a4157aac29b9e0a474f5c9327d4b53edccbc814f"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/mfg-lot-issue/page.tsx",
+      "sha256": "7bab94e8514afe88b40bed6af2c9c752d582a07a5c55c7eb95b505224e2634dc"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/mfg-lot-receive/page.tsx",
+      "sha256": "08088bb37ee1cada1d85db185fb1875b6b7c30d29778f9a3a2a2dc8da6ac3b5a"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/mfg-order-issue/page.tsx",
+      "sha256": "156a18b5bcd7252a96ccc57e6bb1a6f1f230e391de31450578ff70c6dde01c1d"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/mfg-receive/page.tsx",
+      "sha256": "b513325cdafecc7edad3cfed108e604e710ad4fb6568370b2994e2c254877ff0"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/old-item-sales/page.tsx",
+      "sha256": "8b61ff213f34a197a375065c57b99ee28d7052cba8f2242fc68432fe6c344244"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/order-cancel/page.tsx",
+      "sha256": "b7c14e51fbb8a6968c1aa4ca4beacad87c96750b2a506f05b182aa3a5ed04bb2"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/other-commission/page.tsx",
+      "sha256": "e2f76f8dd47de76905cbcacbd4fa66cb63336b1322b4b7a9d01ef1c52b7ca7d5"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/other-income/page.tsx",
+      "sha256": "1c87784c109069693e96758971fe8a2942eb6f08c5eedd1ff76877bc02be4de7"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/other-purchase/page.tsx",
+      "sha256": "a27e0f03a9b18fc3390418d7025f230f2899d1201b597826a381bb2ec2bc1635"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/payment/page.tsx",
+      "sha256": "625d6405133f527ba7a642046380ebfc8de0fb75872ff11020f7f877d11d2060"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/physical-stock/page.tsx",
+      "sha256": "3e3130f25bea52a5b8f7d3928a214e687aa7d7d49f0c8ea6d424a945c3d79a9f"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/purchase/page.tsx",
+      "sha256": "d924cb30f801ce7c0aaf461d540a227c80bc63b53916fb0b26bae9b74008df09"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/purchase-hm/page.tsx",
+      "sha256": "28e39650d9a3f9d3abf69b98bc8c119c6d23263b6ed2f42095ab41b0f0ace68d"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/purchase-quotation/page.tsx",
+      "sha256": "ffcb89933f94fefc9b96297bbe304405bd1779dea23c9142580e0540c08a1f5e"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+      "sha256": "1e951d6786519ca4ad44eb86da9ee37e35a834ed625b0caffbacba82236dc374"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/rate-cut/page.tsx",
+      "sha256": "cfb6acfde7f0b26b8438fd2ff2cc7ca888ad097e4a4f1cc98b48d758dc714214"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/receipt/page.tsx",
+      "sha256": "2b6501272ce5f3b3dd43ef8966ba26c79086fe25ac9d47cec94c01830f789f3d"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/reminders/page.tsx",
+      "sha256": "41400d0c0eb2c6aaf7f236e4d0d6e50c7a702dbacc44bf4b79062f33a12af8f2"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/repair-customer-issue/page.tsx",
+      "sha256": "51a4a563da9fe6af452f82d89a437e2221af8b5de1d651b7f2530da009f954b2"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/repair-karigar-issue/page.tsx",
+      "sha256": "0cf5e43da96db2823f300aa91d81d8cf3cbdb23b3928ca6dc11cfb9e70d23758"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/repair-karigar-receipt/page.tsx",
+      "sha256": "0991a46208bf3de3d46539380d99d1ce7d7d51d74680bfdda7cd34a33e66f03b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/repair-receipt/page.tsx",
+      "sha256": "0bfb525f6648315863b6760476fca3c717bb26917058917ce7586f9cc088c92e"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+      "sha256": "3c8f6e46d9c175793321b852d3adbf434a4214cdd566afad0d1fc979079bb29b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/sales/page.tsx",
+      "sha256": "2de9bce08cc269ead7baffa4ede383130d5f7091cc8ccf3007479fb829675c44"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/sales-order/page.tsx",
+      "sha256": "a2544854db3892240646758b9a4151b0fbfc1364f4e286dd4b32a9efd3595d38"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/sales-quotation/page.tsx",
+      "sha256": "4e5f7a5801449fa4842b1e65f7185d9077f7adbddc6b93d7a271cf22dcbe0dbc"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/scheme/page.tsx",
+      "sha256": "20fb7c4f6435dc03eeae09d248ba3dd8ac2b5edfe15947fb85ec79e75e473986"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/scheme-gold-adjust/page.tsx",
+      "sha256": "460393551b30401a9e836b6871e0234df2711d4665014597f09563157535f91c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/stock/page.tsx",
+      "sha256": "016a81e06e11dbd95351daaa5939dfd1b0f502b21ce4e39a7ca300f5d33db303"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+      "sha256": "6928a301b0433e2734ab9b6b61259e2df68b456fb7aae50bd2a4f585e0228edd"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/stock-in/page.tsx",
+      "sha256": "3b87f0040f49a7cbad62a870b82bb2d056ae07eeebecdb1c6e53e3c67cce27ec"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/stock-out/page.tsx",
+      "sha256": "aa6505b66ef6e4a200b179c2eef6e6212d6aacc8c532688ac9ef512cc532cd25"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/stone-dm-cf/page.tsx",
+      "sha256": "1a09338afb78cf28a4b71cc9f83ebfe68bbb8f0fda505ff5a1436203e17c48c0"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tag-adjust/page.tsx",
+      "sha256": "68adfba778c2740d99056288720f908d5f968684adbc99aa5998463ff7d7b3fd"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tag-cancel/page.tsx",
+      "sha256": "c213ecb26b7ecf9a400379b0f1fa21996f458606c526c5103e3d5bc31e120ebb"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
+      "sha256": "1ee463cd987619922b6f4c973917eff297aecc937a5018ba541813be28875c3c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+      "sha256": "38b22b4c4998eb28b690b23c82b1e155454a022a7afab7c0a2f41b390e747227"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tag-split/page.tsx",
+      "sha256": "2ab6ed5ca2474ff020ae07ced7a1b2bd8214dbff72179411692f236ed88f14e3"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tag-transfer/page.tsx",
+      "sha256": "53ba213b596cecfb3bb9f1d9a97e11f2fa96588a9eccb91ef7fc8ed03fd97717"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tag-weight-diff/page.tsx",
+      "sha256": "e75f41dbcdb1a508525df99b15035a4d1ee5164afdd527126612fb23102b09b3"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tour/page.tsx",
+      "sha256": "2709acb3f32ce62871cf4726c00d9a62d417a399820480f1cf56c138e30bdcf3"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "05ee74b06728d71e44d6dcbf7d6bd927a7024bae47557912e536b6f6a70baf1c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tour-return/page.tsx",
+      "sha256": "988994ebb3400065be6d3f39b185dc21ba215ff3e587f4838a46bbf67d4ef9e9"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/vp-adjustment/page.tsx",
+      "sha256": "404891bad4f97914a45407509cab8cae0613bd0c35435ab49db657ca62974cd9"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/vp-parcel/page.tsx",
+      "sha256": "f02d258437d2cc92cf2ac3bb28d7b5bbe710ab06153813ff609d8e60bb90c38e"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx",
+      "sha256": "196a583a5e4d80eb186eb60a31ec935866d6f641eea57bfff8b63e82c325b0bd"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/wholesale-sale-return/page.tsx",
+      "sha256": "f5b2864b58706c7b6b29bebb328a80a493e25ebced4bdc768c650c22bb19a015"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/data-export/page.tsx",
+      "sha256": "0833e4992f7acdcb27d5cf8135aac0d2f6b64c4c2638de7949fb84e823f71764"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/data-refresh/page.tsx",
+      "sha256": "e3a8f9ce0eb22ade38b87d5d2700f39a95b2c2a895259b84a74e2b8b8efa91dc"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/data-repair/page.tsx",
+      "sha256": "5088ce276c2c6006e748ab5b205f353537906d601480562bb3aebed7383e3c9b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/e-invoice/page.tsx",
+      "sha256": "f934d69876dbf6537d577d3d20525553cd650c0c90ff8f182520dcc79afc9526"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/estimate-reset/page.tsx",
+      "sha256": "962455a737d02c572b908e2a52adef4a45ce9ad1a84c53ce9851667f28972bac"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/hdd-registry/page.tsx",
+      "sha256": "07af3f30ebabcb5461e99524e61ae179d809e45ffa184eb1367dedd0425b76a9"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/page.tsx",
+      "sha256": "555bf7fe2a22c270dae0af01ac6cffb7bfac713da349ecdf84491263d739308c"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/reminder-entry/page.tsx",
+      "sha256": "24e97608f1c441f12d3db329c970e6440b898636de32e57ff9a823681ac5fe07"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/reminders/page.tsx",
+      "sha256": "b86ee84b0f84eded0c3bb4e281ae4ccb414e8a92c9b80f3669b4e1fb98b486d9"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/user-request/page.tsx",
+      "sha256": "78a0a1d197310409d34e6c40e894dd50fbff9d3448b10b994b2a56a6641fd907"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/voucher-renumber/page.tsx",
+      "sha256": "1e4f1bef291f4f8bcdda7b8d4c0b2079727333ba70b4cbeb640eb53da3e2163f"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/window-tiles/page.tsx",
+      "sha256": "a8d2beb9eaad2e3b35f2722d4efd42307746d12177d9dd30bbec672dd2388618"
+    },
+    {
+      "path": "web/apps/web/app/(app)/utilities/year-end/page.tsx",
+      "sha256": "7abe0f669680714c048ea95f4f3685c1f35a34d3c71c024cc4ea11a26cc8c4e8"
+    },
+    {
+      "path": "web/apps/web/app/error.tsx",
+      "sha256": "ccd1b71de9cad8395c911a61aad166f7e64ab4a493e3ec6998d10952830e947c"
+    },
+    {
+      "path": "web/apps/web/app/global-error.tsx",
+      "sha256": "c01c63e8de29aabd2db7ce72c4d014fb60a4d3b58bb2cb4b0da5c914a8e5605f"
+    },
+    {
+      "path": "web/apps/web/app/globals.css",
+      "sha256": "0256ffa96dc812873353d40c4baabcae9726f75e9068ff0f324f025b03150f5d"
+    },
+    {
+      "path": "web/apps/web/app/layout.tsx",
+      "sha256": "0edf11d9ee0068d9d753429ddb75ca3b3e93c6a49f89fd00e8944ae298db5d51"
+    },
+    {
+      "path": "web/apps/web/app/login/page.tsx",
+      "sha256": "30bca74c162d83e31f47aa1aa1ac7ff8b389172f68185c9e087c88de337a1178"
+    },
+    {
+      "path": "web/apps/web/app/not-found.tsx",
+      "sha256": "eb2176aba96d06f6b2f3334303f671eb8c097f9c87fd79f9083fb272c1a6a3d3"
+    },
+    {
+      "path": "web/apps/web/app/page.tsx",
+      "sha256": "084ea4905f7bc2dc323226d6f7038865fab5530e64e02c21b0b97f109bffe511"
+    },
+    {
+      "path": "web/apps/web/app/password-change/page.tsx",
+      "sha256": "3ae27fdeef67ab3028936fc9b7890d2820268742e9a3a795f3d41bc21a635b9e"
+    },
+    {
+      "path": "web/apps/web/app/select/page.tsx",
+      "sha256": "0364bca395bd87d0470df8c812f091a3f454316ec30d8a3f8431a42264e9a903"
+    },
+    {
+      "path": "web/apps/web/components/BookSelect.tsx",
+      "sha256": "e20ea55a2817a0d0fe15253d99e228a410991c343ebb7eab1fc34ffb776cf1b3"
+    },
+    {
+      "path": "web/apps/web/components/BusinessScope.tsx",
+      "sha256": "ffe8f4922dd0c65e7dc9bbb91ae8cdd10b67edd8b1349ef57388ee64d2119213"
+    },
+    {
+      "path": "web/apps/web/components/CameraCapture.tsx",
+      "sha256": "4d7c112cf1d79ed1cef2d6ca4c6c94279c10eb485038797f74a36ef50c637752"
+    },
+    {
+      "path": "web/apps/web/components/DeviceCapabilityProbe.tsx",
+      "sha256": "0fe14d5dcfe0c0534090d0f611f09f825106d88621fc35f4ea39469970ca5e3f"
+    },
+    {
+      "path": "web/apps/web/components/EntityImagePanel.tsx",
+      "sha256": "bf9719fc986c9c9bbc5c5e7781a4a32e91768e768dbfdf609ba565c5d6a33efd"
+    },
+    {
+      "path": "web/apps/web/components/ExtendedGrid.tsx",
+      "sha256": "a886f629ca36d86bd3b35f845f742420515a470dfa99ae04697adf90bba16ba1"
+    },
+    {
+      "path": "web/apps/web/components/FormKeys.tsx",
+      "sha256": "cf565ea18c4c8d77b065f5dcc47a5f20fca3f7a04b9f79d59d9fa650132c239e"
+    },
+    {
+      "path": "web/apps/web/components/GlobalFormKeys.tsx",
+      "sha256": "6422e486cc4429c17e3a63d75094004531eb96ad94efadba6e9f5cec4e306680"
+    },
+    {
+      "path": "web/apps/web/components/GridKeyboard.tsx",
+      "sha256": "be51f6554817c9ac94ae7390e7693d4aa23bf2794830a4bec489720665288b04"
+    },
+    {
+      "path": "web/apps/web/components/KarigarForm.tsx",
+      "sha256": "2cb16a9e29dd2b5494bc7f8371addc670ac0f2c7e6c851c7e5975f64263ee395"
+    },
+    {
+      "path": "web/apps/web/components/KeyboardNav.tsx",
+      "sha256": "a7b99a0097cf0f5bb2c43ddc423ecf99776e4c08b4b80d2e02a48a125cbeb306"
+    },
+    {
+      "path": "web/apps/web/components/LookupPicker.tsx",
+      "sha256": "113d6bd103e08e9b9940a5e7c0464991624e15f9c6cd26972f9a5a861687d46a"
+    },
+    {
+      "path": "web/apps/web/components/MfgLotForm.tsx",
+      "sha256": "bfb5d381cf50ffb68a78aec97e4a898d36a128e87adcc370590af2467d4fca75"
+    },
+    {
+      "path": "web/apps/web/components/OrderImagePanel.tsx",
+      "sha256": "aea2ecfcc2fe08573c43f3fa0ffb7c2849a4e40585e708d6069ec48aae2a4054"
+    },
+    {
+      "path": "web/apps/web/components/ParityContainmentNotice.tsx",
+      "sha256": "4efde27920b4b5c8c2ecee825f7edbbeb999abcc1e75bea5cd37d9b72dd06173"
+    },
+    {
+      "path": "web/apps/web/components/PartyBalance.tsx",
+      "sha256": "36baf53abc074e07b78211d6c75f24841de3aa34c27c64afc4b37564c367e1e7"
+    },
+    {
+      "path": "web/apps/web/components/PaymentForm.tsx",
+      "sha256": "01e34b979a1cd06fc05bfeebc668331f34a83a560d51ef72129be82df480eca6"
+    },
+    {
+      "path": "web/apps/web/components/RateTicker.tsx",
+      "sha256": "2f79f5a08fe3d191a6c66f6268edf0a4956dc1dcb1fe5c43d0b35f951134121b"
+    },
+    {
+      "path": "web/apps/web/components/RepairImagePanel.tsx",
+      "sha256": "1b2ad1142541ca9b6a0fc75298d4bafcf9fe8fe14809ed6a9884341611128b41"
+    },
+    {
+      "path": "web/apps/web/components/SaleReturnReplayPanel.tsx",
+      "sha256": "dac7ad2c31fecba31eab712184c06db2f8c5fe35ffadd435728dee9edda930b7"
+    },
+    {
+      "path": "web/apps/web/components/SaleReturnSavedPanel.tsx",
+      "sha256": "d3d14b9bfec0c3af802447d3f2c4c289cbfea3978695c8fc67d4691d5ae5011a"
+    },
+    {
+      "path": "web/apps/web/components/SalesOrderDesignPicker.tsx",
+      "sha256": "51993834d3348e640c827bce850c4ebcbac04355b25c043473005b92cf76b07d"
+    },
+    {
+      "path": "web/apps/web/components/SavedSalesOrderImages.tsx",
+      "sha256": "225a9b9652544c33153e1eb42685d36ed972045d6c0a2a0255c514c1cbbfdaed"
+    },
+    {
+      "path": "web/apps/web/components/ScaleCapture.tsx",
+      "sha256": "700c91c4c18c8b44d7ec362b5c62b1b343826634b8e04b5b87536aa2613118ed"
+    },
+    {
+      "path": "web/apps/web/components/Shell.tsx",
+      "sha256": "96565f34433a6e7f6c7378e0788e544e4126febc0a72bfdbcc9a33e8d1fa2960"
+    },
+    {
+      "path": "web/apps/web/components/StockInoutForm.tsx",
+      "sha256": "cfc34944062a5ef27709b3d35ba1e3c321d0d8ec417a743d033872ed6ebbacb1"
+    },
+    {
+      "path": "web/apps/web/components/SubDetailGrid.tsx",
+      "sha256": "0e8b088a003f86cb184d23aebb565281c413d3190d7a48bd4ddd58f377711135"
+    },
+    {
+      "path": "web/apps/web/components/TenderPanel.tsx",
+      "sha256": "43ebf8335403e855b665a68b5be46506a88e8313cdc6877d602fca587e915a3b"
+    },
+    {
+      "path": "web/apps/web/components/VoucherChrome.tsx",
+      "sha256": "14493148b2dff752017a83931c98fabee59139f2b000e5337d39c47a33016aeb"
+    },
+    {
+      "path": "web/apps/web/components/VoucherList.tsx",
+      "sha256": "0a16f82d6b050e5f42f2e01b32c464458b0f14a97b83a26d5624733583ee2bb6"
+    },
+    {
+      "path": "web/apps/web/components/focus.ts",
+      "sha256": "fa183b837beff997f90abe97e2eff95af376718a95d77a7c7a51411b2e46b1d4"
+    },
+    {
+      "path": "web/apps/web/lib/api.ts",
+      "sha256": "7b07a3387e30d3a685d2974ad63f172ae381d6cebe1de7b1e1ddd147dfc7b5dc"
+    },
+    {
+      "path": "web/apps/web/lib/cameraRequestGuard.ts",
+      "sha256": "b266b4e7470da7fe778808e0976965ea7b39ed4a60013ee7593100b1f79f8995"
+    },
+    {
+      "path": "web/apps/web/lib/columnSettings.ts",
+      "sha256": "6b6d28365762a1819885f3e3516932810eba61a25c23cb8541042b61bc751771"
+    },
+    {
+      "path": "web/apps/web/lib/companySettings.ts",
+      "sha256": "e9840998005aee4ab8e01d0cc67ad3de6f245a04faefcd8c537d6a706eb60147"
+    },
+    {
+      "path": "web/apps/web/lib/creditNoteView.ts",
+      "sha256": "1a9a51c473081dbae0de155c730aaddc4fc24567364a68b60730efec9ffc7f0f"
+    },
+    {
+      "path": "web/apps/web/lib/designBookDraft.ts",
+      "sha256": "79603788c7257a861ad01f62c29c423a10308faab5966308b1954732bb01d558"
+    },
+    {
+      "path": "web/apps/web/lib/designBookKeyboard.ts",
+      "sha256": "94d336f7b7edd0b63d86eeb24af7b7b859a4700d9603567ee63594f2c1a94725"
+    },
+    {
+      "path": "web/apps/web/lib/imageEditorSession.ts",
+      "sha256": "52ec0b7cb0d068e62f705f3c58de4b9e8a09a84a367e4b9bf8dcc02c9d675482"
+    },
+    {
+      "path": "web/apps/web/lib/imageScopeBarrier.ts",
+      "sha256": "64b523496946c4b8fe82916c7bcd84f0cf444fb54a0c92f29ad998c032be9841"
+    },
+    {
+      "path": "web/apps/web/lib/lineRecalc.ts",
+      "sha256": "1baaa674f0387838e75a84077ef1b583d2aa4e7165af786b705e496a16fdff7b"
+    },
+    {
+      "path": "web/apps/web/lib/masterSearch.ts",
+      "sha256": "21f5e9908808200ff677bb264f1b0a97377a68739d657f1a10bff62e477dbb92"
+    },
+    {
+      "path": "web/apps/web/lib/mfgLotView.ts",
+      "sha256": "a1a3852ec794841f06269733e4526a4d6bf35b29a7763fd7995e773025687a9e"
+    },
+    {
+      "path": "web/apps/web/lib/nav.ts",
+      "sha256": "5707fc83fb534a3bcf7d11a96d0fbabe94df49cc58092f1b6862e1b94be2b669"
+    },
+    {
+      "path": "web/apps/web/lib/salesOrderForm.ts",
+      "sha256": "fad6b74bfe41be5de895922f2f20ae17547dc31f816b16973632723c05319be7"
+    },
+    {
+      "path": "web/apps/web/lib/salesReturnForm.ts",
+      "sha256": "45e1f06c642a3fee536972baf6dfaa3592bd0176f6b6018fabb6e7da151c0e1f"
+    },
+    {
+      "path": "web/apps/web/lib/salesReturnReplay.ts",
+      "sha256": "60093c4f2a0ded2a675c68496c958b5c62dfd24b526dc346c4183e3d9dc6a1ef"
+    },
+    {
+      "path": "web/apps/web/lib/tourOrderForm.ts",
+      "sha256": "6f0c53cf6e46ec81c9bdff26b16877cfe269a9aa5ebea9756ee6e282ebd0dc8c"
+    },
+    {
+      "path": "web/apps/web/lib/useImageEditor.ts",
+      "sha256": "4f34ab41ac1f3d5e66cf9df23684593e887e9c62a95e51d02dab49873b442d3e"
+    },
+    {
+      "path": "web/apps/web/next-env.d.ts",
+      "sha256": "f2b3bca04d1bfe583daae1e1f798c92ec24bb6693bd88d0a09ba6802dee362a8"
+    },
+    {
+      "path": "web/apps/web/next.config.mjs",
+      "sha256": "e92f4f42f66a6bc9b856a17a5c73560947161de36742d39ea0da694562e77354"
+    },
+    {
+      "path": "web/apps/web/package.json",
+      "sha256": "dfab25deacdc2b66e4d1cb767169cebd07152dc283ba65b4362fad627dd42311"
+    },
+    {
+      "path": "web/apps/web/tsconfig.json",
+      "sha256": "f6c45b018bb65e857354f73bf3282ee39208d00b07f081d9467fed8af020afb5"
+    },
+    {
+      "path": "web/deploy/docker-compose.prod.yml",
+      "sha256": "45b62c8c4280c1e647163f7ef177651b2b175f8779e7f178156d04849facabee"
+    },
+    {
+      "path": "web/deploy/sql/audit_log.sql",
+      "sha256": "35a9f08352665de7e87c99f13cde8df718f0867d44fd94793a8bf045bf42579e"
+    },
+    {
+      "path": "web/deploy/sql/augment-all.sql",
+      "sha256": "fd6f666ee8cd5d135fb31ed8670f111b8048e51303a9faec80e88f92db805eb4"
+    },
+    {
+      "path": "web/deploy/sql/augment-columns.sql",
+      "sha256": "84e469fa4909e64d51e8cf9b556c2a0a89c49277d485a900bb6409e0939ad72c"
+    },
+    {
+      "path": "web/deploy/sql/perf-indexes.sql",
+      "sha256": "5da881cdffc2d74b247a551e5102d397825c076eb39d298fc52dfc541a984247"
+    },
+    {
+      "path": "web/docker-compose.parity-test.yml",
+      "sha256": "e4bb245ae8365ea982b6c4541e99581bf34961e8cc21d5532a9f2da66b673b4d"
+    },
+    {
+      "path": "web/docker-compose.yml",
+      "sha256": "e14be573eb5c3eb4932ae9d0f9947b84bded2509f7315f80faa5eebe9d0378ce"
+    },
+    {
+      "path": "web/eslint.config.mjs",
+      "sha256": "82923ac1e45a397241310ebecd84d2c8983e6d93d7bc0c14bda610635d6916ff"
+    },
+    {
+      "path": "web/package.json",
+      "sha256": "88b346ba7597fe1af78ae6151cc6e9ddeeb219f0049df90edbf4d8eaef3731c2"
+    },
+    {
+      "path": "web/packages/core/containment.d.mts",
+      "sha256": "1473a76581387f5e4427e1480e138cef3ea8ed9ae5da53ab0722759e56e75b0f"
+    },
+    {
+      "path": "web/packages/core/containment.mjs",
+      "sha256": "79108272df09bcaa6070ff7a3aebf0b2b7e754323a6943d73ef0bad589306b66"
+    },
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "web/packages/core/src/calc.ts",
+      "sha256": "e0c46c2f17ec6e871309e96539bf2cd00782db9e6db667271421a539d16da291"
+    },
+    {
+      "path": "web/packages/core/src/designCalc.ts",
+      "sha256": "78f207dd2b8796f7f4ea9445c8baa971721f0d78ab82b50168bd67772a391116"
+    },
+    {
+      "path": "web/packages/core/src/finePolicy.ts",
+      "sha256": "38d0ec8f3d6f131bcce490d19e418af8a59de3bdaa309ebf77c2255cc884e96b"
+    },
+    {
+      "path": "web/packages/core/src/index.ts",
+      "sha256": "9385624254a8de2b403132f8ddb610cfedbe09b19569dac71bfd555faf73ae03"
+    },
+    {
+      "path": "web/packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "web/packages/core/src/orderLabour.ts",
+      "sha256": "5981b6198035c845b447caf0d92fe84e3c25d1412e6b61b0eee0483f0224230d"
+    },
+    {
+      "path": "web/packages/core/src/orderLabourWithCache.ts",
+      "sha256": "dd9f429992b33918e97b382d5ead1852219aece381ec7c9bb6a1cc21719f3e4f"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnBillTaxPolicy.ts",
+      "sha256": "4e12c8b129cbdc168bafb01cb40a7a723e1db2bfb57af57a3c73f9099b809622"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+    },
+    {
+      "path": "web/packages/core/src/salesOrderDesign.ts",
+      "sha256": "e6b5b1a4e79a9d93d6fab540565d0159ccde9475714d4f56276c64ce101173af"
+    },
+    {
+      "path": "web/packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "web/packages/db/package.json",
+      "sha256": "72a237ed4afa8e000077130ff3d514528acaa9a3199254ad5deeec5b266300ed"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260627200423_init/migration.sql",
+      "sha256": "c390ab923703889a96e87d08adb5e020cce8b210cf7cc2437969fa3e94ea3097"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260714010000_schema_parity/migration.sql",
+      "sha256": "41f0641b86606851f2a48870c98136f6604fae850b7feff7447e15e5d2a6b1f4"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260715010000_runtime_schema_security/migration.sql",
+      "sha256": "82a7fd3af8ac3259c3df66de4a1e9a154ed65957d3fcecbd3d3d46e2b99923e6"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260715020000_schema_model_convergence/migration.sql",
+      "sha256": "776c66fee6407799fa2393fd9e4aee81461dca9dfefba4e1f56b479a1842901a"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260715030000_authoritative_scope_rbac_sessions/migration.sql",
+      "sha256": "4d011ad562511873982957325ffc47b62ca5d824a25b312495c531c185ae873c"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260715040000_transaction_integrity/migration.sql",
+      "sha256": "91f95a7af1ee8fa41b56cc4ed068e0107b91965d9db45912bc5ea2f4eb364545"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260727010000_repair_image/migration.sql",
+      "sha256": "273493f985ce821a128ee6d2b10f91129ae78242cdf8873e8148eee168a39ef8"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260727020000_melting_detail_parity/migration.sql",
+      "sha256": "ea6d2267d2cf202f63445b33f9afa2b8cd8e42c9fd44031391b66524f529493e"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260727030000_melting_mfg_linkage/migration.sql",
+      "sha256": "0557c5f869957e2edffaf09b014551613e7e63d99c170d520bfca8e1c7031428"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260728010000_message_attempt_log/migration.sql",
+      "sha256": "6ace8aeaa4d29640e9e33c0505ea4dc95a2d153159143ebfcb258af59d1d2512"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260730010000_data_repair_console/migration.sql",
+      "sha256": "6c5a23844987a9909a9ff0de90c6f3b9b4bc9d402ef2ef56c52c37e8c66bc06a"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260730020000_tag_image_store/migration.sql",
+      "sha256": "1d33bffff5724307457d685bf6e7f7a6db7b0c07060f655cc4095aaa74a225bc"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260730030000_entity_image_store/migration.sql",
+      "sha256": "772f68dec65312887af32c511b6f4278e1a81f1779788fcbc989cc44dca31ec3"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260730040000_gold_mast_bank_account/migration.sql",
+      "sha256": "014e9928425e3b6d4f535022524f15abcdf4b77942c327e8a5c70b862ce142a5"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260730050000_message_log_rls/migration.sql",
+      "sha256": "298e2dd8f3b511ae27c2302e8d3d546b06baf13346b6dabbe84a261bdf3449c6"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260801120000_column_type_parity/migration.sql",
+      "sha256": "d90f7313519b2cd7a158a6ce55728e1d181807bfe2d8dc41506efffe55373413"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260801160000_ledger_key_uniqueness/migration.sql",
+      "sha256": "a5233b5115ef855e2bec6999e37fd4a59c58b563dacc27a69f75c0c7a6c7612b"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260829010000_company_restore_sequence_guard/migration.sql",
+      "sha256": "84afef22c62860d9227f6643e537aa5bd393ac93374f69a3b45d23374e609512"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260830000000_data_repair_authority/migration.sql",
+      "sha256": "ede47cc4821cf4c0aaf28f948788df8b900ecf2e753bb483c9b79d9878650ced"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260910010000_upi_data_split_key/migration.sql",
+      "sha256": "27a70022e5f51673fa2f1f086d1fd90723254f49ce74e3fdec31166cb4c18e7a"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260910020000_mfg_isu_rec_item_lot/migration.sql",
+      "sha256": "27f5ee541cd03769e2e1c4de4ba80f936414f9ea964e05dc0ea0eafb4ae788d4"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911010000_design_detail_style/migration.sql",
+      "sha256": "be9000ba6025d5623759473d1218e9e168eacc1229a46ef618c9bbed0682e2cb"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911020000_ledger_entry_timestamp/migration.sql",
+      "sha256": "b6dd19d5450d9c9a6ddfe12521bfbfed1e327979f0d67b4d980e3d1c6e3a2061"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911030000_order_image_identity/migration.sql",
+      "sha256": "af42c4466169c9d325249855737870e404398ce69fbda486aaf3eafe307f5129"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911040000_mfg_component_lot/migration.sql",
+      "sha256": "d34052b7e193a51366dfbcd137e6b70dbaebc2d75a01e665d0d5a5fdf1e1f575"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911050000_sale_header_ledger/migration.sql",
+      "sha256": "2b94e2e048952bf2e3e9daaa7c0bf6c9e65713a3e55f84e9b862bd11f8f4a4e6"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911060000_image_revision/migration.sql",
+      "sha256": "a18e61bcd3460005986fdca31ec8ff63bc010130f2fe73b838228f8850d29570"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260911070000_sale_return_tag_labour_code/migration.sql",
+      "sha256": "585051aaa5d30794ff5248f3c370050cada7edfc2632cbd107dacac8353a9218"
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/migration_lock.toml",
+      "sha256": "99836963713b4f5b269ad49af0ed3d7b0b2e336115c2f92dc9ac683d139d0900"
+    },
+    {
+      "path": "web/packages/db/prisma/rls.sql",
+      "sha256": "6a7245cfad70861341f734386bbd1eb83f2c0fbc60e06055dc55f7deb57df54e"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "web/packages/db/setup_roles.sql",
+      "sha256": "b0736b67fb5e71ef51c1f59a9fa8a3a00dda2b851d3a178c408dbfb89df83bb3"
+    },
+    {
+      "path": "web/packages/db/src/index.ts",
+      "sha256": "74ebbfc61c310b672ed75bf78ca51bcd5fbbb2ef2bab92282fa69d402b779662"
+    },
+    {
+      "path": "web/packages/db/src/scope.ts",
+      "sha256": "6718650c2f7d013309419b2054507e7e0f08433105f4912d0cc6ca88dc4d7e13"
+    },
+    {
+      "path": "web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "web/packages/db/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "web/packages/parity/package.json",
+      "sha256": "87c202354d6b70d85da47d2ffed78b47bb4e6b2854746439ffa8b61bd90d48ed"
+    },
+    {
+      "path": "web/packages/parity/src/index.ts",
+      "sha256": "39f84484f7bd946aa9f5b0d6698879c4d4a1569a978bde9d622f67fe0f2a889b"
+    },
+    {
+      "path": "web/packages/parity/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "web/packages/reports/package.json",
+      "sha256": "82f7f36dbb252838aee96c34c94947187f2217960d562f8002af05e53afd5ab6"
+    },
+    {
+      "path": "web/packages/reports/src/index.ts",
+      "sha256": "b44465ec7db19c867daa25c2ecdaf20b29dc451ebf70e6201a4796fcb5ea4e73"
+    },
+    {
+      "path": "web/packages/reports/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "web/packages/types/package.json",
+      "sha256": "c6d33f27dd07a53b395c785a05bd19ebe3a341f90475bf6b3988faffa37d35ee"
+    },
+    {
+      "path": "web/packages/types/src/index.ts",
+      "sha256": "0ee804625c0ca13b654ba1bf53bc9051ad0005c2e81db0cb9ef5c2ee9ed946c5"
+    },
+    {
+      "path": "web/packages/types/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "web/parity/depth-budget.json",
+      "sha256": "6b2893a435e66f969b334f104eab19e01465899fc4a8a21b9e5f2e0590ad7cdc"
+    },
+    {
+      "path": "web/parity/depth-parity-baseline.json",
+      "sha256": "f1715408a150d2382fad4ef48df67c91d453e239b4462c04e42043ecd7efd032"
+    },
+    {
+      "path": "web/parity/schema-readiness-baseline.json",
+      "sha256": "5840ccbfbb1abba290412c4095cf8a45bdf28b15748cafbf4e75520d8f10c5cf"
+    },
+    {
+      "path": "web/parity/settings-baseline.json",
+      "sha256": "44213be51a310dd7cffb4a0cd8d71c1befa7ffc442097818eba7d17ef9bd3d0a"
+    },
+    {
+      "path": "web/parity/unreachable-triage.json",
+      "sha256": "c1a27db4b51c70e7d152f19ba91e97f04cc8e8d041e6daa9569c8970f051996f"
+    },
+    {
+      "path": "web/pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    },
+    {
+      "path": "web/pnpm-workspace.yaml",
+      "sha256": "60ce4d1dbf137701a4683d171391c51662700c2f3e32a7caab8b2efc22540e65"
+    },
+    {
+      "path": "web/scripts/adopt-sub-detail.py",
+      "sha256": "577bc063d7846537bddef7e4e4fe9c2dbf2d96dd49f4b0247e03b80218181559"
+    },
+    {
+      "path": "web/scripts/check-completion-register.mjs",
+      "sha256": "071bac42bfa3c135f1750fee21c2b50639f4791e753e36a91bb21bed84e2b822"
+    },
+    {
+      "path": "web/scripts/check-contracts.mjs",
+      "sha256": "d7db2562a30e7b20a8542399c98d14588a2fc5f97477ef6bc9c042ed4d58defa"
+    },
+    {
+      "path": "web/scripts/check-dead-cells.mjs",
+      "sha256": "2bcf618ac20fbdf2af293b3726d3d39d7ba7ba79f455442b71a088e8512ec0c5"
+    },
+    {
+      "path": "web/scripts/check-depth.mjs",
+      "sha256": "02887291c8e230250ac0b27d04e0fe2c9273bb6ee66cae08566de4ea24df6be1"
+    },
+    {
+      "path": "web/scripts/check-doc-references.mjs",
+      "sha256": "121d07ebe1004571faa1968295f47e4f88b5f5fc17683eef788c2494d739d90b"
+    },
+    {
+      "path": "web/scripts/check-fresh-provision.mjs",
+      "sha256": "27ef3e267c59df64975d708efc1e0e4db909d681ce0e4cb87e953a2c585cf243"
+    },
+    {
+      "path": "web/scripts/check-g5-parity.mjs",
+      "sha256": "694a8fd545235edfda6bf9bcf22f3e87c5869520359f18d19c77d2609f73ca8c"
+    },
+    {
+      "path": "web/scripts/check-kernel-conformance.mjs",
+      "sha256": "d6a2f76a9ff3445adde86e45d5d9afc5fef64ed9be3f735a0c81df3e02088f3b"
+    },
+    {
+      "path": "web/scripts/check-schema-readiness.mjs",
+      "sha256": "ea05b388573077ed13dd09a77278c103410c7a5370bb9fabee893da108527b0d"
+    },
+    {
+      "path": "web/scripts/check-settings-parity.mjs",
+      "sha256": "1c07bbcb88a43edddc091e4452ff9643fee1edfd3e8b6d8837861b044ef03a26"
+    },
+    {
+      "path": "web/scripts/check-type-parity.mjs",
+      "sha256": "5296ab1ce90e5853cd520151e749d26b721408c532c6ea07e50a0331baa5af23"
+    },
+    {
+      "path": "web/scripts/extract-order-report-specs.py",
+      "sha256": "074a574276974f7e5902915cf9dc590d28aeeb553affdabb6e8f4bc054901e2f"
+    },
+    {
+      "path": "web/scripts/fix-test-nullchecks.mjs",
+      "sha256": "e1f43860edad0b37b5d85d013466bd963bf334e019bb8bbf7bdcf4b36c809960"
+    },
+    {
+      "path": "web/scripts/lib/request-field-trace.mjs",
+      "sha256": "a602d4dd51d9ceddc2f9076c105078b235d24b0e655179afb4324fa0c6bfce55"
+    },
+    {
+      "path": "web/scripts/lib/ui-descriptors.mjs",
+      "sha256": "21790e183d9fb942005c88e9a911b1c64b81da1117040d5d6fc410c10f140d64"
+    },
+    {
+      "path": "web/scripts/lint-workspace.mjs",
+      "sha256": "4059ee4512dea2cc3baf490503ac4fa43d6021b9056d2289a8e7e112a5c6ca79"
+    },
+    {
+      "path": "web/scripts/load-profile.mjs",
+      "sha256": "d8364130c8763433681949ea85c210d49b7bffe50f7f9b76f71ae3825b4fd613"
+    },
+    {
+      "path": "web/scripts/measure-ui-descriptors.mjs",
+      "sha256": "9a24e360b83a3663c0d7a0e139c85daf35e655a213d153fe8785432e3f57b0a1"
+    },
+    {
+      "path": "web/scripts/mount-grid-keyboard.py",
+      "sha256": "2cd86ed26089cff876b347de99f74bbd51754821145a5e98d37284e446220e3a"
+    },
+    {
+      "path": "web/scripts/parity-measure.mjs",
+      "sha256": "d006338ff96b28bbbc226500e8966f4daeec5947b8980cb1f5f7bbf7aef3afa6"
+    },
+    {
+      "path": "web/scripts/parity-test-env.mjs",
+      "sha256": "e0f11c41a5f0971aebece64d4cc341825e9986b40ae46baa4303cc293c341ac2"
+    },
+    {
+      "path": "web/scripts/rasterize-order-report-review.swift",
+      "sha256": "f7302d61903d2636f0048e344f465896f3f9dca4a0964478ccc0ed61bbd70ac2"
+    },
+    {
+      "path": "web/scripts/release-certify.mjs",
+      "sha256": "6d89fd1cf47be6a8bbb3efb3eed1ff23898c60c6ec5244de201ddb40d91241e2"
+    },
+    {
+      "path": "web/scripts/render-order-image-report-review.mjs",
+      "sha256": "93d4f534c2ff862a57f0fbd5422c23d557db90c030e7a7d6f5529570638353c8"
+    },
+    {
+      "path": "web/scripts/render-order-report-review.mjs",
+      "sha256": "3e02b95a0a23dbfc54004e5eed366f8ce9dde229cc21d8b37a00105b15f6697a"
+    },
+    {
+      "path": "web/scripts/report-baselines.mjs",
+      "sha256": "ff7225350f44879ce452b3cdf6d68180b1899d22f6243290ac0349a7dc3d1c47"
+    },
+    {
+      "path": "web/scripts/restore-drill.mjs",
+      "sha256": "7a60b3ce527778c03241ebe39048cc327cc0a788064c877fb60783cd49a1490e"
+    },
+    {
+      "path": "web/scripts/secret-scanner.mjs",
+      "sha256": "c4489a03709a2dba996fcb73526fe613f2d509e3778658234accbed747c155e6"
+    },
+    {
+      "path": "web/scripts/type-parity-baseline.json",
+      "sha256": "2fd1df777ef927c1aea9c6875c8bdf7d4f3b684123ca9c79ffc02319eecbfcd0"
+    },
+    {
+      "path": "web/scripts/wire-mfg-line-fields.py",
+      "sha256": "8faa5ef04f3d162ceb68f98fa8e23a437e5e9491ea7cf04978ee3ee8accf4ba5"
+    },
+    {
+      "path": "web/scripts/wire-p3-remaining.py",
+      "sha256": "fd8a614ef1fce38e6832f970c9b18a240e9766c64b90f01edd177cbeee449a95"
+    },
+    {
+      "path": "web/scripts/wire_extended_columns.py",
+      "sha256": "e8a53b0aaed6a5f5d4f5c75b2773b5eca56d65b3c1d24ba529cfe00e439c499b"
+    },
+    {
+      "path": "web/scripts/writer_verified_fields.py",
+      "sha256": "40eaeebc56d9cd944901d5774b10e5071b99cf2d6dbd15de67102e27ed2a59d1"
+    },
+    {
+      "path": "web/tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    },
+    {
+      "path": "web/turbo.json",
+      "sha256": "47588c1c1bd844ee24983850abc0b829d5811f4eb75e9d80ae44c870b9442238"
+    }
+  ]
+}

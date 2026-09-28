@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "actualArtifact": "web/test-results/parity-real-stack-round13-tour-exact/result.json",
+  "artifactSha256": "e18ac57c94246db8c42064862226f8d94c035c93f544ba42841a47c72afdb337",
+  "journeys": 16,
+  "tourChecks": 17,
+  "requiredNewCheck": "exact saved Tour scalars survive API JSON, browser unchanged/advance-only saves and SQL readback",
+  "mockedRequests": 0,
+  "mockedResponses": 0,
+  "interceptionIndicators": 0,
+  "exactValues": {
+    "scope": {
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "E13"
+    },
+    "voucherNo": "00001",
+    "parentSerials": [
+      7,
+      19
+    ],
+    "childSerials": [
+      3,
+      13
+    ],
+    "protectedBeforeSha256": "418a7870057171c3534c0a370ca577f24f327bfef4b35fa8cb9e755f2987ccda",
+    "protectedAfterSha256": "418a7870057171c3534c0a370ca577f24f327bfef4b35fa8cb9e755f2987ccda",
+    "versions": [
+      "68925c526ac3f2b206607747805cc016a74cb664c71264eda49d7cafe4342256",
+      "e550edfd54aaef9ecb719b6d9ee380e1ad7998a9e59331fa7d9864242e7ab311",
+      "669bf386d2265db4ac6232c3f8280ed916c20fa1afd498c546d6c03da147fb53"
+    ],
+    "beforeSha256": "79280d5adb9664ffa1c8ef77fba3d2732c6f7458aaa1008790e7644ebcdd810e",
+    "afterUnchangedSha256": "79280d5adb9664ffa1c8ef77fba3d2732c6f7458aaa1008790e7644ebcdd810e",
+    "beforeParentChildrenSha256": "baced987876cd0bf5018eb2d6e517d6ae326b4ef834a07d545a8cf3a99f02d60",
+    "afterAdvanceParentChildrenSha256": "baced987876cd0bf5018eb2d6e517d6ae326b4ef834a07d545a8cf3a99f02d60",
+    "changedAdvance": [
+      "25",
+      "40"
+    ]
+  }
+}

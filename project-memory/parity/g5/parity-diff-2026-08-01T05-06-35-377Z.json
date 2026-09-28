@@ -1,0 +1,1562 @@
+{
+ "kind": "datacare.parity-diff/1.0",
+ "comparedAt": "2026-08-01T05:06:35.377Z",
+ "desktop": {
+  "capturedAt": "2026-07-31T21:33:46.349Z",
+  "database": "Live24",
+  "engine": "sqlserver",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU26) (KB5093420) - 16.0.4265.3 (X64) ",
+  "host": "127.0.0.1"
+ },
+ "web": {
+  "capturedAt": "2026-07-31T22:47:47.490Z",
+  "database": "datacare",
+  "engine": "postgres"
+ },
+ "matched": false,
+ "cases": [
+  {
+   "caseId": "sale-027-00001",
+   "description": "",
+   "desktopVoucher": "027/00001",
+   "webVoucher": "027/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 3,
+     "webRows": 4,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [
+      "AC_CODE=00057 DR_AMT=0.45 CR_AMT=0.00"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 75,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000888 DR_AMT=1560.00 CR_AMT=0.00",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "D",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000888 DR_AMT=1560.00 CR_AMT=0.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000888 DR_AMT=1560.00 CR_AMT=0.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000888 DR_AMT=1560.00 CR_AMT=0.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-06",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000888 DR_AMT=1560.00 CR_AMT=0.00",
+       "column": "LDR_NAME",
+       "desktop": "VINUBHAI VALJIBHAI LUNAGARIYA",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00004 DR_AMT=0.00 CR_AMT=1515.00",
+       "column": "LEDR_KEY",
+       "desktop": "01002024-20250270000103",
+       "web": "01002024-20250270000102",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00004 DR_AMT=0.00 CR_AMT=1515.00",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "C",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00004 DR_AMT=0.00 CR_AMT=1515.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00004 DR_AMT=0.00 CR_AMT=1515.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00004 DR_AMT=0.00 CR_AMT=1515.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-06",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00004 DR_AMT=0.00 CR_AMT=1515.00",
+       "column": "PARTY_AC_CODE",
+       "desktop": "",
+       "web": "00004",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00085 DR_AMT=0.00 CR_AMT=45.45",
+       "column": "LEDR_KEY",
+       "desktop": "01002024-20250270000104",
+       "web": "01002024-20250270000103",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00085 DR_AMT=0.00 CR_AMT=45.45",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "C",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00085 DR_AMT=0.00 CR_AMT=45.45",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00085 DR_AMT=0.00 CR_AMT=45.45",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00085 DR_AMT=0.00 CR_AMT=45.45",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-06",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00085 DR_AMT=0.00 CR_AMT=45.45",
+       "column": "PARTY_AC_CODE",
+       "desktop": "",
+       "web": "00085",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "BILL_OS_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 33,
+     "fieldsExcluded": 7,
+     "differences": [
+      {
+       "table": "BILL_OS_DATA",
+       "rowKey": "single unmatched row",
+       "column": "USER_DELETE",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "MAIN_STOCK",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 94,
+     "fieldsExcluded": 3,
+     "differences": [
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "ISR_NO",
+       "desktop": "1",
+       "web": "(null)",
+       "scale": 0
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "TAG_NO",
+       "desktop": "MAS00013",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "VCH_SRNO",
+       "desktop": "100211101051.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "TBL_CODE",
+       "desktop": "001",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "ITM_WEST",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "LBR_RATE",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "OTH_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "ITM_MRP",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "KR_NWT",
+       "desktop": "10.360000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "KR_TOUCH",
+       "desktop": "92.500",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "KR_WEST",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "KR_FINE",
+       "desktop": "9.583",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "KR_LBR_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "KR_OTH_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "KR_COST",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "EMP_CODE",
+       "desktop": "001",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "STK_DATE",
+       "desktop": "2024-04-06",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "OTH_FINE",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "DESIGN_NO",
+       "desktop": "ANTIQUE",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "ITM_SIZE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "ITM_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=MA925 ITM_SIGN=-",
+       "column": "GHT_PRC",
+       "desktop": "0.0000",
+       "web": "(null)",
+       "scale": 4
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "SR_NO",
+       "desktop": "1",
+       "web": "2",
+       "scale": 0
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "ISR_NO",
+       "desktop": "2",
+       "web": "(null)",
+       "scale": 0
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "TBL_CODE",
+       "desktop": "001",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "ITM_WEST",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "ITM_AMT",
+       "desktop": "354.00",
+       "web": "354.20",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "LBR_RATE",
+       "desktop": "16.09",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "LBR_AMT",
+       "desktop": "74.00",
+       "web": "74.01",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "OTH_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "ITM_MRP",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "NET_AMT",
+       "desktop": "428.00",
+       "web": "428.21",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "KR_NWT",
+       "desktop": "4.600000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "KR_TOUCH",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "KR_WEST",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "KR_FINE",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "KR_LBR_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "KR_OTH_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "KR_COST",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "EMP_CODE",
+       "desktop": "001",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "STK_DATE",
+       "desktop": "2024-04-06",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "OTH_FINE",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "DESIGN_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "ITM_SIZE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "ITM_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORS ITM_SIGN=-",
+       "column": "GHT_PRC",
+       "desktop": "0.0000",
+       "web": "(null)",
+       "scale": 4
+      }
+     ]
+    },
+    {
+     "table": "OP_LDR",
+     "presentOn": "desktop-only",
+     "desktopRows": 2,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:",
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "CR_AMT",
+      "CR_GL_FINE",
+      "CR_SL_FINE",
+      "DATA_TYPE",
+      "DR_AMT",
+      "DR_GL_FINE",
+      "DR_SL_FINE",
+      "ENTRY_TYPE",
+      "INOUT_TYPE",
+      "LC_CODE",
+      "VCH_DATE",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 4,
+     "webRows": 5,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:AC_CODE=00004|AC_NAME=VINUBHAI VALJIBHAI LUNAGARIYA|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=1087.00|DATA_TYPE=A|DR_AMT=0.00|ITM_AMT=0.00|ITM_FINE=0.000|ITM_GWT=10.360|ITM_NWT=10.360|ITM_PCS=1.000|ITM_RATE=0.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=MA925|IT_DESC=MACHHALI - 925|IT_TYPE=S|LBR_AMT=1087.00|LBR_RATE=0.00|LC_CODE=00|LD_CODE=000888|LEDR_KEY=01002024-20250270000101         1|MEMB_CODE=|NET_AMT=1087.00|OTH_AMT=0.00|REF_NO=|SCHM_CODE=|SIGN=-|VCH_DATE=2024-04-06|VCH_TYPE=TSSL",
+      "content:AC_CODE=00004|AC_NAME=VINUBHAI VALJIBHAI LUNAGARIYA|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=428.00|DATA_TYPE=A|DR_AMT=0.00|ITM_AMT=354.00|ITM_FINE=0.000|ITM_GWT=4.600|ITM_NWT=4.600|ITM_PCS=1.000|ITM_RATE=77.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=ORS|IT_DESC=SILVER ORNAMENTS|IT_TYPE=S|LBR_AMT=74.00|LBR_RATE=16.09|LC_CODE=00|LD_CODE=000888|LEDR_KEY=01002024-20250270000101         2|MEMB_CODE=|NET_AMT=428.00|OTH_AMT=0.00|REF_NO=|SCHM_CODE=|SIGN=-|VCH_DATE=2024-04-06|VCH_TYPE=TSSL",
+      "content:AC_CODE=000888|AC_NAME=VINUBHAI VALJIBHAI LUNAGARIYA|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=0.00|DATA_TYPE=A|DR_AMT=1560.00|ITM_AMT=0.00|ITM_FINE=0.000|ITM_GWT=0.000|ITM_NWT=0.000|ITM_PCS=0.000|ITM_RATE=0.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=|IT_DESC=|IT_TYPE=A|LBR_AMT=0.00|LBR_RATE=0.00|LC_CODE=00|LD_CODE=00004|LEDR_KEY=01002024-20250270000102|MEMB_CODE=|NET_AMT=0.00|OTH_AMT=0.00|REF_NO=|SCHM_CODE=|SIGN=|VCH_DATE=2024-04-06|VCH_TYPE=TSSL",
+      "content:AC_CODE=00085|AC_NAME=|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=45.45|DATA_TYPE=A|DR_AMT=0.00|ITM_AMT=0.00|ITM_FINE=0.000|ITM_GWT=0.000|ITM_NWT=0.000|ITM_PCS=0.000|ITM_RATE=0.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=|IT_DESC=|IT_TYPE=A|LBR_AMT=0.00|LBR_RATE=0.00|LC_CODE=00|LD_CODE=000888|LEDR_KEY=01002024-20250270000104|MEMB_CODE=|NET_AMT=0.00|OTH_AMT=0.00|REF_NO=|SCHM_CODE=|SIGN=|VCH_DATE=2024-04-06|VCH_TYPE=TSSL"
+     ],
+     "extraRows": [
+      "content:AC_CODE=00004|AC_NAME=REPLAY PARTY|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=1087.00|DATA_TYPE=A|DR_AMT=0.00|ITM_AMT=1087.00|ITM_FINE=0.000|ITM_GWT=10.360|ITM_NWT=10.360|ITM_PCS=1.000|ITM_RATE=0.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=MA925|IT_DESC=SILVER PAYAL|IT_TYPE=S|LBR_AMT=1087.00|LBR_RATE=0.00|LC_CODE=00|LD_CODE=000888|LEDR_KEY=01002024-20250270000101         1|MEMB_CODE=⌀|NET_AMT=1087.00|OTH_AMT=0.00|REF_NO=⌀|SCHM_CODE=⌀|SIGN=-|VCH_DATE=2024-04-06|VCH_TYPE=TSSL",
+      "content:AC_CODE=00004|AC_NAME=REPLAY PARTY|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=428.21|DATA_TYPE=A|DR_AMT=0.00|ITM_AMT=428.21|ITM_FINE=0.000|ITM_GWT=4.600|ITM_NWT=4.600|ITM_PCS=1.000|ITM_RATE=77.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=ORS|IT_DESC=SILVER ORNAMENT|IT_TYPE=S|LBR_AMT=74.01|LBR_RATE=16.09|LC_CODE=00|LD_CODE=000888|LEDR_KEY=01002024-20250270000101         2|MEMB_CODE=⌀|NET_AMT=428.00|OTH_AMT=0.00|REF_NO=⌀|SCHM_CODE=⌀|SIGN=-|VCH_DATE=2024-04-06|VCH_TYPE=TSSL",
+      "content:AC_CODE=000888|AC_NAME=REPLAY PARTY|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=0.00|DATA_TYPE=A|DR_AMT=1560.00|ITM_AMT=0.00|ITM_FINE=0.000|ITM_GWT=0.000|ITM_NWT=0.000|ITM_PCS=0.000|ITM_RATE=0.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=|IT_DESC=|IT_TYPE=A|LBR_AMT=0.00|LBR_RATE=0.00|LC_CODE=00|LD_CODE=00004|LEDR_KEY=01002024-20250270000102|MEMB_CODE=⌀|NET_AMT=0.00|OTH_AMT=0.00|REF_NO=⌀|SCHM_CODE=⌀|SIGN=|VCH_DATE=2024-04-06|VCH_TYPE=TSSL",
+      "content:AC_CODE=00085|AC_NAME=REPLAY PARTY|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=45.45|DATA_TYPE=A|DR_AMT=0.00|ITM_AMT=0.00|ITM_FINE=0.000|ITM_GWT=0.000|ITM_NWT=0.000|ITM_PCS=0.000|ITM_RATE=0.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=|IT_DESC=|IT_TYPE=A|LBR_AMT=0.00|LBR_RATE=0.00|LC_CODE=00|LD_CODE=000888|LEDR_KEY=01002024-20250270000104|MEMB_CODE=⌀|NET_AMT=0.00|OTH_AMT=0.00|REF_NO=⌀|SCHM_CODE=⌀|SIGN=|VCH_DATE=2024-04-06|VCH_TYPE=TSSL",
+      "content:AC_CODE=000888|AC_NAME=REPLAY PARTY|BOOK_NAME=SALES|CO_BOOK=027|CO_CODE=01|CO_YEAR=2024-2025|CR_AMT=0.00|DATA_TYPE=A|DR_AMT=-0.45|ITM_AMT=0.00|ITM_FINE=0.000|ITM_GWT=0.000|ITM_NWT=0.000|ITM_PCS=0.000|ITM_RATE=0.00|ITM_TOUCH=0.000|ITM_WEST=0.000|IT_CODE=|IT_DESC=|IT_TYPE=A|LBR_AMT=0.00|LBR_RATE=0.00|LC_CODE=00|LD_CODE=00057|LEDR_KEY=01002024-20250270000122|MEMB_CODE=⌀|NET_AMT=0.00|OTH_AMT=0.00|REF_NO=⌀|SCHM_CODE=⌀|SIGN=|VCH_DATE=2024-04-06|VCH_TYPE=TSSL"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "SL_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 90,
+     "fieldsExcluded": 8,
+     "differences": [
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BILL_NO",
+       "desktop": "",
+       "web": "00001",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "AC_NAME",
+       "desktop": "VINUBHAI VALJIBHAI LUNAGARIYA",
+       "web": "REPLAY PARTY",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ROF_AMT",
+       "desktop": "0.00",
+       "web": "-0.45",
+       "scale": 2
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ADV_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OLD_GL_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OLD_SL_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OS_ADJ_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CR_DAYS",
+       "desktop": "0",
+       "web": "(null)",
+       "scale": 0
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "EMP_CODE",
+       "desktop": "001",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OLD_GL",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OLD_SL",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "MOBILE",
+       "desktop": "9879494791",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "RTN_NET_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "RTN_TOT_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "RTN_CHQ_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "RTN_CARD_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "RTN_CASH_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "RTN_KASAR_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "RTN_BILL_OS",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "HM_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "HM_TAX_PRC",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "HM_TAX_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "IRN_NO",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ACK_NO",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "TOT_TAX_FREE_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CRNT_ADJ_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "PARTY_FINE",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "IT_TYPE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OZ_RATE",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OZ_CONV",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "FX_RATE",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "MTL_RATE",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "SL_DETL",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 194,
+     "fieldsExcluded": 6,
+     "differences": [
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_NO",
+       "desktop": "MAS00013",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "DESIGN_NO",
+       "desktop": "ANTIQUE",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TOT_AMT",
+       "desktop": "1120.00",
+       "web": "1087.00",
+       "scale": 2
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ITM_REMARK",
+       "desktop": "MACHHALI - 925",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "VCH_SRNO",
+       "desktop": "100211101051.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "KR_NET_WT",
+       "desktop": "10.360",
+       "web": "0.000",
+       "scale": 3
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "KR_TOUCH",
+       "desktop": "92.500",
+       "web": "0.000",
+       "scale": 3
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "KR_FINE",
+       "desktop": "9.583",
+       "web": "0.000",
+       "scale": 3
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "KR_NAME",
+       "desktop": "VIKAS",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "RATE_TYPE",
+       "desktop": "G",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "PR_CODE",
+       "desktop": "MA",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "DATA_TRFR",
+       "desktop": "(null)",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ADD_USER",
+       "desktop": "(null)",
+       "web": "parity-replay",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "GHT_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "HM_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "IT_TAX_AMT",
+       "desktop": "32.610000",
+       "web": "32.6",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "IT_DISC_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_GWT",
+       "desktop": "10.360000",
+       "web": "10.36",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_NWT",
+       "desktop": "10.360000",
+       "web": "10.36",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAXABL_RATE",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ITM_IGST_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ITM_CGST_AMT",
+       "desktop": "0.000000",
+       "web": "16.3",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ITM_SGST_AMT",
+       "desktop": "0.000000",
+       "web": "16.3",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "GRAND_TOTAL",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "FINE_RATE",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "EMP_CODE",
+       "desktop": "001",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ORD_TAG_STK_ADD",
+       "desktop": "N",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "DESIGN_IMG_ID",
+       "desktop": "N",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAX_TYPE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAX_FREE_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "MCX_RATE",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "PRM_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "PRM_DISC",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "LBR_AMT",
+       "desktop": "74.00",
+       "web": "74.01",
+       "scale": 2
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "ITM_AMT",
+       "desktop": "354.00",
+       "web": "354.20",
+       "scale": 2
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "TOT_AMT",
+       "desktop": "441.00",
+       "web": "428.00",
+       "scale": 2
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "ITM_REMARK",
+       "desktop": "MACHHALI",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "KR_NET_WT",
+       "desktop": "4.600",
+       "web": "0.000",
+       "scale": 3
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "RATE_TYPE",
+       "desktop": "G",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "PR_CODE",
+       "desktop": "OR",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "DATA_TRFR",
+       "desktop": "(null)",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "ADD_USER",
+       "desktop": "(null)",
+       "web": "parity-replay",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "GHT_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "HM_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "IT_TAX_AMT",
+       "desktop": "12.840000",
+       "web": "12.84",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "IT_DISC_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "TAG_GWT",
+       "desktop": "0.000000",
+       "web": "4.6",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "TAG_NWT",
+       "desktop": "0.000000",
+       "web": "4.6",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "TAXABL_RATE",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "ITM_IGST_AMT",
+       "desktop": "0.000000",
+       "web": "0",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "ITM_CGST_AMT",
+       "desktop": "0.000000",
+       "web": "6.42",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "ITM_SGST_AMT",
+       "desktop": "0.000000",
+       "web": "6.42",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "GRAND_TOTAL",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "FINE_RATE",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "EMP_CODE",
+       "desktop": "001",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "ORD_TAG_STK_ADD",
+       "desktop": "N",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "DESIGN_IMG_ID",
+       "desktop": "N",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "TAX_TYPE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "TAX_FREE_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "MCX_RATE",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "PRM_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "SL_DETL",
+       "rowKey": "SR_NO=2",
+       "column": "PRM_DISC",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "TAX_DATA",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 50,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "TAX_TYPE",
+       "desktop": "SGST",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "PARTY_NAME",
+       "desktop": "VINUBHAI VALJIBHAI LUNAGARIYA",
+       "web": "REPLAY PARTY",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "R_CHARG",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "ISR_NO",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "TAX_FREE_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "TAX_TYPE",
+       "desktop": "CGST",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "PARTY_NAME",
+       "desktop": "VINUBHAI VALJIBHAI LUNAGARIYA",
+       "web": "REPLAY PARTY",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "R_CHARG",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "ISR_NO",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "TAX_DATA",
+       "rowKey": "TAX_CODE=10",
+       "column": "TAX_FREE_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 4,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "TEMP_BOOK_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BOOK_NAME",
+       "desktop": "Silver Tax Invoice",
+       "web": "Silver Tax Invoice Old",
+       "scale": 6
+      }
+     ]
+    }
+   ],
+   "totals": {
+    "tablesCompared": 8,
+    "tablesDesktopOnly": 1,
+    "tablesWebOnly": 0,
+    "rowsMissing": 6,
+    "rowsExtra": 6,
+    "fieldsCompared": 540,
+    "fieldsExcluded": 32,
+    "fieldDifferences": 169
+   }
+  }
+ ],
+ "desktopOnlyCases": [],
+ "webOnlyCases": [],
+ "totals": {
+  "cases": 1,
+  "casesMatched": 0,
+  "tablesCompared": 8,
+  "tablesDesktopOnly": 1,
+  "tablesWebOnly": 0,
+  "rowsMissing": 6,
+  "rowsExtra": 6,
+  "fieldsCompared": 540,
+  "fieldsExcluded": 32,
+  "fieldDifferences": 169
+ }
+}

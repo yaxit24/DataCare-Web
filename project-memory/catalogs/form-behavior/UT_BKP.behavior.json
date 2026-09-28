@@ -1,0 +1,31 @@
+{
+ "form": "UT_BKP",
+ "loc": 1299,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "Please Select Path and Try"
+ ],
+ "keyboard": {
+  "Esc": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Please Select Path and Try",
+   "when": "Operators.CompareString(tSavePath.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Backup Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "De-Attach iS Complite",
+   "when": ""
+  }
+ ]
+}

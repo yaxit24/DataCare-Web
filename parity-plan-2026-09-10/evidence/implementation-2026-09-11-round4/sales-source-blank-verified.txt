@@ -1,0 +1,87 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "salesOrderRound4.db.test.ts" "tourOrderHydration.db.test.ts" "salesOrderLifecycle.routes.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/tourOrderHydration.db.test.ts (14 tests) 38274ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions 5608ms
+   ✓ Tour Order configured-book and complete editor round trip > does not silently accept a new tag allocation through the ordinary order editor 1242ms
+   ✓ Tour Order configured-book and complete editor round trip > hydrates all persisted input fields and multiple independent children; unchanged edit keeps business rows 3340ms
+   ✓ Tour Order configured-book and complete editor round trip > isolates identical voucher numbers across configured books, locations and fiscal years 1319ms
+   ✓ Tour Order configured-book and complete editor round trip > allows one of two concurrent edits from the same snapshot and keeps both component rows 2030ms
+   ✓ Tour Order configured-book and complete editor round trip > includes ghat in per-gram labour by default, honours N, and rejects stale settings snapshots 1803ms
+   ✓ Tour Order configured-book and complete editor round trip > refuses flattened legacy edits of multiple persisted components without changing any business row 931ms
+   ✓ Tour Order configured-book and complete editor round trip > persists whole-rupee P/G/K/net labour with exact derived-rate and manual edit transitions 3722ms
+   ✓ Tour Order configured-book and complete editor round trip > replays rate-before-ghat and away/back changes, and rolls back mismatched computed payloads 731ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves imported manual metal/labour/net values and voucher time on unchanged and child-only edits 2196ms
+   ✓ Tour Order configured-book and complete editor round trip > uses configured rate precision, ALL_ROF_REMOVE and rejects stale policy changes 2825ms
+   ✓ Tour Order configured-book and complete editor round trip > retains the previous write set when unsupported existing settlement rows would be lost 956ms
+   ✓ Tour Order configured-book and complete editor round trip > blocks the allocated source order while allowing the same number in another book, branch or year 8873ms
+   ✓ Tour Order configured-book and complete editor round trip > treats missing legacy allocation dimensions conservatively but respects an explicit different source dimension 2514ms
+ ✓ test/salesOrderRound4.db.test.ts (10 tests) 20999ms
+   ✓ Sales ordinary saved state and ordered design source replay > preserves complete imported business rows, six-digit clock, nullable values and exact large decimals on unchanged edit 4466ms
+   ✓ Sales ordinary saved state and ordered design source replay > distinguishes explicit zero/blank dirty edits from unchanged null and changes only the selected child cell 1053ms
+   ✓ Sales ordinary saved state and ordered design source replay > validates malformed dates before mutation and preserves omitted saved date/clock on edit 817ms
+   ✓ Sales ordinary saved state and ordered design source replay > keeps F1-only cached totals and applies copied labour/fine only at the later actual trigger 751ms
+   ✓ Sales ordinary saved state and ordered design source replay > rejects stale Design sources and forged journal values without any order writes 307ms
+   ✓ Sales ordinary saved state and ordered design source replay > honours an explicit zero journal commit while retaining other unchanged nullable cells 711ms
+   ✓ Sales ordinary saved state and ordered design source replay > maps unsupported new Design decimal precision to domain validation with no partial write 713ms
+   ✓ Sales ordinary saved state and ordered design source replay > copies source text null as explicit blank on new/existing F1 and keeps no-event null distinct 3145ms
+   ✓ Sales ordinary saved state and ordered design source replay > copies source text "" as explicit blank on new/existing F1 and keeps no-event null distinct 5916ms
+   ✓ Sales ordinary saved state and ordered design source replay > contains tag-removal transitions while allowing unchanged saved tag ownership 2952ms
+ ✓ test/salesOrderLifecycle.routes.db.test.ts (13 tests) 35121ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > reads configuration with Sales rights and the selected historical financial year 1258ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > isolates identical voucher numbers in two explicitly configured non-SOR books 4444ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > requires owning Sales update/delete rights and preserves data after denied requests 4751ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > refuses missing or malformed expected versions before editing or deleting 1006ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > rejects incomplete parent/component arrays without dropping saved data 859ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > rejects stale versions without changing any order, ledger or numbering row 1324ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > rejects missing, malformed and impossible dates without allocating or posting anything 1227ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > separates the unavailable desktop prior-year exception from invalid after-close dates 329ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > rejects a different book family and an unknown book instead of falling back to SOR 471ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > updates through PUT under Sales edit rights and rejects the previous version afterward 3083ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > deletes only the selected saved order with Sales delete rights and its current version 1045ms
+   ✓ ordinary Sales Order configured HTTP lifecycle > retains the desktop View permission to create while refusing later edit and delete 1133ms
+
+ Test Files  3 passed (3)
+      Tests  37 passed (37)
+   Start at  05:39:54
+   Duration  133.71s (transform 16.16s, setup 0ms, collect 29.41s, tests 94.39s, environment 1ms, prepare 1.25s)
+

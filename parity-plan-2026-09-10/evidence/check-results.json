@@ -1,0 +1,59 @@
+[
+  {
+    "check": "depth-audit",
+    "command": [
+      "node",
+      "scripts/check-depth.mjs",
+      "--audit"
+    ],
+    "exitCode": 0,
+    "observedAt": "2026-09-10T06:04:21.082251+00:00"
+  },
+  {
+    "check": "depth-ratchet",
+    "command": [
+      "node",
+      "scripts/check-depth.mjs"
+    ],
+    "exitCode": 0,
+    "observedAt": "2026-09-10T06:04:38.140974+00:00"
+  },
+  {
+    "check": "dead-cells",
+    "command": [
+      "node",
+      "scripts/check-dead-cells.mjs"
+    ],
+    "exitCode": 0,
+    "observedAt": "2026-09-10T06:04:38.234279+00:00"
+  },
+  {
+    "check": "settings-exposure",
+    "command": [
+      "node",
+      "scripts/check-settings-parity.mjs"
+    ],
+    "exitCode": 0,
+    "observedAt": "2026-09-10T06:04:38.303779+00:00"
+  },
+  {
+    "check": "completion-release",
+    "command": [
+      "node",
+      "scripts/check-completion-register.mjs",
+      "--strict",
+      "--release"
+    ],
+    "exitCode": 1,
+    "observedAt": "2026-09-10T06:04:38.370128+00:00"
+  },
+  {
+    "check": "g5-gate",
+    "command": [
+      "node",
+      "scripts/check-g5-parity.mjs"
+    ],
+    "exitCode": 1,
+    "observedAt": "2026-09-10T06:04:38.838170+00:00"
+  }
+]

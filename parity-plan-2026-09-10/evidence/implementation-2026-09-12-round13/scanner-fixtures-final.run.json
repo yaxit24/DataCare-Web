@@ -1,0 +1,21 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "scripts/test/request-field-trace.test.mjs",
+    "scripts/test/ui-descriptors.test.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T00:14:22.629468+00:00",
+  "finishedAtUtc": "2026-09-12T00:14:24.216936+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/scanner-fixtures-final.txt",
+  "logSha256": "5add32b548fe888246de70debdc19f8b634b418291854001a782330450772d7c",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/scanner-fixtures-final.inputs.json",
+  "inputManifestSha256": "afd0776384bd2a8e175c0be640b140f7d637b7313000c31f407a34d41f82e465",
+  "inputCount": 1856,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

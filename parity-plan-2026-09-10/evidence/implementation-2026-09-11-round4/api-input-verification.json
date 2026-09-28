@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-09-11T05:25:10.370840+00:00",
+  "status": "passed",
+  "beforeRunSnapshotSha256": "7925fc0d4a738c2baa286990e6223378ba6e791daea3b868adfeba237f0fe0c3",
+  "matchedInputs": 995,
+  "fullRegression": {
+    "files": 219,
+    "tests": 1711,
+    "skipped": 0
+  },
+  "limits": "Relevant API/core/db source and test inputs were captured before and unchanged after the full run; this is engineering regression evidence only."
+}

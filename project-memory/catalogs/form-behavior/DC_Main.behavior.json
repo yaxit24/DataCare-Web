@@ -1,0 +1,87 @@
+{
+ "form": "DC_Main",
+ "loc": 2299,
+ "gridColumns": {},
+ "inlineSql": [
+  "SELECT name, state_desc from sys.databases GO",
+  "Select AC_CODE,Sum(CR_AMT-DR_AMT) as Amount,SUM(CASE WHEN IT_TYPE = 'G' THEN(CASE WHEN SIGN = '+' THEN FINE_WT ELSE -FINE_WT END) ELSE 0 END) as GoldWt,sum(CASE WHEN IT_TYPE = 'S' THEN (CASE WHEN SIGN = '+' THEN FINE_WT ELSE -FINE_WT END) ELSE 0 END) as SilverWt FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND AC_CODE = ' ? ' and ENTRY_TIME < ' ? MM/dd/yyyy HH:mm:ss ? ' ? C ? AND DATA_TYPE = ' ? ' ? GROUP BY AC_CODE",
+  "SELECT BOOK_NAME as BookNameT,CO_BOOK As BookCodeT,BOOK_TYPE AS TypeL,ITM_TYPE AS ItemL,MAIN_BOOK As MainBookL,BOOK_SNAME As BookSNameL,BOOK_INOUT As BookInOutL,USER_EMP_CODE FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CUR_USE = 'Y' AND DATA_TYPE = 'A' AND MAIN_BOOK = ' ? ' ORDER BY BOOK_NAME",
+  "SELECT * FROM COL_MAST WHERE CO_CODE = ' ? ' AND BOOK_NAME NOT IN ('TAG_IDTL')",
+  "SELECT * FROM COL_MAST WHERE CO_CODE = ' ? ' AND BOOK_NAME IN ('TAG_IDTL')",
+  "UPDATE ITEM_MAST SET AVG_TOUCH = 0,AVG_FINE = 0,AVG_NWT = 0,AVG_RATE = 0 WHERE CO_CODE = ' ? '",
+  "UPDATE GROUP_MAST SET AVG_TOUCH = 0,AVG_FINE = 0,AVG_NWT = 0 WHERE CO_CODE = ' ? '",
+  "UPDATE BAL_GR SET AVG_TOUCH = 0,AVG_FINE = 0,AVG_NWT = 0,AVG_AMT = 0 WHERE CO_CODE = ' ? '",
+  "Select A.IT_CODE, SUM(CASE WHEN ITM_SIGN = '+' THEN KR_NWT ELSE 0 END) AS TotNetWt,SUM(CASE WHEN ITM_SIGN = '+' THEN A.ITM_AMT+A.KR_OTH_AMT+A.KR_LBR_AMT ELSE 0 END) AS TotAmt FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? And A.CO_YEAR = ' ? ' AND B.RATE_TYPE <> 'P' and VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.TR_TYPE IN ('P','I') GROUP BY A.IT_CODE",
+  "Select A.IT_CODE, SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_NWT ELSE -ITM_NWT END) AS TotNetWt FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.IT_CODE = ' ? IT_CODE ? ' AND B.RATE_TYPE <> 'P' and VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.IT_CODE",
+  "UPDATE ITEM_MAST SET AVG_RATE = ? 0.00 ? ,AVG_NWT = ? 0.000 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "UPDATE ITEM_MAST SET AVG_RATE = 0,AVG_NWT = ? TotNetWt ? 0.000 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "Select A.IT_CODE, SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_PCS ELSE 0 END) AS TotPcs,SUM(CASE WHEN ITM_SIGN = '+' THEN CASE WHEN KR_COST <> 0 THEN A.KR_COST ELSE A.ITM_AMT+A.KR_OTH_AMT+A.KR_LBR_AMT END ELSE 0 END) AS TotAmt FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND B.RATE_TYPE = 'P' and VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.TR_TYPE IN ('P','I') GROUP BY A.IT_CODE",
+  "Select A.IT_CODE, SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_PCS ELSE -ITM_PCS END) AS TotPcs FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.IT_CODE = ' ? IT_CODE ? ' AND B.RATE_TYPE = 'P' and VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.IT_CODE",
+  "UPDATE ITEM_MAST SET PCS_RATE = ? 0.00 ? ,TOT_PCS = ? 0.000 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "UPDATE ITEM_MAST SET PCS_RATE = 0,TOT_PCS = ? TotPcs ? 0 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "Select GR_CODE FROM ITEM_MAST WHERE CO_CODE = ' ? ' GROUP BY GR_CODE ORDER BY GR_CODE",
+  "Select B.IT_CODE,B.AVG_NWT,B.AVG_RATE,PCS_RATE,TOT_PCS FROM ITEM_MAST AS B WHERE B.CO_CODE = ' ? ' AND B.GR_CODE = ' ? GR_CODE ? ' GROUP BY B.IT_CODE,B.AVG_NWT, B.AVG_RATE,PCS_RATE,TOT_PCS",
+  "UPDATE GROUP_MAST SET AVG_RATE = ? 0.00 ? ,AVG_NWT = ? 0.000 ? ,TOT_PCS = ? 0 ? ,PCS_RATE = ? 0.00 ? WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? GR_CODE ? '",
+  "Select TRAD_TYPE FROM ITEM_MAST WHERE CO_CODE = ' ? ' GROUP BY TRAD_TYPE ORDER BY TRAD_TYPE",
+  "Select B.IT_CODE,B.AVG_NWT,B.AVG_RATE,PCS_RATE,TOT_PCS FROM ITEM_MAST AS B WHERE B.CO_CODE = ' ? ' AND B.TRAD_TYPE = ' ? TRAD_TYPE ? ' GROUP BY B.IT_CODE,B.AVG_NWT, B.AVG_RATE,PCS_RATE,TOT_PCS",
+  "UPDATE BAL_GR SET AVG_RATE = ? 0.00 ? ,AVG_NWT = ? 0.000 ? ,TOT_PCS = ? 0 ? ,PCS_RATE = ? 0.00 ? WHERE CO_CODE = ' ? ' AND TRAD_TYPE = ' ? TRAD_TYPE ? '",
+  "SELECT B.IT_CODE AS Code ,B.IT_NAME AS Name,B.IT_TYPE As ItType, SUM(CASE WHEN A.VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN A.ITM_NWT ELSE -A.ITM_NWT END) ELSE 0 END) AS ClNwt, SUM(CASE WHEN A.VCH_DATE <= ' ? MM/dd/yyyy ? ' THEN(CASE WHEN ITM_SIGN = '+' THEN A.ITM_FINE ELSE -A.ITM_FINE END) ELSE 0 END) AS ClFine FROM MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND B.RATE_TYPE <> 'P'",
+  "UPDATE ITEM_MAST SET AVG_TOUCH = ? 0.00 ? ,AVG_FINE = ? ClFine ? 0.000 ? ,AVG_NWT = ? ClNwt ? 0.000 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? Code ? '",
+  "UPDATE ITEM_MAST SET AVG_TOUCH = 100,AVG_FINE = ? ClFine ? 0.000 ? ,AVG_NWT = ? ClNwt ? 0.000 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? Code ? '",
+  "Select A.IT_CODE, SUM(CASE WHEN ITM_SIGN = '+' THEN KR_NWT ELSE 0 END) AS TotNetWt,SUM(CASE WHEN ITM_SIGN = '+' THEN KR_FINE ELSE 0 END) AS TotFine FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND B.IT_TYPE IN ('G','S') AND A.KR_FINE <> 0 AND A.ITM_MRP = 0 AND A.TAG_NO <> 'N' and VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.TR_TYPE IN ('P','I') GROUP BY A.IT_CODE",
+  "UPDATE ITEM_MAST SET AVG_TOUCH = ? 0.00 ? ,AVG_FINE = ? 0.000 ? ,AVG_NWT = ? 0.000 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "UPDATE ITEM_MAST SET AVG_TOUCH = 100,AVG_FINE = ? TotNetWt ? 0.000 ? ,AVG_NWT = ? TotNetWt ? 0.000 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "Select GR_CODE FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_TYPE IN ('G','S') GROUP BY GR_CODE ORDER BY GR_CODE",
+  "Select A.IT_CODE,B.AVG_TOUCH, SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_NWT ELSE -ITM_NWT END) AS TotNetWt FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND B.GR_CODE = ' ? GR_CODE ? ' and VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.ITM_MRP = 0 GROUP BY A.IT_CODE,B.AVG_TOUCH",
+  "UPDATE GROUP_MAST SET AVG_TOUCH = ? 0.000 ? ,AVG_FINE = ? 0.000 ? ,AVG_NWT = ? 0.000 ? WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? GR_CODE ? '",
+  "Select TRAD_TYPE FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_TYPE IN ('G','S') GROUP BY TRAD_TYPE ORDER BY TRAD_TYPE",
+  "UPDATE BAL_GR SET AVG_TOUCH = ? 0.000 ? ,AVG_FINE = ? 0.000 ? ,AVG_NWT = ? 0.000 ? WHERE CO_CODE = ' ? ' AND TRAD_TYPE = ' ? TRAD_TYPE ? '",
+  "Select A.IT_CODE, SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_PCS ELSE 0 END) AS TotPcs,SUM(CASE WHEN ITM_SIGN = '+' THEN KR_COST ELSE 0 END) AS TotAmt FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND (B.RATE_TYPE = 'P' OR A.ITM_MRP <> 0) AND A.KR_COST <> 0 and VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.TR_TYPE IN ('P','I') GROUP BY A.IT_CODE",
+  "UPDATE ITEM_MAST SET AVG_RATE = ? 0.00 ? WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? IT_CODE ? '",
+  "Select A.IT_CODE,B.AVG_RATE, SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_PCS ELSE -ITM_PCS END) AS TotPcs FROM MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND B.TRAD_TYPE = ' ? TRAD_TYPE ? ' AND (B.RATE_TYPE = 'P' OR A.ITM_MRP <> 0) AND A.ITM_PCS <> 0 and VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.IT_CODE,B.AVG_RATE",
+  "UPDATE BAL_GR SET AVG_AMT = ? 0.00 ? WHERE CO_CODE = ' ? ' AND TRAD_TYPE = ' ? TRAD_TYPE ? '",
+  "Select A.IT_CODE,C.MELTING_PRC,SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_NWT ELSE -ITM_NWT END) AS TotNetWt FROM (MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE) LEFT JOIN GROUP_MAST AS C ON B.CO_CODE = C.CO_CODE AND B.GR_CODE = C.GR_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND B.RATE_TYPE <> 'P' AND B.IT_TYPE IN ('G','S') and VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.IT_CODE,C.MELTING_PRC",
+  "Select B.GR_CODE,C.MELTING_PRC,SUM(CASE WHEN ITM_SIGN = '+' THEN ITM_NWT ELSE -ITM_NWT END) AS TotNetWt FROM (MAIN_STOCK AS A INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE) LEFT JOIN GROUP_MAST AS C ON B.CO_CODE = C.CO_CODE AND B.GR_CODE = C.GR_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND B.IT_TYPE IN ('G','S') and VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY B.GR_CODE,C.MELTING_PRC",
+  "UPDATE GROUP_MAST SET AVG_TOUCH = ? 0.00 ? ,AVG_FINE = ? 0.000 ? ,AVG_NWT = ? 0.000 ? WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? GR_CODE ? '",
+  "SELECT TAG_NO FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_TYPE = ' ? ' AND PR_CODE = ' ? ' AND LEN(TAG_NO) = 8 GROUP BY TAG_NO UNION ALL SELECT TAG_NO FROM TAG_SET WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_TYPE = ' ? ' AND PR_CODE = ' ? ' AND LEN(TAG_NO) = 8 GROUP BY TAG_NO ORDER BY TAG_NO",
+  "SELECT * FROM USER_MAST",
+  "SELECT SUM(CR_AMT) As CashAmt FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? ' AND LD_CODE = '00001' HAVING SUM(CR_AMT) > 0",
+  "SELECT DEFAULTER_AC FROM AC_MAST WHERE CO_CODE =' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '"
+ ],
+ "keyboard": {},
+ "calc": [
+  "num = Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotAmt\"])) / Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotNetWt\"]));",
+  "num = Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotAmt\"])) / Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotPcs\"]));",
+  "num3 += Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"AVG_NWT\"])) * Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"AVG_RATE\"]));",
+  "num6 += Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TOT_PCS\"])) * Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"PCS_RATE\"]));",
+  "num8 = Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"ClFine\"])) * 100.0 / Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"ClNwt\"]));",
+  "num8 = Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotFine\"])) * 100.0 / Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotNetWt\"]));",
+  "num9 = Conversion.Val(RuntimeHelpers.GetObjectValue(dataTable2.Rows[0][\"TotNetWt\"])) * num8 / 100.0;",
+  "num9 = Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotNetWt\"])) * num8 / 100.0;",
+  "double num8 = Conversion.Val((object)(num10 * 100.0 / num4));",
+  "num += Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotPcs\"])) * Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"AVG_RATE\"]));",
+  "num2 = Conversion.Val(RuntimeHelpers.GetObjectValue(Tbl.Rows[M][\"TotNetWt\"])) * num / 100.0;"
+ ],
+ "validations": [
+  {
+   "message": "Database Is Attach Please ReLogin Software...",
+   "when": "Mc.State == ConnectionState.Open"
+  },
+  {
+   "message": "Please Create Next Image Data In Database...",
+   "when": "!flag"
+  },
+  {
+   "message": "Date Not Valid...",
+   "when": "Operators.CompareString(Strings.Mid(MsDate.Text, 1, 1), \"29\", false) > 0"
+  },
+  {
+   "message": "Month Not Valid...",
+   "when": "num2 > 12.0"
+  },
+  {
+   "message": "Blank",
+   "when": "Operators.CompareString(Convert.ToString(registryKey).Trim(), string.Empty, false) == 0"
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "form": "Module_Save",
+ "tables": [
+  "BAR_DETL",
+  "CO_MAST",
+  "TAG_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "BAR_DETL",
+  "CO_MAST",
+  "TAG_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 12,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 647
+}

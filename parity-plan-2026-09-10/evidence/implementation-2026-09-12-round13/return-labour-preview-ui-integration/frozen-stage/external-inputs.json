@@ -1,0 +1,18 @@
+[
+  {
+    "path": "/tmp/datacare-return-labour-preview-next/implementation-contract.md",
+    "sha256": "2bbfd5a65f6806f50daf3099a9204743be40024d89359861c52e558eee206ccc"
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-api/ready-manifest.json",
+    "sha256": "1f079021e6757104856a508093291a4534558851beda352c22d9bc62cf30c418"
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+    "sha256": "caeca09dcbdff4990ce5ffbe00505605d498f92a63beaec640496398fb236626"
+  },
+  {
+    "path": "/tmp/datacare-return-labour-preview-browser/browser-required-checks.json",
+    "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237"
+  }
+]

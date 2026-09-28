@@ -1,0 +1,180 @@
+[
+ {
+  "form": "DataCareNext.MS_ACCT",
+  "controlCount": 152,
+  "byKind": {
+   "tab": 4,
+   "other": 14,
+   "textbox": 51,
+   "combo": 10,
+   "label": 49,
+   "button": 17,
+   "check": 5,
+   "grid": 2
+  }
+ },
+ {
+  "form": "DataCareNext.MS_MEMB",
+  "controlCount": 100,
+  "byKind": {
+   "tab": 4,
+   "other": 13,
+   "button": 13,
+   "textbox": 35,
+   "label": 31,
+   "combo": 3,
+   "grid": 1
+  }
+ },
+ {
+  "form": "DataCareNext.MS_ADD_MAST",
+  "controlCount": 88,
+  "byKind": {
+   "tab": 4,
+   "other": 10,
+   "textbox": 28,
+   "combo": 6,
+   "label": 32,
+   "button": 7,
+   "grid": 1
+  }
+ },
+ {
+  "form": "DataCareNext.MS_ITEM",
+  "controlCount": 72,
+  "byKind": {
+   "button": 7,
+   "textbox": 24,
+   "combo": 5,
+   "label": 25,
+   "other": 4,
+   "grid": 1,
+   "check": 6
+  }
+ },
+ {
+  "form": "DataCareNext.MS_PRODUCT",
+  "controlCount": 51,
+  "byKind": {
+   "button": 10,
+   "textbox": 15,
+   "label": 16,
+   "combo": 3,
+   "other": 6,
+   "grid": 1
+  }
+ },
+ {
+  "form": "DataCareNext.MS_GROUP",
+  "controlCount": 37,
+  "byKind": {
+   "button": 5,
+   "textbox": 15,
+   "combo": 1,
+   "other": 2,
+   "grid": 1,
+   "label": 12,
+   "check": 1
+  }
+ },
+ {
+  "form": "DataCareNext.MS_GOLD_MAST",
+  "controlCount": 29,
+  "byKind": {
+   "button": 5,
+   "textbox": 10,
+   "check": 2,
+   "other": 2,
+   "label": 10
+  }
+ },
+ {
+  "form": "DataCareNext.MS_AC_GROUP",
+  "controlCount": 28,
+  "byKind": {
+   "button": 6,
+   "textbox": 7,
+   "combo": 2,
+   "other": 3,
+   "grid": 1,
+   "label": 9
+  }
+ },
+ {
+  "form": "DataCareNext.MS_DM",
+  "controlCount": 27,
+  "byKind": {
+   "button": 5,
+   "textbox": 8,
+   "combo": 2,
+   "other": 2,
+   "grid": 1,
+   "label": 9
+  }
+ },
+ {
+  "form": "DataCareNext.MS_TAX",
+  "controlCount": 26,
+  "byKind": {
+   "textbox": 10,
+   "button": 5,
+   "label": 7,
+   "grid": 2,
+   "other": 2
+  }
+ },
+ {
+  "form": "DataCareNext.MS_LBR_TYPE",
+  "controlCount": 24,
+  "byKind": {
+   "button": 5,
+   "textbox": 7,
+   "combo": 1,
+   "other": 4,
+   "grid": 1,
+   "label": 6
+  }
+ },
+ {
+  "form": "DataCareNext.MS_EMP",
+  "controlCount": 23,
+  "byKind": {
+   "button": 5,
+   "textbox": 7,
+   "combo": 1,
+   "label": 7,
+   "other": 2,
+   "grid": 1
+  }
+ },
+ {
+  "form": "DataCareNext.MS_STYLE",
+  "controlCount": 12,
+  "byKind": {
+   "button": 5,
+   "textbox": 2,
+   "other": 2,
+   "label": 2,
+   "grid": 1
+  }
+ },
+ {
+  "form": "DataCareNext.MS_TRADE",
+  "controlCount": 10,
+  "byKind": {
+   "textbox": 1,
+   "grid": 1,
+   "button": 5,
+   "label": 1,
+   "other": 2
+  }
+ },
+ {
+  "form": "DataCareNext.UT_REPORT",
+  "controlCount": 6,
+  "byKind": {
+   "other": 4,
+   "button": 2
+  }
+ }
+]

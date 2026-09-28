@@ -1,0 +1,314 @@
+{
+ "form": "RP_ORDER",
+ "controlCount": 28,
+ "byKind": {
+  "button": 4,
+  "panel": 3,
+  "masked": 2,
+  "grid": 3,
+  "other": 3,
+  "check": 2,
+  "textbox": 2,
+  "combo": 2,
+  "label": 7
+ },
+ "grids": [
+  "DGV_AC",
+  "DGV_DETL",
+  "DGV_DEL"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnCancel",
+   "BtnPrint",
+   "BtnSave",
+   "Panel1"
+  ],
+  "Panel1": [
+   "lblMobile",
+   "lblAdd1"
+  ],
+  "PnlAcSumm": [
+   "DGV_AC",
+   "DGV_DEL",
+   "cboArea",
+   "Label17",
+   "cboCity",
+   "lblCity",
+   "tSerchAll",
+   "tSearch",
+   "mToDt",
+   "mFromDt",
+   "Label3"
+  ],
+  "this": [
+   "chkOpBal",
+   "chkZero",
+   "PnlAcSumm",
+   "Label2",
+   "Cr",
+   "tAcCode",
+   "tAcName",
+   "lblBook",
+   "PnlBotam",
+   "DGV_DETL"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "PnlAcSumm",
+   "type": "Panel",
+   "location": "-1,33",
+   "size": "1196,529",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "65,11",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "01/",
+   "kind": "masked"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "147,11",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "DGV_AC",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "16,46",
+   "size": "1160,467",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tSearch",
+   "type": "SearchControl",
+   "location": "241,11",
+   "size": "150,24",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "chkZero",
+   "type": "CheckBox",
+   "location": "16,7",
+   "size": "141,19",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "tSerchAll",
+   "type": "SearchControl",
+   "location": "397,11",
+   "size": "150,24",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "106,45",
+   "size": "78,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "chkOpBal",
+   "type": "CheckBox",
+   "location": "188,7",
+   "size": "141,20",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "cboCity",
+   "type": "ComboBox",
+   "location": "640,13",
+   "size": "120,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "cboArea",
+   "type": "ComboBox",
+   "location": "846,14",
+   "size": "111,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Order Zoom Report",
+   "kind": "label"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "591,3",
+   "size": "327,38",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "188,45",
+   "size": "272,23",
+   "tabIndex": "1129",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "13,46",
+   "size": "83,20",
+   "tabIndex": "1132",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "DGV_DETL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,79",
+   "size": "1159,473",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "lblCity",
+   "type": "Label",
+   "location": "554,13",
+   "size": "78,19",
+   "tabIndex": "1138",
+   "text": "City",
+   "kind": "label"
+  },
+  {
+   "name": "lblAdd1",
+   "type": "Label",
+   "location": "23,0",
+   "size": "301,20",
+   "tabIndex": "1139",
+   "text": "Address",
+   "kind": "label"
+  },
+  {
+   "name": "lblMobile",
+   "type": "Label",
+   "location": "23,18",
+   "size": "301,20",
+   "tabIndex": "1140",
+   "text": "Mobile",
+   "kind": "label"
+  },
+  {
+   "name": "Label17",
+   "type": "Label",
+   "location": "763,14",
+   "size": "74,19",
+   "tabIndex": "1140",
+   "text": "Area",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "15,11",
+   "size": "44,20",
+   "tabIndex": "1156",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "DGV_DEL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "17,46",
+   "size": "1159,467",
+   "tabIndex": "1157",
+   "text": "",
+   "kind": "grid"
+  }
+ ]
+}

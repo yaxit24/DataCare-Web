@@ -1,0 +1,27 @@
+{
+  "kind": "session-context-browser-lifecycle-addendum-v1",
+  "status": "prospective-unexecuted",
+  "baseRequiredChecksSha256": "c2eb44b97a3230c9619d62eb6d5c2e9da8a8c724915f627dc321988c994b8547",
+  "baseChecksUnchanged": true,
+  "baseChecks": [
+    "real login bootstraps an exact string epoch and immutable login company",
+    "same-scope Open persists one original selection ID and expected epoch before dispatch and bumps once",
+    "cancelled Shell company confirmation preserves the mounted draft and performs no selection",
+    "confirmed Shell company change uses one exact operation and deliberately navigates",
+    "a second tab shares the same session and changes its context through the actual selection UI",
+    "old-page business action receives context-stale without automatic retry or draft DOM replacement",
+    "A to B to A advances epoch while retaining the original page scope values",
+    "an actual late component-default response cannot overwrite the stale page draft",
+    "an uncertain committed Shell selection retains the exact recovery request and draft",
+    "deliberate recovery navigation loads fresh me before retrying the original operation",
+    "exact current receipt retry preserves the epoch and database session row without another open",
+    "business configuration and design rows remain byte-observation unchanged throughout"
+  ],
+  "additionalChecks": [
+    "late successful selection after client-side Back pauses the document without navigation, draft replacement or recovery erasure",
+    "late dropped selection after client-side Back pauses the document and preserves the draft and exact receipt recovery"
+  ],
+  "totalChecks": 14,
+  "requiredTransportFaults": 5,
+  "syntheticBusinessResponses": 0
+}

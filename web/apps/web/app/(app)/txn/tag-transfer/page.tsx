@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { ParityContainmentNotice } from '../../../../components/ParityContainmentNotice';
+import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /** Tag Transfer (TR_TAG_TRFR): convert a barcoded tag into a bulk/loose item (e.g. broken chain → OLD GOLD). */
 interface Row {
@@ -36,9 +39,21 @@ const blank = (): Row => ({
 });
 const n = (v: string) => Number(v || 0);
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
+const containment = parityContainmentRule('tag-transfer');
 
 export default function TagTransferPage() {
   const [rows, setRows] = useState<Row[]>([blank()]);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: rows.length,
+    onAppendRow: () => setRows((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setRows((rows) => (rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row)));
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [vchDate, setVchDate] = useState('');
   const [res, setRes] = useState<{ vchNo: number; lines: number } | null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -51,6 +66,10 @@ export default function TagTransferPage() {
     e.preventDefault();
     setMsg(null);
     setRes(null);
+    if (containment.blocked) {
+      setMsg({ kind: 'err', text: parityContainmentMessage('tag-transfer') });
+      return;
+    }
     const lines = rows
       .filter((r) => r.tagNo.trim() && r.toItCode.trim())
       .map((r) => ({
@@ -100,6 +119,7 @@ export default function TagTransferPage() {
         Tag Transfer{' '}
         <span className="muted">— convert a tag into a bulk/old-gold item (fine conserved)</span>
       </h1>
+      <ParityContainmentNotice operation="tag-transfer" />
       {msg && <div className={`msg ${msg.kind}`}>{msg.text}</div>}
       <form onSubmit={submit}>
         <div className="panel">
@@ -114,7 +134,7 @@ export default function TagTransferPage() {
           </div>
         </div>
         <div className="panel" style={{ overflow: 'auto' }}>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Tag</th>
@@ -276,7 +296,7 @@ export default function TagTransferPage() {
             <span className="muted" style={{ marginRight: 12 }}>
               POST /stock/tag-transfer
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" disabled={busy || containment.blocked}>
               {busy ? 'Posting…' : 'Post Transfer'}
             </button>
           </div>

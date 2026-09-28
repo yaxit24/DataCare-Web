@@ -1,0 +1,23 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "test"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T02:53:43.991873+00:00",
+  "finishedAtUtc": "2026-09-12T02:53:54.083847+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round15/core-final.txt",
+  "logSha256": "680606660a564fc6f538f4cdbd2a3d08268118fa7c2203854207079f0db2bccb",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round15/core-final.inputs.json",
+  "inputManifestSha256": "afb29fbcd45d078b096f5aff51ecd3881123974ac2e8173ee5c8b23a67f0f8af",
+  "inputCount": 1930,
+  "changedInputs": [],
+  "changedPrivateInputs": [],
+  "changedRuntimeInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

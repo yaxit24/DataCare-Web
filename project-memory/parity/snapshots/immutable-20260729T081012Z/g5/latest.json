@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-27T21:39:26.526Z",
+  "mode": "DEGRADED",
+  "verdict": "degraded",
+  "source": {
+    "configured": false,
+    "reachable": false
+  },
+  "goldenVectors": {
+    "status": "passed",
+    "result": {
+      "passed": 15,
+      "failed": 0,
+      "total": 15,
+      "results": [
+        {
+          "name": "gstSplit intra 30",
+          "actual": {
+            "cgst": 15,
+            "sgst": 15,
+            "igst": 0
+          },
+          "expected": {
+            "cgst": 15,
+            "sgst": 15,
+            "igst": 0
+          },
+          "ok": true
+        },
+        {
+          "name": "gstSplit inter 30",
+          "actual": {
+            "cgst": 0,
+            "sgst": 0,
+            "igst": 30
+          },
+          "expected": {
+            "cgst": 0,
+            "sgst": 0,
+            "igst": 30
+          },
+          "ok": true
+        },
+        {
+          "name": "billTotals intra taxable",
+          "actual": 1000,
+          "expected": 1000,
+          "ok": true
+        },
+        {
+          "name": "billTotals intra tax",
+          "actual": 30,
+          "expected": 30,
+          "ok": true
+        },
+        {
+          "name": "billTotals intra total",
+          "actual": 1030,
+          "expected": 1030,
+          "ok": true
+        },
+        {
+          "name": "billTotals intra cgst+sgst",
+          "actual": [
+            15,
+            15,
+            0
+          ],
+          "expected": [
+            15,
+            15,
+            0
+          ],
+          "ok": true
+        },
+        {
+          "name": "billTotals inter igst",
+          "actual": [
+            60,
+            0,
+            0,
+            2060
+          ],
+          "expected": [
+            60,
+            0,
+            0,
+            2060
+          ],
+          "ok": true
+        },
+        {
+          "name": "labour per_gram 10g@50",
+          "actual": 500,
+          "expected": 500,
+          "ok": true
+        },
+        {
+          "name": "dhrn interest 10000@12% 90d/360",
+          "actual": 300,
+          "expected": 300,
+          "ok": true
+        },
+        {
+          "name": "dhrn interest 10000@12% 360d/360",
+          "actual": 1200,
+          "expected": 1200,
+          "ok": true
+        },
+        {
+          "name": "dhrn monthly 10000@2%/mo × 3mo",
+          "actual": 600,
+          "expected": 600,
+          "ok": true
+        },
+        {
+          "name": "dhrn monthly 50000@1.5%/mo × 6mo",
+          "actual": 4500,
+          "expected": 4500,
+          "ok": true
+        },
+        {
+          "name": "karigar fine 100g@92%",
+          "actual": 92,
+          "expected": 92,
+          "ok": true
+        },
+        {
+          "name": "karigar fine+wastage 100g@90%+2%",
+          "actual": 92,
+          "expected": 92,
+          "ok": true
+        },
+        {
+          "name": "ledger balanced 1030",
+          "actual": [
+            true,
+            1030,
+            1030
+          ],
+          "expected": [
+            true,
+            1030,
+            1030
+          ],
+          "ok": true
+        }
+      ]
+    }
+  },
+  "checks": {
+    "sigma": {
+      "status": "skipped",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    },
+    "footprint": {
+      "status": "skipped",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    },
+    "voucherColumns": {
+      "status": "skipped",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    },
+    "calcRecomputation": {
+      "status": "skipped",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    }
+  },
+  "forms": [],
+  "skippedChecks": [
+    {
+      "check": "sigma",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    },
+    {
+      "check": "footprint",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    },
+    {
+      "check": "voucherColumns",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    },
+    {
+      "check": "calcRecomputation",
+      "reason": "Desktop source is not configured; missing CUTOVER_SOURCE_HOST, CUTOVER_SOURCE_USER, CUTOVER_SOURCE_PASSWORD, CUTOVER_SOURCE_DATABASE."
+    }
+  ],
+  "requiredExternalInputs": [
+    "A reachable desktop SQL Server runtime containing sanitized representative shop data.",
+    "Read-only desktop source credentials in CUTOVER_SOURCE_* environment variables.",
+    "A matching migrated PostgreSQL target tenant in DATABASE_URL and G5_TARGET_TENANT.",
+    "G5_FORMS JSON identifying matching desktop and web vouchers for each form."
+  ]
+}

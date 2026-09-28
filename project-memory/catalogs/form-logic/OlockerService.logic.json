@@ -1,0 +1,23 @@
+{
+ "form": "OlockerService",
+ "tables": [
+  "SL_DETL",
+  "SL_IDTL"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "SL_DETL",
+  "SL_IDTL"
+ ],
+ "fKeys": [],
+ "messageBoxes": 2,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [],
+ "loc": 217
+}

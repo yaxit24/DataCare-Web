@@ -1,0 +1,74 @@
+{
+ "form": "RP_BALANCE",
+ "tables": [
+  "AC_DATA",
+  "BAL_GR",
+  "LEDR_AC_DATA",
+  "LOCT_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "AC_DATA": [
+    "AC_CODE",
+    "BILL_DATE",
+    "BILL_NO",
+    "BOOK_NAME",
+    "CHQ_NO",
+    "CLR_DATE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "DATA_TRFR",
+    "DATA_TYPE",
+    "DR_AMT",
+    "ENTRY_TIME",
+    "FINE_RATE",
+    "FINE_WT",
+    "HD_VCH_NO",
+    "IT_DESC",
+    "IT_TYPE",
+    "LC_CODE",
+    "LD_CODE",
+    "LEDR_KEY",
+    "MAIN_USER",
+    "PARTY_AC_CODE",
+    "SIGN",
+    "VCH_DATE",
+    "VCH_NO",
+    "VCH_TYPE"
+   ]
+  },
+  "UPDATE": [
+   "BAL_GR"
+  ],
+  "DELETE": [
+   "AC_DATA",
+   "LEDR_AC_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "LEDR_AC_DATA",
+  "LOCT_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [
+  "AcLdrFineGold = num5 - num6",
+  "AcLdrFineSilver = num7 - num8",
+  "TRAD_AMT = 0 WHERE CO_CODE = '\" + DC_Main.MCo_code + \"'\")",
+  "gr1Amt = num + DC_Main.Fnv(ref Value)",
+  "gr2Amt = num2 + DC_Main.Fnv(ref Value)",
+  "gr3Amt = num3 + DC_Main.Fnv(ref Value)",
+  "gr4Amt = num4 + DC_Main.Fnv(ref Value)"
+ ],
+ "loc": 2711
+}

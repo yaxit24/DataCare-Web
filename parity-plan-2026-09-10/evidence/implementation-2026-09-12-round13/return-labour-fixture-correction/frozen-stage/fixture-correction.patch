@@ -1,0 +1,139 @@
+--- a/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json
++++ b/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json
+@@ -162,7 +162,7 @@
+         "6": "",
+         "7": "",
+         "8": "H1",
+-        "9": "1",
++        "9": "1.000",
+         "10": "10.000",
+         "11": "0.000",
+         "12": "10.000",
+@@ -586,7 +586,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+@@ -841,7 +841,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+@@ -1096,7 +1096,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+@@ -1351,7 +1351,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+@@ -1606,7 +1606,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+@@ -1861,7 +1861,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+@@ -2116,7 +2116,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+@@ -2371,7 +2371,7 @@
+             "6": "",
+             "7": "",
+             "8": "H1",
+-            "9": "1",
++            "9": "1.000",
+             "10": "10.000",
+             "11": "0.000",
+             "12": "10.000",
+--- a/web/apps/api/test/saleReturnLabourReplay.test.ts
++++ b/web/apps/api/test/saleReturnLabourReplay.test.ts
+@@ -30,7 +30,7 @@
+       ),
+     );
+     expect(createHash("sha256").update(bytes).digest("hex")).toBe(
+-      "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
++      "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+     );
+     const x = JSON.parse(bytes.toString());
+     expect(Object.keys(x.expected.prefixes)).toHaveLength(8);
+--- a/web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts
++++ b/web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts
+@@ -49,6 +49,7 @@
+     passwordHash: string;
+   let signed: Login, unrelated: Login, other: Login;
+   const completed = new Map<string, () => void>();
++  let caseAddress = 0;
+   const sql = (q: string, ...args: unknown[]) =>
+     owner.$executeRawUnsafe(q, ...args);
+   const snapshot = () => snapshotLabourFixture(owner, tenants);
+@@ -117,6 +118,8 @@
+     const response = await app.inject({
+       method: "POST",
+       url: "/auth/login",
++      // Each isolated test represents a different client; retain the real 10/minute login limiter.
++      remoteAddress: `127.0.1.${caseAddress}`,
+       headers: { "x-tenant-id": tenantId },
+       payload: {
+         loginName,
+@@ -189,6 +192,7 @@
+     });
+   });
+   beforeEach(async () => {
++    caseAddress += 1;
+     await cleanLabourFixture(owner, tenants);
+     await seedLabourFixture(owner, tenants, passwordHash);
+     signed = await login();
+@@ -254,14 +258,15 @@
+     const p = firstPrefix(await state()),
+       request = { ...p, fieldId: "x13.primary-incoming.c13", editorText: "BB" },
+       before = await snapshot();
+-    for (const pair of [
++    const pairs: Array<Record<string, string> | null> = [
+       null,
+       { "x-session-context-id": signed.context.sessionId },
+       {
+         "x-session-context-id": other.context.sessionId,
+         "x-session-context-epoch": other.context.contextEpoch,
+       },
+-    ]) {
++    ];
++    for (const pair of pairs) {
+       const r = await inject(
+         "POST",
+         endpoint("incoming-labour-observation"),

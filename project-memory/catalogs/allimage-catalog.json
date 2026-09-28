@@ -1,0 +1,51 @@
+{
+ "archive": "AllImage.rar",
+ "finding": "contains vendor ASP.NET web port DataCareWeb + image stores (NOT just images)",
+ "dataCareWeb": {
+  "framework": "ASP.NET WebForms + EntityFramework + SQL Server",
+  "aspxScreens": [
+   "MS_ACCT",
+   "MS_LOGIN",
+   "MS_MDIFORM",
+   "MS_NOTIFICATION",
+   "MS_OPNCOMP",
+   "OR_ITEMSELECT",
+   "PT_CASHREC",
+   "PT_WHSALE",
+   "Print",
+   "RP_LDR",
+   "RP_TAGESTIMATE",
+   "RP_TAGREPORT",
+   "TR_BANKREC",
+   "TR_CASHREC",
+   "TR_ORDER_ENTRY",
+   "TR_WHSALE"
+  ],
+  "perScreenCss": [
+   "MS_ACCT.css",
+   "MS_LOGIN.css",
+   "MS_MDIFORM.css",
+   "MS_NOTIFICATION.css",
+   "PT_CASHREC.css",
+   "PT_WHSALE.css",
+   "RP_LDR.css",
+   "RP_TAGESTIMATE.css",
+   "RP_TAGREPORT.css",
+   "TR_BANKREC.css",
+   "TR_CASHREC.css",
+   "TR_ORDER_ENTRY.css",
+   "TR_WHSALE.css"
+  ],
+  "value": "design reference \u2014 per-screen CSS defines intended web look (brand #ff6a00); aspx show prioritized screens"
+ },
+ "imageStores": [
+  "TagImage",
+  "FtpImage",
+  "DhranImage",
+  "assets/image"
+ ],
+ "fonts": [
+  "FRE3OF9X.TTF (Code39 barcode)",
+  "KAP139.TTF (Gujarati)"
+ ]
+}

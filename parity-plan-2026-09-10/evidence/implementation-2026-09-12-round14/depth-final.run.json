@@ -1,0 +1,21 @@
+{
+  "command": [
+    "node",
+    "scripts/check-depth.mjs"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:24:31.072281+00:00",
+  "finishedAtUtc": "2026-09-12T01:24:53.327429+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/depth-final.txt",
+  "logSha256": "2db3f6c011072faefbfaa70445c7ac5de50821abef869cae927ec4cfaa97ff5d",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/depth-final.inputs.json",
+  "inputManifestSha256": "04c722ee7a695175ab197b1244580ff4bf7c0e536af84b91749749e428fb6faa",
+  "inputCount": 1907,
+  "changedInputs": [],
+  "changedPrivateInputs": [],
+  "changedRuntimeInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

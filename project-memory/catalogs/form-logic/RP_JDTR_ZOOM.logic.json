@@ -1,0 +1,27 @@
+{
+ "form": "RP_JDTR_ZOOM",
+ "tables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "MFG_DETL",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "MFG_DETL",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 1,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 3229
+}

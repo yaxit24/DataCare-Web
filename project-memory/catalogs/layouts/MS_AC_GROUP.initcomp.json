@@ -1,0 +1,66 @@
+{
+ "form": "MS_AC_GROUP",
+ "controlCount": 2,
+ "byKind": {
+  "textbox": 1,
+  "combo": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "PanelAdd": [
+   "btnIp",
+   "Label13",
+   "tPwd",
+   "Label10",
+   "Label9",
+   "tMasterData",
+   "tDataBaseName",
+   "tServerIp",
+   "Label6"
+  ],
+  "this": [
+   "cboUserShow",
+   "Label4",
+   "PanelAdd",
+   "cboMainGr",
+   "Label3",
+   "PnlBotam",
+   "DGV",
+   "Text1",
+   "Label1",
+   "Label2",
+   "tGrCode",
+   "tGrName",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboMainGr",
+   "type": "ComboBox",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "1 SOURCES OF FUNDS",
+   "kind": "combo"
+  }
+ ]
+}

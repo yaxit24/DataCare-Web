@@ -1,0 +1,240 @@
+{
+  "contract": "round10-independent-aggregate-tests-v1",
+  "authoredAtUtc": "2026-09-11T14:06:16.089716+00:00",
+  "status": "scoped-proof-final",
+  "scope": "Pure core incoming aggregate and BILL_TOTAL/composition only. No HTTP/UI, ledger resolution, persisted numeric/financial/stock writes, outgoing admission or desktop execution. Root owns full workspace verification.",
+  "fixtureSha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5",
+  "goldenAuthoring": "Independent source-derived literal expectations frozen before new implementation inspection or execution. Type declarations were read for shapes; generator only expands literal records. Arithmetic fixture never changed.",
+  "currentDirectInputs": [
+    {
+      "path": "packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "packages/core/test/saleReturnIncomingAggregate.test.ts",
+      "sha256": "316f9d7e2187d252bfa9e7fa754869b79ea227daccfd23a608d022d274d56d12"
+    },
+    {
+      "path": "packages/core/test/fixtures/sale-return-incoming-aggregate.v1.json",
+      "sha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    },
+    {
+      "path": "package.json",
+      "sha256": "88b346ba7597fe1af78ae6151cc6e9ddeeb219f0049df90edbf4d8eaef3731c2"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    }
+  ],
+  "currentStage": {
+    "tests": 62,
+    "files": 1,
+    "durationMs": 434,
+    "runtimeExitCode": 0,
+    "runtimeLog": {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-focused-ascii.txt",
+      "sha256": "bb427f5265fff4b71b455533eca2de0e63943ab4e912e5e453644e6972792fac"
+    },
+    "runtimeCommand": "pnpm --filter @datacare/core test -- test/saleReturnIncomingAggregate.test.ts",
+    "strictTestCompilerExitCode": 0,
+    "strictTestCompilerLog": {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-types-ascii.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "strictTestCompilerCommand": "pnpm --filter @datacare/core exec tsc --noEmit --strict --noUncheckedIndexedAccess --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck test/saleReturnIncomingAggregate.test.ts",
+    "beforeAfter": {
+      "inputs": 10,
+      "result": "unchanged",
+      "snapshot": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-ascii-inputs.json",
+        "sha256": "07db45145c4071855a176eea6729b3e8d781ca363c2bfad58b1fe06fb1a75428"
+      },
+      "verification": {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-ascii-input-verification.json",
+        "sha256": "ce9bc71f703b8a3bbc46e729966f3718c79bda1d52b914a416316ba8fa0e2b26"
+      },
+      "indexScope": "Not imported by this test; root tax export integration and full workspace capture are separately owned."
+    }
+  },
+  "historicalStages": [
+    {
+      "tests": 58,
+      "runtime": "passed",
+      "strictCompiler": "first failed on test-only union return annotation; corrected pass",
+      "scope": "Pre-large-bill and pre-ASCII correction;11-input scoped snapshot includes an index hash before root tax exports. No current-workspace equivalence claimed."
+    },
+    {
+      "tests": 59,
+      "runtime": "passed",
+      "strictNoUncheckedCompiler": "passed",
+      "scope": "One independently requested exact large bill residual case added; later superseded by ASCII profile correction."
+    }
+  ],
+  "knownCorrections": [
+    "Owner implemented applied-row ordinal invariant validation and generated-result precision-domain guard before first focused runtime; no pre-fix test failure claimed.",
+    "Test helper return type narrowed to leaveCell after actual strict compiler failure; no arithmetic expectation or product change.",
+    "Reviewer found terminal-newline acceptance through JavaScript regex$; owner added ASCII printable check before trim and exactly3 regression inputs were added. No fabricated pre-fix test run."
+  ],
+  "limitations": [
+    "Mathematical Decimal profile does not prove Windows Double/Val/Format/culture runtime parity.",
+    "Pure context/settings/opening observations do not grant server authority or numeric writes.",
+    "Ledger fixture is prospective evidence only; no database query was executed by this test.",
+    "The focused checker skips library declaration checking; root owns complete production/build/test configuration verification.",
+    "No standalone lint credit claimed."
+  ],
+  "references": [
+    {
+      "path": "packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "packages/core/test/saleReturnIncomingAggregate.test.ts",
+      "sha256": "316f9d7e2187d252bfa9e7fa754869b79ea227daccfd23a608d022d274d56d12"
+    },
+    {
+      "path": "packages/core/test/fixtures/sale-return-incoming-aggregate.v1.json",
+      "sha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "packages/core/tsconfig.json",
+      "sha256": "fc260cbe86688e06932291129be27acbf84fb4b0744efa4cefa4544de09f6f59"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "a422076ad30cff4afb9c18836f30b5bf60f23336a142164fed1af2aa12847336"
+    },
+    {
+      "path": "package.json",
+      "sha256": "88b346ba7597fe1af78ae6151cc6e9ddeeb219f0049df90edbf4d8eaef3731c2"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c2f2ca22531a15d718a417d77dc4119c6694c2076d93652fc1666cac304960c9"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/author-aggregate-vectors.py",
+      "sha256": "560e17c419baf645ff01da97ea2eb7e6fea2f58de4890a60ae1c2df25dce68d7"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-independent-vectors.json",
+      "sha256": "97001a2719f491e50c3b1b9d31c96a822b243b9edd69bcd8b767b79e6b3231b5"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-independent-tests.md",
+      "sha256": "f7baa788ead71173cdf0bd49de84b6aa45a4da6fdeb69adbb8c3dc8f7823542d"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-focused-first.txt",
+      "sha256": "5b6063843788ffad0e77445ec8afcc8591cc05b0431dfceb06f26a08e2a53b3a"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-types-first.txt",
+      "sha256": "9d2e153603b1c69fe8378c13c157f94d35d55c492364280fb04afe1ccc912f5b"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-format.txt",
+      "sha256": "31a628e3196fcc3bdd5165e9c81b602d8938f3a63266267c9cbf416786d778f8"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-focused-verified.txt",
+      "sha256": "e16dc6ad8aba28f82c8bc3d5e04230f3afdfc164de4be574faa3f4b0f5132582"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-types-verified.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-focused-inputs.json",
+      "sha256": "b6dd02c720f1414e10c5c7f0cfc3a495e944c64772e3bda99c37ee658a6b46c9"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-focused-input-verification.json",
+      "sha256": "37183763d2b27abdfebad92a5b269fad1fd7e96fc031c108cc8acd031d06dcc9"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-format-bill-precision.txt",
+      "sha256": "b7e627b8031d0dbdc9b6c354316226dab764e8c3989440152bc33cd73054bbfa"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-focused-bill-precision.txt",
+      "sha256": "614afa9fab326a6b0033cc2b1249857ba38cec6b9081e76ea9bcb0665fb67100"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-types-bill-precision.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-format-ascii.txt",
+      "sha256": "b7e627b8031d0dbdc9b6c354316226dab764e8c3989440152bc33cd73054bbfa"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-focused-ascii.txt",
+      "sha256": "bb427f5265fff4b71b455533eca2de0e63943ab4e912e5e453644e6972792fac"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-test-types-ascii.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-ascii-inputs.json",
+      "sha256": "07db45145c4071855a176eea6729b3e8d781ca363c2bfad58b1fe06fb1a75428"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/core-aggregate-ascii-input-verification.json",
+      "sha256": "ce9bc71f703b8a3bbc46e729966f3718c79bda1d52b914a416316ba8fa0e2b26"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-next-aggregate-requirements.md",
+      "sha256": "ae2b95e059748d34facb152c7ea1268058eb0bf9058ec7f9b91dd30051889ddc"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-next-aggregate-independent-review.md",
+      "sha256": "038745a3fb3ca94016f0801065a638523e2791f19e452e29a20fd29b564ad6df"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-replay-independent-journal-vectors.json",
+      "sha256": "68c3744d2e2cdbf741723effeef853dc05c97222f47bd740ecdd126127f7d83d"
+    }
+  ]
+}

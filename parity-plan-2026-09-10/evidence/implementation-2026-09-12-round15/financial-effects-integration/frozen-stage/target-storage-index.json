@@ -1,0 +1,2042 @@
+{
+  "schema": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+  "schemaSha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+  "tables": {
+    "AC_DATA": {
+      "line": 10,
+      "fields": {
+        "tenant_id": {
+          "type": "String",
+          "nullable": false,
+          "line": 11,
+          "maxLength": 24
+        },
+        "row_id": {
+          "type": "BigInt",
+          "nullable": false,
+          "line": 12
+        },
+        "VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 13,
+          "maxLength": 8
+        },
+        "CO_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 14,
+          "maxLength": 2
+        },
+        "LC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 15,
+          "maxLength": 2
+        },
+        "CO_YEAR": {
+          "type": "String",
+          "nullable": true,
+          "line": 16,
+          "maxLength": 10
+        },
+        "CO_BOOK": {
+          "type": "String",
+          "nullable": true,
+          "line": 17,
+          "maxLength": 3
+        },
+        "VCH_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 18,
+          "maxLength": 6
+        },
+        "VCH_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 19,
+          "storage": "date"
+        },
+        "LEDR_KEY": {
+          "type": "String",
+          "nullable": true,
+          "line": 20,
+          "maxLength": 50
+        },
+        "BOOK_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 21
+        },
+        "BILL_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 22,
+          "maxLength": 30
+        },
+        "BILL_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 23,
+          "storage": "date"
+        },
+        "CHQ_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 24,
+          "maxLength": 10
+        },
+        "AC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 25,
+          "maxLength": 8
+        },
+        "LD_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 26,
+          "maxLength": 8
+        },
+        "CR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 27,
+          "precision": 18,
+          "scale": 2
+        },
+        "DR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 28,
+          "precision": 18,
+          "scale": 2
+        },
+        "IT_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 29,
+          "maxLength": 1
+        },
+        "SIGN": {
+          "type": "String",
+          "nullable": true,
+          "line": 30,
+          "maxLength": 1
+        },
+        "FINE_WT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 31,
+          "precision": 14,
+          "scale": 3
+        },
+        "IT_DESC": {
+          "type": "String",
+          "nullable": true,
+          "line": 32
+        },
+        "ENTRY_TIME": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 33,
+          "storage": "timestamp6"
+        },
+        "HD_VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 34,
+          "maxLength": 10
+        },
+        "CLR_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 35,
+          "storage": "date"
+        },
+        "DATA_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 36,
+          "maxLength": 1
+        },
+        "DATA_TRFR": {
+          "type": "String",
+          "nullable": true,
+          "line": 37,
+          "maxLength": 1
+        },
+        "MAIN_USER": {
+          "type": "String",
+          "nullable": true,
+          "line": 38,
+          "maxLength": 15
+        },
+        "FINE_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 39,
+          "precision": 14,
+          "scale": 3
+        },
+        "PARTY_AC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 40,
+          "maxLength": 255
+        },
+        "LDR_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 41,
+          "maxLength": 255
+        }
+      }
+    },
+    "ROJ_MEL_DATA": {
+      "line": 5602,
+      "fields": {
+        "tenant_id": {
+          "type": "String",
+          "nullable": false,
+          "line": 5603,
+          "maxLength": 24
+        },
+        "CO_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5604,
+          "maxLength": 2
+        },
+        "LC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5605,
+          "maxLength": 2
+        },
+        "CO_YEAR": {
+          "type": "String",
+          "nullable": true,
+          "line": 5606,
+          "maxLength": 10
+        },
+        "CO_BOOK": {
+          "type": "String",
+          "nullable": true,
+          "line": 5607,
+          "maxLength": 3
+        },
+        "VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5608,
+          "maxLength": 8
+        },
+        "LEDR_KEY": {
+          "type": "String",
+          "nullable": false,
+          "line": 5609,
+          "maxLength": 50
+        },
+        "VCH_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 5610,
+          "storage": "date"
+        },
+        "VCH_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5611,
+          "maxLength": 6
+        },
+        "BOOK_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 5612,
+          "maxLength": 20
+        },
+        "AC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5613,
+          "maxLength": 8
+        },
+        "AC_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 5614
+        },
+        "LD_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5615,
+          "maxLength": 8
+        },
+        "CR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5616,
+          "precision": 18,
+          "scale": 2
+        },
+        "DR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5617,
+          "precision": 18,
+          "scale": 2
+        },
+        "IT_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5618,
+          "maxLength": 1
+        },
+        "SIGN": {
+          "type": "String",
+          "nullable": true,
+          "line": 5619,
+          "maxLength": 1
+        },
+        "ITM_PCS": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5620,
+          "precision": 12,
+          "scale": 3
+        },
+        "ITM_GWT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5621,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_NWT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5622,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_TOUCH": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5623,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_WEST": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5624,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_FINE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5625,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5626,
+          "precision": 18,
+          "scale": 2
+        },
+        "ITM_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5627,
+          "precision": 18,
+          "scale": 2
+        },
+        "LBR_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5628,
+          "precision": 18,
+          "scale": 2
+        },
+        "LBR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5629,
+          "precision": 18,
+          "scale": 2
+        },
+        "OTH_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5630,
+          "precision": 18,
+          "scale": 2
+        },
+        "NET_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5631,
+          "precision": 18,
+          "scale": 2
+        },
+        "IT_DESC": {
+          "type": "String",
+          "nullable": true,
+          "line": 5632
+        },
+        "IT_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5633,
+          "maxLength": 5
+        },
+        "MEMB_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5634,
+          "maxLength": 5
+        },
+        "SCHM_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5635,
+          "maxLength": 3
+        },
+        "REF_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5636,
+          "maxLength": 20
+        },
+        "DATA_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5637,
+          "maxLength": 1
+        }
+      }
+    },
+    "MAIN_STOCK": {
+      "line": 3855,
+      "fields": {
+        "tenant_id": {
+          "type": "String",
+          "nullable": false,
+          "line": 3856,
+          "maxLength": 24
+        },
+        "row_id": {
+          "type": "BigInt",
+          "nullable": false,
+          "line": 3857
+        },
+        "VCH_SRNO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 3858
+        },
+        "CO_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3859,
+          "maxLength": 2
+        },
+        "LC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3860
+        },
+        "CO_YEAR": {
+          "type": "String",
+          "nullable": true,
+          "line": 3861,
+          "maxLength": 10
+        },
+        "CO_BOOK": {
+          "type": "String",
+          "nullable": true,
+          "line": 3862,
+          "maxLength": 3
+        },
+        "VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 3863,
+          "maxLength": 8
+        },
+        "SR_NO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 3864
+        },
+        "ISR_NO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 3865
+        },
+        "VCH_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 3866,
+          "storage": "date"
+        },
+        "STK_DATE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3867,
+          "maxLength": 255
+        },
+        "VCH_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3868,
+          "maxLength": 6
+        },
+        "BOOK_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 3869
+        },
+        "AC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3870
+        },
+        "IT_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3871,
+          "maxLength": 5
+        },
+        "TAG_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 3872,
+          "maxLength": 15
+        },
+        "TBL_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3873
+        },
+        "TR_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3874,
+          "maxLength": 1
+        },
+        "ITM_SIGN": {
+          "type": "String",
+          "nullable": true,
+          "line": 3875,
+          "maxLength": 1
+        },
+        "ITM_QTY": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3876,
+          "precision": 12,
+          "scale": 3
+        },
+        "ITM_PCS": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3877,
+          "precision": 12,
+          "scale": 3
+        },
+        "ITM_GWT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3878,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_NWT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3879,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_TOUCH": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3880,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_WEST": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3881,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_FINE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3882,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3883,
+          "precision": 18,
+          "scale": 2
+        },
+        "ITM_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3884,
+          "precision": 18,
+          "scale": 2
+        },
+        "LBR_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3885,
+          "precision": 18,
+          "scale": 2
+        },
+        "LBR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3886,
+          "precision": 18,
+          "scale": 2
+        },
+        "OTH_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3887,
+          "precision": 18,
+          "scale": 2
+        },
+        "ITM_MRP": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3888,
+          "precision": 18,
+          "scale": 2
+        },
+        "NET_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3889,
+          "precision": 18,
+          "scale": 2
+        },
+        "KR_NWT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 3890
+        },
+        "KR_TOUCH": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3891,
+          "precision": 14,
+          "scale": 3
+        },
+        "KR_WEST": {
+          "type": "Float",
+          "nullable": true,
+          "line": 3892
+        },
+        "KR_FINE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3893,
+          "precision": 14,
+          "scale": 3
+        },
+        "KR_LBR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3894,
+          "precision": 18,
+          "scale": 2
+        },
+        "KR_OTH_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 3895
+        },
+        "KR_COST": {
+          "type": "Float",
+          "nullable": true,
+          "line": 3896
+        },
+        "EMP_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3897,
+          "maxLength": 3
+        },
+        "ENTRY_TIME": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 3898,
+          "storage": "date"
+        },
+        "MAIN_USER": {
+          "type": "String",
+          "nullable": true,
+          "line": 3899,
+          "maxLength": 15
+        },
+        "DATA_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3900,
+          "maxLength": 1
+        },
+        "DESIGN_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 3901
+        },
+        "ITM_SIZE": {
+          "type": "String",
+          "nullable": true,
+          "line": 3902,
+          "maxLength": 20
+        },
+        "ITM_DESC": {
+          "type": "String",
+          "nullable": true,
+          "line": 3903,
+          "maxLength": 255
+        },
+        "GHT_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3904,
+          "precision": 9,
+          "scale": 4
+        },
+        "ITM_LOT": {
+          "type": "String",
+          "nullable": true,
+          "line": 3905,
+          "maxLength": 255
+        },
+        "ITM_DISC": {
+          "type": "String",
+          "nullable": true,
+          "line": 3906,
+          "maxLength": 255
+        },
+        "GRID_SCROLL": {
+          "type": "String",
+          "nullable": true,
+          "line": 3907,
+          "maxLength": 255
+        },
+        "OTH_FINE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 3908,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_COLOR": {
+          "type": "String",
+          "nullable": true,
+          "line": 3909,
+          "maxLength": 15
+        }
+      }
+    },
+    "TAX_DATA": {
+      "line": 6639,
+      "fields": {
+        "tenant_id": {
+          "type": "String",
+          "nullable": false,
+          "line": 6640,
+          "maxLength": 24
+        },
+        "row_id": {
+          "type": "BigInt",
+          "nullable": false,
+          "line": 6641
+        },
+        "CO_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 6642,
+          "maxLength": 2
+        },
+        "LC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 6643,
+          "maxLength": 2
+        },
+        "CO_YEAR": {
+          "type": "String",
+          "nullable": true,
+          "line": 6644,
+          "maxLength": 10
+        },
+        "CO_BOOK": {
+          "type": "String",
+          "nullable": true,
+          "line": 6645,
+          "maxLength": 3
+        },
+        "VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 6646
+        },
+        "SR_NO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 6647
+        },
+        "BOOK_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 6648,
+          "maxLength": 20
+        },
+        "TRAN_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 6649,
+          "maxLength": 255
+        },
+        "VCH_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 6650,
+          "storage": "date"
+        },
+        "AC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 6651
+        },
+        "TAX_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 6652,
+          "maxLength": 2
+        },
+        "TAX_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 6653
+        },
+        "TAX_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 6654,
+          "precision": 9,
+          "scale": 4
+        },
+        "NET_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 6655,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAX_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 6656,
+          "precision": 18,
+          "scale": 3
+        },
+        "DISC_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 6657,
+          "precision": 18,
+          "scale": 2
+        },
+        "TOT_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 6658,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAX_SIGN": {
+          "type": "String",
+          "nullable": true,
+          "line": 6659,
+          "maxLength": 255
+        },
+        "PARTY_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 6660,
+          "maxLength": 255
+        },
+        "R_CHARG": {
+          "type": "String",
+          "nullable": true,
+          "line": 6661,
+          "maxLength": 255
+        },
+        "ISR_NO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 6662
+        },
+        "TAX_FREE_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 6663
+        },
+        "ZERO_RATED_AMT": {
+          "type": "String",
+          "nullable": true,
+          "line": 6664,
+          "maxLength": 255
+        },
+        "BILL_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 6665,
+          "maxLength": 20
+        },
+        "BILL_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 6666,
+          "storage": "date"
+        },
+        "BILL_DBCD": {
+          "type": "String",
+          "nullable": true,
+          "line": 6667,
+          "maxLength": 3
+        },
+        "VCH_SRNO": {
+          "type": "String",
+          "nullable": true,
+          "line": 6668,
+          "maxLength": 5
+        }
+      }
+    },
+    "SL_DETL_RTN": {
+      "line": 5867,
+      "fields": {
+        "tenant_id": {
+          "type": "String",
+          "nullable": false,
+          "line": 5868,
+          "maxLength": 24
+        },
+        "CO_CODE": {
+          "type": "String",
+          "nullable": false,
+          "line": 5869,
+          "maxLength": 2
+        },
+        "LC_CODE": {
+          "type": "String",
+          "nullable": false,
+          "line": 5870,
+          "maxLength": 2
+        },
+        "CO_YEAR": {
+          "type": "String",
+          "nullable": false,
+          "line": 5871,
+          "maxLength": 10
+        },
+        "CO_BOOK": {
+          "type": "String",
+          "nullable": false,
+          "line": 5872,
+          "maxLength": 3
+        },
+        "VCH_NO": {
+          "type": "String",
+          "nullable": false,
+          "line": 5873,
+          "maxLength": 8
+        },
+        "SR_NO": {
+          "type": "Float",
+          "nullable": false,
+          "line": 5874
+        },
+        "OLD_SRNO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5875
+        },
+        "VCH_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 5876,
+          "storage": "date"
+        },
+        "VCH_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5877,
+          "maxLength": 6
+        },
+        "INOUT_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5878,
+          "maxLength": 1
+        },
+        "ENTRY_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5879,
+          "maxLength": 1
+        },
+        "VCH_TIME": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 5880,
+          "storage": "timestamp6"
+        },
+        "BOOK_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 5881,
+          "maxLength": 20
+        },
+        "AC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5882,
+          "maxLength": 8
+        },
+        "IT_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5883,
+          "maxLength": 5
+        },
+        "TAG_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5884,
+          "maxLength": 15
+        },
+        "TBL_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5885,
+          "maxLength": 3
+        },
+        "DESIGN_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5886
+        },
+        "ITM_SIZE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5887
+        },
+        "ITM_PCS": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5888,
+          "precision": 12,
+          "scale": 3
+        },
+        "ITM_GWT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5889,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_OTH_WT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5890,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_NWT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5891,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_GHT_WT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5892,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_TOUCH": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5893,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_WEST_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5894,
+          "precision": 9,
+          "scale": 4
+        },
+        "ITM_FINE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5895,
+          "precision": 14,
+          "scale": 3
+        },
+        "ITM_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5896,
+          "precision": 18,
+          "scale": 2
+        },
+        "ITM_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5897,
+          "precision": 18,
+          "scale": 2
+        },
+        "LBR_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5898,
+          "maxLength": 1
+        },
+        "LBR_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5899,
+          "precision": 9,
+          "scale": 4
+        },
+        "LBR_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5900,
+          "precision": 18,
+          "scale": 2
+        },
+        "LBR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5901,
+          "precision": 18,
+          "scale": 2
+        },
+        "OTH_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5902,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAG_LBR_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5903,
+          "precision": 9,
+          "scale": 4
+        },
+        "TAG_LBR_RATE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5904,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAG_LBR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5905,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAG_OTH_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5906,
+          "precision": 18,
+          "scale": 2
+        },
+        "ITM_MRP": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5907,
+          "precision": 18,
+          "scale": 2
+        },
+        "TOT_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5908,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAX_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5909,
+          "precision": 9,
+          "scale": 4
+        },
+        "NET_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5910,
+          "precision": 18,
+          "scale": 2
+        },
+        "RATE_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5911,
+          "maxLength": 1
+        },
+        "IT_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5912,
+          "maxLength": 1
+        },
+        "HD_VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5913,
+          "maxLength": 10
+        },
+        "MAIN_USER": {
+          "type": "String",
+          "nullable": true,
+          "line": 5914,
+          "maxLength": 15
+        },
+        "DATA_TRFR": {
+          "type": "String",
+          "nullable": true,
+          "line": 5915,
+          "maxLength": 1
+        },
+        "KR_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 5916,
+          "maxLength": 5
+        },
+        "TAG_COST": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5917,
+          "precision": 18,
+          "scale": 2
+        },
+        "ITM_MARGIN": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5918
+        },
+        "VCH_SRNO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5919
+        },
+        "TAG_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5920,
+          "maxLength": 1
+        },
+        "PR_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5921,
+          "maxLength": 2
+        },
+        "TAG_SRNO": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5922
+        },
+        "ITM_GHT_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5923,
+          "precision": 9,
+          "scale": 4
+        },
+        "HM_ID2": {
+          "type": "String",
+          "nullable": true,
+          "line": 5924,
+          "maxLength": 10
+        },
+        "HM_ID3": {
+          "type": "String",
+          "nullable": true,
+          "line": 5925,
+          "maxLength": 10
+        },
+        "HM_ID4": {
+          "type": "String",
+          "nullable": true,
+          "line": 5926,
+          "maxLength": 10
+        },
+        "HM_ID_WT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5927,
+          "precision": 14,
+          "scale": 3
+        },
+        "HM_ID2_WT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5928,
+          "precision": 14,
+          "scale": 3
+        },
+        "HM_ID3_WT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5929,
+          "precision": 14,
+          "scale": 3
+        },
+        "HM_ID4_WT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5930,
+          "precision": 14,
+          "scale": 3
+        },
+        "HM_ID": {
+          "type": "String",
+          "nullable": true,
+          "line": 5931,
+          "maxLength": 10
+        },
+        "ITM_REMARK": {
+          "type": "String",
+          "nullable": true,
+          "line": 5932,
+          "maxLength": 50
+        },
+        "ITM_COLOR": {
+          "type": "String",
+          "nullable": true,
+          "line": 5933,
+          "maxLength": 15
+        },
+        "EMP_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5934,
+          "maxLength": 5
+        },
+        "LBR_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5935,
+          "maxLength": 4
+        },
+        "TAG_MRP": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5936,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAG_LBR_CODE": {
+          "type": "String",
+          "nullable": false,
+          "line": 5937,
+          "maxLength": 4
+        },
+        "DESIGN_IMG_ID": {
+          "type": "String",
+          "nullable": true,
+          "line": 5938,
+          "maxLength": 50
+        },
+        "EMP_ISU": {
+          "type": "String",
+          "nullable": true,
+          "line": 5939,
+          "maxLength": 1
+        },
+        "APR_ISU": {
+          "type": "String",
+          "nullable": true,
+          "line": 5940,
+          "maxLength": 1
+        },
+        "ITM_STYLE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5941,
+          "maxLength": 20
+        },
+        "ITM_LOT": {
+          "type": "String",
+          "nullable": true,
+          "line": 5942,
+          "maxLength": 10
+        },
+        "DISC_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5943,
+          "precision": 9,
+          "scale": 4
+        },
+        "DISC_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5944,
+          "precision": 18,
+          "scale": 2
+        },
+        "RTN_IT_TAX_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5945,
+          "precision": 18,
+          "scale": 2
+        },
+        "DATA_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5946,
+          "maxLength": 1
+        }
+      }
+    },
+    "SL_DATA": {
+      "line": 5643,
+      "fields": {
+        "LDR_CODE": {
+          "type": "String",
+          "nullable": false,
+          "line": 5645,
+          "maxLength": 10
+        },
+        "tenant_id": {
+          "type": "String",
+          "nullable": false,
+          "line": 5646,
+          "maxLength": 24
+        },
+        "row_id": {
+          "type": "BigInt",
+          "nullable": false,
+          "line": 5647
+        },
+        "VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5648,
+          "maxLength": 8
+        },
+        "IRN_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5649,
+          "maxLength": 100
+        },
+        "CO_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5650,
+          "maxLength": 2
+        },
+        "LC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5651,
+          "maxLength": 2
+        },
+        "CO_YEAR": {
+          "type": "String",
+          "nullable": true,
+          "line": 5652,
+          "maxLength": 10
+        },
+        "CO_BOOK": {
+          "type": "String",
+          "nullable": true,
+          "line": 5653,
+          "maxLength": 3
+        },
+        "VCH_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 5654,
+          "storage": "date"
+        },
+        "VCH_TIME": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 5655,
+          "storage": "timestamp6"
+        },
+        "BILL_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5656,
+          "maxLength": 30
+        },
+        "HD_VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5657,
+          "maxLength": 10
+        },
+        "AC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5658,
+          "maxLength": 8
+        },
+        "AC_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 5659,
+          "maxLength": 50
+        },
+        "NET_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5660,
+          "precision": 18,
+          "scale": 2
+        },
+        "DISC_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5661,
+          "precision": 9,
+          "scale": 4
+        },
+        "DISC_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5662,
+          "precision": 18,
+          "scale": 2
+        },
+        "TAX_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5663,
+          "maxLength": 2
+        },
+        "TAX_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5664,
+          "precision": 9,
+          "scale": 4
+        },
+        "TAX_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5665,
+          "precision": 18,
+          "scale": 2
+        },
+        "ROF_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5666,
+          "precision": 18,
+          "scale": 2
+        },
+        "TOT_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5667,
+          "precision": 18,
+          "scale": 2
+        },
+        "ADV_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5668
+        },
+        "OLD_GL_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5669
+        },
+        "OLD_SL_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5670
+        },
+        "CASH_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5671,
+          "precision": 18,
+          "scale": 2
+        },
+        "CARD_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5672,
+          "precision": 18,
+          "scale": 2
+        },
+        "CHQ_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5673,
+          "precision": 18,
+          "scale": 2
+        },
+        "SCHM_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5674,
+          "precision": 18,
+          "scale": 2
+        },
+        "CASH_PAID": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5675,
+          "precision": 18,
+          "scale": 2
+        },
+        "KASAR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5676,
+          "precision": 18,
+          "scale": 2
+        },
+        "BILL_OS": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5677
+        },
+        "OS_ADJ_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5678
+        },
+        "CR_DAYS": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5679
+        },
+        "CARD_AC": {
+          "type": "String",
+          "nullable": true,
+          "line": 5680
+        },
+        "BANK_AC": {
+          "type": "String",
+          "nullable": true,
+          "line": 5681
+        },
+        "CHQ_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5682,
+          "maxLength": 10
+        },
+        "BANK_NAME": {
+          "type": "String",
+          "nullable": true,
+          "line": 5683,
+          "maxLength": 50
+        },
+        "EMP_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5684
+        },
+        "VCH_DESC": {
+          "type": "String",
+          "nullable": true,
+          "line": 5685
+        },
+        "ENTRY_TIME": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 5686,
+          "storage": "date"
+        },
+        "OLD_GL": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5687
+        },
+        "OLD_SL": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5688
+        },
+        "ADD1": {
+          "type": "String",
+          "nullable": true,
+          "line": 5689,
+          "maxLength": 255
+        },
+        "ADD2": {
+          "type": "String",
+          "nullable": true,
+          "line": 5690,
+          "maxLength": 255
+        },
+        "ADD3": {
+          "type": "String",
+          "nullable": true,
+          "line": 5691,
+          "maxLength": 255
+        },
+        "CITY": {
+          "type": "String",
+          "nullable": true,
+          "line": 5692,
+          "maxLength": 255
+        },
+        "MOBILE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5693,
+          "maxLength": 255
+        },
+        "AC_GST_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5694,
+          "maxLength": 1
+        },
+        "IGST_TAX": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5695
+        },
+        "CGST_TAX": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5696
+        },
+        "SGST_TAX": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5697
+        },
+        "DATA_TRFR": {
+          "type": "String",
+          "nullable": true,
+          "line": 5698,
+          "maxLength": 1
+        },
+        "OLD_VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5699
+        },
+        "NEW_VCH_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5700
+        },
+        "MAIN_USER": {
+          "type": "String",
+          "nullable": true,
+          "line": 5701,
+          "maxLength": 15
+        },
+        "SCHM_AC": {
+          "type": "String",
+          "nullable": true,
+          "line": 5702,
+          "maxLength": 10
+        },
+        "CARD_ADJ": {
+          "type": "String",
+          "nullable": true,
+          "line": 5703,
+          "maxLength": 255
+        },
+        "ISU_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5704,
+          "maxLength": 10
+        },
+        "ISU_LC_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5705,
+          "maxLength": 255
+        },
+        "ISU_YRCD": {
+          "type": "String",
+          "nullable": true,
+          "line": 5706
+        },
+        "ISU_DBCD": {
+          "type": "String",
+          "nullable": true,
+          "line": 5707,
+          "maxLength": 3
+        },
+        "RTN_NET_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5708
+        },
+        "RTN_TOT_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5709
+        },
+        "RTN_CHQ_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5710
+        },
+        "RTN_CARD_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5711
+        },
+        "RTN_CASH_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5712
+        },
+        "RTN_KASAR_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5713
+        },
+        "RTN_BILL_OS": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5714
+        },
+        "TCS_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5715
+        },
+        "TCS_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5716,
+          "precision": 9,
+          "scale": 4
+        },
+        "TCS_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5717,
+          "precision": 18,
+          "scale": 2
+        },
+        "HM_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5718
+        },
+        "HM_TAX_PRC": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5719
+        },
+        "HM_TAX_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5720
+        },
+        "HM_TAX_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5721,
+          "maxLength": 255
+        },
+        "TDS_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5722
+        },
+        "TDS_PRC": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5723,
+          "precision": 9,
+          "scale": 4
+        },
+        "TDS_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5724,
+          "precision": 18,
+          "scale": 2
+        },
+        "CARD_COM_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5725,
+          "precision": 18,
+          "scale": 2
+        },
+        "USER_UPDATE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5726,
+          "maxLength": 1
+        },
+        "USER_DELETE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5727,
+          "maxLength": 1
+        },
+        "POINT_VAL": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5728
+        },
+        "ACK_NO": {
+          "type": "String",
+          "nullable": true,
+          "line": 5729,
+          "maxLength": 25
+        },
+        "ACK_DATE": {
+          "type": "DateTime",
+          "nullable": true,
+          "line": 5730,
+          "storage": "date"
+        },
+        "ORNA_ISU": {
+          "type": "String",
+          "nullable": true,
+          "line": 5731,
+          "maxLength": 255
+        },
+        "MOB_ENTRY_SAVE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5732,
+          "maxLength": 255
+        },
+        "UPI_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5733,
+          "precision": 18,
+          "scale": 2
+        },
+        "LBR_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5734,
+          "precision": 18,
+          "scale": 2
+        },
+        "OTH_AMT": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5735,
+          "precision": 18,
+          "scale": 2
+        },
+        "CRNT_ADJ_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5736
+        },
+        "PARTY_FINE": {
+          "type": "Decimal",
+          "nullable": true,
+          "line": 5737,
+          "precision": 14,
+          "scale": 3
+        },
+        "IT_TYPE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5738,
+          "maxLength": 1
+        },
+        "OZ_RATE": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5739
+        },
+        "OZ_CONV": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5740
+        },
+        "FX_RATE": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5741
+        },
+        "FX_CODE": {
+          "type": "String",
+          "nullable": true,
+          "line": 5742,
+          "maxLength": 255
+        },
+        "MTL_RATE": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5743
+        },
+        "TOT_TAX_FREE_AMT": {
+          "type": "Float",
+          "nullable": true,
+          "line": 5744
+        },
+        "ZERO_RATED_AMT": {
+          "type": "String",
+          "nullable": true,
+          "line": 5745,
+          "maxLength": 255
+        },
+        "RATE_UNFIX": {
+          "type": "String",
+          "nullable": true,
+          "line": 5746,
+          "maxLength": 255
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+operator-depth parity
+  surface 2677/5107 = 52.4%   grid cols 1653/3508 = 47.1%
+  settings honoured 45/130 (inert 82)   unreachable API fields 96   contained ops 6
+
+improvements since baseline:
+  + runnable report workflows: 46 -> 48 (+2)
+
+depth gate passed.

@@ -1,0 +1,116 @@
+{
+  "kind": "datacare.frozen-workspace-readback/1.0",
+  "verifiedAtUtc": "2026-09-11T19:05:12.790946+00:00",
+  "inputManifestSha256": "52177ad18ac7717c709ccb4b74cdbc325158c5984c9cbc466c7e31c927e9857d",
+  "verificationRoot": "/tmp/datacare-round12-verification",
+  "frozenInputCount": 1734,
+  "changedFrozenInputs": [],
+  "addedFrozenInputs": [],
+  "changedActiveInputs": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "frozenSha256": "5d31fc4ad029acf85e1597dab37d727d9bee96bee7ac8e32e85ecf381c0aa391",
+      "currentSha256": "0ca585315500cc95286fe16515bb9cf5229ddc76a37f886c70c4701d38edbf89"
+    },
+    {
+      "path": ".github/workflows/release-certification.yml",
+      "frozenSha256": "0b7667ed6b427c4287eae3f6e2605f8d02e248fe5767e143e8fb39f12f2d2349",
+      "currentSha256": "abef908a94a1adc37c48561ef61df9c0a1c398ee6e06184ef98b95cc9f584f5a"
+    },
+    {
+      "path": "web/.github/workflows/release-certification.yml",
+      "frozenSha256": "fb791c53ae5715c3c5890ba0a531d6de55e33f6cdb34b4e25484e94f2e768180",
+      "currentSha256": "abef908a94a1adc37c48561ef61df9c0a1c398ee6e06184ef98b95cc9f584f5a"
+    },
+    {
+      "path": "web/apps/api/src/modules/ops/releaseCertification.ts",
+      "frozenSha256": "a71bc33bf97b2eee12a172465a2c4bedfd3c77e05df40c0aeec601ed10b45d0a",
+      "currentSha256": "a226727ef53d31a69d99cc8d675cdd7f7f8ad669700b2d4356cb26a6795e6754"
+    },
+    {
+      "path": "web/apps/api/test/releaseCandidateExpectedIdentity.test.mjs",
+      "frozenSha256": "a2b8c6e77276d1cf57b2cf5e5b89b5a5a77a952f9e5bc7b89b120dcf2d20d8a1",
+      "currentSha256": "40bfdad7727e7bee97bdaebe3512eef38f652b6765e7d4262844efbb55da452d"
+    },
+    {
+      "path": "web/apps/api/test/releaseCertification.test.ts",
+      "frozenSha256": "193a9facd066870b08bce1a2e3e7b4d6e7a04fb87b65c837aa1f27be188cadaa",
+      "currentSha256": "c8e90201803a5bf4360049e46f3c60e38a80647672f10c7717f83c4cb85ea3bb"
+    },
+    {
+      "path": "web/apps/api/test/releaseCertificationRecord.test.mjs",
+      "frozenSha256": "1d13d4bccad975eafad0fdd8787923a9b2d89c69f456ab0adfdbba6a370abb37",
+      "currentSha256": "ddb50f2c4c97e16d92a37f587ead98d86e728bae6619d22501ed6853513ded76"
+    },
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "frozenSha256": "0453be96054844b8bb79475dbe8f2c52ead999a3f9bda6856669189df9868704",
+      "currentSha256": "67e3e7a36fbf6fe1487168b3ad2f10f18eb8da1d40e4e2916940ca6dc7cd3264"
+    },
+    {
+      "path": "web/docs/TECHNICAL-REFERENCE.md",
+      "frozenSha256": "7f99e66b59ecc5da75c78a347f40c3852da8c01a4180f884e0817880c7c1e452",
+      "currentSha256": "048a2d9b0e9890f08ae842a5e9ed6c62be1033aa03d7eeae24b726470993dada"
+    },
+    {
+      "path": "web/scripts/lib/release-candidate-expected-identity.mjs",
+      "frozenSha256": "0204bc60029652dccf7ac236479faa0a38ba91c6acdbf4d08310e8f8f26d2600",
+      "currentSha256": "cf541fe6c1bd673ae6b1643dafec06f98c689c0455a5d959692c6a7463e51986"
+    },
+    {
+      "path": "web/scripts/lib/release-certification-record.mjs",
+      "frozenSha256": "b88a19617bd178c41358d6f7cb17602470d5e766b66b181bf96adbb92d89d773",
+      "currentSha256": "7ed0b952cd3e284b77d7e7cbba3a249571fae082f746f614181ded2d7357ae8b"
+    },
+    {
+      "path": "web/scripts/release-candidate-expected-identity.mjs",
+      "frozenSha256": "0ea5fc8e5a1ac94bf968dc503faae7e525817467919fcdb8c5fa56928c1f99c5",
+      "currentSha256": "4946d3979a564c4a2c229d1176a116e42cb83a3990957f94f1de599f0ef039c2"
+    },
+    {
+      "path": "web/scripts/release-certify.mjs",
+      "frozenSha256": "6a4e7402dd28873870115f276ed7bbfa1e058d6c287d1b61f0d66360b4c4c661",
+      "currentSha256": "a3c721bbd068c4721dac80e8c120c5eadedf06bdfeb2d6215ac451e111bcfb9b"
+    }
+  ],
+  "addedActiveInputs": [
+    {
+      "path": "web/apps/api/test/releaseTemplateBundleIdentity.test.mjs",
+      "currentSha256": "a7082fda7ccd3013f403c151210662ee8536c07988f2fd1e0d87ec15e8ece62b"
+    },
+    {
+      "path": "web/apps/web/test/parity-real-stack-evidence.mjs",
+      "currentSha256": "64c99a83faf8d0f2c0f6cddd66874d4de93bc52f25092d6b45c7a601fd7006b4"
+    },
+    {
+      "path": "web/apps/web/test/parity-real-stack-evidence.test.mjs",
+      "currentSha256": "1cba92def2da2369efea33bd4961bd3d5e28f1fbf4f15c16882dc0340ba7999a"
+    },
+    {
+      "path": "web/scripts/lib/release-certification-workflow-refusal.mjs",
+      "currentSha256": "7478877f0c6cd5c1e7c1ae49ea4d5f5fd2d44378a4c27900f8d83b0beaa3dd51"
+    },
+    {
+      "path": "web/scripts/lib/release-template-bundle-identity.mjs",
+      "currentSha256": "110fbfdc3b60410f34173bd7280bce3b9ce51c60f4fb5b695ac03fcaa57b75f9"
+    },
+    {
+      "path": "web/scripts/release-certification-workflow-refusal.mjs",
+      "currentSha256": "1276376cc74bf8ce779336c8d65cb36ff4a96056427238a4081cd314eca9321e"
+    }
+  ],
+  "externalAbsenceObservations": [
+    {
+      "path": "project-memory/parity/reports/report-comparison-latest.json",
+      "frozenExists": false,
+      "activeExists": false
+    }
+  ],
+  "supplementalBrowserFixtureManifestSha256": "fefebf3b8f64e834537935b91530b621010a9285428f3a51656e62801d211bb5",
+  "changedBrowserFixtureInputs": [],
+  "priorReadback": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-workspace-verification-seal.json",
+    "sha256": "f5aefb4e24a6ae1b0d6676981c5b634b8a7b42321b0365fe73e2af8a1fa13adf"
+  },
+  "reason": "The first check-only capture correctly refused because concurrent active edits changed after the previous readback. All qualified frozen inputs and supplemental fixtures remain unchanged. This new observation preserves the previous evidence and lists current active divergence without certifying it."
+}

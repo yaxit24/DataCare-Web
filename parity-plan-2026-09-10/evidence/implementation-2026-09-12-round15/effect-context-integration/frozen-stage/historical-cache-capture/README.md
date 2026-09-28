@@ -1,0 +1,9 @@
+# Round15 staged effect-context qualifier
+
+Ready for independent integration review. New pure source/test/fixture only; existing saved clock is copied byte-for-byte for isolated compilation and must not replace the active module. No index edit, API, UI, DB or writer is included.
+
+Final focused run: **1 file, 89 tests passed**, 195ms; dedicated strict compiler passed. Both commands and six captured input identities are in `focused-final.run.json` / `focused-final.inputs.json`; changedInputs is empty. The fixture's 60 literals (6 ready/54 unsupported) were frozen before implementation at SHA `1c3285b2a7d4f9d75c2e442cc560a1e0960784cf8095fd640f89149614a8fe1c`. The remaining29 tests establish envelope, immutability and provenance limits.
+
+First focused runtime also passed89. First strict compile failed only TS2538 in the test's symbol-key assignment; the test now uses Reflect.set for the same malformed-envelope case. Production source and all60 literal expectations did not change. First logs/input hashes remain distinct; no failed-stage credit is reused. Final strict compilation is the actual corrected result.
+
+Use `web/packages/core/src/saleReturnEffectContext.ts`, its matching test and fixture. `exports.txt` lists the public surface root may add. The helper retains raw values, permits only source STR(1)'s nine-spaces+1, verifies header/line whole-second coherence, and accepts explicit ISO/zero text witnesses as a named current-PG preservation adaptation. It never authenticates the supplied observation or grants write authority. `implementation-contract.md` records exact source lines, target types and limits; `source-inputs.json` and `source-citations-addendum.json` pin evidence. No Windows/provider/SQL Server execution, current PostgreSQL readback, known closing or writable endpoint acceptance is claimed.

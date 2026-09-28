@@ -1,0 +1,145 @@
+{
+ "form": "RP_TAG",
+ "loc": 10814,
+ "gridColumns": {
+  "c1SrNo": 0,
+  "cAdjSrNo": 0,
+  "c1ItCode": 1,
+  "cAdjTagNo": 1,
+  "c1ItName": 2,
+  "cAdjVchSrNo": 2,
+  "c1Pcs": 3,
+  "cAdjCoBook": 3,
+  "c1GrWt": 4,
+  "cAdjBookName": 4,
+  "c1ConPrc": 5,
+  "cAdjVchNo": 5,
+  "c1RateType": 6,
+  "cAdjDate": 6,
+  "c1ItRate": 7,
+  "cAdjRowSr": 7,
+  "c1ItmAmt": 8,
+  "cAdjItCode": 8,
+  "c1LbrRate": 9,
+  "cAdjTable": 9,
+  "c1LbrAmt": 10,
+  "cAdjGwt": 10,
+  "c1NetAmt": 11,
+  "cAdjMainBook": 11,
+  "c1ConWt": 12,
+  "c1KrWt": 13,
+  "c1KrConWt": 14,
+  "c1ItType": 15,
+  "c1RowSr": 16
+ },
+ "inlineSql": [
+  "SELECT TAG_NO,VCH_SRNO,COUNT(*) As Record FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND ITM_SIGN = '-' AND TAG_NO <> 'N' AND BOOK_NAME NOT IN ('APR ISU','SALES ORDER') GROUP BY TAG_NO,VCH_SRNO HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC",
+  "SELECT A.*,B.BOOK_NAME As BookName,B.MAIN_BOOK FROM MAIN_STOCK AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.TAG_NO = ' ? TAG_NO ? ' AND A.VCH_SRNO = ? VCH_SRNO ? AND ITM_SIGN = '-' ORDER BY VCH_DATE,CO_BOOK,VCH_NO",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT ITM_SIZE FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND ITM_SIZE <> '' GROUP BY ITM_SIZE ORDER BY ITM_SIZE",
+  "SELECT IT_CODE FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND TAG_IDTL_COL = 'Y' ORDER BY IT_CODE",
+  "(Select IT_CODE FROM BAR_IDTL AS L WHERE C.CO_CODE = L.CO_CODE And C.LC_CODE = L.LC_CODE And C.TAG_NO = L.TAG_NO And C.VCH_SRNO = L.VCH_SRNO And L.ISR_NO = 1 GROUP BY L.IT_CODE ) As It1, (Select SUM(D.IT_PCS) FROM BAR_IDTL As D WHERE C.CO_CODE = D.CO_CODE And C.LC_CODE = D.LC_CODE And C.TAG_NO = D.TAG_NO And C.VCH_SRNO = D.VCH_SRNO And D.IT_PCS <> 0 And D.ISR_NO = 1) As It1P, (Select SUM(E.IT_GWT) FROM BAR_IDTL As E WHERE C.CO_CODE = E.CO_CODE And C.LC_CODE = E.LC_CODE And C.TAG_NO = E.TAG_NO And C.VCH_SRNO = E.VCH_SRNO And E.IT_GWT <> 0 And E.ISR_NO = 1) As It1Wt, (Select IT_CODE FROM BAR_IDTL As L WHERE C.CO_CODE = L.CO_CODE And C.LC_CODE = L.LC_CODE And C.TAG_NO = L.TAG_NO And C.VCH_SRNO = L.VCH_SRNO And L.ISR_NO = 2 GROUP BY L.IT_CODE ) As It2, (Select SUM(F.IT_PCS) FROM BAR_IDTL As F WHERE C.CO_CODE = F.CO_CODE And C.LC_CODE = F.LC_CODE And C.TAG_NO = F.TAG_NO And C.VCH_SRNO = F.VCH_SRNO And F.IT_PCS <> 0 And F.ISR_NO = 2) As It2P, (Select SUM(G.IT_GWT) FROM BAR_IDTL As G WHERE C.CO_CODE = G.CO_CODE And C.LC_CODE = G.LC_CODE And C.TAG_NO = G.TAG_NO And C.VCH_SRNO = G.VCH_SRNO And G.IT_GWT <> 0 And G.ISR_NO = 2) As It2Wt, (Select IT_CODE FROM BAR_IDTL As L WHERE C.CO_CODE = L.CO_CODE And C.LC_CODE = L.LC_CODE And C.TAG_NO = L.TAG_NO And C.VCH_SRNO = L.VCH_SRNO And L.ISR_NO = 3 GROUP BY L.IT_CODE ) As It3, (Select SUM(H.IT_PCS) FROM BAR_IDTL As H WHERE C.CO_CODE = H.CO_CODE And C.LC_CODE = H.LC_CODE And C.TAG_NO = H.TAG_NO And C.VCH_SRNO = H.VCH_SRNO And H.IT_PCS <> 0 And H.ISR_NO = 3) As It3P, (Select SUM(I.IT_GWT) FROM BAR_IDTL As I WHERE C.CO_CODE = I.CO_CODE And C.LC_CODE = I.LC_CODE And C.TAG_NO = I.TAG_NO And C.VCH_SRNO = I.VCH_SRNO And I.IT_GWT <> 0 And I.ISR_NO = 3) As It3Wt, (Select IT_CODE FROM BAR_IDTL As L WHERE C.CO_CODE = L.CO_CODE And C.LC_CODE = L.LC_CODE And C.TAG_NO = L.TAG_NO And C.VCH_SRNO = L.VCH_SRNO And L.ISR_NO = 4 GROUP BY L.IT_CODE ) As It4, (Select SUM(J.IT_PCS) FROM BAR_IDTL As J WHERE C.CO_CODE = J.CO_CODE And C.LC_CODE = J.LC_CODE And C.TAG_NO = J.TAG_NO And C.VCH_SRNO = J.VCH_SRNO And J.IT_PCS <> 0 And J.ISR_NO = 4) As It4P, (Select SUM(K.IT_GWT) FROM BAR_IDTL As K WHERE C.CO_CODE = K.CO_CODE And C.LC_CODE = K.LC_CODE And C.TAG_NO = K.TAG_NO And C.VCH_SRNO = K.VCH_SRNO And K.IT_GWT <> 0 And K.ISR_NO = 4) As It4Wt, (Select IT_CODE FROM BAR_IDTL As L WHERE C.CO_CODE = L.CO_CODE And C.LC_CODE = L.LC_CODE And C.TAG_NO = L.TAG_NO And C.VCH_SRNO = L.VCH_SRNO And L.ISR_NO = 5 GROUP BY L.IT_CODE ) As It5, (Select SUM(J.IT_PCS) FROM BAR_IDTL As J WHERE C.CO_CODE = J.CO_CODE And C.LC_CODE = J.LC_CODE And C.TAG_NO = J.TAG_NO And C.VCH_SRNO = J.VCH_SRNO And J.IT_PCS <> 0 And J.ISR_NO = 5) As It5P, (Select SUM(K.IT_GWT) FROM BAR_IDTL As K WHERE C.CO_CODE = K.CO_CODE And C.LC_CODE = K.LC_CODE And C.TAG_NO = K.TAG_NO And C.VCH_SRNO = K.VCH_SRNO And K.IT_GWT <> 0 And K.ISR_NO = 5) As It5Wt,",
+  "Select C.CO_CODE As CoCode,C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.VCH_DATE As VchDate,C.TAG_NO As TagNo,C.IT_CODE As ItCode,C.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 As Qty,C.ITM_PCS As Pcs,C.ITM_GWT As Grwt,C.ITM_NWT As NetWt,C.LBR_PRC As Lbrprc,C.LBR_RATE As LbrRate,C.LBR_AMT LbrAmt,C.OTH_AMT OthAmt,C.CO_BOOK As Book, C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,C.CO_BOOK As Book,C.BOOK_NAME As BookName,C.AC_CODE As AcCode,C.VCH_SRNO As TagId, ? C.HM_ID,C.HM_ID2,C.HM_ID3,C.HM_ID4,B.GR_CODE from BAR_DETL AS C INNER JOIN ITEM_MAST AS B ON C.CO_CODE = B.CO_CODE And C.IT_CODE = B.IT_CODE WHERE C.CO_CODE = ' ? ' ? AND C.LC_CODE = ' ? ' ? AND C.CO_YEAR = ' ? ' AND C.TAG_NO <> 'N' AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND C.DATA_TYPE = ' ? ' ? ",
+  "SELECT A.CO_CODE As CoCode,A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,C.TAG_NO As TagNo,A.IT_CODE As ItCode,A.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 As Qty,A.ITM_PCS as Pcs,FORMAT(A.ITM_GWT,'0.000') As Grwt,FORMAT(A.ITM_NWT,'0.000') AS NetWt,A.LBR_RATE As LbrRate,C.LBR_PRC As Lbrprc,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt,C.CO_BOOK As Book, ? C.HM_ID,C.HM_ID2,C.HM_ID3,C.HM_ID4,B.GR_CODE from (MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE AND A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO) INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.ITM_SIGN = '-' ? C ? AND A.DATA_TYPE = ' ? ' ? ",
+  "SELECT C.CO_CODE As CoCode,C.LC_CODE As LcCode,C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.STK_DATE As VchDate,C.TAG_NO As TagNo,A.IT_CODE As ItCode,C.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 As Qty,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,C.LBR_RATE As LbrRate,C.LBR_PRC As Lbrprc,C.LBR_AMT AS LbrAmt,C.OTH_AMT As OthAmt,C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,C.CO_BOOK As Book,C.VCH_SRNO As TagId, ? C.HM_ID,C.HM_ID2,C.HM_ID3,C.HM_ID4,B.GR_CODE from (MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE And A.LC_CODE = C.LC_CODE And A.TAG_NO = C.TAG_NO And A.VCH_SRNO = C.VCH_SRNO And A.IT_CODE = C.IT_CODE)INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND C.EMP_ISU <> 'Y' ? ",
+  "SELECT A.CO_CODE As CoCode,A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,A.TAG_NO As TagNo,A.IT_CODE As ItCode,D.AC_NAME As PartyName,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.TBL_CODE As Counter,C.ITM_SIZE As Size,1 As Qty,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,C.LBR_RATE As LbrRate,C.LBR_PRC As Lbrprc,C.LBR_AMT As LbrAmt,C.OTH_AMT OthAmt, C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,A.CO_BOOK As Book,A.BOOK_NAME As BookName,A.AC_CODE As AcCode,C.VCH_SRNO As TagId, ? C.HM_ID,C.HM_ID2,C.HM_ID3,C.HM_ID4,B.GR_CODE from ((APR_DETL AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE And A.TAG_NO = C.TAG_NO And A.VCH_SRNO = C.VCH_SRNO And A.IT_CODE = C.IT_CODE)INNER JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE) LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.BOOK_NAME = 'APR ISU' AND A.ISU_REC = 'N'",
+  "SELECT C.CO_CODE As CoCode,C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.VCH_DATE As VchDate,C.TAG_NO As TagNo,C.IT_CODE As ItCode,C.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 AS Qty,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,C.LBR_PRC As Lbrprc,C.LBR_RATE As LbrRate,C.LBR_AMT LbrAmt,C.OTH_AMT OthAmt,C.CO_BOOK As Book, C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,C.CO_BOOK As Book,C.BOOK_NAME As BookName,C.AC_CODE As AcCode,C.VCH_SRNO As TagId, (Select SUM(D.IT_PCS) FROM BAR_IDTL AS D WHERE C.CO_CODE = D.CO_CODE AND C.LC_CODE = D.LC_CODE AND C.TAG_NO = D.TAG_NO AND C.VCH_SRNO = D.VCH_SRNO AND D.IT_PCS <> 0 AND D.IT_CODE = ' ? ') As ? pc, (Select SUM(E.IT_GWT) FROM BAR_IDTL AS E WHERE C.CO_CODE = E.CO_CODE AND C.LC_CODE = E.LC_CODE AND C.TAG_NO = E.TAG_NO AND C.VCH_SRNO = E.VCH_SRNO AND E.IT_GWT <> 0 AND E.IT_CODE = ' ? ') As ? wt, (Select SUM(F.IT_PCS) FROM BAR_IDTL As F WHERE C.CO_CODE = F.CO_CODE AND C.LC_CODE = F.LC_CODE And C.TAG_NO = F.TAG_NO And C.VCH_SRNO = F.VCH_SRNO And F.IT_PCS <> 0 And F.IT_CODE = ' ? ') As ? pc, (Select SUM(G.IT_GWT) FROM BAR_IDTL As G WHERE C.CO_CODE = G.CO_CODE AND C.LC_CODE = G.LC_CODE And C.TAG_NO = G.TAG_NO And C.VCH_SRNO = G.VCH_SRNO And G.IT_GWT <> 0 And G.IT_CODE = ' ? ') As ? wt, (Select SUM(H.IT_PCS) FROM BAR_IDTL As H WHERE C.CO_CODE = H.CO_CODE AND C.LC_CODE = H.LC_CODE And C.TAG_NO = H.TAG_NO And C.VCH_SRNO = H.VCH_SRNO And H.IT_PCS <> 0 And H.IT_CODE = ' ? ') As ? pc, (Select SUM(I.IT_GWT) FROM BAR_IDTL AS I WHERE C.CO_CODE = I.CO_CODE AND C.LC_CODE = I.LC_CODE AND C.TAG_NO = I.TAG_NO AND C.VCH_SRNO = I.VCH_SRNO AND I.IT_GWT <> 0 AND I.IT_CODE = ' ? ') As ? wt, (Select SUM(J.IT_PCS) FROM BAR_IDTL As J WHERE C.CO_CODE = J.CO_CODE AND C.LC_CODE = J.LC_CODE And C.TAG_NO = J.TAG_NO And C.VCH_SRNO = J.VCH_SRNO And J.IT_PCS <> 0 And J.IT_CODE = ' ? ') As ? pc, (Select SUM(K.IT_GWT) FROM BAR_IDTL AS K WHERE C.CO_CODE = K.CO_CODE AND C.LC_CODE = K.LC_CODE AND C.TAG_NO = K.TAG_NO AND C.VCH_SRNO = K.VCH_SRNO AND K.IT_GWT <> 0 AND K.IT_CODE = ' ? ') As ? wt,C.HM_ID,C.HM_ID2,C.HM_ID3,C.HM_ID4,B.GR_CODE from BAR_DETL AS C LEFT JOIN ITEM_MAST AS B ON C.CO_CODE = B.CO_CODE And C.IT_CODE = B.IT_CODE WHERE C.CO_CODE = ' ? ' ? AND C.LC_CODE = ' ? ' ? AND C.CO_YEAR = ' ? ' AND C.TAG_NO <> 'N' AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND C.DATA_TYPE = ' ? ' ? ",
+  "SELECT A.CO_CODE As CoCode,A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,DATEDIFF(day,format(C.STK_DATE,'yyyy-MM-dd'),format(A.VCH_DATE,'yyyy-MM-dd')) As Day,C.TAG_NO As TagNo,A.IT_CODE As ItCode,C.DESIGN_NO As Design,C.ITM_STYLE As Style,A.TBL_CODE As Counter,C.ITM_SIZE As Size,1 As Qty,A.ITM_PCS as Pcs,FORMAT(A.ITM_GWT,'0.000') As Grwt,FORMAT(A.ITM_NWT,'0.000') AS NetWt,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt, C.KR_COST As PrCost,A.ITM_TOUCH As Touch,A.ITM_WEST As West,A.ITM_FINE As Fine,C.KR_NET_WT As KrNwt,C.KR_TOUCH As KrTch,C.KR_WEST_PRC As KrWest,C.KR_FINE As KrFine,C.KR_OTH_FINE As OthFine,C.KR_TOT_FINE As TotFine,C.KR_GWT_TOUCH As GrTouch,C.SL_TYPE As TagType,format((A.ITM_FINE)-(C.KR_FINE+C.KR_OTH_FINE),'0.000') As TagProfit,C.KR_NAME As KrName,A.CO_BOOK As Book,A.BOOK_NAME As BookName,A.AC_CODE As AcCode,A.VCH_SRNO As TagId from (MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE AND A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO) LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.ITM_SIGN = '+' ? C ? AND A.DATA_TYPE = ' ? ' ? ",
+  "SELECT C.CO_CODE As CoCode,C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.VCH_DATE As VchDate,DATEDIFF(day,format(C.STK_DATE,'yyyy-MM-dd'),' ? yyyy-MM-dd ? ') As Day,C.TAG_NO As TagNo,C.IT_CODE As ItCode,C.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 AS Qty,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,C.LBR_PRC As Lbrprc,C.LBR_RATE As LbrRate,C.LBR_AMT LbrAmt,C.OTH_AMT OthAmt, C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,C.ITM_REMARK As Remark,C.CO_BOOK As Book,C.BOOK_NAME As BookName,C.AC_CODE As AcCode,C.VCH_SRNO As TagId,B.SAFE_NAME As SafeName from BAR_DETL AS C LEFT JOIN ITEM_MAST AS B ON C.CO_CODE = B.CO_CODE And C.IT_CODE = B.IT_CODE WHERE C.CO_CODE = ' ? ' ? AND C.LC_CODE = ' ? ' ? AND C.CO_YEAR = ' ? ' AND C.TAG_NO <> 'N' AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND C.DATA_TYPE = ' ? ' ? ",
+  "SELECT C.CO_CODE As CoCode,C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.STK_DATE As VchDate,C.TAG_NO As TagNo,A.IT_CODE As ItCode,C.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 As Qty,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,C.LBR_RATE As LbrRate,C.LBR_PRC As Lbrprc,C.LBR_AMT AS LbrAmt,C.OTH_AMT As OthAmt, C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,C.CO_BOOK As Book,C.BOOK_NAME As BookName,C.AC_CODE As AcCode,C.VCH_SRNO As TagId from (MAIN_STOCK AS A LEFT JOIN BAR_DETL AS C ON A.LC_CODE = C.LC_CODE And A.TAG_NO = C.TAG_NO And A.VCH_SRNO = C.VCH_SRNO And A.IT_CODE = C.IT_CODE)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_YEAR = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? ",
+  "SELECT C.CO_CODE As CoCode,C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.STK_DATE As VchDate,DATEDIFF(day,format(C.STK_DATE,'yyyy-MM-dd'),' ? yyyy-MM-dd ? ') As Day,C.TAG_NO As TagNo,A.IT_CODE As ItCode,C.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 As Qty,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,C.KR_NET_WT AS KrNwt,format(SUM(C.ITM_NWT-C.KR_NET_WT),'0.000') As KrDif,C.KR_TOUCH As KrTch,C.KR_WEST_PRC As KrWest,C.KR_FINE AS KrFine,C.KR_OTH_FINE As OthFine,C.KR_TOT_FINE As TotFine,C.KR_GWT_TOUCH As GrTouch,C.SL_TYPE As TagType, C.LBR_AMT As LbrAmt,C.OTH_AMT As OthAmt, C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,C.CO_BOOK As Book,C.BOOK_NAME As BookName,C.AC_CODE As AcCode,C.VCH_SRNO As TagId from (MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE And A.TAG_NO = C.TAG_NO And A.VCH_SRNO = C.VCH_SRNO And A.IT_CODE = C.IT_CODE)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND C.EMP_ISU <> 'Y' ? ",
+  "SELECT C.CO_CODE As CoCode,C.LC_CODE As LcCode,C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.STK_DATE As VchDate,DATEDIFF(day,format(C.STK_DATE,'yyyy-MM-dd'),' ? yyyy-MM-dd ? ') As Day,C.TAG_NO As TagNo,A.IT_CODE As ItCode,C.TBL_CODE As Counter,C.DESIGN_NO As Design,C.ITM_STYLE As Style,C.ITM_SIZE As Size,1 As Qty,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,C.LBR_RATE As LbrRate,C.LBR_PRC As Lbrprc,C.LBR_AMT AS LbrAmt,C.OTH_AMT As OthAmt, C.KR_COST As PrCost,C.ITM_MRP As Mrp,C.KR_NAME As KrName,C.ITM_REMARK As Remark,C.CO_BOOK As Book,C.BOOK_NAME As BookName,C.AC_CODE As AcCode,C.VCH_SRNO As TagId,B.SAFE_NAME As SafeName from (MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE And A.TAG_NO = C.TAG_NO And A.VCH_SRNO = C.VCH_SRNO And A.IT_CODE = C.IT_CODE)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND C.EMP_ISU <> 'Y' ? ",
+  "SELECT TAG_NO FROM BAR_DETL WHERE CO_CODE = ' ? ' ? AND LC_CODE = ' ? ' ? AND EMP_ISU = 'Y'",
+  "DELETE FROM TAG_STOCK_PRINT",
+  "SELECT C.IT_CODE As ItCode,B.IT_NAME As Name,SUM(1) AS Qty,SUM(C.ITM_PCS) as Pcs,SUM(C.ITM_GWT) As Grwt,SUM(C.ITM_NWT) AS NetWt,B.IT_TYPE from BAR_DETL AS C LEFT JOIN ITEM_MAST AS B ON C.CO_CODE = B.CO_CODE And C.IT_CODE = B.IT_CODE WHERE C.CO_CODE = ' ? ' ? AND C.LC_CODE = ' ? ' ? AND C.CO_YEAR = ' ? ' AND C.TAG_NO <> 'N' AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND C.DATA_TYPE = ' ? ' ? ",
+  "SELECT A.IT_CODE As ItCode,B.IT_NAME As Name,SUM(1) AS Qty,SUM(A.ITM_PCS) as Pcs,SUM(A.ITM_GWT) As Grwt,SUM(A.ITM_NWT) AS NetWt,B.IT_TYPE from MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_YEAR = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.TAG_NO <> 'N' AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.ITM_SIGN = '-' ? C ? AND A.DATA_TYPE = ' ? ' ? ",
+  "DELETE FROM TAG_SUM_DATA",
+  "INSERT INTO TAG_SUM_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE, IT_CODE,TAG_NO,VCH_SRNO,IT_TYPE,DATA_TYPE,ITM_QTY,ITM_PCS,ITM_GWT,ITM_NWT,ITM_FINE) SELECT C.CO_CODE,C.LC_CODE,C.CO_YEAR,C.CO_BOOK,C.VCH_NO,0,1,C.VCH_DATE, C.IT_CODE,A.TAG_NO,C.VCH_SRNO,B.IT_TYPE,C.DATA_TYPE,1,C.ITM_PCS,C.ITM_GWT,C.ITM_NWT,C.ITM_FINE from (MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE And A.TAG_NO = C.TAG_NO And A.VCH_SRNO = C.VCH_SRNO AND A.IT_CODE = C.IT_CODE) LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? AND C.EMP_ISU <> 'Y' ? GROUP BY C.CO_CODE,C.LC_CODE,C.CO_YEAR,C.CO_BOOK,C.VCH_NO,C.VCH_DATE,C.IT_CODE,A.TAG_NO,C.VCH_SRNO,B.IT_TYPE,C.DATA_TYPE,C.ITM_PCS,C.ITM_GWT,C.ITM_NWT,C.ITM_FINE ? HAVING SUM(CASE WHEN A.ITM_SIGN = '+' THEN A.VCH_SRNO ELSE -A.VCH_SRNO END) > 0 ORDER BY A.TAG_NO",
+  "SELECT A.IT_CODE As ItCode,B.IT_NAME As Name,SUM(ITM_QTY)AS Qty,SUM(A.ITM_PCS) AS Pcs,SUM(A.ITM_GWT) AS Grwt,SUM(A.ITM_NWT) AS NetWt,B.IT_TYPE from TAG_SUM_DATA AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? ",
+  "AND A.TAG_NO IN (SELECT TAG_NO FROM MAIN_STOCK AS C WHERE C.CO_CODE = ' ? ' AND C.LC_CODE = ' ? ' AND C.TAG_NO <> 'N' GROUP BY C.TAG_NO HAVING SUM(CASE WHEN C.ITM_SIGN = '+' THEN C.VCH_SRNO ELSE -C.VCH_SRNO END) > 0)",
+  "SELECT B.PR_CODE As ItCode,C.PR_NAME As Name,SUM(ITM_QTY)AS Qty,SUM(A.ITM_PCS) AS Pcs,SUM(A.ITM_GWT) AS Grwt,SUM(A.ITM_NWT) AS NetWt,B.IT_TYPE from (TAG_SUM_DATA AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE)LEFT JOIN PRODUCT_MAST AS C ON A.CO_CODE = C.CO_CODE AND B.PR_CODE = C.PR_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> 'N' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? ",
+  "DELETE FROM TAG_STOCK_PRINT WHERE CO_CODE = ' ? '",
+  "INSERT INTO TAG_STOCK_PRINT(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,VCH_TYPE,INOUT_TYPE,BOOK_NAME, IT_CODE,TAG_NO,VCH_SRNO,ITM_SIGN,DESIGN_NO,ITM_SIZE,TBL_CODE,ITM_QTY,ITM_PCS,ITM_GWT,ITM_NWT,ITM_FINE,DATA_TYPE) VALUES(' ? ',' ? ',' ? ',' ? Book ? ',' ? VchNo ? ', ? ,' ? VchDate ? MM/dd/yyyy ? ',' ? VchTyp ? ','I',' ? VchTyp ? ', ? ' ? ItCode ? ',' ? TagNo ? ', ? TagId ? ,'+',' ? Design ? ',' ? Size ? ',' ? Counter ? ',1, ? Pcs ? , ? Grwt ? , ? NetWt ? ,0,'A')",
+  "Select * FROM TAG_STOCK_PRINT",
+  "INSERT INTO TAG_STOCK_PRINT(CO_CODE,LC_CODE,IT_CODE,IT_DESC,ITM_QTY,ITM_PCS,ITM_GWT,ITM_NWT,VCH_TYPE) VALUES(' ? ',' ? ',' ? ',' ? ', ? , ? , ? , ? ,' ? ')",
+  "SELECT * FROM TAG_STOCK_PRINT",
+  "SELECT BOOK_NAME ,CO_BOOK ,BOOK_TYPE,ITM_TYPE,MAIN_BOOK,BOOK_SNAME,BOOK_INOUT,MENU_NAME FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? Book ? '",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? TagNo ? ' AND VCH_SRNO = ? TagId ? ",
+  "SELECT A.*,B.IT_NAME FROM BAR_IDTL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.TAG_NO = ' ? TagNo ? ' AND A.VCH_SRNO = ? TagId ? ",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME",
+  "Select * From PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "SELECT PR_NAME As PrNameL,PR_CODE as PrCodeL FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_NAME",
+  "Select * From LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "Select LC_CODE As CodeL,LC_NAME As NameL,LC_ADD1 As AddressL,LC_CITY As CityL FROM LOCT_MAST WHERE CO_CODE = ' ? ' ORDER BY LC_CODE",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItNameL,A.IT_CODE As ItCodeL FROM ITEM_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_CODE",
+  "Select * From BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT A.BOOK_NAME As BookNameL,A.CO_BOOK As BookL FROM BOOK_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ORDER BY A.BOOK_NAME",
+  "SELECT B.MAIN_BOOK,B.BOOK_TBL_NAME FROM BOOK_DATA AS B WHERE B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_BOOK = ' ? ' AND B.BOOK_TBL_NAME <> ''",
+  "SELECT TAG_NO,VCH_SRNO FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' GROUP BY TAG_NO,VCH_SRNO HAVING SUM(IIF(ITM_SIGN = '+',VCH_SRNO,-VCH_SRNO)) > 0",
+  "SL_DATA ? UPDATE SL_DETL SET VCH_SRNO = ? VCH_SRNO ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND TAG_NO = ' ? '",
+  "KR_DATA ? UPDATE KR_DETL SET VCH_SRNO = ? VCH_SRNO ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND TAG_NO = ' ? '",
+  "BAR_CAN_DATA ? UPDATE BAR_CAN_DETL SET VCH_SRNO = ? VCH_SRNO ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND TAG_NO = ' ? '",
+  "RATE_CUT_DATA ? UPDATE RATE_CUT_ISU SET VCH_SRNO = ? VCH_SRNO ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND TAG_NO = ' ? '",
+  "LBR_DATA ? UPDATE LBR_ISU_DETL SET VCH_SRNO = ? VCH_SRNO ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ' AND TAG_NO = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 2,
+  "F1": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "'Yes' Then Counter Wise Summ Report?",
+   "when": "(int)Interaction.MsgBox((object)\"'Yes' Then Counter Wise Summ Report?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Report With Other Detail Item Name...",
+   "when": "(int)Interaction.MsgBox((object)\"Report With Other Detail Item Name...\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Tour Outword Stock Show....?",
+   "when": "(int)Interaction.MsgBox((object)\"Tour Outword Stock Show....?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "'Yes' Then Wt and Qry Or 'No' then Dm and Ston Summ Report?",
+   "when": ""
+  },
+  {
+   "message": "Product Wise Group Report",
+   "when": "(int)Interaction.MsgBox((object)\"Product Wise Group Report\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "You Have No Rights...",
+   "when": "dataTable2.Rows.Count > 0 && Operators.ConditionalCompareObjectEqual(Operators.ConcatenateObject(dataTable2.Rows[0][\"FRM_VIEW\"], (object)\"\"), (object)\"N\", false"
+  },
+  {
+   "message": "Tag Adjust Ok Please First Data Refresh And Check......",
+   "when": ""
+  },
+  {
+   "message": "Please Select Outword Tag List First And Try....",
+   "when": ""
+  },
+  {
+   "message": "This Is a Item Wise Opening Stock Voucher You Cant Zoom ....",
+   "when": ""
+  },
+  {
+   "message": "Re Adjust This Tag...",
+   "when": "(int)e.KeyCode == 112 && (int)Interaction.MsgBox((object)\"Re Adjust This Tag...\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Tag Is Adjust...",
+   "when": ""
+  }
+ ]
+}

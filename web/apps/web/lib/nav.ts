@@ -5,6 +5,8 @@ export interface NavItem {
   label: string;
   href: string;
   ready?: boolean;
+  /** Optional canonical rights form when the menu label is a shortcut to another form's action. */
+  form?: string;
 }
 export interface NavGroup {
   label: string;
@@ -12,6 +14,10 @@ export interface NavGroup {
 }
 
 export const NAV: NavGroup[] = [
+  {
+    label: 'Company',
+    items: [{ label: 'Balance TrFr', href: '/company/balance-transfer', ready: true }],
+  },
   {
     label: 'Masters',
     items: [
@@ -30,6 +36,7 @@ export const NAV: NavGroup[] = [
       { label: 'Products', href: '/masters/products', ready: true },
       { label: 'Locations', href: '/masters/locations', ready: true },
       { label: 'Designs', href: '/masters/designs', ready: true },
+      { label: 'Design Book', href: '/masters/design-book', ready: true },
       { label: 'Diamonds', href: '/masters/diamonds', ready: true },
       { label: 'Models', href: '/masters/models', ready: true },
       { label: 'States', href: '/masters/states', ready: true },
@@ -46,6 +53,8 @@ export const NAV: NavGroup[] = [
       { label: 'Live Gold Rate Cfg', href: '/masters/gold-rate', ready: true },
       { label: 'Schemes', href: '/masters/schemes', ready: true },
       { label: 'Counters', href: '/masters/counters', ready: true },
+      { label: 'Dm Size', href: '/masters/diamond-sizes', ready: true },
+      { label: 'ItStk Limit', href: '/masters/item-stock-limits', ready: true },
       { label: 'Item Weight Slabs', href: '/masters/item-weights', ready: true },
       { label: 'Styles / Columns', href: '/masters/styles', ready: true },
       { label: 'Print Formats', href: '/masters/print-formats', ready: true },
@@ -71,7 +80,9 @@ export const NAV: NavGroup[] = [
       { label: 'Sales Order', href: '/txn/sales-order', ready: true },
       { label: 'Order Cancel', href: '/txn/order-cancel', ready: true },
       { label: 'Estimate', href: '/txn/estimate', ready: true },
+      { label: 'Sales Quotation', href: '/txn/sales-quotation', ready: true },
       { label: 'Bullion Booking', href: '/txn/bullion', ready: true },
+      { label: 'Bul Sales', href: '/txn/bullion-sale', ready: true },
       { label: 'Tour / Approval Sale', href: '/txn/tour', ready: true },
       { label: 'Approval Return', href: '/txn/tour-return', ready: true },
       { label: 'VP Parcel', href: '/txn/vp-parcel', ready: true },
@@ -81,9 +92,12 @@ export const NAV: NavGroup[] = [
     label: 'Purchase',
     items: [
       { label: 'Purchase Invoice', href: '/txn/purchase', ready: true },
+      { label: 'Purchase Quotation', href: '/txn/purchase-quotation', ready: true },
       { label: 'Purchase Return', href: '/txn/purchase-return', ready: true },
       { label: 'Hallmark Purchase', href: '/txn/purchase-hm', ready: true },
+      { label: 'Consignment Purchase', href: '/txn/consi-purchase', ready: true },
       { label: 'Other Purchase', href: '/txn/other-purchase', ready: true },
+      { label: 'Other Income', href: '/txn/other-income', ready: true },
       {
         label: 'Other Commission / Expense Voucher',
         href: '/txn/other-commission',
@@ -93,11 +107,34 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    label: 'Transaction',
+    items: [
+      { label: 'Stock In', href: '/txn/stock-in', ready: true },
+      { label: 'Stock Out', href: '/txn/stock-out', ready: true },
+      {
+        label: 'E CrntNote',
+        href: '/txn/e-crnt-note',
+        ready: true,
+        form: 'Transaction/E CrntNote',
+      },
+    ],
+  },
+  {
+    label: 'ExtraTran',
+    items: [{ label: 'Old Item Sales', href: '/txn/old-item-sales', ready: true }],
+  },
+  {
     label: 'Cash / Bank',
     items: [
       { label: 'Receipt', href: '/txn/receipt', ready: true },
       { label: 'Multi-Party Receipt', href: '/txn/batch-receipt', ready: true },
       { label: 'Payment', href: '/txn/payment', ready: true },
+      {
+        label: 'Cheque Print',
+        href: '/txn/cheque-print',
+        ready: true,
+        form: 'Cash / Bank/Payment',
+      },
       { label: 'Contra', href: '/txn/contra', ready: true },
       { label: 'Journal Voucher', href: '/txn/journal', ready: true },
       { label: 'Account Opening Bal', href: '/txn/ac-opbl', ready: true },
@@ -123,12 +160,14 @@ export const NAV: NavGroup[] = [
       { label: 'Tag Print', href: '/txn/tag-print', ready: true },
       { label: 'Item Opening (non-tag)', href: '/txn/item-opening', ready: true },
       { label: 'Tag Cancel', href: '/txn/tag-cancel', ready: true },
+      { label: 'Tag Adjust', href: '/txn/tag-adjust', ready: true },
       { label: 'Tag Weight Diff', href: '/txn/tag-weight-diff', ready: true },
       { label: 'Tag Split', href: '/txn/tag-split', ready: true },
       { label: 'Physical Stock', href: '/txn/physical-stock', ready: true },
       { label: 'Stock Adjust', href: '/txn/stock-adjust', ready: true },
       { label: 'Tag Transfer', href: '/txn/tag-transfer', ready: true },
       { label: 'Counter Transfer', href: '/txn/counter-transfer', ready: true },
+      { label: 'Stone/Dm-Cf', href: '/txn/stone-dm-cf', ready: true },
       { label: 'Lot Management', href: '/txn/item-lot', ready: true },
       { label: 'Fine In / Out', href: '/txn/fine-inout', ready: true },
     ],
@@ -138,12 +177,15 @@ export const NAV: NavGroup[] = [
     items: [
       { label: 'Karigar Issue', href: '/txn/karigar-issue', ready: true },
       { label: 'Karigar Receive', href: '/txn/karigar-receive', ready: true },
+      { label: 'Tour Order', href: '/txn/tour-order', ready: true, form: 'Karigar/Tour Order' },
       { label: 'Repair Receipt', href: '/txn/repair-receipt', ready: true },
       { label: 'Repair Karigar Issue', href: '/txn/repair-karigar-issue', ready: true },
       { label: 'Repair Karigar Receipt', href: '/txn/repair-karigar-receipt', ready: true },
       { label: 'Repair Customer Issue', href: '/txn/repair-customer-issue', ready: true },
       { label: 'MFG Issue', href: '/txn/mfg-issue', ready: true },
       { label: 'MFG Receive', href: '/txn/mfg-receive', ready: true },
+      { label: 'Setting Isu', href: '/txn/mfg-lot-issue', ready: true },
+      { label: 'Setting Rec', href: '/txn/mfg-lot-receive', ready: true },
       { label: 'Job-work Issue', href: '/txn/jobwork-issue', ready: true },
       { label: 'Job-work Receive', href: '/txn/jobwork-receive', ready: true },
       { label: 'Order Issue', href: '/txn/mfg-order-issue', ready: true },
@@ -156,6 +198,8 @@ export const NAV: NavGroup[] = [
       { label: 'Pledge Issue', href: '/txn/dhrn-issue', ready: true },
       { label: 'Pledge Receipt', href: '/txn/dhrn-receipt', ready: true },
       { label: 'Interest Receipt', href: '/txn/dhrn-interest', ready: true },
+      { label: 'Loan Received', href: '/txn/loan-received', ready: true },
+      { label: 'Loan Issue', href: '/txn/loan-issue', ready: true },
     ],
   },
   {
@@ -163,6 +207,7 @@ export const NAV: NavGroup[] = [
     items: [
       { label: 'Members & Loyalty', href: '/txn/membership', ready: true },
       { label: 'Saving Schemes', href: '/txn/scheme', ready: true },
+      { label: 'Gold Adjust', href: '/txn/scheme-gold-adjust', ready: true },
     ],
   },
   {
@@ -173,7 +218,9 @@ export const NAV: NavGroup[] = [
       { label: 'Day Book', href: '/reports/day-book', ready: true },
       // The desktop's F11 report: metal weights beside money, which the AC_DATA day book omits.
       { label: 'Rojmel (Day Book)', href: '/reports/rojmel', ready: true },
+      { label: 'Final Reports', href: '/reports/final-reports', ready: true },
       { label: 'Trial Balance', href: '/reports/trial-balance', ready: true },
+      { label: 'Profit and Loss', href: '/reports/profit-loss', ready: true },
       { label: 'Balance Sheet', href: '/reports/balance-sheet', ready: true },
       { label: 'Account Ledger', href: '/reports/account-ledger', ready: true },
       { label: 'Account Balances', href: '/reports/account-balances', ready: true },
@@ -210,9 +257,42 @@ export const NAV: NavGroup[] = [
       { label: 'Area-wise Sales', href: '/reports/area-wise-sales', ready: true },
       { label: 'Location-wise Sales', href: '/reports/location-wise-sales', ready: true },
       { label: 'GST Input Register', href: '/reports/gst-input-register', ready: true },
+      { label: 'GST Report', href: '/reports/gst-report', ready: true },
+      { label: 'Delete Data', href: '/reports/delete-data', ready: true },
+      { label: 'Point Report', href: '/reports/point-report', ready: true },
+      { label: 'Approval Report', href: '/reports/approval-report', ready: true },
+      { label: 'VP Report', href: '/reports/vp-report', ready: true },
+      { label: 'Bullion Report', href: '/reports/bullion-report', ready: true },
+      { label: 'Karigar Report', href: '/reports/karigar-report', ready: true },
+      { label: 'Repair Report', href: '/reports/repair-report', ready: true },
       { label: 'Pledge Outstanding', href: '/reports/dhrn-outstanding', ready: true },
+      { label: 'Dhiran Report', href: '/reports/dhiran-report', ready: true },
+      { label: 'Loan Report', href: '/reports/loan-report', ready: true },
+      { label: 'Scheme Monthly Report', href: '/reports/scheme-monthly', ready: true },
       { label: 'Karigar Balances', href: '/reports/karigar-balances', ready: true },
       { label: 'Stock Valuation', href: '/reports/stock-valuation', ready: true },
+      { label: 'Item Stock Level', href: '/reports/item-weight-levels', ready: true },
+      { label: 'Stock Movement', href: '/reports/size-movement', ready: true },
+      { label: 'Branch InOut', href: '/reports/branch-inout', ready: true },
+      { label: 'Other Item Report', href: '/reports/other-item-report', ready: true },
+      { label: 'Design Move', href: '/reports/design-move', ready: true },
+      { label: 'Consi Report', href: '/reports/consi-report', ready: true },
+      { label: 'Old Stock', href: '/reports/old-stock', ready: true },
+      { label: 'Trading Report', href: '/reports/trading-report', ready: true },
+      { label: 'Tour Report', href: '/reports/tour-report', ready: true },
+      { label: 'Tour Tag', href: '/reports/tour-tag', ready: true },
+      { label: 'Order Track', href: '/reports/order-track', ready: true },
+      { label: 'Graph Report', href: '/reports/graph-report', ready: true },
+      { label: 'Mfg InOut', href: '/reports/mfg-inout', ready: true },
+      { label: 'Mfg Lot IsuRec', href: '/reports/mfg-lot-isurec', ready: true },
+      { label: 'Mfg Ledger', href: '/reports/mfg-ledger', ready: true },
+      { label: 'Physical Stock Verify', href: '/reports/physical-stock-verify', ready: true },
+      { label: 'Bill Wise Profit', href: '/reports/bill-profit', ready: true },
+      { label: 'HUID Report', href: '/reports/huid', ready: true },
+      { label: 'Last Visit', href: '/reports/last-visit', ready: true },
+      { label: 'Address Print', href: '/reports/address-print', ready: true },
+      { label: 'Entry Check', href: '/reports/entry-check', ready: true },
+      { label: 'User Report', href: '/reports/user-report', ready: true },
       { label: 'Tag-Stock Report', href: '/reports/tag-stock', ready: true },
       { label: 'Karigar Ledger', href: '/reports/karigar-ledger', ready: true },
       { label: 'Old Gold / Exchange', href: '/reports/old-gold-register', ready: true },
@@ -233,6 +313,8 @@ export const NAV: NavGroup[] = [
       { label: 'Settings', href: '/settings', ready: true },
       { label: 'Audit Log', href: '/audit', ready: true },
       { label: 'Import / Export', href: '/masters/accounts', ready: true },
+      { label: 'Data Export', href: '/utilities/data-export', ready: true },
+      { label: 'Estimate Reset', href: '/utilities/estimate-reset', ready: true },
       { label: 'Backup', href: '/backup', ready: true },
       { label: 'Data Refresh', href: '/utilities/data-refresh', ready: true },
       { label: 'Data Repair', href: '/utilities/data-repair', ready: true },

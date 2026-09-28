@@ -1,0 +1,113 @@
+{
+ "form": "MS_USER",
+ "tables": [
+  "BOOK_DATA",
+  "BOOK_DETL",
+  "BOOK_IDTL",
+  "LOCT_MAST",
+  "LOGIN_MAST",
+  "MENU_DATA",
+  "MFG_DATA",
+  "TILE_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "LOGIN_MAST": [
+    "CO_CODE",
+    "LOGIN_CATG",
+    "LOGIN_NAME",
+    "LOGIN_PWD",
+    "MAIN_USER"
+   ],
+   "USER_SET": [
+    "CO_CODE",
+    "FRM_DELETE",
+    "FRM_EDIT",
+    "FRM_PRINT",
+    "FRM_VIEW",
+    "LC_CODE",
+    "MAIN_MENU",
+    "MAIN_SRNO",
+    "SUB_MENU",
+    "SUB_SRNO",
+    "USER_NAME"
+   ],
+   "MENU_DATA": [
+    "BTN_NAME",
+    "MAIN_SRNO",
+    "SM_CODE",
+    "SM_MAIN_CODE",
+    "SM_MAIN_NAME",
+    "SM_NAME",
+    "SM_TYPE",
+    "SM_VIEW",
+    "TILE_ITEM"
+   ],
+   "BOOK_IDTL": [
+    "AC_CODE",
+    "AC_NAME",
+    "INOUT_TYPE",
+    "MAIN_BOOK",
+    "SR_NO"
+   ],
+   "BOOK_DATA": [
+    "BOOK_INOUT",
+    "BOOK_NAME",
+    "BOOK_SNAME",
+    "BOOK_SR_NAME",
+    "BOOK_TBL_NAME",
+    "BOOK_TYPE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CUR_USE",
+    "DATA_TYPE",
+    "ITM_TYPE",
+    "LC_CODE",
+    "MAIN_BOOK",
+    "MENU_NAME",
+    "RESET_BOOK"
+   ],
+   "TILE_DATA": [
+    "DISPLAY_NAME",
+    "ITM_SHOW",
+    "SHORT_NAME",
+    "SM_MAIN_NAME",
+    "SR_NO",
+    "TILE_NAME"
+   ]
+  },
+  "UPDATE": [
+   "MENU_DATA",
+   "TILE_DATA"
+  ],
+  "DELETE": [
+   "BOOK_DATA",
+   "BOOK_DETL",
+   "BOOK_IDTL",
+   "LOGIN_MAST",
+   "MENU_DATA",
+   "USER_SET"
+  ]
+ },
+ "selectTables": [
+  "BOOK_DATA",
+  "BOOK_DETL",
+  "BOOK_IDTL",
+  "LOCT_MAST",
+  "LOGIN_MAST",
+  "MENU_DATA",
+  "MFG_DATA",
+  "TILE_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 22,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 5313
+}

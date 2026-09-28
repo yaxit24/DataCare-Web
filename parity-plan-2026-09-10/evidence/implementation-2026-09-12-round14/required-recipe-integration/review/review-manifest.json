@@ -1,0 +1,17 @@
+{
+  "status": "staged-review-and-static-syntax-only",
+  "files": [
+    {
+      "path": "ready-manifest.json",
+      "sha256": "99e20f848bed02060b6161c1c646e2f87baa7843b4d576f7dd1d7c8ec433bfd9"
+    },
+    {
+      "path": "README.md",
+      "sha256": "4a58cd85ba651974198d75ec7b2a8ae1d5b69cda6c1f286e8cf342074911aea8"
+    },
+    {
+      "path": "static-syntax-first.txt",
+      "sha256": "aff0f3031b6a62f82d509b2444537591a762a464afec02f66f2b20f56065f28e"
+    }
+  ]
+}

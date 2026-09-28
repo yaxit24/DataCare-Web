@@ -1,0 +1,42 @@
+{
+  "kind": "pure-context-value-independent-review/v1",
+  "reviewedAtUtc": "2026-09-11T18:56:20.282972+00:00",
+  "disposition": "No confirmed semantic mismatch against frozen63-case fixture; runtime and compiler verification pending.",
+  "plannedTestCount": 84,
+  "plannedCountComposition": "63 independent literals +1 fixture SHA guard +20 post-read structural containment/preservation cases",
+  "observations": [
+    "Epoch parser enforces nonempty canonical ASCII digits without leading0, uses bounded length/lexical max comparison, and does not coerce via Number.",
+    "Successor validates first and uses BigInt; max refuses with context-epoch-exhausted.",
+    "UUID validator requires exact36-character lowercase v4/variant8-9-a-b representation. Length guard prevents a terminal-newline anchor match from accepting an otherwise valid UUID.",
+    "Ledger envelope requires exact own keys and enumerable data descriptors, exact version/unknown/null/one-of-three-reasons, and publishes a detached frozen scalar object.",
+    "Throwing reflection and revoked proxies are contained as invalid; ordinary own getters and scalar coercion hooks are not invoked.",
+    "Transparent proxies are not universally identified or authenticated; structural qualification grants no live session, permission, freshness, retry, known mode or closing authority.",
+    "The null-prototype acceptance check documents the explicitly staged plain-data behavior; it is a post-read structural case, not a claim it was independently frozen among63 literals."
+  ],
+  "references": [
+    {
+      "path": "/tmp/datacare-session-context-next/staged/web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/staged/web/apps/api/test/sessionContextValue.test.ts",
+      "sha256": "07af22741acdcaea9349985a62c62b290d5f15ce01efa58c435f9ebf2fdb8117"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/staged/web/apps/api/test/fixtures/sessionContextValue.independent.json",
+      "sha256": "6596159e7e7b1fe1ce2fdf40370b6d2533837b13e834f65dbc38f37f0c654910"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/context-vectors/session-context-dto-independent.v1.json",
+      "sha256": "6596159e7e7b1fe1ce2fdf40370b6d2533837b13e834f65dbc38f37f0c654910"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/context-vectors/vector-authorship.json",
+      "sha256": "5ffcb61b9830db4b7360e0e152961b8a0d4c5c1c4bf03a69e48e91acbfa5ad4c"
+    }
+  ],
+  "runtimeExitCode": null,
+  "compilerExitCode": null,
+  "mainRepositoryMutations": false,
+  "databaseOperations": false
+}

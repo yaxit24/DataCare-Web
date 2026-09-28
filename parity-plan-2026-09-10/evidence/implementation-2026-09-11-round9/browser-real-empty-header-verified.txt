@@ -1,0 +1,54 @@
+
+> datacare-web-saas@0.0.0 test:parity:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+node:internal/process/promises:332
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+page.waitForResponse: Timeout 30000ms exceeded while waiting for event "response"
+    at responseFor (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-replay.journey.mjs:228:12)
+    at load (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-replay.journey.mjs:251:21)
+    at async exerciseSalesReturnReplay (/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-replay.journey.mjs:556:23)
+    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs:483:32 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+Node.js v25.8.0
+PARITY_TEST_FAILED node exited 1
+ ELIFECYCLE  Command failed with exit code 1.

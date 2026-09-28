@@ -1,0 +1,14 @@
+
+> @datacare/web@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> vitest run --passWithNoTests "test/salesReturnForm.test.ts"
+
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/salesReturnForm.test.ts (31 tests) 8ms
+
+ Test Files  1 passed (1)
+      Tests  31 passed (31)
+   Start at  13:44:04
+   Duration  526ms (transform 132ms, setup 0ms, collect 130ms, tests 8ms, environment 0ms, prepare 46ms)
+

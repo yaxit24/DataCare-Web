@@ -1,0 +1,137 @@
+{
+  "kind": "round14-current-document-replacements-v1",
+  "workspaceRoot": "/Users/yakshitsavaliya/Desktop/imodule-extracted",
+  "applicationStatus": "staged-only; root owns application, verification completion and checkpoint sealing",
+  "progressDraft": "/tmp/datacare-round14-doc-update/40-implementation-progress-round14.md",
+  "progressDraftSha256": "32a1682dc46f10195f40bd04bc9fff6690b62b31b0b8453f4f8dd155e749a01c",
+  "sourceDraft": "/tmp/datacare-round14-plan-review/proposed-draft.md",
+  "sourceDraftSha256": "1a696e7b3c8b443e4304e08e91e904850cdf6e99011cf76c29f767c835df883c",
+  "draftEdit": "Only BAR_STATUS_PLACEHOLDER replaced; VERIFICATION_PLACEHOLDER retained exactly once; accepted seven semantic corrections unchanged.",
+  "checkpointLinkQualification": "40/41 are the root-owned current-progress/final-checkpoint destinations. This stage does not assert checkpoint41 exists or is sealed. Apply current links with the completed root handoff.",
+  "changes": [
+    {
+      "path": "parity-plan-2026-09-10/02-implementation-plan.md",
+      "baseSha256": "8030ca400af3c7de2282e310cf429ba7e5de23a83eaf5a160eeb6f42716ce1cc",
+      "resultSha256": "05ab5f4b485d8e8bf101828b5a4982e3c35629a00a743eeff3923cca1eec3089",
+      "replacements": [
+        {
+          "old": "**The conversion is not complete.** All 198 menu entries declare web surfaces, but all remain implemented-unverified. Implementation now includes Design Book components, calculations and configured repeat/keyboard events; configured ordinary Sales and Tour Order editing, complete nested saved values, source-verified Sales Design selection and concurrent saved tag/image identity; five explicit order report templates; ledger time and credit-note ledger override preservation; Setting lot browse/source selection; versioned generic/Design/repair images with scope and asynchronous guards; scoped saved Sales Return hydration with exact raw values and bounded versioned metadata edits; and a Return-specific calculation core with exact original-sale source readers, authoritative incoming configuration observations and form-family-qualified column settings. A saved-row server calculation preview is implemented under an explicit twelve-field profile, with separate saved values, ordered committed events, stale-input recovery and read-only empty-header inspection. Round11 adds a separate saved incoming bill preview: exact saved-header projection, trusted server observation, full-grid running totals, distinct loaded/opened/event phases and per-event bill callbacks, with a guarded preview UI. It retains the earlier row-only preview. Round12 adds a pure session-mode resolver, an internal cross-book amount/gold/silver balance reader with exact cutoff and grouped NULL handling, and a pure saved Return clock projector. The projector preserves raw values and combines the saved voucher date with canonical JSONB timestamp clock text at whole-second precision, without rounding or timezone conversion. Round13 implements transaction-aware scope/principal readers, epoch/unknown-context storage, atomic login/refresh/selection, epoch-bearing request admission and browser context/recovery controls. The14-check browser lifecycle suite and16 existing business journeys pass with their distinct provenance. Six Sales/Tour create/edit/delete routes now hold session authority throughout the financial transaction. The exact Return labour-master reader, source-derived c13/c29 copy and pure atomic copy-row-fold-bill composition pass focused tests. The separately versioned saved incoming labour-and-bill preview is now adopted through three read endpoints and an exclusive guarded UI. Current verification passes3,050 API tests,522 web tests plus6 native cases,17 business browser journeys,14 session checks and5 labour lifecycle checks. Exact Tour imported values also roundtrip through the actual browser/API/database. Other financial writers, same-snapshot known ledger/closing, full Return numeric stock/financial persistence and all desktop/business acceptance remain open. Customer closing remains unavailable until that integration is verified; numeric, stock, settlement and financial persistence remain disabled in these previews. Full source admission, outgoing/variant workflows and all remaining depth and acceptance work remain required. The original 83 package headings are not 83 completed packages. Read [the current implementation progress and exact next steps](38-implementation-progress-round13.md) before continuing. [Round10's pure-prerequisite progress](32-implementation-progress-round10.md) and [checkpoint33](33-implementation-checkpoint-round10.json) remain historical evidence.",
+          "new": "**The conversion is not complete.** All 198 menu entries declare web surfaces, while all 34 execution cards, 83 original packages and 198 whole-menu acceptances remain open. Preserve the implemented session/browser controls, six guarded Sales/Tour mutations, exact Tour saved values and separate saved Return metadata, row, bill and labour previews. Round 14 adds diagnostic incoming Save mapping, exact qualification of three Float header targets, source-shaped N BAR companion matching and a separate internal Serializable Return Update coordinator. None enables a numeric Return save or known closing balance; the pure mapping results retain `canCommit:false`. Read [current progress and the complete next-write sequence](40-implementation-progress-round14.md) and [checkpoint 41](41-implementation-checkpoint-round14.json) for actual verification and limits. The next implementation requires a complete independent Option A fixture, fully bound effects and Save guards, fresh versioned admission, exact atomic persistence with rollback/conflict/recovery tests, then UI/report/desktop verification. Remaining source, outgoing, variant, settlement and production acceptance stay open. [Round 13 progress](38-implementation-progress-round13.md) and [checkpoint 39](39-implementation-checkpoint-round13.json), together with [Round 10 progress](32-implementation-progress-round10.md) and [checkpoint 33](33-implementation-checkpoint-round10.json), retain their historical evidence and qualifications. Functional completion percentage remains unmeasured.",
+          "expectedOccurrences": 1
+        }
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/README.md",
+      "baseSha256": "6c72ba5904fac9a6070f84d8cdc7ff238e610a4dec97d264c9a6a9ee2a1f6f37",
+      "resultSha256": "566ab5b26047afa4da39422594ae61a60964640868520a0ad77e720d59419991",
+      "replacements": [
+        {
+          "old": "Updated **12 September 2026, round 13 in progress**: menu mapping is **198/198 (100%)**, verified menu closure is **0/198 (0%)**, and the true full-feature/workflow implementation percentage remains unmeasured. The review's historical **73%** static surface ratio is not functional parity. Substantial code is present, but both implementation and acceptance work remain.",
+          "new": "Updated **12 September 2026, round 14**: menu mapping is **198/198 (100%)**, verified menu closure is **0/198 (0%)**, and the true full-feature/workflow implementation percentage remains unmeasured. The review's historical **73%** static surface ratio is not functional parity. Substantial code is present, but both implementation and acceptance work remain.",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "- [Current implementation continuation](38-implementation-progress-round13.md) and [checkpoint39](39-implementation-checkpoint-round13.json): atomic session/browser controls, six guarded order mutations, exact Tour saved-value round trips and the separately versioned saved incoming Return labour-and-bill preview.17 business journeys,14 session checks and5 labour lifecycle checks pass. Full numeric/source/closing and desktop/business/production acceptance remain open.",
+          "new": "- [Current Round 14 continuation](40-implementation-progress-round14.md) and [checkpoint 41](41-implementation-checkpoint-round14.json): diagnostic incoming Save mapping, exact header Float qualification, N BAR companion matching and an internal Serializable Return Update coordinator. Numeric saves and known closing remain disabled. The complete next-write prerequisites, actual verification and retained failures are recorded there; all 34 cards, 83 packages and 198 whole-menu acceptances remain open.\n- [Round 13 continuation](38-implementation-progress-round13.md) and [checkpoint 39](39-implementation-checkpoint-round13.json): historical session/browser, Sales/Tour and saved Return labour-preview integration, with the Round 14 dependency-coverage erratum retained separately.",
+          "expectedOccurrences": 1
+        }
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/execution-addendum-intro.md",
+      "baseSha256": "d41e244d972dd3b2c96c420696a7cc32884f7c0d652c6f631c78979773a72a2b",
+      "resultSha256": "013b9de8dbbf573dbe3814a50f36c258ce5ced691534941f4c07802213f7e889",
+      "replacements": [
+        {
+          "old": "Current implementation progress is recorded in [document 38](38-implementation-progress-round13.md), following ",
+          "new": "Current implementation progress and the complete next-write sequence are recorded in [document 40](40-implementation-progress-round14.md), with actual verification in [checkpoint 41](41-implementation-checkpoint-round14.json), following [round 13 in document 38](38-implementation-progress-round13.md), ",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "2. X13/X02: preserve metadata and the separate row, bill and resolved-labour previews recorded in [document38](38-implementation-progress-round13.md). Atomic session lifecycle, browser context/recovery and six Sales/Tour write guards are implemented; adopt transaction-owned context across the remaining financial writers. The labour preview now has three read-only routes, independent full-state literals, exclusive browser ownership and real baseline/lifecycle checks. Continue with the frozen [finite numeric-write contract](evidence/implementation-2026-09-12-round13/return-next-write-contract/implementation-contract.md) and its mandatory [independent review](evidence/implementation-2026-09-12-round13/return-next-write-contract-review/review.md), including the corrected MAIN_STOCK.SR_NO=2/ISR_NO=incoming ordinal mapping and post-replay profile refusals. Implement the pure source save map/representability before complete independent effect goldens and a separate versioned transaction writer; the generic salesReturn writer does not implement this contract. Reuse the pure session-mode resolver, canonical saved-clock projector and internal account-balance reader, but require trusted mode authority and one snapshot for all ledger/config/document dependencies before enabling closing balances. Complete all remaining source/code admission, input events, outgoing/variant workflows and authoritative numeric stock/financial writes. The round4/x13-sale-return-33-next-contract.md classification still governs all33 findings: incoming SL_DETL_RTN, separate outgoing SL_DETL, derived/hidden/original-reference values and UAE RATE_WITH have distinct ownership. Finish hydration, reports, settlement/reversal and runtime field proof; a preview token never authorizes a financial save.",
+          "new": "2. X13/X02: preserve the existing metadata, row, bill and resolved-labour previews, session/browser controls and six Sales/Tour write guards. [Document 40](40-implementation-progress-round14.md) records the implemented diagnostic Save map, exact header Float qualifier, N BAR matcher and separate Serializable Return Update coordinator; none grants a numeric capability. Follow its complete next-write sequence together with the frozen [finite numeric-write contract](evidence/implementation-2026-09-12-round13/return-next-write-contract/implementation-contract.md), mandatory [independent review and stock erratum](evidence/implementation-2026-09-12-round13/return-next-write-contract-review/review.md) and [complete source-effect inventory](evidence/implementation-2026-09-12-round14/return-save-effects-analysis/effects-contract.md). First freeze the fully bound Option A fixture, including raw cells/caches, policy, per-prefix bill phases, N companions, all Save guards and complete effects. Then implement the pure effect plan, fresh versioned observation/admission, exact transaction-owned commit and failure/recovery tests before a separate endpoint and UI Save. MAIN_STOCK.SR_NO=2 and ISR_NO comes from incoming SR_NO; row and book data types have distinct ownership. Revalidate zero, omitted-row, received-side and changed BAR membership after replay; qualify cash, edition/audit and hidden-number/key collision behavior explicitly. The generic salesReturn writer and existing preview tokens do not authorize this path. Trusted mode and same-snapshot ledger/closing integration, remaining financial-writer adoption, source/child/tag admission, outgoing/variant workflows, settlement/reversal, reports and desktop/business/production acceptance remain open. The round4/x13-sale-return-33-next-contract.md classification still governs all 33 incoming, outgoing, hidden/reference and UAE field findings.",
+          "expectedOccurrences": 1
+        }
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/build_execution_addendum.py",
+      "baseSha256": "10939e22d79a30610e3e68bd279748386b083eb8f7849c464c72531ee69daa4d",
+      "resultSha256": "5d93181447f14d9f969dc0790f986bed65d0f20da2d3d8ffd6c2137475d23127",
+      "replacements": [
+        {
+          "old": "\n\nfor _card in TASKS:\n    if _card['id'] in IMPLEMENTATION_PROGRESS:\n",
+          "new": "\n\n# Round14 records diagnostic save prerequisites; earlier round records remain intact.\nIMPLEMENTATION_PROGRESS['X13'].update(\n    asOf='2026-09-12 round 14',\n    progressDocument='parity-plan-2026-09-10/40-implementation-progress-round14.md')\nIMPLEMENTATION_PROGRESS['X13']['implementedOrInvestigated'] += (\n    ' Round14 adds the complete incoming Save field projection, exact binary64 qualification '\n    'for three Float header targets, source-shaped N BAR header/parent matching and a separate '\n    'internal Serializable Return Update coordinator. The pure mappings remain canCommit:false; '\n    'no numeric endpoint, writer, known closing or existing preview capability is enabled. '\n    'Document40 and checkpoint41 record actual verification, source qualifications and retained '\n    'failures, including the Round13 final-source API dependency-coverage erratum. Earlier '\n    'round counts above remain historical evidence with their stated limits.')\nIMPLEMENTATION_PROGRESS['X13']['remainingBeforeAcceptance'][0] = (\n    'Follow document40 and checkpoint41, the frozen Round13 return-next-write-contract and '\n    'mandatory review/stock erratum, and the Round14 return-save-effects-analysis. Preserve all '\n    'existing previews and session/browser/order contracts. Freeze a complete independent Option A '\n    'fixture with raw header/rows,63 visible cells, eight caches, width/calculation policy, full '\n    'loaded/opened/per-prefix bill phases, qualified16-field N BAR context, all master/config/guard '\n    'facts and every before/after effect. Resolve symbolic bindings before claiming executable '\n    'goldens. Build the pure effect plan:221 source-owned entries per phase across seven conditional '\n    'financial rows plus full saved line/header and retained/absent companions; preserve unowned '\n    'NULL/text/identities. MAIN_STOCK.SR_NO is2 and ISR_NO comes from incoming SR_NO, with row '\n    'and book data types kept distinct. Add separately versioned fresh Update admission, exact '\n    'physical/dependency versions, Save guards, cash/edition/audit authority and cross-year '\n    'temporary/key collision checks. Replay only the accepted ordered c27 history and refuse '\n    'unsupported zero/omission/received/BAR-membership transitions; no-op means the whole plan '\n    'is unchanged. Implement one exact Serializable commit with deterministic locks, typed '\n    'row-qualified DML, affected-count/conservation checks and final context/clock, without '\n    'generic salesReturn writer reuse or automatic retry. Verify complete rollback, stale/SSI '\n    'conflicts and ambiguous acknowledgment recovery before endpoint/UI adoption; then verify '\n    'reopen, reports and independent desktop outcomes. Continue all other writer adoption, '\n    'trusted mode/ledger/closing, source/tag/child and outgoing/variant workflows, settlement '\n    'and full business/production acceptance. A hash, selected book or caller-qualified context '\n    'does not establish authority; numeric/source/closing capability remains disabled.')\n\nfor _card in TASKS:\n    if _card['id'] in IMPLEMENTATION_PROGRESS:\n",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "            'Bounded saved incoming metadata and separately versioned row/bill previews are implemented. '\n            'Pure ledger-mode, canonical saved-clock, internal balance and atomic labour-copy calculation prerequisites plus separately versioned labour API/UI previews are implemented. Atomic session lifecycle, browser guards and six order transaction entries are implemented; remaining writer adoption, trusted mode authority, same-snapshot ledger/closing integration, full source admission, outgoing and variant workflows, numeric '\n            'stock/financial persistence, settlement/reversal and complete desktop/business acceptance remain open.')",
+          "new": "            'Saved incoming metadata, separate row/bill/labour previews, session/browser controls '\n            'and six guarded order mutations are implemented. Round14 adds diagnostic incoming Save '\n            'mapping, exact header Float qualification, N BAR companion matching and an internal '\n            'Serializable Return Update coordinator. Numeric saves and known closing remain disabled. '\n            'Document40 and checkpoint41 govern the complete independent fixture, effects, Save guards, '\n            'versioned admission and exact atomic writer prerequisites; all remaining source/variant, '\n            'ledger/closing, settlement, report and desktop/business/production acceptance stays open.')",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "'latestImplementationProgress': 'parity-plan-2026-09-10/38-implementation-progress-round13.md'",
+          "new": "'latestImplementationProgress': 'parity-plan-2026-09-10/40-implementation-progress-round14.md'",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "    work['note'] = 'Original 83 delivery packages retained. Current open status records incomplete acceptance, not absence of implementation. See 11/12/13 for measured review and detailed continuation; document38 records round13 session/browser controls, six guarded order mutations, exact Tour roundtrips, separately versioned labour API/UI previews, actual verification and remaining parity acceptance.'",
+          "new": "    work['note'] = 'Original 83 delivery packages retained. Open status records incomplete acceptance, not absent implementation. See 11/12/13 for the review and execution cards; document40 and checkpoint41 record Round14 diagnostic Save/header/BAR prerequisites, the internal Serializable coordinator, actual verification, retained failures and the complete next-write sequence. Numeric saves, known closing and full parity acceptance remain open; earlier round evidence is preserved.'",
+          "expectedOccurrences": 1
+        }
+      ]
+    },
+    {
+      "path": "web/docs/TECHNICAL-REFERENCE.md",
+      "baseSha256": "7025ddd74164176f4cc3c3cf0f906a0f368f562c949afcd4d887a2a1b7b85423",
+      "resultSha256": "1ee9df3f9ef141995aa3448422419fa29a549d8552cf70d8587c08ecd43c5fd4",
+      "replacements": [
+        {
+          "old": "**Architecture narrative last reviewed:** 2026-08-01. The inventory counts below were refreshed on 2026-09-12; current behavior and verification are recorded in [the current implementation progress](../../parity-plan-2026-09-10/38-implementation-progress-round13.md). Round13 implements atomic login/refresh/selection, browser context/recovery controls, session-guarded Sales/Tour mutations, exact Tour saved-value round trips and the separate saved incoming Return labour-and-bill preview. Current API regression passes3,050 tests, web522 plus6 native cases;17 business journeys,14 session checks and5 labour lifecycle checks pass with their separate provenance. Remaining writer adoption, trusted mode/closing, full Return numeric/source/stock/financial workflows and complete desktop acceptance remain open.",
+          "new": "**Architecture narrative last reviewed:** 2026-08-01. The inventory below has current 12 September source/test counts where stated; inventory is separate from execution evidence. Use [Round 14 progress and complete next steps](../../parity-plan-2026-09-10/40-implementation-progress-round14.md) and [checkpoint 41](../../parity-plan-2026-09-10/41-implementation-checkpoint-round14.json) for actual runs, source qualifications and retained failures. Round 14 adds diagnostic incoming Save mapping, exact header Float qualification, N BAR companion matching and a separate internal Serializable Return Update coordinator. Existing session/browser, Sales/Tour and saved Return previews remain implemented. Numeric Return saves and known closing remain disabled. Complete independent fixtures, source effects, Save guards, fresh admission, atomic write/recovery verification and full desktop/business/production acceptance remain required.",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "31 module directories, 247 source TS files",
+          "new": "31 module directories, 248 source TS files",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "| API top-level TypeScript test files | 263 |",
+          "new": "| API top-level TypeScript test files | 266 |",
+          "expectedOccurrences": 1
+        },
+        {
+          "old": "| DB test files | 149 |",
+          "new": "| DB test files | 151 |",
+          "expectedOccurrences": 1
+        }
+      ]
+    },
+    {
+      "path": "web/docs/STATE-OF-PARITY.md",
+      "baseSha256": "9e474c34e3cfa40dd12d6d4f62a81448e557a134b131bba3ba7298b234381fb3",
+      "resultSha256": "cff9f1103e1bf68e7c4ff97f837f1a38401eb0423d97d600708ec5a190c4b6a4",
+      "replacements": [
+        {
+          "old": "> Current status supersedes this dated narrative: read [the 11 September completion review](../../parity-plan-2026-09-10/11-current-completion-review.md) and [current implementation progress](../../parity-plan-2026-09-10/38-implementation-progress-round13.md). Round13 implements atomic login/refresh/selection, browser context/recovery controls, session-guarded Sales/Tour mutations, exact Tour saved-value round trips and the separate saved incoming Return labour-and-bill preview. Current API regression passes3,050 tests, web522 plus6 native cases;17 business journeys,14 session checks and5 labour lifecycle checks pass with their separate provenance. Remaining writer adoption, trusted mode/closing, full Return numeric/source/stock/financial workflows and complete desktop acceptance remain open. Menu mapping is complete; full implementation and parity acceptance remain open.",
+          "new": "> Current status supersedes this dated narrative: read [Round 14 progress and complete next steps](../../parity-plan-2026-09-10/40-implementation-progress-round14.md) and [checkpoint 41](../../parity-plan-2026-09-10/41-implementation-checkpoint-round14.json), together with [the completion review](../../parity-plan-2026-09-10/11-current-completion-review.md). Round 14 adds diagnostic incoming Save mapping, exact header Float qualification, N BAR companion matching and a separate internal Serializable Return Update coordinator. Existing session/browser, Sales/Tour and saved Return previews remain implemented. Numeric Return saves and known closing remain disabled. Complete independent fixtures, source effects, Save guards, fresh admission, atomic write/recovery verification and full desktop/business/production acceptance remain required. All 34 cards, 83 packages and 198 whole-menu acceptances remain open; heuristic surface counts do not measure functional parity.",
+          "expectedOccurrences": 1
+        }
+      ]
+    },
+    {
+      "path": "web/docs/HANDOFF.md",
+      "baseSha256": "6a5f073d304d1fe1aef65b0370979d114ef4d4bf83957eef8d5990be01b9e541",
+      "resultSha256": "ae9cfd72838cd0803e078cad6021418f85b055bd17b9995243037ce59d58d2b2",
+      "replacements": [
+        {
+          "old": "> Current implementation and safe test startup: [12 September round-13 implementation progress](../../parity-plan-2026-09-10/38-implementation-progress-round13.md). Run `pnpm test:parity:api` for the isolated API suite, or `node scripts/parity-test-env.mjs -- <command>` for another isolated test command. Calling the wrapper without a command only provisions the test DB. Round13 implements atomic login/refresh/selection, browser context/recovery controls, session-guarded Sales/Tour mutations, exact Tour saved-value round trips and the separate saved incoming Return labour-and-bill preview. Current API regression passes3,050 tests, web522 plus6 native cases;17 business journeys,14 session checks and5 labour lifecycle checks pass with their separate provenance. Remaining writer adoption, trusted mode/closing, full Return numeric/source/stock/financial workflows and complete desktop acceptance remain open. The older environment instructions below are historical.",
+          "new": "> Current implementation and safe test startup: [Round 14 progress and complete next steps](../../parity-plan-2026-09-10/40-implementation-progress-round14.md) and [checkpoint 41](../../parity-plan-2026-09-10/41-implementation-checkpoint-round14.json). Run `pnpm test:parity:api` for the isolated API suite, or `node scripts/parity-test-env.mjs -- <command>` for another isolated test command. Calling the wrapper without a command only provisions the test DB. Round 14 adds diagnostic incoming Save mapping, exact header Float qualification, N BAR companion matching and a separate internal Serializable Return Update coordinator. Existing session/browser, Sales/Tour and saved Return previews remain implemented. Numeric Return saves and known closing remain disabled. Complete independent fixtures, source effects, Save guards, fresh admission, atomic write/recovery verification and full desktop/business/production acceptance remain required. Keep each actual run bound to its full dependency snapshot; current totals and failure qualifications belong in the checkpoint. The older environment instructions below remain historical.",
+          "expectedOccurrences": 1
+        }
+      ]
+    }
+  ]
+}

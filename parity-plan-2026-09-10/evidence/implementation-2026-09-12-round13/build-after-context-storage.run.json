@@ -1,0 +1,21 @@
+{
+  "command": [
+    "env",
+    "API_ORIGIN=http://127.0.0.1:4410",
+    "pnpm",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T19:36:36.450959+00:00",
+  "finishedAtUtc": "2026-09-11T19:36:58.411811+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-after-context-storage.txt",
+  "logSha256": "c25da261847833888f0c1e7d750bdaadb6a1270ce5b2250c7ed583d64e9cc2f6",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-after-context-storage.inputs.json",
+  "inputManifestSha256": "f7e49e9f478e7adad0c7853d245319f18466d3af10bd8b1e9093ea1f6ae00775",
+  "inputCount": 1755,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

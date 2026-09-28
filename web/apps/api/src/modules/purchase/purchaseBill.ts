@@ -56,6 +56,9 @@ export interface PurchaseBillCtx {
   party?: any;
   copy?: string;
   fallbackName?: string;
+  title?: string;
+  partyCaption?: string;
+  footerText?: string;
 }
 
 export function purchaseBillHtml(header: any, lines: any[], ctx: PurchaseBillCtx = {}): string {
@@ -71,12 +74,12 @@ export function purchaseBillHtml(header: any, lines: any[], ctx: PurchaseBillCtx
 
   const mob = h.MOBILE ?? p.AC_MOBILE;
   return docShell({
-    title: 'Purchase Bill',
+    title: ctx.title ?? 'Purchase Bill',
     copy: ctx.copy,
     company: ctx.company,
     fallbackName: ctx.fallbackName,
     billTo: {
-      cap: 'Supplier',
+      cap: ctx.partyCaption ?? 'Supplier',
       name: p.AC_NAME ?? h.AC_NAME ?? h.AC_CODE,
       addr: [
         h.ADD1 ?? p.AC_ADD1,
@@ -93,7 +96,8 @@ export function purchaseBillHtml(header: any, lines: any[], ctx: PurchaseBillCtx
     footer: billFooter(
       ctx.company,
       ctx.fallbackName,
-      'Purchase bill — goods received as per particulars above. Subject to verification. E.&O.E.',
+      ctx.footerText ??
+        'Purchase bill — goods received as per particulars above. Subject to verification. E.&O.E.',
     ),
   });
 }

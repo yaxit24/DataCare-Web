@@ -1,0 +1,1170 @@
+[
+  {
+    "id": "AC_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "AC_GROUP",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "AC_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ADD_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "AD_ADJ",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "AD_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "AD_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "AD_MEMB",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "AD_OS",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "APR_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "APR_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "APR_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BAL_GR",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BANK_RECONCILE",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BAR_CAN_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BAR_CAN_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BAR_CAN_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BAR_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BAR_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BAR_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BILL_OS_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BOOK_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BOOK_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BOOK_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "BUL_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CARD_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CASH_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "COL_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CONTRA_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CONV_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "COUNTRY_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CO_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CO_SET",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CO_SET_NEW",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CRNT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CUT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CUT_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "CUT_STK_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DELETE_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DESIGN_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DESIGN_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DESIGN_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DHRN_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DHRN_ISU_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DHRN_ISU_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DHRN_REC_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DHRN_REC_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DM_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DM_KR_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DM_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "DM_SIZE",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "EMP_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "EMP_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "E_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "E_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "FINE_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "GROUP_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "HDD_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "IMAGE_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "INOUT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "INOUT_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "INOUT_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ITEM_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ITM_CITY",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ITM_LOT_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ITM_OPBL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ITM_WT_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "KR_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "KR_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "KR_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LBR_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LBR_ISU_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LBR_ISU_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LBR_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LBR_REC_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LDR_ADJ_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LEDR_AC_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LOCT_AMT",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LOCT_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LOGIN_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "LOT_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MAIN_STOCK",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MFG_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MFG_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MFG_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MFG_ISU_REC",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MFG_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MLT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MLT_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MODEL_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "MSG_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "OP_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "OP_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "OP_LDR",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "PAY_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "PAY_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "POINT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "POINT_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "POINT_MEMB",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "PRINT_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "PRODUCT_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "PR_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "PR_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "PR_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "RATE_CUT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "RATE_CUT_ISU",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "RATE_CUT_ISU_REC",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "RATE_CUT_REC",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "RATE_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "REM_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "REPORT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "REP_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "REP_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ROJMEL_BAL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "ROJ_MEL_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_DETL_RTN",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_ORD_ADJ",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_ORD_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_ORD_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_ORD_IDTL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SL_PR_DETL",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "SRNO_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "STATE_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TABLE_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TAG_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TAG_PRINT_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TAG_SET",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TAG_STOCK_PRINT",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TAG_SUM_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TAX_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TAX_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TEMP_ADD",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TEMP_AD_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TEMP_BOOK_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "TOUCH_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "UPI_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "USER_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "USER_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "USER_REQUEST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "VP_ADJ_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "WEB_DATA",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "WEIGHT_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  },
+  {
+    "id": "YEAR_MAST",
+    "category": "desktop-table",
+    "status": "unverified",
+    "ownershipKey": null,
+    "migrationDisposition": null,
+    "comparisonEvidence": null
+  }
+]

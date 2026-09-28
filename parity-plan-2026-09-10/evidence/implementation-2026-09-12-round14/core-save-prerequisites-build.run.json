@@ -1,0 +1,52 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T00:32:10.122730+00:00",
+  "finishedAtUtc": "2026-09-12T00:32:11.064367+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-save-prerequisites-build.txt",
+  "logSha256": "79da90d454c83eb7b7c76d1548b439a13925b548ccc7911efbe41f4e31f94aa5",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-save-prerequisites-build.inputs.json",
+  "inputManifestSha256": "c56f14fc721b3e553aa738df62be94379b967956621348b2cd20a464861c6a09",
+  "inputCount": 1866,
+  "changedInputs": [
+    {
+      "path": "web/packages/core/dist/index.d.ts",
+      "beforeSha256": "bdb04aa90892583fa4530a083f3df90e9f3aa276b2eea6b7e5909708ef77cb56",
+      "afterSha256": "fe752e07a451cd294c642716b4887707b534b71b91abb43a710412df8d8a6442"
+    },
+    {
+      "path": "web/packages/core/dist/index.js",
+      "beforeSha256": "5dfce4ff14dc3a3d405832563963c6bd8cded95630e47fe36c11eeed065b9f52",
+      "afterSha256": "be65786e22ea7654c0416c0c3cf2c9fbff61a358278febf05c4fd5e1918c6fcd"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnHeaderFloat.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "fa669d3004dd7ad6eca4d0cee005deea405dccefc277e46849d04606964352af"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnHeaderFloat.js",
+      "beforeSha256": null,
+      "afterSha256": "c4d79f4472ab990687cbed5f459616095a9bf889ae83f1087db4678c98c7fb13"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnIncomingSaveProjection.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "2f9f5cbd32c2a5d5ef5eb244f4d7533d0bc2b7b106ba4967a4efbb2ff144740a"
+    },
+    {
+      "path": "web/packages/core/dist/saleReturnIncomingSaveProjection.js",
+      "beforeSha256": null,
+      "afterSha256": "d1b30d2c5b0ba7a3183a730664a408d88ce981a62a1fa5854bb269b69deff0c4"
+    }
+  ],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

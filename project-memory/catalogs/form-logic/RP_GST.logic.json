@@ -1,0 +1,34 @@
+{
+ "form": "RP_GST",
+ "tables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "LOCT_MAST",
+  "TAX_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "LOCT_MAST",
+  "TAX_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 7,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [
+  "TAX_SIGN = '+' \"",
+  "TAX_SIGN = '+' AND A.R_CHARG = 'Y'\"",
+  "TAX_SIGN = '+' AND B.AC_GSTNO = '' GROUP BY C.STATE_CODE,B.AC_STATE \"",
+  "TAX_SIGN = '-' AND A.R_CHARG = 'N'\""
+ ],
+ "loc": 3945
+}

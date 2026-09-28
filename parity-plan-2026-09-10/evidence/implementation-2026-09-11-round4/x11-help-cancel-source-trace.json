@@ -1,0 +1,91 @@
+{
+  "id": "X11-shared-help-escape-source-trace-round4",
+  "capturedAtUtc": "2026-09-11T05:16:29.366855+00:00",
+  "observedDesktopExecution": false,
+  "businessAcceptance": null,
+  "sources": [
+    {
+      "path": "../unified/src/csharp/DataCareNext/MS_HELP.cs",
+      "sha256": "350899da0ffc4d237602f22ed23ef5054374d2f2073558c5fb060a0e583022cf",
+      "excerpts": [
+        {
+          "startLine": 1052,
+          "endLine": 1070,
+          "text": "\t\t\t\t\t\tIL_046f:\n\t\t\t\t\t\tnum2 = 45;\n\t\t\t\t\t\ttSearchText.Text = \"\";\n\t\t\t\t\t\tgoto IL_0483;\n\t\t\t\t\t\tIL_0483:\n\t\t\t\t\t\tnum2 = 46;\n\t\t\t\t\t\tDC_Main.HelpClose = false;\n\t\t\t\t\t\tgoto IL_048c;\n\t\t\t\t\t\tIL_048c:\n\t\t\t\t\t\tnum2 = 47;\n\t\t\t\t\t\tif (DC_Main.RsDg.Rows.Count > 0)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tgoto IL_04aa;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tgoto IL_0cf3;\n\t\t\t\t\t\tIL_04aa:\n\t\t\t\t\t\tnum2 = 48;\n\t\t\t\t\t\tif (Operators.CompareString(DC_Main.MsFontChange, \"Y\", false) == 0)\n\t\t\t\t\t\t{"
+        },
+        {
+          "startLine": 1228,
+          "endLine": 1240,
+          "text": "\t\t\t\t\t\tgoto IL_0c09;\n\t\t\t\t\t\tIL_0c09:\n\t\t\t\t\t\tnum2 = 112;\n\t\t\t\t\t\t((Control)tSearchText).Width = ((Control)MSG).Width;\n\t\t\t\t\t\tgoto IL_0c23;\n\t\t\t\t\t\tIL_0c23:\n\t\t\t\t\t\tnum2 = 113;\n\t\t\t\t\t\tDC_Main.ColValue = new string[DC_Main.RsDg.Columns.Count - 1 + 1];\n\t\t\t\t\t\tgoto IL_0c43;\n\t\t\t\t\t\tIL_0c43:\n\t\t\t\t\t\tnum2 = 114;\n\t\t\t\t\t\t((DataGridView)MSG).Rows[((DataGridView)MSG).RowCount - 1].Cells[0].Selected = true;\n\t\t\t\t\t\tgoto IL_0c75;"
+        },
+        {
+          "startLine": 2192,
+          "endLine": 2223,
+          "text": "\t\t\t\t}\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tif ((int)e.KeyCode != 13)\n\t\t\t\t{\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tif (DC_Main.RsDg.Rows.Count == 0)\n\t\t\t\t{\n\t\t\t\t\tDC_Main.HelpClose = true;\n\t\t\t\t\t((Form)this).Close();\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tint index = ((DataGridViewBand)((DataGridView)MSG).CurrentRow).Index;\n\t\t\t\tchecked\n\t\t\t\t{\n\t\t\t\t\tif (DC_Main.RsDg.Rows.Count > 0)\n\t\t\t\t\t{\n\t\t\t\t\t\tint num = ((DataGridView)MSG).ColumnCount - 1;\n\t\t\t\t\t\tDC_Main.X = 0;\n\t\t\t\t\t\twhile (DC_Main.X <= num)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tDC_Main.ColValue[DC_Main.X] = Conversions.ToString(Operators.ConcatenateObject(((DataGridView)MSG).Rows[index].Cells[DC_Main.X].Value, (object)\"\"));\n\t\t\t\t\t\t\tDC_Main.X++;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t((Form)this).Close();\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}"
+        },
+        {
+          "startLine": 2230,
+          "endLine": 2264,
+          "text": "\tprivate void MS_HELP_KeyDown(object sender, KeyEventArgs e)\n\t{\n\t\t//IL_0002: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_0009: Invalid comparison between Unknown and I4\n\t\t//IL_001a: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_0021: Invalid comparison between Unknown and I4\n\t\tif ((int)e.KeyCode == 27)\n\t\t{\n\t\t\t((Form)this).Close();\n\t\t}\n\t\telse if ((int)e.KeyCode == 112)\n\t\t{\n\t\t\tif (Operators.CompareString(DC_Main.MsMobileLen, \"\", false) != 0)\n\t\t\t{\n\t\t\t\tDC_Main.MsMobileSearchNo = tSearchText.Text;\n\t\t\t}\n\t\t\tif (DC_Main.MsCreat)\n\t\t\t{\n\t\t\t\tDC_Main.MsSubCreat = true;\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tDC_Main.MsCreat = true;\n\t\t\t}\n\t\t\t((Form)this).Close();\n\t\t}\n\t}\n\n\tprivate void MS_HELP_KeyPress(object sender, KeyPressEventArgs e)\n\t{\n\t\tif (Operators.CompareString(tSearchText.Text, \"\", false) == 0)\n\t\t{\n\t\t\t((Control)tSearchText).Focus();\n\t\t}\n\t}"
+        },
+        {
+          "startLine": 2388,
+          "endLine": 2393,
+          "text": "\tprivate void MS_HELP_Closed(object sender, EventArgs e)\n\t{\n\t\tDC_Main.F1Search = false;\n\t\tDC_Main.MsMobileLen = \"\";\n\t}\n"
+        }
+      ]
+    },
+    {
+      "path": "../unified/src/csharp_nextdm/DataCareNext/MS_HELP.cs",
+      "sha256": "56331370ef42a9b9a4c0b6126898cf4d6c6286fa6041b9819fd2be4dd2ce9f9e",
+      "excerpts": [
+        {
+          "startLine": 1052,
+          "endLine": 1070,
+          "text": "\t\t\t\t\t\tIL_046f:\n\t\t\t\t\t\tnum2 = 45;\n\t\t\t\t\t\ttSearchText.Text = \"\";\n\t\t\t\t\t\tgoto IL_0483;\n\t\t\t\t\t\tIL_0483:\n\t\t\t\t\t\tnum2 = 46;\n\t\t\t\t\t\tDC_Main.HelpClose = false;\n\t\t\t\t\t\tgoto IL_048c;\n\t\t\t\t\t\tIL_048c:\n\t\t\t\t\t\tnum2 = 47;\n\t\t\t\t\t\tif (DC_Main.RsDg.Rows.Count > 0)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tgoto IL_04aa;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tgoto IL_0cf3;\n\t\t\t\t\t\tIL_04aa:\n\t\t\t\t\t\tnum2 = 48;\n\t\t\t\t\t\tif (Operators.CompareString(DC_Main.MsFontChange, \"Y\", false) == 0)\n\t\t\t\t\t\t{"
+        },
+        {
+          "startLine": 1228,
+          "endLine": 1240,
+          "text": "\t\t\t\t\t\tgoto IL_0c09;\n\t\t\t\t\t\tIL_0c09:\n\t\t\t\t\t\tnum2 = 112;\n\t\t\t\t\t\t((Control)tSearchText).Width = ((Control)MSG).Width;\n\t\t\t\t\t\tgoto IL_0c23;\n\t\t\t\t\t\tIL_0c23:\n\t\t\t\t\t\tnum2 = 113;\n\t\t\t\t\t\tDC_Main.ColValue = new string[DC_Main.RsDg.Columns.Count - 1 + 1];\n\t\t\t\t\t\tgoto IL_0c43;\n\t\t\t\t\t\tIL_0c43:\n\t\t\t\t\t\tnum2 = 114;\n\t\t\t\t\t\t((DataGridView)MSG).Rows[((DataGridView)MSG).RowCount - 1].Cells[0].Selected = true;\n\t\t\t\t\t\tgoto IL_0c75;"
+        },
+        {
+          "startLine": 2192,
+          "endLine": 2223,
+          "text": "\t\t\t\t}\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tif ((int)e.KeyCode != 13)\n\t\t\t\t{\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tif (DC_Main.RsDg.Rows.Count == 0)\n\t\t\t\t{\n\t\t\t\t\tDC_Main.HelpClose = true;\n\t\t\t\t\t((Form)this).Close();\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tint index = ((DataGridViewBand)((DataGridView)MSG).CurrentRow).Index;\n\t\t\t\tchecked\n\t\t\t\t{\n\t\t\t\t\tif (DC_Main.RsDg.Rows.Count > 0)\n\t\t\t\t\t{\n\t\t\t\t\t\tint num = ((DataGridView)MSG).ColumnCount - 1;\n\t\t\t\t\t\tDC_Main.X = 0;\n\t\t\t\t\t\twhile (DC_Main.X <= num)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tDC_Main.ColValue[DC_Main.X] = Conversions.ToString(Operators.ConcatenateObject(((DataGridView)MSG).Rows[index].Cells[DC_Main.X].Value, (object)\"\"));\n\t\t\t\t\t\t\tDC_Main.X++;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t((Form)this).Close();\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}"
+        },
+        {
+          "startLine": 2230,
+          "endLine": 2264,
+          "text": "\tprivate void MS_HELP_KeyDown(object sender, KeyEventArgs e)\n\t{\n\t\t//IL_0002: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_0009: Invalid comparison between Unknown and I4\n\t\t//IL_001a: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_0021: Invalid comparison between Unknown and I4\n\t\tif ((int)e.KeyCode == 27)\n\t\t{\n\t\t\t((Form)this).Close();\n\t\t}\n\t\telse if ((int)e.KeyCode == 112)\n\t\t{\n\t\t\tif (Operators.CompareString(DC_Main.MsMobileLen, \"\", false) != 0)\n\t\t\t{\n\t\t\t\tDC_Main.MsMobileSearchNo = tSearchText.Text;\n\t\t\t}\n\t\t\tif (DC_Main.MsCreat)\n\t\t\t{\n\t\t\t\tDC_Main.MsSubCreat = true;\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tDC_Main.MsCreat = true;\n\t\t\t}\n\t\t\t((Form)this).Close();\n\t\t}\n\t}\n\n\tprivate void MS_HELP_KeyPress(object sender, KeyPressEventArgs e)\n\t{\n\t\tif (Operators.CompareString(tSearchText.Text, \"\", false) == 0)\n\t\t{\n\t\t\t((Control)tSearchText).Focus();\n\t\t}\n\t}"
+        },
+        {
+          "startLine": 2388,
+          "endLine": 2393,
+          "text": "\tprivate void MS_HELP_Closed(object sender, EventArgs e)\n\t{\n\t\tDC_Main.F1Search = false;\n\t\tDC_Main.MsMobileLen = \"\";\n\t}\n"
+        }
+      ]
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3",
+      "excerpts": [
+        {
+          "startLine": 7335,
+          "endLine": 7374,
+          "text": "\t\t\t\t}\n\t\t\t\tif (Operators.CompareString(DC_Main.ColValue[0], \"\", false) != 0)\n\t\t\t\t{\n\t\t\t\t\tTEXT_ENTRY.Text = DC_Main.ColValue[0];\n\t\t\t\t\tmSG[mSG.Row, 4] = DC_Main.ColValue[0];\n\t\t\t\t\tmSG[mSG.Row, 6] = DC_Main.ColValue[3];\n\t\t\t\t\tmSG[mSG.Row, 30] = DC_Main.ColValue[4];\n\t\t\t\t\tif (Operators.CompareString(mSG[mSG.Row, 53], \"E\", false) != 0)\n\t\t\t\t\t{\n\t\t\t\t\t\tif (Conversion.Val(DC_Main.ColValue[6]) != 0.0)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmSG[mSG.Row, 14] = Strings.Format((object)Conversion.Val(DC_Main.ColValue[6]), \"0.00\");\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (Conversion.Val(DC_Main.ColValue[7]) != 0.0)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmSG[mSG.Row, 15] = Strings.Format((object)Conversion.Val(DC_Main.ColValue[7]), \"0.00\");\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (Conversion.Val(DC_Main.ColValue[8]) != 0.0)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmSG[mSG.Row, 20] = Strings.Format((object)Conversion.Val(DC_Main.ColValue[8]), \"0.00\");\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (Conversion.Val(DC_Main.ColValue[8]) == 0.0 && Conversion.Val(DC_Main.ColValue[9]) != 0.0)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmSG[mSG.Row, 22] = Strings.Format((object)Conversion.Val(DC_Main.ColValue[9]), \"0.00\");\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tmSG[mSG.Row, 71] = DC_Main.ColValue[10];\n\t\t\t\t\tMsgOldRow = 0;\n\t\t\t\t\tMSG_RowColChange(MSG, new EventArgs());\n\t\t\t\t}\n\t\t\t\telse\n\t\t\t\t{\n\t\t\t\t\tTEXT_ENTRY.Text = \"\";\n\t\t\t\t\tmSG[mSG.Row, 4] = \"\";\n\t\t\t\t\tmSG[mSG.Row, 71] = \"N\";\n\t\t\t\t}\n\t\t\t\t((Control)TEXT_ENTRY).Focus();\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tif (mSG.Col == 18)"
+        }
+      ]
+    }
+  ],
+  "sourceFindings": [
+    "Help load resets HelpClose to false.",
+    "With source rows, help allocates a new empty ColValue string array.",
+    "Enter on zero rows explicitly sets HelpClose true.",
+    "Escape closes the help form without setting HelpClose; the Closed handler only clears unrelated flags.",
+    "Sales caller returns unchanged on HelpClose true, otherwise a blank selected Design enters the Design-empty/image-N branch."
+  ],
+  "inference": "The source path indicates ordinary Escape can clear the current Design/image through the empty-selection branch. It is not proof from running the original desktop executable.",
+  "webBehavior": "Escape and Close deliberately retain the draft; exact source command parity remains an explicit acceptance gap.",
+  "supersedes": "The broad cancellation-no-change assumption in the frozen round3 x11-design-to-order-next-contract; the frozen artifact remains unchanged."
+}

@@ -1,0 +1,28 @@
+{
+  "initialTrackedInputs": 688,
+  "apiCoreDatabaseAndToolingUnchanged": true,
+  "disposition": "Only browser page/journey corrections changed after full API verification; final production build and real browser must validate these exact final files.",
+  "snapshotTiming": "Captured during the final full API run after all API edits were frozen.",
+  "changedSinceSnapshot": [
+    {
+      "path": "web/apps/web/app/(app)/txn/e-crnt-note/page.tsx",
+      "before": "0f61c7b05dae29dc54166e95b0efb31d914b7d13c2ad2f8d841d6fa39ff092fc",
+      "after": "a53c1160b53a0b3448ffe9eccdca601a6a15a66ea8e962715624b46709a98d8b"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "before": "1fbdeb573501057edb6eaa49ae27f1818d3c25beb56d6b2c8f2420f3491e51f6",
+      "after": "673f600619bf082138863f6a08942fe297d40173e791550d727cf7d67ac04706"
+    },
+    {
+      "path": "web/apps/web/test/credit-note.journey.mjs",
+      "before": "d5f780b7d6b11b28d807cf3fc4d0d221391d041692e92ee35f5771ee3dcbcfb7",
+      "after": "e68c6c5567a20ff00a832f70d8310e2f8d57176c30905cba4b71ad19afd0049f"
+    },
+    {
+      "path": "web/apps/web/test/tour-order.journey.mjs",
+      "before": "fdd356cf03ab09182a8f82ae0081eee42a9ebd4a1931a7892d0fdce2ed7513ed",
+      "after": "67587a68b5139c039bcccebe0499140093496e04b5b2813350cc27e129cbc904"
+    }
+  ]
+}

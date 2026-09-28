@@ -1,0 +1,15 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run "test/salesOrderDesign.test.ts" "test/orderLabourWithCache.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/salesOrderDesign.test.ts (8 tests) 8ms
+ ✓ test/orderLabourWithCache.test.ts (11 tests) 12ms
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  10:27:13
+   Duration  1.05s (transform 338ms, setup 0ms, collect 377ms, tests 20ms, environment 1ms, prepare 307ms)
+

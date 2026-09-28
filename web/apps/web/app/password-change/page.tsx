@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ApiError, post } from '../../lib/api';
+import { ApiError, post, loadPageSession, PageContextError } from '../../lib/api';
+import { useOperationLease } from '../../components/useOperationLease';
 
 export default function PasswordChangePage() {
   const router = useRouter();
@@ -10,21 +11,47 @@ export default function PasswordChangePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [ready, setReady] = useState(false);
+  const busyRef = useRef(false);
+  const { beginOperation } = useOperationLease();
+  useEffect(() => {
+    let cancelled = false;
+    loadPageSession()
+      .then(() => {
+        if (!cancelled) setReady(true);
+      })
+      .catch((cause) => {
+        if (cancelled) return;
+        if (cause instanceof ApiError && cause.status === 401) router.push('/login');
+        else setError(cause instanceof Error ? cause.message : 'Cannot load the current session.');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (!ready || busyRef.current) return;
     setError('');
     if (newPassword !== confirmPassword) {
       setError('New password and confirmation do not match.');
       return;
     }
+    const isCurrent = beginOperation();
+    if (!isCurrent()) return;
+    busyRef.current = true;
     setBusy(true);
     try {
       await post('/auth/password/change', { currentPassword, newPassword, confirmPassword });
-      router.push('/select');
+      if (!isCurrent()) return;
+      window.location.assign('/select');
     } catch (cause) {
+      if (!isCurrent()) return;
       const body = cause instanceof ApiError ? cause.body : undefined;
-      if (body?.error === 'weak-password') {
+      if (cause instanceof PageContextError) {
+        setError(cause.message);
+      } else if (body?.error === 'weak-password') {
         setError(`Password does not meet policy (${(body.reasons ?? []).join(', ')}).`);
       } else if (body?.error === 'current-password-invalid') {
         setError('Current password is incorrect.');
@@ -32,7 +59,10 @@ export default function PasswordChangePage() {
         setError('Password could not be changed.');
       }
     } finally {
-      setBusy(false);
+      if (isCurrent()) {
+        busyRef.current = false;
+        setBusy(false);
+      }
     }
   }
 
@@ -75,7 +105,7 @@ export default function PasswordChangePage() {
         <button
           className="primary"
           style={{ width: '100%', marginTop: 8 }}
-          disabled={busy || !currentPassword || !newPassword || !confirmPassword}
+          disabled={!ready || busy || !currentPassword || !newPassword || !confirmPassword}
         >
           {busy ? 'Changing…' : 'Change Password'}
         </button>

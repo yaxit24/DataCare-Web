@@ -1,0 +1,1729 @@
+using System;
+using System.Collections;
+using System.ComponentModel;
+using System.Data;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Drawing;
+using System.Runtime.CompilerServices;
+using System.Windows.Forms;
+using DataCareNext.My;
+using DataCareNext.My.Resources;
+using DevComponents.DotNetBar;
+using DevComponents.DotNetBar.Controls;
+using DevExpress.Utils;
+using DevExpress.Utils.Svg;
+using DevExpress.XtraEditors;
+using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.VisualBasic.CompilerServices;
+
+namespace DataCareNext;
+
+[DesignerGenerated]
+public class MS_EMP : Form
+{
+	private IContainer components;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("tEmpCode")]
+	private TextBox _tEmpCode;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("tEmpName")]
+	private TextBox _tEmpName;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("Text1")]
+	private TextBox _Text1;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("DGV")]
+	private DataGridViewX _DGV;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("tEmpAmt")]
+	private TextBox _tEmpAmt;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("tEmpAc")]
+	private TextBox _tEmpAc;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("BtnExit")]
+	private SimpleButton _BtnExit;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("BtnDelete")]
+	private SimpleButton _BtnDelete;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("BtnCancel")]
+	private SimpleButton _BtnCancel;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("BtnSave")]
+	private SimpleButton _BtnSave;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("BtnPrint")]
+	private SimpleButton _BtnPrint;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("cboUser")]
+	private ComboBox _cboUser;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("nDayHour")]
+	private TextBox _nDayHour;
+
+	private string EntryMode;
+
+	private Control CurActCtrl;
+
+	private DataTable RsMast;
+
+	private double ColCon;
+
+	private string UserEdit;
+
+	private string UserDelete;
+
+	private string UserPrint;
+
+	private string MainUser;
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("lblBook")]
+	private virtual Label _lblBook;
+
+	internal virtual Label lblBook
+	{
+		get
+		{
+			return _lblBook;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_lblBook = value;
+		}
+	}
+
+	internal virtual TextBox tEmpCode
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _tEmpCode;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			//IL_0007: Unknown result type (might be due to invalid IL or missing references)
+			//IL_000d: Expected O, but got Unknown
+			KeyEventHandler val = new KeyEventHandler(tEmpCode_KeyDown);
+			CancelEventHandler cancelEventHandler = tEmpCode_Validating;
+			TextBox val2 = _tEmpCode;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown -= val;
+				((Control)val2).Validating -= cancelEventHandler;
+			}
+			_tEmpCode = value;
+			val2 = _tEmpCode;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown += val;
+				((Control)val2).Validating += cancelEventHandler;
+			}
+		}
+	}
+
+	internal virtual TextBox tEmpName
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _tEmpName;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			//IL_0007: Unknown result type (might be due to invalid IL or missing references)
+			//IL_000d: Expected O, but got Unknown
+			KeyEventHandler val = new KeyEventHandler(tEmpName_KeyDown);
+			CancelEventHandler cancelEventHandler = tEmpName_Validating;
+			TextBox val2 = _tEmpName;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown -= val;
+				((Control)val2).Validating -= cancelEventHandler;
+			}
+			_tEmpName = value;
+			val2 = _tEmpName;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown += val;
+				((Control)val2).Validating += cancelEventHandler;
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("Label2")]
+	private virtual Label _Label2;
+
+	internal virtual Label Label2
+	{
+		get
+		{
+			return _Label2;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_Label2 = value;
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("Label1")]
+	private virtual Label _Label1;
+
+	internal virtual Label Label1
+	{
+		get
+		{
+			return _Label1;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_Label1 = value;
+		}
+	}
+
+	public virtual TextBox Text1
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _Text1;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			EventHandler eventHandler = Text1_TextChanged;
+			EventHandler eventHandler2 = Text1_Click;
+			TextBox val = _Text1;
+			if (val != null)
+			{
+				((Control)val).TextChanged -= eventHandler;
+				((TextBoxBase)val).Click -= eventHandler2;
+			}
+			_Text1 = value;
+			val = _Text1;
+			if (val != null)
+			{
+				((Control)val).TextChanged += eventHandler;
+				((TextBoxBase)val).Click += eventHandler2;
+			}
+		}
+	}
+
+	internal virtual DataGridViewX DGV
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _DGV;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			//IL_0007: Unknown result type (might be due to invalid IL or missing references)
+			//IL_000d: Expected O, but got Unknown
+			KeyEventHandler val = new KeyEventHandler(DGV_KeyDown);
+			EventHandler eventHandler = DGV_DoubleClick;
+			DataGridViewX val2 = _DGV;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown -= val;
+				((Control)val2).DoubleClick -= eventHandler;
+			}
+			_DGV = value;
+			val2 = _DGV;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown += val;
+				((Control)val2).DoubleClick += eventHandler;
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("Label3")]
+	private virtual Label _Label3;
+
+	internal virtual Label Label3
+	{
+		get
+		{
+			return _Label3;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_Label3 = value;
+		}
+	}
+
+	internal virtual TextBox tEmpAmt
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _tEmpAmt;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			//IL_0007: Unknown result type (might be due to invalid IL or missing references)
+			//IL_000d: Expected O, but got Unknown
+			KeyEventHandler val = new KeyEventHandler(tEmpAmt_KeyDown);
+			TextBox val2 = _tEmpAmt;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown -= val;
+			}
+			_tEmpAmt = value;
+			val2 = _tEmpAmt;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown += val;
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("Label4")]
+	private virtual Label _Label4;
+
+	internal virtual Label Label4
+	{
+		get
+		{
+			return _Label4;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_Label4 = value;
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("tEmpAcName")]
+	private virtual TextBox _tEmpAcName;
+
+	internal virtual TextBox tEmpAcName
+	{
+		get
+		{
+			return _tEmpAcName;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_tEmpAcName = value;
+		}
+	}
+
+	internal virtual TextBox tEmpAc
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _tEmpAc;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			//IL_0007: Unknown result type (might be due to invalid IL or missing references)
+			//IL_000d: Expected O, but got Unknown
+			KeyEventHandler val = new KeyEventHandler(tEmpAc_KeyDown);
+			TextBox val2 = _tEmpAc;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown -= val;
+			}
+			_tEmpAc = value;
+			val2 = _tEmpAc;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown += val;
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("PnlBotam")]
+	private virtual FlowLayoutPanel _PnlBotam;
+
+	internal virtual FlowLayoutPanel PnlBotam
+	{
+		get
+		{
+			return _PnlBotam;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_PnlBotam = value;
+		}
+	}
+
+	internal virtual SimpleButton BtnExit
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _BtnExit;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			EventHandler eventHandler = BtnExit_Click;
+			SimpleButton val = _BtnExit;
+			if (val != null)
+			{
+				((Control)val).Click -= eventHandler;
+			}
+			_BtnExit = value;
+			val = _BtnExit;
+			if (val != null)
+			{
+				((Control)val).Click += eventHandler;
+			}
+		}
+	}
+
+	internal virtual SimpleButton BtnDelete
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _BtnDelete;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			EventHandler eventHandler = BtnDelete_Click;
+			SimpleButton val = _BtnDelete;
+			if (val != null)
+			{
+				((Control)val).Click -= eventHandler;
+			}
+			_BtnDelete = value;
+			val = _BtnDelete;
+			if (val != null)
+			{
+				((Control)val).Click += eventHandler;
+			}
+		}
+	}
+
+	internal virtual SimpleButton BtnCancel
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _BtnCancel;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			EventHandler eventHandler = BtnCancel_Click;
+			SimpleButton val = _BtnCancel;
+			if (val != null)
+			{
+				((Control)val).Click -= eventHandler;
+			}
+			_BtnCancel = value;
+			val = _BtnCancel;
+			if (val != null)
+			{
+				((Control)val).Click += eventHandler;
+			}
+		}
+	}
+
+	internal virtual SimpleButton BtnSave
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _BtnSave;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			EventHandler eventHandler = BtnSave_Click;
+			SimpleButton val = _BtnSave;
+			if (val != null)
+			{
+				((Control)val).Click -= eventHandler;
+			}
+			_BtnSave = value;
+			val = _BtnSave;
+			if (val != null)
+			{
+				((Control)val).Click += eventHandler;
+			}
+		}
+	}
+
+	internal virtual SimpleButton BtnPrint
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _BtnPrint;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			EventHandler eventHandler = BtnPrint_Click;
+			SimpleButton val = _BtnPrint;
+			if (val != null)
+			{
+				((Control)val).Click -= eventHandler;
+			}
+			_BtnPrint = value;
+			val = _BtnPrint;
+			if (val != null)
+			{
+				((Control)val).Click += eventHandler;
+			}
+		}
+	}
+
+	internal virtual ComboBox cboUser
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _cboUser;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			//IL_0007: Unknown result type (might be due to invalid IL or missing references)
+			//IL_000d: Expected O, but got Unknown
+			KeyEventHandler val = new KeyEventHandler(cboUser_KeyDown);
+			EventHandler eventHandler = cboUser_SelectedIndexChanged;
+			ComboBox val2 = _cboUser;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown -= val;
+				val2.SelectedIndexChanged -= eventHandler;
+			}
+			_cboUser = value;
+			val2 = _cboUser;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown += val;
+				val2.SelectedIndexChanged += eventHandler;
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("Label6")]
+	private virtual Label _Label6;
+
+	internal virtual Label Label6
+	{
+		get
+		{
+			return _Label6;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_Label6 = value;
+		}
+	}
+
+	internal virtual TextBox nDayHour
+	{
+		[CompilerGenerated]
+		get
+		{
+			return _nDayHour;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		[CompilerGenerated]
+		set
+		{
+			//IL_0007: Unknown result type (might be due to invalid IL or missing references)
+			//IL_000d: Expected O, but got Unknown
+			KeyEventHandler val = new KeyEventHandler(nDayHour_KeyDown);
+			TextBox val2 = _nDayHour;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown -= val;
+			}
+			_nDayHour = value;
+			val2 = _nDayHour;
+			if (val2 != null)
+			{
+				((Control)val2).KeyDown += val;
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	[AccessedThroughProperty("Label5")]
+	private virtual Label _Label5;
+
+	internal virtual Label Label5
+	{
+		get
+		{
+			return _Label5;
+		}
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		set
+		{
+			_Label5 = value;
+		}
+	}
+
+	public MS_EMP()
+	{
+		//IL_0044: Unknown result type (might be due to invalid IL or missing references)
+		//IL_004e: Expected O, but got Unknown
+		//IL_0056: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0060: Expected O, but got Unknown
+		((Form)this).Load += MS_EMP_Load;
+		((Form)this).Activated += MS_EMP_Activated;
+		((Form)this).Deactivate += MS_EMP_Deactivate;
+		((Control)this).KeyPress += new KeyPressEventHandler(MS_EMP_KeyPress);
+		((Control)this).KeyDown += new KeyEventHandler(MS_EMP_KeyDown);
+		((Form)this).Closed += MS_EMP_Closed;
+		InitializeComponent();
+	}
+
+	[DebuggerNonUserCode]
+	protected override void Dispose(bool disposing)
+	{
+		try
+		{
+			if (disposing && components != null)
+			{
+				components.Dispose();
+			}
+		}
+		finally
+		{
+			((Form)this).Dispose(disposing);
+		}
+	}
+
+	[DebuggerStepThrough]
+	private void InitializeComponent()
+	{
+		//IL_0011: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0017: Expected O, but got Unknown
+		//IL_0017: Unknown result type (might be due to invalid IL or missing references)
+		//IL_001d: Expected O, but got Unknown
+		//IL_001d: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0023: Expected O, but got Unknown
+		//IL_0023: Unknown result type (might be due to invalid IL or missing references)
+		//IL_002a: Expected O, but got Unknown
+		//IL_002a: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0031: Expected O, but got Unknown
+		//IL_0032: Unknown result type (might be due to invalid IL or missing references)
+		//IL_003c: Expected O, but got Unknown
+		//IL_003e: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0048: Expected O, but got Unknown
+		//IL_004a: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0054: Expected O, but got Unknown
+		//IL_0056: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0060: Expected O, but got Unknown
+		//IL_0062: Unknown result type (might be due to invalid IL or missing references)
+		//IL_006c: Expected O, but got Unknown
+		//IL_006e: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0078: Expected O, but got Unknown
+		//IL_007a: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0084: Expected O, but got Unknown
+		//IL_0086: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0090: Expected O, but got Unknown
+		//IL_0092: Unknown result type (might be due to invalid IL or missing references)
+		//IL_009c: Expected O, but got Unknown
+		//IL_009e: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00a8: Expected O, but got Unknown
+		//IL_00aa: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00b4: Expected O, but got Unknown
+		//IL_00b6: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00c0: Expected O, but got Unknown
+		//IL_00c2: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00cc: Expected O, but got Unknown
+		//IL_00ce: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00d8: Expected O, but got Unknown
+		//IL_00da: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00e4: Expected O, but got Unknown
+		//IL_00e6: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00f0: Expected O, but got Unknown
+		//IL_00f2: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00fc: Expected O, but got Unknown
+		//IL_00fe: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0108: Expected O, but got Unknown
+		//IL_010a: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0114: Expected O, but got Unknown
+		//IL_0116: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0120: Expected O, but got Unknown
+		//IL_0122: Unknown result type (might be due to invalid IL or missing references)
+		//IL_012c: Expected O, but got Unknown
+		//IL_012e: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0138: Expected O, but got Unknown
+		//IL_033f: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0349: Expected O, but got Unknown
+		//IL_03de: Unknown result type (might be due to invalid IL or missing references)
+		//IL_03e8: Expected O, but got Unknown
+		//IL_046a: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0474: Expected O, but got Unknown
+		//IL_0541: Unknown result type (might be due to invalid IL or missing references)
+		//IL_054b: Expected O, but got Unknown
+		//IL_05a6: Unknown result type (might be due to invalid IL or missing references)
+		//IL_05b0: Expected O, but got Unknown
+		//IL_07c7: Unknown result type (might be due to invalid IL or missing references)
+		//IL_07d1: Expected O, but got Unknown
+		//IL_0834: Unknown result type (might be due to invalid IL or missing references)
+		//IL_083e: Expected O, but got Unknown
+		//IL_08ad: Unknown result type (might be due to invalid IL or missing references)
+		//IL_08b7: Expected O, but got Unknown
+		//IL_0988: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0992: Expected O, but got Unknown
+		//IL_0a75: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0a7f: Expected O, but got Unknown
+		//IL_0ae2: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0aec: Expected O, but got Unknown
+		//IL_0b5b: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0b65: Expected O, but got Unknown
+		//IL_0bc8: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0bd2: Expected O, but got Unknown
+		ComponentResourceManager componentResourceManager = new ComponentResourceManager(typeof(MS_EMP));
+		DataGridViewCellStyle val = new DataGridViewCellStyle();
+		DataGridViewCellStyle val2 = new DataGridViewCellStyle();
+		DataGridViewCellStyle val3 = new DataGridViewCellStyle();
+		DataGridViewCellStyle val4 = new DataGridViewCellStyle();
+		DataGridViewCellStyle val5 = new DataGridViewCellStyle();
+		lblBook = new Label();
+		tEmpCode = new TextBox();
+		tEmpName = new TextBox();
+		Label2 = new Label();
+		Label1 = new Label();
+		Text1 = new TextBox();
+		DGV = new DataGridViewX();
+		Label3 = new Label();
+		tEmpAc = new TextBox();
+		tEmpAcName = new TextBox();
+		Label4 = new Label();
+		tEmpAmt = new TextBox();
+		PnlBotam = new FlowLayoutPanel();
+		BtnExit = new SimpleButton();
+		BtnDelete = new SimpleButton();
+		BtnCancel = new SimpleButton();
+		BtnSave = new SimpleButton();
+		BtnPrint = new SimpleButton();
+		cboUser = new ComboBox();
+		Label6 = new Label();
+		nDayHour = new TextBox();
+		Label5 = new Label();
+		((ISupportInitialize)DGV).BeginInit();
+		((Control)PnlBotam).SuspendLayout();
+		((Control)this).SuspendLayout();
+		((Control)lblBook).BackColor = Color.FromArgb(255, 224, 192);
+		componentResourceManager.ApplyResources(lblBook, "lblBook");
+		lblBook.FlatStyle = (FlatStyle)1;
+		((Control)lblBook).ForeColor = Color.FromArgb(64, 0, 64);
+		((Control)lblBook).Name = "lblBook";
+		((TextBoxBase)tEmpCode).BackColor = Color.White;
+		componentResourceManager.ApplyResources(tEmpCode, "tEmpCode");
+		((Control)tEmpCode).Name = "tEmpCode";
+		((TextBoxBase)tEmpName).BackColor = Color.White;
+		componentResourceManager.ApplyResources(tEmpName, "tEmpName");
+		((Control)tEmpName).Name = "tEmpName";
+		componentResourceManager.ApplyResources(Label2, "Label2");
+		((Control)Label2).ForeColor = Color.Black;
+		((Control)Label2).Name = "Label2";
+		componentResourceManager.ApplyResources(Label1, "Label1");
+		((Control)Label1).ForeColor = Color.Black;
+		((Control)Label1).Name = "Label1";
+		Text1.AcceptsReturn = true;
+		((TextBoxBase)Text1).BackColor = SystemColors.ButtonHighlight;
+		((TextBoxBase)Text1).BorderStyle = (BorderStyle)0;
+		((Control)Text1).Cursor = Cursors.IBeam;
+		componentResourceManager.ApplyResources(Text1, "Text1");
+		((TextBoxBase)Text1).ForeColor = Color.Navy;
+		((Control)Text1).Name = "Text1";
+		((DataGridView)DGV).AllowUserToAddRows = false;
+		((DataGridView)DGV).AllowUserToDeleteRows = false;
+		((DataGridView)DGV).AllowUserToResizeRows = false;
+		val.BackColor = Color.PapayaWhip;
+		val.Font = new Font("Tahoma", 9.75f, (FontStyle)0, (GraphicsUnit)3, (byte)0);
+		val.ForeColor = Color.FromArgb(64, 64, 64);
+		val.SelectionBackColor = Color.FromArgb(255, 192, 192);
+		val.SelectionForeColor = Color.Maroon;
+		((DataGridView)DGV).AlternatingRowsDefaultCellStyle = val;
+		((DataGridView)DGV).BackgroundColor = Color.SeaShell;
+		((DataGridView)DGV).BorderStyle = (BorderStyle)2;
+		((DataGridView)DGV).CellBorderStyle = (DataGridViewCellBorderStyle)2;
+		val2.Alignment = (DataGridViewContentAlignment)16;
+		val2.BackColor = SystemColors.Control;
+		val2.Font = new Font("Calibri", 12f, (FontStyle)1, (GraphicsUnit)3, (byte)0);
+		val2.ForeColor = Color.FromArgb(64, 64, 64);
+		val2.SelectionBackColor = SystemColors.ScrollBar;
+		val2.SelectionForeColor = Color.White;
+		val2.WrapMode = (DataGridViewTriState)2;
+		((DataGridView)DGV).ColumnHeadersDefaultCellStyle = val2;
+		componentResourceManager.ApplyResources(DGV, "DGV");
+		((DataGridView)DGV).ColumnHeadersHeightSizeMode = (DataGridViewColumnHeadersHeightSizeMode)1;
+		val3.Alignment = (DataGridViewContentAlignment)16;
+		val3.BackColor = SystemColors.Window;
+		val3.Font = new Font("Tahoma", 9.75f, (FontStyle)0, (GraphicsUnit)3, (byte)0);
+		val3.ForeColor = Color.FromArgb(64, 64, 64);
+		val3.SelectionBackColor = Color.FromArgb(255, 192, 192);
+		val3.SelectionForeColor = Color.Maroon;
+		val3.WrapMode = (DataGridViewTriState)2;
+		((DataGridView)DGV).DefaultCellStyle = val3;
+		((DataGridView)DGV).EnableHeadersVisualStyles = false;
+		((DataGridView)DGV).GridColor = Color.FromArgb(208, 215, 229);
+		((Control)DGV).Name = "DGV";
+		DGV.PaintEnhancedSelection = false;
+		((DataGridView)DGV).ReadOnly = true;
+		val4.Alignment = (DataGridViewContentAlignment)16;
+		val4.BackColor = Color.MintCream;
+		val4.Font = new Font("Tahoma", 9.75f, (FontStyle)0, (GraphicsUnit)3, (byte)0);
+		val4.ForeColor = SystemColors.WindowText;
+		val4.SelectionBackColor = SystemColors.Highlight;
+		val4.SelectionForeColor = SystemColors.HighlightText;
+		val4.WrapMode = (DataGridViewTriState)1;
+		((DataGridView)DGV).RowHeadersDefaultCellStyle = val4;
+		((DataGridView)DGV).RowHeadersVisible = false;
+		val5.Font = new Font("Tahoma", 9.75f, (FontStyle)0, (GraphicsUnit)3, (byte)0);
+		val5.ForeColor = Color.FromArgb(64, 64, 64);
+		((DataGridView)DGV).RowsDefaultCellStyle = val5;
+		DGV.ScrollBarAppearance = (eScrollBarAppearance)0;
+		DGV.SelectAllSignVisible = false;
+		((DataGridView)DGV).SelectionMode = (DataGridViewSelectionMode)0;
+		((DataGridView)DGV).StandardTab = true;
+		componentResourceManager.ApplyResources(Label3, "Label3");
+		((Control)Label3).ForeColor = Color.Black;
+		((Control)Label3).Name = "Label3";
+		((TextBoxBase)tEmpAc).BackColor = Color.White;
+		componentResourceManager.ApplyResources(tEmpAc, "tEmpAc");
+		((Control)tEmpAc).Name = "tEmpAc";
+		((TextBoxBase)tEmpAcName).BackColor = Color.PapayaWhip;
+		componentResourceManager.ApplyResources(tEmpAcName, "tEmpAcName");
+		((Control)tEmpAcName).Name = "tEmpAcName";
+		componentResourceManager.ApplyResources(Label4, "Label4");
+		((Control)Label4).ForeColor = Color.Black;
+		((Control)Label4).Name = "Label4";
+		((TextBoxBase)tEmpAmt).BackColor = Color.White;
+		componentResourceManager.ApplyResources(tEmpAmt, "tEmpAmt");
+		((Control)tEmpAmt).Name = "tEmpAmt";
+		((Control)PnlBotam).BackColor = Color.SandyBrown;
+		((Control)PnlBotam).Controls.Add((Control)(object)BtnExit);
+		((Control)PnlBotam).Controls.Add((Control)(object)BtnDelete);
+		((Control)PnlBotam).Controls.Add((Control)(object)BtnCancel);
+		((Control)PnlBotam).Controls.Add((Control)(object)BtnSave);
+		((Control)PnlBotam).Controls.Add((Control)(object)BtnPrint);
+		componentResourceManager.ApplyResources(PnlBotam, "PnlBotam");
+		((Control)PnlBotam).Name = "PnlBotam";
+		((BaseStyleControl)BtnExit).Appearance.Font = (Font)componentResourceManager.GetObject("BtnExit.Appearance.Font");
+		((BaseStyleControl)BtnExit).Appearance.ForeColor = Color.FromArgb(192, 64, 0);
+		((BaseStyleControl)BtnExit).Appearance.Options.UseFont = true;
+		((BaseStyleControl)BtnExit).Appearance.Options.UseForeColor = true;
+		((ImageCollectionImageOptions)BtnExit.ImageOptions).SvgImage = (SvgImage)componentResourceManager.GetObject("BtnExit.ImageOptions.SvgImage");
+		componentResourceManager.ApplyResources(BtnExit, "BtnExit");
+		((BaseControl)BtnExit).LookAndFeel.SkinName = "The Bezier";
+		((BaseControl)BtnExit).LookAndFeel.UseDefaultLookAndFeel = false;
+		((Control)BtnExit).Name = "BtnExit";
+		((BaseButton)BtnExit).ToolTipAnchor = (ToolTipAnchor)1;
+		((BaseStyleControl)BtnDelete).Appearance.Font = (Font)componentResourceManager.GetObject("BtnDelete.Appearance.Font");
+		((BaseStyleControl)BtnDelete).Appearance.ForeColor = Color.FromArgb(192, 64, 0);
+		((BaseStyleControl)BtnDelete).Appearance.Options.UseFont = true;
+		((BaseStyleControl)BtnDelete).Appearance.Options.UseForeColor = true;
+		((ImageCollectionImageOptions)BtnDelete.ImageOptions).SvgImage = Resources.actions_trash;
+		componentResourceManager.ApplyResources(BtnDelete, "BtnDelete");
+		((BaseControl)BtnDelete).LookAndFeel.SkinName = "The Bezier";
+		((BaseControl)BtnDelete).LookAndFeel.UseDefaultLookAndFeel = false;
+		((Control)BtnDelete).Name = "BtnDelete";
+		((BaseButton)BtnDelete).ToolTipAnchor = (ToolTipAnchor)1;
+		((BaseStyleControl)BtnCancel).Appearance.Font = (Font)componentResourceManager.GetObject("BtnCancel.Appearance.Font");
+		((BaseStyleControl)BtnCancel).Appearance.ForeColor = Color.FromArgb(192, 64, 0);
+		((BaseStyleControl)BtnCancel).Appearance.Options.UseFont = true;
+		((BaseStyleControl)BtnCancel).Appearance.Options.UseForeColor = true;
+		BtnCancel.ImageOptions.Location = (ImageLocation)1;
+		((ImageCollectionImageOptions)BtnCancel.ImageOptions).SvgImage = Resources.grandtotalsoffrowscolumnspivottable;
+		componentResourceManager.ApplyResources(BtnCancel, "BtnCancel");
+		((BaseControl)BtnCancel).LookAndFeel.SkinName = "The Bezier";
+		((BaseControl)BtnCancel).LookAndFeel.UseDefaultLookAndFeel = false;
+		((Control)BtnCancel).Name = "BtnCancel";
+		((BaseButton)BtnCancel).ToolTipAnchor = (ToolTipAnchor)1;
+		((BaseStyleControl)BtnSave).Appearance.Font = (Font)componentResourceManager.GetObject("BtnSave.Appearance.Font");
+		((BaseStyleControl)BtnSave).Appearance.ForeColor = Color.FromArgb(192, 64, 0);
+		((BaseStyleControl)BtnSave).Appearance.Options.UseFont = true;
+		((BaseStyleControl)BtnSave).Appearance.Options.UseForeColor = true;
+		((ImageCollectionImageOptions)BtnSave.ImageOptions).SvgImage = (SvgImage)componentResourceManager.GetObject("BtnSave.ImageOptions.SvgImage");
+		componentResourceManager.ApplyResources(BtnSave, "BtnSave");
+		((BaseControl)BtnSave).LookAndFeel.SkinName = "The Bezier";
+		((BaseControl)BtnSave).LookAndFeel.UseDefaultLookAndFeel = false;
+		((Control)BtnSave).Name = "BtnSave";
+		((BaseButton)BtnSave).ToolTipAnchor = (ToolTipAnchor)1;
+		((BaseStyleControl)BtnPrint).Appearance.Font = (Font)componentResourceManager.GetObject("BtnPrint.Appearance.Font");
+		((BaseStyleControl)BtnPrint).Appearance.ForeColor = Color.FromArgb(192, 64, 0);
+		((BaseStyleControl)BtnPrint).Appearance.Options.UseFont = true;
+		((BaseStyleControl)BtnPrint).Appearance.Options.UseForeColor = true;
+		((ImageCollectionImageOptions)BtnPrint.ImageOptions).SvgImage = (SvgImage)componentResourceManager.GetObject("BtnPrint.ImageOptions.SvgImage");
+		componentResourceManager.ApplyResources(BtnPrint, "BtnPrint");
+		((BaseControl)BtnPrint).LookAndFeel.SkinName = "The Bezier";
+		((BaseControl)BtnPrint).LookAndFeel.UseDefaultLookAndFeel = false;
+		((Control)BtnPrint).Name = "BtnPrint";
+		((BaseButton)BtnPrint).ToolTipAnchor = (ToolTipAnchor)1;
+		cboUser.BackColor = Color.FromArgb(255, 224, 192);
+		cboUser.DropDownStyle = (ComboBoxStyle)2;
+		componentResourceManager.ApplyResources(cboUser, "cboUser");
+		((ListControl)cboUser).FormattingEnabled = true;
+		((Control)cboUser).Name = "cboUser";
+		((Control)Label6).BackColor = Color.Transparent;
+		componentResourceManager.ApplyResources(Label6, "Label6");
+		((Control)Label6).ForeColor = Color.Black;
+		((Control)Label6).Name = "Label6";
+		((TextBoxBase)nDayHour).BackColor = Color.White;
+		componentResourceManager.ApplyResources(nDayHour, "nDayHour");
+		((Control)nDayHour).Name = "nDayHour";
+		componentResourceManager.ApplyResources(Label5, "Label5");
+		((Control)Label5).ForeColor = Color.Black;
+		((Control)Label5).Name = "Label5";
+		componentResourceManager.ApplyResources(this, "$this");
+		((ContainerControl)this).AutoScaleMode = (AutoScaleMode)2;
+		((Form)this).BackColor = SystemColors.ButtonHighlight;
+		((Control)this).Controls.Add((Control)(object)nDayHour);
+		((Control)this).Controls.Add((Control)(object)Label5);
+		((Control)this).Controls.Add((Control)(object)cboUser);
+		((Control)this).Controls.Add((Control)(object)Label6);
+		((Control)this).Controls.Add((Control)(object)PnlBotam);
+		((Control)this).Controls.Add((Control)(object)tEmpAmt);
+		((Control)this).Controls.Add((Control)(object)Label4);
+		((Control)this).Controls.Add((Control)(object)tEmpAcName);
+		((Control)this).Controls.Add((Control)(object)tEmpAc);
+		((Control)this).Controls.Add((Control)(object)Label3);
+		((Control)this).Controls.Add((Control)(object)DGV);
+		((Control)this).Controls.Add((Control)(object)Text1);
+		((Control)this).Controls.Add((Control)(object)Label1);
+		((Control)this).Controls.Add((Control)(object)Label2);
+		((Control)this).Controls.Add((Control)(object)tEmpCode);
+		((Control)this).Controls.Add((Control)(object)tEmpName);
+		((Control)this).Controls.Add((Control)(object)lblBook);
+		((Form)this).FormBorderStyle = (FormBorderStyle)1;
+		((Form)this).KeyPreview = true;
+		((Control)this).Name = "MS_EMP";
+		((ISupportInitialize)DGV).EndInit();
+		((Control)PnlBotam).ResumeLayout(false);
+		((Control)this).ResumeLayout(false);
+		((Control)this).PerformLayout();
+	}
+
+	private void MS_EMP_Load(object sender, EventArgs e)
+	{
+		//IL_0154: Unknown result type (might be due to invalid IL or missing references)
+		//IL_015b: Expected O, but got Unknown
+		//IL_07eb: Unknown result type (might be due to invalid IL or missing references)
+		//IL_07f2: Expected O, but got Unknown
+		//IL_0857: Unknown result type (might be due to invalid IL or missing references)
+		//IL_085c: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0866: Expected O, but got Unknown
+		//IL_08ee: Unknown result type (might be due to invalid IL or missing references)
+		//IL_08f3: Unknown result type (might be due to invalid IL or missing references)
+		//IL_08fd: Expected O, but got Unknown
+		//IL_096f: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0974: Unknown result type (might be due to invalid IL or missing references)
+		//IL_097a: Expected O, but got Unknown
+		//IL_0a2c: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0a31: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0a3b: Expected O, but got Unknown
+		//IL_0a5a: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0a5f: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0a69: Expected O, but got Unknown
+		//IL_0a88: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0a8d: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0a97: Expected O, but got Unknown
+		DC_Main.RsQry = "Select * From USER_SET WHERE LC_CODE = '" + DC_Main.MLc_code + "' AND  USER_NAME = '" + DC_Main.MCo_User + "' AND SUB_MENU = '" + DC_Main.MsUserRightForm + "' ";
+		DataTable dataTable = DC_Main.OpenRecordSetMc(DC_Main.RsQry);
+		DC_Main.MsUserRightForm = "";
+		if (dataTable.Rows.Count > 0)
+		{
+			UserEdit = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["FRM_EDIT"], (object)""));
+			UserDelete = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["FRM_DELETE"], (object)""));
+			UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["FRM_PRINT"], (object)""));
+		}
+		((Control)this).SuspendLayout();
+		((Control)this).ResumeLayout();
+		double num = (DC_Main.PcW - DC_Main.MainPcW) / DC_Main.MainPcW;
+		double num2 = (DC_Main.PcH - DC_Main.MainPcH) / DC_Main.MainPcH;
+		ColCon = 1.0 + num;
+		checked
+		{
+			foreach (Control control in ((Control)this).Controls)
+			{
+				Control val = control;
+				Control val2;
+				(val2 = val).Width = val2.Width + (int)Math.Round((double)val.Width * num);
+				(val2 = val).Height = val2.Height + (int)Math.Round((double)val.Height * num2);
+				(val2 = val).Left = val2.Left + (int)Math.Round((double)val.Left * num);
+				(val2 = val).Top = val2.Top + (int)Math.Round((double)val.Top * num2);
+			}
+			foreach (object control2 in ((Control)PnlBotam).Controls)
+			{
+				object objectValue = RuntimeHelpers.GetObjectValue(control2);
+				object obj = objectValue;
+				NewLateBinding.LateSet(obj, (Type)null, "Width", new object[1] { Operators.AddObject(NewLateBinding.LateGet(obj, (Type)null, "Width", new object[0], (string[])null, (Type[])null, (bool[])null), (object)Conversions.ToInteger(Operators.MultiplyObject(NewLateBinding.LateGet(objectValue, (Type)null, "Width", new object[0], (string[])null, (Type[])null, (bool[])null), (object)num))) }, (string[])null, (Type[])null);
+				obj = objectValue;
+				NewLateBinding.LateSet(obj, (Type)null, "Height", new object[1] { Operators.AddObject(NewLateBinding.LateGet(obj, (Type)null, "Height", new object[0], (string[])null, (Type[])null, (bool[])null), (object)Conversions.ToInteger(Operators.MultiplyObject(NewLateBinding.LateGet(objectValue, (Type)null, "Height", new object[0], (string[])null, (Type[])null, (bool[])null), (object)num2))) }, (string[])null, (Type[])null);
+				obj = objectValue;
+				NewLateBinding.LateSet(obj, (Type)null, "Left", new object[1] { Operators.AddObject(NewLateBinding.LateGet(obj, (Type)null, "Left", new object[0], (string[])null, (Type[])null, (bool[])null), (object)Conversions.ToInteger(Operators.MultiplyObject(NewLateBinding.LateGet(objectValue, (Type)null, "Left", new object[0], (string[])null, (Type[])null, (bool[])null), (object)num))) }, (string[])null, (Type[])null);
+				obj = objectValue;
+				NewLateBinding.LateSet(obj, (Type)null, "Top", new object[1] { Operators.AddObject(NewLateBinding.LateGet(obj, (Type)null, "Top", new object[0], (string[])null, (Type[])null, (bool[])null), (object)Conversions.ToInteger(Operators.MultiplyObject(NewLateBinding.LateGet(objectValue, (Type)null, "Top", new object[0], (string[])null, (Type[])null, (bool[])null), (object)num2))) }, (string[])null, (Type[])null);
+			}
+			((Form)this).ClientSize = new Size((int)Math.Round(DC_Main.MainPcW), (int)Math.Round(DC_Main.MainPcH));
+			((Control)this).Dock = (DockStyle)5;
+			ColorConverter colorConverter = new ColorConverter();
+			if (DC_Main.MsCoTheme == 2)
+			{
+				((Form)this).BackColor = Color.Silver;
+				((TextBoxBase)Text1).BackColor = ((Form)this).BackColor;
+				Label obj2 = lblBook;
+				object? obj3 = colorConverter.ConvertFromString("MistyRose");
+				((Control)obj2).BackColor = ((obj3 != null) ? ((Color)obj3) : default(Color));
+				Label obj4 = lblBook;
+				object? obj5 = colorConverter.ConvertFromString("64, 0, 64");
+				((Control)obj4).ForeColor = ((obj5 != null) ? ((Color)obj5) : default(Color));
+				FlowLayoutPanel pnlBotam = PnlBotam;
+				object? obj6 = colorConverter.ConvertFromString("MistyRose");
+				((Control)pnlBotam).BackColor = ((obj6 != null) ? ((Color)obj6) : default(Color));
+				((DataGridView)DGV).BackgroundColor = Color.DarkGray;
+				DataGridViewCellStyle alternatingRowsDefaultCellStyle = ((DataGridView)DGV).AlternatingRowsDefaultCellStyle;
+				object? obj7 = colorConverter.ConvertFromString("243, 240, 239");
+				alternatingRowsDefaultCellStyle.BackColor = ((obj7 != null) ? ((Color)obj7) : default(Color));
+				TextBox obj8 = tEmpAcName;
+				object? obj9 = colorConverter.ConvertFromString("243, 240, 239");
+				((TextBoxBase)obj8).BackColor = ((obj9 != null) ? ((Color)obj9) : default(Color));
+			}
+			else if (DC_Main.MsCoTheme == 3)
+			{
+				object? obj10 = colorConverter.ConvertFromString("200, 205, 210");
+				((Form)this).BackColor = ((obj10 != null) ? ((Color)obj10) : default(Color));
+				((TextBoxBase)Text1).BackColor = ((Form)this).BackColor;
+				((Control)lblBook).BackColor = Color.LightSlateGray;
+				((Control)lblBook).ForeColor = Color.White;
+				((Control)PnlBotam).BackColor = Color.SlateGray;
+				DataGridViewX dGV = DGV;
+				object? obj11 = colorConverter.ConvertFromString("174, 184, 194");
+				((DataGridView)dGV).BackgroundColor = ((obj11 != null) ? ((Color)obj11) : default(Color));
+				DataGridViewCellStyle alternatingRowsDefaultCellStyle2 = ((DataGridView)DGV).AlternatingRowsDefaultCellStyle;
+				object? obj12 = colorConverter.ConvertFromString("233, 235, 240");
+				alternatingRowsDefaultCellStyle2.BackColor = ((obj12 != null) ? ((Color)obj12) : default(Color));
+				TextBox obj13 = tEmpAcName;
+				object? obj14 = colorConverter.ConvertFromString("233, 235, 240");
+				((TextBoxBase)obj13).BackColor = ((obj14 != null) ? ((Color)obj14) : default(Color));
+			}
+			else if (DC_Main.MsCoTheme == 4)
+			{
+				object? obj15 = colorConverter.ConvertFromString("205, 220, 220");
+				((Form)this).BackColor = ((obj15 != null) ? ((Color)obj15) : default(Color));
+				((TextBoxBase)Text1).BackColor = ((Form)this).BackColor;
+				((Control)lblBook).BackColor = Color.Cornsilk;
+				Label obj16 = lblBook;
+				object? obj17 = colorConverter.ConvertFromString("0, 0, 192");
+				((Control)obj16).ForeColor = ((obj17 != null) ? ((Color)obj17) : default(Color));
+				FlowLayoutPanel pnlBotam2 = PnlBotam;
+				object? obj18 = colorConverter.ConvertFromString("CadetBlue");
+				((Control)pnlBotam2).BackColor = ((obj18 != null) ? ((Color)obj18) : default(Color));
+				DataGridViewX dGV2 = DGV;
+				object? obj19 = colorConverter.ConvertFromString("Ivory");
+				((DataGridView)dGV2).BackgroundColor = ((obj19 != null) ? ((Color)obj19) : default(Color));
+				DataGridViewCellStyle alternatingRowsDefaultCellStyle3 = ((DataGridView)DGV).AlternatingRowsDefaultCellStyle;
+				object? obj20 = colorConverter.ConvertFromString("238, 244, 236");
+				alternatingRowsDefaultCellStyle3.BackColor = ((obj20 != null) ? ((Color)obj20) : default(Color));
+				((TextBoxBase)tEmpAcName).BackColor = Color.Cornsilk;
+			}
+			if ((Operators.CompareString(DC_Main.MsMainFontChange, "Y", false) == 0) & (DC_Main.ScreenHight > 1.0))
+			{
+				int num3 = (int)Math.Ceiling((double)((Control)tEmpAcName).Font.Size * (1.0 + num2));
+				Font font = ((Control)tEmpAcName).Font;
+				try
+				{
+					foreach (Control control3 in ((Control)this).Controls)
+					{
+						Control val3 = control3;
+						if (unchecked(val3 is TextBox || val3 is Label || val3 is ComboBox || val3 is MaskedTextBox || val3 is SimpleButton) && Operators.CompareString(val3.Name, "lblBook", false) != 0)
+						{
+							val3.Font = new Font(font.FontFamily, (float)num3, font.Style);
+						}
+					}
+				}
+				finally
+				{
+					((IDisposable)font)?.Dispose();
+				}
+				num3 = (int)Math.Ceiling((double)((Control)lblBook).Font.Size * (1.0 + num2));
+				((Control)lblBook).Font = new Font(((Control)lblBook).Font.FontFamily, (float)num3, ((Control)lblBook).Font.Style);
+				num3 = (int)Math.Ceiling((double)((BaseStyleControl)BtnSave).Font.Size * (1.0 + num2));
+				Font font2 = ((BaseStyleControl)BtnSave).Font;
+				try
+				{
+					foreach (object control4 in ((Control)PnlBotam).Controls)
+					{
+						object objectValue2 = RuntimeHelpers.GetObjectValue(control4);
+						NewLateBinding.LateSet(objectValue2, (Type)null, "Font", new object[1] { (object)new Font(font2.FontFamily, (float)num3, font2.Style) }, (string[])null, (Type[])null);
+					}
+				}
+				finally
+				{
+					((IDisposable)font2)?.Dispose();
+				}
+				if (unchecked(Operators.CompareString(DC_Main.MsFontChange, "N", false) == 0 && 1.0 + num2 > 1.0))
+				{
+					num3 = (int)Math.Ceiling(9.0 * (1.0 + num2));
+					((DataGridView)DGV).ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Semibold", (float)num3, ((DataGridView)DGV).ColumnHeadersDefaultCellStyle.Font.Style);
+					((DataGridView)DGV).RowsDefaultCellStyle.Font = new Font("Segoe UI Semibold", (float)num3, ((DataGridView)DGV).Font.Style);
+					((DataGridView)DGV).AlternatingRowsDefaultCellStyle.Font = new Font("Segoe UI Semibold", (float)num3, ((DataGridView)DGV).Font.Style);
+					((DataGridView)DGV).ColumnHeadersHeight = (int)Math.Round((double)((DataGridView)DGV).ColumnHeadersHeight * (1.0 + num2));
+					((DataGridView)DGV).RowTemplate.Height = (int)Math.Round((double)((DataGridView)DGV).RowTemplate.Height * (1.0 + num2));
+				}
+			}
+			DC_Main.RsQry = "SELECT * FROM EMP_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "' ORDER BY EMP_NAME ";
+			RsMast = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+			CLEAR_DATA();
+			EntryMode = "A";
+			CurActCtrl = (Control)(object)tEmpName;
+		}
+	}
+
+	private void AddCboItem()
+	{
+		cboUser.Items.Clear();
+		DC_Main.RsQry = "SELECT LOGIN_NAME FROM LOGIN_MAST WHERE CO_CODE = '01' GROUP BY LOGIN_NAME ORDER BY LOGIN_NAME ";
+		DC_Main.Rshlp = DC_Main.OpenRecordSetMc(DC_Main.RsQry);
+		cboUser.Items.Clear();
+		checked
+		{
+			if (DC_Main.Rshlp.Rows.Count > 0)
+			{
+				cboUser.Items.Add((object)"");
+				int num = DC_Main.Rshlp.Rows.Count - 1;
+				DC_Main.X = 0;
+				while (DC_Main.X <= num)
+				{
+					cboUser.Items.Add(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.X]["LOGIN_NAME"], (object)""));
+					DC_Main.X++;
+				}
+				cboUser.SelectedIndex = 0;
+			}
+			else
+			{
+				cboUser.Items.Add((object)"");
+			}
+		}
+	}
+
+	private void MS_EMP_Activated(object sender, EventArgs e)
+	{
+		if (DC_Main.MsCreat)
+		{
+			DC_Main.MsCreat = false;
+			tEmpAc.Text = DC_Main.MsCode;
+			tEmpAcName.Text = DC_Main.MsName;
+			DC_Main.MsCode = "";
+			DC_Main.MsName = "";
+		}
+		((ContainerControl)this).ActiveControl = CurActCtrl;
+	}
+
+	private void DGV_CLEAR()
+	{
+		((DataGridView)DGV).DataSource = null;
+	}
+
+	private void DGV_FILL()
+	{
+		//IL_0054: Unknown result type (might be due to invalid IL or missing references)
+		//IL_005e: Expected O, but got Unknown
+		//IL_008e: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0093: Unknown result type (might be due to invalid IL or missing references)
+		//IL_009d: Expected O, but got Unknown
+		//IL_00b3: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00b8: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00c2: Expected O, but got Unknown
+		//IL_00d8: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00dd: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00e7: Expected O, but got Unknown
+		//IL_01dd: Unknown result type (might be due to invalid IL or missing references)
+		//IL_01e7: Expected O, but got Unknown
+		DGV_CLEAR();
+		DataView dataView = new DataView(RsMast);
+		if (dataView.Count > 0)
+		{
+			((DataGridView)DGV).MultiSelect = false;
+			((DataGridView)DGV).AutoGenerateColumns = false;
+			((DataGridView)DGV).ColumnHeadersDefaultCellStyle.Font = new Font("Franklin Gothic Book", 11f, (FontStyle)1);
+			if (Operators.CompareString(DC_Main.MsFontChange, "Y", false) == 0)
+			{
+				((DataGridView)DGV).ColumnHeadersDefaultCellStyle.Font = new Font(DC_Main.MsFontName, DC_Main.MsFontSize, DC_Main.MsFontStyle);
+				((DataGridView)DGV).RowsDefaultCellStyle.Font = new Font(DC_Main.MsFontName, DC_Main.MsFontSize, DC_Main.MsFontStyle);
+				((DataGridView)DGV).AlternatingRowsDefaultCellStyle.Font = new Font(DC_Main.MsFontName, DC_Main.MsFontSize, DC_Main.MsFontStyle);
+				((DataGridView)DGV).RowTemplate.Height = DC_Main.MsGridRowHeight;
+			}
+			((DataGridView)DGV).ColumnCount = 2;
+			((DataGridView)DGV).Columns[0].Width = 80;
+			((DataGridView)DGV).Columns[0].DataPropertyName = "EMP_CODE";
+			((DataGridView)DGV).Columns[0].HeaderText = "Code";
+			((DataGridView)DGV).Columns[1].Width = 300;
+			((DataGridView)DGV).Columns[1].DataPropertyName = "EMP_NAME";
+			((DataGridView)DGV).Columns[1].HeaderText = "Name";
+			if (DC_Main.ScreenHight > 1.0)
+			{
+				((DataGridView)DGV).ColumnHeadersDefaultCellStyle.Font = new Font("Arial", (float)DC_Main.HaderFont, (FontStyle)1);
+			}
+			((DataGridView)DGV).DataSource = dataView;
+		}
+	}
+
+	private void CLEAR_DATA()
+	{
+		//IL_0015: Unknown result type (might be due to invalid IL or missing references)
+		//IL_001b: Expected O, but got Unknown
+		foreach (Control control in ((Control)this).Controls)
+		{
+			Control val = control;
+			if (val is TextBox)
+			{
+				val.Text = "";
+			}
+		}
+		MainUser = DC_Main.MCo_User;
+		DGV_CLEAR();
+		DGV_FILL();
+		Text1.Text = "SEARCH RECORD";
+		((TextBoxBase)tEmpCode).MaxLength = 3;
+		((TextBoxBase)tEmpCode).ReadOnly = false;
+		AddCboItem();
+		DC_Main.RsQry = "SELECT EMP_CODE AS EmpCode  From EMP_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "' ORDER BY EMP_CODE DESC ";
+		DC_Main.Rshlp = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+		if (DC_Main.Rshlp.Rows.Count == 0)
+		{
+			tEmpCode.Text = "001";
+		}
+		else
+		{
+			tEmpCode.Text = Strings.Format(Operators.AddObject(DC_Main.Rshlp.Rows[0]["EmpCode"], (object)1), "000");
+		}
+		EntryMode = "A";
+		((Control)tEmpName).Focus();
+	}
+
+	private void DISPLAY_DATA()
+	{
+		DataView dataView = new DataView(RsMast);
+		dataView.RowFilter = " EMP_CODE = '" + tEmpCode.Text + "'";
+		if (dataView.Count > 0)
+		{
+			DataView dataView2 = dataView;
+			tEmpCode.Text = Conversions.ToString(Operators.ConcatenateObject(dataView2[0]["EMP_CODE"], (object)""));
+			tEmpName.Text = Conversions.ToString(Operators.ConcatenateObject(dataView2[0]["EMP_NAME"], (object)""));
+			cboUser.Text = Conversions.ToString(Operators.ConcatenateObject(dataView2[0]["USER_NAME"], (object)""));
+			tEmpAc.Text = Conversions.ToString(Operators.ConcatenateObject(dataView2[0]["EMP_AC"], (object)""));
+			DC_Main.RsQry = "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE ='" + DC_Main.MCo_code + "' AND AC_CODE = '" + tEmpAc.Text + "'";
+			DC_Main.Rshlp = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+			if (DC_Main.Rshlp.Rows.Count > 0)
+			{
+				tEmpAcName.Text = Conversions.ToString(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[0]["AC_NAME"], (object)""));
+			}
+			tEmpAmt.Text = Strings.Format(RuntimeHelpers.GetObjectValue(dataView2[0]["EMP_AMT"]), "0.00");
+			nDayHour.Text = Strings.Format(RuntimeHelpers.GetObjectValue(dataView2[0]["DAY_HOURS"]), "0.00");
+			MainUser = Conversions.ToString(Operators.ConcatenateObject(dataView2[0]["MAIN_USER"], (object)""));
+			dataView2 = null;
+			EntryMode = "E";
+			((TextBoxBase)tEmpCode).ReadOnly = true;
+		}
+	}
+
+	private void BtnExit_Click(object sender, EventArgs e)
+	{
+		((Form)this).Close();
+	}
+
+	private void BtnCancel_Click(object sender, EventArgs e)
+	{
+		CLEAR_DATA();
+	}
+
+	private void MS_EMP_Deactivate(object sender, EventArgs e)
+	{
+		if (Information.IsReference((object)CurActCtrl))
+		{
+			CurActCtrl = null;
+			CurActCtrl = ((ContainerControl)this).ActiveControl;
+		}
+	}
+
+	private void MS_EMP_KeyPress(object sender, KeyPressEventArgs e)
+	{
+		short num;
+		checked
+		{
+			num = (short)Strings.Asc(e.KeyChar);
+			num = (short)Strings.Asc(Strings.UCase(Strings.Chr(unchecked((int)num))));
+		}
+		e.KeyChar = Strings.Chr((int)num);
+		if (num == 0 || num == 39)
+		{
+			e.Handled = true;
+		}
+	}
+
+	private void tEmpCode_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		//IL_001f: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0026: Invalid comparison between Unknown and I4
+		if ((int)e.KeyCode == 112)
+		{
+			((Control)Text1).Focus();
+		}
+		else if ((int)e.KeyCode == 13 && Operators.CompareString(tEmpCode.Text, "", false) != 0)
+		{
+			SendKeys.Send("{tab}");
+		}
+	}
+
+	private void tEmpCode_Validating(object sender, CancelEventArgs e)
+	{
+		//IL_008f: Unknown result type (might be due to invalid IL or missing references)
+		bool cancel = e.Cancel;
+		DataView dataView = new DataView(RsMast);
+		dataView.RowFilter = " EMP_CODE = '" + tEmpCode.Text + "'";
+		if (dataView.Count > 0)
+		{
+			if (Operators.ConditionalCompareObjectNotEqual(dataView[0]["EMP_NAME"], (object)tEmpName.Text, false))
+			{
+				Interaction.MsgBox(Operators.ConcatenateObject(Operators.ConcatenateObject((object)"This Employee Code already Exist in  '", dataView[0]["EMP_NAME"]), (object)"'  Employee Name...Please Change Employee Code..."), (MsgBoxStyle)0, (object)null);
+				cancel = true;
+				((TextBoxBase)tEmpCode).SelectAll();
+			}
+		}
+		else
+		{
+			cancel = false;
+		}
+		e.Cancel = cancel;
+	}
+
+	private void tEmpName_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		//IL_0033: Unknown result type (might be due to invalid IL or missing references)
+		if ((int)e.KeyCode == 13)
+		{
+			if (Operators.CompareString(tEmpName.Text, "", false) == 0)
+			{
+				Interaction.MsgBox((object)"Please Insert Employee Name ...", (MsgBoxStyle)0, (object)null);
+				((Control)tEmpName).Focus();
+			}
+			else
+			{
+				SendKeys.Send("{tab}");
+			}
+		}
+	}
+
+	private void tEmpName_Validating(object sender, CancelEventArgs e)
+	{
+		//IL_008f: Unknown result type (might be due to invalid IL or missing references)
+		bool cancel = e.Cancel;
+		DataView dataView = new DataView(RsMast);
+		dataView.RowFilter = " EMP_NAME = '" + tEmpName.Text + "'";
+		if (dataView.Count > 0)
+		{
+			if (Operators.ConditionalCompareObjectNotEqual(dataView[0]["EMP_CODE"], (object)tEmpCode.Text, false))
+			{
+				Interaction.MsgBox(Operators.ConcatenateObject(Operators.ConcatenateObject((object)"This Employee Name already Exist in  '", dataView[0]["EMP_CODE"]), (object)"'  Employee Code...Please Change Employee Name..."), (MsgBoxStyle)0, (object)null);
+				cancel = true;
+				((TextBoxBase)tEmpName).SelectAll();
+			}
+		}
+		else
+		{
+			cancel = false;
+		}
+		e.Cancel = cancel;
+	}
+
+	private void Text1_TextChanged(object sender, EventArgs e)
+	{
+		if ((Operators.CompareString(Text1.Text, "", false) == 0) & (Operators.CompareString(Text1.Text, "SEARCH RECORD", false) != 0))
+		{
+			DGV_FILL();
+		}
+		else if ((Operators.CompareString(Text1.Text, "", false) != 0) & (Operators.CompareString(Text1.Text, "SEARCH RECORD", false) != 0))
+		{
+			DGV_CLEAR();
+			DataView dataView = new DataView(RsMast);
+			dataView.RowFilter = "EMP_NAME Like  '" + Text1.Text + "%' ";
+			if (dataView.Count > 0)
+			{
+				((DataGridView)DGV).AutoGenerateColumns = false;
+				((DataGridView)DGV).Columns[0].Width = 80;
+				((DataGridView)DGV).Columns[0].DataPropertyName = "EMP_CODE";
+				((DataGridView)DGV).Columns[1].Width = 320;
+				((DataGridView)DGV).Columns[1].DataPropertyName = "EMP_NAME";
+				((DataGridView)DGV).DataSource = dataView;
+			}
+		}
+	}
+
+	private void MS_EMP_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		//IL_0019: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0020: Invalid comparison between Unknown and I4
+		//IL_0023: Unknown result type (might be due to invalid IL or missing references)
+		//IL_002a: Invalid comparison between Unknown and I4
+		if ((int)e.KeyCode == 27)
+		{
+			((Form)this).Close();
+		}
+		if (((int)e.KeyCode == 38) | ((int)e.KeyCode == 40))
+		{
+			((Control)DGV).Focus();
+		}
+	}
+
+	private void Text1_Click(object sender, EventArgs e)
+	{
+		if (Operators.CompareString(Text1.Text, "SEARCH RECORD", false) == 0)
+		{
+			Text1.Text = "";
+		}
+	}
+
+	private void BtnSave_Click(object sender, EventArgs e)
+	{
+		//IL_0036: Unknown result type (might be due to invalid IL or missing references)
+		//IL_02e3: Unknown result type (might be due to invalid IL or missing references)
+		//IL_008c: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0283: Unknown result type (might be due to invalid IL or missing references)
+		int try0001_dispatch = -1;
+		int num2 = default(int);
+		int num = default(int);
+		while (true)
+		{
+			try
+			{
+				/*Note: ILSpy has introduced the following switch to emulate a goto from catch-block to try-block*/;
+				switch (try0001_dispatch)
+				{
+				default:
+				{
+					if ((Operators.CompareString(UserEdit, "Y", false) != 0) & (Operators.CompareString(EntryMode, "E", false) == 0))
+					{
+						Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);
+						goto end_IL_0001;
+					}
+					ProjectData.ClearProjectError();
+					num2 = 2;
+					if ((Operators.CompareString(tEmpCode.Text, "", false) == 0) & (Operators.CompareString(tEmpName.Text, "", false) == 0))
+					{
+						Interaction.MsgBox((object)"Enter Employee Detail", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);
+						((Control)tEmpName).Focus();
+						goto end_IL_0001;
+					}
+					DC_Main.RsQry = "DELETE FROM EMP_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND EMP_CODE = '" + tEmpCode.Text + "'";
+					DC_Main.ExeQuteDc(DC_Main.RsQry);
+					DC_Main.RsQry = "SELECT * FROM EMP_MAST  WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND EMP_CODE = '" + tEmpCode.Text + "'";
+					DC_Main.Rshlp = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+					DC_Main.MsInsertData();
+					DataRow dataRow = DC_Main.Rshlp.NewRow();
+					dataRow["CO_CODE"] = DC_Main.MCo_code;
+					dataRow["EMP_CODE"] = tEmpCode.Text;
+					dataRow["EMP_NAME"] = tEmpName.Text;
+					dataRow["EMP_AC"] = tEmpAc.Text;
+					dataRow["EMP_AMT"] = Conversion.Val(tEmpAmt.Text);
+					dataRow["DAY_HOURS"] = Conversion.Val(nDayHour.Text);
+					if (Operators.CompareString(cboUser.Text, "", false) == 0)
+					{
+						dataRow["USER_NAME"] = "ABC";
+					}
+					else
+					{
+						dataRow["USER_NAME"] = cboUser.Text;
+					}
+					dataRow["MAIN_USER"] = MainUser;
+					DC_Main.Rshlp.Rows.Add(dataRow);
+					((DbDataAdapter)(object)DC_Main.Da).Update(DC_Main.Rshlp);
+					DC_Main.Rshlp.Clear();
+					Interaction.MsgBox((object)"Data Are Saved.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);
+					CLEAR_DATA();
+					DC_Main.RsQry = "SELECT * FROM EMP_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "' ORDER BY EMP_NAME ";
+					RsMast = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+					DGV_FILL();
+					goto end_IL_0001;
+				}
+				case 748:
+					num = -1;
+					switch (num2)
+					{
+					case 2:
+						Interaction.MsgBox((object)("Error Found: " + Information.Err().Description + "\rClick Ok to Exit."), (MsgBoxStyle)48, (object)DC_Main.MsgTitle);
+						goto end_IL_0001;
+					}
+					break;
+				}
+			}
+			catch (object obj) when (obj is Exception && num2 != 0 && num == 0)
+			{
+				ProjectData.SetProjectError((Exception)obj);
+				try0001_dispatch = 748;
+				continue;
+			}
+			throw ProjectData.CreateProjectError(-2146828237);
+			continue;
+			end_IL_0001:
+			break;
+		}
+		if (num != 0)
+		{
+			ProjectData.ClearProjectError();
+		}
+	}
+
+	private void BtnDelete_Click(object sender, EventArgs e)
+	{
+		//IL_0020: Unknown result type (might be due to invalid IL or missing references)
+		//IL_006c: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0072: Invalid comparison between Unknown and I4
+		//IL_0054: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00a0: Unknown result type (might be due to invalid IL or missing references)
+		//IL_00f6: Unknown result type (might be due to invalid IL or missing references)
+		if (Operators.CompareString(UserDelete, "Y", false) != 0)
+		{
+			Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);
+		}
+		else if (Operators.CompareString(tEmpCode.Text, "", false) == 0)
+		{
+			Interaction.MsgBox((object)"Please Select Employee For Delete.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);
+		}
+		else if ((int)Interaction.MsgBox((object)"Are You Sure To Delete This Record now?", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6)
+		{
+			string text = tEmpCode.Text;
+			if (Operators.CompareString(text, "001", false) == 0)
+			{
+				Interaction.MsgBox((object)"You Cant Delete Record, This Empoyee Is Default Empoyee....", (MsgBoxStyle)0, (object)null);
+				return;
+			}
+			DC_Main.ExeQuteDc("DELETE FROM EMP_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND  EMP_CODE = '" + tEmpCode.Text + "'");
+			Interaction.MsgBox((object)"Delete Success.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);
+			CLEAR_DATA();
+			DC_Main.RsQry = "SELECT * FROM EMP_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "' ORDER BY EMP_CODE ";
+			RsMast = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+			DGV_FILL();
+		}
+	}
+
+	private void BtnPrint_Click(object sender, EventArgs e)
+	{
+		//IL_0020: Unknown result type (might be due to invalid IL or missing references)
+		if (Operators.CompareString(UserPrint, "Y", false) != 0)
+		{
+			Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxStyle)0, (object)null);
+			return;
+		}
+		DC_Main.RptName = "EmpMast";
+		DC_Main.RptFormula = "{EMP_MAST.CO_CODE}= '" + DC_Main.MCo_code + "' ";
+		UT_REPORT uT_REPORT = new UT_REPORT();
+		((Control)uT_REPORT).Show();
+		((Control)uT_REPORT).Focus();
+	}
+
+	private void DGV_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		//IL_0021: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0028: Invalid comparison between Unknown and I4
+		//IL_0071: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0077: Invalid comparison between Unknown and I4
+		if ((int)e.KeyCode == 112)
+		{
+			((Control)Text1).Focus();
+		}
+		else if ((int)e.KeyCode == 13)
+		{
+			tEmpCode.Text = Conversions.ToString(((DataGridView)DGV).CurrentRow.Cells[0].Value);
+			DISPLAY_DATA();
+			((Control)tEmpName).Focus();
+		}
+		else if ((int)e.KeyCode == 8 && Strings.Len(Text1.Text) > 0)
+		{
+			Text1.Text = Strings.Mid(Text1.Text, 1, checked(Strings.Len(Text1.Text) - 1));
+		}
+	}
+
+	private void DGV_DoubleClick(object sender, EventArgs e)
+	{
+		tEmpCode.Text = Conversions.ToString(((DataGridView)DGV).CurrentRow.Cells[0].Value);
+		DISPLAY_DATA();
+		((Control)tEmpName).Focus();
+	}
+
+	private void tEmpAc_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		//IL_00eb: Unknown result type (might be due to invalid IL or missing references)
+		if ((int)e.KeyCode != 13)
+		{
+			return;
+		}
+		DC_Main.RsQry = "Select * From AC_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "'  AND AC_CODE = '" + tEmpAc.Text + "'";
+		DC_Main.Tbl = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+		if (DC_Main.Tbl.Rows.Count == 0)
+		{
+			DC_Main.RsQry = "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL,AC_GR AS AcGrL FROM AC_MAST WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND AC_CODE <> '00020' AND AC_GR IN ('09','10','45') ORDER BY AC_GR,AC_NAME";
+			DC_Main.RsDg = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+			DC_Main.ColWidth = new double[4];
+			DC_Main.ColWidth[0] = 300.0;
+			DC_Main.ColWidth[1] = 100.0;
+			DC_Main.ColWidth[2] = 100.0;
+			DC_Main.HelpSelect = 1;
+			((Form)MyProject.Forms.MS_HELP).ShowDialog();
+			if (DC_Main.HelpClose)
+			{
+				return;
+			}
+			if (DC_Main.MsCreat)
+			{
+				DC_Main.MsGrCode = "10";
+				MS_ACCT mS_ACCT = new MS_ACCT();
+				((Form)mS_ACCT).MdiParent = (Form)(object)MyProject.Forms.MDI_FORM;
+				((Control)mS_ACCT).Show();
+				((Control)mS_ACCT).Focus();
+			}
+			else
+			{
+				if (Operators.CompareString(DC_Main.ColValue[1], "", false) != 0)
+				{
+					tEmpAc.Text = DC_Main.ColValue[1];
+					tEmpAcName.Text = DC_Main.ColValue[0];
+				}
+				((Control)tEmpAc).Focus();
+			}
+		}
+		else
+		{
+			tEmpAcName.Text = Conversions.ToString(Operators.ConcatenateObject(DC_Main.Tbl.Rows[0]["AC_NAME"], (object)""));
+			SendKeys.Send("{tab}");
+		}
+	}
+
+	private void tEmpAmt_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		if ((int)e.KeyCode == 13)
+		{
+			tEmpAmt.Text = Strings.Format((object)Convert.ToDouble(Conversion.Val(tEmpAmt.Text)), "0.00");
+			SendKeys.Send("{TAB}");
+		}
+	}
+
+	private void MS_EMP_Closed(object sender, EventArgs e)
+	{
+		if (((ReadOnlyCollectionBase)(object)((WindowsFormsApplicationBase)MyProject.Application).OpenForms).Count <= 3)
+		{
+			((Control)MyProject.Forms.MDI_FORM.PanelImage).Visible = true;
+		}
+		else
+		{
+			((Control)MyProject.Forms.MDI_FORM.PanelImage).Visible = false;
+		}
+	}
+
+	private void cboUser_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		if ((int)e.KeyCode == 13)
+		{
+			SendKeys.Send("{TAB}");
+		}
+	}
+
+	private void nDayHour_KeyDown(object sender, KeyEventArgs e)
+	{
+		//IL_0002: Unknown result type (might be due to invalid IL or missing references)
+		//IL_0009: Invalid comparison between Unknown and I4
+		if ((int)e.KeyCode == 13)
+		{
+			nDayHour.Text = Strings.Format((object)Convert.ToDouble(Conversion.Val(nDayHour.Text)), "0.00");
+			SendKeys.Send("{TAB}");
+		}
+	}
+
+	private void cboUser_SelectedIndexChanged(object sender, EventArgs e)
+	{
+		((Control)cboUser).Focus();
+	}
+}

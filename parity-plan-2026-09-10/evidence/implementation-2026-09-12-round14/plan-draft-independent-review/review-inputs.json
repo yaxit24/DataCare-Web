@@ -1,0 +1,78 @@
+{
+  "kind": "source-and-recorded-evidence-read-only-review",
+  "reviewerExecution": false,
+  "files": [
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/effects-contract.md",
+      "sha256": "00c0d6551a0b08445835869c93bb19cafa42e879b841c315596581ec4f7b28c2"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/expected-before-after.inventory.json",
+      "sha256": "461cd378334806592661c141e72ecc4b5597cebad6609145e9878890a7e14cbc"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/remaining-blockers.json",
+      "sha256": "86aa52414f3f41f12e05a8141f7d15247cfb985096bf9d5fe73eb16a47eeea43"
+    },
+    {
+      "path": "/tmp/datacare-return-save-prerequisites-review/review.md",
+      "sha256": "4a1d4ed3aefe655d866fd419e7e5ec956d86ffa20fe14bf63d9c39645cc623d9"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-review/review.md",
+      "sha256": "91ecc6c07b81518d9590b3310d866e6f7f7d89424589738cc906fe2b36fe7acf"
+    },
+    {
+      "path": "/tmp/datacare-session-serializable-command-staged/web/apps/api/src/modules/auth/sessionContextSerializableCommand.ts",
+      "sha256": "300447e6d3a8f11306620e12e6a5d13f0802dfc42544f73951231c13ba52bb37"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/saleReturnHeaderFloat.db.test.ts",
+      "sha256": "c3b92cbfb658db079a5f3c880f77e4d5cc1d4c61f4bc0a14d87f43fe3ba98fc9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/header-float-postgres.run.json",
+      "sha256": "6a768c9afad3822abff51683fd6b8956b2768677bd06d7a4d83f3e70362cb347"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/header-float-postgres.txt",
+      "sha256": "0cac68483726c19aa46e9971d8486563de603e07e44ddc2d85eaf2ba1fd7ae81"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/session-serializable-focused.run.json",
+      "sha256": "1902398a9809c2cb8fcd9a455182c14c07d87eefd91db83c9a4a438f57ac9369"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/session-serializable-focused.txt",
+      "sha256": "4f2d66d701aaaba550463206fbc36357ad90e0e0d043bf7bce7ba75540bc3577"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/release-browser-journey-correction/contract.json",
+      "sha256": "5b7802793f40120a57f7ae8f22de51e496d20864b2fc9d6a4bb514e8fcc0e4b6"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-save-prerequisites-full.run.json",
+      "sha256": "7d22d399bbcba9c9721adf81cabcdfe77905c50f3cd2ad50f3fcf50e08014174"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-save-prerequisites-full.txt",
+      "sha256": "e723ae457dc8da7ad26dadfbeb336064e57fb820debc96fb301e2a59ce63dbb8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/releaseCertification.test.ts",
+      "sha256": "dd46dc3eb0c093fc51fa17ae7fe693028b1a9470b89dc329337097e5517e8b56"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/ops/releaseCertification.ts",
+      "sha256": "35b19dfe89e0fc103e01c25a81c9779267a60d2064ec81079cc1c666d5ebce77"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "fa51a775930b7c3c9c21c393961ff2dc651210b7c65f79c624739c5f999b3019"
+    }
+  ]
+}

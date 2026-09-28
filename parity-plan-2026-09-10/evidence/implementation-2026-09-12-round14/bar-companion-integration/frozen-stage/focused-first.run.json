@@ -1,0 +1,49 @@
+{
+  "runs": [
+    {
+      "label": "focused-first",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.config.ts"
+      ],
+      "cwd": "/tmp/datacare-return-bar-companion-staged/web/packages/core",
+      "startedAtUtc": "2026-09-12T01:02:07.818921+00:00",
+      "finishedAtUtc": "2026-09-12T01:02:08.571128+00:00",
+      "exitCode": 0,
+      "log": "focused-first.txt",
+      "logSha256": "7c2f2ba71acc93898d34232345872f2c38180f5b7a10374a85f19624d4655293"
+    },
+    {
+      "label": "types-first",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.bin/tsc",
+        "--noEmit",
+        "--strict",
+        "--noUncheckedIndexedAccess",
+        "--isolatedModules",
+        "--skipLibCheck",
+        "--target",
+        "ES2022",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--types",
+        "node",
+        "src/saleReturnNBarCompanions.ts",
+        "test/saleReturnNBarCompanions.test.ts"
+      ],
+      "cwd": "/tmp/datacare-return-bar-companion-staged/web/packages/core",
+      "startedAtUtc": "2026-09-12T01:02:08.571286+00:00",
+      "finishedAtUtc": "2026-09-12T01:02:09.254745+00:00",
+      "exitCode": 2,
+      "log": "types-first.txt",
+      "logSha256": "3f4ae3b7a76d810fb53660be9fe55af99a97d1114a1a67878ae57370e890bff4"
+    }
+  ],
+  "inputManifest": "focused-first.inputs.json",
+  "inputCount": 5,
+  "changedInputs": []
+}

@@ -1,0 +1,26 @@
+# Fidelity Acceptance Checklist
+
+- [x] `python3 tools/audit_next1106_parity.py` runs successfully.
+- [x] `DataCareNext.missing_source_resources` is empty.
+- [x] `NextDm.missing_source_resources` is empty.
+- [ ] All required original DLLs exist under `extracted_code/DataCareNext/libs/original`.
+- [ ] All required original DLLs exist under `extracted_code/NextDm/libs/original`.
+- [ ] `msbuild extracted_code\DataCareNext\DataCareNext.csproj /p:Configuration=Release /p:Platform=x86` succeeds on Windows.
+- [ ] `msbuild extracted_code\NextDm\NextDm.csproj /p:Configuration=Release /p:Platform=x86` succeeds on Windows.
+- [ ] `tools/compare_manifest_resources.py` reports `missing=0` and `extra=0` for `DataCareNext.exe`.
+- [ ] `tools/compare_manifest_resources.py` reports `missing=0` and `extra=0` for `NextDm.exe`.
+- [ ] `tools/compare_pe_identity.py` reports Win32 resource/version parity for `DataCareNext.exe`.
+- [ ] `tools/compare_pe_identity.py` reports Win32 resource/version parity for `NextDm.exe`.
+- [ ] `tools/audit_type_coverage.py` reports no unexplained TypeDef coverage gaps for `DataCareNext.exe`.
+- [ ] `tools/audit_type_coverage.py` reports no unexplained TypeDef coverage gaps for `NextDm.exe`.
+- [ ] `tools/parse_build_errors.py` reports `total_errors=0` for the latest Windows `DataCareNext` build log.
+- [ ] `tools/parse_build_errors.py` reports `total_errors=0` for the latest Windows `NextDm` build log.
+- [ ] Runtime config is recovered from the original deployment or documented as an external blocker.
+- [ ] `Report/` contains every reachable `.RPT` template.
+- [ ] `MS_LOGIN` startup matches original.
+- [ ] `MS_OPNCOMP` company/year selection matches original.
+- [ ] `MDI_FORM` menus/icons/navigation match original.
+- [ ] Representative master, transaction, report, utility, print/export workflows match original against the same database.
+- [ ] No runtime path uses `DevExpressStubs.dll`.
+- [ ] No runtime path uses fallback stub controls for Crystal, MSFlexGrid, DotNetBar, Qios, Tagit, or WhatsApp.
+- [ ] Package artifact exists at `dist/Next_1106-rebuilt.zip`.

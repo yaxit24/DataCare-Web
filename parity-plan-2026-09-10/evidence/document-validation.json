@@ -1,0 +1,21 @@
+{
+  "validatedAt": "2026-09-10T07:12:11.826798+00:00",
+  "status": "passed",
+  "localLinksChecked": 937,
+  "workPackages": 83,
+  "scenarioAnchors": 128,
+  "planningCoverageDomains": 23,
+  "supplementalControlCandidates": 916,
+  "supportingSourceFiles": 8,
+  "registerCounts": {
+    "form-register": 204,
+    "grid-requirements": 3508,
+    "control-requirements": 1599,
+    "event-requirements": 5838,
+    "report-register": 275,
+    "table-register": 146
+  },
+  "reviewedSourceFilesUnchanged": 1325,
+  "errors": [],
+  "limits": "Documentation/schema/link and source-preservation checks only; not implementation or runtime certification."
+}

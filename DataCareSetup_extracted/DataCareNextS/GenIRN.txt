@@ -1,0 +1,112 @@
+{
+  "Version": "1.1",
+  "TranDtls": {
+    "TaxSch": "GST",
+    "SupTyp": "B2B",
+    "RegRev": "N",
+    "EcmGstin": null,
+    "IgstOnIntra": "N"
+  },
+  "DocDtls": {
+    "Typ": "INV",
+    "No": "DF/00005",
+    "Dt": "09/06/2023"
+  },
+  "SellerDtls": {
+    "Gstin": "34AACCC1596Q002",
+    "LglNm": "NIC company pvt ltd",
+    "TrdNm": "NIC company pvt ltd",
+    "Addr1": "5th block, kuvempu layout",
+    "Loc": "GANDHINAGAR",
+    "Pin": 605001,
+    "Stcd": "34"
+  },
+  "BuyerDtls": {
+    "Gstin": "24ALOPV4774H2ZF",
+    "LglNm": "DATACARE SOFTTECH",
+    "TrdNm": "DATACARE SOFTTECH",
+    "Pos": "24",
+    "Addr1": "505, SHIVALIK SATYAMEV, NR. VAKIL SAHEB BRIDGE",
+    "Loc": "AHMEDABAD",
+    "Pin": 380058,
+    "Stcd": "24"
+  },
+  "DispDtls": {
+    "Nm": "NIC company pvt ltd",
+    "Addr1": "5th block, kuvempu layout",
+    "Loc": "GANDHINAGAR",
+    "Pin": 605001,
+    "Stcd": "34"
+  },
+  "ShipDtls": {
+    "Gstin": "34AACCC1596Q002",
+    "LglNm": "NIC company pvt ltd",
+    "TrdNm": "NIC company pvt ltd",
+    "Addr1": "5th block, kuvempu layout",
+    "Loc": "GANDHINAGAR",
+    "Pin": 605001,
+    "Stcd": "34"
+  },
+  "ItemList": [
+    {
+      "SlNo": "1",
+      "PrdDesc": "BANGLE 916",
+      "IsServc": "N",
+      "HsnCd": "711319",
+      "Qty": 18.3,
+      "FreeQty": 0.0,
+      "Unit": "GMS",
+      "UnitPrice": 1180.0,
+      "TotAmt": 21594.0,
+      "Discount": 0.0,
+      "PreTaxVal": 21594.0,
+      "AssAmt": 21594.0,
+      "GstRt": 3.0,
+      "IgstAmt": 647.82,
+      "CgstAmt": 0.0,
+      "SgstAmt": 0.0,
+      "CesRt": 0.0,
+      "CesAmt": 0.0,
+      "CesNonAdvlAmt": 0.0,
+      "StateCesRt": 0.0,
+      "StateCesAmt": 0.0,
+      "StateCesNonAdvlAmt": 0.0,
+      "OthChrg": 0.0,
+      "TotItemVal": 22242.0,
+      "PrdSlNo": "DF/00005",
+      "BchDtls": {
+        "Nm": "DF/00005",
+        "ExpDt": "09/06/2023",
+        "WrDt": "09/06/2023"
+      },
+      "AttribDtls": []
+    }
+  ],
+  "ValDtls": {
+    "AssVal": 21594.0,
+    "CgstVal": 0.0,
+    "SgstVal": 0.0,
+    "IgstVal": 647.82,
+    "CesVal": 0.0,
+    "StCesVal": 0.0,
+    "Discount": 0.0,
+    "OthChrg": 0.0,
+    "RndOffAmt": 0.0,
+    "TotInvVal": 22242.0,
+    "TotInvValFc": 0.0
+  },
+  "RefDtls": {
+    "InvRm": "TEST",
+    "DocPerdDtls": {
+      "InvStDt": "09/06/2023",
+      "InvEndDt": "09/06/2023"
+    },
+    "PrecDocDtls": [
+      {
+        "InvNo": "DF/00005",
+        "InvDt": "09/06/2023"
+      }
+    ],
+    "ContrDtls": []
+  }
+}

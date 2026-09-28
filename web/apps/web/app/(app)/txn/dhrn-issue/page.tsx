@@ -5,6 +5,8 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { fineFor } from '@datacare/core';
 
 // One pledged-ornament collateral line. Fine + Amount are computed previews (see calc()).
 interface Coll {
@@ -55,6 +57,19 @@ export default function DhrnIssuePage() {
   const [otherCharges, setOtherCharges] = useState('');
   const [toDate, setToDate] = useState('');
   const [lines, setLines] = useState<Coll[]>([blank()]);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [res, setRes] = useState<{ vchNo: number; intAmt: number; monthInt: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -64,14 +79,26 @@ export default function DhrnIssuePage() {
 
   // per-line preview: fine = net×touch/100, amount = fine×rate (valuation of the pledged metal)
   const calc = (l: Coll) => {
-    const fine = r2((n(l.netWt) * n(l.touch)) / 100);
+    const fine = fineFor('sale', { netWt: n(l.netWt), touch: n(l.touch) });
     const amount = r2(fine * n(l.rate));
     return { fine, amount };
   };
   const totalFine = r2(lines.reduce((s, l) => s + calc(l).fine, 0));
   const totalAmount = r2(lines.reduce((s, l) => s + calc(l).amount, 0));
-  // issue-time interest preview = principal × annual%/100 × (months×30)/360  (TR_DHRN_ISU BILL_TOTAL parity)
-  const intPreview = r2(((n(principal) * n(intPrc)) / 100) * ((n(intMonths) * 30) / 360));
+  // Issue-time interest preview.
+  //
+  // This mirrors `desktopDhrnInterest` for the SIMPLE case only: monthly mode, no compounding,
+  // a 360-day year. That function (settingsBehavior.ts) actually derives days from the book's
+  // interest type ('M' -> months x 30, else a day count honouring CO_SET.INT_DAY), divides by
+  // CO_SET.INT_YEAR_DAYS rather than a literal 360, and compounds in annual blocks when
+  // CO_SET.DHIRN_COMPOUND is set and days/365 exceeds 1 (TR_DHRN_REC.cs:6897-6927).
+  //
+  // The server recomputes on save and is authoritative, so this is a guide, not the charge. It
+  // is labelled as such below rather than presented as the figure, because a preview that
+  // silently disagrees with the posted interest is worse than no preview at all.
+  const intPreviewApproximate = r2(
+    ((n(principal) * n(intPrc)) / 100) * ((n(intMonths) * 30) / 360),
+  );
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -96,7 +123,14 @@ export default function DhrnIssuePage() {
         adjustedDhrn: extra.adjustedDhrn ? Number(extra.adjustedDhrn) : undefined,
         uncheckedReceipts: extra.uncheckedReceipts ? Number(extra.uncheckedReceipts) : undefined,
         loanAc: extra.loanAc || undefined,
-        intPrc: Number(intPrc || 0),
+        // P1-1: omit `intPrc` when blank so the company default can supply it.
+        //
+        // `dhrn.ts:306` resolves `input.intPrc ?? cfg.dhrnDefaultRate` (desktop
+        // TR_DHRN_ISU.cs:4787 reads CO_SET.DHRN_PRC), and `:307-308` refuses only when BOTH are
+        // absent. Sending 0 satisfied the `annualRatePct >= 0` guard, so a blank field silently
+        // issued a zero-interest loan instead of using the configured rate — the company default
+        // could never take effect through this screen.
+        intPrc: intPrc.trim() === '' ? undefined : Number(intPrc),
         intMonths: Number(intMonths || 0),
         loanType,
         packetNo: packetNo || undefined,
@@ -199,14 +233,16 @@ export default function DhrnIssuePage() {
             </div>
           </div>
           <div className="muted" style={{ marginTop: 6 }}>
-            Interest preview <b>₹{inr(intPreview)}</b> = principal × {n(intPrc)}%/yr × (
-            {n(intMonths)}×30)/360
+            Approximate interest <b>₹{inr(intPreviewApproximate)}</b> = principal ×{' '}
+            {intPrc.trim() === '' ? 'company default' : `${n(intPrc)}%`}/yr × ({n(intMonths)}
+            ×30)/360. The posted amount is recomputed on save from this loan&rsquo;s configured
+            interest type, day basis, year length and compounding, so it may differ.
           </div>
         </div>
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Collateral — Pledged Ornaments</h2>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>

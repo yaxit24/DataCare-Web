@@ -1,0 +1,9 @@
+{
+  "attemptedAtUtc": "2026-09-11T05:42:33.585171+00:00",
+  "action": "mcp__cua_repl.js: await cua.getState()",
+  "purpose": "Discover a usable native desktop surface for independent desktop behavior verification",
+  "status": "unavailable",
+  "reportedError": "Sky Computer Use native pipe startup failed",
+  "observedDesktopApplication": false,
+  "limits": "No desktop UI behavior was observed or accepted. This tool startup failure does not imply that no VM or desktop installation exists. Source analysis and isolated web tests remain separate evidence."
+}

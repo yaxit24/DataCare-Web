@@ -1,0 +1,4 @@
+
+> @datacare/api@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> tsc -p tsconfig.json --noEmit
+

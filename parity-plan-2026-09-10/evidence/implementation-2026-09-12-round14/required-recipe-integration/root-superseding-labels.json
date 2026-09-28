@@ -1,0 +1,11 @@
+{
+  "beforeHelperSha256": "e0e4d21cea6418d4dc7e45396d4d25b206e8658304a780510cdbe370102c82bf",
+  "afterHelperSha256": "e699ab1cbc9cdc8ad46d163b85ee78c1ab4cc47f9a2e820664e96fea11a249e7",
+  "replacements": {
+    "docs-refs-final": "docs-refs-qualified",
+    "recipe-controls-final": "recipe-controls-qualified",
+    "checkpoint-chain-final": "checkpoint-chain-qualified"
+  },
+  "reason": "Docs reference check correctly found stale263 claim after266 tests; also corrected core inventory18 to21. Preserve every old run. Three superseding required labels allow fresh documentation/recipe/chain checks without overwriting results. Fixed18 semantic checks, commands, required counts and input domains are unchanged.",
+  "productSourceChanges": false
+}

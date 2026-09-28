@@ -1,0 +1,9 @@
+
+> @datacare/web@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> tsc --noEmit
+
+lib/salesReturnForm.ts(232,33): error TS18046: 'line.raw' is of type 'unknown'.
+lib/salesReturnForm.ts(232,54): error TS18046: 'line.identity' is of type 'unknown'.
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/web@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

@@ -1,0 +1,53 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/app.runtime.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:17:23.985718+00:00",
+  "finishedAtUtc": "2026-09-11T21:17:28.530952+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/app-runtime-cookie-fixture-corrected.txt",
+  "logSha256": "fab3622add808842f3172ae8aedebf95f11ea8cbac5606e95f7f9a0b2c5548b9",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/app-runtime-cookie-fixture-corrected.inputs.json",
+  "inputManifestSha256": "541d40afe62da29dd866bce9b74abd47221c1cc18ac14e587ca1081bca60bbbb",
+  "inputCount": 1787,
+  "changedInputs": [
+    {
+      "path": "parity-plan-2026-09-10/build_execution_addendum.py",
+      "beforeSha256": "e7b8ce470d066f22051d83b516daf5c853913678cac5c01736c01cb1ec6b1b73",
+      "afterSha256": "590ee117698c69cfdd8f0963bd9f18fe2f515e8241e15ead502af29298f47a3a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/execution-addendum-intro.md",
+      "beforeSha256": "dda185e2f4955e0937e46f9cb2c8890899ec63a97dc24c005cb0d3ed0667d5d3",
+      "afterSha256": "a17cf43d823cc7c3d677b59d42928b3847e739069ba2a11c0452b4c3a99266a0"
+    },
+    {
+      "path": "web/docs/HANDOFF.md",
+      "beforeSha256": "7949a4da82863443ced5b3a1752a01ef4d393c121a109652ea268271c44e30ad",
+      "afterSha256": "05b715347e8b6cbcbf5e03fba6f0ac9b73cf1fb293a3aab2f4f215f0e42aa195"
+    },
+    {
+      "path": "web/docs/STATE-OF-PARITY.md",
+      "beforeSha256": "3c285ae9089ce0ae3c7311a2a2d8a8ea512cd4b57cee30530ef0972f9b5b1a50",
+      "afterSha256": "a74376f5bade9ad30976f334545c48a76b44cb8277a0512c9cf5dea15e397a70"
+    },
+    {
+      "path": "web/docs/TECHNICAL-REFERENCE.md",
+      "beforeSha256": "f66d66b4a72b90c67fe8e398e2abe823cebeac641356c84f32ffe88974d385ec",
+      "afterSha256": "8794f868ab86f602af35510cd5c6a01a0f1b7263d4cec9098487b6e025aaf0d6"
+    }
+  ],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

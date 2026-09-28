@@ -1,0 +1,416 @@
+{
+  "card": "X25",
+  "round": 2,
+  "slice": "source-recovered-sales-tour-order-documents",
+  "implementationState": "partial",
+  "engineeringState": "focused-checks-passed",
+  "desktopAcceptance": null,
+  "physicalPrinterAcceptance": null,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "capturedAtUtc": "2026-09-10T23:26:40.958414+00:00",
+  "sourceState": "shared-dirty-development-tree; listed input hashes identify this slice, not a clean release candidate",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "inputFiles": [
+    {
+      "path": "apps/api/src/modules/reports/reportBind.ts",
+      "sha256": "ff0d456657acb6349f44d828ea5ad06ba6555bbb76dc344fe50d9eba9c7355f2"
+    },
+    {
+      "path": "apps/api/src/modules/reports/reportBindingContract.ts",
+      "sha256": "ae15bf14d0c5429f71801ee0d08a21d48d838202c3b5ba8914fb75d372540ade"
+    },
+    {
+      "path": "apps/api/src/modules/reports/reportEngine.ts",
+      "sha256": "3eb545de38c1e17cd94e86cca546514d41e90bd7b45d0cf358b62625a88b5ca7"
+    },
+    {
+      "path": "apps/api/src/modules/reports/orderReportLayout.ts",
+      "sha256": "727a973e35e916fbafc2091806d16a62ed49acfe252c9e3118d194cc8dcb4dfe"
+    },
+    {
+      "path": "apps/api/src/modules/reports/orderReportValues.ts",
+      "sha256": "4923c70f5685db25b8fc88094aeb701ce945408096fde38d35337fac5d4aaefe"
+    },
+    {
+      "path": "apps/api/src/modules/reports/render.ts",
+      "sha256": "c01e8621a32cbdfba85b8101dfbcbade7f9d29f561a4ca1e98dba16f90611c94"
+    },
+    {
+      "path": "apps/api/src/modules/sales/orderDoc.ts",
+      "sha256": "804924d2788cd41540c8b335336ba1df39f7358f3a9f487e6d60f273151dc655"
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "e6eba0e63764428b305c3b3b0736cc5e45a54b0821b3083eeff2c9c4eb44ca5f"
+    },
+    {
+      "path": "apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "5a531946bb774604c05eaeaebe1d4c848aee9bbc33db40d871f88bebaba2797e"
+    },
+    {
+      "path": "apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e"
+    },
+    {
+      "path": "apps/api/test/orderReport.test.ts",
+      "sha256": "298d770efb1ad311b92c84f8ac9e0e806b2e7a1aa96f8eb2d7a65fe7e279767c"
+    },
+    {
+      "path": "apps/api/test/orderReport.db.test.ts",
+      "sha256": "1a8c1db7cc8129b390359e665539bb36c38ed4385231b9326a61195fcacfaf68"
+    },
+    {
+      "path": "apps/api/test/tourOrderPrint.routes.db.test.ts",
+      "sha256": "328134556ed3aad524696e53fe21cc386b9e78375668f5d68d25984a8dddc23d"
+    },
+    {
+      "path": "apps/api/test/reportBind.test.ts",
+      "sha256": "38440274a7087cb11db5e659da37260794b6e27ba4be1e377a388bd2906f7944"
+    },
+    {
+      "path": "apps/api/test/reportChildren.db.test.ts",
+      "sha256": "3fa3d7e1b49d1ba2df9538d522939836c680b1e931aa9d1d7a8abd212f871207"
+    },
+    {
+      "path": "apps/api/test/reportRender.db.test.ts",
+      "sha256": "7e0391399d3ebf284779a7aca7f6f3f2ecda112417e4903c3641ff7388ef359c"
+    },
+    {
+      "path": "apps/api/test/reportEngine.test.ts",
+      "sha256": "644c22b21308f27c65c120325c2eee848ab3109159da507110cdcdeae8a638ab"
+    },
+    {
+      "path": "apps/api/report-specs/OrderVch.spec.json",
+      "sha256": "e3e88cd83314e2d650d7311e54647ef72241e70b410802c71bef859703b6d161"
+    },
+    {
+      "path": "apps/api/report-specs/OrderBill.spec.json",
+      "sha256": "9d41fd605ade7c18ed10406d8361df3dca8b12bcaff00e1dbcf41cf4accb9f5c"
+    },
+    {
+      "path": "apps/api/report-specs/TourOrdVch.spec.json",
+      "sha256": "df1b3e3e51b5b1b06c116144c52d2bc1d534ffe207a5ec0eaa61bb73a5c92cc1"
+    },
+    {
+      "path": "apps/api/report-specs/report-layouts-index.json",
+      "sha256": "c232f5af23c5b497d2a2c31994d31052e052625d684fd08f7f41f62ea09773a5"
+    },
+    {
+      "path": "scripts/extract-order-report-specs.py",
+      "sha256": "52c525d8e73b5f6a204e56a743b82813a3b109fa5d77f682623151ca88521650"
+    },
+    {
+      "path": "scripts/render-order-report-review.mjs",
+      "sha256": "3e02b95a0a23dbfc54004e5eed366f8ce9dde229cc21d8b37a00105b15f6697a"
+    },
+    {
+      "path": "scripts/rasterize-order-report-review.swift",
+      "sha256": "f7302d61903d2636f0048e344f465896f3f9dca4a0964478ccc0ed61bbd70ac2"
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "sha256": "1a74d5c28f82a0c3b16a8226e23f3c1f90c9064834f625a97d13da832e4cecc3"
+    },
+    {
+      "path": "packages/db/prisma/migrations/20260911020000_ledger_entry_timestamp/migration.sql",
+      "sha256": "b6dd19d5450d9c9a6ddfe12521bfbfed1e327979f0d67b4d980e3d1c6e3a2061"
+    },
+    {
+      "path": "packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "scripts/parity-test-env.mjs",
+      "sha256": "e0f11c41a5f0971aebece64d4cc341825e9986b40ae46baa4303cc293c341ac2"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "879301e14ee6f08fab429b1e54952ab118dabc371c5ce2dc7677bfde20337c1b"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/TR_TOUR_ORD.cs",
+      "sha256": "b27ad23a324b837bed8ef7a4d672a7ce82006c51485fb68fa4dced3e6bf49ced"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "../extraction_output/rpt_xml/OrderVch.xml",
+      "sha256": "df6241686f9815e782f80aa1b79537901538d8ee57ca4a8a0c7dcac2a8b38cd3"
+    },
+    {
+      "path": "../extraction_output/rpt_xml/OrderBill.xml",
+      "sha256": "73270086cc7e665d8122c35e258e5eaee9f5acfe9f6e5bc75900de3c7864106a"
+    },
+    {
+      "path": "../extraction_output/rpt_xml/TourOrdVch.xml",
+      "sha256": "448b93030f73b40153c111e2ca2aade2f70150a90ffaef80caa5ddc5f2df21ba"
+    }
+  ],
+  "inputBundleSha256": "601adc8a9c6bb48fabf25f4657b4c22a7a7ed43682161aef122007de6be219f2",
+  "database": "positively identified disposable localhost:55433; isolated Compose project; migrations; non-owner runtime; forced RLS",
+  "testRuns": [
+    {
+      "phase": "focused report regression before microsecond cutoff correction",
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- reportBind.test.ts orderReport.test.ts orderReport.db.test.ts reportChildren.db.test.ts reportRender.db.test.ts reportEngine.test.ts tourOrderPrint.routes.db.test.ts",
+      "result": {
+        "filesPassed": 7,
+        "testsPassed": 77,
+        "testsSkipped": 0,
+        "exitCode": 0
+      },
+      "log": "docs/parity-evidence/X25-order-report-tests-round2-2026-09-11.txt"
+    },
+    {
+      "phase": "required focused follow-up after exact timestamp correction; overlaps earlier tests, do not add as unique counts",
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- orderReport.db.test.ts tourOrderPrint.routes.db.test.ts",
+      "result": {
+        "filesPassed": 2,
+        "testsPassed": 13,
+        "testsSkipped": 0,
+        "exitCode": 0
+      },
+      "log": "docs/parity-evidence/X25-order-report-timestamp-tests-round2-2026-09-11.txt"
+    },
+    {
+      "phase": "spec-aware Sales/Tour item-name correction; overlaps earlier tests, do not add as unique counts",
+      "command": "pnpm --filter @datacare/api test -- orderReport.test.ts",
+      "environment": "already-provisioned isolated localhost:55433 credentials loaded privately; no role/migration setup or fixture writes during this unit-only run",
+      "result": {
+        "filesPassed": 1,
+        "testsPassed": 14,
+        "testsSkipped": 0,
+        "exitCode": 0
+      },
+      "log": "docs/parity-evidence/X25-order-report-item-name-tests-round2-2026-09-11.txt"
+    }
+  ],
+  "otherChecks": [
+    {
+      "command": "python3 scripts/extract-order-report-specs.py --check",
+      "result": "passed; only 3 main specs and 3 catalog entries"
+    },
+    {
+      "command": "git diff --check -- <owned report files>",
+      "result": "passed"
+    },
+    {
+      "command": "node scripts/render-order-report-review.mjs",
+      "result": "passed; 4 synthetic PDFs; page counts 1,1,1,4; no measured band/footer overflow or browser page errors"
+    },
+    {
+      "command": "swift scripts/rasterize-order-report-review.swift output/pdf/order-report-round2",
+      "result": "passed; all 7 actual PDF pages visually reviewed via direct CoreGraphics rasterization"
+    }
+  ],
+  "evidenceMode": "real PostgreSQL fixtures and HTTP routes; instrumented concurrency scheduling; synthetic HTML/Chromium PDF examples; source XML contracts; no desktop golden",
+  "resolvedDuringDevelopment": [
+    "Restored main report instead of first nested OrdRec definition.",
+    "Ignored source border extents when computing band height; borders can intentionally span later bands.",
+    "Preserved all six timestamp digits with SQL text projection after review found second-level truncation.",
+    "Replaced PDFKit thumbnail rendering with direct CoreGraphics PDF rendering after missing-thumbnail-glyph artifacts.",
+    "Matched exact ItemName source formulas: OrderBill always prints design; only TourOrdVch uses tag prefix. Added unit and persisted DB vectors."
+  ],
+  "contractAndCaseMatrix": "docs/parity-evidence/X25-order-report-round2-2026-09-11.md",
+  "templateInventory": "docs/parity-evidence/X25-order-report-scope-round2-2026-09-11.json",
+  "counts": {
+    "catalogNames": 254,
+    "previouslyInferred": 102,
+    "registeredDatasetOrDocumentContracts": 26,
+    "containedPreviouslyInferred": 79,
+    "recoveredContractsOutsidePreviousInventory": 3,
+    "recordsInThisInventory": 105
+  },
+  "artifacts": [
+    {
+      "path": "docs/parity-evidence/X25-order-image-next-steps-round2-2026-09-11.md",
+      "sha256": "0b793108ca6d321a0179c7e89d0c610a3387a53f429f42e1c69553dc7c53378d"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-report-item-name-tests-round2-2026-09-11.txt",
+      "sha256": "3bdcf4f8041693369e7766c1fc2361065c556bc1484b7fd7fdeb997550cb8b66"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-report-pdf-qa-round2-2026-09-11.txt",
+      "sha256": "8d4f25528408bde93e11bb74bd2d871f8ca081aadf93ab7fe37da20438bd7c0b"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-report-round2-2026-09-11.md",
+      "sha256": "c60ea697c79889b887999302b53bf8937aa636078e297aeea29a074e8762f9cb"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-report-scope-round2-2026-09-11.json",
+      "sha256": "d5420af0c4c7b9bea3683c2974e9a8ce282e5f3eb21668bd04ceaeb2b21041d4"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-report-tests-round2-2026-09-11.txt",
+      "sha256": "571288105bb67202191a0a1235dea6dcbfab682cf1a165c80c0858e9875ef4c7"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-report-timestamp-tests-round2-2026-09-11.txt",
+      "sha256": "19a04748d2df1ebb5b19d5a52c798f16bd24aa2d09a9be2df9784e8c4139da72"
+    },
+    {
+      "path": "docs/parity-evidence/X25-order-report-visual-round2-2026-09-11.txt",
+      "sha256": "4d2515f0bffa2968d99c88accbb4cbcf86822c55ed77ea78132040389fe7c7b6"
+    },
+    {
+      "path": "output/pdf/order-report-round2/OrderBill-page-1.png",
+      "sha256": "8578d6b72adacaf5edcedde33b0dd5ef58c5073fd9b96343a3b38e7ca1b35b9f"
+    },
+    {
+      "path": "output/pdf/order-report-round2/OrderBill.html",
+      "sha256": "c708917b95970f02fe0ad384e398d0bc885073241f1aca5157d9c056ef5bcd21"
+    },
+    {
+      "path": "output/pdf/order-report-round2/OrderBill.pdf",
+      "sha256": "ceac958f4e131e241656b7d25773e1f561889b2732cc3f5a1f98326d60dd0b3d"
+    },
+    {
+      "path": "output/pdf/order-report-round2/OrderVch-page-1.png",
+      "sha256": "b79e4018027f66f41003fcc6c4b12aa5aef7afff747df348d48d92efd579326e"
+    },
+    {
+      "path": "output/pdf/order-report-round2/OrderVch.html",
+      "sha256": "605ef2caeb61a333755248e8df17a9485fce77b381e545380926138e4b51e7f8"
+    },
+    {
+      "path": "output/pdf/order-report-round2/OrderVch.pdf",
+      "sha256": "24ebc598b1ae0bcc361f87b5566685a53ef694a4a55d26e12a08f84339c720e0"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch-long-page-1.png",
+      "sha256": "a902239997d87adb6f29b1f0bfb0f769d57a2680aa5238bbcc6ea8376ae2f07e"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch-long-page-2.png",
+      "sha256": "d23dee7071a0190815b6961686ce5d610db9cd290da51834564e95aed9e29ce7"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch-long-page-3.png",
+      "sha256": "a9badb3d1d80634d5d58c0b509ffd06d92a2eef1fc616a1400869794161a3d00"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch-long-page-4.png",
+      "sha256": "0b96323927bbf6267c7b2e78b4c34c35dc2bacb6a60d97226d7bed63728bbdfa"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch-long.html",
+      "sha256": "2ece0b13d2775a28934855cf6e7b1892f0d9ef2bf73cb3034be54406dfe5d3ca"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch-long.pdf",
+      "sha256": "de3a1c7dd4eae796f7916a419f1efcfa91b3bfed67a71887823c64be25754b16"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch-page-1.png",
+      "sha256": "0cc714b7c406c019b5598ea78f5ce695b51250736bca24249612775fa57c1f2a"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch.html",
+      "sha256": "517aee7aadf3c3da0ddacd20aa6a375eb0e72443f90ed4115a37dbe5c6935cd5"
+    },
+    {
+      "path": "output/pdf/order-report-round2/TourOrdVch.pdf",
+      "sha256": "cd37f94191caab38828d59cc0530663203244605c220ffe462bddf03618a842c"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/OrderBill-page-1.png",
+      "sha256": "1ea4f9cd20f3efdcadc435919c9149b579e9508bd2ea47d9134a596e4d0118cb"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/OrderBill.txt",
+      "sha256": "7be89a0ad03fcb11471bfdd1d77541412588afc5811efde0863d4ced544e07f5"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/OrderVch-page-1.png",
+      "sha256": "fee1deeaf80ca135fa5fd893722aff996a65513e8519b826eeb3dd032be5e2f6"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/OrderVch.txt",
+      "sha256": "3ce9e60fc54b40752aa67ee710e598cd384659b5fd7178cae7811b2454c540d2"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/TourOrdVch-long-page-1.png",
+      "sha256": "8ba1882a64986c070d13040c38a805154b73c7a09a1ed452962062e2cfcab461"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/TourOrdVch-long-page-2.png",
+      "sha256": "fb362fe5ac97167ab40512b0a4089629ec678597e8f0543ab0be2bc8cc7a150f"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/TourOrdVch-long-page-3.png",
+      "sha256": "be06dc49da2617b37f7a005832e1b93ae3ed31d2c9b3776a37979a8a9e427bfd"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/TourOrdVch-long-page-4.png",
+      "sha256": "eb0e31d974482e02535d21a1957ce40a9d771e64448889aff4972641445204f8"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/TourOrdVch-long.txt",
+      "sha256": "7a3966e663178159bce53db90bd1c80a56362b0945574150cd16809852866fec"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/TourOrdVch-page-1.png",
+      "sha256": "74b090cc5494efa767c600336de098ba2b9f98da790a09e586cf9697637d2a48"
+    },
+    {
+      "path": "output/pdf/order-report-round2/pdf-raster/TourOrdVch.txt",
+      "sha256": "259230fc16bcc63c4863d461f6d5592e9520be68b5b1b465e7bc6563a1d35fb4"
+    },
+    {
+      "path": "output/pdf/order-report-round2/render-review.json",
+      "sha256": "cbab72cd30c7235218fcca8662d941a6fef7c4c6a56e4a932616a4512a7bf675"
+    }
+  ],
+  "remaining": [
+    "Image variants OrdVchImg/TourOrdImg remain explicitly contained.",
+    "Same 79 formerly inferred reports remain contained; recovered 3 were outside their inventory.",
+    "Exact Crystal ToWords/locale/numeric formatting/fonts/long-page line geometry/group splitting and desktop goldens remain open.",
+    "Historical date-truncated ledger clocks require authoritative reimport and reconciliation.",
+    "Full copy dialog/data-type selector, peripheral workflows, physical printing and business acceptance remain open.",
+    "Retained generic report checksum harness requires reviewed valid order fixtures and intentional baseline review; none was reset.",
+    "X25 and its parents remain open; final build/full API checks are linked above and coordinator browser acceptance is recorded separately."
+  ],
+  "coordinatorChecks": [
+    {
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test",
+      "result": {
+        "filesPassed": 210,
+        "testsPassed": 1630,
+        "testsSkipped": 0,
+        "exitCode": 0
+      },
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/api-full-verified.txt",
+      "logSha256": "07ae4d2463610380db3eea7ed57c2b7962c84df7f8e52a2d965b0cca21c7f770"
+    },
+    {
+      "command": "pnpm typecheck:tests",
+      "result": "passed",
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/test-types-verified.txt",
+      "logSha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9"
+    },
+    {
+      "command": "pnpm --filter @datacare/api build",
+      "result": "passed",
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/api-build-verified.txt",
+      "logSha256": "1b3c6b51e7a2857ae9a82742c6aabb8621b297775605d4aad7888c0e5308b043"
+    }
+  ],
+  "nextContract": "docs/parity-evidence/X25-order-image-next-steps-round2-2026-09-11.md",
+  "visualReview": {
+    "finalRuntimeSource": "apps/api/dist; compiled module hashes captured by output/pdf/order-report-round2/render-review.json",
+    "result": "four PDFs regenerated; page counts 1/1/1/4; corrected OrderBill reviewed; remaining six PDF raster PNGs byte-identical to previous reviewed pages",
+    "desktopGolden": false
+  }
+}

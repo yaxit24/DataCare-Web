@@ -1,0 +1,15 @@
+{
+  "beforeTestSha256": "e2c3cd9a9869b1ca9e947966b90a4e7ec393aebbbac0f20b29498136274f84ef",
+  "afterTestSha256": "bff4c2d0428a6494124fff0137c84c6592f7715707ed5363755afb330469c0ee",
+  "exactTestReplacement": {
+    "old": "'browser-qualified'",
+    "new": "'browser-bound'"
+  },
+  "occurrences": 1,
+  "failure": "recipe-controls-bound had19 successful methods and one StopIteration from obsolete label; no product failure. All20 original assertions/methods retained.",
+  "requiredRunLabelReplacements": {
+    "recipe-controls-bound": "recipe-controls-recorded",
+    "checkpoint-chain-bound": "checkpoint-chain-recorded"
+  },
+  "browserResults": "Allthreeboundbrowserruns passed unchangedpublic/private/runtime and includeexternalrequiredchecksJSON."
+}

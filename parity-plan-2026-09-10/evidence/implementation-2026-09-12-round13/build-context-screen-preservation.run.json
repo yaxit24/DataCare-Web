@@ -1,0 +1,21 @@
+{
+  "command": [
+    "env",
+    "API_ORIGIN=http://127.0.0.1:4410",
+    "pnpm",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T21:29:07.992515+00:00",
+  "finishedAtUtc": "2026-09-11T21:29:28.340979+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-context-screen-preservation.txt",
+  "logSha256": "b15b3630a6f09b7856d414a539c3b10a6be907182516754cc393b1703d07c948",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/build-context-screen-preservation.inputs.json",
+  "inputManifestSha256": "26b6e3dc322d025539aa07607736f80b37e01c50b2b3ac9ef606077067d1d443",
+  "inputCount": 1788,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

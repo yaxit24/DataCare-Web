@@ -1,0 +1,37 @@
+{
+  "status": "prospective-contracts-not-runtime-acceptance",
+  "files": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-session-command-contract/implementation-contract.md",
+      "sha256": "ef2e6acba21dca9b6696c3dbe6bac983db42587c56e70ec0a2169b7e8eaacbbe"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-session-command-contract/independent-proposal-review.md",
+      "sha256": "633544967db5f89e3a35d95d6153dc2d391d99eb7dd1f7781273a2a7f692b421"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-session-command-contract/inputs.json",
+      "sha256": "43c297255c2cdf5ddfc9e8b0fb9e295c82f6286a725a548f0eb91c5f57fe71d2"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-session-command-contract/session-command-independent.v1.json",
+      "sha256": "ed87f81e039273c6bd25c9a19184b7c964c7b48cbfd7a3bb39eb0c58032f4aa4"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-return-labour-contract/labour-code-independent-candidates.json",
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-return-labour-contract/migration-manifest-review.json",
+      "sha256": "48a5f2d83e86d567a0f56a2a4c59b459ddfa76d6d14d914dd969537dbc453bb1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-return-labour-contract/next-admission-contract.md",
+      "sha256": "40c4f718173465275a0396db861c98acf5eee686c48e745d7ff8afa9d45b17ac"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/next-return-labour-contract/next-admission-inputs.json",
+      "sha256": "3e6a4ff68dff3a48eae212a52f55fb4829a8ba1c0ded419832824c3d4c94d006"
+    }
+  ]
+}

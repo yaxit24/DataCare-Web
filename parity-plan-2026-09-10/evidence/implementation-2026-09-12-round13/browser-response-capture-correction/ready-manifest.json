@@ -1,0 +1,67 @@
+{
+  "kind": "session-context-browser-response-observation-correction-v1",
+  "status": "ready-unexecuted-correction",
+  "createdAtUtc": "2026-09-11T21:21:39.762630+00:00",
+  "failure": {
+    "result": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/test-results/session-context-real-stack-lifecycle/result.json",
+    "sha256": "f97b4a0269d12ed8f8e5e31736b428580fe7715967e7a0fbdb6eb6fc89e9629b",
+    "log": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-context-lifecycle-first.txt",
+    "logSha256": "6b9dd950b6fcd93132a0c0a23602ffe42db9660825472319e9c846ac34a87ae0",
+    "run": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/browser-context-lifecycle-first.run.json",
+    "runSha256": "9f18d43dc7adc8c86a0dc636cd46211656978aff9f2aa897095f3304ddcf6407",
+    "observedError": "response.text: Protocol error (Network.getResponseBody): No resource with given identifier found",
+    "passedChecksBeforeFailure": 1
+  },
+  "classification": "Test response observation timing across intentional full navigation; no product/HTTP/SQL behavior change",
+  "assertionsUnchanged": {
+    "base": 12,
+    "additional": 2,
+    "transportInjections": 5,
+    "checkStringsIdentical": true,
+    "callsiteTransformMatchesIgnoringFormattingWhitespaceAndTrailingCommas": true
+  },
+  "baseline": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context.journey.mjs",
+      "sha256": "3fbefbb8c61da36d202a77be04bad6c4e1689feed710b10f6880ecf40b3092e5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context-lifecycle.journey.mjs",
+      "sha256": "1a5ca4dbedacd9dc28627a9bf3601873aae220916f5ddc0633ef1f0be3e72cc3"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context.real-stack.additive.mjs",
+      "sha256": "7b0cafbfe88b39ef8deb7a2b8987463285350e30e7adf59275f91309b78a06c4"
+    }
+  ],
+  "files": [
+    {
+      "path": "correction.md",
+      "sha256": "18e86b74f080d25342f09ba77ff3d739084ce1172af2cafc9a443b4495baa4f1"
+    },
+    {
+      "path": "response-observation.patch",
+      "sha256": "8ca2343e187d4dbf46e814625d84a90b637fd29ae7be8a4a1b0bf6907af30bb0"
+    },
+    {
+      "path": "web/apps/web/test/session-context-lifecycle.journey.mjs",
+      "sha256": "bc4dcb18b7ccb2b10ae4e4f892de4fdeb73de82d69d3097ded74c0c32bd37a29"
+    },
+    {
+      "path": "web/apps/web/test/session-context-response-observation.mjs",
+      "sha256": "a4c3ccbefc8b00b8192a94a0ee17ba6ef6a180c96ee76091d1af9ad3e18099c4"
+    },
+    {
+      "path": "web/apps/web/test/session-context.journey.mjs",
+      "sha256": "d4f3819cc97fdc794b62664553da617cfec99e323013bbb76a6f19f2ec7ffd54"
+    }
+  ],
+  "execution": {
+    "browser": false,
+    "database": false,
+    "compiler": false,
+    "tests": false,
+    "formatter": "staged JavaScript only"
+  },
+  "rootRerunRequired": true
+}

@@ -1,0 +1,29 @@
+{
+ "form": "TR_UPI_REC",
+ "tables": [
+  "AC_MAST",
+  "UPI_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "UPI_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "UPI_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 4,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [
+  "MsUpiAmt = -5.0"
+ ],
+ "loc": 1689
+}

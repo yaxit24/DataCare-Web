@@ -1,0 +1,13 @@
+{
+  "status": "staged-unexecuted",
+  "priorTestSha256": "aace25ae72e70a4027a8e88c0146564d4dd3253d3a66dcf396ee805672bb3eb3",
+  "afterTestSha256": "c64e604c7995d4ca299c94ac2767472be78f89eb7a784cca6cf18341ef2ce0d2",
+  "replacedGateWaits": 4,
+  "declaredCasesUnchanged": 13,
+  "files": {
+    "README.md": "a5d8bc7f319cce68259d4f284f01daec0fad33df74e61e5c2cd351f78d7f92c2",
+    "barrier.patch": "6b35dade6624359fe777302b7d0ee09ff71d36d33f653f07a2137db9bec0c287",
+    "before-sessionContextCommand.db.test.ts": "aace25ae72e70a4027a8e88c0146564d4dd3253d3a66dcf396ee805672bb3eb3",
+    "sessionContextCommand.db.test.ts": "c64e604c7995d4ca299c94ac2767472be78f89eb7a784cca6cf18341ef2ce0d2"
+  }
+}

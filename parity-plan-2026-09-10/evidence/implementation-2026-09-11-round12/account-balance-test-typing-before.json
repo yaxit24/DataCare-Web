@@ -1,0 +1,14 @@
+{
+  "capturedAtUtc": "2026-09-11T17:16:55.320Z",
+  "typescript": "5.9.3",
+  "source": "web/apps/api/test/desktopAccountBalance.db.test.ts",
+  "sourceSha256": "da57beda30df821c8178f423a2b2f6142381348e1033ca386a56617322ca017c",
+  "erasedJavaScriptSha256": "fc7f7f10253a0b610337d0aaa5f02f7a6cc35df4797717bd1eb68a2202961450",
+  "options": {
+    "target": 9,
+    "module": 199,
+    "sourceMap": false,
+    "inlineSourceMap": false
+  },
+  "claim": "Pre-correction transpilation only; not strict typecheck or DB execution."
+}

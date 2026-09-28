@@ -1,0 +1,264 @@
+{
+  "cards": [
+    "X05",
+    "X25"
+  ],
+  "round": 5,
+  "slice": "authenticated-generic-design-repair-image-CAS-regressions",
+  "state": "scoped API focused/full-regression/strict-test-types verified; desktop/business/production acceptance open",
+  "desktopAcceptance": null,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "capturedAtUtc": "2026-09-11T07:15:08.485658+00:00",
+  "pathBase": "web workspace root",
+  "captureTiming": "Scoped source identities captured after verification; final coordinated API evidence separately pins its complete before-run snapshot and unchanged-after verification. Earlier focused logs retain their original code stages.",
+  "inputs": [
+    {
+      "path": "apps/api/test/entityImageConcurrency.routes.db.test.ts",
+      "sha256": "d9a53295d9b5d6f27f1a0dbc6a48d0abcdbcfd99a137b62b3f2dfd35624cbfa2",
+      "bytes": 29622
+    },
+    {
+      "path": "apps/api/test/repairImageConcurrency.routes.db.test.ts",
+      "sha256": "82323c7b2cfa8b0490a30fdac77e978bf59dc64c236f00f02f1844db29248acf",
+      "bytes": 18629
+    },
+    {
+      "path": "apps/api/test/designBook.routes.db.test.ts",
+      "sha256": "e29db4f1de30bb0af0ff795dc39180df88fa66518c2880d0ca7747aa04fdea75",
+      "bytes": 11801
+    },
+    {
+      "path": "apps/api/test/entityImage.db.test.ts",
+      "sha256": "1085e96b4146a559ac32660f2a599ab8bb7e5d9ffd845c1ef7abcbc0e7193570",
+      "bytes": 11563
+    },
+    {
+      "path": "apps/api/test/fixtures/order-design-portrait.png",
+      "sha256": "07483dd16ab2c80e943244713cb5b17028cd9ca04d013dd3ff5e7f66fa9044fd",
+      "bytes": 2420
+    },
+    {
+      "path": "apps/api/test/fixtures/order-tag-landscape.jpg",
+      "sha256": "a68df11677d3d4b1fa648a43740b46b18b49d02420ae3acb1113941422a765b2",
+      "bytes": 2974
+    },
+    {
+      "path": "apps/api/src/modules/images/entityImage.ts",
+      "sha256": "65d0691f06bc7ef45571aff4f2ec17f01a512b4fa2f96a3d07f71f9b057ffa34",
+      "bytes": 16141
+    },
+    {
+      "path": "apps/api/src/modules/images/imageState.ts",
+      "sha256": "d00ea6c503805f78ea6f5983aae921dcaae9bc50fe2110fdc69718d2656966ef",
+      "bytes": 2997
+    },
+    {
+      "path": "apps/api/src/modules/images/imageRevision.ts",
+      "sha256": "b542e244cbab9b0ff8d0b89403446a457aeae34c14c4911d5c3441ed0e7bdff5",
+      "bytes": 1760
+    },
+    {
+      "path": "apps/api/src/modules/images/orderImage.ts",
+      "sha256": "92860333cc6949457710be45c4fb32ae3812ba9ee482c7006bd257da77543643",
+      "bytes": 15392
+    },
+    {
+      "path": "apps/api/src/modules/repair/repairImage.ts",
+      "sha256": "3799aaa1eb60212ac06388a4a247c4a5bce57e542d95f8a4a5aeace7cc071a37",
+      "bytes": 14239
+    },
+    {
+      "path": "apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e",
+      "bytes": 9247
+    },
+    {
+      "path": "apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "8d16e047c473fb9f843b10956545bf280ab58c21dc4b9abf519e7e3afab74b21",
+      "bytes": 34383
+    },
+    {
+      "path": "apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34",
+      "bytes": 5075
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "0af1e071370d7e976ce2e4e7679d7c699bf5b4a7c92036bb294352d68a4fdb01",
+      "bytes": 275246
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "sha256": "da810d40fecbe8c5ef631fc66e458d3bcfeb641c67521a6f29f6c6732b2248d2",
+      "bytes": 261865
+    },
+    {
+      "path": "scripts/parity-test-env.mjs",
+      "sha256": "e0f11c41a5f0971aebece64d4cc341825e9986b40ae46baa4303cc293c341ac2",
+      "bytes": 4196
+    },
+    {
+      "path": "apps/api/test/routePolicy.test.ts",
+      "sha256": "0affa7b9169e9f50e5e4fc6a7a6f1c47def75025f4fddc81ec110c025c7fcf76",
+      "bytes": 32301
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/image-cas-api-contract.md",
+      "sha256": "c44d66133b392a4091359221677168f7839f615457a573dc7421e11820f90598",
+      "bytes": 9873
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/image-cas-first.txt",
+      "sha256": "3df0d162402f9a97a7e61f15974bde9d1159e81456bf60b81f0f244583462e5c",
+      "bytes": 3577
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/image-cas-focused.txt",
+      "sha256": "38b4aa9ba2473bd333e144dbbffd707ff05513e6b0572ef62663363aaac38b62",
+      "bytes": 7713
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/image-cas-verified.txt",
+      "sha256": "a443a4424c72c2bf03f98095aa2c39656bd67b5345647cedd0a20bbe258fca42",
+      "bytes": 1597
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/image-cas-large-verified.txt",
+      "sha256": "d3a8f77edf5d9b501a1d803f07376966e3aee147a58c867a6353735d048c898a",
+      "bytes": 1891
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-full-complete.txt",
+      "sha256": "07c6ce09d9f73b44375e62a8141eb4b25eeb6423b759dc3a7f2b95bbfcc7d632",
+      "bytes": 15150
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-snapshot-complete.json",
+      "sha256": "d543879f8549ea10627d6c7b8bb927dd0ad9383d382d7824ca64a087fd2832af",
+      "bytes": 160741
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-verification-complete.json",
+      "sha256": "a3f159c733c874788734cd74d1f6194bd8d624fd1ba56b3b6eae893e3f850b02",
+      "bytes": 449
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/test-types.txt",
+      "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9",
+      "bytes": 188
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-full-initial.txt",
+      "sha256": "be238dcfdb43305b03ac58501aa9ebd405de2837350f98fa9e5e1ad5e8560ab3",
+      "bytes": 16276
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-snapshot-initial.json",
+      "sha256": "d427e2d6d2d654522c70834d3f92727801623142b01d5e5a9867344876d4749c",
+      "bytes": 160697
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-verification-initial.json",
+      "sha256": "a484513b3db3a47a82e94f04e5a2d6c7032159268d28b8155263f6150bcbb8b0",
+      "bytes": 449
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-full-before-test-types.txt",
+      "sha256": "21e60fe591d974281594c53a04a545f9c881f38bc4b77b43d887b54e682aa0c3",
+      "bytes": 16779
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-snapshot-before-test-types.json",
+      "sha256": "b55128e1ac1546ddd64024fcf4dacc235763dcf72c2fd406956d0566575c8549",
+      "bytes": 160756
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-verification-before-test-types.json",
+      "sha256": "f934e812b42638d897f4276b4b40080e73199213be8edad520bff2940d06066f",
+      "bytes": 403
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/test-types-initial.txt",
+      "sha256": "481ba257980399211a9fdaaedb389e35de79b8d6966c9fb74821126729e359c8",
+      "bytes": 1504
+    }
+  ],
+  "coordinatedVerification": {
+    "state": "API and strict test types passed on final current source",
+    "api": {
+      "exitCode": 0,
+      "filesPassed": 221,
+      "testsPassed": 1740,
+      "skipped": 0,
+      "durationSeconds": 113.16,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-full-complete.txt",
+      "inputSnapshot": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-snapshot-complete.json",
+      "inputVerification": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-input-verification-complete.json",
+      "inputCount": 1001,
+      "inputsUnchanged": true,
+      "independentlyRecheckedAtScopedFinalization": true
+    },
+    "strictApiTestTypes": {
+      "exitCode": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/test-types.txt",
+      "completionEvidence": "Root explicitly confirmed successful final command completion; tsc success emits no additional text."
+    },
+    "buildAndBrowser": "Separate root/client evidence; not claimed by this API manifest"
+  },
+  "limitations": [
+    "Modern HTTP contract only; trusted direct services retain optional-version compatibility.",
+    "No executable desktop or business acceptance credited.",
+    "All generic UI mounts, image import, camera/retry/scope UX and Repair stage selectors require separate evidence.",
+    "Prior test failures retained; Repair raw/list source-book defect corrected by parent before final focused run."
+  ],
+  "focusedRuns": [
+    {
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- test/entityImageConcurrency.routes.db.test.ts test/repairImageConcurrency.routes.db.test.ts test/entityImage.db.test.ts test/designBook.routes.db.test.ts",
+      "exitCode": 0,
+      "filesPassed": 4,
+      "testsPassed": 46,
+      "skipped": 0,
+      "durationSeconds": 6.62,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/image-cas-verified.txt",
+      "stage": "before the three large-body cases and before strict tuple-only test annotations; generic15 + Repair8 + Design5 + entity18"
+    },
+    {
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- test/entityImageConcurrency.routes.db.test.ts test/repairImageConcurrency.routes.db.test.ts",
+      "exitCode": 0,
+      "filesPassed": 2,
+      "testsPassed": 26,
+      "skipped": 0,
+      "durationSeconds": 7.13,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/image-cas-large-verified.txt",
+      "stage": "after large-body route correction and cases, before strict tuple-only test annotations; generic/Design17 + Repair9"
+    }
+  ],
+  "earlierCoordinatedRuns": [
+    {
+      "stage": "initial full API before large-body/registry additions",
+      "filesPassed": 220,
+      "filesFailed": 1,
+      "testsPassed": 1735,
+      "testsFailed": 1,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-full-initial.txt",
+      "reason": "exact declared-route assertion still540 after three actual state endpoints increased it to543"
+    },
+    {
+      "stage": "full runtime pass before strict tuple annotations",
+      "filesPassed": 221,
+      "testsPassed": 1740,
+      "skipped": 0,
+      "durationSeconds": 129.79,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/api-full-before-test-types.txt"
+    },
+    {
+      "stage": "strict test types before explicit tuple annotations",
+      "exitCode": 2,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round5/test-types-initial.txt",
+      "reason": "URLSearchParams helper inferred string[][]; route policy iteration inferred possibly undefined tuple elements"
+    }
+  ]
+}

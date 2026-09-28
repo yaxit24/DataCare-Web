@@ -1,0 +1,11 @@
+{
+ "form": "Module_WhatsApp",
+ "loc": 4524,
+ "gridColumns": {},
+ "inlineSql": [
+  "SELECT CommandLine FROM Win32_Process WHERE ProcessId = {pid}"
+ ],
+ "keyboard": {},
+ "calc": [],
+ "validations": []
+}

@@ -1,0 +1,157 @@
+{
+  "desktopTablesWritten": 122,
+  "webWritesAtAll": 111,
+  "tablesNeverWrittenByWeb": 11,
+  "totalDesktopWrittenColumns": 3669,
+  "totalWebWrittenColumns": 3280,
+  "overallColumnCoveragePct": 89.4,
+  "avgCoverageOfWrittenTablesPct": 91.3,
+  "worstCoveredWrittenTables": [
+    {
+      "table": "TAG_STOCK",
+      "pct": 0.0,
+      "missing": 25
+    },
+    {
+      "table": "POINT_DATA",
+      "pct": 63.2,
+      "missing": 7
+    },
+    {
+      "table": "TAG_STOCK_PRINT",
+      "pct": 68.9,
+      "missing": 14
+    },
+    {
+      "table": "PR_IDTL",
+      "pct": 71.1,
+      "missing": 13
+    },
+    {
+      "table": "APR_IDTL",
+      "pct": 71.7,
+      "missing": 13
+    },
+    {
+      "table": "RATE_CUT_ISU",
+      "pct": 75.0,
+      "missing": 19
+    },
+    {
+      "table": "SL_ORD_ADJ",
+      "pct": 75.0,
+      "missing": 9
+    },
+    {
+      "table": "AD_ADJ",
+      "pct": 75.7,
+      "missing": 9
+    },
+    {
+      "table": "CASH_DATA",
+      "pct": 75.8,
+      "missing": 8
+    },
+    {
+      "table": "DHRN_ISU_DATA",
+      "pct": 76.1,
+      "missing": 11
+    },
+    {
+      "table": "BAR_IDTL",
+      "pct": 77.4,
+      "missing": 12
+    },
+    {
+      "table": "DHRN_ISU_DETL",
+      "pct": 77.5,
+      "missing": 9
+    },
+    {
+      "table": "RATE_CUT_REC",
+      "pct": 78.0,
+      "missing": 13
+    },
+    {
+      "table": "POINT_MEMB",
+      "pct": 80.0,
+      "missing": 2
+    },
+    {
+      "table": "AD_DATA",
+      "pct": 81.2,
+      "missing": 6
+    },
+    {
+      "table": "APR_DATA",
+      "pct": 81.2,
+      "missing": 3
+    },
+    {
+      "table": "APR_DETL",
+      "pct": 81.6,
+      "missing": 14
+    },
+    {
+      "table": "AD_MAST",
+      "pct": 83.3,
+      "missing": 2
+    },
+    {
+      "table": "REP_DETL",
+      "pct": 83.8,
+      "missing": 12
+    },
+    {
+      "table": "POINT_MAST",
+      "pct": 84.6,
+      "missing": 2
+    }
+  ],
+  "largestUnwrittenTables": [
+    {
+      "table": "TAG_SUM_DATA",
+      "desktopColumns": 23
+    },
+    {
+      "table": "OP_LDR",
+      "desktopColumns": 18
+    },
+    {
+      "table": "MENU_DATA",
+      "desktopColumns": 9
+    },
+    {
+      "table": "TAG_SET",
+      "desktopColumns": 8
+    },
+    {
+      "table": "BOOK_IDTL",
+      "desktopColumns": 6
+    },
+    {
+      "table": "ROJMEL_BAL",
+      "desktopColumns": 5
+    },
+    {
+      "table": "WEIGHT_MAST",
+      "desktopColumns": 4
+    },
+    {
+      "table": "TAG_DATA",
+      "desktopColumns": 3
+    },
+    {
+      "table": "USER_MAST",
+      "desktopColumns": 2
+    },
+    {
+      "table": "APP_CHATMESSAGES",
+      "desktopColumns": 0
+    },
+    {
+      "table": "WEBHOOKINBOX",
+      "desktopColumns": 0
+    }
+  ]
+}

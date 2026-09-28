@@ -1,0 +1,4 @@
+OrdVchImg.pdf: 1 PDF pages
+TourOrdImg-long.pdf: 6 PDF pages
+TourOrdImg-missing.pdf: 1 PDF pages
+TourOrdImg.pdf: 1 PDF pages

@@ -1,0 +1,206 @@
+{
+  "output": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/output/pdf/order-image-report-round3",
+  "results": [
+    {
+      "report": "OrdVchImg",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "2",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdImg",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "2",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdImg-missing",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdImg-long",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 6,
+      "outside": [],
+      "overlaps": [],
+      "images": [
+        {
+          "parent": "1",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "2",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "3",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "4",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "5",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "6",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "7",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "8",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "9",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "10",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "11",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "12",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "13",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "14",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "15",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "16",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        },
+        {
+          "parent": "17",
+          "decoded": true,
+          "width": 90,
+          "height": 150,
+          "inParentGroup": true
+        },
+        {
+          "parent": "18",
+          "decoded": true,
+          "width": 180,
+          "height": 90,
+          "inParentGroup": true
+        }
+      ],
+      "pageErrors": []
+    }
+  ]
+}

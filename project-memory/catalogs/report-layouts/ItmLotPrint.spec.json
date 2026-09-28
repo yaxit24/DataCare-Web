@@ -1,0 +1,210 @@
+{
+ "report": "ItmLotPrint",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 566,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 910,
+       "top": 120,
+       "width": 960,
+       "height": 226,
+       "dataSource": "{TAG_PRINT_DATA.TAG_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 2400,
+       "top": 240,
+       "width": 555,
+       "height": 172,
+       "dataSource": "{@ACName}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "Detail",
+     "height": 780,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 0,
+       "top": 0,
+       "width": 0,
+       "height": 200,
+       "dataSource": "{TAG_PRINT_DATA.IT_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 60,
+       "top": 19,
+       "width": 960,
+       "height": 226,
+       "dataSource": "{TAG_PRINT_DATA.LOT_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 1390,
+       "top": 60,
+       "width": 1650,
+       "height": 201,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 40,
+       "top": 210,
+       "width": 787,
+       "height": 172,
+       "dataSource": "{@ItmWt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 1560,
+       "top": 300,
+       "width": 1575,
+       "height": 187,
+       "dataSource": "{@TagNo}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 40,
+       "top": 398,
+       "width": 800,
+       "height": 172,
+       "dataSource": "{@OtherAmt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 2115,
+       "top": 555,
+       "width": 432,
+       "height": 172,
+       "dataSource": "{ITEM_MAST.GR_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 40,
+       "top": 585,
+       "width": 810,
+       "height": 160,
+       "dataSource": "{@Labour}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "PageFooter",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "ACName",
+   "ref": "{@ACName}",
+   "type": "StringField",
+   "text": "{TAG_PRINT_DATA.KR_NAME}"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "UnknownField",
+   "text": "{TAG_PRINT_DATA.DESIGN}"
+  },
+  {
+   "name": "ItmWt",
+   "ref": "{@ItmWt}",
+   "type": "StringField",
+   "text": "'G.'+totext({TAG_PRINT_DATA.ITM_GWT},3)"
+  },
+  {
+   "name": "Labour",
+   "ref": "{@Labour}",
+   "type": "StringField",
+   "text": "if {TAG_PRINT_DATA.ITM_MRP} <>0 then 'MRP: ' & totext({TAG_PRINT_DATA.ITM_MRP},'0') ELSE IF {TAG_PRINT_DATA.LBR_RATE} <> 0 THEN 'LP: ' & totext({TAG_PRINT_DATA.LBR_RATE},'0') else IF {TAG_PRINT_DATA.L"
+  },
+  {
+   "name": "MrpPrint",
+   "ref": "{@MrpPrint}",
+   "type": "StringField",
+   "text": "''"
+  },
+  {
+   "name": "OtherAmt",
+   "ref": "{@OtherAmt}",
+   "type": "StringField",
+   "text": "'N.'+totext({TAG_PRINT_DATA.ITM_NWT},3)"
+  },
+  {
+   "name": "Pcs",
+   "ref": "{@Pcs}",
+   "type": "StringField",
+   "text": "totext({TAG_PRINT_DATA.ITM_PCS},'0')"
+  },
+  {
+   "name": "TagNo",
+   "ref": "{@TagNo}",
+   "type": "StringField",
+   "text": "'*' + {TAG_PRINT_DATA.LOT_NO} + '*'"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 10,
+ "formulaCount": 8
+}

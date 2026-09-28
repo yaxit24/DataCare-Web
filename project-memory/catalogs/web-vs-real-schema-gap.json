@@ -1,0 +1,49 @@
+{
+ "realTables": 146,
+ "webLiveTables": 164,
+ "missingTables": [
+  "COUNTRY_MAST",
+  "IMAGE_DATA",
+  "LBR_ISU_IDTL",
+  "OP_DETL"
+ ],
+ "totalMissingCols": 22,
+ "columnGaps": [
+  {
+   "table": "TAG_DATA",
+   "realCols": 23,
+   "missingCount": 20,
+   "missing": [
+    "B2B_LRATE",
+    "B2B_WEST",
+    "B2C_LRATE",
+    "B2C_WEST",
+    "DESIGN_NO",
+    "EMP_CODE",
+    "ITM_CITY",
+    "ITM_LOT",
+    "ITM_MRP",
+    "ITM_TOUCH",
+    "IT_CODE",
+    "IT_TYPE",
+    "KR_NAME",
+    "LBR_TYPE",
+    "LC_LRATE",
+    "LC_WEST",
+    "MAIN_USER",
+    "MODEL_NAME",
+    "OLD_SRNO",
+    "PR_CODE"
+   ]
+  },
+  {
+   "table": "DM_DATA",
+   "realCols": 30,
+   "missingCount": 2,
+   "missing": [
+    "INOUT_TYPE",
+    "MAIN_IT_CODE"
+   ]
+  }
+ ]
+}

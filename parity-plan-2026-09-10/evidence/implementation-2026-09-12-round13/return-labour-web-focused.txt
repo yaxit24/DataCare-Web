@@ -1,0 +1,13 @@
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/salesReturnForm.test.ts (31 tests) 6ms
+ ✓ test/salesReturnReplay.test.ts (32 tests) 13ms
+ ✓ test/salesReturnBillReplay.test.ts (67 tests) 21ms
+ ✓ test/salesReturnLabourReplay.test.ts (65 tests) 67ms
+
+ Test Files  4 passed (4)
+      Tests  195 passed (195)
+   Start at  04:54:36
+   Duration  491ms (transform 426ms, setup 0ms, collect 556ms, tests 107ms, environment 0ms, prepare 219ms)
+

@@ -1,0 +1,63 @@
+{
+ "form": "TR_PR_SL_HEDG",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "CUT_DATA",
+  "CUT_DETL",
+  "CUT_STK_DETL",
+  "EMP_MAST",
+  "MAIN_STOCK",
+  "PR_DETL",
+  "RATE_CUT_ISU",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "MAIN_STOCK",
+   "PR_DETL",
+   "RATE_CUT_ISU"
+  ],
+  "DELETE": [
+   "AC_DATA",
+   "CUT_DATA",
+   "CUT_DETL",
+   "CUT_STK_DETL",
+   "MAIN_STOCK",
+   "REMARK_DATA",
+   "ROJ_MEL_DATA",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "CUT_DATA",
+  "CUT_DETL",
+  "CUT_STK_DETL",
+  "EMP_MAST",
+  "MAIN_STOCK",
+  "PR_DETL",
+  "RATE_CUT_ISU",
+  "REMARK_DATA",
+  "ROJ_MEL_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 18,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [
+  "CustClAmt = Conversion.Val(mSG2_TOTAL[5, 3]) - Math.Abs(CustOpAmt)",
+  "CustClAmt = CustOpAmt + Conversion.Val(mSG2_TOTAL[5, 3])"
+ ],
+ "loc": 4655
+}

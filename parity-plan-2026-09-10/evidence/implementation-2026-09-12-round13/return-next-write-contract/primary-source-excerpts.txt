@@ -1,0 +1,1617 @@
+
+### TR_SALE_RTN.cs:10353-10438
+10353: 				DC_Main.RsQry = "SELECT A.*,B.IT_NAME,B.RATE_TYPE,B.IT_TYPE FROM SL_DETL_RTN AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND  A.CO_BOOK = '" + DC_Main.MCo_Book + "' AND A.VCH_NO = '" + tVchNo.Text + "' ORDER BY A.SR_NO";
+10354: 				RsPrDetl = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+10355: 				DC_Main.i = 0;
+10356: 				AxMSFlexGrid mSG_PR = MSG_PR;
+10357: 				while (DC_Main.i < RsPrDetl.Rows.Count)
+10358: 				{
+10359: 					mSG_PR[DC_Main.i + 1, 0] = Conversions.ToString(DC_Main.i + 1);
+10360: 					mSG_PR[DC_Main.i + 1, 51] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["OLD_SRNO"])), "0");
+10361: 					mSG_PR[DC_Main.i + 1, 1] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["IT_CODE"], (object)""));
+10362: 					if (Operators.ConditionalCompareObjectNotEqual(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["ITM_REMARK"], (object)""), (object)"", false))
+10363: 					{
+10364: 						mSG_PR[DC_Main.i + 1, 3] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["ITM_REMARK"], (object)""));
+10365: 					}
+10366: 					else
+10367: 					{
+10368: 						mSG_PR[DC_Main.i + 1, 3] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["IT_NAME"], (object)""));
+10369: 					}
+10370: 					mSG_PR[DC_Main.i + 1, 2] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["TAG_NO"], (object)""));
+10371: 					mSG_PR[DC_Main.i + 1, 4] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["TBL_CODE"], (object)""));
+10372: 					mSG_PR[DC_Main.i + 1, 5] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["DESIGN_NO"], (object)""));
+10373: 					mSG_PR[DC_Main.i + 1, 6] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["ITM_STYLE"], (object)""));
+10374: 					mSG_PR[DC_Main.i + 1, 7] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["ITM_SIZE"], (object)""));
+10375: 					mSG_PR[DC_Main.i + 1, 8] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["HM_ID"], (object)""));
+10376: 					mSG_PR[DC_Main.i + 1, 9] = Conversions.ToString(RsPrDetl.Rows[DC_Main.i]["ITM_PCS"]);
+10377: 					mSG_PR[DC_Main.i + 1, 10] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_GWT"])), "0.000");
+10378: 					mSG_PR[DC_Main.i + 1, 45] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_GWT"])), "0.000");
+10379: 					mSG_PR[DC_Main.i + 1, 11] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_OTH_WT"])), "0.000");
+10380: 					mSG_PR[DC_Main.i + 1, 12] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_NWT"])), "0.000");
+10381: 					mSG_PR[DC_Main.i + 1, 46] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_NWT"])), "0.000");
+10382: 					mSG_PR[DC_Main.i + 1, 14] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_GHT_PRC"])), "0.00");
+10383: 					mSG_PR[DC_Main.i + 1, 15] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_GHT_WT"])), "0.000");
+10384: 					mSG_PR[DC_Main.i + 1, 16] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_TOUCH"])), "0.00");
+10385: 					mSG_PR[DC_Main.i + 1, 47] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_TOUCH"])), "0.00");
+10386: 					mSG_PR[DC_Main.i + 1, 17] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_WEST_PRC"])), "0.00");
+10387: 					mSG_PR[DC_Main.i + 1, 48] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_WEST_PRC"])), "0.00");
+10388: 					mSG_PR[DC_Main.i + 1, 18] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_FINE"])), "0.000");
+10389: 					mSG_PR[DC_Main.i + 1, 13] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["LBR_CODE"], (object)""));
+10390: 					mSG_PR[DC_Main.i + 1, 21] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["LBR_PRC"])), "0.00");
+10391: 					mSG_PR[DC_Main.i + 1, 66] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["LBR_PRC"])), "0.00");
+10392: 					mSG_PR[DC_Main.i + 1, 22] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["LBR_TYPE"], (object)""));
+10393: 					mSG_PR[DC_Main.i + 1, 23] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["LBR_RATE"])), "0.00");
+10394: 					mSG_PR[DC_Main.i + 1, 58] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["LBR_RATE"])), "0.00");
+10395: 					mSG_PR[DC_Main.i + 1, 24] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["LBR_AMT"])), "0.00");
+10396: 					mSG_PR[DC_Main.i + 1, 25] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["DISC_PRC"])), "0.00");
+10397: 					mSG_PR[DC_Main.i + 1, 26] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["DISC_AMT"])), "0.00");
+10398: 					mSG_PR[DC_Main.i + 1, 27] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["OTH_AMT"])), "0.00");
+10399: 					mSG_PR[DC_Main.i + 1, 28] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_MRP"])), "0.00");
+10400: 					mSG_PR[DC_Main.i + 1, 29] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["TAG_LBR_CODE"], (object)""));
+10401: 					if (Operators.CompareString(mSG_PR[DC_Main.i + 1, 29], "", false) == 0)
+10402: 					{
+10403: 						mSG_PR[DC_Main.i + 1, 29] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["LBR_CODE"], (object)""));
+10404: 					}
+10405: 					mSG_PR[DC_Main.i + 1, 30] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAG_LBR_PRC"])), "0.00");
+10406: 					mSG_PR[DC_Main.i + 1, 31] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAG_LBR_RATE"])), "0.00");
+10407: 					mSG_PR[DC_Main.i + 1, 32] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAG_LBR_AMT"])), "0.00");
+10408: 					mSG_PR[DC_Main.i + 1, 33] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAG_OTH_AMT"])), "0.00");
+10409: 					mSG_PR[DC_Main.i + 1, 19] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_RATE"])), "0.00");
+10410: 					mSG_PR[DC_Main.i + 1, 49] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_RATE"])), "0.00");
+10411: 					mSG_PR[DC_Main.i + 1, 20] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_AMT"])), "0.00");
+10412: 					mSG_PR[DC_Main.i + 1, 34] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAG_COST"])), "0.00");
+10413: 					mSG_PR[DC_Main.i + 1, 35] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAG_MRP"])), "0.00");
+10414: 					mSG_PR[DC_Main.i + 1, 36] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TOT_AMT"])), "0.00");
+10415: 					mSG_PR[DC_Main.i + 1, 37] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAX_PRC"])), "0.00");
+10416: 					mSG_PR[DC_Main.i + 1, 67] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAX_PRC"])), "0.00");
+10417: 					mSG_PR[DC_Main.i + 1, 38] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["NET_AMT"])), "0.00");
+10418: 					mSG_PR[DC_Main.i + 1, 39] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["KR_NAME"], (object)""));
+10419: 					mSG_PR[DC_Main.i + 1, 40] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["VCH_SRNO"], (object)""));
+10420: 					mSG_PR[DC_Main.i + 1, 56] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["TAG_SRNO"])), "0");
+10421: 					mSG_PR[DC_Main.i + 1, 44] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["RATE_TYPE"], (object)""));
+10422: 					mSG_PR[DC_Main.i + 1, 43] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["IT_TYPE"], (object)""));
+10423: 					mSG_PR[DC_Main.i + 1, 52] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["PR_CODE"], (object)""));
+10424: 					mSG_PR[DC_Main.i + 1, 53] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["PR_CODE"], (object)""));
+10425: 					mSG_PR[DC_Main.i + 1, 54] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["TAG_TYPE"], (object)""));
+10426: 					mSG_PR[DC_Main.i + 1, 55] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["TAG_TYPE"], (object)""));
+10427: 					mSG_PR[DC_Main.i + 1, 59] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["HM_ID2"], (object)""));
+10428: 					mSG_PR[DC_Main.i + 1, 60] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["HM_ID3"], (object)""));
+10429: 					mSG_PR[DC_Main.i + 1, 61] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["HM_ID4"], (object)""));
+10430: 					mSG_PR[DC_Main.i + 1, 62] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["HM_ID_WT"])), "0.000");
+10431: 					mSG_PR[DC_Main.i + 1, 63] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["HM_ID2_WT"])), "0.000");
+10432: 					mSG_PR[DC_Main.i + 1, 64] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["HM_ID3_WT"])), "0.000");
+10433: 					mSG_PR[DC_Main.i + 1, 65] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["HM_ID4_WT"])), "0.000");
+10434: 					mSG_PR[DC_Main.i + 1, 50] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["APR_ISU"], (object)""));
+10435: 					mSG_PR[DC_Main.i + 1, 68] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["EMP_ISU"], (object)""));
+10436: 					mSG_PR[DC_Main.i + 1, 57] = "E";
+10437: 					mSG_PR[DC_Main.i + 1, 69] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["DESIGN_IMG_ID"], (object)""));
+10438: 					mSG_PR[DC_Main.i + 1, 70] = Conversions.ToString(Operators.ConcatenateObject(RsPrDetl.Rows[DC_Main.i]["DATA_TYPE"], (object)""));
+
+### TR_SALE_RTN.cs:12125-12398
+12125: 						goto IL_008c;
+12126: 						IL_008c:
+12127: 						num2 = 7;
+12128: 						((Control)tEmpCode).Focus();
+12129: 						goto end_IL_0001_3;
+12130: 						IL_00a1:
+12131: 						num2 = 10;
+12132: 						DC_Main.DefaulterAc(tAcCode.Text);
+12133: 						goto IL_00b5;
+12134: 						IL_00b5:
+12135: 						num2 = 11;
+12136: 						if ((Operators.CompareString(DC_Main.MsDefaulterAc, "Y", false) == 0) & (Conversion.Val(MSG2_TOTAL[8, 4]) > 0.0))
+12137: 						{
+12138: 							goto IL_00ef;
+12139: 						}
+12140: 						goto IL_0113;
+12141: 						IL_00ef:
+12142: 						num2 = 12;
+12143: 						Interaction.MsgBox((object)"You Cant Save Entry Because This Party Is in Defaulter List...Please Change It First In AcMast...", (MsgBoxStyle)0, (object)null);
+12144: 						goto IL_00ff;
+12145: 						IL_00ff:
+12146: 						num2 = 13;
+12147: 						DC_Main.MsDefaulterAc = "N";
+12148: 						goto end_IL_0001_3;
+12149: 						IL_0113:
+12150: 						num2 = 16;
+12151: 						if (DC_Main.MsCashLimit > 0.0)
+12152: 						{
+12153: 							goto IL_012f;
+12154: 						}
+12155: 						goto IL_021b;
+12156: 						IL_012f:
+12157: 						num2 = 17;
+12158: 						if (Operators.CompareString(tAcCode.Text, "00045", false) != 0)
+12159: 						{
+12160: 							goto IL_0154;
+12161: 						}
+12162: 						goto IL_021b;
+12163: 						IL_0154:
+12164: 						num2 = 18;
+12165: 						DC_Main.LedrCash(tAcCode.Text, DC_Main.MCo_Book, tVchNo.Text);
+12166: 						goto IL_0178;
+12167: 						IL_0178:
+12168: 						num2 = 19;
+12169: 						if (Conversion.Val(MSG2_TOTAL[6, 4]) + DC_Main.AcCash > DC_Main.MsCashLimit)
+12170: 						{
+12171: 							goto IL_01a0;
+12172: 						}
+12173: 						goto IL_021b;
+12174: 						IL_01a0:
+12175: 						num2 = 20;
+12176: 						Interaction.MsgBox((object)("Cash Recieved Limit Amount = " + Conversions.ToString(DC_Main.MsCashLimit) + " \r\nOld Ledr Value Is " + Conversions.ToString(DC_Main.AcCash) + " \r\nAnd Total Cash Amount Is " + Conversions.ToString(Conversion.Val(MSG2_TOTAL[6, 4]) + DC_Main.AcCash) + " You Can Not Receive More Then Cash Limit ..."), (MsgBoxStyle)0, (object)null);
+12177: 						goto end_IL_0001_3;
+12178: 						IL_021b:
+12179: 						num2 = 25;
+12180: 						if ((Operators.CompareString(DC_Main.MsEmpCodeMendetry, "Y", false) == 0) & (Operators.CompareString(tEmpCode.Text, "", false) == 0))
+12181: 						{
+12182: 							goto IL_0251;
+12183: 						}
+12184: 						goto IL_0277;
+12185: 						IL_0251:
+12186: 						num2 = 26;
+12187: 						Interaction.MsgBox((object)"Please Select Employee Code and Try....", (MsgBoxStyle)0, (object)null);
+12188: 						goto IL_0261;
+12189: 						IL_0261:
+12190: 						num2 = 27;
+12191: 						((Control)tEmpCode).Focus();
+12192: 						goto end_IL_0001_3;
+12193: 						IL_0277:
+12194: 						num2 = 30;
+12195: 						if ((Conversion.Val(MSG2_TOTAL[4, 3]) + Conversion.Val(MSG2_TOTAL[4, 4]) != 0.0) & (Operators.CompareString(MSG2_TOTAL[4, 5], "", false) == 0))
+12196: 						{
+12197: 							goto IL_02cf;
+12198: 						}
+12199: 						goto IL_02f6;
+12200: 						IL_02cf:
+12201: 						num2 = 31;
+12202: 						Interaction.MsgBox((object)"Please Select Bank Account And Try Because Chq Rec Amt <> 0......", (MsgBoxStyle)0, (object)null);
+12203: 						goto IL_02df;
+12204: 						IL_02df:
+12205: 						num2 = 32;
+12206: 						((Control)BtnSave).Enabled = true;
+12207: 						goto end_IL_0001_3;
+12208: 						IL_02f6:
+12209: 						num2 = 35;
+12210: 						if ((Conversion.Val(MSG2_TOTAL[5, 3]) + Conversion.Val(MSG2_TOTAL[5, 4]) != 0.0) & (Operators.CompareString(MSG2_TOTAL[5, 5], "", false) == 0))
+12211: 						{
+12212: 							goto IL_034e;
+12213: 						}
+12214: 						goto IL_0375;
+12215: 						IL_034e:
+12216: 						num2 = 36;
+12217: 						Interaction.MsgBox((object)"Please Select Card Bank Account And Try Because Card Amt <> 0......", (MsgBoxStyle)0, (object)null);
+12218: 						goto IL_035e;
+12219: 						IL_035e:
+12220: 						num2 = 37;
+12221: 						((Control)BtnSave).Enabled = true;
+12222: 						goto end_IL_0001_3;
+12223: 						IL_0375:
+12224: 						num2 = 40;
+12225: 						if ((Operators.CompareString(DC_Main.MCo_Type, "B", false) == 0) & (Operators.CompareString(EntryMode, "A", false) == 0))
+12226: 						{
+12227: 							goto IL_03a6;
+12228: 						}
+12229: 						goto IL_03cd;
+12230: 						IL_03a6:
+12231: 						num2 = 41;
+12232: 						Interaction.MsgBox((object)"You Cant Save This Voucher Becouse This Company Type is B......", (MsgBoxStyle)0, (object)null);
+12233: 						goto IL_03b6;
+12234: 						IL_03b6:
+12235: 						num2 = 42;
+12236: 						((Control)BtnSave).Enabled = true;
+12237: 						goto end_IL_0001_3;
+12238: 						IL_03cd:
+12239: 						num2 = 45;
+12240: 						if (Operators.CompareString(EntryMode, "A", false) == 0)
+12241: 						{
+12242: 							goto IL_03ea;
+12243: 						}
+12244: 						goto IL_040e;
+12245: 						IL_03ea:
+12246: 						num2 = 46;
+12247: 						mTime.Text = DateTime.Now.ToString("HH:mm:ss");
+12248: 						goto IL_040e;
+12249: 						IL_040e:
+12250: 						num2 = 48;
+12251: 						((Control)BtnSave).Enabled = false;
+12252: 						goto IL_041e;
+12253: 						IL_041e:
+12254: 						num2 = 49;
+12255: 						if ((DateTime.Compare(Conversions.ToDate(DC_Main.MCo_OpDate), Conversions.ToDate(mVchDate.Text)) > 0) | (DateTime.Compare(Conversions.ToDate(DC_Main.MCo_ClDate), Conversions.ToDate(mVchDate.Text)) < 0))
+12256: 						{
+12257: 							goto IL_046c;
+12258: 						}
+12259: 						goto IL_0497;
+12260: 						IL_046c:
+12261: 						num2 = 50;
+12262: 						Interaction.MsgBox((object)"You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);
+12263: 						goto IL_0480;
+12264: 						IL_0480:
+12265: 						num2 = 51;
+12266: 						((Control)BtnSave).Enabled = true;
+12267: 						goto end_IL_0001_3;
+12268: 						IL_0497:
+12269: 						num2 = 54;
+12270: 						if (DateTime.Compare(DC_Main.MsLockDt, Conversions.ToDate(mVchDate.Text)) >= 0)
+12271: 						{
+12272: 							goto IL_04c0;
+12273: 						}
+12274: 						goto IL_04fb;
+12275: 						IL_04c0:
+12276: 						num2 = 55;
+12277: 						Interaction.MsgBox((object)("You Cant Save and Delete This Voucher Becouse Lock Date is = " + Conversions.ToString(DC_Main.MsLockDt) + " ...."), (MsgBoxStyle)0, (object)null);
+12278: 						goto IL_04e4;
+12279: 						IL_04e4:
+12280: 						num2 = 56;
+12281: 						((Control)BtnSave).Enabled = true;
+12282: 						goto end_IL_0001_3;
+12283: 						IL_04fb:
+12284: 						num2 = 59;
+12285: 						if (Operators.CompareString(UsUPdate, "Y", false) != 0)
+12286: 						{
+12287: 							goto IL_0518;
+12288: 						}
+12289: 						goto IL_0573;
+12290: 						IL_0518:
+12291: 						num2 = 60;
+12292: 						if ((Operators.CompareString(UserEdit, "Y", false) != 0) & (Operators.CompareString(EntryMode, "E", false) == 0))
+12293: 						{
+12294: 							goto IL_054a;
+12295: 						}
+12296: 						goto IL_0573;
+12297: 						IL_054a:
+12298: 						num2 = 61;
+12299: 						Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);
+12300: 						goto IL_055a;
+12301: 						IL_055a:
+12302: 						num2 = 62;
+12303: 						((Control)BtnSave).Enabled = true;
+12304: 						goto end_IL_0001_3;
+12305: 						IL_0573:
+12306: 						num2 = 66;
+12307: 						if (Operators.CompareString(tVchNo.Text, "", false) == 0)
+12308: 						{
+12309: 							goto IL_0595;
+12310: 						}
+12311: 						goto IL_05bc;
+12312: 						IL_0595:
+12313: 						num2 = 67;
+12314: 						Interaction.MsgBox((object)"Please Insert VchNo and try", (MsgBoxStyle)0, (object)null);
+12315: 						goto IL_05a5;
+12316: 						IL_05a5:
+12317: 						num2 = 68;
+12318: 						((Control)BtnSave).Enabled = true;
+12319: 						goto end_IL_0001_3;
+12320: 						IL_05bc:
+12321: 						num2 = 71;
+12322: 						if (Operators.CompareString(DC_Main.MsCntrStk, "Y", false) == 0)
+12323: 						{
+12324: 							goto IL_05db;
+12325: 						}
+12326: 						goto IL_06cc;
+12327: 						IL_05db:
+12328: 						num2 = 72;
+12329: 						num5 = MSG_PR.Rows - 1;
+12330: 						DC_Main.M = 1;
+12331: 						goto IL_06be;
+12332: 						IL_06be:
+12333: 						if (DC_Main.M <= num5)
+12334: 						{
+12335: 							goto IL_05f8;
+12336: 						}
+12337: 						goto IL_06cc;
+12338: 						IL_05f8:
+12339: 						num2 = 73;
+12340: 						if ((Operators.CompareString(MSG_PR[DC_Main.M, 4], "", false) == 0) & (Operators.CompareString(MSG_PR[DC_Main.M, 1], "", false) != 0))
+12341: 						{
+12342: 							goto IL_0640;
+12343: 						}
+12344: 						goto IL_06af;
+12345: 						IL_0640:
+12346: 						num2 = 74;
+12347: 						Interaction.MsgBox((object)"Please Insert Tag Entry Counter Code and Try Because It is Mandatory...", (MsgBoxStyle)0, (object)null);
+12348: 						goto IL_0650;
+12349: 						IL_0650:
+12350: 						num2 = 75;
+12351: 						((Control)BtnSave).Enabled = true;
+12352: 						goto IL_0660;
+12353: 						IL_0660:
+12354: 						num2 = 76;
+12355: 						MSG_PR.Row = DC_Main.M;
+12356: 						goto IL_0674;
+12357: 						IL_0674:
+12358: 						num2 = 77;
+12359: 						MSG_PR.Col = 4;
+12360: 						goto IL_0684;
+12361: 						IL_0684:
+12362: 						num2 = 78;
+12363: 						MSG_PR_EnterCell(MSG_PR, new EventArgs());
+12364: 						goto IL_0699;
+12365: 						IL_0699:
+12366: 						num2 = 79;
+12367: 						((Control)TEXT_PR).Focus();
+12368: 						goto end_IL_0001_3;
+12369: 						IL_06af:
+12370: 						num2 = 82;
+12371: 						DC_Main.M++;
+12372: 						goto IL_06be;
+12373: 						IL_06cc:
+12374: 						num2 = 84;
+12375: 						MSG_TOT_FILL();
+12376: 						goto IL_06d6;
+12377: 						IL_06d6:
+12378: 						num2 = 85;
+12379: 						MSG_PR_TOT_FILL();
+12380: 						goto IL_06e0;
+12381: 						IL_06e0:
+12382: 						num2 = 86;
+12383: 						num6 = 0.0;
+12384: 						goto IL_06ed;
+12385: 						IL_06ed:
+12386: 						num2 = 87;
+12387: 						if (Operators.CompareString(DC_Main.SSRegSrNo, "HM376NEHM", false) == 0)
+12388: 						{
+12389: 							goto IL_0709;
+12390: 						}
+12391: 						goto IL_0722;
+12392: 						IL_0709:
+12393: 						num2 = 88;
+12394: 						num6 = Conversion.Val(MSG_PR_TOT[0, 18]);
+12395: 						goto IL_0722;
+12396: 						IL_0722:
+12397: 						num2 = 90;
+12398: 						if (Conversion.Val(nAcCrAmt.Text) + Conversion.Val(nAcDrAmt.Text) + num6 == 0.0)
+
+### TR_SALE_RTN.cs:12623-12948
+12623: 						dataRow2["NET_AMT"] = Conversion.Val(nAcDrAmt.Text);
+12624: 						goto IL_0ff8;
+12625: 						IL_0ff8:
+12626: 						num2 = 149;
+12627: 						dataRow2["DISC_PRC"] = 0;
+12628: 						goto IL_1011;
+12629: 						IL_1011:
+12630: 						num2 = 150;
+12631: 						dataRow2["DISC_AMT"] = 0;
+12632: 						goto IL_102a;
+12633: 						IL_102a:
+12634: 						num2 = 151;
+12635: 						dataRow2["ROF_AMT"] = 0;
+12636: 						goto IL_1043;
+12637: 						IL_1043:
+12638: 						num2 = 152;
+12639: 						dataRow2["ADV_AMT"] = 0;
+12640: 						goto IL_105c;
+12641: 						IL_105c:
+12642: 						num2 = 153;
+12643: 						dataRow2["CRNT_ADJ_AMT"] = 0;
+12644: 						goto IL_1075;
+12645: 						IL_1075:
+12646: 						num2 = 154;
+12647: 						dataRow2["OLD_GL_AMT"] = 0;
+12648: 						goto IL_108e;
+12649: 						IL_108e:
+12650: 						num2 = 155;
+12651: 						dataRow2["OLD_SL_AMT"] = 0;
+12652: 						goto IL_10a7;
+12653: 						IL_10a7:
+12654: 						num2 = 156;
+12655: 						dataRow2["SCHM_AMT"] = 0;
+12656: 						goto IL_10c0;
+12657: 						IL_10c0:
+12658: 						num2 = 157;
+12659: 						dataRow2["OLD_GL"] = 0;
+12660: 						goto IL_10d9;
+12661: 						IL_10d9:
+12662: 						num2 = 158;
+12663: 						dataRow2["OLD_SL"] = 0;
+12664: 						goto IL_10f2;
+12665: 						IL_10f2:
+12666: 						num2 = 159;
+12667: 						dataRow2["AC_GST_TYPE"] = AcGstType;
+12668: 						goto IL_110b;
+12669: 						IL_110b:
+12670: 						num2 = 160;
+12671: 						dataRow2["LBR_AMT"] = Conversion.Val(MSG_TOT[0, 21]);
+12672: 						goto IL_1136;
+12673: 						IL_1136:
+12674: 						num2 = 161;
+12675: 						dataRow2["OTH_AMT"] = Conversion.Val(MSG_TOT[0, 22]);
+12676: 						goto IL_1161;
+12677: 						IL_1161:
+12678: 						num2 = 162;
+12679: 						dataRow2["TOT_AMT"] = Conversion.Val(MSG2_TOTAL[3, 4]);
+12680: 						goto IL_118b;
+12681: 						IL_118b:
+12682: 						num2 = 163;
+12683: 						dataRow2["CHQ_AMT"] = Conversion.Val(MSG2_TOTAL[4, 4]);
+12684: 						goto IL_11b5;
+12685: 						IL_11b5:
+12686: 						num2 = 164;
+12687: 						dataRow2["CARD_AMT"] = Conversion.Val(MSG2_TOTAL[5, 4]);
+12688: 						goto IL_11df;
+12689: 						IL_11df:
+12690: 						num2 = 165;
+12691: 						dataRow2["CARD_COM_AMT"] = 0;
+12692: 						goto IL_11f8;
+12693: 						IL_11f8:
+12694: 						num2 = 166;
+12695: 						dataRow2["CASH_AMT"] = Conversion.Val(MSG2_TOTAL[6, 4]);
+12696: 						goto IL_1222;
+12697: 						IL_1222:
+12698: 						num2 = 167;
+12699: 						dataRow2["KASAR_AMT"] = Conversion.Val(MSG2_TOTAL[7, 4]);
+12700: 						goto IL_124c;
+12701: 						IL_124c:
+12702: 						num2 = 168;
+12703: 						dataRow2["BILL_OS"] = Conversion.Val(MSG2_TOTAL[8, 4]);
+12704: 						goto IL_1276;
+12705: 						IL_1276:
+12706: 						num2 = 169;
+12707: 						dataRow2["RTN_NET_AMT"] = Conversion.Val(nAcCrAmt.Text);
+12708: 						goto IL_129e;
+12709: 						IL_129e:
+12710: 						num2 = 170;
+12711: 						dataRow2["TAX_CODE"] = Conversion.Val(MSG2_TOTAL[2, 5]);
+12712: 						goto IL_12c8;
+12713: 						IL_12c8:
+12714: 						num2 = 171;
+12715: 						dataRow2["TAX_PRC"] = Conversion.Val(MSG2_TOTAL[2, 2]);
+12716: 						goto IL_12f2;
+12717: 						IL_12f2:
+12718: 						num2 = 172;
+12719: 						dataRow2["TAX_AMT"] = Conversion.Val(MSG2_TOTAL[2, 3]);
+12720: 						goto IL_131c;
+12721: 						IL_131c:
+12722: 						num2 = 173;
+12723: 						if (Conversion.Val(MSG2_TOTAL[2, 3]) != 0.0)
+12724: 						{
+12725: 							goto IL_134b;
+12726: 						}
+12727: 						goto IL_1454;
+12728: 						IL_134b:
+12729: 						num2 = 174;
+12730: 						if (Operators.CompareString(AcGstType, "I", false) == 0)
+12731: 						{
+12732: 							goto IL_136b;
+12733: 						}
+12734: 						goto IL_13ce;
+12735: 						IL_136b:
+12736: 						num2 = 175;
+12737: 						dataRow2["IGST_TAX"] = Conversion.Val(MSG2_TOTAL[2, 3]);
+12738: 						goto IL_1395;
+12739: 						IL_1395:
+12740: 						num2 = 176;
+12741: 						dataRow2["SGST_TAX"] = 0;
+12742: 						goto IL_13ae;
+12743: 						IL_13ae:
+12744: 						num2 = 177;
+12745: 						dataRow2["CGST_TAX"] = 0;
+12746: 						goto IL_14a0;
+12747: 						IL_13ce:
+12748: 						num2 = 179;
+12749: 						dataRow2["IGST_TAX"] = 0;
+12750: 						goto IL_13e7;
+12751: 						IL_13e7:
+12752: 						num2 = 180;
+12753: 						dataRow2["SGST_TAX"] = Conversion.Val(MSG2_TOTAL[2, 3]) / 2.0;
+12754: 						goto IL_141b;
+12755: 						IL_141b:
+12756: 						num2 = 181;
+12757: 						dataRow2["CGST_TAX"] = Conversion.Val(MSG2_TOTAL[2, 3]) / 2.0;
+12758: 						goto IL_14a0;
+12759: 						IL_1454:
+12760: 						num2 = 184;
+12761: 						dataRow2["IGST_TAX"] = 0;
+12762: 						goto IL_146d;
+12763: 						IL_146d:
+12764: 						num2 = 185;
+12765: 						dataRow2["SGST_TAX"] = 0;
+12766: 						goto IL_1486;
+12767: 						IL_1486:
+12768: 						num2 = 186;
+12769: 						dataRow2["CGST_TAX"] = 0;
+12770: 						goto IL_14a0;
+12771: 						IL_14a0:
+12772: 						num2 = 188;
+12773: 						dataRow2["HM_AMT"] = 0;
+12774: 						goto IL_14b9;
+12775: 						IL_14b9:
+12776: 						num2 = 189;
+12777: 						dataRow2["HM_TAX_CODE"] = "";
+12778: 						goto IL_14d1;
+12779: 						IL_14d1:
+12780: 						num2 = 190;
+12781: 						dataRow2["HM_TAX_PRC"] = 0;
+12782: 						goto IL_14ea;
+12783: 						IL_14ea:
+12784: 						num2 = 191;
+12785: 						dataRow2["HM_TAX_AMT"] = 0;
+12786: 						goto IL_1503;
+12787: 						IL_1503:
+12788: 						num2 = 192;
+12789: 						dataRow2["RTN_TOT_AMT"] = Conversion.Val(MSG2_TOTAL[3, 3]);
+12790: 						goto IL_152d;
+12791: 						IL_152d:
+12792: 						num2 = 193;
+12793: 						dataRow2["RTN_CHQ_AMT"] = Conversion.Val(MSG2_TOTAL[4, 3]);
+12794: 						goto IL_1557;
+12795: 						IL_1557:
+12796: 						num2 = 194;
+12797: 						dataRow2["RTN_CARD_AMT"] = Conversion.Val(MSG2_TOTAL[5, 3]);
+12798: 						goto IL_1581;
+12799: 						IL_1581:
+12800: 						num2 = 195;
+12801: 						dataRow2["RTN_CASH_AMT"] = Conversion.Val(MSG2_TOTAL[6, 3]);
+12802: 						goto IL_15ab;
+12803: 						IL_15ab:
+12804: 						num2 = 196;
+12805: 						dataRow2["RTN_KASAR_AMT"] = Conversion.Val(MSG2_TOTAL[7, 3]);
+12806: 						goto IL_15d5;
+12807: 						IL_15d5:
+12808: 						num2 = 197;
+12809: 						dataRow2["RTN_BILL_OS"] = Conversion.Val(MSG2_TOTAL[8, 3]);
+12810: 						goto IL_15ff;
+12811: 						IL_15ff:
+12812: 						num2 = 198;
+12813: 						dataRow2["CARD_AC"] = MSG2_TOTAL[5, 5];
+12814: 						goto IL_161f;
+12815: 						IL_161f:
+12816: 						num2 = 199;
+12817: 						dataRow2["BANK_AC"] = MSG2_TOTAL[4, 5];
+12818: 						goto IL_163f;
+12819: 						IL_163f:
+12820: 						num2 = 200;
+12821: 						dataRow2["CHQ_NO"] = MSG2_TOTAL[4, 2];
+12822: 						goto IL_165f;
+12823: 						IL_165f:
+12824: 						num2 = 201;
+12825: 						dataRow2["ISU_NO"] = tIsuNo.Text;
+12826: 						goto IL_167d;
+12827: 						IL_167d:
+12828: 						num2 = 202;
+12829: 						dataRow2["ISU_LC_CODE"] = DC_Main.MLc_code;
+12830: 						goto IL_1695;
+12831: 						IL_1695:
+12832: 						num2 = 203;
+12833: 						dataRow2["ISU_YRCD"] = tIsuYrCd.Text;
+12834: 						goto IL_16b3;
+12835: 						IL_16b3:
+12836: 						num2 = 204;
+12837: 						dataRow2["ISU_DBCD"] = tIsuDbCd.Text;
+12838: 						goto IL_16d1;
+12839: 						IL_16d1:
+12840: 						num2 = 205;
+12841: 						dataRow2["BILL_NO"] = "";
+12842: 						goto IL_16e9;
+12843: 						IL_16e9:
+12844: 						num2 = 206;
+12845: 						dataRow2["CARD_ADJ"] = "N";
+12846: 						goto IL_1701;
+12847: 						IL_1701:
+12848: 						num2 = 207;
+12849: 						dataRow2["ADD1"] = "";
+12850: 						goto IL_1719;
+12851: 						IL_1719:
+12852: 						num2 = 208;
+12853: 						dataRow2["ADD2"] = "";
+12854: 						goto IL_1731;
+12855: 						IL_1731:
+12856: 						num2 = 209;
+12857: 						dataRow2["ADD3"] = "";
+12858: 						goto IL_1749;
+12859: 						IL_1749:
+12860: 						num2 = 210;
+12861: 						dataRow2["CITY"] = "";
+12862: 						goto IL_1761;
+12863: 						IL_1761:
+12864: 						num2 = 211;
+12865: 						dataRow2["MOBILE"] = "";
+12866: 						goto IL_1779;
+12867: 						IL_1779:
+12868: 						num2 = 212;
+12869: 						dataRow2["BANK_NAME"] = "";
+12870: 						goto IL_1791;
+12871: 						IL_1791:
+12872: 						num2 = 213;
+12873: 						dataRow2["SCHM_AC"] = "";
+12874: 						goto IL_17a9;
+12875: 						IL_17a9:
+12876: 						num2 = 214;
+12877: 						dataRow2["EMP_CODE"] = tEmpCode.Text;
+12878: 						goto IL_17c7;
+12879: 						IL_17c7:
+12880: 						num2 = 215;
+12881: 						dataRow2["VCH_DESC"] = tVchDesc.Text;
+12882: 						goto IL_17e5;
+12883: 						IL_17e5:
+12884: 						num2 = 216;
+12885: 						dataRow2["VCH_TIME"] = mVchDate.Text + " " + mTime.Text;
+12886: 						goto IL_1818;
+12887: 						IL_1818:
+12888: 						num2 = 217;
+12889: 						dataRow2["DATA_TRFR"] = "N";
+12890: 						goto IL_1830;
+12891: 						IL_1830:
+12892: 						num2 = 218;
+12893: 						if (Operators.CompareString(DataTrfr, "Y", false) == 0)
+12894: 						{
+12895: 							goto IL_1850;
+12896: 						}
+12897: 						goto IL_186b;
+12898: 						IL_1850:
+12899: 						num2 = 219;
+12900: 						dataRow2["RE_TRFR"] = "Y";
+12901: 						goto IL_1883;
+12902: 						IL_186b:
+12903: 						num2 = 221;
+12904: 						dataRow2["RE_TRFR"] = "N";
+12905: 						goto IL_1883;
+12906: 						IL_1883:
+12907: 						num2 = 222;
+12908: 						dataRow2["MAIN_USER"] = MainUser;
+12909: 						goto IL_189c;
+12910: 						IL_189c:
+12911: 						num2 = 223;
+12912: 						dataRow2["USER_UPDATE"] = "N";
+12913: 						goto IL_18b4;
+12914: 						IL_18b4:
+12915: 						num2 = 224;
+12916: 						dataRow2["USER_DELETE"] = "N";
+12917: 						goto IL_18cc;
+12918: 						IL_18cc:
+12919: 						num2 = 225;
+12920: 						dataRow2["MOB_ENTRY_SAVE"] = "Y";
+12921: 						goto IL_18e4;
+12922: 						IL_18e4:
+12923: 						num2 = 226;
+12924: 						dataRow2["RATE_UNFIX"] = "N";
+12925: 						goto IL_18fc;
+12926: 						IL_18fc:
+12927: 						num2 = 227;
+12928: 						dataRow2["OZ_RATE"] = 0;
+12929: 						goto IL_1915;
+12930: 						IL_1915:
+12931: 						num2 = 228;
+12932: 						dataRow2["OZ_CONV"] = 0;
+12933: 						goto IL_192e;
+12934: 						IL_192e:
+12935: 						num2 = 229;
+12936: 						dataRow2["FX_RATE"] = 0;
+12937: 						goto IL_1947;
+12938: 						IL_1947:
+12939: 						num2 = 230;
+12940: 						dataRow2["FX_CODE"] = "";
+12941: 						goto IL_195f;
+12942: 						IL_195f:
+12943: 						num2 = 231;
+12944: 						dataRow2["MTL_RATE"] = 0;
+12945: 						goto IL_1978;
+12946: 						IL_1978:
+12947: 						num2 = 232;
+12948: 						RsData.Rows.Add(dataRow2);
+
+### TR_SALE_RTN.cs:13190-13380
+13190: 						}
+13191: 						goto IL_53d0;
+13192: 						IL_53d0:
+13193: 						num2 = 635;
+13194: 						if (Operators.CompareString(tAcCode.Text, "00045", false) != 0)
+13195: 						{
+13196: 							goto IL_53f8;
+13197: 						}
+13198: 						goto IL_5971;
+13199: 						IL_53f8:
+13200: 						num2 = 636;
+13201: 						DC_Main.ExeQuteDc("DELETE FROM BILL_OS_DATA WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND LC_CODE = '" + DC_Main.MLc_code + "' AND CO_YEAR = '" + DC_Main.MCo_year + "' AND CO_BOOK = '" + DC_Main.MCo_Book + "' AND  VCH_NO = '" + tVchNo.Text + "'");
+13202: 						goto IL_5470;
+13203: 						IL_5470:
+13204: 						num2 = 637;
+13205: 						DC_Main.RsQry = "SELECT * FROM BILL_OS_DATA WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND LC_CODE = '" + DC_Main.MLc_code + "' AND CO_BOOK = '" + DC_Main.MCo_Book + "' AND  VCH_NO = '" + tVchNo.Text + "' ";
+13206: 						goto IL_54d5;
+13207: 						IL_54d5:
+13208: 						num2 = 638;
+13209: 						RsBillOs = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+13210: 						goto IL_54eb;
+13211: 						IL_54eb:
+13212: 						num2 = 639;
+13213: 						DC_Main.MsInsertData();
+13214: 						goto IL_54f7;
+13215: 						IL_54f7:
+13216: 						num2 = 640;
+13217: 						dataRow9 = RsBillOs.NewRow();
+13218: 						goto IL_550a;
+13219: 						IL_550a:
+13220: 						num2 = 641;
+13221: 						if (Conversion.Val(MSG2_TOTAL[3, 4]) != 0.0)
+13222: 						{
+13223: 							goto IL_5539;
+13224: 						}
+13225: 						goto IL_5971;
+13226: 						IL_5539:
+13227: 						num2 = 642;
+13228: 						dataRow9["CO_CODE"] = DC_Main.MCo_code;
+13229: 						goto IL_5551;
+13230: 						IL_5551:
+13231: 						num2 = 643;
+13232: 						dataRow9["LC_CODE"] = DC_Main.MLc_code;
+13233: 						goto IL_5569;
+13234: 						IL_5569:
+13235: 						num2 = 644;
+13236: 						dataRow9["CO_YEAR"] = DC_Main.MCo_year;
+13237: 						goto IL_5581;
+13238: 						IL_5581:
+13239: 						num2 = 645;
+13240: 						dataRow9["CO_BOOK"] = DC_Main.MCo_Book;
+13241: 						goto IL_5599;
+13242: 						IL_5599:
+13243: 						num2 = 646;
+13244: 						dataRow9["VCH_NO"] = tVchNo.Text;
+13245: 						goto IL_55b7;
+13246: 						IL_55b7:
+13247: 						num2 = 647;
+13248: 						dataRow9["SR_NO"] = 1;
+13249: 						goto IL_55d0;
+13250: 						IL_55d0:
+13251: 						num2 = 648;
+13252: 						dataRow9["VCH_DATE"] = mVchDate.Text;
+13253: 						goto IL_55ee;
+13254: 						IL_55ee:
+13255: 						num2 = 649;
+13256: 						dataRow9["HD_VCH_NO"] = tHdVchNo.Text;
+13257: 						goto IL_560c;
+13258: 						IL_560c:
+13259: 						num2 = 650;
+13260: 						dataRow9["AC_CODE"] = tAcCode.Text;
+13261: 						goto IL_562a;
+13262: 						IL_562a:
+13263: 						num2 = 651;
+13264: 						dataRow9["VCH_TYPE"] = FormBookSname;
+13265: 						goto IL_5643;
+13266: 						IL_5643:
+13267: 						num2 = 652;
+13268: 						dataRow9["INOUT_TYPE"] = FormBookInOut;
+13269: 						goto IL_565c;
+13270: 						IL_565c:
+13271: 						num2 = 653;
+13272: 						dataRow9["ENTRY_TYPE"] = "O";
+13273: 						goto IL_5674;
+13274: 						IL_5674:
+13275: 						num2 = 654;
+13276: 						dataRow9["BOOK_NAME"] = FormMainBook;
+13277: 						goto IL_568d;
+13278: 						IL_568d:
+13279: 						num2 = 655;
+13280: 						dataRow9["BILL_AMT"] = Conversion.Val(MSG2_TOTAL[3, 4]);
+13281: 						goto IL_56b7;
+13282: 						IL_56b7:
+13283: 						num2 = 656;
+13284: 						dataRow9["REC_AMT"] = Conversion.Val(MSG2_TOTAL[3, 4]) - (Conversion.Val(MSG2_TOTAL[8, 4]) + Conversion.Val(MSG2_TOTAL[7, 4]));
+13285: 						goto IL_5707;
+13286: 						IL_5707:
+13287: 						num2 = 657;
+13288: 						dataRow9["KASAR_AMT"] = Conversion.Val(MSG2_TOTAL[7, 4]);
+13289: 						goto IL_5731;
+13290: 						IL_5731:
+13291: 						num2 = 658;
+13292: 						dataRow9["BILL_GOLD"] = 0;
+13293: 						goto IL_574a;
+13294: 						IL_574a:
+13295: 						num2 = 659;
+13296: 						dataRow9["REC_GOLD"] = 0;
+13297: 						goto IL_5763;
+13298: 						IL_5763:
+13299: 						num2 = 660;
+13300: 						dataRow9["KASAR_GOLD"] = 0;
+13301: 						goto IL_577c;
+13302: 						IL_577c:
+13303: 						num2 = 661;
+13304: 						dataRow9["BILL_SILVER"] = 0;
+13305: 						goto IL_5795;
+13306: 						IL_5795:
+13307: 						num2 = 662;
+13308: 						dataRow9["REC_SILVER"] = 0;
+13309: 						goto IL_57ae;
+13310: 						IL_57ae:
+13311: 						num2 = 663;
+13312: 						dataRow9["KASAR_SILVER"] = 0;
+13313: 						goto IL_57c7;
+13314: 						IL_57c7:
+13315: 						num2 = 664;
+13316: 						dataRow9["OLD_ADJ_AMT"] = 0;
+13317: 						goto IL_57e0;
+13318: 						IL_57e0:
+13319: 						num2 = 665;
+13320: 						dataRow9["OLD_ADJ_GOLD"] = 0;
+13321: 						goto IL_57f9;
+13322: 						IL_57f9:
+13323: 						num2 = 666;
+13324: 						dataRow9["OLD_ADJ_SILVER"] = 0;
+13325: 						goto IL_5812;
+13326: 						IL_5812:
+13327: 						num2 = 667;
+13328: 						dataRow9["BILL_LC"] = DC_Main.MLc_code;
+13329: 						goto IL_582a;
+13330: 						IL_582a:
+13331: 						num2 = 668;
+13332: 						dataRow9["BILL_YRCD"] = DC_Main.MCo_year;
+13333: 						goto IL_5842;
+13334: 						IL_5842:
+13335: 						num2 = 669;
+13336: 						dataRow9["BILL_DBCD"] = DC_Main.MCo_Book;
+13337: 						goto IL_585a;
+13338: 						IL_585a:
+13339: 						num2 = 670;
+13340: 						dataRow9["BILL_NO"] = tVchNo.Text;
+13341: 						goto IL_5878;
+13342: 						IL_5878:
+13343: 						num2 = 671;
+13344: 						dataRow9["BILL_HD_VCH_NO"] = tHdVchNo.Text;
+13345: 						goto IL_5896;
+13346: 						IL_5896:
+13347: 						num2 = 672;
+13348: 						dataRow9["BILL_SRNO"] = 1;
+13349: 						goto IL_58af;
+13350: 						IL_58af:
+13351: 						num2 = 673;
+13352: 						dataRow9["VCH_TIME"] = mVchDate.Text + " " + mTime.Text;
+13353: 						goto IL_58e2;
+13354: 						IL_58e2:
+13355: 						num2 = 674;
+13356: 						dataRow9["MAIN_USER"] = MainUser;
+13357: 						goto IL_58fb;
+13358: 						IL_58fb:
+13359: 						num2 = 675;
+13360: 						dataRow9["DATA_TRFR"] = "N";
+13361: 						goto IL_5913;
+13362: 						IL_5913:
+13363: 						num2 = 676;
+13364: 						dataRow9["DATA_TYPE"] = "A";
+13365: 						goto IL_592b;
+13366: 						IL_592b:
+13367: 						num2 = 677;
+13368: 						RsBillOs.Rows.Add(dataRow9);
+13369: 						goto IL_5944;
+13370: 						IL_5944:
+13371: 						num2 = 678;
+13372: 						((DbDataAdapter)(object)DC_Main.Da).Update(RsBillOs);
+13373: 						goto IL_595b;
+13374: 						IL_595b:
+13375: 						num2 = 679;
+13376: 						RsBillOs.Clear();
+13377: 						goto IL_5971;
+13378: 						IL_5971:
+13379: 						num2 = 682;
+13380: 						if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))
+
+### TR_SALE_RTN.cs:13380-13466
+13380: 						if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))
+13381: 						{
+13382: 							goto IL_59a7;
+13383: 						}
+13384: 						goto IL_5ab9;
+13385: 						IL_59a7:
+13386: 						num2 = 683;
+13387: 						DC_Main.RsQry = "UPDATE BAR_DETL SET BAR_DETL.DATA_TYPE = C.DATA_TYPE FROM SL_DETL,BAR_DETL AS B,BOOK_DATA AS C WHERE SL_DETL.CO_CODE = B.CO_CODE AND SL_DETL.LC_CODE = B.LC_CODE AND SL_DETL.TAG_NO = B.TAG_NO  AND SL_DETL.VCH_SRNO = B.VCH_SRNO AND SL_DETL.CO_CODE = C.CO_CODE AND SL_DETL.LC_CODE = C.LC_CODE AND SL_DETL.CO_BOOK = C.CO_BOOK AND SL_DETL.CO_CODE = '" + DC_Main.MCo_code + "' AND SL_DETL.LC_CODE = '" + DC_Main.MLc_code + "' AND SL_DETL.CO_YEAR = '" + DC_Main.MCo_year + "' AND SL_DETL.CO_BOOK = '" + DC_Main.MCo_Book + "' AND SL_DETL.VCH_NO = '" + tVchNo.Text + "' AND SL_DETL.TAG_NO <> 'N' ";
+13388: 						goto IL_5a1e;
+13389: 						IL_5a1e:
+13390: 						num2 = 684;
+13391: 						DC_Main.ExeQuteDc(DC_Main.RsQry);
+13392: 						goto IL_5a2f;
+13393: 						IL_5a2f:
+13394: 						num2 = 685;
+13395: 						DC_Main.RsQry = "UPDATE MAIN_STOCK SET MAIN_STOCK.DATA_TYPE = C.DATA_TYPE FROM SL_DETL,MAIN_STOCK AS B,BOOK_DATA AS C WHERE SL_DETL.CO_CODE = B.CO_CODE AND SL_DETL.LC_CODE = B.LC_CODE AND SL_DETL.TAG_NO = B.TAG_NO  AND SL_DETL.VCH_SRNO = B.VCH_SRNO AND SL_DETL.CO_CODE = C.CO_CODE AND SL_DETL.LC_CODE = C.LC_CODE AND SL_DETL.CO_BOOK = C.CO_BOOK AND SL_DETL.CO_CODE = '" + DC_Main.MCo_code + "' AND SL_DETL.LC_CODE = '" + DC_Main.MLc_code + "' AND SL_DETL.CO_YEAR = '" + DC_Main.MCo_year + "' AND SL_DETL.CO_BOOK = '" + DC_Main.MCo_Book + "' AND SL_DETL.VCH_NO = '" + tVchNo.Text + "' AND SL_DETL.TAG_NO <> 'N' ";
+13396: 						goto IL_5aa6;
+13397: 						IL_5aa6:
+13398: 						num2 = 686;
+13399: 						DC_Main.ExeQuteDc(DC_Main.RsQry);
+13400: 						goto IL_5ab9;
+13401: 						IL_5ab9:
+13402: 						num2 = 688;
+13403: 						DC_Main.RsQry = "DELETE FROM AC_DATA WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND LC_CODE = '" + DC_Main.MLc_code + "' AND CO_YEAR = '" + DC_Main.MCo_year + "' AND CO_BOOK = '" + DC_Main.MCo_Book + "' AND VCH_NO = '" + tVchNo.Text + "' ";
+13404: 						goto IL_5b30;
+13405: 						IL_5b30:
+13406: 						num2 = 689;
+13407: 						DC_Main.ExeQuteDc(DC_Main.RsQry);
+13408: 						goto IL_5b41;
+13409: 						IL_5b41:
+13410: 						num2 = 690;
+13411: 						Ac_Ledr.SaleReturn_Ledr(DC_Main.MCo_Book, tVchNo.Text);
+13412: 						goto IL_5b5d;
+13413: 						IL_5b5d:
+13414: 						num2 = 691;
+13415: 						DC_Main.RsQry = "DELETE FROM ROJ_MEL_DATA WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND LC_CODE = '" + DC_Main.MLc_code + "' AND CO_YEAR = '" + DC_Main.MCo_year + "' AND CO_BOOK = '" + DC_Main.MCo_Book + "' AND VCH_NO = '" + tVchNo.Text + "' ";
+13416: 						goto IL_5bd4;
+13417: 						IL_5bd4:
+13418: 						num2 = 692;
+13419: 						DC_Main.ExeQuteDc(DC_Main.RsQry);
+13420: 						goto IL_5be5;
+13421: 						IL_5be5:
+13422: 						num2 = 693;
+13423: 						Ac_Rojmel.SaleReturn_RojMel(DC_Main.MCo_Book, tVchNo.Text);
+13424: 						goto IL_5c01;
+13425: 						IL_5c01:
+13426: 						num2 = 694;
+13427: 						DC_Main.RsQry = "DELETE FROM MAIN_STOCK WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND LC_CODE = '" + DC_Main.MLc_code + "' AND CO_YEAR = '" + DC_Main.MCo_year + "' AND CO_BOOK = '" + DC_Main.MCo_Book + "' AND VCH_NO = '" + tVchNo.Text + "' ";
+13428: 						goto IL_5c78;
+13429: 						IL_5c78:
+13430: 						num2 = 695;
+13431: 						DC_Main.ExeQuteDc(DC_Main.RsQry);
+13432: 						goto IL_5c89;
+13433: 						IL_5c89:
+13434: 						num2 = 696;
+13435: 						Ac_Stock.SaleReturn_Stk(DC_Main.MCo_Book, tVchNo.Text);
+13436: 						goto IL_5ca5;
+13437: 						IL_5ca5:
+13438: 						num2 = 697;
+13439: 						DC_Main.RsQry = "DELETE FROM TAX_DATA WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND LC_CODE = '" + DC_Main.MLc_code + "' AND CO_YEAR = '" + DC_Main.MCo_year + "' AND CO_BOOK = '" + DC_Main.MCo_Book + "' AND  VCH_NO = '" + tVchNo.Text + "' ";
+13440: 						goto IL_5d1c;
+13441: 						IL_5d1c:
+13442: 						num2 = 698;
+13443: 						DC_Main.ExeQuteDc(DC_Main.RsQry);
+13444: 						goto IL_5d2d;
+13445: 						IL_5d2d:
+13446: 						num2 = 699;
+13447: 						Ac_Tax.Sales_Rtn_GST(DC_Main.MCo_Book, tVchNo.Text);
+13448: 						goto IL_5d49;
+13449: 						IL_5d49:
+13450: 						num2 = 700;
+13451: 						DC_Main.RsQry = "DELETE FROM DM_DATA WHERE CO_CODE = '" + DC_Main.MCo_code + "' AND LC_CODE = '" + DC_Main.MLc_code + "' AND CO_YEAR = '" + DC_Main.MCo_year + "' AND CO_BOOK = '" + DC_Main.MCo_Book + "' AND VCH_NO = '" + tVchNo.Text + "' ";
+13452: 						goto IL_5dc0;
+13453: 						IL_5dc0:
+13454: 						num2 = 701;
+13455: 						DC_Main.ExeQuteDc(DC_Main.RsQry);
+13456: 						goto IL_5dd1;
+13457: 						IL_5dd1:
+13458: 						num2 = 702;
+13459: 						Ac_Stock.Dm_Sale_Return_Detl(DC_Main.MCo_Book, tVchNo.Text);
+13460: 						goto IL_5ded;
+13461: 						IL_5ded:
+13462: 						num2 = 703;
+13463: 						Ac_Tax.Vch_Remark(DC_Main.MCo_Book, tVchNo.Text, 0);
+13464: 						goto IL_5e0a;
+13465: 						IL_5e0a:
+13466: 						num2 = 704;
+
+### TR_SALE_RTN.cs:14248-14600
+14248: 						val3 = MSG_PR;
+14249: 						goto IL_2e76;
+14250: 						IL_2e76:
+14251: 						num2 = 369;
+14252: 						if ((Conversion.Val(MSG_PR[DC_Main.i, 12]) + Conversion.Val(MSG_PR[DC_Main.i, 38]) != 0.0) & (Operators.CompareString(MSG_PR[DC_Main.i, 1], "", false) != 0))
+14253: 						{
+14254: 							goto IL_2ee2;
+14255: 						}
+14256: 						goto IL_3b5c;
+14257: 						IL_2ee2:
+14258: 						num2 = 370;
+14259: 						dataRow5["CO_CODE"] = DC_Main.MCo_code;
+14260: 						goto IL_2efa;
+14261: 						IL_2efa:
+14262: 						num2 = 371;
+14263: 						dataRow5["LC_CODE"] = DC_Main.MLc_code;
+14264: 						goto IL_2f12;
+14265: 						IL_2f12:
+14266: 						num2 = 372;
+14267: 						dataRow5["CO_YEAR"] = DC_Main.MCo_year;
+14268: 						goto IL_2f2a;
+14269: 						IL_2f2a:
+14270: 						num2 = 373;
+14271: 						dataRow5["CO_BOOK"] = DC_Main.MCo_Book;
+14272: 						goto IL_2f42;
+14273: 						IL_2f42:
+14274: 						num2 = 374;
+14275: 						dataRow5["VCH_NO"] = tVchNo.Text;
+14276: 						goto IL_2f60;
+14277: 						IL_2f60:
+14278: 						num2 = 375;
+14279: 						dataRow5["VCH_DATE"] = mVchDate.Text;
+14280: 						goto IL_2f7e;
+14281: 						IL_2f7e:
+14282: 						num2 = 376;
+14283: 						dataRow5["HD_VCH_NO"] = tHdVchNo.Text;
+14284: 						goto IL_2f9c;
+14285: 						IL_2f9c:
+14286: 						num2 = 377;
+14287: 						dataRow5["AC_CODE"] = tAcCode.Text;
+14288: 						goto IL_2fba;
+14289: 						IL_2fba:
+14290: 						num2 = 378;
+14291: 						dataRow5["VCH_TYPE"] = FormBookSname;
+14292: 						goto IL_2fd3;
+14293: 						IL_2fd3:
+14294: 						num2 = 379;
+14295: 						dataRow5["INOUT_TYPE"] = FormBookInOut;
+14296: 						goto IL_2fec;
+14297: 						IL_2fec:
+14298: 						num2 = 380;
+14299: 						dataRow5["ENTRY_TYPE"] = "P";
+14300: 						goto IL_3004;
+14301: 						IL_3004:
+14302: 						num2 = 381;
+14303: 						dataRow5["BOOK_NAME"] = FormMainBook;
+14304: 						goto IL_301d;
+14305: 						IL_301d:
+14306: 						num2 = 382;
+14307: 						dataRow5["SR_NO"] = Conversion.Val(val3[DC_Main.i, 0]);
+14308: 						goto IL_3047;
+14309: 						IL_3047:
+14310: 						num2 = 383;
+14311: 						dataRow5["OLD_SRNO"] = Conversion.Val(val3[DC_Main.i, 51]);
+14312: 						goto IL_3072;
+14313: 						IL_3072:
+14314: 						num2 = 384;
+14315: 						dataRow5["IT_CODE"] = val3[DC_Main.i, 1];
+14316: 						goto IL_3092;
+14317: 						IL_3092:
+14318: 						num2 = 385;
+14319: 						dataRow5["ITM_REMARK"] = val3[DC_Main.i, 3];
+14320: 						goto IL_30b2;
+14321: 						IL_30b2:
+14322: 						num2 = 386;
+14323: 						if (Operators.CompareString(val3[DC_Main.i, 2], "", false) == 0)
+14324: 						{
+14325: 							goto IL_30d9;
+14326: 						}
+14327: 						goto IL_30f5;
+14328: 						IL_30d9:
+14329: 						num2 = 387;
+14330: 						dataRow5["TAG_NO"] = "N";
+14331: 						goto IL_3116;
+14332: 						IL_30f5:
+14333: 						num2 = 389;
+14334: 						dataRow5["TAG_NO"] = val3[DC_Main.i, 2];
+14335: 						goto IL_3116;
+14336: 						IL_3116:
+14337: 						num2 = 391;
+14338: 						dataRow5["TBL_CODE"] = val3[DC_Main.i, 4];
+14339: 						goto IL_3136;
+14340: 						IL_3136:
+14341: 						num2 = 392;
+14342: 						dataRow5["DESIGN_NO"] = val3[DC_Main.i, 5];
+14343: 						goto IL_3156;
+14344: 						IL_3156:
+14345: 						num2 = 393;
+14346: 						dataRow5["ITM_STYLE"] = val3[DC_Main.i, 6];
+14347: 						goto IL_3176;
+14348: 						IL_3176:
+14349: 						num2 = 394;
+14350: 						dataRow5["ITM_SIZE"] = val3[DC_Main.i, 7];
+14351: 						goto IL_3196;
+14352: 						IL_3196:
+14353: 						num2 = 395;
+14354: 						dataRow5["HM_ID"] = val3[DC_Main.i, 8];
+14355: 						goto IL_31b6;
+14356: 						IL_31b6:
+14357: 						num2 = 396;
+14358: 						dataRow5["ITM_PCS"] = Conversion.Val(val3[DC_Main.i, 9]);
+14359: 						goto IL_31e1;
+14360: 						IL_31e1:
+14361: 						num2 = 397;
+14362: 						dataRow5["ITM_GWT"] = Conversion.Val(val3[DC_Main.i, 10]);
+14363: 						goto IL_320c;
+14364: 						IL_320c:
+14365: 						num2 = 398;
+14366: 						dataRow5["ITM_OTH_WT"] = Conversion.Val(val3[DC_Main.i, 11]);
+14367: 						goto IL_3237;
+14368: 						IL_3237:
+14369: 						num2 = 399;
+14370: 						dataRow5["ITM_NWT"] = Conversion.Val(val3[DC_Main.i, 12]);
+14371: 						goto IL_3262;
+14372: 						IL_3262:
+14373: 						num2 = 400;
+14374: 						dataRow5["ITM_GHT_PRC"] = Conversion.Val(val3[DC_Main.i, 14]);
+14375: 						goto IL_328d;
+14376: 						IL_328d:
+14377: 						num2 = 401;
+14378: 						dataRow5["ITM_GHT_WT"] = Conversion.Val(val3[DC_Main.i, 15]);
+14379: 						goto IL_32b8;
+14380: 						IL_32b8:
+14381: 						num2 = 402;
+14382: 						dataRow5["ITM_TOUCH"] = Conversion.Val(val3[DC_Main.i, 16]);
+14383: 						goto IL_32e3;
+14384: 						IL_32e3:
+14385: 						num2 = 403;
+14386: 						dataRow5["ITM_WEST_PRC"] = Conversion.Val(val3[DC_Main.i, 17]);
+14387: 						goto IL_330e;
+14388: 						IL_330e:
+14389: 						num2 = 404;
+14390: 						dataRow5["ITM_FINE"] = Conversion.Val(val3[DC_Main.i, 18]);
+14391: 						goto IL_3339;
+14392: 						IL_3339:
+14393: 						num2 = 405;
+14394: 						dataRow5["ITM_RATE"] = Conversion.Val(val3[DC_Main.i, 19]);
+14395: 						goto IL_3364;
+14396: 						IL_3364:
+14397: 						num2 = 406;
+14398: 						dataRow5["ITM_AMT"] = Conversion.Val(val3[DC_Main.i, 20]);
+14399: 						goto IL_338f;
+14400: 						IL_338f:
+14401: 						num2 = 407;
+14402: 						dataRow5["LBR_CODE"] = val3[DC_Main.i, 13];
+14403: 						goto IL_33b0;
+14404: 						IL_33b0:
+14405: 						num2 = 408;
+14406: 						dataRow5["LBR_PRC"] = Conversion.Val(val3[DC_Main.i, 21]);
+14407: 						goto IL_33db;
+14408: 						IL_33db:
+14409: 						num2 = 409;
+14410: 						dataRow5["LBR_TYPE"] = val3[DC_Main.i, 22];
+14411: 						goto IL_33fc;
+14412: 						IL_33fc:
+14413: 						num2 = 410;
+14414: 						dataRow5["LBR_RATE"] = Conversion.Val(val3[DC_Main.i, 23]);
+14415: 						goto IL_3427;
+14416: 						IL_3427:
+14417: 						num2 = 411;
+14418: 						dataRow5["LBR_AMT"] = Conversion.Val(val3[DC_Main.i, 24]);
+14419: 						goto IL_3452;
+14420: 						IL_3452:
+14421: 						num2 = 412;
+14422: 						dataRow5["DISC_PRC"] = Conversion.Val(val3[DC_Main.i, 25]);
+14423: 						goto IL_347d;
+14424: 						IL_347d:
+14425: 						num2 = 413;
+14426: 						dataRow5["DISC_AMT"] = Conversion.Val(val3[DC_Main.i, 26]);
+14427: 						goto IL_34a8;
+14428: 						IL_34a8:
+14429: 						num2 = 414;
+14430: 						dataRow5["OTH_AMT"] = Conversion.Val(val3[DC_Main.i, 27]);
+14431: 						goto IL_34d3;
+14432: 						IL_34d3:
+14433: 						num2 = 415;
+14434: 						dataRow5["ITM_MRP"] = Conversion.Val(val3[DC_Main.i, 28]);
+14435: 						goto IL_34fe;
+14436: 						IL_34fe:
+14437: 						num2 = 416;
+14438: 						dataRow5["TAG_LBR_CODE"] = val3[DC_Main.i, 29];
+14439: 						goto IL_351f;
+14440: 						IL_351f:
+14441: 						num2 = 417;
+14442: 						dataRow5["TAG_LBR_PRC"] = Conversion.Val(val3[DC_Main.i, 30]);
+14443: 						goto IL_354a;
+14444: 						IL_354a:
+14445: 						num2 = 418;
+14446: 						dataRow5["TAG_LBR_RATE"] = Conversion.Val(val3[DC_Main.i, 31]);
+14447: 						goto IL_3575;
+14448: 						IL_3575:
+14449: 						num2 = 419;
+14450: 						dataRow5["TAG_LBR_AMT"] = Conversion.Val(val3[DC_Main.i, 32]);
+14451: 						goto IL_35a0;
+14452: 						IL_35a0:
+14453: 						num2 = 420;
+14454: 						dataRow5["TAG_OTH_AMT"] = Conversion.Val(val3[DC_Main.i, 33]);
+14455: 						goto IL_35cb;
+14456: 						IL_35cb:
+14457: 						num2 = 421;
+14458: 						dataRow5["TAG_COST"] = Conversion.Val(val3[DC_Main.i, 34]);
+14459: 						goto IL_35f6;
+14460: 						IL_35f6:
+14461: 						num2 = 422;
+14462: 						dataRow5["TAG_MRP"] = Conversion.Val(val3[DC_Main.i, 35]);
+14463: 						goto IL_3621;
+14464: 						IL_3621:
+14465: 						num2 = 423;
+14466: 						dataRow5["TOT_AMT"] = Conversion.Val(val3[DC_Main.i, 36]);
+14467: 						goto IL_364c;
+14468: 						IL_364c:
+14469: 						num2 = 424;
+14470: 						dataRow5["TAX_PRC"] = Conversion.Val(val3[DC_Main.i, 37]);
+14471: 						goto IL_3677;
+14472: 						IL_3677:
+14473: 						num2 = 425;
+14474: 						dataRow5["NET_AMT"] = Conversion.Val(val3[DC_Main.i, 38]);
+14475: 						goto IL_36a2;
+14476: 						IL_36a2:
+14477: 						num2 = 426;
+14478: 						dataRow5["KR_NAME"] = val3[DC_Main.i, 39];
+14479: 						goto IL_36c3;
+14480: 						IL_36c3:
+14481: 						num2 = 427;
+14482: 						if (Conversion.Val(val3[DC_Main.i, 40]) == 0.0)
+14483: 						{
+14484: 							goto IL_36f0;
+14485: 						}
+14486: 						goto IL_37fa;
+14487: 						IL_36f0:
+14488: 						num2 = 428;
+14489: 						val3[DC_Main.i, 40] = Conversions.ToString(Conversion.Val(DC_Main.MCo_code)) + Conversions.ToString(Conversion.Val(DC_Main.MLc_code)) + Strings.Mid(DC_Main.MCo_year, 4, 1) + Conversions.ToString(DateAndTime.Month(Conversions.ToDate(mVchDate.Text))) + Strings.Format((object)Conversions.ToDate(mVchDate.Text), "dd") + Strings.Format((object)DateAndTime.Now, "HH") + Strings.Format((object)DateAndTime.Now, "mm") + Conversions.ToString(Conversion.Val(val3[DC_Main.i, 51]));
+14490: 						goto IL_37cb;
+14491: 						IL_37cb:
+14492: 						num2 = 429;
+14493: 						dataRow5["VCH_SRNO"] = Conversion.Val(val3[DC_Main.i, 40]);
+14494: 						goto IL_3826;
+14495: 						IL_37fa:
+14496: 						num2 = 431;
+14497: 						dataRow5["VCH_SRNO"] = Conversion.Val(val3[DC_Main.i, 40]);
+14498: 						goto IL_3826;
+14499: 						IL_3826:
+14500: 						num2 = 433;
+14501: 						dataRow5["RATE_TYPE"] = val3[DC_Main.i, 44];
+14502: 						goto IL_3847;
+14503: 						IL_3847:
+14504: 						num2 = 434;
+14505: 						dataRow5["PR_CODE"] = val3[DC_Main.i, 52];
+14506: 						goto IL_3868;
+14507: 						IL_3868:
+14508: 						num2 = 435;
+14509: 						dataRow5["TAG_TYPE"] = val3[DC_Main.i, 54];
+14510: 						goto IL_3889;
+14511: 						IL_3889:
+14512: 						num2 = 436;
+14513: 						dataRow5["TAG_SRNO"] = Conversion.Val(val3[DC_Main.i, 56]);
+14514: 						goto IL_38b4;
+14515: 						IL_38b4:
+14516: 						num2 = 437;
+14517: 						dataRow5["HM_ID2"] = val3[DC_Main.i, 59];
+14518: 						goto IL_38d5;
+14519: 						IL_38d5:
+14520: 						num2 = 438;
+14521: 						dataRow5["HM_ID3"] = val3[DC_Main.i, 60];
+14522: 						goto IL_38f6;
+14523: 						IL_38f6:
+14524: 						num2 = 439;
+14525: 						dataRow5["HM_ID4"] = val3[DC_Main.i, 61];
+14526: 						goto IL_3917;
+14527: 						IL_3917:
+14528: 						num2 = 440;
+14529: 						dataRow5["HM_ID_WT"] = Conversion.Val(val3[DC_Main.i, 62]);
+14530: 						goto IL_3942;
+14531: 						IL_3942:
+14532: 						num2 = 441;
+14533: 						dataRow5["HM_ID2_WT"] = Conversion.Val(val3[DC_Main.i, 63]);
+14534: 						goto IL_396d;
+14535: 						IL_396d:
+14536: 						num2 = 442;
+14537: 						dataRow5["HM_ID3_WT"] = Conversion.Val(val3[DC_Main.i, 64]);
+14538: 						goto IL_3998;
+14539: 						IL_3998:
+14540: 						num2 = 443;
+14541: 						dataRow5["HM_ID4_WT"] = Conversion.Val(val3[DC_Main.i, 65]);
+14542: 						goto IL_39c3;
+14543: 						IL_39c3:
+14544: 						num2 = 444;
+14545: 						dataRow5["APR_ISU"] = val3[DC_Main.i, 50];
+14546: 						goto IL_39e4;
+14547: 						IL_39e4:
+14548: 						num2 = 445;
+14549: 						dataRow5["EMP_ISU"] = val3[DC_Main.i, 68];
+14550: 						goto IL_3a05;
+14551: 						IL_3a05:
+14552: 						num2 = 446;
+14553: 						dataRow5["IT_TYPE"] = val3[DC_Main.i, 43];
+14554: 						goto IL_3a26;
+14555: 						IL_3a26:
+14556: 						num2 = 447;
+14557: 						dataRow5["VCH_TIME"] = mVchDate.Text + " " + mTime.Text;
+14558: 						goto IL_3a59;
+14559: 						IL_3a59:
+14560: 						num2 = 448;
+14561: 						dataRow5["MAIN_USER"] = MainUser;
+14562: 						goto IL_3a72;
+14563: 						IL_3a72:
+14564: 						num2 = 449;
+14565: 						dataRow5["EMP_CODE"] = tEmpCode.Text;
+14566: 						goto IL_3a90;
+14567: 						IL_3a90:
+14568: 						num2 = 450;
+14569: 						dataRow5["DESIGN_IMG_ID"] = val3[DC_Main.i, 69];
+14570: 						goto IL_3ab1;
+14571: 						IL_3ab1:
+14572: 						num2 = 451;
+14573: 						if (Operators.CompareString(val3[DC_Main.i, 70], "", false) == 0)
+14574: 						{
+14575: 							goto IL_3ad9;
+14576: 						}
+14577: 						goto IL_3af5;
+14578: 						IL_3ad9:
+14579: 						num2 = 452;
+14580: 						dataRow5["DATA_TYPE"] = "A";
+14581: 						goto IL_3b17;
+14582: 						IL_3af5:
+14583: 						num2 = 454;
+14584: 						dataRow5["DATA_TYPE"] = val3[DC_Main.i, 70];
+14585: 						goto IL_3b17;
+14586: 						IL_3b17:
+14587: 						num2 = 456;
+14588: 						RsPrDetl.Rows.Add(dataRow5);
+14589: 						goto IL_3b30;
+14590: 						IL_3b30:
+14591: 						num2 = 457;
+14592: 						((DbDataAdapter)(object)DC_Main.Da).Update(RsPrDetl);
+14593: 						goto IL_3b47;
+14594: 						IL_3b47:
+14595: 						num2 = 458;
+14596: 						RsPrDetl.Clear();
+14597: 						goto IL_3b5c;
+14598: 						IL_3b5c:
+14599: 						val3 = null;
+14600: 						goto IL_3b5f;
+
+### Ac_Ledr.cs:1321-1396
+1321: 	public static void SaleReturn_Ledr(string MsBook, string MsVchNo)
+1322: 	{
+1323: 		DC_Main.ExeQuteDc("UPDATE SL_DATA SET RATE_UNFIX = 'N' WHERE RATE_UNFIX IS NULL");
+1324: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',A.AC_CODE,D.SALE_AC,A.NET_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM (((SL_DATA AS E LEFT JOIN SL_DETL_RTN AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO)LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)"  AND A.NET_AMT <> 0 AND E.RATE_UNFIX <> 'Y' "));
+1325: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1326: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',D.SALE_AC,A.AC_CODE,0,A.NET_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (((SL_DATA AS E LEFT JOIN SL_DETL_RTN AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I'  "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.NET_AMT <> 0 AND E.RATE_UNFIX <> 'Y' "));
+1327: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1328: 		if (Operators.CompareString(DC_Main.MCo_SName, "UAE", false) == 0)
+1329: 		{
+1330: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'03'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'','00095',D.SALE_AC,A.NET_AMT-A.LBR_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM (((SL_DATA AS E LEFT JOIN SL_DETL_RTN AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO)LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)"  AND A.NET_AMT <> 0 AND E.RATE_UNFIX = 'Y' "));
+1331: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1332: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'04'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',D.SALE_AC,A.AC_CODE,0,A.NET_AMT-A.LBR_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (((SL_DATA AS E LEFT JOIN SL_DETL_RTN AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I'  "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.NET_AMT <> 0 AND E.RATE_UNFIX = 'Y' "));
+1333: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1334: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'05',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,'00041',A.HM_AMT+A.HM_TAX_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,A.AC_NAME FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 5 AND A.HM_AMT <> 0 AND A.RATE_UNFIX = 'Y' "));
+1335: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1336: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'06',B.MAIN_BOOK,A.BILL_NO,Null,'','00041',A.AC_CODE,0,A.HM_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,A.AC_NAME FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 5 AND A.HM_AMT <> 0 AND A.RATE_UNFIX = 'Y' "));
+1337: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1338: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'07',B.MAIN_BOOK,A.BILL_NO,Null,'',D.TAX_AC,A.AC_CODE,0,HM_TAX_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.HM_TAX_CODE = D.TAX_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' AND D.SR_NO = 0 "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.HM_TAX_AMT <> 0 "));
+1339: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1340: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'08',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,D.TAX_AC,HM_TAX_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.HM_TAX_CODE = D.TAX_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' AND D.SR_NO = 0 "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.HM_TAX_AMT <> 0 AND A.RATE_UNFIX <> 'Y' "));
+1341: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1342: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'09'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',A.AC_CODE,D.SALE_AC,0,0,C.IT_TYPE,'+',A.ITM_FINE,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM (((SL_DATA AS E LEFT JOIN SL_DETL_RTN AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO)LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)  LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' AND E.RATE_UNFIX = 'Y' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.ITM_FINE <> 0 AND E.RATE_UNFIX = 'Y'"));
+1343: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1344: 		}
+1345: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'10'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',A.AC_CODE,D.SALE_AC,0,A.NET_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM (((SL_DATA AS E LEFT JOIN SL_DETL AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)"  AND A.NET_AMT <> 0 AND E.RATE_UNFIX <> 'Y' "));
+1346: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1347: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'11'+STR(A.SR_NO),B.MAIN_BOOK,'',Null,'',D.SALE_AC,A.AC_CODE,A.NET_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (((SL_DATA AS E LEFT JOIN SL_DETL AS A ON E.CO_CODE = A.CO_CODE AND E.LC_CODE = A.LC_CODE AND E.CO_YEAR = A.CO_YEAR AND E.CO_BOOK = A.CO_BOOK AND E.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I'  "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.NET_AMT <> 0 AND E.RATE_UNFIX <> 'Y' "));
+1348: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1349: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'12',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,D.TAX_AC,TAX_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.TAX_CODE = D.TAX_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' AND D.SR_NO = 0 "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.TAX_AMT <> 0 AND A.RATE_UNFIX <> 'Y' "));
+1350: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1351: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'13',B.MAIN_BOOK,A.BILL_NO,Null,'',D.TAX_AC,A.AC_CODE,0,TAX_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM (SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.TAX_CODE = D.TAX_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' AND D.SR_NO = 0 "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.TAX_AMT <> 0 AND A.RATE_UNFIX <> 'Y' "));
+1352: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1353: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'14',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,A.BANK_AC,CHQ_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.CHQ_AMT <> 0 "));
+1354: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1355: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'15',B.MAIN_BOOK,A.BILL_NO,Null,'',A.BANK_AC,A.AC_CODE,0,CHQ_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.CHQ_AMT <> 0 "));
+1356: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1357: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'16',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,A.BANK_AC,0,RTN_CHQ_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.RTN_CHQ_AMT <> 0 "));
+1358: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1359: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'17',B.MAIN_BOOK,A.BILL_NO,Null,'',A.BANK_AC,A.AC_CODE,RTN_CHQ_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.RTN_CHQ_AMT <> 0 "));
+1360: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1361: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'18',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,A.CARD_AC,CARD_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.CARD_AMT <> 0 "));
+1362: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1363: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'19',B.MAIN_BOOK,A.BILL_NO,Null,'',A.CARD_AC,A.AC_CODE,0,CARD_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.CARD_AMT <> 0 "));
+1364: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1365: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'20',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,A.CARD_AC,0,RTN_CARD_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.RTN_CARD_AMT <> 0 "));
+1366: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1367: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'21',B.MAIN_BOOK,A.BILL_NO,Null,'',A.CARD_AC,A.AC_CODE,RTN_CARD_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.RTN_CARD_AMT <> 0 "));
+1368: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1369: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'22',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,B.AC_CODE,CASH_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 2 AND A.CASH_AMT <> 0 "));
+1370: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1371: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'23',B.MAIN_BOOK,A.BILL_NO,Null,'',B.AC_CODE,A.AC_CODE,0,CASH_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 2  AND A.CASH_AMT <> 0 "));
+1372: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1373: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'24',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,B.AC_CODE,0,RTN_CASH_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 2  AND A.RTN_CASH_AMT <> 0 "));
+1374: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1375: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'25',B.MAIN_BOOK,A.BILL_NO,Null,'',B.AC_CODE,A.AC_CODE,RTN_CASH_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 2  AND A.RTN_CASH_AMT <> 0 "));
+1376: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1377: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'26',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,B.AC_CODE,KASAR_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 4 AND A.KASAR_AMT <> 0 "));
+1378: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1379: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'27',B.MAIN_BOOK,A.BILL_NO,Null,'',B.AC_CODE,A.AC_CODE,0,KASAR_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 4  AND A.KASAR_AMT <> 0 "));
+1380: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1381: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'28',B.MAIN_BOOK,A.BILL_NO,Null,'',A.AC_CODE,B.AC_CODE,0,RTN_KASAR_AMT,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 3  AND A.RTN_KASAR_AMT <> 0 "));
+1382: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1383: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'29',B.MAIN_BOOK,A.BILL_NO,Null,'',B.AC_CODE,A.AC_CODE,RTN_KASAR_AMT,0,'A','',0,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK   WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 3  AND A.RTN_KASAR_AMT <> 0 "));
+1384: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+1385: 		if (Operators.CompareString(DC_Main.SSRegSrNo, "HM376NEHM", false) == 0)
+1386: 		{
+1387: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+STR(A.SR_NO)+'30',B.MAIN_BOOK,'',Null,'',A.AC_CODE,D.PURC_AC,0,0,A.IT_TYPE,'+',A.ITM_FINE,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,A.AC_CODE,'' FROM ((SL_DETL_RTN AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)  LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.ITM_AMT = 0  AND A.ITM_FINE <> 0"));
+1388: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+1389: 			if (Operators.CompareString(DC_Main.MsTradFine, "Y", false) == 0)
+1390: 			{
+1391: 				DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE,CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE,LDR_NAME)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,B.BOOK_SNAME,A.VCH_NO,A.VCH_DATE,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+STR(A.SR_NO)+'31',B.MAIN_BOOK,'',Null,'',D.PURC_AC,A.AC_CODE,0,0,A.IT_TYPE,'-',A.ITM_FINE,'',A.VCH_TIME,A.HD_VCH_NO,Null,B.DATA_TYPE,'N',A.MAIN_USER,0,'','' FROM ((SL_DETL_RTN AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)  LEFT JOIN GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.ITM_AMT = 0 AND A.ITM_FINE <> 0 "));
+1392: 				DC_Main.ExeQuteDc(DC_Main.RsQry);
+1393: 			}
+1394: 		}
+1395: 	}
+1396: 
+
+### Ac_Rojmel.cs:584-616
+584: 	public static void SaleReturn_RojMel(string MsBook, string MsVchNo)
+585: 	{
+586: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.AC_CODE,B.AC_CODE,A.RTN_BILL_OS,0,'','A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 1 AND A.RTN_BILL_OS  <> 0  "));
+587: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+588: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.AC_CODE,B.AC_CODE,0,A.RTN_NET_AMT,'RTN' + ' - ' + A.AC_NAME,'A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.BOOK_TYPE = 'T' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 1 AND A.RTN_NET_AMT <> 0 "));
+589: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+590: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO),A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  D.SALE_AC,A.AC_CODE,0,A.NET_AMT,F.AC_NAME,A.IT_TYPE,'-',A.ITM_PCS,A.ITM_GWT,A.ITM_NWT,0,0,0,A.ITM_RATE,A.ITM_AMT,A.LBR_RATE,A.LBR_AMT,A.OTH_AMT,A.NET_AMT,  C.IT_NAME,A.IT_CODE,'','','',B.DATA_TYPE FROM ((((SL_DATA AS F LEFT JOIN SL_DETL_RTN AS A ON F.CO_CODE = A.CO_CODE AND F.LC_CODE = A.LC_CODE AND F.CO_YEAR = A.CO_YEAR AND F.CO_BOOK = A.CO_BOOK AND F.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)  LEFT JOIN  GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE)LEFT JOIN AC_MAST AS E ON A.CO_CODE = E.CO_CODE AND A.AC_CODE = E.AC_CODE WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE <> 'T' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 1 AND A.NET_AMT <> 0 "));
+591: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+592: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'03',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.AC_CODE,B.AC_CODE,0,A.BILL_OS,'','A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 1 AND A.BILL_OS  <> 0 "));
+593: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+594: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'04'+STR(A.SR_NO),A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.AC_CODE,D.SALE_AC,A.NET_AMT,0,F.AC_NAME,A.IT_TYPE,'-',A.ITM_PCS,A.ITM_GWT,A.ITM_NWT,0,0,0,A.ITM_RATE,A.ITM_AMT,A.LBR_RATE,A.LBR_AMT,A.OTH_AMT,A.NET_AMT,  C.IT_NAME,A.IT_CODE,'','','',B.DATA_TYPE FROM ((((SL_DATA AS F LEFT JOIN SL_DETL AS A ON F.CO_CODE = A.CO_CODE AND F.LC_CODE = A.LC_CODE AND F.CO_YEAR = A.CO_YEAR AND F.CO_BOOK = A.CO_BOOK AND F.VCH_NO = A.VCH_NO) LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)  LEFT JOIN  GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE)LEFT JOIN AC_MAST AS E ON A.CO_CODE = E.CO_CODE AND A.AC_CODE = E.AC_CODE WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK = 'SALES RETURNE' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 1 AND A.NET_AMT <> 0 "));
+595: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+596: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'05',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.BANK_AC,A.AC_CODE,0,A.CHQ_AMT,'','A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.CHQ_AMT <> 0 "));
+597: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+598: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'06',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.BANK_AC,A.AC_CODE,A.RTN_CHQ_AMT,0,'','A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.RTN_CHQ_AMT <> 0 "));
+599: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+600: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'07',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.CARD_AC,A.AC_CODE,0,A.CARD_AMT,'','A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.CARD_AMT <> 0 "));
+601: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+602: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'08',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.CARD_AC,A.AC_CODE,A.RTN_CARD_AMT,0,'','A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.RTN_CARD_AMT <> 0 "));
+603: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+604: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'09',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  B.AC_CODE,A.AC_CODE,0,A.KASAR_AMT,'KSR' + ' - ' + C.AC_NAME,'A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM (SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 3 AND A.KASAR_AMT <> 0 "));
+605: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+606: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'10',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  B.AC_CODE,A.AC_CODE,A.RTN_KASAR_AMT,0,'KSR' + ' - ' + C.AC_NAME,'A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM (SL_DATA AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 4 AND A.RTN_KASAR_AMT <> 0 "));
+607: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+608: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'11',A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  '00085',A.AC_CODE,0,A.TAX_AMT,'GST' + ' - ' + C.AC_NAME,'A','',0,0,0,0,0,0,0,0,0,0,0,0,  A.VCH_DESC,'','','','',B.DATA_TYPE FROM (SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.TAX_AMT <> 0"));
+609: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+610: 		if (Operators.CompareString(DC_Main.SSRegSrNo, "HM376NEHM", false) == 0)
+611: 		{
+612: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO ROJ_MEL_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,LEDR_KEY,VCH_DATE,VCH_TYPE,BOOK_NAME,  AC_CODE,LD_CODE,CR_AMT,DR_AMT,AC_NAME,IT_TYPE,SIGN,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,NET_AMT,  IT_DESC,IT_CODE,MEMB_CODE,SCHM_CODE,REF_NO,DATA_TYPE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'15'+Str(A.SR_NO),A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,  A.AC_CODE,D.PURC_AC,0,0,E.AC_NAME,A.IT_TYPE,'+',A.ITM_PCS,A.ITM_GWT,A.ITM_NWT,A.ITM_TOUCH,A.ITM_WEST_PRC,A.ITM_FINE,0,0,0,0,0,0,  C.IT_NAME,A.IT_CODE,'','','',B.DATA_TYPE FROM (((SL_DETL_RTN AS A LEFT JOIN BOOK_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE)  LEFT JOIN  GROUP_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.GR_CODE = D.GR_CODE)LEFT JOIN AC_MAST AS E ON A.CO_CODE = E.CO_CODE AND A.AC_CODE = E.AC_CODE WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND A.VCH_DATE >= '" + Strings.Format((object)DC_Main.MOp_dt, "MM/dd/yyyy") + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND B.SR_NO = 1 AND A.ITM_FINE <> 0 AND A.ITM_AMT = 0 "));
+613: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+614: 		}
+615: 	}
+616: 
+
+### Ac_Stock.cs:239-250
+239: 	public static void SaleReturn_Stk(string StkBook, string StkVchNo)
+240: 	{
+241: 		if (Operators.CompareString(StkVchNo, "", false) != 0)
+242: 		{
+243: 			DC_Main.MsPostingDate = "";
+244: 		}
+245: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO MAIN_STOCK (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE,STK_DATE,VCH_TYPE,BOOK_NAME,AC_CODE,IT_CODE,TAG_NO,VCH_SRNO,TBL_CODE,TR_TYPE,ITM_SIGN,  ITM_QTY,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,ITM_MRP,NET_AMT,  KR_NWT,KR_TOUCH,KR_WEST,KR_FINE,KR_LBR_AMT,KR_OTH_AMT,KR_COST,EMP_CODE,ENTRY_TIME,MAIN_USER,DATA_TYPE,DESIGN_NO,ITM_SIZE,ITM_DESC,GHT_PRC,ITM_LOT,ITM_DISC)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,1,A.SR_NO,A.VCH_DATE,A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,A.AC_CODE,A.IT_CODE,A.TAG_NO,A.VCH_SRNO,A.TBL_CODE,'O','-',  1,A.ITM_PCS,A.ITM_GWT,A.ITM_NWT,A.ITM_TOUCH,0,A.ITM_FINE,A.ITM_RATE,A.ITM_AMT,A.LBR_RATE,A.LBR_AMT,A.OTH_AMT,0,A.NET_AMT,  A.KR_NET_WT,A.KR_TOUCH,A.KR_WEST_PRC,A.KR_FINE,0,0,0,A.EMP_CODE,A.VCH_TIME,A.MAIN_USER,B.DATA_TYPE,A.DESIGN_NO,A.ITM_SIZE,'',A.ITM_GHT_PRC,'',0  FROM  SL_DETL AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(StkBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + StkBook + "'"))), Interaction.IIf(Operators.CompareString(StkVchNo, "", false) == 0, (object)DC_Main.MsPostingDate, (object)(" AND A.VCH_NO ='" + StkVchNo + "'"))), (object)" "));
+246: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+247: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO MAIN_STOCK (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE,STK_DATE,VCH_TYPE,BOOK_NAME,AC_CODE,IT_CODE,TAG_NO,VCH_SRNO,TBL_CODE,TR_TYPE,ITM_SIGN,  ITM_QTY,ITM_PCS,ITM_GWT,ITM_NWT,ITM_TOUCH,ITM_WEST,ITM_FINE,ITM_RATE,ITM_AMT,LBR_RATE,LBR_AMT,OTH_AMT,ITM_MRP,NET_AMT,  KR_NWT,KR_TOUCH,KR_WEST,KR_FINE,KR_LBR_AMT,KR_OTH_AMT,KR_COST,EMP_CODE,ENTRY_TIME,MAIN_USER,DATA_TYPE,DESIGN_NO,ITM_SIZE,ITM_DESC,GHT_PRC,ITM_LOT,ITM_DISC)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,2,A.SR_NO,A.VCH_DATE,A.VCH_DATE,B.BOOK_SNAME,B.MAIN_BOOK,A.AC_CODE,A.IT_CODE,A.TAG_NO,A.VCH_SRNO,A.TBL_CODE,'I','+',  1,A.ITM_PCS,A.ITM_GWT,A.ITM_NWT,A.ITM_TOUCH,A.ITM_WEST_PRC,A.ITM_FINE,A.ITM_RATE,A.ITM_AMT,A.LBR_RATE,A.LBR_AMT,A.OTH_AMT,0,A.NET_AMT,  A.ITM_NWT,A.ITM_TOUCH,A.ITM_WEST_PRC,A.ITM_FINE,0,0,A.TAG_COST,A.EMP_CODE,A.VCH_TIME,A.MAIN_USER,A.DATA_TYPE,A.DESIGN_NO,A.ITM_SIZE,'',A.ITM_GHT_PRC,'',0  FROM  SL_DETL_RTN AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_INOUT = 'I' "), Interaction.IIf(Operators.CompareString(StkBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + StkBook + "'"))), Interaction.IIf(Operators.CompareString(StkVchNo, "", false) == 0, (object)DC_Main.MsPostingDate, (object)(" AND A.VCH_NO ='" + StkVchNo + "'"))), (object)" "));
+248: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+249: 	}
+250: 
+
+### Ac_Stock.cs:804-811
+804: 	public static void Dm_Sale_Return_Detl(string StkBook, string StkVchNo)
+805: 	{
+806: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO DM_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,MAIN_SRNO,SR_NO,ISR_NO,VCH_DATE,ENTRY_TYPE,BOOK_NAME,AC_CODE,IT_CODE,  DM_CODE,DM_ORIGIN,DM_REMARK,DM_SIZE,DM_COLOR,DM_LOT_NO,DM_PCS,DM_WT,DM_SIGN,DM_RATE,DM_AMT,EMP_CODE,TAG_NO,VCH_SRNO,MAIN_IT_CODE,INOUT_TYPE,TBL_CODE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,1,A.SR_NO,A.ISR_NO,A.VCH_DATE,'S',B.BOOK_SNAME,A.AC_CODE,A.IT_CODE,  A.DM_CODE,A.DM_ORIGIN,A.DM_REMARK,A.DM_SIZE,A.DM_COLOR,'',A.IT_PCS,A.IT_GWT,'-',IT_RATE,IT_AMT,'',CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END,A.VCH_SRNO,D.IT_CODE,'S',D.TBL_CODE FROM ((SL_DETL AS D INNER JOIN SL_IDTL AS A ON D.CO_CODE = A.CO_CODE AND D.LC_CODE = A.LC_CODE AND D.CO_YEAR = A.CO_YEAR AND D.CO_BOOK = A.CO_BOOK AND D.VCH_NO = A.VCH_NO AND D.OLD_SRNO = A.SR_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(StkBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + StkBook + "'"))), Interaction.IIf(Operators.CompareString(StkVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + StkVchNo + "'"))), (object)" AND C.OTH_DETL_POSTING = 'Y' "));
+807: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+808: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("INSERT INTO DM_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,MAIN_SRNO,SR_NO,ISR_NO,VCH_DATE,ENTRY_TYPE,BOOK_NAME,AC_CODE,IT_CODE,  DM_CODE,DM_ORIGIN,DM_REMARK,DM_SIZE,DM_COLOR,DM_LOT_NO,DM_PCS,DM_WT,DM_SIGN,DM_RATE,DM_AMT,EMP_CODE,TAG_NO,VCH_SRNO,MAIN_IT_CODE,INOUT_TYPE,TBL_CODE)  Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,A.VCH_NO,2,A.SR_NO,A.ISR_NO,A.VCH_DATE,'S',B.BOOK_SNAME,A.AC_CODE,A.IT_CODE,  A.DM_CODE,A.DM_ORIGIN,A.DM_REMARK,A.DM_SIZE,A.DM_COLOR,'',A.IT_PCS,A.IT_GWT,'+',IT_RATE,IT_AMT,'',A.TAG_NO,A.VCH_SRNO,D.IT_CODE,'I',D.TBL_CODE FROM ((BAR_DETL AS D INNER JOIN BAR_IDTL AS A ON D.CO_CODE = A.CO_CODE AND D.LC_CODE = A.LC_CODE AND D.CO_YEAR = A.CO_YEAR AND D.CO_BOOK = A.CO_BOOK AND D.VCH_NO = A.VCH_NO AND D.OLD_SRNO = A.SR_NO) LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') "), Interaction.IIf(Operators.CompareString(StkBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + StkBook + "'"))), Interaction.IIf(Operators.CompareString(StkVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + StkVchNo + "'"))), (object)" AND C.OTH_DETL_POSTING = 'Y' "));
+809: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+810: 	}
+811: 
+
+### Ac_Tax.cs:179-204
+179: 	public static void Sales_Rtn_GST(string MsBook, string MsVchNo)
+180: 	{
+181: 		if (Operators.CompareString(DC_Main.MCo_SName, "UAE", false) == 0)
+182: 		{
+183: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,1,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,'I',C.TAX_PRC,A.RTN_NET_AMT,A.TAX_AMT,A.DISC_AMT,format(A.TOT_AMT+A.TDS_AMT-(A.HM_AMT+A.HM_TAX_AMT+A.TCS_AMT),'0.00'),'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_TYPE = 'T' AND A.CO_BOOK NOT IN ('099','199') AND A.NET_AMT <> 0 AND C.SR_NO = 0  "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.TAX_AMT <> 0"));
+184: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+185: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,2,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.HM_TAX_CODE,'S',C.TAX_PRC,A.HM_AMT,A.HM_TAX_AMT,0,format(A.HM_AMT+A.HM_TAX_AMT,'0.00'),'-',A.AC_NAME,'N',0,format(A.TOT_AMT+A.TDS_AMT-(A.HM_AMT+A.HM_TAX_AMT+A.TCS_AMT),'0.00'),0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.HM_TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_TYPE = 'T' AND A.CO_BOOK NOT IN ('099','199') AND A.HM_TAX_AMT <> 0 AND C.SR_NO = 0  "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)""));
+186: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+187: 			DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,3,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,'00','I',0,0,0,A.DISC_AMT,0,'-',A.AC_NAME,'N',0,format(A.RTN_TOT_AMT-(A.HM_AMT+A.HM_TAX_AMT+A.TCS_AMT),'0.00'),A.ZERO_RATED_AMT FROM (SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_TYPE = 'T' AND A.CO_BOOK NOT IN ('099','199') AND A.RTN_TOT_AMT <> 0 "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)" AND A.TAX_AMT = 0 "));
+188: 			DC_Main.ExeQuteDc(DC_Main.RsQry);
+189: 			return;
+190: 		}
+191: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,1,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.RTN_NET_AMT,A.TAX_AMT/2,0,A.RTN_TOT_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE = 'T'  AND A.RTN_NET_AMT <> 0 AND C.SR_NO = 1 AND D.AC_GST_TYPE <> 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)""));
+192: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+193: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,2,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.RTN_NET_AMT,A.TAX_AMT/2,0,A.RTN_TOT_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE = 'T' AND A.RTN_NET_AMT <> 0 AND C.SR_NO = 2 AND D.AC_GST_TYPE <> 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)""));
+194: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+195: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,3,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.RTN_NET_AMT,A.TAX_AMT,0,A.RTN_TOT_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK = 'SALES RETURNE' AND B.BOOK_TYPE = 'T' AND A.RTN_NET_AMT <> 0 AND C.SR_NO = 3 AND D.AC_GST_TYPE = 'I'  "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)""));
+196: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+197: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,10,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.HM_AMT,A.HM_TAX_AMT/2,0,A.HM_AMT+A.HM_TAX_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.HM_TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_TYPE = 'T' AND A.HM_TAX_AMT <> 0 AND C.SR_NO = 1 AND D.AC_GST_TYPE <> 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)""));
+198: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+199: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,20,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.HM_AMT,A.HM_TAX_AMT/2,0,A.HM_AMT+A.HM_TAX_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.HM_TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_TYPE = 'T' AND A.HM_TAX_AMT <> 0 AND C.SR_NO = 2 AND D.AC_GST_TYPE <> 'I' "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)""));
+200: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+201: 		DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Insert Into TAX_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,BOOK_NAME,TRAN_TYPE,VCH_DATE,AC_CODE,TAX_CODE,TAX_TYPE,TAX_PRC,NET_AMT,TAX_AMT,DISC_AMT,TOT_AMT,TAX_SIGN,PARTY_NAME,R_CHARG,ISR_NO,TAX_FREE_AMT,ZERO_RATED_AMT) Select A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,30,B.MAIN_BOOK,'S',A.VCH_DATE,A.AC_CODE,A.TAX_CODE,C.TAX_GROUP,C.TAX_PRC,A.HM_AMT,A.HM_TAX_AMT,0,A.HM_AMT+A.HM_TAX_AMT,'-',A.AC_NAME,'N',0,0,0 FROM ((SL_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN TAX_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.HM_TAX_CODE = C.TAX_CODE)LEFT JOIN AC_MAST AS D ON A.CO_CODE = D.CO_CODE AND A.AC_CODE = D.AC_CODE  WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.CO_YEAR = '" + DC_Main.MCo_year + "' AND B.MAIN_BOOK IN ('SALES RETURNE') AND B.BOOK_TYPE = 'T' AND A.HM_TAX_AMT <> 0 AND C.SR_NO = 3 AND D.AC_GST_TYPE = 'I'  "), Interaction.IIf(Operators.CompareString(MsBook, "", false) == 0, (object)"", (object)(" AND A.CO_BOOK ='" + MsBook + "'"))), Interaction.IIf(Operators.CompareString(MsVchNo, "", false) == 0, (object)"", (object)(" AND A.VCH_NO ='" + MsVchNo + "'"))), (object)""));
+202: 		DC_Main.ExeQuteDc(DC_Main.RsQry);
+203: 	}
+204: 
+
+### DC_Main.cs:1463-1487
+1463: 	public static void MsAcBal(string AcCode, DateTime TranTime)
+1464: 	{
+1465: 		MsAcAmtOpBal = 0.0;
+1466: 		MsAcAmtClBal = 0.0;
+1467: 		MsAcGoldOpBal = 0.0;
+1468: 		MsAcGoldClBal = 0.0;
+1469: 		MsAcSilverOpBal = 0.0;
+1470: 		MsAcSilverClBal = 0.0;
+1471: 		RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Select AC_CODE,Sum(CR_AMT-DR_AMT) as Amount,SUM(CASE WHEN IT_TYPE = 'G' THEN(CASE WHEN SIGN = '+' THEN FINE_WT ELSE -FINE_WT END) ELSE 0 END) as GoldWt,sum(CASE WHEN IT_TYPE = 'S' THEN (CASE WHEN SIGN = '+' THEN FINE_WT ELSE -FINE_WT END) ELSE 0 END) as SilverWt FROM AC_DATA  WHERE CO_CODE = '" + MCo_code + "' AND LC_CODE = '" + MLc_code + "' AND CO_YEAR = '" + MCo_year + "' AND AC_CODE = '" + AcCode + "' and ENTRY_TIME < '" + Strings.Format((object)TranTime, "MM/dd/yyyy HH:mm:ss") + "' "), Interaction.IIf(Operators.CompareString(MsDataType, "C", false) == 0, (object)"", (object)("AND DATA_TYPE = '" + MsDataType + "'"))), (object)"   GROUP BY AC_CODE"));
+1472: 		DataTable dataTable = OpenRecordSetDc(RsQry);
+1473: 		if (dataTable.Rows.Count > 0)
+1474: 		{
+1475: 			MsAcAmtOpBal = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(dataTable.Rows[0]["Amount"]), "0.00"));
+1476: 			MsAcGoldOpBal = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(dataTable.Rows[0]["GoldWt"]), "0.000"));
+1477: 			MsAcSilverOpBal = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(dataTable.Rows[0]["SilverWt"]), "0.000"));
+1478: 		}
+1479: 		RsQry = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject((object)("Select AC_CODE,Sum(CR_AMT-DR_AMT) as Amount,SUM(CASE WHEN IT_TYPE = 'G' THEN(CASE WHEN SIGN = '+' THEN FINE_WT ELSE -FINE_WT END) ELSE 0 END) as GoldWt,sum(CASE WHEN IT_TYPE = 'S' THEN (CASE WHEN SIGN = '+' THEN FINE_WT ELSE -FINE_WT END) ELSE 0 END) as SilverWt FROM AC_DATA  WHERE CO_CODE = '" + MCo_code + "' AND LC_CODE = '" + MLc_code + "' AND CO_YEAR = '" + MCo_year + "' AND AC_CODE = '" + AcCode + "' and ENTRY_TIME <= '" + Strings.Format((object)TranTime, "MM/dd/yyyy HH:mm:ss") + "' "), Interaction.IIf(Operators.CompareString(MsDataType, "C", false) == 0, (object)"", (object)("AND DATA_TYPE = '" + MsDataType + "'"))), (object)"   GROUP BY AC_CODE"));
+1480: 		dataTable = OpenRecordSetDc(RsQry);
+1481: 		if (dataTable.Rows.Count > 0)
+1482: 		{
+1483: 			MsAcAmtClBal = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(dataTable.Rows[0]["Amount"]), "0.00"));
+1484: 			MsAcGoldClBal = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(dataTable.Rows[0]["GoldWt"]), "0.000"));
+1485: 			MsAcSilverClBal = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(dataTable.Rows[0]["SilverWt"]), "0.000"));
+1486: 		}
+1487: 	}
+
+### MS_OPNCOMP.cs:1458-1477
+1458: 						CurProcess = false;
+1459: 						DC_Main.MsDataType = "C";
+1460: 						if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))
+1461: 						{
+1462: 							DC_Main.MsDataType = "A";
+1463: 						}
+1464: 						switch (DC_Main.SSRegSrNo)
+1465: 						{
+1466: 						case "HM283NEKU":
+1467: 						case "HM287NEKU":
+1468: 						case "HM310NEPK":
+1469: 						case "HM307NEKU":
+1470: 						case "HM340NEKU":
+1471: 						case "VK142NEVK":
+1472: 						case "HM382NEKU":
+1473: 						case "HM190NEKU":
+1474: 						case "DM119NEDG":
+1475: 							DC_Main.MsDataType = "C";
+1476: 							break;
+1477: 						}
+
+### MDI_FORM.cs:12721-12792
+12721: 		if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))
+12722: 		{
+12723: 			Keys keyCode3 = e.KeyCode;
+12724: 			if ((int)keyCode3 == (0x41 & (0 - (e.Control ? 1 : 0))) || (int)keyCode3 == (0x42 & (0 - (e.Control ? 1 : 0))) || (int)keyCode3 == (0x43 & (0 - (e.Control ? 1 : 0))))
+12725: 			{
+12726: 				DC_Main.RsQry = "SELECT CON_NAME FROM CONV_MAST WHERE CO_CODE = '01' AND CON_CODE = 'A'";
+12727: 				DataTable dataTable = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+12728: 				if (dataTable.Rows.Count == 0)
+12729: 				{
+12730: 					if (Operators.CompareString(CodVal, "A", false) == 0)
+12731: 					{
+12732: 						DC_Main.MsDataType = "A";
+12733: 					}
+12734: 					else if (Operators.CompareString(CodVal, "B", false) == 0)
+12735: 					{
+12736: 						DC_Main.MsDataType = "B";
+12737: 					}
+12738: 					else if (Operators.CompareString(CodVal, "C", false) == 0)
+12739: 					{
+12740: 						DC_Main.MsDataType = "C";
+12741: 					}
+12742: 					else
+12743: 					{
+12744: 						DC_Main.MsDataType = "A";
+12745: 					}
+12746: 				}
+12747: 				else
+12748: 				{
+12749: 					DC_Main.RsQry = "SELECT CON_CODE FROM CONV_MAST WHERE CO_CODE = '01' AND CON_NAME = '" + CodVal + "'";
+12750: 					dataTable = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+12751: 					if (dataTable.Rows.Count > 0)
+12752: 					{
+12753: 						DC_Main.MsDataType = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["CON_CODE"], (object)""));
+12754: 					}
+12755: 					else
+12756: 					{
+12757: 						DC_Main.MsDataType = "A";
+12758: 					}
+12759: 				}
+12760: 				if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))
+12761: 				{
+12762: 					tSoftDemoType.Text = "- -";
+12763: 					((Control)tSoftDemoType).Font = new Font("Arial", 12f, (FontStyle)1);
+12764: 					if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)
+12765: 					{
+12766: 						((Control)tSoftDemoType).Visible = false;
+12767: 					}
+12768: 					if (Operators.CompareString(DC_Main.MsDataType, "B", false) == 0)
+12769: 					{
+12770: 						((Control)tSoftDemoType).Visible = true;
+12771: 						((TextBoxBase)tSoftDemoType).ForeColor = Color.Red;
+12772: 					}
+12773: 					if (Operators.CompareString(DC_Main.MsDataType, "C", false) == 0)
+12774: 					{
+12775: 						((Control)tSoftDemoType).Visible = true;
+12776: 						((TextBoxBase)tSoftDemoType).ForeColor = Color.Green;
+12777: 					}
+12778: 				}
+12779: 				else if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)
+12780: 				{
+12781: 					((Control)tSoftDemoType).Visible = false;
+12782: 				}
+12783: 			}
+12784: 			else if (Operators.CompareString(CodVal, "", false) != 0)
+12785: 			{
+12786: 				DC_Main.RsQry = "SELECT CON_CODE FROM CONV_MAST WHERE CO_CODE = '01' AND CON_NAME = '" + CodVal + "'";
+12787: 				DataTable dataTable = DC_Main.OpenRecordSetDc(DC_Main.RsQry);
+12788: 				if (dataTable.Rows.Count > 0)
+12789: 				{
+12790: 					DC_Main.MsDataType = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["CON_CODE"], (object)""));
+12791: 				}
+12792: 				if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))

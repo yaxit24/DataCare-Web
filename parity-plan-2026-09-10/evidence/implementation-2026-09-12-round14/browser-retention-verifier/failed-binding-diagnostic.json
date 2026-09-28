@@ -1,0 +1,66 @@
+{
+  "status": "diagnostic-only-no-retention",
+  "capturedAtUtc": "2026-09-12T01:51:11.557619+00:00",
+  "missingOrDifferentBindings": [
+    {
+      "run": "browser-qualified",
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+      "expectedSha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+      "recordedSha256": null,
+      "kind": "missing"
+    },
+    {
+      "run": "browser-context-qualified",
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+      "expectedSha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+      "recordedSha256": null,
+      "kind": "missing"
+    },
+    {
+      "run": "browser-labour-qualified",
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+      "expectedSha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+      "recordedSha256": null,
+      "kind": "missing"
+    }
+  ],
+  "resultFieldChecks": [
+    {
+      "kind": "baseline",
+      "resultSha256": "b4b00b3c4ddb142ae5d9bac9160bdd80d81f6ce4d7c70e46afdf9f06c174aeb9",
+      "checks": "passed",
+      "detail": {
+        "baselineJourneys": 17,
+        "labourChecks": 12,
+        "mockedRequests": 0,
+        "mockedResponses": 0,
+        "interceptionIndicators": 0,
+        "cleanupQualification": "Completed exit-zero run required; result precedes outer cleanup."
+      }
+    },
+    {
+      "kind": "context",
+      "resultSha256": "98bfbcd8e305331a0b28603120cf3dba8cf4690a922e9d4c0e1832d0a40474fb",
+      "checks": "passed",
+      "detail": {
+        "sessionLifecycleChecks": 14,
+        "sessionActualResponseFaults": 5,
+        "syntheticBusinessResponses": 0,
+        "journeyCleanupErrors": [],
+        "cleanupQualification": "Completed exit-zero run required; result precedes outer cleanup."
+      }
+    },
+    {
+      "kind": "labour",
+      "resultSha256": "6f22445074a833080a63251ec54d4a5d5db8a5c4159fa68e1f53a255ff07ca97",
+      "checks": "passed",
+      "detail": {
+        "labourLifecycleChecks": 5,
+        "labourActualResponseFaults": 4,
+        "syntheticBusinessResponses": 0,
+        "cleanupErrors": []
+      }
+    }
+  ],
+  "qualification": "This diagnostic does not bypass the failed main verifier or qualify missing source bindings."
+}

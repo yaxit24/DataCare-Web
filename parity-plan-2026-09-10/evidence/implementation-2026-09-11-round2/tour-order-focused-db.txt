@@ -1,0 +1,15 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/salesFamilyLifecycle.db.test.ts (29 tests) 2799ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance 398ms
+ ✓ test/tourOrderHydration.db.test.ts (10 tests) 1804ms
+   ✓ Tour Order configured-book and complete editor round trip > hydrates all persisted input fields and multiple independent children; unchanged edit keeps business rows 619ms
+ ✓ test/tourOrder.db.test.ts (2 tests) 285ms
+
+ Test Files  3 passed (3)
+      Tests  41 passed (41)
+   Start at  22:30:42
+   Duration  6.84s (transform 394ms, setup 0ms, collect 747ms, tests 4.89s, environment 0ms, prepare 181ms)
+

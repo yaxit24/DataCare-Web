@@ -1,0 +1,29 @@
+{
+ "form": "RP_TRADING",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 4,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 3322
+}

@@ -1,0 +1,14 @@
+
+> @datacare/web@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> vitest run --passWithNoTests "test/mfgLotView.test.ts"
+
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+
+ ✓ test/mfgLotView.test.ts (3 tests) 2ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  08:47:53
+   Duration  1.35s (transform 419ms, setup 0ms, collect 381ms, tests 2ms, environment 0ms, prepare 243ms)
+

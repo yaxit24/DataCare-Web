@@ -1,0 +1,2844 @@
+{
+ "kind": "datacare.parity-bundle/1.0",
+ "side": "desktop",
+ "capturedAt": "2026-08-01T14:42:11.266Z",
+ "source": {
+  "engine": "sqlserver",
+  "database": "Live24",
+  "host": "127.0.0.1",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU26) (KB5093420) - 16.0.4265.3 (X64) "
+ },
+ "scope": {
+  "coCode": "01"
+ },
+ "cases": [
+  {
+   "caseId": "cashrec-001-00001",
+   "description": "",
+   "voucher": {
+    "book": "001",
+    "vchNo": "00001"
+   },
+   "tables": {
+    "AC_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BILL_DATE",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "FINE_WT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CLR_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "FINE_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "PARTY_AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LDR_NAME",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "CREC",
+       "00001",
+       "2024-04-03T00:00:00.000Z",
+       "01002024-202500100001         101",
+       "CASH REC",
+       "",
+       null,
+       "",
+       "000926",
+       "00001",
+       60000,
+       0,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-03T15:22:38.000Z",
+       "00001",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "000926",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "CREC",
+       "00001",
+       "2024-04-03T00:00:00.000Z",
+       "01002024-202500100001         102",
+       "CASH REC",
+       "",
+       null,
+       "",
+       "00001",
+       "000926",
+       0,
+       60000,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-03T15:22:38.000Z",
+       "00001",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "CREC",
+       "00001",
+       "2024-04-03T00:00:00.000Z",
+       "01002024-202500100001         103",
+       "CASH REC",
+       "",
+       null,
+       "",
+       "000926",
+       "00057",
+       771,
+       0,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-03T15:22:38.000Z",
+       "00001",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "000926",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "CREC",
+       "00001",
+       "2024-04-03T00:00:00.000Z",
+       "01002024-202500100001         104",
+       "CASH REC",
+       "",
+       null,
+       "",
+       "00057",
+       "000926",
+       0,
+       771,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-03T15:22:38.000Z",
+       "00001",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ]
+     ]
+    },
+    "CASH_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "int",
+       "scale": 0
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_TIME",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REC_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "KASAR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BANK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "OLD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "NEW_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ADD_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REC_AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CHQ_PRINT_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CLR_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "USER_UPDATE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "USER_DELETE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BANK_CHARGES",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "MOB_ENTRY_SAVE",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "00001",
+       1,
+       "2024-04-03T00:00:00.000Z",
+       "CREC",
+       "I",
+       "C",
+       "CASH REC",
+       "2024-04-03T15:22:38.000Z",
+       "000926",
+       "KASHYAP KAMBALIYA",
+       "",
+       60000,
+       771,
+       "",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00001",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-03T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ]
+     ]
+    },
+    "OP_LDR": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "CR_GL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_GL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "CR_SL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_SL_FINE",
+       "type": "float",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "00001",
+       "A",
+       "2023-04-05T00:00:00.000Z",
+       "CREC",
+       "I",
+       "I",
+       "CASH REC",
+       "000666",
+       5000,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "00001",
+       "A",
+       "2023-04-05T00:00:00.000Z",
+       "CREC",
+       "I",
+       "I",
+       "CASH REC",
+       "00001",
+       0,
+       5000,
+       0,
+       0,
+       0,
+       0
+      ]
+     ]
+    },
+    "ROJ_MEL_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ITM_PCS",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_NWT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_TOUCH",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_WEST",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "LBR_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "NET_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "IT_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REF_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "00001",
+       "01002024-20250010000101         1",
+       "2024-04-03T00:00:00.000Z",
+       "CREC",
+       "CASH REC",
+       "00001",
+       "KASHYAP KAMBALIYA",
+       "000926",
+       60000,
+       0,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "00001",
+       "01002024-20250010000102         1",
+       "2024-04-03T00:00:00.000Z",
+       "CREC",
+       "CASH REC",
+       "000926",
+       "KSR - KASHYAP KAMBALIYA",
+       "00057",
+       771,
+       0,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "001",
+       "00001",
+       "01002024-20250010000103         1",
+       "2024-04-03T00:00:00.000Z",
+       "CREC",
+       "CASH REC",
+       "00057",
+       "KSR - KASHYAP KAMBALIYA",
+       "000926",
+       0,
+       771,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ]
+     ]
+    },
+    "TEMP_BOOK_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "001",
+       "00001",
+       "Cash Received"
+      ]
+     ]
+    }
+   }
+  },
+  {
+   "caseId": "cashpay-002-00029",
+   "description": "",
+   "voucher": {
+    "book": "002",
+    "vchNo": "00029"
+   },
+   "tables": {
+    "AC_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BILL_DATE",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "FINE_WT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CLR_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "FINE_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "PARTY_AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LDR_NAME",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         105",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "000760",
+       "00001",
+       0,
+       5000,
+       "A",
+       "",
+       0,
+       "AMDAVAD",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "000760",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         106",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "000760",
+       5000,
+       0,
+       "A",
+       "",
+       0,
+       "AMDAVAD",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         205",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00052",
+       "00001",
+       0,
+       1000,
+       "A",
+       "",
+       0,
+       "DIESEL ERTIGA",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "00052",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         206",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "00052",
+       1000,
+       0,
+       "A",
+       "",
+       0,
+       "DIESEL ERTIGA",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         305",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00052",
+       "00001",
+       0,
+       750,
+       "A",
+       "",
+       0,
+       "VEGITABLES",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "00052",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         306",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "00052",
+       750,
+       0,
+       "A",
+       "",
+       0,
+       "VEGITABLES",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         405",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00052",
+       "00001",
+       0,
+       250,
+       "A",
+       "",
+       0,
+       "CABLE",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "00052",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         406",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "00052",
+       250,
+       0,
+       "A",
+       "",
+       0,
+       "CABLE",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         505",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00052",
+       "00001",
+       0,
+       300,
+       "A",
+       "",
+       0,
+       "VERAVAL JATA CHA PANI\r\n",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "00052",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         506",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "00052",
+       300,
+       0,
+       "A",
+       "",
+       0,
+       "VERAVAL JATA CHA PANI\r\n",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         605",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00052",
+       "00001",
+       0,
+       1100,
+       "A",
+       "",
+       0,
+       "GIFT - CHANDALO LALO SHANGAR",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "00052",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         606",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "00052",
+       1100,
+       0,
+       "A",
+       "",
+       0,
+       "GIFT - CHANDALO LALO SHANGAR",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         705",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00052",
+       "00001",
+       0,
+       300,
+       "A",
+       "",
+       0,
+       "NASTO GHAR MATE",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "00052",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         706",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "00052",
+       300,
+       0,
+       "A",
+       "",
+       0,
+       "NASTO GHAR MATE",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         805",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "000463",
+       "00001",
+       0,
+       1800,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "000463",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         806",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "000463",
+       1800,
+       0,
+       "A",
+       "",
+       0,
+       "",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         905",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00052",
+       "00001",
+       0,
+       160,
+       "A",
+       "",
+       0,
+       "XTRA KHARCH\r\n",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "00052",
+       ""
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "CPAY",
+       "00029",
+       "2024-04-22T00:00:00.000Z",
+       "01002024-202500200029         906",
+       "CASH PAY",
+       "",
+       null,
+       "",
+       "00001",
+       "00052",
+       160,
+       0,
+       "A",
+       "",
+       0,
+       "XTRA KHARCH\r\n",
+       "2024-04-22T20:08:33.000Z",
+       "00029",
+       null,
+       "A",
+       "N",
+       "ABC",
+       0,
+       "",
+       ""
+      ]
+     ]
+    },
+    "CASH_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "int",
+       "scale": 0
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_TIME",
+       "type": "datetime",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REC_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "KASAR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BANK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "OLD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "NEW_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ADD_USER",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REC_AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CHQ_PRINT_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CLR_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "USER_UPDATE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "USER_DELETE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BANK_CHARGES",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "MOB_ENTRY_SAVE",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       1,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "000760",
+       "JASHRAJ DHAKAN",
+       "",
+       5000,
+       0,
+       "AMDAVAD",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       2,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "00052",
+       "HOME EXPENSES A/C",
+       "",
+       1000,
+       0,
+       "DIESEL ERTIGA",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       3,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "00052",
+       "HOME EXPENSES A/C",
+       "",
+       750,
+       0,
+       "VEGITABLES",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       4,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "00052",
+       "HOME EXPENSES A/C",
+       "",
+       250,
+       0,
+       "CABLE",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       5,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "00052",
+       "HOME EXPENSES A/C",
+       "",
+       300,
+       0,
+       "VERAVAL JATA CHA PANI\r\n",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       6,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "00052",
+       "HOME EXPENSES A/C",
+       "",
+       1100,
+       0,
+       "GIFT - CHANDALO LALO SHANGAR",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       7,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "00052",
+       "HOME EXPENSES A/C",
+       "",
+       300,
+       0,
+       "NASTO GHAR MATE",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       8,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "000463",
+       "BHAVESH DHAKAN",
+       "",
+       1800,
+       0,
+       "",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       9,
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "C",
+       "CASH PAY",
+       "2024-04-22T20:08:33.000Z",
+       "00052",
+       "HOME EXPENSES A/C",
+       "",
+       160,
+       0,
+       "XTRA KHARCH\r\n",
+       "",
+       "",
+       "N",
+       null,
+       null,
+       "00029",
+       "ABC",
+       null,
+       null,
+       "",
+       "2024-04-22T00:00:00.000Z",
+       "N",
+       "N",
+       0,
+       null
+      ]
+     ]
+    },
+    "OP_LDR": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "CR_GL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_GL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "CR_SL_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_SL_FINE",
+       "type": "float",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "A",
+       "2023-06-27T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "O",
+       "CASH PAY",
+       "000693",
+       0,
+       48639.33,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "A",
+       "2023-06-27T00:00:00.000Z",
+       "CPAY",
+       "O",
+       "O",
+       "CASH PAY",
+       "00001",
+       48639.33,
+       0,
+       0,
+       0,
+       0,
+       0
+      ]
+     ]
+    },
+    "ROJ_MEL_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "DR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "ITM_PCS",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_NWT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_TOUCH",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_WEST",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_FINE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "ITM_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "LBR_RATE",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "NET_AMT",
+       "type": "float",
+       "scale": null
+      },
+      {
+       "name": "IT_DESC",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "IT_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "REF_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         1",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "JASHRAJ DHAKAN",
+       "000760",
+       0,
+       5000,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "AMDAVAD",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         2",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "HOME EXPENSES A/C",
+       "00052",
+       0,
+       1000,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "DIESEL ERTIGA",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         3",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "HOME EXPENSES A/C",
+       "00052",
+       0,
+       750,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "VEGITABLES",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         4",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "HOME EXPENSES A/C",
+       "00052",
+       0,
+       250,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "CABLE",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         5",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "HOME EXPENSES A/C",
+       "00052",
+       0,
+       300,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "VERAVAL JATA CHA PANI\r\n",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         6",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "HOME EXPENSES A/C",
+       "00052",
+       0,
+       1100,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "GIFT - CHANDALO LALO SHANGAR",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         7",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "HOME EXPENSES A/C",
+       "00052",
+       0,
+       300,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "NASTO GHAR MATE",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         8",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "BHAVESH DHAKAN",
+       "000463",
+       0,
+       1800,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ],
+      [
+       "01",
+       "00",
+       "2024-2025",
+       "002",
+       "00029",
+       "01002024-20250020002904         9",
+       "2024-04-22T00:00:00.000Z",
+       "CPAY",
+       "CASH PAY",
+       "00001",
+       "HOME EXPENSES A/C",
+       "00052",
+       0,
+       160,
+       "A",
+       "",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       "XTRA KHARCH\r\n",
+       "",
+       "",
+       "",
+       "",
+       "A"
+      ]
+     ]
+    },
+    "TEMP_BOOK_DATA": {
+     "columns": [
+      {
+       "name": "CO_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "varchar",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "varchar",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "01",
+       "00",
+       "002",
+       "00029",
+       "Cash Payment"
+      ]
+     ]
+    }
+   }
+  }
+ ]
+}

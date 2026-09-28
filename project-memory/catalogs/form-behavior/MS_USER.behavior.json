@@ -1,0 +1,138 @@
+{
+ "form": "MS_USER",
+ "loc": 5313,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM LOGIN_MAST WHERE CO_CODE = '01' ORDER BY LOGIN_NAME",
+  "SELECT LOGIN_NAME FROM LOGIN_MAST WHERE CO_CODE = '01' GROUP BY LOGIN_NAME ORDER BY LOGIN_NAME",
+  "SELECT A.* FROM USER_SET AS A LEFT JOIN MENU_DATA AS B ON A.MAIN_SRNO = B.MAIN_SRNO AND A.SUB_SRNO = B.SM_MAIN_CODE WHERE A.LC_CODE = ' ? ' AND A.USER_NAME = ' ? ' AND B.SM_TYPE = 'L' ORDER BY A.MAIN_SRNO,A.SUB_SRNO",
+  "DELETE FROM LOGIN_MAST WHERE CO_CODE = '01' AND LOGIN_NAME = ' ? '",
+  "INSERT INTO LOGIN_MAST (CO_CODE,LOGIN_NAME,LOGIN_PWD,LOGIN_CATG,MAIN_USER) VALUES ('01',' ? ',' ? ',' ? ',' ? ')",
+  "DELETE FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = '00' AND USER_NAME = ' ? '",
+  "INSERT INTO USER_SET (CO_CODE,LC_CODE,MAIN_SRNO, SUB_SRNO, USER_NAME, MAIN_MENU, SUB_MENU, FRM_VIEW, FRM_EDIT, FRM_DELETE, FRM_PRINT) SELECT '01','00',MAIN_SRNO,SM_MAIN_CODE,' ? ',BTN_NAME,SM_MAIN_NAME,'Y','Y','Y','Y' FROM MENU_DATA",
+  "DELETE FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = ' ? ' AND USER_NAME = ' ? '",
+  "Please Select User For Delete.",
+  "SELECT * FROM LOGIN_MAST WHERE CO_CODE = '01' AND LOGIN_NAME = ' ? '",
+  "DELETE FROM USER_SET WHERE CO_CODE = '01' AND USER_NAME = ' ? '",
+  "SELECT * FROM LOGIN_MAST where LOGIN_NAME=' ? '",
+  "INSERT INTO USER_SET(CO_CODE,LC_CODE,MAIN_SRNO,SUB_SRNO,USER_NAME,MAIN_MENU,SUB_MENU,FRM_VIEW,FRM_EDIT,FRM_DELETE,FRM_PRINT) VALUES(@CO_CODE,@LC_CODE,@MAIN_SRNO,@SUB_SRNO,@USER_NAME,@MAIN_MENU,@SUB_MENU,@FRM_VIEW,@FRM_EDIT,@FRM_DELETE,@FRM_PRINT)",
+  "User Name Is Not Selected,Please Select User Name First And Try Again..",
+  "All Menu And ABC User Right Is Update....Please Re open Software",
+  "SELECT * FROM MFG_DATA WHERE CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316','317','318','319')",
+  "DELETE FROM MENU_DATA WHERE BTN_NAME <> 'Mfg'",
+  "DELETE FROM MENU_DATA",
+  "INSERT INTO MENU_DATA (MAIN_SRNO,BTN_NAME,SM_MAIN_CODE,SM_CODE,SM_MAIN_NAME,SM_NAME,SM_VIEW,SM_TYPE,TILE_ITEM) VALUES ('01','Company','00','00','','','N','L','N')",
+  "SELECT * FROM MFG_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316','317','318','319')",
+  "UPDATE MENU_DATA SET SM_VIEW = 'Y' WHERE MAIN_SRNO = '06' AND SM_MAIN_CODE IN ('14','15','16','17','18')",
+  "DELETE FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK IN ('270','275')",
+  "DELETE FROM BOOK_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK IN ('270','275')",
+  "DELETE FROM BOOK_IDTL WHERE MAIN_BOOK IN ('MFG ISU ITEM','MFG REC ITEM')",
+  "INSERT INTO BOOK_IDTL (MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME) VALUES ('MFG ISU ITEM',1,'I','00001','CASH ON HAND')",
+  "INSERT INTO BOOK_IDTL (MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME) VALUES ('MFG ISU ITEM',2,'I','00008','PURCHASE GOLD A/C')",
+  "INSERT INTO BOOK_DATA(CO_CODE,LC_CODE,CO_BOOK,BOOK_NAME,BOOK_SNAME,BOOK_INOUT,BOOK_TYPE,ITM_TYPE,BOOK_SR_NAME,MAIN_BOOK,CUR_USE,DATA_TYPE,RESET_BOOK,MENU_NAME,BOOK_TBL_NAME) VALUES (' ? ',' ? ','270','Mfg Isu','MFGIS','O','F','A','','MFG ISU ITEM','Y','A','N','Mfg Isu','MFG_DATA')",
+  "INSERT INTO BOOK_IDTL (MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME) VALUES ('MFG REC ITEM',1,'I','00001','CASH ON HAND')",
+  "INSERT INTO BOOK_IDTL (MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME) VALUES ('MFG REC ITEM',2,'I','00008','PURCHASE GOLD A/C')",
+  "INSERT INTO BOOK_IDTL (MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME) VALUES ('MFG REC ITEM',3,'I','00056','LABOUR EXP A/C')",
+  "UPDATE MENU_DATA SET SM_VIEW = 'N' WHERE MAIN_SRNO = '06' AND SM_MAIN_CODE IN ('14','15','16','17','18')",
+  "UPDATE MENU_DATA SET SM_TYPE = 'S' WHERE MAIN_SRNO = '03' AND SM_MAIN_CODE = '15' AND SM_MAIN_NAME = 'Stock Out'",
+  "UPDATE MENU_DATA SET SM_TYPE = 'S' WHERE MAIN_SRNO = '03' AND SM_MAIN_CODE = '16' AND SM_MAIN_NAME = 'Stock In'",
+  "UPDATE MENU_DATA SET SM_TYPE = 'S' WHERE MAIN_SRNO = '09' AND SM_MAIN_CODE = '15' AND SM_MAIN_NAME = 'Amt Out'",
+  "UPDATE MENU_DATA SET SM_TYPE = 'S' WHERE MAIN_SRNO = '09' AND SM_MAIN_CODE = '16' AND SM_MAIN_NAME = 'Amt In'",
+  "UPDATE MENU_DATA SET SM_TYPE = 'B' WHERE MAIN_SRNO = '03' AND SM_MAIN_CODE = '17' AND SM_MAIN_NAME = 'Sale Booking'",
+  "UPDATE MENU_DATA SET SM_TYPE = 'B' WHERE MAIN_SRNO = '03' AND SM_MAIN_CODE = '18' AND SM_MAIN_NAME = 'Purc Booking'",
+  "UPDATE MENU_DATA SET SM_TYPE = 'B' WHERE MAIN_SRNO = '03' AND SM_MAIN_CODE = '19' AND SM_MAIN_NAME = 'Bul Sales'",
+  "UPDATE MENU_DATA SET SM_TYPE = 'B' WHERE MAIN_SRNO = '05' AND SM_MAIN_CODE = '17' AND SM_MAIN_NAME = 'Bul Report'",
+  "DELETE FROM USER_SET WHERE CO_CODE <> '01'",
+  "SELECT LC_CODE FROM LOCT_MAST WHERE CO_CODE = '01' ORDER BY LC_CODE",
+  "DELETE FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = ' ? LC_CODE ? ' AND USER_NAME = 'ABC'",
+  "DELETE FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = '00' AND USER_NAME = 'ABC'",
+  "SELECT LOGIN_NAME FROM LOGIN_MAST WHERE LOGIN_NAME <> 'ABC' GROUP BY LOGIN_NAME ORDER BY LOGIN_NAME",
+  "SELECT * FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = '00' AND USER_NAME = 'ABC' ORDER BY MAIN_SRNO,SUB_SRNO",
+  "SELECT MAIN_MENU FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = ' ? ' AND USER_NAME = ' ? LOGIN_NAME ? ' AND MAIN_SRNO = ' ? MAIN_SRNO ? ' AND SUB_SRNO = ' ? SUB_SRNO ? '",
+  "SELECT * FROM TILE_DATA WHERE SM_MAIN_NAME = 'Opning Form'",
+  "UPDATE TILE_DATA SET SHORT_NAME = ' ? ' WHERE SM_MAIN_NAME = 'Opning Form'"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 2,
+  "Enter": 5,
+  "Ctrl+R": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "User Are Created.",
+   "when": ""
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": ""
+  },
+  {
+   "message": "Please Enter User Name.",
+   "when": ""
+  },
+  {
+   "message": "Please Select User For Delete.",
+   "when": "Operators.CompareString(tUserName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This User now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This User now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "This User Name already Exist.Please Change User Name...",
+   "when": "Operators.CompareString(EntryMode, \"E\", false) != 0 && Operators.ConditionalCompareObjectEqual(dataView[0][\"LOGIN_NAME\"], (object)tUserName.Text, false)"
+  },
+  {
+   "message": "Password Not Match",
+   "when": "Operators.CompareString(tPasword.Text, tConPasword.Text, false) != 0"
+  },
+  {
+   "message": "Please Insert Old Password",
+   "when": "Operators.CompareString(tOldPasword.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Old Password Doesn't Match",
+   "when": "Operators.ConditionalCompareObjectNotEqual(dataView[0][\"LOGIN_PWD\"], (object)tOldPasword.Text, false)"
+  },
+  {
+   "message": "Data Are Update.",
+   "when": ""
+  },
+  {
+   "message": "User Name Is Not Selected,Please Select User Name First And Try Again..",
+   "when": ""
+  },
+  {
+   "message": "All Menu And ABC User Right Is Update....Please Re open Software",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Reset All Menu ?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are You Sure To Reset All Menu ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) != 6"
+  },
+  {
+   "message": "You Cant Reset Mfg Master Because More Then 10 Transection in MFG_DATA First Delete It and Try...",
+   "when": ""
+  },
+  {
+   "message": "Please Insert Reset Passward and Try...",
+   "when": "Operators.CompareString(tResetPwd.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Your Data Reset Pwd Is Save...Please Take Backup And Check",
+   "when": ""
+  }
+ ]
+}

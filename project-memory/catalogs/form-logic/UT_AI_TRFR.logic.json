@@ -1,0 +1,62 @@
+{
+ "form": "UT_AI_TRFR",
+ "tables": [
+  "BAR_DETL",
+  "BOOK_IDTL",
+  "GROUP_MAST",
+  "PRODUCT_MAST",
+  "TAG_DATA",
+  "TAG_IMAGE_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "TAG_DATA": [
+    "CO_CODE",
+    "CO_HDD",
+    "IMG_ID",
+    "ITM_GWT",
+    "ITM_NWT",
+    "LC_CODE",
+    "LOGIN_NAME",
+    "PR_NAME",
+    "SR_NO",
+    "TAG_NO",
+    "VCH_DATE",
+    "VCH_SRNO"
+   ],
+   "BOOK_IDTL": [
+    "AC_CODE",
+    "AC_NAME",
+    "INOUT_TYPE",
+    "MAIN_BOOK",
+    "SR_NO",
+    "SVR_PWD"
+   ]
+  },
+  "UPDATE": [
+   "BAR_DETL",
+   "TAG_DATA"
+  ],
+  "DELETE": [
+   "BOOK_IDTL",
+   "TAG_DATA",
+   "TAG_IMAGE_DATA"
+  ]
+ },
+ "selectTables": [
+  "BOOK_IDTL",
+  "GROUP_MAST",
+  "PRODUCT_MAST",
+  "TAG_DATA",
+  "TAG_IMAGE_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 8,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2848
+}

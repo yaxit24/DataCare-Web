@@ -1,0 +1,5 @@
+dead-cell audit: 606 extended columns checked across 20 pages
+  x wholesale-sale: 4 dead of 27 -> issueYear, issueBook, issueNo, issueSrno
+
+DEAD CELLS: 4. A column the writer never reads silently discards operator input
+and is counted as parity by the depth metric. Wire it in the writer or remove the column.

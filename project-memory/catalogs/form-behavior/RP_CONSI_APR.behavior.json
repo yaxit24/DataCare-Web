@@ -1,0 +1,56 @@
+{
+ "form": "RP_CONSI_APR",
+ "loc": 2574,
+ "gridColumns": {
+  "cSrNo": 0,
+  "c2SrNo": 0,
+  "cAcCode": 1,
+  "c2BookName": 1,
+  "cAcName": 2,
+  "c2VchNo": 2,
+  "cMobile": 3,
+  "c2VchDate": 3,
+  "cRecGold": 4,
+  "c2AcName": 4,
+  "cAdjGold": 5,
+  "c2AcArea": 5,
+  "cBalGold": 6,
+  "c2DrAmt": 6,
+  "cRecSilver": 7,
+  "c2Cramt": 7,
+  "cAdjSilver": 8,
+  "c2BalAmt": 8,
+  "cBalSilver": 9,
+  "c2CrDr": 9,
+  "cAcCity": 10,
+  "c2CoBook": 10,
+  "cAddress": 11,
+  "c2AcCode": 11,
+  "c2MainBook": 12
+ },
+ "inlineSql": [
+  "Select 1 AS SrNo,A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE,B.AC_CITY,C.IT_TYPE, SUM(Case When C.IT_TYPE = 'G' THEN A.ITM_NWT ELSE 0 END) As RecGold, SUM(Case When C.IT_TYPE = 'G' THEN A.ADJ_NWT ELSE 0 END) As AdjGold, SUM(Case When C.IT_TYPE = 'G' THEN A.ITM_NWT-A.ADJ_NWT ELSE 0 END) As BalGold, SUM(Case When C.IT_TYPE = 'S' THEN A.ITM_NWT ELSE 0 END) As RecSilver, SUM(Case When C.IT_TYPE = 'S' THEN A.ADJ_NWT ELSE 0 END) As AdjSilver, SUM(Case When C.IT_TYPE = 'S' THEN A.ITM_NWT-A.ADJ_NWT ELSE 0 END) As BalSilver FROM (APR_DETL AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE And A.AC_CODE = B.AC_CODE)LEFT JOIN ITEM_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.IT_CODE = C.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.BOOK_NAME = 'CON REC' and A.VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE,B.AC_CITY,C.IT_TYPE ORDER BY B.AC_NAME",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT CO_BOOK,VCH_NO,AC_NAME FROM SL_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND VCH_DATE >= ' ? MM/dd/yyyy ? ' AND VCH_DATE <= ' ? MM/dd/yyyy ? '",
+  "SELECT CO_BOOK,VCH_NO,AC_NAME FROM PR_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND VCH_DATE >= ' ? MM/dd/yyyy ? ' AND VCH_DATE <= ' ? MM/dd/yyyy ? '",
+  "Select Case When SUM(A.CR_AMT-A.DR_AMT) < 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As DrAmt, Case WHEN SUM(A.CR_AMT-A.DR_AMT) > 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As CrAmt, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrGold, Case When SUM(Case When A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrGold, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrSilver, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrSilver FROM (AC_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE And A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.AC_CODE = ' ? ' and A.VCH_DATE < ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? ",
+  "Select B.BOOK_NAME,A.CO_BOOK,A.VCH_NO,A.VCH_DATE,A.LEDR_KEY,A.LD_CODE As AC_CODE,C.AC_NAME,C.AC_ADD1,C.AC_MOBILE,B.MAIN_BOOK,C.AC_AREA, Case When SUM(A.CR_AMT-A.DR_AMT) < 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As DrAmt, Case WHEN SUM(A.CR_AMT-A.DR_AMT) > 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As CrAmt, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrGold, Case When SUM(Case When A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrGold, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrSilver, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrSilver,B.MAIN_BOOK FROM (AC_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK) LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE And A.LD_CODE = C.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.AC_CODE = ' ? ' and A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? GROUP BY B.BOOK_NAME,A.CO_BOOK,A.VCH_NO,A.VCH_DATE,A.LEDR_KEY,A.LD_CODE,C.AC_NAME,C.AC_ADD1,C.AC_MOBILE,B.MAIN_BOOK,C.AC_AREA ORDER BY A.VCH_DATE,B.BOOK_NAME",
+  "SELECT Sum(CR_AMT - DR_AMT) as BalAmt FROM AC_DATA WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? ' and VCH_DATE < ' ? MM/dd/yyyy ? ' HAVING SUM(CR_AMT-DR_AMT) <> 0",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE As AcCodeL, AC_GR AS GroupL,AC_ADD1 As AddressL,AC_PHONE As PhoneL,AC_MOBILE As MobileL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT Sum(CR_AMT - DR_AMT) as BalAmt FROM AC_DATA WHERE CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND AC_CODE = ' ? ' and VCH_DATE < ' ? MM/dd/yyyy ? ' ? C ? AND DATA_TYPE = ' ? ' ? HAVING SUM(CR_AMT-DR_AMT) <> 0"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 2
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": ""
+  }
+ ]
+}

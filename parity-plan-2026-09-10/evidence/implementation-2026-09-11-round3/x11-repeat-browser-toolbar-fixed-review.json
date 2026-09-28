@@ -1,0 +1,48 @@
+{
+  "status": "design-14-checks-and-visual-review-passed-overall-run-failed",
+  "reviewedAtUtc": "2026-09-11T04:09:00.233426+00:00",
+  "checks": [
+    "configured parent and component repeat without calculation",
+    "hidden repeated cost and independent parent image identity",
+    "Gross Enter focuses the active parent last component",
+    "Net Amount Enter appends with stable noncontiguous IDs",
+    "Ctrl+D confirm/cancel and no deleted ID reuse",
+    "invalid Enter retains focus/draft and blocks child allocation",
+    "blank Item Enter returns to the invoking parent and discards only an untouched placeholder",
+    "parent focus updates component context without mutating saved data",
+    "complete unchanged save after focus preserves the saved snapshot",
+    "item Enter waits for scoped defaults before moving focus",
+    "Weight Enter uses prior zero weight and current scoped fixed amount",
+    "cleared rate persists as source Conversion.Val zero",
+    "real save/reopen/delete and no unhandled page errors",
+    "parent and component context/actions remain visible when their grids scroll"
+  ],
+  "mockedRequests": 0,
+  "overallFailureStage": "later order-image journey expected400 versus defined actual422 assertion",
+  "overallError": "Expected values to be strictly equal:\n\n422 !== 400\n",
+  "result": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-browser-toolbar-fixed-result.json",
+    "sha256": "653aa17f1e7b0ef4cb6abcef773823670a81cca337b9acbe73836feec7ef1a5f"
+  },
+  "screenshots": [
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-repeat-identities-toolbar-fixed.png",
+      "sha256": "e53df4015a8808ab080b7b3017cb77947256a7525d4ffe31f2cd9877c3c3578d"
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x11-weight-enter-toolbar-fixed.png",
+      "sha256": "c91e4d89bb32bc3a890ec00a8e53efd7336c241448a84d2d1c6ae65ab1b50277"
+    }
+  ],
+  "visualReview": {
+    "passed": true,
+    "observations": [
+      "Parent count and Add Design stay inside the parent panel",
+      "Component heading, Recalculate and Add Component remain visible when Net Amount has focus at the far-right end",
+      "Only tables scroll horizontally; navigation, book controls and photo panel remain in place",
+      "Noncontiguous identities and saved values remain visible and legible"
+    ],
+    "productChangesRequired": false
+  },
+  "combinedFinalRerun": "pending after unrelated image assertion correction"
+}

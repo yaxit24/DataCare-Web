@@ -1,0 +1,51 @@
+{
+  "runs": [
+    {
+      "label": "focused-final",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.config.ts"
+      ],
+      "cwd": "/tmp/datacare-return-bar-companion-staged/web/packages/core",
+      "startedAtUtc": "2026-09-12T01:03:06.714976+00:00",
+      "finishedAtUtc": "2026-09-12T01:03:07.256707+00:00",
+      "exitCode": 0,
+      "log": "focused-final.txt",
+      "logSha256": "7053f7377633055a029f4eb8044bdeaf7c703b128e23569ed8f337bf42afa8bc"
+    },
+    {
+      "label": "types-final",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.bin/tsc",
+        "--noEmit",
+        "--strict",
+        "--noUncheckedIndexedAccess",
+        "--isolatedModules",
+        "--skipLibCheck",
+        "--target",
+        "ES2022",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--types",
+        "node",
+        "src/saleReturnNBarCompanions.ts",
+        "test/saleReturnNBarCompanions.test.ts"
+      ],
+      "cwd": "/tmp/datacare-return-bar-companion-staged/web/packages/core",
+      "startedAtUtc": "2026-09-12T01:03:07.256863+00:00",
+      "finishedAtUtc": "2026-09-12T01:03:07.769936+00:00",
+      "exitCode": 0,
+      "log": "types-final.txt",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "inputManifest": "focused-final.inputs.json",
+  "inputManifestSha256": "a8b058043094d293dfbab0c843881fd9ad1ce026ed66e8d81b6f573287b626fb",
+  "inputCount": 5,
+  "changedInputs": [],
+  "limits": "New staged pure module/test only; no DB/API/browser/shared build or broad tests."
+}

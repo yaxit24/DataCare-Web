@@ -87,6 +87,35 @@ export function monthlyTermInterest(
 }
 
 export type InterestType = 'M' | 'D'; // CO_SET.DHRN_INT_TYPE: 'M' monthly (default), 'D' day-count
+export type DhrnEntryType = 'D' | 'L';
+type DhrnIssueLedgerMode = 'pledge-issue' | 'loan-received';
+type DhrnReceiptLedgerMode = 'pledge-receipt' | 'loan-issue';
+type DhrnBook = Awaited<ReturnType<typeof configuredBookTx>>;
+
+function normalized(value: unknown): string {
+  return String(value ?? '').trim().toUpperCase();
+}
+
+function assertDhrnBook(
+  book: DhrnBook,
+  expectedMainBook?: string,
+  expectedInout?: 'I' | 'O',
+): void {
+  if (expectedMainBook && normalized(book.mainBook) !== normalized(expectedMainBook)) {
+    throw new DhrnValidationError(
+      `book is ${book.mainBook || book.name || 'blank'}, expected ${expectedMainBook}`,
+    );
+  }
+  if (expectedInout && normalized(book.inout) !== expectedInout) {
+    throw new DhrnValidationError(
+      `book direction is ${book.inout || 'blank'}, expected ${expectedInout}`,
+    );
+  }
+}
+
+function desktopDhrnBookName(book: DhrnBook, entryType: DhrnEntryType): string {
+  return entryType === 'L' ? book.mainBook || book.name : book.name;
+}
 
 /** Interest dispatcher honouring the desktop CO_SET interest type. */
 export function dhrnInterest(args: {
@@ -198,8 +227,22 @@ export function buildDhrnIssueLedger(
 ): LedgerLine[] {
   const base = { ...key, VCH_TYPE: 'DISU' };
   return [
-    { ...base, AC_CODE: loanAc, DR_AMT: principal, CR_AMT: 0, SIGN: 'D' },
-    { ...base, AC_CODE: cashAc, DR_AMT: 0, CR_AMT: principal, SIGN: 'C' },
+    { ...base, AC_CODE: loanAc, LD_CODE: cashAc, DR_AMT: principal, CR_AMT: 0, SIGN: 'D' },
+    { ...base, AC_CODE: cashAc, LD_CODE: loanAc, DR_AMT: 0, CR_AMT: principal, SIGN: 'C' },
+  ];
+}
+
+/** Loan Received (TR_DHRN_ISU + MAIN_BOOK LOAN REC): Dr settlement / Cr lender. */
+function buildLoanReceivedLedger(
+  key: VoucherKey,
+  lenderAc: string,
+  cashAc: string,
+  principal: number,
+): LedgerLine[] {
+  const base = { ...key, VCH_TYPE: 'LONRC' };
+  return [
+    { ...base, AC_CODE: lenderAc, LD_CODE: cashAc, DR_AMT: 0, CR_AMT: principal, SIGN: 'C' },
+    { ...base, AC_CODE: cashAc, LD_CODE: lenderAc, DR_AMT: principal, CR_AMT: 0, SIGN: 'D' },
   ];
 }
 
@@ -214,13 +257,41 @@ export function buildDhrnReceiptLedger(
 ): LedgerLine[] {
   const base = { ...key, VCH_TYPE: 'DREC' };
   const lines: LedgerLine[] = [
-    { ...base, AC_CODE: cashAc, DR_AMT: round2(principalRepaid + interest), CR_AMT: 0, SIGN: 'D' },
-    { ...base, AC_CODE: loanAc, DR_AMT: 0, CR_AMT: principalRepaid, SIGN: 'C' },
+    { ...base, AC_CODE: cashAc, LD_CODE: loanAc, DR_AMT: round2(principalRepaid + interest), CR_AMT: 0, SIGN: 'D' },
+    { ...base, AC_CODE: loanAc, LD_CODE: cashAc, DR_AMT: 0, CR_AMT: principalRepaid, SIGN: 'C' },
   ];
   if (interest > 0)
-    lines.push({ ...base, AC_CODE: intIncAc, DR_AMT: 0, CR_AMT: interest, SIGN: 'C' });
+    lines.push({ ...base, AC_CODE: intIncAc, LD_CODE: cashAc, DR_AMT: 0, CR_AMT: interest, SIGN: 'C' });
   return lines;
 }
+
+/** Loan Issue (TR_DHRN_REC + MAIN_BOOK LOAN ISSUE): Dr lender/principal and interest, Cr settlement. */
+function buildLoanIssueLedger(
+  key: VoucherKey,
+  lenderAc: string,
+  cashAc: string,
+  intExpenseAc: string,
+  principalIssued: number,
+  interest: number,
+): LedgerLine[] {
+  const base = { ...key, VCH_TYPE: 'LONIS' };
+  const lines: LedgerLine[] = [
+    { ...base, AC_CODE: lenderAc, LD_CODE: cashAc, DR_AMT: principalIssued, CR_AMT: 0, SIGN: 'D' },
+  ];
+  if (interest > 0) {
+    lines.push({ ...base, AC_CODE: intExpenseAc, LD_CODE: cashAc, DR_AMT: interest, CR_AMT: 0, SIGN: 'D' });
+  }
+  lines.push({
+    ...base,
+    AC_CODE: cashAc,
+    LD_CODE: lenderAc,
+    DR_AMT: 0,
+    CR_AMT: round2(principalIssued + interest),
+    SIGN: 'C',
+  });
+  return lines;
+}
+
 
 function keyOf(s: VoucherScope, vchNo: number, book: string): VoucherKey {
   return {
@@ -265,6 +336,10 @@ export interface DhrnIssueInput {
   adjustedDhrn?: number; // ADJ_DHRN
   uncheckedReceipts?: number; // UNCHAK_DHRN_REC
   scope: VoucherScope;
+  entryType?: DhrnEntryType;
+  expectedMainBook?: string;
+  expectedBookInout?: 'I' | 'O';
+  ledgerMode?: DhrnIssueLedgerMode;
   borrowerAc: string;
   borrowerName?: string;
   principal: number; // DHRN_AMT
@@ -275,6 +350,7 @@ export interface DhrnIssueInput {
   otherCharges?: number;
   goldWt?: number;
   goldAmt?: number;
+  vchDate?: Date | string;
   fromDate?: Date | string;
   toDate?: Date | string;
   loanAc?: string; // receivable ledger (default 'DHRN')
@@ -291,10 +367,19 @@ export async function issueDhrn(
   completeFinanceScope(input.scope);
   if (!input.borrowerAc) throw new DhrnValidationError('borrower account is required');
   if (!(input.principal > 0)) throw new DhrnValidationError('principal must be positive');
-  const date = input.fromDate ? new Date(input.fromDate) : new Date();
+  const date = input.vchDate
+    ? new Date(input.vchDate)
+    : input.fromDate
+      ? new Date(input.fromDate)
+      : new Date();
   const run = async (tx: any, identity: VoucherIdentity) => {
     const loanAc = (input.loanAc ?? '').trim() || input.borrowerAc;
     const cashAc = input.cashAc ?? 'CASH';
+    const book = await configuredBookTx(tx, input.scope);
+    assertDhrnBook(book, input.expectedMainBook, input.expectedBookInout);
+    const entryType = input.entryType ?? 'D';
+    const inoutType = input.expectedBookInout ?? ((book.inout as 'I' | 'O' | '') || 'O');
+    const bookName = desktopDhrnBookName(book, entryType);
     const N = (v: unknown): number => (v == null ? 0 : Number(v));
     const text = (v: unknown, len: number): string | null =>
       String(v ?? '')
@@ -314,7 +399,7 @@ export async function issueDhrn(
       settings: {
         ...cfg,
         // Book-driven interest type (TR_DHRN_REC.cs:5626-5643, TR_DHRN_INTREC.cs:4265-4280).
-        loanIntType: interestTypeForBook(cfg, (await configuredBookTx(tx, input.scope)).mainBook),
+        loanIntType: interestTypeForBook(cfg, book.mainBook),
       },
       loanType: input.loanType ?? 'A',
     } as const;
@@ -331,9 +416,12 @@ export async function issueDhrn(
       )
       .join(', ')
       .slice(0, 255);
-    const book = await configuredBookTx(tx, input.scope);
     const key = voucherKey(input.scope, identity.voucherNo);
-    const ledger = buildDhrnIssueLedger(key, loanAc, cashAc, input.principal).map((l) => ({
+    const ledgerBuilder =
+      input.ledgerMode === 'loan-received'
+        ? buildLoanReceivedLedger(key, input.borrowerAc, cashAc, input.principal)
+        : buildDhrnIssueLedger(key, loanAc, cashAc, input.principal);
+    const ledger = ledgerBuilder.map((l) => ({
       ...l,
       VCH_TYPE: book.shortName,
       VCH_DATE: identity.voucherDate,
@@ -342,9 +430,9 @@ export async function issueDhrn(
     const common = {
       ...key,
       VCH_TYPE: book.shortName,
-      INOUT_TYPE: 'O',
-      ENTRY_TYPE: 'D',
-      BOOK_NAME: book.name,
+      INOUT_TYPE: inoutType,
+      ENTRY_TYPE: entryType,
+      BOOK_NAME: bookName,
       VCH_DATE: identity.voucherDate,
       VCH_TIME: identity.voucherTime,
       HD_VCH_NO: identity.hiddenVoucherNo,
@@ -435,7 +523,7 @@ export async function issueDhrn(
     await insertHiddenIdentityTx(tx, input.scope, identity, book.name);
     await postVoucherTx(tx, input.scope.tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
-      bookName: book.name,
+      bookName,
       writes: [
         { table: 'DHRN_ISU_DATA', rows: [header] },
         ...(detl.length ? [{ table: 'DHRN_ISU_DETL', rows: detl }] : []),
@@ -452,6 +540,10 @@ export async function issueDhrn(
 
 export interface DhrnReceiptInput {
   scope: VoucherScope;
+  entryType?: DhrnEntryType;
+  expectedMainBook?: string;
+  expectedBookInout?: 'I' | 'O';
+  ledgerMode?: DhrnReceiptLedgerMode;
   isuNo: number | string; // the issue VCH_NO this repayment is against
   borrowerAc: string;
   borrowerName?: string;
@@ -555,7 +647,12 @@ export async function receiveDhrn(
     const loanAc = (input.loanAc ?? '').trim() || input.borrowerAc;
     const cashAc = input.cashAc ?? 'CASH';
     const intIncAc = input.intIncAc ?? 'INTINC';
-    const before = await outstandingTx(tx, input.scope, input.isuNo);
+    const entryType = input.entryType ?? 'D';
+    const before = await outstandingTx(tx, input.scope, input.isuNo, {
+      isuBook: input.isuBook,
+      isuYear: input.isuYear,
+      entryType,
+    });
     if (input.principalRepaid > before + 1e-6)
       throw new DhrnValidationError(
         `principal repaid (${input.principalRepaid}) exceeds outstanding (${before})`,
@@ -568,22 +665,28 @@ export async function receiveDhrn(
       throw new DhrnValidationError('repayment must be positive and interest non-negative');
     const newOs = round2(before - input.principalRepaid);
     const book = await configuredBookTx(tx, input.scope);
+    assertDhrnBook(book, input.expectedMainBook, input.expectedBookInout);
+    const inoutType = input.expectedBookInout ?? ((book.inout as 'I' | 'O' | '') || 'I');
+    const bookName = desktopDhrnBookName(book, entryType);
     const key = voucherKey(input.scope, identity.voucherNo);
-    const ledger = buildDhrnReceiptLedger(
-      key,
-      loanAc,
-      cashAc,
-      intIncAc,
-      input.principalRepaid,
-      interest,
-    ).map((l) => ({ ...l, VCH_TYPE: book.shortName, VCH_DATE: identity.voucherDate }));
+    const ledgerBuilder =
+      input.ledgerMode === 'loan-issue'
+        ? buildLoanIssueLedger(key, input.borrowerAc, cashAc, intIncAc, input.principalRepaid, interest)
+        : buildDhrnReceiptLedger(key, loanAc, cashAc, intIncAc, input.principalRepaid, interest);
+    const ledger = ledgerBuilder.map((l) => ({
+      ...l,
+      VCH_TYPE: book.shortName,
+      VCH_DATE: identity.voucherDate,
+    }));
     assertBalanced(ledger);
     const common = {
       ...key,
       VCH_TYPE: book.shortName,
       VCH_DATE: identity.voucherDate,
       VCH_TIME: identity.voucherTime,
-      BOOK_NAME: book.name,
+      INOUT_TYPE: inoutType,
+      ENTRY_TYPE: entryType,
+      BOOK_NAME: bookName,
       HD_VCH_NO: identity.hiddenVoucherNo,
       MAIN_USER: identity.mainUser || null,
       DATA_TRFR: 'N',
@@ -638,8 +741,8 @@ export async function receiveDhrn(
     const movement = {
       ...common,
       SR_NO: 1,
-      INOUT_TYPE: 'I',
-      ENTRY_TYPE: 'D',
+      INOUT_TYPE: inoutType,
+      ENTRY_TYPE: entryType,
       AC_CODE: input.borrowerAc,
       DHRN_AMT: 0,
       DHRN_REC_AMT: input.principalRepaid,
@@ -650,7 +753,7 @@ export async function receiveDhrn(
       ISU_LC: input.scope.lcCode,
       ISU_YRCD: isuYear ?? null,
       ISU_DBCD: isuBook,
-      LOAN_TYPE: 'A',
+      LOAN_TYPE: txtR(input.loanType, 1) ?? 'A',
     };
     // DHRN_REC_DETL: the pledged items released by this receipt (TR_DHRN_REC.cs:6212-6272).
     // Header-derived columns come from the book and scope; an empty grid writes no rows.
@@ -658,8 +761,8 @@ export async function receiveDhrn(
       ...common,
       SR_NO: item.srNo ?? idx + 1, // mSG[i,0]  :6241
       OLD_SRNO: item.srNo ?? idx + 1, // mSG[i,0]  :6242
-      INOUT_TYPE: 'I', // FormBookInOut :6231
-      ENTRY_TYPE: 'L', // literal       :6234
+      INOUT_TYPE: inoutType, // FormBookInOut :6231
+      ENTRY_TYPE: entryType, // desktop: D for Dhiran receipt, L for Loan Issue
       AC_CODE: input.borrowerAc, // tAcCode.Text  :6229
       PACKET_NO: txtR(item.packetNo, 10), // mSG[i,1]  :6243
       CUST_NAME: txtR(item.custName, 50), // mSG[i,2]  :6244
@@ -691,7 +794,7 @@ export async function receiveDhrn(
     await insertHiddenIdentityTx(tx, input.scope, identity, book.name);
     await postVoucherTx(tx, input.scope.tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
-      bookName: book.name,
+      bookName,
       writes: [
         { table: 'DHRN_REC_DATA', rows: [row] },
         ...(recDetl.length ? [{ table: 'DHRN_REC_DETL', rows: recDetl }] : []),
@@ -719,6 +822,48 @@ export async function receiveDhrn(
   if (context) return run(context.tx, context.identity);
   return withTenant(prisma, input.scope.tenantId, async (tx) =>
     run(tx, await createIdentityTx(tx, input.scope, date, input.mainUser)),
+  );
+}
+
+export function receiveLoan(
+  prisma: any,
+  input: Omit<
+    DhrnIssueInput,
+    'entryType' | 'expectedMainBook' | 'expectedBookInout' | 'ledgerMode'
+  >,
+  context?: { tx: any; identity: VoucherIdentity },
+): Promise<{ vchNo: number; monthInt: number; intAmt: number }> {
+  return issueDhrn(
+    prisma,
+    {
+      ...input,
+      entryType: 'L',
+      expectedMainBook: 'LOAN REC',
+      expectedBookInout: 'I',
+      ledgerMode: 'loan-received',
+    },
+    context,
+  );
+}
+
+export function issueLoan(
+  prisma: any,
+  input: Omit<
+    DhrnReceiptInput,
+    'entryType' | 'expectedMainBook' | 'expectedBookInout' | 'ledgerMode'
+  >,
+  context?: { tx: any; identity: VoucherIdentity },
+): Promise<{ vchNo: number; outstanding: number }> {
+  return receiveDhrn(
+    prisma,
+    {
+      ...input,
+      entryType: 'L',
+      expectedMainBook: 'LOAN ISSUE',
+      expectedBookInout: 'O',
+      ledgerMode: 'loan-issue',
+    },
+    context,
   );
 }
 
@@ -816,20 +961,58 @@ export async function receiveDhrnInterest(
   return { vchNo };
 }
 
-async function outstandingTx(tx: any, s: VoucherScope, isuNo: number | string): Promise<number> {
+async function outstandingTx(
+  tx: any,
+  s: VoucherScope,
+  isuNo: number | string,
+  options: { isuBook?: string; isuYear?: string; entryType?: DhrnEntryType } = {},
+): Promise<number> {
+  const issueWhere = [
+    `tenant_id=$1`,
+    `"CO_CODE"=$2`,
+    `"LC_CODE"=$3`,
+    `"VCH_NO"=$4`,
+  ];
+  const issueParams: unknown[] = [s.tenantId, s.coCode, s.lcCode, formatVoucherNo(isuNo)];
+  if (options.isuBook) {
+    issueParams.push(options.isuBook);
+    issueWhere.push(`"CO_BOOK"=$${issueParams.length}`);
+  }
+  if (options.isuYear) {
+    issueParams.push(options.isuYear);
+    issueWhere.push(`"CO_YEAR"=$${issueParams.length}`);
+  }
+  if (options.entryType) {
+    issueParams.push(options.entryType);
+    issueWhere.push(`coalesce("ENTRY_TYPE",'D')=$${issueParams.length}`);
+  }
   const issue: { p: unknown }[] = await tx.$queryRawUnsafe(
-    `SELECT coalesce("DHRN_AMT",0) AS p FROM "DHRN_ISU_DATA" WHERE "VCH_NO"=$1 AND "CO_CODE"=$2 LIMIT 1`,
-    formatVoucherNo(isuNo),
-    s.coCode,
+    `SELECT coalesce("DHRN_AMT",0) AS p FROM "DHRN_ISU_DATA" WHERE ${issueWhere.join(' AND ')} LIMIT 1`,
+    ...issueParams,
   );
   const principal = Number(issue[0]?.p ?? 0);
+
+  const recWhere = [`tenant_id=$1`, `"CO_CODE"=$2`, `"LC_CODE"=$3`, `"ISU_NO"=$4`];
+  const recParams: unknown[] = [s.tenantId, s.coCode, s.lcCode, formatVoucherNo(isuNo)];
+  if (options.isuBook) {
+    recParams.push(options.isuBook);
+    recWhere.push(`"ISU_DBCD"=$${recParams.length}`);
+  }
+  if (options.isuYear) {
+    recParams.push(options.isuYear);
+    recWhere.push(`"ISU_YRCD"=$${recParams.length}`);
+  }
+  if (options.entryType) {
+    recParams.push(options.entryType);
+    recWhere.push(`coalesce("ENTRY_TYPE",'D')=$${recParams.length}`);
+  }
   const rec: { r: unknown }[] = await tx.$queryRawUnsafe(
-    `SELECT coalesce(sum("DHRN_REC_AMT"),0) AS r FROM "DHRN_REC_DATA" WHERE "ISU_NO"=$1 AND "CO_CODE"=$2`,
-    formatVoucherNo(isuNo),
-    s.coCode,
+    `SELECT coalesce(sum("DHRN_REC_AMT"),0) AS r FROM "DHRN_REC_DATA" WHERE ${recWhere.join(' AND ')}`,
+    ...recParams,
   );
   return round2(principal - Number(rec[0]?.r ?? 0));
 }
+
 
 /** Outstanding principal for a Dhrn issue = principal − Σ receipts (desktop OS-report parity). */
 export async function outstanding(

@@ -1,0 +1,116 @@
+{
+  "status": "read-only-prospective-no-execution",
+  "createdAt": "2026-09-11T15:13:24.392768+00:00",
+  "base": "/Users/yakshitsavaliya/Desktop/imodule-extracted",
+  "sources": [
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+      "sha256": "cb91085c50d07a07ae5c5a8e6982ef6f9a2c533e2b55d61fc8c35f093f5dfbbc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/session.ts",
+      "sha256": "17765f43964137139d582695cc0d10e3713227b8e118070e6f3e4a07fdb63bf0"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/jwt.ts",
+      "sha256": "4bd2d709bcd6ec64d3734822972932aed4bcd1797422815caf4a8eaa90de3169"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/auth.service.ts",
+      "sha256": "cb6269a6b3793d9dc7163bbd1f144336f12da461cdec7177e620b5f5f74f026e"
+    },
+    {
+      "path": "web/apps/api/src/app.ts",
+      "sha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "b78bbed89d97a401227fa1399448b3b56081c07676986621b89e697ef968d953"
+    },
+    {
+      "path": "web/apps/web/components/BusinessScope.tsx",
+      "sha256": "ffe8f4922dd0c65e7dc9bbb91ae8cdd10b67edd8b1349ef57388ee64d2119213"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-contract.md",
+      "sha256": "7240e8f6b3e0ea5b25ddd98535862d6e7a8cbf50cd981caccf049ef35b707b6b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/x13-aggregate-trusted-observation-source-addendum.md",
+      "sha256": "9f41889ef665c3a0934412c619921bf5788b853269967ea81e8ca267f09347ae"
+    }
+  ],
+  "directAssignmentScan": {
+    "files": 204,
+    "entries": [
+      {
+        "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+        "line": 12732
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+        "line": 12736
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+        "line": 12740
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+        "line": 12744
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+        "line": 12753
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+        "line": 12757
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+        "line": 12790
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+        "line": 1459
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+        "line": 1462
+      },
+      {
+        "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+        "line": 1475
+      }
+    ]
+  },
+  "note": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-session-ledger-mode-next-contract.md",
+    "sha256": "180b315ae44c23c663a7d4a95ca1d5ddc98b4f460bb932db7735216f78ac93b0"
+  }
+}

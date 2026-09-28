@@ -1,0 +1,122 @@
+{
+ "form": "MS_MFG_MAST",
+ "loc": 1886,
+ "gridColumns": {
+  "cSr": 0,
+  "cMainCode": 1,
+  "cMainMenu": 2,
+  "cCoBook": 3,
+  "cTrnCode": 4,
+  "cTrnName": 5,
+  "cBookSname": 6,
+  "cCurInUse": 7,
+  "cLastTran": 8,
+  "cEntryType": 9,
+  "cNextTran": 10,
+  "cMainBook": 11,
+  "cStkILess": 12,
+  "cStkAdd": 13
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM MFG_MAST WHERE CO_CODE = ' ? ' ORDER BY SM_CODE",
+  "SELECT * FROM MFG_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316','317','318','319')",
+  "UPDATE BOOK_DATA SET CUR_USE ='N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316','317','318','319')",
+  "DELETE FROM MFG_MAST WHERE CO_CODE = ' ? '",
+  "SELECT * FROM MFG_MAST WHERE CO_CODE = ' ? '",
+  "UPDATE MENU_DATA SET SM_VIEW = 'N' WHERE SM_MAIN_CODE IN ('02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20') AND BTN_NAME = 'Mfg'",
+  "UPDATE MENU_DATA SET SM_CODE = ' ? ',SM_NAME = ' ? ',SM_VIEW = 'Y' WHERE SM_MAIN_NAME = ' ? ' AND BTN_NAME = 'Mfg'",
+  "UPDATE BOOK_DATA SET BOOK_NAME = ' ? ',BOOK_SNAME = ' ? ',CUR_USE ='Y' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "UPDATE MENU_DATA SET SM_VIEW = 'N',SM_CODE = ' ? ' WHERE SM_MAIN_NAME = ' ? ' AND BTN_NAME = 'Mfg'",
+  "UPDATE MFG_MAST SET SM_MAIN_CODE = SM_CODE WHERE CO_CODE = ' ? '",
+  "UPDATE MENU_DATA SET SM_MAIN_CODE = ? WHERE SM_MAIN_CODE = ' ? 00 ? ' AND BTN_NAME = 'Mfg'",
+  "UPDATE MENU_DATA SET SM_MAIN_CODE = SM_CODE WHERE BTN_NAME = 'Mfg'",
+  "UPDATE MENU_DATA SET SM_VIEW = 'N' WHERE BTN_NAME = 'Mfg' AND SM_MAIN_NAME = 'Mfg Mast'",
+  "Select MAIN_BOOK From BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND MAIN_BOOK = ' ? '",
+  "SELECT MAIN_BOOK As MainBookL FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316','317','318','319') ORDER BY CO_BOOK",
+  "SELECT * FROM MFG_DATA WHERE CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316','317','318','319')",
+  "DELETE FROM MENU_DATA WHERE BTN_NAME = 'Mfg' AND SM_MAIN_NAME <> 'Mfg Mast'",
+  "DELETE FROM USER_SET WHERE CO_CODE <> '01'",
+  "SELECT LC_CODE FROM LOCT_MAST WHERE CO_CODE = '01' ORDER BY LC_CODE",
+  "DELETE FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = ' ? LC_CODE ? ' AND USER_NAME = 'ABC'",
+  "INSERT INTO USER_SET (CO_CODE,LC_CODE,MAIN_SRNO, SUB_SRNO, USER_NAME, MAIN_MENU, SUB_MENU, FRM_VIEW, FRM_EDIT, FRM_DELETE, FRM_PRINT) SELECT '01',' ? LC_CODE ? ',MAIN_SRNO,SM_MAIN_CODE,'ABC',BTN_NAME,SM_MAIN_NAME,'Y','Y','Y','Y' FROM MENU_DATA ? WHERE BTN_NAME NOT IN('Jadtar','Mfg') ? ",
+  "DELETE FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = '00' AND USER_NAME = 'ABC'",
+  "SELECT LOGIN_NAME FROM LOGIN_MAST WHERE LOGIN_NAME <> 'ABC' GROUP BY LOGIN_NAME ORDER BY LOGIN_NAME",
+  "SELECT * FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = '00' AND USER_NAME = 'ABC' ORDER BY MAIN_SRNO,SUB_SRNO",
+  "SELECT MAIN_MENU FROM USER_SET WHERE CO_CODE = '01' AND LC_CODE = ' ? ' AND USER_NAME = ' ? LOGIN_NAME ? ' AND MAIN_SRNO = ' ? MAIN_SRNO ? ' AND SUB_SRNO = ' ? SUB_SRNO ? '",
+  "UPDATE SL_ORD_DETL SET SL_ORD_DETL.DESIGN_ISU = 'N' FROM SL_ORD_DETL,MFG_DETL AS B WHERE SL_ORD_DETL.CO_CODE = B.CO_CODE AND SL_ORD_DETL.LC_CODE = B.LC_CODE AND SL_ORD_DETL.CO_YEAR = B.ORD_YRCD AND SL_ORD_DETL.CO_BOOK = B.ORD_DBCD AND SL_ORD_DETL.VCH_NO = B.ORD_NO AND SL_ORD_DETL.OLD_SRNO = B.ORD_SRNO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316')",
+  "DELETE FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK IN ('301','302','303','304','305','306','307','308','309','310','311','312','313','314','315','316')",
+  "DELETE FROM MFG_ISU_REC WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM MFG_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM MFG_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM MFG_IDTL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "Ctrl+O": 1,
+  "Esc": 1,
+  "Right": 1,
+  "Left": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save Mfg Master Because More Then 10 Transection in MFG_DATA First Delete It and Try...",
+   "when": "DC_Main.Tbl.Rows.Count > 10"
+  },
+  {
+   "message": "Please Insert Transection Name First and Try...",
+   "when": "Operators.CompareString(MSG[DC_Main.i, 5], \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert BookSName First and Try...",
+   "when": "Operators.CompareString(MSG[DC_Main.i, 6], \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Next Transection Processand Try...",
+   "when": "Operators.CompareString(MSG[DC_Main.i, 10], \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Main book Name and Try...",
+   "when": "Operators.CompareString(MSG[DC_Main.i, 11], \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.. Please Save All Mfg Book Reng(301 to 319 book No) In Book Master...",
+   "when": ""
+  },
+  {
+   "message": "You Cant Delete Mfg Mast Please Contect Our Tem and Reset It...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Reset Mfg Menu...?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are You Sure To Reset Mfg Menu...?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) != 6"
+  },
+  {
+   "message": "Mfg Master Reset Ok....",
+   "when": ""
+  },
+  {
+   "message": "You Cant Reset Mfg Master Because More Then 10 Transection in MFG_DATA First Delete It and Try...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Voucher now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.Please Stock and AcData Refresh...",
+   "when": ""
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+{
+  "reviewedAt": "2026-09-10T07:04:04.708725+00:00",
+  "kind": "plan-reverification-source-evidence",
+  "implementationCertified": false,
+  "originalControlCandidates": 1599,
+  "additionalModifierControlCandidates": 916,
+  "affectedPrimaryUnits": 143,
+  "combinedInputDeclarationCandidates": 2515,
+  "primaryNamespaceUnits": 204,
+  "fullPrimaryTreeCsFiles": 212,
+  "supportingCsFilesOutside204": 8,
+  "namedGridCandidatesWithNoLiteralLine": 43,
+  "authoredContractFiles": 11,
+  "originalScanner": {
+    "path": "project-memory/parity/richness_desktop.py",
+    "sha256": "862afb98bf91b3d7c93c02289de34bb7821a7d8515df5e328bbdb7a2679f6b78",
+    "declarationPattern": "^\\s*(?:private|public|internal|protected)\\s+([A-Za-z_][\\w.]*)\\s+(_?[A-Za-z_]\\w*)\\s*;\\s*$"
+  },
+  "limits": "Additional source declaration candidates, not newly proven business fields or a corrected parity percentage. Runtime visibility, semantic identity, remaining parser omissions and every caller still require reconciliation. Original evidence is retained unchanged."
+}

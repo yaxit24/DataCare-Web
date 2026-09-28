@@ -54,11 +54,7 @@ function interfaceFields(source: string, name: string): string[] {
   return [...fields];
 }
 
-/** Extract the object literal passed as the second argument of `call(prisma, { ... })`. */
-function forwardedKeys(source: string, call: string): string[] {
-  const at = source.indexOf(`${call}(prisma, {`);
-  if (at < 0) throw new Error(`call ${call}(prisma, { … }) not found`);
-  const open = source.indexOf('{', at);
+function literalKeys(source: string, open: number): string[] {
   let depth = 0;
   let end = open;
   for (let i = open; i < source.length; i += 1) {
@@ -82,8 +78,26 @@ function forwardedKeys(source: string, call: string): string[] {
   return [...keys];
 }
 
+/** Extract the object literal passed as the second argument of `call(prisma, { ... })`. */
+function forwardedKeys(source: string, call: string): string[] {
+  const at = source.indexOf(`${call}(prisma, {`);
+  if (at < 0) throw new Error(`call ${call}(prisma, { … }) not found`);
+  return literalKeys(source, source.indexOf('{', at));
+}
+
+/** Extract keys from a route-local helper defined as `const helper = (...) => ({ ... })`. */
+function helperKeys(source: string, helper: string): string[] {
+  const at = source.indexOf(`const ${helper} =`);
+  if (at < 0) throw new Error(`helper ${helper} not found`);
+  const arrow = source.indexOf('=> ({', at);
+  if (arrow < 0) throw new Error(`helper ${helper} does not return an object literal`);
+  return literalKeys(source, source.indexOf('{', arrow));
+}
+
+
 describe('routes forward every documented module input', () => {
   const scheme = read('modules/membership/scheme.ts');
+  const rateCut = read('modules/sales/rateCut.ts');
   const txn = read('routes/txn.ts');
 
   it('the extractors actually find something (guard against a vacuous pass)', () => {
@@ -104,6 +118,14 @@ describe('routes forward every documented module input', () => {
   it('/scheme/opening forwards them too (same grid, book 075)', () => {
     const declared = interfaceFields(scheme, 'SchemeInstallmentInput');
     const forwarded = new Set(forwardedKeys(txn, 'schemeOpening'));
+    const missing = declared.filter((f) => !forwarded.has(f) && !(f in SERVER_OWNED));
+    expect(missing).toEqual([]);
+  });
+
+  it('/rate-cut forwards all client-supplied RateCutInput fields', () => {
+    expect(txn).toContain('postRateCut(prisma, rateCutInput(req, b))');
+    const declared = interfaceFields(rateCut, 'RateCutInput');
+    const forwarded = new Set(helperKeys(txn, 'rateCutInput'));
     const missing = declared.filter((f) => !forwarded.has(f) && !(f in SERVER_OWNED));
     expect(missing).toEqual([]);
   });

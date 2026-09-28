@@ -1,0 +1,1224 @@
+{
+  "kind": "x13-primary-incoming-source-vectors-v1",
+  "status": "source-derived-only-not-executable-desktop-confirmation",
+  "source": {
+    "path": "unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+    "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+    "functions": {
+      "leaveCell": [
+        4592,
+        4664
+      ],
+      "calculation": [
+        4866,
+        5160
+      ]
+    }
+  },
+  "observationPoint": "Row cells immediately before MSG_PR_TOT_FILL/BILL_TOTAL at5157-5158; header and persisted outcomes are not asserted.",
+  "independence": "Expected literals were derived by direct source-expression arithmetic; no Return implementation, Order/Design reducer, live desktop, database or browser generated them.",
+  "mergeContract": "Each vector merges initialCells over baseCells and settings over baseSettings. Unlisted cells initially contain empty text. Subsequent events apply to the prior output. expectedCells is a bounded assertion set, not a full golden row.",
+  "baseCells": {
+    "0": "1",
+    "1": "GOLD",
+    "3": "Saved description",
+    "8": "OLD123",
+    "9": "2",
+    "10": "10.000",
+    "11": "0.000",
+    "12": "10.000",
+    "14": "0.00",
+    "15": "0.000",
+    "16": "100.00",
+    "17": "0.00",
+    "18": "10.000",
+    "19": "0.00",
+    "20": "0.00",
+    "21": "0.00",
+    "22": "N",
+    "23": "0.00",
+    "24": "0.00",
+    "25": "0.00",
+    "26": "0.00",
+    "27": "0.00",
+    "28": "0.00",
+    "30": "0.00",
+    "31": "0.00",
+    "32": "0.00",
+    "36": "0.00",
+    "37": "0.00",
+    "38": "0.00",
+    "44": "G",
+    "45": "10.000",
+    "46": "10.000",
+    "47": "100.00",
+    "48": "0.00",
+    "49": "0.00",
+    "58": "0.00",
+    "66": "0.00",
+    "67": "0.00"
+  },
+  "baseSettings": {
+    "MsSlAmtType": "N",
+    "MsLbrRof": 2,
+    "MsLbrWithGht": "Y",
+    "MsLbrGen": "N"
+  },
+  "eventPreconditions": {
+    "currentRow": 1,
+    "MsgPrClear": false,
+    "editorVisible": true,
+    "committedColumnControlPropertyNonzero": true,
+    "UpDown": false,
+    "fineColumnSingleIndexProperty": "unknown; all unconditional vectors avoid MsSlAmtTypeF"
+  },
+  "vectors": [
+    {
+      "id": "text-huid-no-calc",
+      "purpose": "Text metadata does not reprice imported amounts",
+      "status": "source-derived",
+      "initialCells": {
+        "20": "77.37",
+        "24": "9.19",
+        "36": "100.01",
+        "38": "91.17"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 8,
+        "text": "NEW123"
+      },
+      "expectedCells": {
+        "8": "NEW123",
+        "20": "77.37",
+        "24": "9.19",
+        "36": "100.01",
+        "38": "91.17",
+        "49": "0.00"
+      },
+      "sourceLines": [
+        4616,
+        4628
+      ]
+    },
+    {
+      "id": "labour-type-text-no-calc",
+      "purpose": "Changing Ltype is text-only in LeaveCell",
+      "status": "source-derived",
+      "initialCells": {
+        "23": "10.00",
+        "58": "10.00",
+        "24": "37.37"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 22,
+        "text": "P"
+      },
+      "expectedCells": {
+        "22": "P",
+        "23": "10.00",
+        "58": "10.00",
+        "24": "37.37"
+      },
+      "sourceLines": [
+        4616,
+        4628
+      ]
+    },
+    {
+      "id": "ghat-before-new-net",
+      "purpose": "Gross change derives ghat from prior net, then new net and fine",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "10.000",
+        "11": "2.000",
+        "12": "8.000",
+        "14": "10.00",
+        "15": "0.800",
+        "18": "8.800",
+        "45": "10.000",
+        "46": "8.000"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 10,
+        "text": "20"
+      },
+      "expectedCells": {
+        "10": "20.000",
+        "12": "18.000",
+        "15": "0.800",
+        "18": "18.800",
+        "45": "20.000",
+        "46": "18.000"
+      },
+      "sourceLines": [
+        4869,
+        4913
+      ],
+      "subsequentEvents": [
+        {
+          "event": {
+            "kind": "leaveCell",
+            "column": 27,
+            "text": "0"
+          },
+          "expectedCells": {
+            "12": "18.000",
+            "15": "1.800",
+            "18": "18.800",
+            "45": "20.000",
+            "46": "18.000"
+          },
+          "note": "Ghat refreshes on the next calculation but fine remains stale with unchanged nonzero touch/west and non-F basis."
+        }
+      ]
+    },
+    {
+      "id": "clear-ghat-percent-retains-weight",
+      "purpose": "Zero ghat percentage skips its write",
+      "status": "source-derived",
+      "initialCells": {
+        "14": "5.00",
+        "15": "0.500",
+        "18": "10.500"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 14,
+        "text": "0"
+      },
+      "expectedCells": {
+        "14": "0.00",
+        "15": "0.500",
+        "18": "10.500"
+      },
+      "sourceLines": [
+        4869,
+        4872,
+        4882,
+        4913
+      ]
+    },
+    {
+      "id": "manual-ghat-overwritten",
+      "purpose": "A direct ghat weight edit loses to nonzero ghat percentage",
+      "status": "source-derived",
+      "initialCells": {
+        "14": "5.00",
+        "15": "0.500",
+        "18": "10.500"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 15,
+        "text": "1.000"
+      },
+      "expectedCells": {
+        "15": "0.500",
+        "18": "10.500"
+      },
+      "sourceLines": [
+        4653,
+        4661,
+        4869,
+        4872
+      ]
+    },
+    {
+      "id": "clear-other-weight-retains-net",
+      "purpose": "Other weight zero does not force gross minus other when gross cache is unchanged",
+      "status": "source-derived",
+      "initialCells": {
+        "11": "2.000",
+        "12": "8.000",
+        "46": "8.000",
+        "18": "8.000"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 11,
+        "text": "0"
+      },
+      "expectedCells": {
+        "11": "0.000",
+        "12": "8.000",
+        "46": "8.000",
+        "18": "8.000"
+      },
+      "sourceLines": [
+        4873,
+        4881
+      ]
+    },
+    {
+      "id": "metal-pieces-even-tie",
+      "purpose": "P row rate basis uses pieces and whole half-even rounding",
+      "status": "source-derived",
+      "initialCells": {
+        "9": "3",
+        "44": "P"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 19,
+        "text": "3.50"
+      },
+      "expectedCells": {
+        "19": "3.50",
+        "20": "10.00",
+        "49": "3.50",
+        "66": "0",
+        "67": "0",
+        "36": "10.00",
+        "38": "10.00"
+      },
+      "sourceLines": [
+        4935,
+        4958
+      ]
+    },
+    {
+      "id": "metal-net-plus-ghat-even-tie",
+      "purpose": "Global N uses net plus ghat independently of labour ghat setting",
+      "status": "source-derived",
+      "initialCells": {
+        "12": "8.000",
+        "46": "8.000",
+        "15": "1.000",
+        "18": "9.000"
+      },
+      "settings": {
+        "MsLbrWithGht": "N"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 19,
+        "text": "2.50"
+      },
+      "expectedCells": {
+        "20": "22.00",
+        "36": "22.00",
+        "38": "22.00"
+      },
+      "sourceLines": [
+        4915,
+        4958
+      ]
+    },
+    {
+      "id": "metal-gross",
+      "purpose": "Global G uses gross without adding ghat",
+      "status": "source-derived",
+      "initialCells": {
+        "12": "8.000",
+        "46": "8.000",
+        "15": "1.000",
+        "18": "9.000"
+      },
+      "settings": {
+        "MsSlAmtType": "G"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 19,
+        "text": "2.50"
+      },
+      "expectedCells": {
+        "20": "25.00",
+        "36": "25.00",
+        "38": "25.00"
+      },
+      "sourceLines": [
+        4915,
+        4958
+      ]
+    },
+    {
+      "id": "metal-ten-unit-even-tie",
+      "purpose": "RATE_TYPE1 divides item rate by10",
+      "status": "source-derived",
+      "initialCells": {
+        "44": "1"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 19,
+        "text": "12.50"
+      },
+      "expectedCells": {
+        "20": "12.00",
+        "36": "12.00",
+        "38": "12.00"
+      },
+      "sourceLines": [
+        4948,
+        4950
+      ]
+    },
+    {
+      "id": "metal-kilogram-even-tie",
+      "purpose": "RATE_TYPEK divides item rate by1000; exact binary tie12.5 rounds to12",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "12.500",
+        "12": "12.500",
+        "45": "12.500",
+        "46": "12.500",
+        "18": "12.500",
+        "44": "K"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 19,
+        "text": "1000"
+      },
+      "expectedCells": {
+        "20": "12.00",
+        "36": "12.00",
+        "38": "12.00"
+      },
+      "sourceLines": [
+        4951,
+        4953
+      ]
+    },
+    {
+      "id": "global-p-is-not-pieces",
+      "purpose": "Global P follows default net+ghat branch when row rate type is notP",
+      "status": "source-derived",
+      "initialCells": {},
+      "settings": {
+        "MsSlAmtType": "P"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 19,
+        "text": "3.50"
+      },
+      "expectedCells": {
+        "20": "35.00",
+        "36": "35.00",
+        "38": "35.00"
+      },
+      "sourceLines": [
+        4915,
+        4917,
+        4943,
+        4958
+      ]
+    },
+    {
+      "id": "zero-item-rate-retains-amount",
+      "purpose": "Clearing rate invalidates caches but does not clear prior metal amount",
+      "status": "source-derived",
+      "initialCells": {
+        "19": "100.00",
+        "49": "100.00",
+        "20": "77.37",
+        "66": "2.00",
+        "67": "0.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 19,
+        "text": "0"
+      },
+      "expectedCells": {
+        "19": "0.00",
+        "49": "0.00",
+        "20": "77.37",
+        "66": "0",
+        "67": "0",
+        "36": "77.37",
+        "38": "77.37"
+      },
+      "sourceLines": [
+        4935,
+        4958
+      ]
+    },
+    {
+      "id": "incoming-versus-tag-rounding",
+      "purpose": "Incoming LAmt uses whole rupees; TagLAmt and labour discount use configured2 decimals",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "3.000",
+        "12": "3.000",
+        "45": "3.000",
+        "46": "3.000",
+        "18": "3.000",
+        "25": "12.50",
+        "31": "12.50"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 23,
+        "text": "12.50"
+      },
+      "expectedCells": {
+        "23": "12.50",
+        "58": "12.50",
+        "24": "38.00",
+        "32": "37.50",
+        "26": "4.75",
+        "36": "33.25",
+        "38": "33.25",
+        "67": "0"
+      },
+      "sourceLines": [
+        4969,
+        4995,
+        5022,
+        5050
+      ]
+    },
+    {
+      "id": "labour-n-excludes-ghat",
+      "purpose": "LBR_WITH_GHT N excludes ghat in N forward labour only",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "5.000",
+        "12": "3.000",
+        "45": "5.000",
+        "46": "3.000",
+        "15": "1.000",
+        "18": "4.000"
+      },
+      "settings": {
+        "MsLbrWithGht": "N"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 23,
+        "text": "2.50"
+      },
+      "expectedCells": {
+        "24": "8.00",
+        "36": "8.00",
+        "38": "8.00"
+      },
+      "sourceLines": [
+        4978,
+        4986
+      ]
+    },
+    {
+      "id": "labour-n-includes-ghat",
+      "purpose": "LBR_WITH_GHT Y includes ghat in N forward labour",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "5.000",
+        "12": "3.000",
+        "45": "5.000",
+        "46": "3.000",
+        "15": "1.000",
+        "18": "4.000"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 23,
+        "text": "2.50"
+      },
+      "expectedCells": {
+        "24": "10.00",
+        "36": "10.00",
+        "38": "10.00"
+      },
+      "sourceLines": [
+        4978,
+        4986
+      ]
+    },
+    {
+      "id": "labour-pieces-even-tie",
+      "purpose": "P labour rounds pieces times rate to whole even rupee",
+      "status": "source-derived",
+      "initialCells": {
+        "9": "3",
+        "22": "P"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 23,
+        "text": "2.50"
+      },
+      "expectedCells": {
+        "24": "8.00",
+        "36": "8.00",
+        "38": "8.00"
+      },
+      "sourceLines": [
+        4973,
+        4977
+      ]
+    },
+    {
+      "id": "labour-gross-even-tie",
+      "purpose": "G and unknown labour types use the default gross branch",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "5.000",
+        "45": "5.000",
+        "22": "G"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 23,
+        "text": "2.50"
+      },
+      "expectedCells": {
+        "24": "12.00",
+        "36": "12.00",
+        "38": "12.00"
+      },
+      "sourceLines": [
+        4991,
+        4993
+      ]
+    },
+    {
+      "id": "labour-k-always-ghat",
+      "purpose": "K forward labour adds ghat even if the N-specific setting saysNo",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "5.000",
+        "12": "3.000",
+        "45": "5.000",
+        "46": "3.000",
+        "15": "1.000",
+        "18": "4.000",
+        "22": "K"
+      },
+      "settings": {
+        "MsLbrWithGht": "N"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 23,
+        "text": "3125"
+      },
+      "expectedCells": {
+        "24": "12.00",
+        "36": "12.00",
+        "38": "12.00"
+      },
+      "sourceLines": [
+        4988,
+        4990
+      ]
+    },
+    {
+      "id": "percentage-configured-even-tie",
+      "purpose": "Percentage-derived rate uses configured half-even before forward whole-rupee labour",
+      "status": "source-derived",
+      "initialCells": {
+        "19": "10.00",
+        "49": "10.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 21,
+        "text": "1.25"
+      },
+      "expectedCells": {
+        "21": "1.25",
+        "66": "1.25",
+        "23": "0.12",
+        "58": "0.12",
+        "24": "1.00",
+        "20": "100.00",
+        "36": "101.00",
+        "38": "101.00",
+        "67": "0"
+      },
+      "sourceLines": [
+        4959,
+        4964,
+        4969,
+        4995
+      ]
+    },
+    {
+      "id": "manual-amount-generation-off",
+      "purpose": "Without MsLbrGen, manual amount does not derive a new rate",
+      "status": "source-derived",
+      "initialCells": {
+        "23": "2.00",
+        "58": "2.00",
+        "24": "20.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 24,
+        "text": "25"
+      },
+      "expectedCells": {
+        "24": "25.00",
+        "23": "2.00",
+        "58": "2.00",
+        "36": "25.00",
+        "38": "25.00"
+      },
+      "sourceLines": [
+        4969,
+        5021
+      ]
+    },
+    {
+      "id": "manual-amount-generation-on",
+      "purpose": "Unchanged cached rate plus MsLbrGen derives rate from manual amount",
+      "status": "source-derived",
+      "initialCells": {
+        "23": "2.00",
+        "58": "2.00",
+        "24": "20.00"
+      },
+      "settings": {
+        "MsLbrGen": "Y"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 24,
+        "text": "25"
+      },
+      "expectedCells": {
+        "24": "25.00",
+        "23": "2.50",
+        "58": "2.50",
+        "36": "25.00",
+        "38": "25.00"
+      },
+      "sourceLines": [
+        4996,
+        5021
+      ]
+    },
+    {
+      "id": "k-generation-multiplies1000",
+      "purpose": "Literal K generation expression uses net+ghat and times1000",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "2000.000",
+        "12": "1000.000",
+        "45": "2000.000",
+        "46": "1000.000",
+        "18": "1000.000",
+        "22": "K",
+        "23": "100.00",
+        "58": "100.00"
+      },
+      "settings": {
+        "MsLbrGen": "Y"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 24,
+        "text": "1500"
+      },
+      "expectedCells": {
+        "24": "1500.00",
+        "23": "1500.00",
+        "58": "1500.00",
+        "36": "1500.00",
+        "38": "1500.00"
+      },
+      "sourceLines": [
+        5013,
+        5015
+      ]
+    },
+    {
+      "id": "manual-total",
+      "purpose": "Manual no-tax/no-MRP total derives residual labour then its rate",
+      "status": "source-derived",
+      "initialCells": {
+        "19": "10.00",
+        "49": "10.00",
+        "20": "100.00",
+        "23": "2.00",
+        "58": "2.00",
+        "24": "20.00",
+        "27": "10.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 36,
+        "text": "150"
+      },
+      "expectedCells": {
+        "24": "40.00",
+        "23": "4.00",
+        "58": "4",
+        "36": "150.00",
+        "38": "150.00"
+      },
+      "sourceLines": [
+        5071,
+        5119
+      ]
+    },
+    {
+      "id": "manual-total-negative-labour-blank",
+      "purpose": "Source retains entered total after blanking negative residual labour",
+      "status": "literal-source-anomaly-needs-acceptance",
+      "initialCells": {
+        "19": "10.00",
+        "49": "10.00",
+        "20": "100.00",
+        "23": "2.00",
+        "58": "2.00",
+        "24": "20.00",
+        "27": "10.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 36,
+        "text": "50"
+      },
+      "expectedCells": {
+        "24": "",
+        "23": "2.00",
+        "58": "2.00",
+        "36": "50.00",
+        "38": "50.00"
+      },
+      "sourceLines": [
+        5075,
+        5119
+      ]
+    },
+    {
+      "id": "manual-total-k-divides1000",
+      "purpose": "Manual-total K inverse contradicts the generation inverse",
+      "status": "literal-source-anomaly-needs-acceptance",
+      "initialCells": {
+        "10": "1000.000",
+        "12": "1000.000",
+        "45": "1000.000",
+        "46": "1000.000",
+        "18": "1000.000",
+        "22": "K",
+        "23": "100.00",
+        "58": "100.00",
+        "24": "100.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 36,
+        "text": "2000"
+      },
+      "expectedCells": {
+        "24": "2000.00",
+        "23": "0.00",
+        "58": "0",
+        "36": "2000.00",
+        "38": "2000.00"
+      },
+      "sourceLines": [
+        5075,
+        5119
+      ]
+    },
+    {
+      "id": "mrp-tax-discount-overwrites-net",
+      "purpose": "MRP tax extraction subtracts discount again and finalelse overwrites extracted net",
+      "status": "literal-source-anomaly-needs-acceptance",
+      "initialCells": {
+        "25": "10.00",
+        "37": "10.00",
+        "67": "10.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 28,
+        "text": "1000"
+      },
+      "expectedCells": {
+        "28": "1000.00",
+        "26": "100.00",
+        "36": "718.00",
+        "38": "718.00"
+      },
+      "sourceLines": [
+        5051,
+        5068,
+        5120,
+        5156
+      ]
+    },
+    {
+      "id": "mrp-zero-tax-ignores-discount-in-total",
+      "purpose": "MRP discount is populated but zero-tax total remains fullMRP",
+      "status": "literal-source-anomaly-needs-acceptance",
+      "initialCells": {
+        "25": "10.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 28,
+        "text": "1000"
+      },
+      "expectedCells": {
+        "28": "1000.00",
+        "26": "100.00",
+        "36": "1000.00",
+        "38": "1000.00"
+      },
+      "sourceLines": [
+        5051,
+        5068,
+        5120,
+        5156
+      ]
+    },
+    {
+      "id": "tax-cache-first-versus-repeat",
+      "purpose": "A changed tax extracts net and residual labour; repeated same numeric event follows different path",
+      "status": "literal-source-anomaly-needs-acceptance",
+      "initialCells": {
+        "19": "10.00",
+        "49": "10.00",
+        "20": "100.00",
+        "23": "2.00",
+        "58": "2.00",
+        "24": "20.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 37,
+        "text": "20"
+      },
+      "expectedCells": {
+        "37": "20.00",
+        "67": "20.00",
+        "36": "120.00",
+        "38": "100.00",
+        "24": "0.00",
+        "23": "2.00",
+        "58": "2.00"
+      },
+      "sourceLines": [
+        5120,
+        5156
+      ],
+      "subsequentEvents": [
+        {
+          "event": {
+            "kind": "leaveCell",
+            "column": 27,
+            "text": "0"
+          },
+          "expectedCells": {
+            "36": "100.00",
+            "38": "100.00",
+            "24": "0.00",
+            "37": "20.00",
+            "67": "20.00"
+          },
+          "note": "Tax cache now matches; finalelse copies recomputedtotal toNetAmt."
+        }
+      ]
+    },
+    {
+      "id": "f1-calls-calculation-and-leaves-pct-cache",
+      "purpose": "Original-sale F1 calls calculator and does not seed66 alongside copied21",
+      "status": "source-derived",
+      "initialCells": {
+        "19": "100.00",
+        "49": "100.00",
+        "20": "1111.11",
+        "21": "2.00",
+        "66": "0.00",
+        "23": "3.00",
+        "58": "3.00",
+        "24": "37.37",
+        "36": "1148.48",
+        "38": "1148.48"
+      },
+      "settings": {},
+      "event": {
+        "kind": "sourceSelectionAfterCopy",
+        "activeColumn": 1,
+        "text": "GOLD",
+        "precondition": "Source parent/children already resolved under exact original scope; input is the copied state, not a client-authoritative F1 payload"
+      },
+      "expectedCells": {
+        "20": "1000.00",
+        "21": "2.00",
+        "66": "2.00",
+        "23": "2.00",
+        "58": "2.00",
+        "24": "20.00",
+        "36": "1020.00",
+        "38": "1020.00",
+        "67": "0"
+      },
+      "sourceLines": [
+        3924,
+        3955,
+        4023,
+        4941,
+        4995
+      ]
+    },
+    {
+      "id": "saved-hydration-does-not-call-row-calculation",
+      "purpose": "Saved row load seeds caches and preserves imported amounts without replay",
+      "status": "source-derived",
+      "initialCells": {
+        "19": "100.00",
+        "20": "1111.11",
+        "21": "2.00",
+        "23": "3.00",
+        "24": "37.37",
+        "36": "1148.48",
+        "38": "1148.48"
+      },
+      "settings": {},
+      "event": {
+        "kind": "savedHydration"
+      },
+      "expectedCells": {
+        "19": "100.00",
+        "49": "100.00",
+        "20": "1111.11",
+        "21": "2.00",
+        "66": "2.00",
+        "23": "3.00",
+        "58": "3.00",
+        "24": "37.37",
+        "36": "1148.48",
+        "38": "1148.48",
+        "67": "0.00"
+      },
+      "sourceLines": [
+        10377,
+        10417,
+        10447
+      ]
+    },
+    {
+      "id": "configured-three-then-two-decimals",
+      "purpose": "Derived rate is rounded at configured3 then formatted into a2-decimal cell",
+      "status": "source-derived",
+      "initialCells": {
+        "10": "1000.000",
+        "12": "1000.000",
+        "45": "1000.000",
+        "46": "1000.000",
+        "18": "1000.000",
+        "23": "1.00",
+        "58": "1.00"
+      },
+      "settings": {
+        "MsLbrRof": 3,
+        "MsLbrGen": "Y"
+      },
+      "event": {
+        "kind": "leaveCell",
+        "column": 24,
+        "text": "123.45"
+      },
+      "expectedCells": {
+        "24": "123.45",
+        "23": "0.12",
+        "58": "0.12",
+        "36": "123.45",
+        "38": "123.45"
+      },
+      "sourceLines": [
+        4996,
+        5021
+      ]
+    },
+    {
+      "id": "zero-tag-rate-retains-amount",
+      "purpose": "Zero tag rate skips tag-amount update while incoming total ignores tag amount",
+      "status": "source-derived",
+      "initialCells": {
+        "31": "10.00",
+        "32": "99.99"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 31,
+        "text": "0"
+      },
+      "expectedCells": {
+        "31": "0.00",
+        "32": "99.99",
+        "36": "0.00",
+        "38": "0.00"
+      },
+      "sourceLines": [
+        5026,
+        5050,
+        5071
+      ]
+    },
+    {
+      "id": "zero-discount-pct-retains-amount",
+      "purpose": "Cleared labour discount percentage retains its previous discount amount",
+      "status": "source-derived",
+      "initialCells": {
+        "24": "20.00",
+        "25": "10.00",
+        "26": "2.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 25,
+        "text": "0"
+      },
+      "expectedCells": {
+        "25": "0.00",
+        "26": "2.00",
+        "24": "20.00",
+        "36": "18.00",
+        "38": "18.00"
+      },
+      "sourceLines": [
+        5022,
+        5025,
+        5071
+      ]
+    },
+    {
+      "id": "tax-residual-negative-labour",
+      "purpose": "Tax cache branch omits discount from labour residual and permits negative labour",
+      "status": "literal-source-anomaly-needs-acceptance",
+      "initialCells": {
+        "19": "10.00",
+        "49": "10.00",
+        "20": "100.00",
+        "23": "2.00",
+        "58": "2.00",
+        "24": "20.00",
+        "27": "10.00",
+        "26": "5.00"
+      },
+      "settings": {},
+      "event": {
+        "kind": "leaveCell",
+        "column": 37,
+        "text": "25"
+      },
+      "expectedCells": {
+        "36": "125.00",
+        "38": "100.00",
+        "24": "-10.00",
+        "23": "-1.00",
+        "58": "-1.00",
+        "67": "25.00",
+        "26": "5.00"
+      },
+      "sourceLines": [
+        5071,
+        5120,
+        5156
+      ]
+    }
+  ],
+  "unresolvedProbes": [
+    {
+      "id": "fine-control-property",
+      "inputs": {
+        "MsSlAmtType": "F",
+        "net": "10",
+        "ghat": "1",
+        "touch": "90",
+        "west": "0",
+        "itemRate": "100"
+      },
+      "expectedCells": null,
+      "reason": "Resolve actual single-index COM getter at4919 and configured visibility before asserting either branch; it is not current fine cell value."
+    },
+    {
+      "id": "zero-denominator-generation",
+      "inputs": {
+        "MsLbrGen": "Y",
+        "labourType": "P",
+        "pieces": "0",
+        "labourAmount": "10",
+        "labourRateEqualsCache": true
+      },
+      "expectedCells": null,
+      "reason": "No denominator guard at5001; desktop infinity/format/Val behavior not measured."
+    },
+    {
+      "id": "zero-net-plus-ghat",
+      "inputs": {
+        "MsLbrGen": "Y",
+        "labourType": "N",
+        "MsLbrWithGht": "Y",
+        "net": "1",
+        "ghat": "-1",
+        "labourAmount": "10",
+        "labourRateEqualsCache": true
+      },
+      "expectedCells": null,
+      "reason": "Zero net+ghat is unguarded in inverse branches, including tax branch that only guardsnet."
+    },
+    {
+      "id": "tax-minus100",
+      "inputs": {
+        "tax": "-100",
+        "cachedTax": "0",
+        "MRP": "0",
+        "total": "100"
+      },
+      "expectedCells": null,
+      "reason": "Tax divisor iszero at5123; no invented0 or error result."
+    },
+    {
+      "id": "double-format-midpoints",
+      "inputs": {
+        "decimalCases": [
+          "1.005",
+          "2.675",
+          "0.0005"
+        ],
+        "runtime": "original desktop framework/culture unknown"
+      },
+      "expectedCells": null,
+      "reason": "Obtain executable desktop captures before treating mathematical Decimal rounding as all Double/Strings.Format runtime behavior."
+    },
+    {
+      "id": "double-division-before-k-tie",
+      "inputs": {
+        "basis": "1500",
+        "rate": "1001",
+        "RATE_TYPE": "K"
+      },
+      "expectedCells": null,
+      "reason": "The source evaluates Double(1500)*(Double(1001)/1000), whereas exact decimal arithmetic gives1501.5. A local Python binary64 arithmetic diagnostic yields1501.4999999999998; this is not a desktop execution result. Probe the original .NET path before choosing Decimal midpoint behavior."
+    }
+  ],
+  "acceptanceLimit": "No numeric writer or UI acceptance; tagged admission, source lookup, components, outgoing exchange, UAE, accounting, reversal, physical desktop operation remain separate."
+}

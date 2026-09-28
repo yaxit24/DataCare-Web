@@ -1,0 +1,14 @@
+{
+  "integratedAtUtc": "2026-09-11T19:21:26.703901+00:00",
+  "testedMigrationSha256": "6f495c3b4948eba2c4f05449e48afac761ea5af0ce6520b9fde53812a93f6aa8",
+  "installedMigration": {
+    "path": "web/packages/db/prisma/migrations/20260912004500_session_context_epoch/migration.sql",
+    "sha256": "b2ebec67672c219db30e547cb1b6b7346f49e94cc3c621a12610e1e54bf35b7d"
+  },
+  "schema": {
+    "path": "web/packages/db/prisma/schema.prisma",
+    "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+  },
+  "onlySqlDifference": "Replaced the first status comment with a production description. Every byte after that first newline, including all executable SQL, is identical to the28-case tested migration.",
+  "runtimeStatus": "Migration/schema integrated; isolated deployment and Prisma generation pending. Existing session writers are not yet epoch-aware, so no live context authority or rollout compatibility is claimed."
+}

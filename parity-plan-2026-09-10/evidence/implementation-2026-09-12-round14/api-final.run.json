@@ -1,0 +1,38 @@
+{
+  "command": [
+    "env",
+    "NODE_OPTIONS=--max-old-space-size=4096",
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "test"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T01:16:11.829019+00:00",
+  "finishedAtUtc": "2026-09-12T01:18:52.153565+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-final.txt",
+  "logSha256": "6570300b2f1a3c94296f6177a6360d8eab4eb7a1a2430a9969d7ff4a5ed4fc34",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-final.inputs.json",
+  "inputManifestSha256": "bccfc89c9907240176c076150e54235ab5084e7cdc659fd656592f9639d52a30",
+  "inputCount": 1906,
+  "changedInputs": [
+    {
+      "path": "parity-plan-2026-09-10/capture_implementation_checkpoint_round14.py",
+      "beforeSha256": "7e746aa27ff091e322be51302cc348529728d4af2f851075749e9388feba4b4d",
+      "afterSha256": "fffdf946ec1e43e80e05ec448bdb85e1cc721475e4029ef06274585bed7a6746"
+    },
+    {
+      "path": "parity-plan-2026-09-10/run_check_round14.py",
+      "beforeSha256": "40357fb2a5449143616e9b76010dcab9655664801c63ca6a3052d50923b0b56c",
+      "afterSha256": "7ce815dd69bba2e733bb932db58a44cbeb6a4c244b292d02f1dbbb548fcedc0d"
+    }
+  ],
+  "changedPrivateInputs": [],
+  "qualification": "concurrent-input-drift-requires-explicit-scope-review",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

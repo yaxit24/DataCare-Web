@@ -1,0 +1,9 @@
+
+> datacare-web-saas@0.0.0 test:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> pnpm --filter @datacare/web test:browser
+
+
+> @datacare/web@0.0.0 test:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> node test/browser.smoke.mjs
+
+Browser smoke passed: auth, scope, global F-key navigation, desktop Ctrl chords, tag images, sales lifecycle, tag/item-opening/item-lot accessible keyboard grids, all four repair workflow stages, repair images, MLT PRO, physical stock, dashboard, logout

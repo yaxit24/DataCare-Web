@@ -1,0 +1,114 @@
+--- a/apps/api/src/routes/txn.ts
++++ b/apps/api/src/routes/txn.ts
+@@ -66,15 +66,15 @@
+   SaleReturnBillReplayError,
+ } from '../modules/sales/saleReturnBillReplay.js';
+ import {
+-  cancelSalesOrder,
++  cancelSalesOrderInSession,
+   cancelSalesOrderAdjust,
+-  cancelTourOrder,
++  cancelTourOrderInSession,
+   getTourOrderConfiguration,
+   getSalesOrderConfiguration,
+   editSalesOrderInSession,
+-  createSalesOrder,
+-  createTourOrder,
+-  editTourOrder,
++  createSalesOrderInSession,
++  createTourOrderInSession,
++  editTourOrderInSession,
+   getSalesOrder,
+   getSalesOrderAdjustment,
+   getTourOrder,
+@@ -1356,6 +1356,17 @@
+   });
+ 
+   // ---- Sales order ----
++  // Retained authenticated request context, never body/query authority or a later cookie.
++  const orderCommandIdentity = (req: FastifyRequest) => ({
++    tenantId: sess(req).tenantId,
++    sessionId: sess(req).sid,
++    loginName: sess(req).sub,
++    loginCoCode: sess(req).loginCoCode,
++    coCode: sess(req).coCode,
++    lcCode: sess(req).lcCode,
++    coYear: sess(req).coYear,
++    contextEpoch: sess(req).contextEpoch,
++  });
+   const requireOrderVersion = (value: unknown): string => {
+     if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) {
+       const error = new Error(
+@@ -1425,7 +1436,9 @@
+   );
+   app.post('/sales-orders', auth, async (req, reply) => {
+     if (!guard(req, reply, 'create')) return;
+-    return run(reply, 201, () => createSalesOrder(prisma, completeSalesOrderInput(req)));
++    return run(reply, 201, () => createSalesOrderInSession(prisma, {
++      identity: orderCommandIdentity(req), input: completeSalesOrderInput(req),
++    }));
+   });
+   app.get('/sales-orders', auth, async (req, reply) =>
+     run(reply, 200, () => listSalesOrders(prisma, readScope(req) as any)),
+@@ -1450,11 +1463,14 @@
+   app.delete('/sales-orders/:vchNo', auth, async (req, reply) => {
+     if (!guard(req, reply, 'delete')) return;
+     return run(reply, 200, () =>
+-      cancelSalesOrder(prisma, {
+-        scope: scopeOf(req),
+-        expectedVersion: requireOrderVersion(body(req).expectedVersion),
+-        vchNo: (req.params as any).vchNo,
+-        deleteUser: sess(req).sub,
++      cancelSalesOrderInSession(prisma, {
++        identity: orderCommandIdentity(req),
++        input: {
++          scope: scopeOf(req),
++          expectedVersion: requireOrderVersion(body(req).expectedVersion),
++          vchNo: (req.params as any).vchNo,
++          deleteUser: sess(req).sub,
++        },
+       }),
+     );
+   });
+@@ -1480,7 +1496,9 @@
+   });
+   app.post('/tour-orders', auth, async (req, reply) => {
+     if (!guard(req, reply, 'create')) return;
+-    return run(reply, 201, () => createTourOrder(prisma, salesOrderInput(req)));
++    return run(reply, 201, () => createTourOrderInSession(prisma, {
++      identity: orderCommandIdentity(req), input: salesOrderInput(req),
++    }));
+   });
+   app.get('/tour-orders', auth, async (req, reply) =>
+     run(reply, 200, () => listTourOrders(prisma, readScope(req) as any)),
+@@ -1492,17 +1510,24 @@
+   app.put('/tour-orders/:vchNo', auth, async (req, reply) => {
+     if (!guard(req, reply, 'update')) return;
+     return run(reply, 200, () =>
+-      editTourOrder(prisma, salesOrderInput(req), (req.params as any).vchNo),
++      editTourOrderInSession(prisma, {
++        identity: orderCommandIdentity(req),
++        input: { ...salesOrderInput(req), expectedVersion: requireOrderVersion(body(req).expectedVersion) },
++        voucherNo: (req.params as any).vchNo,
++      }),
+     );
+   });
+   app.delete('/tour-orders/:vchNo', auth, async (req, reply) => {
+     if (!guard(req, reply, 'delete')) return;
+     return run(reply, 200, () =>
+-      cancelTourOrder(prisma, {
+-        scope: scopeOf(req),
+-        expectedVersion: body(req).expectedVersion,
+-        vchNo: (req.params as any).vchNo,
+-        deleteUser: sess(req).sub,
++      cancelTourOrderInSession(prisma, {
++        identity: orderCommandIdentity(req),
++        input: {
++          scope: scopeOf(req),
++          expectedVersion: requireOrderVersion(body(req).expectedVersion),
++          vchNo: (req.params as any).vchNo,
++          deleteUser: sess(req).sub,
++        },
+       }),
+     );
+   });

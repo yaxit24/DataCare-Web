@@ -6,6 +6,14 @@ import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { VoucherList } from '../../../../components/VoucherList';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { SaleReturnSavedPanel } from '../../../../components/SaleReturnSavedPanel';
+import { fineFor, labourCharge } from '@datacare/core';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 interface Line {
   itCode: string;
@@ -16,7 +24,135 @@ interface Line {
   touch: string;
   rate: string;
   making: string;
+  ordNo: string;
+  ordYrcd: string;
+  ordDbcd: string;
+  ordSrno: string;
+  isuNo: string;
+  isuYrcd: string;
+  isuDbcd: string;
+  isuSrno: string;
+  ghtWt: string;
+  westPct: string;
+  fineWt: string;
+  metalAmount: string;
+  labourPct: string;
+  labourFixed: string;
+  otherAmount: string;
+  huid: string;
+  designNo: string;
+  itmSize: string;
+  lessWt: string;
+  tblCode: string;
+  mrp: string;
+  bagWt: string;
+  tagGrossWt: string;
+  tagNetWt: string;
+  ghtPct: string;
+  itemLot: string;
+  remark: string;
+  discountPct: string;
+  ghatAmount: string;
+  rateWith: string;
+  rateType: string;
+  tagCost: string;
+  karigarNetWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
+  karigarName: string;
+  employeeCode: string;
+  prCode: string;
+  orderTagStockAdd: string;
+  designImageId: string;
+  hallmarkId2: string;
+  hallmarkId3: string;
+  hallmarkId4: string;
+  hallmarkIdWt: string;
+  hallmarkId2Wt: string;
+  hallmarkId3Wt: string;
+  hallmarkId4Wt: string;
 }
+const extendedLineFields: Array<[keyof Line, string]> = [
+  ['ordNo', 'OrdNo'],
+  ['ordYrcd', 'OrdYr'],
+  ['ordDbcd', 'OrdBk'],
+  ['ordSrno', 'OrdSr'],
+  ['isuNo', 'IsuNo'],
+  ['isuYrcd', 'IsuYr'],
+  ['isuDbcd', 'IsuBk'],
+  ['isuSrno', 'IsuSr'],
+  ['ghtWt', 'GhtWt'],
+  ['westPct', 'West%'],
+  ['fineWt', 'Fine'],
+  ['metalAmount', 'ItAmt'],
+  ['labourPct', 'Lbr%'],
+  ['labourFixed', 'LbrFix'],
+  ['otherAmount', 'OthAmt'],
+  ['huid', 'HmId'],
+  ['designNo', 'Design'],
+  ['itmSize', 'Size'],
+  ['lessWt', 'LessWt'],
+  ['tblCode', 'Counter'],
+  ['mrp', 'RtnMrp'],
+  ['bagWt', 'BagWt'],
+  ['tagGrossWt', 'TagGwt'],
+  ['tagNetWt', 'TagNwt'],
+  ['ghtPct', 'Ght%'],
+  ['itemLot', 'ItmLot'],
+  ['remark', 'Remark'],
+  ['discountPct', 'LDisc%'],
+  ['ghatAmount', 'GhtAmt'],
+  ['rateWith', 'RtWith'],
+  ['rateType', 'RateType'],
+  ['tagCost', 'TagCost'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
+  ['karigarName', 'KrCode'],
+  ['employeeCode', 'EmpCod'],
+  ['prCode', 'PrCost'],
+  ['orderTagStockAdd', 'OrdStk'],
+  ['designImageId', 'Image'],
+  ['hallmarkId2', 'HmId2'],
+  ['hallmarkId3', 'HmId3'],
+  ['hallmarkId4', 'HmId4'],
+  ['hallmarkIdWt', 'HmIdWt'],
+  ['hallmarkId2Wt', 'HmId2Wt'],
+  ['hallmarkId3Wt', 'HmId3Wt'],
+  ['hallmarkId4Wt', 'HmId4Wt'],
+];
+
+const NUMERIC_EXTENDED = new Set<string>([
+  'ordSrno',
+  'isuSrno',
+  'ghtWt',
+  'westPct',
+  'fineWt',
+  'metalAmount',
+  'labourPct',
+  'labourFixed',
+  'otherAmount',
+  'lessWt',
+  'mrp',
+  'bagWt',
+  'tagGrossWt',
+  'tagNetWt',
+  'ghtPct',
+  'discountPct',
+  'ghatAmount',
+  'tagCost',
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+  'hallmarkIdWt',
+  'hallmarkId2Wt',
+  'hallmarkId3Wt',
+  'hallmarkId4Wt',
+]);
+
 const blank = (): Line => ({
   itCode: 'GOLD',
   tagNo: '',
@@ -26,11 +162,92 @@ const blank = (): Line => ({
   touch: '',
   rate: '',
   making: '',
+  ordNo: '',
+  ordYrcd: '',
+  ordDbcd: '',
+  ordSrno: '',
+  isuNo: '',
+  isuYrcd: '',
+  isuDbcd: '',
+  isuSrno: '',
+  ghtWt: '',
+  westPct: '',
+  fineWt: '',
+  metalAmount: '',
+  labourPct: '',
+  labourFixed: '',
+  otherAmount: '',
+  huid: '',
+  designNo: '',
+  itmSize: '',
+  lessWt: '',
+  tblCode: '',
+  mrp: '',
+  bagWt: '',
+  tagGrossWt: '',
+  tagNetWt: '',
+  ghtPct: '',
+  itemLot: '',
+  remark: '',
+  discountPct: '',
+  ghatAmount: '',
+  rateWith: '',
+  rateType: '',
+  tagCost: '',
+  karigarNetWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
+  karigarName: '',
+  employeeCode: '',
+  prCode: '',
+  orderTagStockAdd: '',
+  designImageId: '',
+  hallmarkId2: '',
+  hallmarkId3: '',
+  hallmarkId4: '',
+  hallmarkIdWt: '',
+  hallmarkId2Wt: '',
+  hallmarkId3Wt: '',
+  hallmarkId4Wt: '',
 });
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
 export default function SaleReturnPage() {
+  const [mode, setMode] = useState<'new' | 'saved'>('new');
+  const [metadataDirty, setMetadataDirty] = useState(false);
+  return (
+    <div style={{ minWidth: 0 }}>
+      <h1>Sales Return</h1>
+      <div className="toolbar" aria-label="Sales Return workspace">
+        <button
+          type="button"
+          className="ghost"
+          aria-pressed={mode === 'new'}
+          disabled={mode === 'saved' && metadataDirty}
+          onClick={() => setMode('new')}
+        >
+          New return
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          aria-pressed={mode === 'saved'}
+          onClick={() => setMode('saved')}
+        >
+          Saved returns
+        </button>
+      </div>
+      {mode === 'saved' && <SaleReturnSavedPanel onDirtyChange={setMetadataDirty} />}
+      <div hidden={mode !== 'new'}>
+        <LegacySaleReturnForm />
+      </div>
+    </div>
+  );
+}
+
+function LegacySaleReturnForm() {
   const { coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [acCode, setAcCode] = useState('');
@@ -42,6 +259,20 @@ export default function SaleReturnPage() {
   const [origBook, setOrigBook] = useState('SAL');
   const [tender, setTender] = useState<Tender>({});
   const [lines, setLines] = useState<Line[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [result, setResult] = useState<any>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -86,9 +317,20 @@ export default function SaleReturnPage() {
 
   // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
   const calc = (l: Line) => {
-    const fine = r2((n(l.netWt) * n(l.touch)) / 100);
+    const fine = fineFor('sale', {
+      netWt: n(l.netWt),
+      touch: n(l.touch),
+      ghtWt: n(l.ghtWt),
+      westPct: n(l.westPct),
+    });
     const metal = r2(fine * n(l.rate));
-    const mk = r2(n(l.netWt) * n(l.making));
+    // P5/P7: the grid now carries ghat; per-gram labour is (net + ghat) x rate (LBR_WITH_GHT blank 'Y').
+    const mk = labourCharge('per_gram', {
+      netWt: n(l.netWt),
+      ghatWt: n(l.ghtWt),
+      withGhat: true,
+      rate: n(l.making),
+    });
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
@@ -131,6 +373,16 @@ export default function SaleReturnPage() {
             touch: n(l.touch),
             rate: n(l.rate),
             ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
+            // P7: writer-verified extended columns; a blank cell is OMITTED, never sent as 0.
+            ...Object.fromEntries(
+              extendedLineFields
+                .map(([key]) => [
+                  key,
+                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                ])
+                .filter(([, v]) => v !== '')
+                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+            ),
           })),
       };
       setResult(await post('/sales-returns', body));
@@ -143,7 +395,6 @@ export default function SaleReturnPage() {
 
   return (
     <div>
-      <h1>Sales Return</h1>
       <form onSubmit={submit}>
         <div className="panel">
           <div className="row">
@@ -211,7 +462,13 @@ export default function SaleReturnPage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Returned Items</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="sale-return-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -224,6 +481,7 @@ export default function SaleReturnPage() {
                 <th className="num">Making/g</th>
                 <th className="num">Fine</th>
                 <th className="num">Amount</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -309,6 +567,14 @@ export default function SaleReturnPage() {
                     </td>
                     <td className="num">{c.fine.toLocaleString('en-IN')}</td>
                     <td className="num">{c.net.toLocaleString('en-IN')}</td>
+                    <ExtendedBodyCells
+                      full={fullGrid}
+                      fields={extendedLineFields}
+                      line={l}
+                      row={i}
+                      baseColumns={10}
+                      setValue={(row, key, value) => setLine(row, key, value)}
+                    />
                     <td>
                       <button
                         type="button"

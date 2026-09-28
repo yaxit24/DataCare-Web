@@ -1,0 +1,528 @@
+{
+ "form": "UT_SET_ADMIN",
+ "controlCount": 50,
+ "byKind": {
+  "tab": 7,
+  "panel": 4,
+  "button": 16,
+  "label": 12,
+  "combo": 11
+ },
+ "grids": [],
+ "tabs": [
+  "TabPanel1",
+  "TabPanel2",
+  "TabPanel3",
+  "TabMenu",
+  "Tab1",
+  "Tab2",
+  "Tab3"
+ ],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "TabMenu": [
+   "TabPanel1",
+   "TabPanel2",
+   "TabPanel3"
+  ],
+  "Pnl1": [
+   "BtnStkLimitWithDesign",
+   "cboStklimitWithDesign",
+   "Label11",
+   "btnKrTouchHide",
+   "cboKrTouchHide",
+   "Label10",
+   "btnSlYearSale",
+   "cboSlYearSale",
+   "Label9",
+   "btnGlYearSale",
+   "cboGlYearSale",
+   "Label8",
+   "btnPurcLot",
+   "cboPurcLot",
+   "Label7",
+   "QButton1",
+   "cbobillprofit",
+   "Label6",
+   "btnSlNwtLock",
+   "cboSlNwtLock",
+   "Label5",
+   "btnNegativeStk",
+   "cboNegativeStk",
+   "Label4",
+   "btnOldPurcTch",
+   "cboOldPurcTch",
+   "Label3",
+   "btnEstmateBank",
+   "cboEstmatBank",
+   "Label2",
+   "btnCounterStk",
+   "cboCounterStk",
+   "Label1"
+  ],
+  "this": [
+   "TabMenu",
+   "PnlBotam",
+   "lblBook"
+  ]
+ },
+ "controls": [
+  {
+   "name": "TabPanel1",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Pnl1",
+   "type": "Panel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "TabPanel2",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Pnl2",
+   "type": "Panel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "TabPanel3",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Pnl3",
+   "type": "Panel",
+   "location": "0,0",
+   "size": "1309,507",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "101",
+   "text": "Admin Setting",
+   "kind": "label"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "1126",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "TabMenu",
+   "type": "SuperTabControl",
+   "location": "0,32",
+   "size": "1309,534",
+   "tabIndex": "1127",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "16,29",
+   "size": "273,20",
+   "tabIndex": "1131",
+   "text": "Tag Entry Counter Mandatory",
+   "kind": "label"
+  },
+  {
+   "name": "cboCounterStk",
+   "type": "ComboBox",
+   "location": "299,29",
+   "size": "106,22",
+   "tabIndex": "1132",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnCounterStk",
+   "type": "QButton",
+   "location": "413,23",
+   "size": "121,32",
+   "tabIndex": "1133",
+   "text": "Cntr Stk Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "16,73",
+   "size": "271,20",
+   "tabIndex": "1134",
+   "text": "Estmate Then Bank Rec Lock",
+   "kind": "label"
+  },
+  {
+   "name": "cboEstmatBank",
+   "type": "ComboBox",
+   "location": "299,73",
+   "size": "106,22",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnEstmateBank",
+   "type": "QButton",
+   "location": "413,67",
+   "size": "121,32",
+   "tabIndex": "1136",
+   "text": "Bank Entry Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "33,117",
+   "size": "254,20",
+   "tabIndex": "1137",
+   "text": "Old Purchase Touch Genrate",
+   "kind": "label"
+  },
+  {
+   "name": "cboOldPurcTch",
+   "type": "ComboBox",
+   "location": "299,117",
+   "size": "106,22",
+   "tabIndex": "1138",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnOldPurcTch",
+   "type": "QButton",
+   "location": "413,111",
+   "size": "121,32",
+   "tabIndex": "1139",
+   "text": "Bank Entry Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "33,161",
+   "size": "254,20",
+   "tabIndex": "1140",
+   "text": "Negative Stock Sales Allow",
+   "kind": "label"
+  },
+  {
+   "name": "cboNegativeStk",
+   "type": "ComboBox",
+   "location": "299,161",
+   "size": "106,22",
+   "tabIndex": "1141",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnNegativeStk",
+   "type": "QButton",
+   "location": "413,155",
+   "size": "121,32",
+   "tabIndex": "1142",
+   "text": "Sales Allow",
+   "kind": "button"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "33,205",
+   "size": "254,20",
+   "tabIndex": "1143",
+   "text": "Tag Wise Sale Then Entry Lock",
+   "kind": "label"
+  },
+  {
+   "name": "cboSlNwtLock",
+   "type": "ComboBox",
+   "location": "299,205",
+   "size": "106,22",
+   "tabIndex": "1144",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnSlNwtLock",
+   "type": "QButton",
+   "location": "413,199",
+   "size": "121,32",
+   "tabIndex": "1145",
+   "text": "Nwt Wt Lock",
+   "kind": "button"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "23,249",
+   "size": "264,20",
+   "tabIndex": "1146",
+   "text": "Sales Bill Profit Display",
+   "kind": "label"
+  },
+  {
+   "name": "cbobillprofit",
+   "type": "ComboBox",
+   "location": "299,249",
+   "size": "106,22",
+   "tabIndex": "1147",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "QButton1",
+   "type": "QButton",
+   "location": "413,243",
+   "size": "121,32",
+   "tabIndex": "1148",
+   "text": "Bill Profit Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "23,293",
+   "size": "264,20",
+   "tabIndex": "1149",
+   "text": "Lot Wise Purc and Tag Gen",
+   "kind": "label"
+  },
+  {
+   "name": "cboPurcLot",
+   "type": "ComboBox",
+   "location": "299,293",
+   "size": "106,22",
+   "tabIndex": "1150",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnPurcLot",
+   "type": "QButton",
+   "location": "413,287",
+   "size": "121,32",
+   "tabIndex": "1151",
+   "text": "Lot Gen Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "23,337",
+   "size": "264,20",
+   "tabIndex": "1152",
+   "text": "Yearly Gold Sale Target  In (kg)",
+   "kind": "label"
+  },
+  {
+   "name": "cboGlYearSale",
+   "type": "ComboBox",
+   "location": "299,337",
+   "size": "106,22",
+   "tabIndex": "1153",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnGlYearSale",
+   "type": "QButton",
+   "location": "413,331",
+   "size": "121,32",
+   "tabIndex": "1154",
+   "text": "Gold Sale Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "23,381",
+   "size": "264,20",
+   "tabIndex": "1155",
+   "text": "Yearly Silver Sale Target  In (kg)",
+   "kind": "label"
+  },
+  {
+   "name": "cboSlYearSale",
+   "type": "ComboBox",
+   "location": "299,381",
+   "size": "106,22",
+   "tabIndex": "1156",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnSlYearSale",
+   "type": "QButton",
+   "location": "413,375",
+   "size": "121,32",
+   "tabIndex": "1157",
+   "text": "Silver Sale Set",
+   "kind": "button"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "23,425",
+   "size": "264,20",
+   "tabIndex": "1158",
+   "text": "Tag Entry Then User Kr Touch Hide",
+   "kind": "label"
+  },
+  {
+   "name": "cboKrTouchHide",
+   "type": "ComboBox",
+   "location": "299,425",
+   "size": "106,22",
+   "tabIndex": "1159",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "btnKrTouchHide",
+   "type": "QButton",
+   "location": "413,419",
+   "size": "121,32",
+   "tabIndex": "1160",
+   "text": "Kr Tch Hide",
+   "kind": "button"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "556,29",
+   "size": "331,20",
+   "tabIndex": "1161",
+   "text": "ItStk Limit Master With Design",
+   "kind": "label"
+  },
+  {
+   "name": "cboStklimitWithDesign",
+   "type": "ComboBox",
+   "location": "897,29",
+   "size": "106,22",
+   "tabIndex": "1162",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "BtnStkLimitWithDesign",
+   "type": "QButton",
+   "location": "1011,23",
+   "size": "121,32",
+   "tabIndex": "1163",
+   "text": "With Design Set",
+   "kind": "button"
+  },
+  {
+   "name": "Tab1",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Setting1",
+   "kind": "tab"
+  },
+  {
+   "name": "Tab2",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Setting2",
+   "kind": "tab"
+  },
+  {
+   "name": "Tab3",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Setting3",
+   "kind": "tab"
+  }
+ ]
+}

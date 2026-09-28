@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /private/tmp/datacare-round15-save-guards/web
+
+ ✓ packages/core/test/saleReturnSaveGuards.test.ts (123 tests) 37ms
+
+ Test Files  1 passed (1)
+      Tests  123 passed (123)
+   Start at  08:14:49
+   Duration  234ms (transform 37ms, setup 0ms, collect 41ms, tests 37ms, environment 0ms, prepare 40ms)
+

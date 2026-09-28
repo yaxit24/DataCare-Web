@@ -1,0 +1,883 @@
+{
+ "report": "SalesSumm",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 240,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageHeader",
+     "height": 1080,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 105,
+       "top": 0,
+       "width": 16287,
+       "height": 366,
+       "dataSource": "{@Company}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 105,
+       "top": 480,
+       "width": 16287,
+       "height": 240,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 30,
+       "top": 765,
+       "width": 16335,
+       "height": 240,
+       "dataSource": "{@RptTitel}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 105,
+       "top": 1080,
+       "width": 16335,
+       "height": 0
+      }
+     ]
+    },
+    {
+     "name": "Section4",
+     "kind": "PageHeader",
+     "height": 312,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 105,
+       "top": 75,
+       "width": 540,
+       "height": 158,
+       "text": "BIL_NO"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 638,
+       "top": 75,
+       "width": 675,
+       "height": 158,
+       "text": "BIL_DATE"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 1358,
+       "top": 75,
+       "width": 1282,
+       "height": 158,
+       "text": "AC NAME"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text19",
+       "left": 2678,
+       "top": 75,
+       "width": 465,
+       "height": 158,
+       "text": "City"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 3885,
+       "top": 75,
+       "width": 600,
+       "height": 158,
+       "text": "Mobile"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text20",
+       "left": 4530,
+       "top": 75,
+       "width": 600,
+       "height": 158,
+       "text": "Pan No"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text21",
+       "left": 5175,
+       "top": 75,
+       "width": 698,
+       "height": 158,
+       "text": "GST No"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text18",
+       "left": 5980,
+       "top": 75,
+       "width": 1100,
+       "height": 158,
+       "text": "Product Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text22",
+       "left": 8322,
+       "top": 75,
+       "width": 698,
+       "height": 158,
+       "text": "Net Wt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 9143,
+       "top": 75,
+       "width": 1080,
+       "height": 158,
+       "text": "Net AMT"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text15",
+       "left": 10290,
+       "top": 75,
+       "width": 563,
+       "height": 158,
+       "text": "CGST"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 10913,
+       "top": 75,
+       "width": 510,
+       "height": 158,
+       "text": "SGST"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text9",
+       "left": 11475,
+       "top": 75,
+       "width": 668,
+       "height": 158,
+       "text": "TOT_AMT"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 12195,
+       "top": 75,
+       "width": 540,
+       "height": 158,
+       "text": "CASH"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 12788,
+       "top": 75,
+       "width": 517,
+       "height": 158,
+       "text": "Bank"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 13350,
+       "top": 75,
+       "width": 548,
+       "height": 158,
+       "text": "Les:Adv"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text13",
+       "left": 13958,
+       "top": 75,
+       "width": 637,
+       "height": 158,
+       "text": "Old Gold"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text14",
+       "left": 14663,
+       "top": 75,
+       "width": 525,
+       "height": 158,
+       "text": "Old Sl"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text16",
+       "left": 15225,
+       "top": 75,
+       "width": 533,
+       "height": 158,
+       "text": "Kasar"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text17",
+       "left": 15818,
+       "top": 75,
+       "width": 574,
+       "height": 158,
+       "text": "Os Amt"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 0,
+       "top": 278,
+       "width": 16395,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "GroupHeader",
+     "height": 290,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area8",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "GroupHeader",
+     "height": 281,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 105,
+       "top": 30,
+       "width": 533,
+       "height": 161,
+       "dataSource": "{SL_DATA.VCH_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 638,
+       "top": 30,
+       "width": 675,
+       "height": 141,
+       "dataSource": "{SL_DATA.VCH_DATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 1358,
+       "top": 30,
+       "width": 1282,
+       "height": 161,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field43",
+       "left": 2678,
+       "top": 30,
+       "width": 480,
+       "height": 161,
+       "dataSource": "{AC_MAST.AC_CITY}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field41",
+       "left": 3895,
+       "top": 30,
+       "width": 590,
+       "height": 161,
+       "dataSource": "{AC_MAST.AC_MOBILE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field44",
+       "left": 4530,
+       "top": 30,
+       "width": 615,
+       "height": 161,
+       "dataSource": "{AC_MAST.AC_PANNO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field45",
+       "left": 5175,
+       "top": 30,
+       "width": 698,
+       "height": 161,
+       "dataSource": "{AC_MAST.AC_GSTNO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 9506,
+       "top": 30,
+       "width": 717,
+       "height": 141,
+       "dataSource": "{SL_DATA.NET_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field35",
+       "left": 10290,
+       "top": 30,
+       "width": 563,
+       "height": 141,
+       "dataSource": "{SL_DATA.CGST_TAX}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field36",
+       "left": 10913,
+       "top": 30,
+       "width": 510,
+       "height": 141,
+       "dataSource": "{SL_DATA.SGST_TAX}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 11475,
+       "top": 30,
+       "width": 651,
+       "height": 141,
+       "dataSource": "{SL_DATA.TOT_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 12195,
+       "top": 30,
+       "width": 540,
+       "height": 141,
+       "dataSource": "{@CSH_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 12788,
+       "top": 30,
+       "width": 517,
+       "height": 141,
+       "dataSource": "{@Crd_amt}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 13350,
+       "top": 30,
+       "width": 548,
+       "height": 141,
+       "dataSource": "{@Advance}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 13958,
+       "top": 30,
+       "width": 637,
+       "height": 141,
+       "dataSource": "{SL_DATA.OLD_GL_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 14663,
+       "top": 30,
+       "width": 525,
+       "height": 141,
+       "dataSource": "{SL_DATA.OLD_SL_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field34",
+       "left": 15225,
+       "top": 30,
+       "width": 533,
+       "height": 141,
+       "dataSource": "{SL_DATA.KASAR_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 15818,
+       "top": 30,
+       "width": 574,
+       "height": 141,
+       "dataSource": "{SL_DATA.BILL_OS}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area10",
+   "sections": [
+    {
+     "name": "Section11",
+     "kind": "GroupHeader",
+     "height": 186,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field50",
+       "left": 5873,
+       "top": 30,
+       "width": 2647,
+       "height": 150,
+       "dataSource": "{ITEM_MAST.IT_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field51",
+       "left": 8437,
+       "top": 30,
+       "width": 583,
+       "height": 141,
+       "dataSource": "{SL_DETL.ITM_NWT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "Detail",
+     "height": 338,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area11",
+   "sections": [
+    {
+     "name": "Section12",
+     "kind": "GroupFooter",
+     "height": 223,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area9",
+   "sections": [
+    {
+     "name": "Section10",
+     "kind": "GroupFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "GroupFooter",
+     "height": 238,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 105,
+       "top": 15,
+       "width": 16335,
+       "height": 0
+      },
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 105,
+       "top": 15,
+       "width": 16350,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text11",
+       "left": 4800,
+       "top": 45,
+       "width": 3420,
+       "height": 165,
+       "text": "DATE TOTAL :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field53",
+       "left": 8400,
+       "top": 45,
+       "width": 620,
+       "height": 147,
+       "dataSource": "Sum ({SL_DETL.ITM_NWT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 9506,
+       "top": 45,
+       "width": 784,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.NET_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 10290,
+       "top": 45,
+       "width": 616,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.CGST_TAX}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 10913,
+       "top": 45,
+       "width": 558,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.SGST_TAX}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field18",
+       "left": 11475,
+       "top": 45,
+       "width": 731,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.TOT_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 12195,
+       "top": 45,
+       "width": 590,
+       "height": 147,
+       "dataSource": "Sum ({@CSH_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field16",
+       "left": 12788,
+       "top": 45,
+       "width": 565,
+       "height": 147,
+       "dataSource": "Sum ({@Crd_amt}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 13350,
+       "top": 45,
+       "width": 599,
+       "height": 147,
+       "dataSource": "Sum ({@Advance}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 13958,
+       "top": 45,
+       "width": 702,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.OLD_GL_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 14663,
+       "top": 45,
+       "width": 574,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.OLD_SL_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field37",
+       "left": 15225,
+       "top": 45,
+       "width": 583,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.KASAR_AMT}, {SL_DATA.VCH_DATE}, \"daily\")"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field39",
+       "left": 15818,
+       "top": 45,
+       "width": 628,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.BILL_OS}, {SL_DATA.VCH_DATE}, \"daily\")"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area6",
+   "sections": [
+    {
+     "name": "Section8",
+     "kind": "ReportFooter",
+     "height": 248,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 48,
+       "top": 12,
+       "width": 16392,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text12",
+       "left": 4920,
+       "top": 45,
+       "width": 3420,
+       "height": 147,
+       "text": "GRAND TOTAL :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "SumofITMNWT1",
+       "left": 8400,
+       "top": 45,
+       "width": 620,
+       "height": 147,
+       "dataSource": "Sum ({SL_DETL.ITM_NWT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field33",
+       "left": 9439,
+       "top": 45,
+       "width": 784,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.NET_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 10290,
+       "top": 45,
+       "width": 563,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.CGST_TAX})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 10913,
+       "top": 45,
+       "width": 510,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.SGST_TAX})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 11475,
+       "top": 45,
+       "width": 655,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.TOT_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 12195,
+       "top": 45,
+       "width": 540,
+       "height": 147,
+       "dataSource": "Sum ({@CSH_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 12788,
+       "top": 45,
+       "width": 517,
+       "height": 147,
+       "dataSource": "Sum ({@Crd_amt})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 13350,
+       "top": 45,
+       "width": 548,
+       "height": 147,
+       "dataSource": "Sum ({@Advance})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field29",
+       "left": 13949,
+       "top": 45,
+       "width": 646,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.OLD_GL_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field31",
+       "left": 14663,
+       "top": 45,
+       "width": 525,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.OLD_SL_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field38",
+       "left": 15225,
+       "top": 45,
+       "width": 533,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.KASAR_AMT})"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field40",
+       "left": 15818,
+       "top": 45,
+       "width": 574,
+       "height": 147,
+       "dataSource": "Sum ({SL_DATA.BILL_OS})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 0,
+       "top": 248,
+       "width": 16392,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area7",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "PageFooter",
+     "height": 270,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "Advance",
+   "ref": "{@Advance}",
+   "type": "NumberField",
+   "text": "{SL_DATA.ADV_AMT}"
+  },
+  {
+   "name": "Card_amt",
+   "ref": "{@Card_amt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.CARD_AMT}"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3}+{CO_MAST.CO_CITY}+'-'+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "Crd_amt",
+   "ref": "{@Crd_amt}",
+   "type": "NumberField",
+   "text": "{SL_DATA.CHQ_AMT}"
+  },
+  {
+   "name": "CSH_AMT",
+   "ref": "{@CSH_AMT}",
+   "type": "NumberField",
+   "text": "{SL_DATA.CASH_AMT}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'SALES REPORT'"
+  },
+  {
+   "name": "SrNo",
+   "ref": "{@SrNo}",
+   "type": "NumberField",
+   "text": "{SL_DETL.SR_NO}"
+  },
+  {
+   "name": "VchNo",
+   "ref": "{@VchNo}",
+   "type": "StringField",
+   "text": "{SL_DATA.VCH_NO}"
+  }
+ ],
+ "sectionCount": 12,
+ "objectCount": 75,
+ "formulaCount": 10
+}

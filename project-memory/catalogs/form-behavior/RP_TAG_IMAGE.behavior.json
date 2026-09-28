@@ -1,0 +1,120 @@
+{
+ "form": "RP_TAG_IMAGE",
+ "loc": 6003,
+ "gridColumns": {
+  "cBox": 0,
+  "cSrNo": 1,
+  "cTagNo": 2,
+  "cItemName": 3,
+  "cDesign": 4,
+  "cPcs": 5,
+  "cGrWt": 6,
+  "cNetWt": 7,
+  "cImage": 8,
+  "cBookType": 9,
+  "cVchNo": 10,
+  "cSize": 11,
+  "cTouch": 12,
+  "cWest": 13,
+  "cFine": 14,
+  "cLbrPrc": 15,
+  "cLbrAmt": 16,
+  "cOthAmt": 17,
+  "cMrp": 18,
+  "cVchDate": 19,
+  "cBookCode": 20,
+  "cBookName": 21,
+  "cVchSrNo": 22
+ },
+ "inlineSql": [
+  "Please Select Item Code or Product Name and Try",
+  "In ? SELECT A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,A.TAG_NO As TagNo,B.IT_NAME As ItName,A.ITM_SIZE As Size,A.ITM_PCS as Pcs,A.ITM_GWT As Grwt,A.ITM_NWT AS NetWt,'' AS ItImage, A.ITM_TOUCH As ItTouch,A.ITM_WEST_PRC As ItWest,A.ITM_FINE As ItFine,A.LBR_PRC As LbrPrc,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt,A.ITM_MRP As Mrp, A.CO_BOOK As Book,A.BOOK_NAME As BookName,A.VCH_SRNO As TagId,A.DESIGN_NO As Design from BAR_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> '' AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? '",
+  "SELECT C.VCH_TYPE As VchTyp,C.VCH_NO VchNo,C.VCH_DATE As VchDate,C.TAG_NO As TagNo,B.IT_NAME As ItName,A.ITM_SIZE As Size,A.ITM_PCS as Pcs,A.ITM_GWT As Grwt,A.ITM_NWT AS NetWt,'' AS ItImage, A.ITM_TOUCH As ItTouch,A.ITM_WEST_PRC As ItWest,A.ITM_FINE As ItFine,A.LBR_PRC As LbrPrc,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt,A.ITM_MRP As Mrp, A.CO_BOOK As Book,A.BOOK_NAME As BookName,A.VCH_SRNO As TagId,C.DESIGN_NO As Design from (SL_ORD_DETL AS C LEFT JOIN BAR_DETL AS A ON C.CO_CODE = A.CO_CODE AND C.TAG_NO = A.TAG_NO AND C.VCH_SRNO = A.VCH_SRNO) LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE C.CO_CODE = ' ? ' AND C.LC_CODE = ' ? ' AND C.CO_YEAR = ' ? ' AND C.TAG_NO <> 'N' AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND C.TAG_NO <> ''",
+  "SELECT A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,A.TAG_NO As TagNo,B.IT_NAME As ItName,A.ITM_SIZE As Size,A.ITM_PCS as Pcs,A.ITM_GWT As Grwt,A.ITM_NWT AS NetWt,'' AS ItImage, A.ITM_TOUCH As ItTouch,A.ITM_WEST_PRC As ItWest,A.ITM_FINE As ItFine,A.LBR_PRC As LbrPrc,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt,A.ITM_MRP As Mrp, A.CO_BOOK As Book,A.BOOK_NAME As BookName,A.VCH_SRNO As TagId,C.DESIGN_NO As Design from (MAIN_STOCK AS C LEFT JOIN BAR_DETL AS A ON C.CO_CODE = A.CO_CODE AND C.TAG_NO = A.TAG_NO AND C.VCH_SRNO = A.VCH_SRNO) LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE C.CO_CODE = ' ? ' AND C.LC_CODE = ' ? ' AND C.CO_YEAR = ' ? ' AND C.TAG_NO <> 'N' AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND C.ITM_SIGN = '-'",
+  "Stock ? SELECT A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,A.TAG_NO As TagNo,B.IT_NAME As ItName,A.ITM_SIZE As Size,A.ITM_PCS as Pcs,A.ITM_GWT As Grwt,A.ITM_NWT AS NetWt,'' AS ItImage, A.ITM_TOUCH As ItTouch,A.ITM_WEST_PRC As ItWest,A.ITM_FINE As ItFine,A.LBR_PRC As LbrPrc,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt,A.ITM_MRP As Mrp, A.CO_BOOK As Book,A.BOOK_NAME As BookName,C.VCH_SRNO As TagId,A.DESIGN_NO Design from (MAIN_STOCK AS C INNER JOIN BAR_DETL AS A ON C.CO_CODE = A.CO_CODE And C.TAG_NO = A.TAG_NO And C.VCH_SRNO = A.VCH_SRNO)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE C.CO_CODE = ' ? ' AND C.LC_CODE = ' ? ' AND C.CO_YEAR = ' ? ' AND C.TAG_NO <> 'N' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? '",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? TagNo ? ' AND VCH_SRNO = ? TagId ? ",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT WAPP_DELAY From CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT B.PR_CODE,C.PR_NAME FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE) LEFT JOIN PRODUCT_MAST AS C ON B.CO_CODE = C.CO_CODE AND B.PR_CODE = C.PR_CODE WHERE A.CO_CODE = ' ? ' AND B.IT_TYPE = ' ? ' AND A.TAG_NO <> 'N' GROUP BY B.PR_CODE,C.PR_NAME ORDER BY C.PR_NAME",
+  "DELETE FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT IT_NAME As ItNameL,IT_CODE as ItCodeL FROM ITEM_MAST WHERE CO_CODE = ' ? ' ORDER BY IT_NAME",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME",
+  "Please Select Mobile No Firt And Try...",
+  "Please Select Image First And Try...",
+  "SELECT A.AC_NAME As AcNameL,A.AC_ADD1 As AddressL,A.AC_MOBILE As MobileL,A.AC_CITY As CityL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ORDER BY AC_NAME",
+  "Select * From BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? '",
+  "SELECT A.BOOK_NAME As BookNameL,A.CO_BOOK As BookL FROM BOOK_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ORDER BY A.BOOK_NAME",
+  "SELECT A.IT_CODE,A.IT_NAME FROM ITEM_MAST AS A WHERE A.CO_CODE = ' ? ' ? AND IT_TYPE = ' ? ' ? ORDER BY A.IT_NAME",
+  "Please Select Book First....",
+  "SELECT BOOK_TBL_NAME,MAIN_BOOK FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND (BOOK_TBL_NAME <> '' OR BOOK_TBL_NAME IS NOT NULL)",
+  "SELECT A.VCH_NO As VchNoL,replace(convert(NVARCHAR,A.VCH_DATE, 103), ' ', '/') AS VchDateL,B.AC_NAME As PartyNameL FROM ? AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' GROUP BY A.VCH_NO,A.VCH_DATE,B.AC_NAME ORDER BY A.VCH_NO",
+  "Please Update User Mast Field Update and Try...."
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 5
+ },
+ "calc": [
+  "nToWt.Text = Strings.Format((object)Convert.ToDouble(Conversion.Val(nFromWt.Text) + 1.0), \"0.000\");",
+  "double a = Conversion.Val(nFromRow.Text) - 1.0;",
+  "double a2 = Conversion.Val(nToRow.Text) - 1.0;"
+ ],
+ "validations": [
+  {
+   "message": "Please Select Item Code or Product Name and Try",
+   "when": "Operators.CompareString(((TextEdit)tSerchAll).Text, \"\", false) == 0 && Operators.CompareString(RptType, \"Stock\", false) == 0 && ((Operators.CompareString(tItCod"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": ""
+  },
+  {
+   "message": "Please Check Len Connection...You Cant Save Image...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Please Select Mobile No Firt And Try...",
+   "when": "Operators.CompareString(tMobileNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please First Connect Wapp Then Try...",
+   "when": ""
+  },
+  {
+   "message": "Please Connect Whatsapp Firt And Try...",
+   "when": ""
+  },
+  {
+   "message": "Please Select Image First And Try...",
+   "when": "num == 0"
+  },
+  {
+   "message": "All Message Sent....",
+   "when": ""
+  },
+  {
+   "message": "You Cant Set From Row > To row Please change it...",
+   "when": "Conversion.Val(nToRow.Text) < Conversion.Val(nFromRow.Text)"
+  },
+  {
+   "message": "Item Selection Not Done...",
+   "when": "Operators.CompareString(SelectIt, \"\", false) == 0"
+  },
+  {
+   "message": "Please Select Book First....",
+   "when": "Operators.CompareString(tBookCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Update User Mast Field Update and Try....",
+   "when": ""
+  }
+ ]
+}

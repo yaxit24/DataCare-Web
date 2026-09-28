@@ -1,0 +1,21 @@
+{
+  "files": [
+    {
+      "path": "web/apps/web/test/salesReturnLabourReplay.wire.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "e3d8a48a929c1cf26bd0dfcd36a60e6d05840dbe4ec35b60b17ca0cc429e2044"
+    },
+    {
+      "path": "web/apps/web/lib/salesReturnLabourReplay.ts",
+      "beforeSha256": "a5c5b4c21bf630d9fc99c86294660a2465c0d1392ee45f09f9b65cbd57139ae8",
+      "afterSha256": "c9775c999e07f5827a9196f975aea7315da0ae275ab492f64c411f1c510a4905"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/saleReturnLabourReplay.wire.json",
+      "beforeSha256": null,
+      "afterSha256": "db718afe6248e75a0dc81eb5dfbb872042fadeb50c95d21d9ed49d45038120cb"
+    }
+  ],
+  "capturedAtUtc": "2026-09-11T23:51:09.972500+00:00",
+  "qualification": "Observed real-wire scope regression; expected four-field business scope projected explicitly while response exactness and server tenant authority remain unchanged."
+}

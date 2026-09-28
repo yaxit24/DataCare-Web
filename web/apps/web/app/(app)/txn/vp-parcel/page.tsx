@@ -6,6 +6,10 @@ import { BookSelect } from '../../../../components/BookSelect';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
+import SubDetailGrid, {
+  SUB_DETAIL_COMPONENT,
+  useSubDetail,
+} from '../../../../components/SubDetailGrid';
 
 type ParcelLine = {
   tagNo: string;
@@ -137,6 +141,9 @@ export default function VpParcelPage() {
   const [employeeCode, setEmployeeCode] = useState('');
   const [description, setDescription] = useState('');
   const [rows, setRows] = useState<ParcelLine[]>([blankLine()]);
+  // Desktop TR_VP_PARCEL sub-detail hangs a component row set under each line; the server already
+  // accepts `components` and this page sent nothing.
+  const sub = useSubDetail(rows.length);
   const [saved, setSaved] = useState<SaveResult | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -152,7 +159,10 @@ export default function VpParcelPage() {
   const gridKeys = useGridKeyboard({
     rowCount: rows.length,
     columnCount: 14,
-    onAppendRow: () => setRows((current) => [...current, blankLine()]),
+    onAppendRow: () => {
+      setRows((current) => [...current, blankLine()]);
+      sub.appendLine();
+    },
     onRemoveRow: (index) => {
       if (rows.length === 1) return false;
       setRows((current) => current.filter((_, i) => i !== index));
@@ -206,9 +216,12 @@ export default function VpParcelPage() {
   }
 
   async function save() {
-    const lines = rows.filter(
-      (row) => row.tagNo.trim() || row.itemCode.trim() || row.pcs !== 0 || row.grossWt !== 0,
-    );
+    const lines = rows
+      // Original index carried through the filter so components attach to the right line.
+      .map((row, sourceIndex) => ({ row, sourceIndex }))
+      .filter(
+        ({ row }) => row.tagNo.trim() || row.itemCode.trim() || row.pcs !== 0 || row.grossWt !== 0,
+      );
     if (!coBook || !partyCode.trim() || !lines.length) {
       setError('Select a VP PARCEL book, enter a party, and add at least one item or tag.');
       return;
@@ -223,10 +236,19 @@ export default function VpParcelPage() {
         billNo,
         employeeCode,
         description,
-        lines: lines.map(({ itemName: _itemName, fineWt: _fineWt, netAmount: _net, ...line }) =>
-          line.tagNo.trim()
-            ? { ...line, itemCode: undefined, tagNo: line.tagNo.trim() }
-            : { ...line, tagNo: 'N' },
+        lines: lines.map(
+          ({
+            row: { itemName: _itemName, fineWt: _fineWt, netAmount: _net, ...line },
+            sourceIndex,
+          }) =>
+            line.tagNo.trim()
+              ? {
+                  ...line,
+                  itemCode: undefined,
+                  tagNo: line.tagNo.trim(),
+                  components: sub.componentsFor(sourceIndex),
+                }
+              : { ...line, tagNo: 'N', components: sub.componentsFor(sourceIndex) },
         ),
       };
       const result = loadedVoucherNo
@@ -455,6 +477,31 @@ export default function VpParcelPage() {
               ))}
             </tbody>
           </table>
+          <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
+            <div className="field">
+              <label>Components for line</label>
+              <select
+                value={sub.activeLine}
+                onChange={(e) => sub.setActiveLine(Number(e.target.value))}
+              >
+                {rows.map((r, i) => (
+                  <option key={i} value={i}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <span className="muted">{sub.totalRows} row(s) on this voucher</span>
+            </div>
+          </div>
+          <SubDetailGrid
+            rows={sub.rowsFor(sub.activeLine)}
+            onRowsChange={(r) => sub.setRowsFor(sub.activeLine, r)}
+            columns={SUB_DETAIL_COMPONENT}
+            parentLabel={`line ${sub.activeLine + 1}`}
+            desktopSource="TR_VP_PARCEL sub-detail"
+          />
           {rows.map((row, index) => (
             <details key={`vp-row-extra-${index}`} style={{ marginTop: 8 }}>
               <summary>Parcel row {index + 1} desktop fields</summary>

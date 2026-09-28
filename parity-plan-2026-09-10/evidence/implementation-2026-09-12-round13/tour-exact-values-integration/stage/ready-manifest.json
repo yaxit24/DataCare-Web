@@ -1,0 +1,150 @@
+{
+  "version": "tour-exact-values-stage-v1",
+  "status": "frozen staged source/tests; unexecuted",
+  "webDeclaredCases": 19,
+  "apiDeclaredCases": 8,
+  "historicalFamilyDeclaredCases": 34,
+  "frozenLiteralCases": 16,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "055f669c7ecdaa45b6f090cc5f7c3170529ebfa8e2e40b0368c82d7d51c55343",
+      "bytes": 4362
+    },
+    {
+      "path": "baseline/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+      "sha256": "a226087e96f0bbb3c4de2d75b3634b0a0b8d39f33f8d5630b98e775de1f05251",
+      "bytes": 10439
+    },
+    {
+      "path": "baseline/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "a3c91053e27cbae2c1fbea06c93ad8cfba9846bcae5562b1a1e37323dc15ddd1",
+      "bytes": 92111
+    },
+    {
+      "path": "baseline/apps/api/src/modules/shared/stoneSubDetail.ts",
+      "sha256": "e97982d8b1a88c96971de52095773dc4269448bb488881058f8ea58d20cce7a5",
+      "bytes": 6729
+    },
+    {
+      "path": "baseline/apps/api/test/tourOrderHydration.db.test.ts",
+      "sha256": "1a1ab2dc5162cdd65aa7e60db79d1dc86808a9a5728ba56c2cb1b5985895e485",
+      "bytes": 29653
+    },
+    {
+      "path": "baseline/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "05ee74b06728d71e44d6dcbf7d6bd927a7024bae47557912e536b6f6a70baf1c",
+      "bytes": 26523
+    },
+    {
+      "path": "baseline/apps/web/components/SubDetailGrid.tsx",
+      "sha256": "0e8b088a003f86cb184d23aebb565281c413d3190d7a48bd4ddd58f377711135",
+      "bytes": 17258
+    },
+    {
+      "path": "baseline/apps/web/lib/salesOrderForm.ts",
+      "sha256": "fad6b74bfe41be5de895922f2f20ae17547dc31f816b16973632723c05319be7",
+      "bytes": 15085
+    },
+    {
+      "path": "baseline/apps/web/lib/tourOrderForm.ts",
+      "sha256": "6f0c53cf6e46ec81c9bdff26b16877cfe269a9aa5ebea9756ee6e282ebd0dc8c",
+      "bytes": 14576
+    },
+    {
+      "path": "baseline/apps/web/test/tourOrderForm.test.ts",
+      "sha256": "013c527bb07b7e30118c89ba9c083bf12239e19a7d02332f98f3ea3ac3e4fff3",
+      "bytes": 7075
+    },
+    {
+      "path": "baseline/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "bytes": 262459
+    },
+    {
+      "path": "baseline-inputs.json",
+      "sha256": "5a8ebc8d939d7f6aecd87d31e16753844cef134aa5bee0cba8c11c996d431a7c",
+      "bytes": 2810
+    },
+    {
+      "path": "contract-inputs.json",
+      "sha256": "8578deff862267d6b30921ca264f6861bb0306f0057f9d6ba19a7c4bac240bfa",
+      "bytes": 363
+    },
+    {
+      "path": "historical-refusal-correction/baseline.json",
+      "sha256": "7dba3a6d0aeefae5370bcf45b4724e2639f63b21b5ab50d81cf1605566bd6cad",
+      "bytes": 277
+    },
+    {
+      "path": "historical-refusal-correction/order-family-exact-read.patch",
+      "sha256": "a56b69a32f2b29904ea4df398092bf8fd03e4f109669f2578d0c7667f5cfd578",
+      "bytes": 1653
+    },
+    {
+      "path": "historical-refusal-correction/orderSessionCommands.before.ts",
+      "sha256": "dd2e9d984e2cbf2f73e439da116908db7b5b809a2ab3dac061901d6e91868d5e",
+      "bytes": 32935
+    },
+    {
+      "path": "historical-refusal-correction/web/apps/api/test/orderSessionCommands.db.test.ts",
+      "sha256": "1ab1ff011f17ab60407447f40e09dcf9b28e64ea0968a5871ef36eb045d3d07a",
+      "bytes": 32496
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "03e67f8a1f22f55c02adf8020ab7b9e0a108f9a5bee1cf60395916ecf8c8a390",
+      "bytes": 7690
+    },
+    {
+      "path": "source-comparison.json",
+      "sha256": "59a56f2e0368332aafb7ba190267c848d39401e10f2b37d5e56d2aaef05066ad",
+      "bytes": 427
+    },
+    {
+      "path": "staged/tour-exact-runtime.patch",
+      "sha256": "dd0237708f4e8dda4e5ba9de1a0f5fd11039294fa8afa9476af3d25a3d559d2a",
+      "bytes": 7585
+    },
+    {
+      "path": "staged/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "d0c880975689647e30379bf91b2fcd46115719fa216618c5c29c1f248e67c884",
+      "bytes": 92106
+    },
+    {
+      "path": "staged/web/apps/api/test/fixtures/tourExactValues.independent.json",
+      "sha256": "4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a",
+      "bytes": 6990
+    },
+    {
+      "path": "staged/web/apps/api/test/tourOrderExactValues.db.test.ts",
+      "sha256": "443ed7c5c1a1a9f30c52507666961090339d059c199a90af6b96aa63c09c53bd",
+      "bytes": 11763
+    },
+    {
+      "path": "staged/web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "f0e7f6e463475485fd7243165dea6e344043418926092dcf94244254671a45e0",
+      "bytes": 26672
+    },
+    {
+      "path": "staged/web/apps/web/lib/tourOrderForm.ts",
+      "sha256": "6fdb9b06e672335ac5b482597cab12a1cfb6a4a51a95dc5cdbeb22c4c78a3366",
+      "bytes": 18271
+    },
+    {
+      "path": "staged/web/apps/web/test/fixtures/tourExactValues.independent.json",
+      "sha256": "4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a",
+      "bytes": 6990
+    },
+    {
+      "path": "staged/web/apps/web/test/tourOrderExactValues.test.ts",
+      "sha256": "64796d3e68fed0c051128c1330080f586960f92b9a1afc0683ee8e1a6b58f46d",
+      "bytes": 8801
+    },
+    {
+      "path": "tour-exact-values-independent.v1.json",
+      "sha256": "4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a",
+      "bytes": 6990
+    }
+  ]
+}

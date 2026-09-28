@@ -1,0 +1,139 @@
+﻿*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+body,
+button,
+input,
+textarea {
+    font-family: "Poppins", sans-serif;
+}
+/* ========== top heading mate*/
+.top {
+    background-color: #ff6a00;
+    height: 4.5rem;
+    width: 99%;
+    
+    padding-top: 20px;
+    text-align:center;
+}
+.toplbl {
+    padding: 2%;
+    font: 35px/68px 'Muli', sans-serif;
+    font-weight: 600;
+    color:white;
+}
+
+.section {
+    padding: 1rem 0rem;
+}
+.grid {
+    width: 100%;
+    margin: 1.5rem 0;
+    margin: auto;
+    
+}
+.grid-item {
+   
+    padding: 1rem 0.4rem;
+}
+.filter-row {
+    background-color: lightgrey;
+    height: 4.5rem;
+    width: 99%;
+    position: sticky;
+    text-align: center;
+}
+.VCHNO {
+    color: #a52323;
+    letter-spacing: 2px;
+    width:10%;
+}
+
+.cIsuSrNo {
+    margin: 1rem;
+    box-shadow: 0px 8px 30px gray;
+    border-end-end-radius: 20px;
+    border-end-start-radius: 20px;
+    border-start-start-radius: 20px;
+    border-start-end-radius: 20px;
+    background-color:whitesmoke;
+    padding: 20px;
+    width: 100%;
+    display: block;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    
+    
+}
+
+.sectiondtl {
+    font-family: Bahnschrift;
+    color: #808080;
+    text-align: left;
+    font-size: 30px;
+    font-weight: 600;
+    
+    padding-left: 2%;
+}
+table {
+    border: none;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(35, 5rem);
+}
+tbody {
+    content: "";
+    display: table;
+    clear: both;
+}
+tr {
+    float: left;
+    width: 45%;
+    padding: 0px 10px;
+    display:inline-grid;
+    margin:10px;
+}
+
+.acspace {
+    margin-top: 9px;
+}
+/*===========Botom Button Mate*/
+.bottom {
+    background-color: #dbedf7;
+    height: 120px;
+    width: 100%;
+    border-radius: 10px;
+    position: fixed;
+    bottom: 0;
+}
+
+.left-buttom {
+    margin: 3%;
+    height: 80px;
+    width: 80px;
+    cursor: pointer;
+    margin-left: 16%;
+}
+
+.right-buttom {
+    margin-right: 16%;
+    margin-top: 3%;
+    float: right;
+    height: 80px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.mid-buttom {
+    margin-left: 17%;
+    margin-bottom: 3%;
+    cursor: pointer;
+    height: 80px;
+    width: 80px;
+}

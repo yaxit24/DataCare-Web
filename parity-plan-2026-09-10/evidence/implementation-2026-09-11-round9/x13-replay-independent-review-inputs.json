@@ -1,0 +1,200 @@
+{
+  "round": 9,
+  "scope": "Independent API integration review and source journal expectations; separate projection was authored by reviewer, so no independent projection implementation review claim.",
+  "capturedAtUtc": "2026-09-11T12:28:12.150051+00:00",
+  "pathBase": "web workspace root",
+  "captureTiming": "After owner-coordinated final focused execution and read review. This is not a before-run execution snapshot. Wider root checkpoint independently captures its own verification inputs.",
+  "disposition": "bounded review pass for read-only saved-primary-incoming-money-preview-v1; no numeric persistence/desktop/business acceptance",
+  "focusedResult": {
+    "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-service-focused-verified.txt",
+    "exitCode": 0,
+    "files": 6,
+    "tests": 192,
+    "skips": 0,
+    "seconds": 38.51,
+    "breakdown": {
+      "serviceDb": 43,
+      "transport": 31,
+      "http": 12,
+      "routePolicy": 54,
+      "savedReaderDb": 26,
+      "configurationDb": 26
+    },
+    "executor": "coordinating service owner; reviewer inspected complete output and final assertions, did not run DB"
+  },
+  "independentVectors": {
+    "cases": 3,
+    "prefixes": 6,
+    "sha256": "68c3744d2e2cdbf741723effeef853dc05c97222f47bd740ecdd126127f7d83d",
+    "expectedValuesComputedByReducer": false,
+    "fullVisibleAndCacheComparisonPerPrefix": true,
+    "exactSpecialEditorAssertions": true
+  },
+  "files": [
+    {
+      "path": "apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "69a8e90c32258e756e8294dd3c8ebb5aeb185d64fb567e1fcf03b74f7e8f4190",
+      "bytes": 20833
+    },
+    {
+      "path": "apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "8096ac9629eb45e1b56e599d3e06d2adb2b93e731bcb88c1574156aaa2e8c285",
+      "bytes": 24942
+    },
+    {
+      "path": "apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505",
+      "bytes": 21346
+    },
+    {
+      "path": "apps/api/src/modules/shared/bookPolicy.ts",
+      "sha256": "e5a9a6c75f2c4ccb66f7c2504253876ca9b9b3687e5003de8bf4c9362c03ed74",
+      "bytes": 5243
+    },
+    {
+      "path": "apps/api/src/routes/txn.ts",
+      "sha256": "a925b7fe7a43207e53deee7f34eaee179a3bf9341bea9b3f8b15874d7fda4669",
+      "bytes": 283055
+    },
+    {
+      "path": "apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "9baf3e75355b6653e12cbe6944d94c0c519f88ab6922af1a67bd2ccc1710361b",
+      "bytes": 34797
+    },
+    {
+      "path": "apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34",
+      "bytes": 5075
+    },
+    {
+      "path": "apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e",
+      "bytes": 9247
+    },
+    {
+      "path": "apps/api/src/app.ts",
+      "sha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a",
+      "bytes": 33817
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingReplay.db.test.ts",
+      "sha256": "b3438681084ed99e11b2ec06db38d766e53799db439800fca76de7065ba1251a",
+      "bytes": 23647
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingReplay.test.ts",
+      "sha256": "3387a2a20898ed1cfebac66e5ec0f534525fb6b9106aba1fd05280ecca8ac90c",
+      "bytes": 3209
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingReplay.routes.db.test.ts",
+      "sha256": "22295cc1b5905795b49a4c0b7253750f8c2050a817189c0efdae312e84f6cb19",
+      "bytes": 19646
+    },
+    {
+      "path": "apps/api/test/routePolicy.test.ts",
+      "sha256": "7bba72ffae4b5c29399b05a294268f7cbc0c21f6559968df4190f67258d11b14",
+      "bytes": 33139
+    },
+    {
+      "path": "apps/api/test/savedSaleReturn.db.test.ts",
+      "sha256": "4a89b531ea665426669660547b7ab3df941f1e246958fc233aa1c05876724ac7",
+      "bytes": 30055
+    },
+    {
+      "path": "apps/api/test/saleReturnIncomingConfiguration.db.test.ts",
+      "sha256": "cddffa4076d2aa6ddde48480c29bda82ebb908fabd2b953d5b8fd4a29d27c07f",
+      "bytes": 16089
+    },
+    {
+      "path": "apps/api/test/fixtures/saleReturnIncomingReplay.independent.json",
+      "sha256": "68c3744d2e2cdbf741723effeef853dc05c97222f47bd740ecdd126127f7d83d",
+      "bytes": 30657
+    },
+    {
+      "path": "packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e",
+      "bytes": 11556
+    },
+    {
+      "path": "packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "bytes": 18267
+    },
+    {
+      "path": "packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131",
+      "bytes": 3246
+    },
+    {
+      "path": "packages/core/test/saleReturnIncomingProjection.test.ts",
+      "sha256": "15e26f97b869c4798e9735489ff328dd444cae91647deb678bdab9d02382a2e7",
+      "bytes": 12004
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754",
+      "bytes": 261920
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "../extracted_code/DataCareNext/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+      "bytes": 85154
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-replay-independent-journal-vectors.json",
+      "sha256": "68c3744d2e2cdbf741723effeef853dc05c97222f47bd740ecdd126127f7d83d",
+      "bytes": 30657
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-replay-ui-contract.md",
+      "sha256": "cc2891e4d3be9c651a0139883f6eb031386715031cf92d1fa67fc7f8066a7fcd",
+      "bytes": 15102
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-next-server-replay-contract.md",
+      "sha256": "c01e0a6d59dfaa6bd634a945148d3cb97e8e97486668bfafc503e1fbe9c17dcd",
+      "bytes": 31492
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-replay-validation-matrix.md",
+      "sha256": "c0a5ee987b82a526815924f56434121b253dc35360107f604d8979e48e503a00",
+      "bytes": 19571
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-projection-core-run.json",
+      "sha256": "241e6e682c88e38b90c8a54337902f3373c9952b6f52988c6838fb544a566eb1",
+      "bytes": 11935
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-http-first.txt",
+      "sha256": "d42aae47a1fe4a02e09c01e93fec7d215afef238f198d90e4ddc185a6ce5dbf1",
+      "bytes": 2654
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-service-focused-first.txt",
+      "sha256": "019de88ed91d1b323d62ca32c8299dff52bab981c6a190b07da48b6c6e7e1468",
+      "bytes": 31039
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-service-db-fixture-corrected.txt",
+      "sha256": "3c060c615bf93248b89af05891f104b3e419354af33dc1131ae42bae61528703",
+      "bytes": 15069
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/replay-service-focused-verified.txt",
+      "sha256": "b5b3e7ead0d8aa61936504e72563154d9d3e3cd1ee0f4d449958371364c26979",
+      "bytes": 3864
+    },
+    {
+      "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round9/x13-replay-independent-review.md",
+      "sha256": "c1073a04da894695afe960446f4fbede71e78ff65ed411a54c7abbc4198de3c4",
+      "bytes": 14354
+    }
+  ]
+}

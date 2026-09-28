@@ -1,0 +1,82 @@
+
+> datacare-web-saas@0.0.0 test:parity:api /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/salesFamilyLifecycle.db.test.ts (29 tests) 3243ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance 635ms
+ ✓ test/repairReceipt.db.test.ts (9 tests) 1246ms
+ ✓ test/purchase.lifecycle.db.test.ts (18 tests) 1893ms
+   ✓ database-backed purchase voucher lifecycle > creates, opens and edits with independent numbering and preserved identity without delete audit 401ms
+ ✓ test/mfgLifecycle.db.test.ts (9 tests) 1202ms
+   ✓ database-backed karigar/manufacturing edit lifecycle > covers karigar issue create/get/edit/persisted-date lock/delete against PostgreSQL 625ms
+ ✓ test/sales.lifecycle.db.test.ts (18 tests) 2025ms
+   ✓ database-backed sales voucher lifecycle > persists the complete desktop Sales-family column sets under the restricted role 306ms
+ ✓ test/rojmel.test.ts (66 tests) 15ms
+ ✓ test/routePolicy.test.ts (54 tests) 28ms
+ ✓ test/rateCutSettlement.db.test.ts (19 tests) 2000ms
+   ✓ rate-cut settlement persistence > writes RATE_PAR = G from the company setting, not a constant 309ms
+ ✓ test/operatorDepth.roundtrip.db.test.ts (3 tests) 1297ms
+   ✓ operator depth — lossless round trips > purchase preserves every supplied field across an unchanged save 690ms
+ ✓ test/savedSaleReturn.db.test.ts (26 tests) 2924ms
+ ✓ test/columnSettings.db.test.ts (21 tests) 1431ms
+ ✓ test/tourOrderHydration.db.test.ts (14 tests) 2505ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions 456ms
+   ✓ Tour Order configured-book and complete editor round trip > blocks the allocated source order while allowing the same number in another book, branch or year 341ms
+ ✓ test/entityImageConcurrency.routes.db.test.ts (17 tests) 3783ms
+   ✓ generic entity image HTTP compare-and-swap > accepts a complete large generic image within the advertised 4 MB binary limit 449ms
+   ✓ generic entity image HTTP compare-and-swap > accepts a complete large design image within the advertised 4 MB binary limit 541ms
+ ✓ test/dataRepair.db.test.ts (15 tests) 1049ms
+ ✓ test/backupRestore.db.test.ts (13 tests) 27958ms
+   ✓ WP-02A company logical backup/restore > classifies the complete live schema and seals a lossless v2 document 1019ms
+   ✓ WP-02A company logical backup/restore > exports every row beyond the former 100000-row ceiling 3805ms
+   ✓ WP-02A company logical backup/restore > round-trips exact rows while preserving the other company, tenant, shared data, and sequences 7067ms
+   ✓ WP-02A company logical backup/restore > rejects a tampered checksum before deleting any target row 599ms
+   ✓ WP-02A company logical backup/restore > rolls back every delete when a validly sealed row overflows its database type 4676ms
+   ✓ WP-02A company logical backup/restore > rolls back when persisted values do not match the sealed SHA-256 checksum 2078ms
+   ✓ WP-02A company logical backup/restore > rolls back the whole replace transaction on a primary-key conflict 3019ms
+   ✓ WP-02A company logical backup/restore > rejects malformed document shape without a TypeError or database mutation 548ms
+   ✓ WP-02A company logical backup/restore > rejects wrong authenticated tenant or company scope before mutation 1096ms
+   ✓ WP-02A company logical backup/restore > rejects a self-consistent but non-live schema manifest before deletion 876ms
+   ✓ WP-02A company logical backup/restore > preflights internal company and external tenant-shared foreign keys before live replacement 3018ms

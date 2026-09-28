@@ -1,0 +1,43 @@
+{
+ "form": "MS_BOOK",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "BOOK_DETL",
+  "BOOK_IDTL",
+  "EMP_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "BOOK_DATA",
+   "BOOK_DETL"
+  ],
+  "DELETE": [
+   "BOOK_DATA",
+   "BOOK_DETL"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BOOK_DATA",
+  "BOOK_DETL",
+  "BOOK_IDTL",
+  "EMP_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 17,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 3123
+}

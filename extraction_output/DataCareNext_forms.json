@@ -1,0 +1,2218 @@
+{
+  "TR_CONTRA": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_MEMB": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_DHRN_INTREC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_CARD_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MFG_ORD_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_UPI_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_DHRN_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_REP_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MFG_GHAT_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_JDT_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MFG_ISU_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MFG_KR_ISU_REC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_OTH_PURC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_PURC": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_HDD": {
+    "event_handlers": [
+      "Load"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_HUID": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SALE_ORD": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_TOUR_ORD": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_PR_SL_UAE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SALE_RTN_UAE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_E_INVOICE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_BALANCE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_TRADE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_TAG_IMAGE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_LC_SALE": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_WH_SALE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_BUL_SALE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SALE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_TOUR_SALE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_STYLE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_STOCK_FINE": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_LBR_TYPE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_UPDATE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_TAG_ESTMATE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_RATE": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_STOCK_VALUE": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_STK_MOVE": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_TAG_WT_DIFF": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_TAG": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_PR_SL_HEDG": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_MFG": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_TRADING": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_BUL_BOOKING": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_TASTING": {
+    "event_handlers": [
+      "Load"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_SETTING": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_GRAPH": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_CASH": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_WAPP_WITH_API": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MEMB_ADJ": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SL_ORD_ADJ": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_VP_ADJ": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_LEDR_ADJ": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_ORD_TRACK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_STOCK": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_PHY_STOCK": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_CASH_BANK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_BANK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_GOLD_BOOK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_DESIGN_BOOK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_BOOK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_DAY_WORK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_PHYSTK": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_AC_OPBL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_TAG_OPBL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_ITM_OPBL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_ROJMEL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_STK_LEVEL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_ALL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SL_EBILL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_OTH_DETL": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_WEB_CAM": {
+    "event_handlers": [
+      "Load"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_DM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MFG_ITEM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_AUTO_ITEM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SL_PR_ITEM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_ITEM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_PURC_HM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SALE_HM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_OTH_COMM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_MFG_ZOOM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_BAL_ZOOM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_SLPR_ZOOM": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_JDTR_ZOOM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_TOUR_ZOOM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_CUST_CRM": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MDI_FORM": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "KeyDown",
+      "KeyUp"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_TAG_CAN": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_DHRN_LOAN": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_SETTING_MAIN": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_LOGIN": {
+    "event_handlers": [
+      "Load"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_SET_ADMIN": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_WH_SALE_RTN": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SALE_RTN": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MLT_PRO": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_BILL_TO": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_BKP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_HELP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_EMP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_EMP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_OPNCOMP": {
+    "event_handlers": [
+      "Load",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_WHATSAPP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_AC_GROUP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_GROUP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_VP": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_YEAR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_SALE_LBR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_VCH_RE_NUMBR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_MFG_LEDR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_LEDR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_REMINDER": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_REMINDER": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_ORDER": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_USER": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_USER": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_AI_TRFR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_BAL_TRFR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_CONSI_APR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_FINE_SL_PR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_TOUR": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_SMS": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_DHRN_OS": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_OS": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_ADDRESS": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_ACCT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_LOCT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Validated",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_PRODUCT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_WINDOW_SET": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_BILL_PROFIT": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_TAG_SPLIT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_STK_LIMIT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_LOCT_AMT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_MOVEMENT": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MEMB_ENT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_POINT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MFG_WITH_LOT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_ITM_LOT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_REPORT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_IMPORT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_EXPORT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_ADD_MAST": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_GOLD_MAST": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_MFG_MAST": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_USER_REQUEST": {
+    "event_handlers": [
+      "Load",
+      "KeyDown"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_GST": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_BOOKLIST": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_CUST": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_LC_INOUT": {
+    "event_handlers": [
+      "Load",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_FN_INOUT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_INOUT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_INOUT": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_MFG_ORD_ISU": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_DHRN_ISU": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_KR_ISU": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_APR_ISU": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "TR_EMP_JV": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_WINDOW": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "RP_TAX": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_TAX": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_COMPANY": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Validated",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_CUST_ENTRY": {
+    "event_handlers": [
+      "Load",
+      "Closed",
+      "Activated",
+      "Deactivate",
+      "KeyDown",
+      "KeyUp",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "MS_PRINT": {
+    "event_handlers": [
+      "Activated"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "UT_TASTING": {
+    "event_handlers": [
+      "Deactivate",
+      "KeyPress"
+    ],
+    "controls": [],
+    "properties": []
+  },
+  "_global_buttons": {
+    "event_handlers": [],
+    "controls": [
+      "BtnF1",
+      "BtnGstr1",
+      "BtnTran2",
+      "BtnImgC",
+      "BtnImgD",
+      "BtnPandL",
+      "BtnImgS",
+      "BtnBillOrna",
+      "BtnWebData",
+      "BtnImgData",
+      "BtnCrmData",
+      "BtnBarData",
+      "BtnEdata",
+      "BtnDcMemb",
+      "BtnMemb",
+      "BtnCashPurcAc",
+      "BtnSlWithAc",
+      "BtnMainAc",
+      "BtnAc",
+      "BtnRepRec",
+      "BtnKrRepRec",
+      "BtnPurc",
+      "BtnCountryId",
+      "BtnImgUpload",
+      "Btn2Add",
+      "Btn3Add",
+      "BtnAdd",
+      "BtnRfid",
+      "BtnNexHuid",
+      "BtnGold",
+      "BtnProd",
+      "BtnItmOutWord",
+      "BtnExitUae",
+      "BtnTrialBalance",
+      "BtnBalance",
+      "BtnAcBalence",
+      "BtnHide",
+      "BtnSafe",
+      "BtnOrdImage",
+      "BtnTagWtChange",
+      "BtnTagRowChange",
+      "BtnWhSale",
+      "BtnWhEmpSale",
+      "BtnTable",
+      "BtnCsvFile",
+      "BtnFontStyle",
+      "BtnFontName",
+      "BtnDelyTime",
+      "BtnHome",
+      "BtnPlusTagDataType",
+      "BtnRateType",
+      "BtnDhrnType",
+      "BtnExpType",
+      "BtnStkRptType",
+      "BtnRptType",
+      "BtnRestore",
+      "BtnImgCapture",
+      "BtnTimeWise",
+      "BtnTagWise",
+      "BtnBillWise",
+      "BtnGroupWise",
+      "BtnRemClose",
+      "BtnClose",
+      "BtnBrowse",
+      "BtnGoldRate",
+      "BtnDhrnAcUPdate",
+      "BtnRemUpdate",
+      "BtnUpdate",
+      "BtnState",
+      "BtnSLImageDelete",
+      "BtnDelete",
+      "BtnLite",
+      "BtnIssue",
+      "BtneSave",
+      "BtnSave",
+      "BtnTagRowSave",
+      "BtnRateRemove",
+      "BtnOthItmWtRemove",
+      "BtnSize",
+      "BtnFontSize",
+      "BtnPlusAcRef",
+      "BtnRef",
+      "BtnDiff",
+      "BtnTagSlWtDiff",
+      "BtnSlWtDiff",
+      "BtnPrRateRof",
+      "BtnBillTitRof",
+      "BtnTaxRof",
+      "BtnOldNewtag",
+      "BtnSalesReg",
+      "BtnMfg",
+      "BtnWhSaleImg",
+      "BtnNewTagImg",
+      "BtnAprlImg",
+      "BtnFontChang",
+      "BtnTrading",
+      "BtnBusSlPanding",
+      "BtnAprPanding",
+      "BtnReparing",
+      "BtnPlusReparing",
+      "BtnTextMsg",
+      "BtnMobileSearch",
+      "BtnHelpSearch",
+      "BtnOth",
+      "BtnAngAdj",
+      "BtnVpAdj",
+      "BtnOrnaOk",
+      "BtnOk",
+      "BtnPreviousLock",
+      "BtnTagStock",
+      "BtnStock",
+      "BtnPhBook",
+      "BtnSlBook",
+      "BtnPrBook",
+      "BtnPassBook",
+      "BtnDailyWork",
+      "BtnItmStk",
+      "BtnMothSl",
+      "BtnEmpSl",
+      "BtnKrSl",
+      "BtnOpbal",
+      "BtnAbAcOpbl",
+      "BtnImgDel",
+      "BtnCancel",
+      "BtnItCancel",
+      "BtnExcel",
+      "BtnExel",
+      "BtnAll",
+      "BtnWappInstall",
+      "BtnSalesBill",
+      "BtnCudhiSql",
+      "BtnBarIdtl",
+      "BtnPlusBarIdtl",
+      "BtnLastYearIdtl",
+      "BtnItem",
+      "BtnSalesItem",
+      "BtnSchm",
+      "BtnPlusSchm",
+      "BtnWhSumm",
+      "BtnSumm",
+      "BtnLdrSumm",
+      "BtnInOutSumm",
+      "BtnGst1Zoom",
+      "BtnGst2Zoom",
+      "BtnGst3Zoom",
+      "BtnPandLZoom",
+      "BtnBalanceZoom",
+      "BtnZoom",
+      "BtnlosItmIn",
+      "BtnIn",
+      "BtnOrdMakePan",
+      "BtnAngPan",
+      "BtnVpPan",
+      "BtnKrRepPan",
+      "BtnCustRepPan",
+      "BtnCustRepIsuPan",
+      "BtnLoan",
+      "BtnPlusLoan",
+      "BtnTran",
+      "BtnTokanGen",
+      "BtnDesignGen",
+      "BtnIrnGen",
+      "BtnLbrGen",
+      "BtnStkLimitWithDesign",
+      "BtnDesign",
+      "BtnQtion",
+      "BtnRateOpn",
+      "BtnRtlDhrn",
+      "BtnDhrn",
+      "BtnOpDhrn",
+      "BtnIsuNo",
+      "BtnPlusAcOp",
+      "BtnBkp",
+      "BtnTagVchHelp",
+      "BtnEmp",
+      "BtnAcimp",
+      "BtnComp",
+      "BtnSendWapp",
+      "BtnSchmWapp",
+      "BtnDhrnWapp",
+      "BtnWapp",
+      "BtnWhatsapp",
+      "BtnMrp",
+      "BtnGroup",
+      "BtnQr",
+      "BtnScrolbar",
+      "BtnClear",
+      "BtnKarigar",
+      "BtnJmaUdhar",
+      "BtnTimeLdr",
+      "BtnTagReNumber",
+      "BtnReminder",
+      "BtnOrder",
+      "BtnEmpAsUser",
+      "BtnCounter",
+      "BtnSilver",
+      "BtnCntrTrfr",
+      "BtnVptrfr",
+      "BtnKrgr",
+      "BtnApr",
+      "BtnAcOs",
+      "BtnWhSales",
+      "BtnSales",
+      "BtnOrdTagStkLess",
+      "BtnUserRights",
+      "BtnTanslat",
+      "BtnImgSelect",
+      "BtnProduct",
+      "BtnRtlJdt",
+      "BtnTagSet",
+      "BtnUrlSet",
+      "BtnPrintFormSet",
+      "BtnLoanSet",
+      "BtnAdminSet",
+      "BtnColumnSet",
+      "BtnGridRowHeightSet",
+      "Btnbalsheet",
+      "BtnReset",
+      "BtnMenuReset",
+      "BtnLbrWithGht",
+      "BtnSilverWt3digit",
+      "BtnTagSplit",
+      "BtnCashLimit",
+      "BtnQuit",
+      "BtnEExit",
+      "BtneExit",
+      "BtnExit",
+      "BtnAmt",
+      "BtnInt",
+      "BtnHelpLent",
+      "BtnePrint",
+      "BtnTagPrint",
+      "BtnDhrnImgPrint",
+      "BtnDupPrint",
+      "BtnGrPrint",
+      "BtnTagRowPrint",
+      "BtnWappSlprint",
+      "BtnPurcLot",
+      "BtnQuot",
+      "BtnPurcRpt",
+      "BtnSlRpt",
+      "BtnRpt",
+      "BtnIntRpt",
+      "BtnSvrImgConvert",
+      "BtnAcShort",
+      "BtnReport",
+      "BtnRtlAreaImport",
+      "BtnAcImport",
+      "BtnOldSoftImagImport",
+      "BtnExelImport",
+      "BtnExlImport",
+      "BtnImprt",
+      "BtnLast",
+      "BtnMast",
+      "BtnUserReqest",
+      "BtnList",
+      "BtnCrList",
+      "BtnDrList",
+      "BtnPlustagcost",
+      "BtnFirst",
+      "BtnAdjust",
+      "BtnlosItmOut",
+      "BtnItmInOut",
+      "BtnOut",
+      "BtnlosItmInout",
+      "BtnWindowMenu",
+      "BtnBillOrnaIsu",
+      "BtnOrnaIsu",
+      "BtnMultyTimeIsu",
+      "BtnAngIsu",
+      "BtnVpIsu",
+      "BtnRepIsu",
+      "BtnKrRepIsu",
+      "BtnView",
+      "BtnAllBranchAcShow",
+      "BtnRptTotShow",
+      "BtnEstmatTax",
+      "BtnBirthday",
+      "BtnEmpMandotry",
+      "BtnParty",
+      "BtnSiz"
+    ],
+    "properties": []
+  }
+}

@@ -1,0 +1,23 @@
+operator-depth parity
+  surface 3649/5107 = 71.5%   grid cols 2157/3508 = 61.5%
+  settings honoured 45/130 (inert 82)   unreachable API fields 101   contained ops 6
+
+improvements since baseline:
+  + web operator field surface: 2677 -> 3649 (+972)
+  + web visible grid columns: 1653 -> 2157 (+504)
+  + web input controls: 1024 -> 1492 (+468)
+  + pages with grid keyboard: 50 -> 62 (+12)
+  + txn pages with grid keyboard: 50 -> 61 (+11)
+  + txn pages presenting a line grid: 59 -> 72 (+13)
+  + txn grid pages honouring the keyboard contract: 50 -> 61 (+11)
+  + txn pages with an operator-authored grid: 50 -> 63 (+13)
+  + authored grids honouring the keyboard contract: 50 -> 61 (+11)
+  + pages rendering a sub-detail grid: 12 -> 16 (+4)
+  + enforced validation messages: 598 -> 725 (+127)
+  + runnable report workflows: 46 -> 78 (+32)
+  + operator surface % of desktop: 52.4 -> 71.5 (+19.1)
+  + grid column % of desktop: 47.1 -> 61.5 (+14.4)
+  + API fields reachable from a screen: 2042 -> 2263 (+221)
+
+DEPTH GATE FAILED
+  - CEILING BREACHED  API fields no screen can supply: 96 -> 101 (regression)

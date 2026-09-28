@@ -1,0 +1,198 @@
+--- a/apps/api/src/modules/sales/salesOrder.ts
++++ b/apps/api/src/modules/sales/salesOrder.ts
+@@ -1584,31 +1584,30 @@
+             .map(readStoneSubDetail),
+         })),
+       };
+-      if (options.orderMainBook !== 'TOUR ORDER') {
+-        exactOrderValues(dto, x, ORDER_HEADER_FIELDS);
+-        dto.lines.forEach((line, index) => {
+-          const parent = d[index];
+-          exactOrderValues(
+-            line,
+-            parent,
+-            Object.fromEntries(
+-              Object.entries(ORDER_PARENT_FIELDS).filter(([field]) => field !== 'making'),
+-            ),
++      // Both saved order forms retain exact mapped scalar values; calculations remain server-owned.
++      exactOrderValues(dto, x, ORDER_HEADER_FIELDS);
++      dto.lines.forEach((line, index) => {
++        const parent = d[index];
++        exactOrderValues(
++          line,
++          parent,
++          Object.fromEntries(
++            Object.entries(ORDER_PARENT_FIELDS).filter(([field]) => field !== 'making'),
++          ),
++        );
++        exactOrderValues(line, parent, {
++          fineWeight: 'ITM_FINE',
++          itemAmount: 'ITM_AMT',
++          lineNetAmount: 'NET_AMT',
++          lineTotalAmount: 'TOT_AMT',
++        });
++        for (const child of line.components) {
++          const saved = state.SL_ORD_IDTL.find(
++            (row) => n(row.SR_NO) === n(parent.SR_NO) && n(row.ISR_NO) === n(child.isrNo),
+           );
+-          exactOrderValues(line, parent, {
+-            fineWeight: 'ITM_FINE',
+-            itemAmount: 'ITM_AMT',
+-            lineNetAmount: 'NET_AMT',
+-            lineTotalAmount: 'TOT_AMT',
+-          });
+-          for (const child of line.components) {
+-            const saved = state.SL_ORD_IDTL.find(
+-              (row) => n(row.SR_NO) === n(parent.SR_NO) && n(row.ISR_NO) === n(child.isrNo),
+-            );
+-            if (saved) exactOrderValues(child, saved, ORDER_COMPONENT_FIELDS);
+-          }
+-        });
+-      }
++          if (saved) exactOrderValues(child, saved, ORDER_COMPONENT_FIELDS);
++        }
++      });
+       return dto;
+     },
+     { isolationLevel: 'RepeatableRead' },
+--- a/apps/web/lib/tourOrderForm.ts
++++ b/apps/web/lib/tourOrderForm.ts
+@@ -366,6 +366,7 @@
+   header: Record<string, string>,
+   rows: Row[],
+   expectedVersion?: string,
++  original?: Record<string, any>,
+ ) {
+   if (!f.acCode.trim()) throw new Error('Customer is required');
+   const lines = rows
+@@ -419,7 +420,96 @@
+     result[field] = numericHeaderFields.has(field)
+       ? numberCell(header[field], label)
+       : header[field]?.trim() || undefined;
+-  return result;
++  return original
++    ? preserveSavedTourValues(result, f, header, rows, expectedVersion, original)
++    : result;
++}
++
++/** Saved input-shaped scalars only; no raw tables, calculated fields or client authority are copied. */
++function preserveSavedTourValues(
++  payload: Record<string, unknown>,
++  f: ReturnType<typeof blankOrderHeader>,
++  header: Record<string, string>,
++  rows: Row[],
++  expectedVersion: string | undefined,
++  original: Record<string, any>,
++): Record<string, unknown> {
++  if (typeof original.version !== 'string' || expectedVersion !== original.version)
++    throw new Error('The saved Tour Order snapshot no longer matches this edit; reload it.');
++  const scalar = (value: unknown): value is string | number | null =>
++    value === null || typeof value === 'string' || typeof value === 'number';
++  const copyCell = (
++    out: Record<string, unknown>,
++    field: string,
++    visible: unknown,
++    prior: Record<string, any> | undefined,
++    numeric: boolean,
++  ) => {
++    const editor = String(visible ?? '');
++    if (
++      prior &&
++      Object.hasOwn(prior, field) &&
++      scalar(prior[field]) &&
++      editor === String(prior[field] ?? '')
++    ) {
++      out[field] = prior[field];
++      return;
++    }
++    // The existing calculation, not Number coercion in the browser, must decide whether this
++    // changed saved decimal is supported. Blank/nondecimal syntax retains existing parser behavior.
++    const text = editor.trim();
++    const decimal = /^[+-]?\d+(?:\.\d+)?$/.exec(text);
++    if (numeric && decimal?.[0] === text) out[field] = text;
++  };
++  for (const field of Object.keys(f) as Array<keyof typeof f>)
++    copyCell(payload, field, f[field], original, ['taxRatePct', 'advanceAmount'].includes(field));
++  for (const [field] of extendedHeaderFields)
++    copyCell(payload, field, header[field], original, numericHeaderFields.has(field));
++  const kept = rows.filter((row) => row.itCode.trim());
++  for (const [index, out] of (payload.lines as Record<string, any>[]).entries()) {
++    const row = kept[index]!;
++    const matches = row.srNo
++      ? (original.lines ?? []).filter(
++          (line: Record<string, unknown>) => String(line.srNo) === row.srNo,
++        )
++      : [];
++    if (matches.length > 1)
++      throw new Error('The saved Tour Order item identity is ambiguous; reload it.');
++    const prior = matches[0] as Record<string, any> | undefined;
++    for (const field of Object.keys(blank()) as Array<keyof Row>) {
++      if (
++        [
++          'components',
++          'consumed',
++          'labourEdits',
++          'labourAction',
++          'itemAmount',
++          'lineNetAmount',
++          'lineTotalAmount',
++        ].includes(field)
++      )
++        continue;
++      copyCell(out, field, row[field], prior, numericLineFields.has(field));
++    }
++    const keptChildren = row.components.filter((child) =>
++      Object.values(child).some((value) => String(value ?? '').trim()),
++    );
++    for (const [childIndex, child] of (out.components as Record<string, unknown>[]).entries()) {
++      const draft = keptChildren[childIndex]!;
++      const candidates =
++        prior && draft.isrNo
++          ? (prior.components ?? []).filter(
++              (saved: Record<string, unknown>) => String(saved.isrNo) === draft.isrNo,
++            )
++          : [];
++      if (candidates.length > 1)
++        throw new Error('The saved Tour Order component identity is ambiguous; reload it.');
++      const priorChild = candidates[0] as Record<string, any> | undefined;
++      for (const field of Object.keys(SUB_DETAIL_COLUMNS) as SubDetailField[])
++        copyCell(child, field, draft[field], priorChild, !!SUB_DETAIL_COLUMNS[field].numeric);
++    }
++  }
++  return payload;
+ }
+ 
+ export function tourOrderQuery(scope: BusinessScope, coBook: string): string {
+--- a/apps/web/app/(app)/txn/tour-order/page.tsx
++++ b/apps/web/app/(app)/txn/tour-order/page.tsx
+@@ -40,6 +40,7 @@
+     voucherNo: string;
+     version: string;
+     scope: string;
++    original: Record<string, any>;
+     blocked?: string;
+   } | null>(null);
+   const [voucherLookup, setVoucherLookup] = useState('');
+@@ -204,6 +205,7 @@
+         voucherNo: document.voucherNo,
+         scope: scopeQuery,
+         version: document.version,
++        original: structuredClone(document),
+         blocked:
+           document.editBlockedReason ||
+           (document.lines?.some((line: any) => line.consumed)
+@@ -251,7 +253,13 @@
+     }
+     setBusy(true);
+     try {
+-      const payload = tourOrderPayload(f, header, rowsRef.current, selected?.version);
++      const payload = tourOrderPayload(
++        f,
++        header,
++        rowsRef.current,
++        selected?.version,
++        selected?.original,
++      );
+       const result = selected
+         ? await put(`/tour-orders/${encodeURIComponent(selected.voucherNo)}?${scopeQuery}`, payload)
+         : await post(`/tour-orders?${scopeQuery}`, payload);

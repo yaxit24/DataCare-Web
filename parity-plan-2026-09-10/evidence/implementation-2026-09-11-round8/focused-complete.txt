@@ -1,0 +1,63 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/saleReturnIncomingConfiguration.test.ts" "test/saleReturnIncomingConfiguration.db.test.ts" "test/saleReturnIncomingConfiguration.review.test.ts" "test/saleReturnIncomingConfiguration.routes.db.test.ts" "test/columnSettings.test.ts" "test/columnSettings.db.test.ts" "test/routePolicy.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 45ms
+ ✓ test/columnSettings.db.test.ts (21 tests) 13003ms
+   ✓ column settings exact family lifecycle through PostgreSQL and authenticated HTTP > publishes exact metadata and current form capabilities, including the existing View→create rule 343ms
+   ✓ column settings exact family lifecycle through PostgreSQL and authenticated HTTP > runs authenticated create/read/update/delete without collateral same-name changes 315ms
+   ✓ column settings exact family lifecycle through PostgreSQL and authenticated HTTP > rejects missing family/version, foreign scope and stale HTTP writes without any business changes 1905ms
+   ✓ column settings exact family lifecycle through PostgreSQL and authenticated HTTP > preserves exact tenant isolation in authenticated reads and versions 4102ms
+   ✓ column settings exact family lifecycle through PostgreSQL and authenticated HTTP > imports through the exact create path and reports per-row failures without overwriting duplicates 1756ms
+   ✓ column settings exact family lifecycle through PostgreSQL and authenticated HTTP > shares the same absent-key lock between concurrent HTTP create and CSV import 910ms
+   ✓ column settings exact family lifecycle through PostgreSQL and authenticated HTTP > rejects malformed HTTP pagination/filter values while supporting bounded scalar page requests 544ms
+ ✓ test/saleReturnIncomingConfiguration.review.test.ts (69 tests) 1040ms
+ ✓ test/saleReturnIncomingConfiguration.db.test.ts (26 tests) 1485ms
+   ✓ incoming Return configuration from exact scoped database observations > returns configured source policy and stable fields without changing raw saved data or provisioning columns 366ms
+ ✓ test/saleReturnIncomingConfiguration.routes.db.test.ts (9 tests) 4167ms
+ ✓ test/saleReturnIncomingConfiguration.test.ts (37 tests) 92ms
+ ✓ test/columnSettings.test.ts (37 tests) 17ms
+
+ Test Files  7 passed (7)
+      Tests  253 passed (253)
+   Start at  10:14:24
+   Duration  30.97s (transform 2.39s, setup 0ms, collect 6.71s, tests 19.85s, environment 2ms, prepare 972ms)
+

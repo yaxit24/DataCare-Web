@@ -1,0 +1,818 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 14ms
+ ✓ test/saleReturnBillReplay.db.test.ts (34 tests) 2560ms
+ ✓ test/saleReturnBillReplay.routes.db.test.ts (10 tests) 1687ms
+   ✓ authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text 321ms
+ ❯ test/saleReturnLabourReplay.routes.db.test.ts (10 tests | 8 failed) 1243ms
+   ✓ real authenticated labour observation and append routes > loads complete literal phases with View-only rights and no business/session edits 334ms
+   × real authenticated labour observation and append routes > runs lookup and two source code prefixes without numeric writes, and audits exact POST outcomes 216ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+   × real authenticated labour observation and append routes > denies anonymous, unrelated View and forced reset without accepting code events 126ms
+     → {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 1 minute"}: expected 429 to be 200 // Object.is equality
+   × real authenticated labour observation and append routes > rejects a foreign base and malformed authority/policy fields while preserving business state 44ms
+     → {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 1 minute"}: expected 429 to be 200 // Object.is equality
+   × real authenticated labour observation and append routes > fails an old bearer after actual same-scope selection and old page pair after fresh bearer adoption 45ms
+     → {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 1 minute"}: expected 429 to be 200 // Object.is equality
+   × real authenticated labour observation and append routes > rejects real signed access claims lacking epoch rather than supplying a default 43ms
+     → {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 1 minute"}: expected 429 to be 200 // Object.is equality
+   × real authenticated labour observation and append routes > maps changed historical master to409 without returning or accepting a replacement prefix 61ms
+     → {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 1 minute"}: expected 429 to be 200 // Object.is equality
+   × real authenticated labour observation and append routes > returns the exact accepted prefix after a real post-copy bill rejection 33ms
+     → {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 59 seconds"}: expected 429 to be 200 // Object.is equality
+   × real authenticated labour observation and append routes > keeps legacy preview responses/allowlists unchanged and never exposes labour in v1 31ms
+     → {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 59 seconds"}: expected 429 to be 200 // Object.is equality
+ ❯ test/saleReturnLabourReplay.db.test.ts (17 tests | 8 failed) 1834ms
+   × session-bound saved labour preview in PostgreSQL > preserves old DTO/hash and complete literal loaded/opened states with no writes 232ms
+     → expected { Object (identity, rowIdentity, ...) } to match object { visible: { '0': '1', …(62) }, …(2) }
+(89 matching properties omitted from actual)
+   × session-bound saved labour preview in PostgreSQL > lookup neither copies nor appends; BB then AA preserves exact bill tax history 144ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+   × session-bound saved labour preview in PostgreSQL > interleaves money and labour at every bill prefix 100ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+   × session-bound saved labour preview in PostgreSQL > qualifies AA c13 and matches every independently expected cell 100ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+   × session-bound saved labour preview in PostgreSQL > qualifies TA c29 and matches every independently expected cell 91ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+   × session-bound saved labour preview in PostgreSQL > qualifies C3 c13 and matches every independently expected cell 91ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+   × session-bound saved labour preview in PostgreSQL > qualifies ZZ c13 and matches every independently expected cell 96ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+   × session-bound saved labour preview in PostgreSQL > retains repeated same-code events and deterministic retry without persistence 134ms
+     → expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+ ✓ test/saleReturnLabourReplay.test.ts (30 tests) 12ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > preserves old DTO/hash and complete literal loaded/opened states with no writes
+AssertionError: expected { Object (identity, rowIdentity, ...) } to match object { visible: { '0': '1', …(62) }, …(2) }
+(89 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "caches": Object {
+      "45": "10.000",
+      "46": "10.000",
+      "47": "100.00",
+      "48": "0.00",
+      "49": "10.00",
+      "58": "1.00",
+      "66": "0.00",
+      "67": "0.00",
+    },
+    "editorTextByField": Object {
+      "x13.primary-incoming.c19": "10.00",
+      "x13.primary-incoming.c20": "100.00",
+      "x13.primary-incoming.c21": "0.00",
+      "x13.primary-incoming.c23": "1.00",
+      "x13.primary-incoming.c24": "10.00",
+      "x13.primary-incoming.c25": "0.00",
+      "x13.primary-incoming.c26": "0.00",
+      "x13.primary-incoming.c27": "0.00",
+      "x13.primary-incoming.c28": "0.00",
+      "x13.primary-incoming.c36": "110.00",
+      "x13.primary-incoming.c37": "0.00",
+      "x13.primary-incoming.c38": "110.00",
+    },
+    "visible": Object {
+      "0": "1",
+      "1": "GOLD",
+      "10": "10.000",
+      "11": "0.000",
+      "12": "10.000",
+      "13": "AA",
+      "14": "0.00",
+      "15": "0.000",
+      "16": "100.00",
+      "17": "0.00",
+      "18": "10.000",
+      "19": "10.00",
+      "2": "N",
+      "20": "100.00",
+      "21": "0.00",
+      "22": "N",
+      "23": "1.00",
+      "24": "10.00",
+      "25": "0.00",
+      "26": "0.00",
+      "27": "0.00",
+      "28": "0.00",
+      "29": "TA",
+      "3": "Source gold",
+      "30": "0.00",
+      "31": "0.00",
+      "32": "0.00",
+      "33": "0.00",
+      "34": "0.00",
+      "35": "0.00",
+      "36": "110.00",
+      "37": "0.00",
+      "38": "110.00",
+      "39": "",
+      "4": "T01",
+      "40": "500001",
+      "41": "",
+      "42": "",
+      "43": "G",
+      "44": "N",
+      "5": "D-SAVED",
+      "50": "N",
+      "51": "31",
+      "52": "01",
+      "53": "01",
+      "54": "G",
+      "55": "G",
+      "56": "123",
+      "57": "E",
+      "59": "",
+      "6": "",
+      "60": "",
+      "61": "H4",
+      "62": "0.000",
+      "63": "0.000",
+      "64": "0.000",
+      "65": "0.000",
+      "68": "N",
+      "69": "",
+      "7": "",
+      "70": "A",
+      "8": "H1",
+-     "9": "1",
++     "9": "1.000",
+    },
+  }
+
+ ❯ test/saleReturnLabourReplay.db.test.ts:93:46
+     91|       dto = await get();
+     92|     expect(dto.billReplay).toEqual(old);
+     93|     expect(dto.billReplay.rowReplay.rows[0]).toMatchObject(
+       |                                              ^
+     94|       golden.expected.initial,
+     95|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > lookup neither copies nor appends; BB then AA preserves exact bill tax history
+AssertionError: expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "caches": Object {
+      "45": "10.000",
+      "46": "10.000",
+      "47": "100.00",
+      "48": "0.00",
+      "49": "10.00",
+      "58": "2.00",
+      "66": "0.00",
+      "67": "0",
+    },
+    "editorTextByField": Object {
+      "x13.primary-incoming.c19": "10.00",
+      "x13.primary-incoming.c20": "100.00",
+      "x13.primary-incoming.c21": "0.00",
+      "x13.primary-incoming.c23": "2.00",
+      "x13.primary-incoming.c24": "20.00",
+      "x13.primary-incoming.c25": "0.00",
+      "x13.primary-incoming.c26": "0.00",
+      "x13.primary-incoming.c27": "0.00",
+      "x13.primary-incoming.c28": "0.00",
+      "x13.primary-incoming.c36": "120.00",
+      "x13.primary-incoming.c37": "0.00",
+      "x13.primary-incoming.c38": "120.00",
+    },
+    "visible": Object {
+      "0": "1",
+      "1": "GOLD",
+      "10": "10.000",
+      "11": "0.000",
+      "12": "10.000",
+      "13": "BB",
+      "14": "",
+      "15": "0.000",
+      "16": "100.00",
+      "17": "",
+      "18": "10.000",
+      "19": "10.00",
+      "2": "N",
+      "20": "100.00",
+      "21": "",
+      "22": "N",
+      "23": "2.00",
+      "24": "20.00",
+      "25": "0.00",
+      "26": "0.00",
+      "27": "0.00",
+      "28": "",
+      "29": "TA",
+      "3": "Source gold",
+      "30": "0.00",
+      "31": "0.00",
+      "32": "0.00",
+      "33": "0.00",
+      "34": "0.00",
+      "35": "0.00",
+      "36": "120.00",
+      "37": "0.00",
+      "38": "120.00",
+      "39": "",
+      "4": "T01",
+      "40": "500001",
+      "41": "",
+      "42": "",
+      "43": "G",
+      "44": "N",
+      "5": "D-SAVED",
+      "50": "N",
+      "51": "31",
+      "52": "01",
+      "53": "01",
+      "54": "G",
+      "55": "G",
+      "56": "123",
+      "57": "E",
+      "59": "",
+      "6": "",
+      "60": "",
+      "61": "H4",
+      "62": "0.000",
+      "63": "0.000",
+      "64": "0.000",
+      "65": "0.000",
+      "68": "N",
+      "69": "",
+      "7": "",
+      "70": "A",
+      "8": "H1",
+-     "9": "1",
++     "9": "1.000",
+    },
+  }
+
+ ❯ Module.assertGolden test/fixtures/saleReturnLabourReplay.fixture.ts:178:26
+    176|   name: keyof typeof golden.expected.prefixes,
+    177| ) {
+    178|   expect(actual.preview).toEqual(golden.expected.prefixes[name].previe…
+       |                          ^
+    179|   expect(actual.phase).toEqual(golden.expected.prefixes[name].phase);
+    180| }
+ ❯ test/saleReturnLabourReplay.db.test.ts:128:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > interleaves money and labour at every bill prefix
+AssertionError: expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "caches": Object {
+      "45": "10.000",
+      "46": "10.000",
+      "47": "100.00",
+      "48": "0.00",
+      "49": "10.00",
+      "58": "2.00",
+      "66": "0.00",
+      "67": "0",
+    },
+    "editorTextByField": Object {
+      "x13.primary-incoming.c19": "10.00",
+      "x13.primary-incoming.c20": "100.00",
+      "x13.primary-incoming.c21": "0.00",
+      "x13.primary-incoming.c23": "2.00",
+      "x13.primary-incoming.c24": "20.00",
+      "x13.primary-incoming.c25": "0.00",
+      "x13.primary-incoming.c26": "0.00",
+      "x13.primary-incoming.c27": "1.00",
+      "x13.primary-incoming.c28": "0.00",
+      "x13.primary-incoming.c36": "121.00",
+      "x13.primary-incoming.c37": "0.00",
+      "x13.primary-incoming.c38": "121.00",
+    },
+    "visible": Object {
+      "0": "1",
+      "1": "GOLD",
+      "10": "10.000",
+      "11": "0.000",
+      "12": "10.000",
+      "13": "BB",
+      "14": "",
+      "15": "0.000",
+      "16": "100.00",
+      "17": "",
+      "18": "10.000",
+      "19": "10.00",
+      "2": "N",
+      "20": "100.00",
+      "21": "",
+      "22": "N",
+      "23": "2.00",
+      "24": "20.00",
+      "25": "0.00",
+      "26": "0.00",
+      "27": "1.00",
+      "28": "",
+      "29": "TA",
+      "3": "Source gold",
+      "30": "0.00",
+      "31": "0.00",
+      "32": "0.00",
+      "33": "0.00",
+      "34": "0.00",
+      "35": "0.00",
+      "36": "121.00",
+      "37": "0.00",
+      "38": "121.00",
+      "39": "",
+      "4": "T01",
+      "40": "500001",
+      "41": "",
+      "42": "",
+      "43": "G",
+      "44": "N",
+      "5": "D-SAVED",
+      "50": "N",
+      "51": "31",
+      "52": "01",
+      "53": "01",
+      "54": "G",
+      "55": "G",
+      "56": "123",
+      "57": "E",
+      "59": "",
+      "6": "",
+      "60": "",
+      "61": "H4",
+      "62": "0.000",
+      "63": "0.000",
+      "64": "0.000",
+      "65": "0.000",
+      "68": "N",
+      "69": "",
+      "7": "",
+      "70": "A",
+      "8": "H1",
+-     "9": "1",
++     "9": "1.000",
+    },
+  }
+
+ ❯ Module.assertGolden test/fixtures/saleReturnLabourReplay.fixture.ts:178:26
+    176|   name: keyof typeof golden.expected.prefixes,
+    177| ) {
+    178|   expect(actual.preview).toEqual(golden.expected.prefixes[name].previe…
+       |                          ^
+    179|   expect(actual.phase).toEqual(golden.expected.prefixes[name].phase);
+    180| }
+ ❯ test/saleReturnLabourReplay.db.test.ts:143:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > qualifies AA c13 and matches every independently expected cell
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > qualifies TA c29 and matches every independently expected cell
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > qualifies C3 c13 and matches every independently expected cell
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > qualifies ZZ c13 and matches every independently expected cell
+AssertionError: expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "caches": Object {
+      "45": "10.000",
+      "46": "10.000",
+      "47": "100.00",
+      "48": "0.00",
+      "49": "10.00",
+      "58": "1.00",
+      "66": "0.00",
+      "67": "0.00",
+    },
+    "editorTextByField": Object {
+      "x13.primary-incoming.c19": "10.00",
+      "x13.primary-incoming.c20": "100.00",
+      "x13.primary-incoming.c21": "0.00",
+      "x13.primary-incoming.c23": "1.00",
+      "x13.primary-incoming.c24": "10.00",
+      "x13.primary-incoming.c25": "0.00",
+      "x13.primary-incoming.c26": "0.00",
+      "x13.primary-incoming.c27": "0.00",
+      "x13.primary-incoming.c28": "0.00",
+      "x13.primary-incoming.c36": "110.00",
+      "x13.primary-incoming.c37": "0.00",
+      "x13.primary-incoming.c38": "110.00",
+    },
+    "visible": Object {
+      "0": "1",
+      "1": "GOLD",
+      "10": "10.000",
+      "11": "0.000",
+      "12": "10.000",
+      "13": "AA",
+      "14": "0.00",
+      "15": "0.000",
+      "16": "100.00",
+      "17": "0.00",
+      "18": "10.000",
+      "19": "10.00",
+      "2": "N",
+      "20": "100.00",
+      "21": "0.00",
+      "22": "N",
+      "23": "1.00",
+      "24": "10.00",
+      "25": "0.00",
+      "26": "0.00",
+      "27": "0.00",
+      "28": "0.00",
+      "29": "TA",
+      "3": "Source gold",
+      "30": "0.00",
+      "31": "0.00",
+      "32": "0.00",
+      "33": "0.00",
+      "34": "0.00",
+      "35": "0.00",
+      "36": "110.00",
+      "37": "0.00",
+      "38": "110.00",
+      "39": "",
+      "4": "T01",
+      "40": "500001",
+      "41": "",
+      "42": "",
+      "43": "G",
+      "44": "N",
+      "5": "D-SAVED",
+      "50": "N",
+      "51": "31",
+      "52": "01",
+      "53": "01",
+      "54": "G",
+      "55": "G",
+      "56": "123",
+      "57": "E",
+      "59": "",
+      "6": "",
+      "60": "",
+      "61": "H4",
+      "62": "0.000",
+      "63": "0.000",
+      "64": "0.000",
+      "65": "0.000",
+      "68": "N",
+      "69": "",
+      "7": "",
+      "70": "A",
+      "8": "H1",
+-     "9": "1",
++     "9": "1.000",
+    },
+  }
+
+ ❯ Module.assertGolden test/fixtures/saleReturnLabourReplay.fixture.ts:178:26
+    176|   name: keyof typeof golden.expected.prefixes,
+    177| ) {
+    178|   expect(actual.preview).toEqual(golden.expected.prefixes[name].previe…
+       |                          ^
+    179|   expect(actual.phase).toEqual(golden.expected.prefixes[name].phase);
+    180| }
+ ❯ test/saleReturnLabourReplay.db.test.ts:162:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > retains repeated same-code events and deterministic retry without persistence
+AssertionError: expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "caches": Object {
+      "45": "10.000",
+      "46": "10.000",
+      "47": "100.00",
+      "48": "0.00",
+      "49": "10.00",
+      "58": "1.00",
+      "66": "0.00",
+      "67": "0.00",
+    },
+    "editorTextByField": Object {
+      "x13.primary-incoming.c19": "10.00",
+      "x13.primary-incoming.c20": "100.00",
+      "x13.primary-incoming.c21": "0.00",
+      "x13.primary-incoming.c23": "1.00",
+      "x13.primary-incoming.c24": "10.00",
+      "x13.primary-incoming.c25": "0.00",
+      "x13.primary-incoming.c26": "0.00",
+      "x13.primary-incoming.c27": "0.00",
+      "x13.primary-incoming.c28": "0.00",
+      "x13.primary-incoming.c36": "110.00",
+      "x13.primary-incoming.c37": "0.00",
+      "x13.primary-incoming.c38": "110.00",
+    },
+    "visible": Object {
+      "0": "1",
+      "1": "GOLD",
+      "10": "10.000",
+      "11": "0.000",
+      "12": "10.000",
+      "13": "AA",
+      "14": "0.00",
+      "15": "0.000",
+      "16": "100.00",
+      "17": "0.00",
+      "18": "10.000",
+      "19": "10.00",
+      "2": "N",
+      "20": "100.00",
+      "21": "0.00",
+      "22": "N",
+      "23": "1.00",
+      "24": "10.00",
+      "25": "0.00",
+      "26": "0.00",
+      "27": "0.00",
+      "28": "0.00",
+      "29": "TA",
+      "3": "Source gold",
+      "30": "0.00",
+      "31": "0.00",
+      "32": "0.00",
+      "33": "0.00",
+      "34": "0.00",
+      "35": "0.00",
+      "36": "110.00",
+      "37": "0.00",
+      "38": "110.00",
+      "39": "",
+      "4": "T01",
+      "40": "500001",
+      "41": "",
+      "42": "",
+      "43": "G",
+      "44": "N",
+      "5": "D-SAVED",
+      "50": "N",
+      "51": "31",
+      "52": "01",
+      "53": "01",
+      "54": "G",
+      "55": "G",
+      "56": "123",
+      "57": "E",
+      "59": "",
+      "6": "",
+      "60": "",
+      "61": "H4",
+      "62": "0.000",
+      "63": "0.000",
+      "64": "0.000",
+      "65": "0.000",
+      "68": "N",
+      "69": "",
+      "7": "",
+      "70": "A",
+      "8": "H1",
+-     "9": "1",
++     "9": "1.000",
+    },
+  }
+
+ ❯ Module.assertGolden test/fixtures/saleReturnLabourReplay.fixture.ts:178:26
+    176|   name: keyof typeof golden.expected.prefixes,
+    177| ) {
+    178|   expect(actual.preview).toEqual(golden.expected.prefixes[name].previe…
+       |                          ^
+    179|   expect(actual.phase).toEqual(golden.expected.prefixes[name].phase);
+    180| }
+ ❯ test/saleReturnLabourReplay.db.test.ts:181:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > runs lookup and two source code prefixes without numeric writes, and audits exact POST outcomes
+AssertionError: expected { visible: { '0': '1', …(62) }, …(2) } to deeply equal { visible: { '0': '1', …(62) }, …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "caches": Object {
+      "45": "10.000",
+      "46": "10.000",
+      "47": "100.00",
+      "48": "0.00",
+      "49": "10.00",
+      "58": "2.00",
+      "66": "0.00",
+      "67": "0",
+    },
+    "editorTextByField": Object {
+      "x13.primary-incoming.c19": "10.00",
+      "x13.primary-incoming.c20": "100.00",
+      "x13.primary-incoming.c21": "0.00",
+      "x13.primary-incoming.c23": "2.00",
+      "x13.primary-incoming.c24": "20.00",
+      "x13.primary-incoming.c25": "0.00",
+      "x13.primary-incoming.c26": "0.00",
+      "x13.primary-incoming.c27": "0.00",
+      "x13.primary-incoming.c28": "0.00",
+      "x13.primary-incoming.c36": "120.00",
+      "x13.primary-incoming.c37": "0.00",
+      "x13.primary-incoming.c38": "120.00",
+    },
+    "visible": Object {
+      "0": "1",
+      "1": "GOLD",
+      "10": "10.000",
+      "11": "0.000",
+      "12": "10.000",
+      "13": "BB",
+      "14": "",
+      "15": "0.000",
+      "16": "100.00",
+      "17": "",
+      "18": "10.000",
+      "19": "10.00",
+      "2": "N",
+      "20": "100.00",
+      "21": "",
+      "22": "N",
+      "23": "2.00",
+      "24": "20.00",
+      "25": "0.00",
+      "26": "0.00",
+      "27": "0.00",
+      "28": "",
+      "29": "TA",
+      "3": "Source gold",
+      "30": "0.00",
+      "31": "0.00",
+      "32": "0.00",
+      "33": "0.00",
+      "34": "0.00",
+      "35": "0.00",
+      "36": "120.00",
+      "37": "0.00",
+      "38": "120.00",
+      "39": "",
+      "4": "T01",
+      "40": "500001",
+      "41": "",
+      "42": "",
+      "43": "G",
+      "44": "N",
+      "5": "D-SAVED",
+      "50": "N",
+      "51": "31",
+      "52": "01",
+      "53": "01",
+      "54": "G",
+      "55": "G",
+      "56": "123",
+      "57": "E",
+      "59": "",
+      "6": "",
+      "60": "",
+      "61": "H4",
+      "62": "0.000",
+      "63": "0.000",
+      "64": "0.000",
+      "65": "0.000",
+      "68": "N",
+      "69": "",
+      "7": "",
+      "70": "A",
+      "8": "H1",
+-     "9": "1",
++     "9": "1.000",
+    },
+  }
+
+ ❯ Module.assertGolden test/fixtures/saleReturnLabourReplay.fixture.ts:178:26
+    176|   name: keyof typeof golden.expected.prefixes,
+    177| ) {
+    178|   expect(actual.preview).toEqual(golden.expected.prefixes[name].previe…
+       |                          ^
+    179|   expect(actual.phase).toEqual(golden.expected.prefixes[name].phase);
+    180| }
+ ❯ test/saleReturnLabourReplay.routes.db.test.ts:225:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > denies anonymous, unrelated View and forced reset without accepting code events
+AssertionError: {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 1 minute"}: expected 429 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 429
+
+ ❯ login test/saleReturnLabourReplay.routes.db.test.ts:129:48
+    127|       },
+    128|     });
+    129|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+    130|     return { cookie: cookie(response), context: response.json().contex…
+    131|   }
+ ❯ test/saleReturnLabourReplay.routes.db.test.ts:195:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > rejects a foreign base and malformed authority/policy fields while preserving business state
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > fails an old bearer after actual same-scope selection and old page pair after fresh bearer adoption
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > rejects real signed access claims lacking epoch rather than supplying a default
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > maps changed historical master to409 without returning or accepting a replacement prefix
+AssertionError: {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 1 minute"}: expected 429 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 429
+
+ ❯ login test/saleReturnLabourReplay.routes.db.test.ts:129:48
+    127|       },
+    128|     });
+    129|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+    130|     return { cookie: cookie(response), context: response.json().contex…
+    131|   }
+ ❯ test/saleReturnLabourReplay.routes.db.test.ts:194:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/16]⎯
+
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > returns the exact accepted prefix after a real post-copy bill rejection
+ FAIL  test/saleReturnLabourReplay.routes.db.test.ts > real authenticated labour observation and append routes > keeps legacy preview responses/allowlists unchanged and never exposes labour in v1
+AssertionError: {"statusCode":429,"error":"Too Many Requests","message":"Rate limit exceeded, retry in 59 seconds"}: expected 429 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 429
+
+ ❯ login test/saleReturnLabourReplay.routes.db.test.ts:129:48
+    127|       },
+    128|     });
+    129|     expect(response.statusCode, response.body).toBe(200);
+       |                                                ^
+    130|     return { cookie: cookie(response), context: response.json().contex…
+    131|   }
+ ❯ test/saleReturnLabourReplay.routes.db.test.ts:194:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/16]⎯
+
+ Test Files  2 failed | 4 passed (6)
+      Tests  16 failed | 139 passed (155)
+   Start at  23:22:52
+   Duration  10.21s (transform 973ms, setup 0ms, collect 1.80s, tests 7.35s, environment 0ms, prepare 160ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/saleReturnLabourReplay.test.ts test/saleReturnLabourReplay.db.test.ts test/saleReturnLabourReplay.routes.db.test.ts test/saleReturnBillReplay.test.ts test/saleReturnBillReplay.db.test.ts test/saleReturnBillReplay.routes.db.test.ts test/routePolicy.test.ts
+PARITY_TEST_FAILED pnpm exited 1

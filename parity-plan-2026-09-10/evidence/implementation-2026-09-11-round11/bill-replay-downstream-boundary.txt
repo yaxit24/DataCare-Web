@@ -1,0 +1,79 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/saleReturnBillReplay.db.test.ts (34 tests | 1 failed) 2477ms
+   × trusted saved incoming bill phases in PostgreSQL > rolls back the row and aggregate journals when a later bill-tax result exceeds the admitted range 37ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "ITM_TCH" of relation "SL_DETL_RTN" does not exist`
+ ✓ test/saleReturnBillReplay.routes.db.test.ts (10 tests) 1841ms
+   ✓ authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text 482ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > rolls back the row and aggregate journals when a later bill-tax result exceeds the admitted range
+PrismaClientKnownRequestError: 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "ITM_TCH" of relation "SL_DETL_RTN" does not exist`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ test/saleReturnBillReplay.db.test.ts:437:5
+    435|       tenantId,
+    436|     );
+    437|     await sql(
+       |     ^
+    438|       `UPDATE "SL_DETL_RTN" SET "ITM_GWT"=10000000000,"ITM_NWT"=100000…
+    439|         "ITM_TCH"=1000000000,"ITM_RATE"=1000000000000000,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 43 passed (44)
+   Start at  14:46:11
+   Duration  6.13s (transform 890ms, setup 0ms, collect 1.37s, tests 4.32s, environment 0ms, prepare 60ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/saleReturnBillReplay.db.test.ts test/saleReturnBillReplay.routes.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1

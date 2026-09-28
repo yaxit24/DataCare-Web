@@ -1,0 +1,14 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run "test/saleReturnIncomingAggregate.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnIncomingAggregate.test.ts (62 tests) 24ms
+
+ Test Files  1 passed (1)
+      Tests  62 passed (62)
+   Start at  19:33:05
+   Duration  434ms (transform 117ms, setup 0ms, collect 121ms, tests 24ms, environment 0ms, prepare 68ms)
+

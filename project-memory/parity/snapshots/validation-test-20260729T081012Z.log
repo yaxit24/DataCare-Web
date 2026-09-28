@@ -1,0 +1,243 @@
+
+> datacare-web-saas@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web
+> turbo run test
+
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running test in 7 packages
+   • Remote caching disabled
+
+@datacare/parity:test: cache miss, executing 9489ebf0793c1d8c
+@datacare/types:test: cache miss, executing 178ba19ef4011f24
+@datacare/core:build: cache hit, replaying logs 39c861034c57d064
+@datacare/db:build: cache hit, replaying logs 64f5e78c5158ded0
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/core
+@datacare/reports:test: cache miss, executing 369d38fd115d6647
+@datacare/db:test: cache miss, executing 2ed00b5433ca39ac
+@datacare/types:build: cache hit, replaying logs 2f339ad5308aa62d
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/core:test: cache miss, executing c4d0e813d736b77f
+@datacare/web:test: cache miss, executing 1fc1f31acc1e9cf3
+@datacare/api:test: cache miss, executing 15fa8ccaad7a0a4a
+@datacare/api:test: 
+@datacare/api:test: > @datacare/api@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/apps/api
+@datacare/api:test: > vitest run
+@datacare/api:test: 
+@datacare/web:test: 
+@datacare/web:test: > @datacare/web@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/apps/web
+@datacare/web:test: > vitest run --passWithNoTests
+@datacare/web:test: 
+@datacare/parity:test: 
+@datacare/parity:test: > @datacare/parity@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/parity
+@datacare/parity:test: > vitest run
+@datacare/parity:test: 
+@datacare/core:test: 
+@datacare/core:test: > @datacare/core@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/core
+@datacare/core:test: > vitest run
+@datacare/core:test: 
+@datacare/reports:test: 
+@datacare/reports:test: > @datacare/reports@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/reports
+@datacare/reports:test: > vitest run --passWithNoTests
+@datacare/reports:test: 
+@datacare/types:test: 
+@datacare/types:test: > @datacare/types@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/types
+@datacare/types:test: > vitest run
+@datacare/types:test: 
+@datacare/db:test: 
+@datacare/db:test: > @datacare/db@0.0.0 test /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/db
+@datacare/db:test: > vitest run --passWithNoTests
+@datacare/db:test: 
+@datacare/api:test: 
+@datacare/api:test:  RUN  v2.1.9 /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/apps/api
+@datacare/api:test: 
+@datacare/db:test: 
+@datacare/db:test:  RUN  v2.1.9 /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/db
+@datacare/db:test: 
+@datacare/web:test: 
+@datacare/web:test:  RUN  v2.1.8 /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/apps/web
+@datacare/web:test: 
+@datacare/parity:test: 
+@datacare/parity:test:  RUN  v2.1.9 /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/parity
+@datacare/parity:test: 
+@datacare/core:test: 
+@datacare/core:test:  RUN  v2.1.9 /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/core
+@datacare/core:test: 
+@datacare/reports:test: 
+@datacare/reports:test:  RUN  v2.1.9 /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/reports
+@datacare/reports:test: 
+@datacare/reports:test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+@datacare/reports:test: No test files found, exiting with code 0
+@datacare/reports:test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+@datacare/reports:test: 
+@datacare/types:test: 
+@datacare/types:test:  RUN  v2.1.9 /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/types
+@datacare/types:test: 
+@datacare/web:test:  ✓ test/gridKeyboard.test.ts (5 tests) 13ms
+@datacare/db:test:  ✓ test/scope.test.ts (3 tests) 8ms
+@datacare/db:test: 
+@datacare/db:test:  Test Files  1 passed (1)
+@datacare/db:test:       Tests  3 passed (3)
+@datacare/db:test:    Start at  13:52:07
+@datacare/db:test:    Duration  2.38s (transform 201ms, setup 0ms, collect 262ms, tests 8ms, environment 0ms, prepare 933ms)
+@datacare/db:test: 
+@datacare/web:test:  ✓ test/formKeys.test.ts (4 tests) 7ms
+@datacare/parity:test:  ✓ test/diff.test.ts (6 tests) 6ms
+@datacare/web:test: 
+@datacare/web:test:  Test Files  2 passed (2)
+@datacare/web:test:       Tests  9 passed (9)
+@datacare/web:test:    Start at  13:52:07
+@datacare/web:test:    Duration  2.68s (transform 375ms, setup 0ms, collect 415ms, tests 20ms, environment 61ms, prepare 1.64s)
+@datacare/web:test: 
+@datacare/parity:test: 
+@datacare/parity:test:  Test Files  1 passed (1)
+@datacare/parity:test:       Tests  6 passed (6)
+@datacare/parity:test:    Start at  13:52:07
+@datacare/parity:test:    Duration  2.59s (transform 104ms, setup 0ms, collect 95ms, tests 6ms, environment 0ms, prepare 658ms)
+@datacare/parity:test: 
+@datacare/core:test:  ✓ test/calc.test.ts (10 tests) 9ms
+@datacare/core:test:  ✓ test/money.test.ts (3 tests) 4ms
+@datacare/core:test: 
+@datacare/core:test:  Test Files  2 passed (2)
+@datacare/core:test:       Tests  13 passed (13)
+@datacare/core:test:    Start at  13:52:07
+@datacare/core:test:    Duration  2.59s (transform 145ms, setup 0ms, collect 214ms, tests 13ms, environment 0ms, prepare 1.21s)
+@datacare/core:test: 
+@datacare/types:test:  ✓ test/scope.test.ts (3 tests) 5ms
+@datacare/types:test: 
+@datacare/types:test:  Test Files  1 passed (1)
+@datacare/types:test:       Tests  3 passed (3)
+@datacare/types:test:    Start at  13:52:07
+@datacare/types:test:    Duration  1.81s (transform 66ms, setup 0ms, collect 83ms, tests 5ms, environment 0ms, prepare 247ms)
+@datacare/types:test: 
+@datacare/api:test:  ↓ test/vpParcel.db.test.ts (1 test | 1 skipped)
+@datacare/api:test:  ↓ test/mfgLifecycle.db.test.ts (4 tests | 4 skipped)
+@datacare/api:test:  ↓ test/repairReceipt.db.test.ts (9 tests | 9 skipped)
+@datacare/api:test:  ↓ test/sales.lifecycle.db.test.ts (7 tests | 7 skipped)
+@datacare/api:test:  ↓ test/purchase.lifecycle.db.test.ts (13 tests | 13 skipped)
+@datacare/api:test:  ↓ test/salesFamilyLifecycle.db.test.ts (12 tests | 12 skipped)
+@datacare/api:test:  ↓ test/transaction.integrity.db.test.ts (4 tests | 4 skipped)
+@datacare/api:test:  ↓ test/stockLifecycle.db.test.ts (5 tests | 5 skipped)
+@datacare/api:test:  ↓ test/goldBookLoctAmt.db.test.ts (2 tests | 2 skipped)
+@datacare/api:test:  ↓ test/wholesaleSaleReturn.db.test.ts (1 test | 1 skipped)
+@datacare/api:test:  ↓ test/settingsBehavior.db.test.ts (11 tests | 11 skipped)
+@datacare/api:test: stdout | test/reportContract.test.ts > Crystal report data-source contracts > classifies every token and resolves every non-allowlisted database field to Prisma
+@datacare/api:test: REPORT_CONTRACT_TOTALS {"specs":254,"distinctTokens":2398,"database":1214,"formula":408,"special":776,"unresolvable":0,"resolvedDatabase":1124,"allowlistedDatabaseGaps":90}
+@datacare/api:test: 
+@datacare/api:test:  ✓ test/reportContract.test.ts (1 test) 155ms
+@datacare/api:test:  ✓ test/documents.test.ts (17 tests) 102ms
+@datacare/api:test:  ↓ test/financeLifecycle.db.test.ts (4 tests | 4 skipped)
+@datacare/api:test:  ✓ test/goldenVectors.test.ts (27 tests) 48ms
+@datacare/api:test:  ↓ test/physicalStock.db.test.ts (5 tests | 5 skipped)
+@datacare/api:test:  ↓ test/otherCommission.db.test.ts (1 test | 1 skipped)
+@datacare/api:test:  ✓ test/integrationWireContract.test.ts (14 tests) 24ms
+@datacare/api:test:  ✓ test/conditionalRules.test.ts (25 tests) 19ms
+@datacare/api:test:  ✓ test/settingsBehavior.test.ts (93 tests) 31ms
+@datacare/api:test:  ↓ test/meltingPro.db.test.ts (3 tests | 3 skipped)
+@datacare/api:test:  ↓ test/vpLifecycle.db.test.ts (1 test | 1 skipped)
+@datacare/api:test:  ✓ test/routePolicy.test.ts (15 tests) 37ms
+@datacare/api:test:  ↓ test/utilities.db.test.ts (4 tests | 4 skipped)
+@datacare/api:test:  ↓ test/ledgerStaging.db.test.ts (6 tests | 6 skipped)
+@datacare/api:test:  ↓ test/dhrnReceipt.db.test.ts (2 tests | 2 skipped)
+@datacare/api:test:  ↓ test/tourIdtl.db.test.ts (3 tests | 3 skipped)
+@datacare/api:test:  ↓ test/companySettings.db.test.ts (7 tests | 7 skipped)
+@datacare/api:test:  ✓ test/workflows.test.ts (19 tests) 12ms
+@datacare/api:test:  ↓ test/tagPrintStaging.db.test.ts (3 tests | 3 skipped)
+@datacare/api:test:  ✓ test/integrationReadiness.test.ts (13 tests) 12ms
+@datacare/api:test:  ↓ test/desktopMessages.db.test.ts (8 tests | 8 skipped)
+@datacare/api:test:  ↓ test/reportRender.db.test.ts (5 tests | 5 skipped)
+@datacare/api:test:  ↓ test/designBook.db.test.ts (5 tests | 5 skipped)
+@datacare/api:test:  ↓ test/app.security.db.test.ts (5 tests | 5 skipped)
+@datacare/api:test:  ✓ test/auth.session.test.ts (3 tests) 31ms
+@datacare/api:test:  ✓ test/repairKarigarReceipt.test.ts (10 tests) 11ms
+@datacare/api:test:  ✓ test/purchase.test.ts (13 tests) 40ms
+@datacare/api:test:  ✓ test/einvoice_gsp.test.ts (5 tests) 6ms
+@datacare/api:test:  ↓ test/reportGridStaging.db.test.ts (4 tests | 4 skipped)
+@datacare/api:test:  ✓ test/meltingParity.test.ts (5 tests) 8ms
+@datacare/api:test:  ✓ test/sales.test.ts (12 tests) 16ms
+@datacare/api:test:  ✓ test/rateCut.test.ts (9 tests) 10ms
+@datacare/api:test:  ↓ test/messaging.db.test.ts (4 tests | 4 skipped)
+@datacare/api:test:  ✓ test/g5Harness.test.ts (6 tests) 7ms
+@datacare/api:test:  ↓ test/opsInvariants.db.test.ts (2 tests | 2 skipped)
+@datacare/api:test:  ↓ test/windowTiles.db.test.ts (5 tests | 5 skipped)
+@datacare/api:test:  ✓ test/finePolicy.test.ts (13 tests) 7ms
+@datacare/api:test:  ✓ test/rbac.authorization.test.ts (5 tests) 10ms
+@datacare/api:test:  ✓ test/scheme.test.ts (8 tests) 6ms
+@datacare/api:test:  ✓ test/metrics.test.ts (3 tests) 109ms
+@datacare/api:test:  ✓ test/repairImage.test.ts (5 tests) 39ms
+@datacare/api:test:  ✓ test/roundingPolicy.test.ts (14 tests) 63ms
+@datacare/api:test:  ✓ test/scaleProtocol.test.ts (10 tests) 10ms
+@datacare/api:test:  ✓ test/repairReceipt.test.ts (6 tests) 7ms
+@datacare/api:test:  ✓ test/cutover.test.ts (2 tests) 10ms
+@datacare/api:test:  ✓ test/runtimeConfig.test.ts (9 tests) 9ms
+@datacare/api:test:  ✓ test/health.test.ts (7 tests) 425ms
+@datacare/api:test:    ✓ GET /ready > returns HTTP 503 when the runtime database is not security-ready 413ms
+@datacare/api:test:  ✓ test/barcode.test.ts (3 tests) 31ms
+@datacare/api:test:  ✓ test/posting.test.ts (5 tests) 10ms
+@datacare/api:test:  ✓ test/gst.test.ts (6 tests) 48ms
+@datacare/api:test:  ✓ test/bookPolicy.test.ts (7 tests) 7ms
+@datacare/api:test:  ✓ test/whatsapp.test.ts (3 tests) 33ms
+@datacare/api:test:  ✓ test/masters.test.ts (6 tests) 7ms
+@datacare/api:test:  ✓ test/businessScope.test.ts (5 tests) 11ms
+@datacare/api:test:  ✓ test/dhrn.test.ts (6 tests) 10ms
+@datacare/api:test:  ✓ test/auth.jwt.test.ts (5 tests) 19ms
+@datacare/api:test:  ↓ test/integrationReadiness.db.test.ts (2 tests | 2 skipped)
+@datacare/api:test:  ✓ test/integrations.test.ts (8 tests) 8ms
+@datacare/api:test:  ✓ test/requestContext.test.ts (6 tests) 8ms
+@datacare/api:test:  ✓ test/financeWriters.test.ts (7 tests) 6ms
+@datacare/api:test:  ✓ test/einvoice.test.ts (5 tests) 6ms
+@datacare/api:test:  ✓ test/auth.service.test.ts (5 tests) 177ms
+@datacare/api:test:  ✓ test/finance.test.ts (4 tests) 7ms
+@datacare/api:test:  ✓ test/security.test.ts (8 tests) 1656ms
+@datacare/api:test:    ✓ workspace secret literal policy > finds plausible assigned credentials and ignores placeholders or environment reads 1647ms
+@datacare/api:test:  ✓ test/rbac.policy.test.ts (5 tests) 7ms
+@datacare/api:test:  ✓ test/rates.test.ts (4 tests) 6ms
+@datacare/api:test:  ✓ test/registry.test.ts (3 tests) 8ms
+@datacare/api:test:  ✓ test/render.test.ts (5 tests) 35ms
+@datacare/api:test:  ✓ test/deviceBridge.test.ts (5 tests) 6ms
+@datacare/api:test:  ✓ test/voucherLifecycle.test.ts (4 tests) 11ms
+@datacare/api:test:  ✓ test/audit.test.ts (2 tests) 20ms
+@datacare/api:test:  ✓ test/salesReturn.test.ts (2 tests) 4ms
+@datacare/api:test:  ✓ test/app.runtime.test.ts (1 test) 648ms
+@datacare/api:test:    ✓ production application security options > sets Secure on access and refresh cookies in production mode 646ms
+@datacare/api:test:  ✓ test/crystalFormula.test.ts (6 tests) 7ms
+@datacare/api:test:  ✓ test/reportEngine.test.ts (4 tests) 17ms
+@datacare/api:test:  ✓ test/taxPolicy.test.ts (2 tests) 5ms
+@datacare/api:test:  ✓ test/auth.password.test.ts (4 tests) 217ms
+@datacare/api:test:  ✓ test/accounting.test.ts (3 tests) 6ms
+@datacare/api:test:  ✓ test/numbering.test.ts (3 tests) 5ms
+@datacare/api:test:  ✓ test/karigar.test.ts (4 tests) 8ms
+@datacare/api:test:  ✓ test/formLayoutEngine.test.ts (3 tests) 62ms
+@datacare/api:test:  ✓ test/purchaseReturn.test.ts (1 test) 6ms
+@datacare/api:test:  ✓ test/reports.test.ts (2 tests) 4ms
+@datacare/api:test:  ✓ test/melting.test.ts (3 tests) 3ms
+@datacare/api:test:  ✓ test/stock.test.ts (3 tests) 4ms
+@datacare/api:test:  ✓ test/parity.test.ts (1 test) 6ms
+@datacare/api:test: 
+@datacare/api:test:  Test Files  66 passed | 31 skipped (97)
+@datacare/api:test:       Tests  528 passed | 148 skipped (676)
+@datacare/api:test:    Start at  13:52:07
+@datacare/api:test:    Duration  12.89s (transform 7.46s, setup 0ms, collect 27.26s, tests 4.41s, environment 26ms, prepare 20.34s)
+@datacare/api:test: 
+
+ Tasks:    10 successful, 10 total
+Cached:    3 cached, 10 total
+  Time:    15.865s 
+
+ WARNING  no output files found for task @datacare/api#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/core#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/db#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/parity#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/reports#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/types#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/web#test. Please check your `outputs` key in `turbo.json`

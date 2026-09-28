@@ -1,0 +1,9 @@
+
+> datacare-web-saas@0.0.0 docs:refs /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/check-doc-references.mjs
+
+doc references: 35 document(s), 196 file citation(s), 14 with a line number, 1 verifiable claim(s)
+DOC_REFS_RED 1 problem(s)
+    TECHNICAL-REFERENCE.md: claim is stale -> ls apps/api/test/*.test.ts | wc -l | tr -d ' '
+      expected 235, got 237
+ ELIFECYCLE  Command failed with exit code 1.

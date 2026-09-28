@@ -1,0 +1,31 @@
+{
+  "kind": "preimplementation-lifecycle-browser-cases",
+  "capturedAtUtc": "2026-09-11T23:14:54.735953+00:00",
+  "newJourneyExists": false,
+  "files": [
+    {
+      "path": "/tmp/datacare-return-labour-preview-faults/browser-required-checks.json",
+      "sha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-browser/web/apps/web/test/sales-return-labour-replay.journey.mjs",
+      "sha256": "339fb86f08a95f123283c26b66875d3f4c3dcebbaeada52d7b5175cffeaa2148"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-browser/saleReturnLabourReplay.independent.json",
+      "sha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/implementation-contract.md",
+      "sha256": "2bbfd5a65f6806f50daf3099a9204743be40024d89359861c52e558eee206ccc"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context.journey.mjs",
+      "sha256": "113c5841f9390c3a826b5c6d4c63e96bc0fd232197b3101cfddc8378a0bf1798"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/session-context.real-stack.additive.mjs",
+      "sha256": "7b0cafbfe88b39ef8deb7a2b8987463285350e30e7adf59275f91309b78a06c4"
+    }
+  ]
+}

@@ -1,0 +1,1781 @@
+[
+ {
+  "report": "LabourBillGst",
+  "areas": 11,
+  "sections": 29,
+  "objects": 169,
+  "formulas": 48
+ },
+ {
+  "report": "SalesBillA4_WithImage",
+  "areas": 9,
+  "sections": 27,
+  "objects": 164,
+  "formulas": 31
+ },
+ {
+  "report": "SalesBillA4",
+  "areas": 9,
+  "sections": 26,
+  "objects": 163,
+  "formulas": 31
+ },
+ {
+  "report": "SalesBillA4Gst",
+  "areas": 9,
+  "sections": 26,
+  "objects": 163,
+  "formulas": 31
+ },
+ {
+  "report": "SalesBillHzGst",
+  "areas": 9,
+  "sections": 26,
+  "objects": 163,
+  "formulas": 31
+ },
+ {
+  "report": "SlBillWapp",
+  "areas": 9,
+  "sections": 26,
+  "objects": 163,
+  "formulas": 31
+ },
+ {
+  "report": "PrRtnBillGst",
+  "areas": 9,
+  "sections": 21,
+  "objects": 156,
+  "formulas": 39
+ },
+ {
+  "report": "SalesQuotation",
+  "status": "partial",
+  "areas": 9,
+  "sections": 30,
+  "objects": 155,
+  "formulas": 34
+ },
+ {
+  "report": "SalesRtnA4Gst",
+  "areas": 9,
+  "sections": 21,
+  "objects": 152,
+  "formulas": 29
+ },
+ {
+  "report": "B2BPurcBillA4Tax",
+  "areas": 9,
+  "sections": 21,
+  "objects": 148,
+  "formulas": 31
+ },
+ {
+  "report": "B2BSaleBillA4Tax",
+  "areas": 9,
+  "sections": 21,
+  "objects": 148,
+  "formulas": 31
+ },
+ {
+  "report": "KrRecVchGst",
+  "areas": 9,
+  "sections": 21,
+  "objects": 148,
+  "formulas": 31
+ },
+ {
+  "report": "PurcBillA4Gst",
+  "areas": 9,
+  "sections": 21,
+  "objects": 148,
+  "formulas": 31
+ },
+ {
+  "report": "PurcBillHalfGst",
+  "areas": 9,
+  "sections": 21,
+  "objects": 148,
+  "formulas": 31
+ },
+ {
+  "report": "SalesRtnBillUae",
+  "areas": 9,
+  "sections": 19,
+  "objects": 142,
+  "formulas": 32
+ },
+ {
+  "report": "FineSalesGstBill",
+  "areas": 9,
+  "sections": 27,
+  "objects": 137,
+  "formulas": 40
+ },
+ {
+  "report": "WhSalesBill",
+  "areas": 11,
+  "sections": 24,
+  "objects": 128,
+  "formulas": 41
+ },
+ {
+  "report": "RateCutItmBill",
+  "areas": 11,
+  "sections": 24,
+  "objects": 127,
+  "formulas": 41
+ },
+ {
+  "report": "WhSalesRtnBill",
+  "areas": 11,
+  "sections": 24,
+  "objects": 125,
+  "formulas": 41
+ },
+ {
+  "report": "PurcToSalesFixingVch",
+  "areas": 9,
+  "sections": 16,
+  "objects": 122,
+  "formulas": 31
+ },
+ {
+  "report": "SalesToPurcFixingVch",
+  "areas": 9,
+  "sections": 16,
+  "objects": 122,
+  "formulas": 31
+ },
+ {
+  "report": "TagWtChangeVch",
+  "areas": 11,
+  "sections": 23,
+  "objects": 121,
+  "formulas": 41
+ },
+ {
+  "report": "LabourWorkVch",
+  "areas": 11,
+  "sections": 18,
+  "objects": 118,
+  "formulas": 33
+ },
+ {
+  "report": "LabourBill",
+  "areas": 11,
+  "sections": 18,
+  "objects": 117,
+  "formulas": 33
+ },
+ {
+  "report": "OthCommVch",
+  "areas": 9,
+  "sections": 22,
+  "objects": 115,
+  "formulas": 30
+ },
+ {
+  "report": "SalesBillHz",
+  "areas": 9,
+  "sections": 22,
+  "objects": 113,
+  "formulas": 22
+ },
+ {
+  "report": "PaymentVch",
+  "areas": 9,
+  "sections": 20,
+  "objects": 109,
+  "formulas": 29
+ },
+ {
+  "report": "TagSplitVch",
+  "areas": 11,
+  "sections": 19,
+  "objects": 109,
+  "formulas": 41
+ },
+ {
+  "report": "SalesBillOrgDup",
+  "areas": 7,
+  "sections": 16,
+  "objects": 106,
+  "formulas": 62
+ },
+ {
+  "report": "SalesRtnA4",
+  "areas": 11,
+  "sections": 17,
+  "objects": 105,
+  "formulas": 33
+ },
+ {
+  "report": "Gstr_1",
+  "areas": 9,
+  "sections": 13,
+  "objects": 104,
+  "formulas": 24
+ },
+ {
+  "report": "StngIsuRec",
+  "areas": 9,
+  "sections": 16,
+  "objects": 103,
+  "formulas": 30
+ },
+ {
+  "report": "ReparingKrRec",
+  "areas": 7,
+  "sections": 8,
+  "objects": 99,
+  "formulas": 27
+ },
+ {
+  "report": "MfgLedger",
+  "areas": 7,
+  "sections": 9,
+  "objects": 98,
+  "formulas": 43
+ },
+ {
+  "report": "TableStkGwtRpt",
+  "areas": 11,
+  "sections": 14,
+  "objects": 98,
+  "formulas": 24
+ },
+ {
+  "report": "Gstr_2",
+  "areas": 9,
+  "sections": 13,
+  "objects": 97,
+  "formulas": 23
+ },
+ {
+  "report": "JmUdFine",
+  "areas": 11,
+  "sections": 13,
+  "objects": 97,
+  "formulas": 35
+ },
+ {
+  "report": "JmUdFineSl",
+  "areas": 11,
+  "sections": 13,
+  "objects": 97,
+  "formulas": 35
+ },
+ {
+  "report": "KrIsuBill",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "KrIsuBillGst",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "KrRecVch",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "MfgGhatRec",
+  "areas": 7,
+  "sections": 9,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "MfgMinoIsuRec",
+  "areas": 7,
+  "sections": 9,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "MfgVch",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "MtlIsu",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "OldItmSaleVch",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "PrRtnBill",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "PurcBillA4",
+  "areas": 7,
+  "sections": 8,
+  "objects": 97,
+  "formulas": 26
+ },
+ {
+  "report": "ReparingRec",
+  "areas": 7,
+  "sections": 8,
+  "objects": 96,
+  "formulas": 26
+ },
+ {
+  "report": "OthExpUae",
+  "areas": 9,
+  "sections": 18,
+  "objects": 94,
+  "formulas": 29
+ },
+ {
+  "report": "RateCutBill",
+  "areas": 7,
+  "sections": 22,
+  "objects": 93,
+  "formulas": 28
+ },
+ {
+  "report": "MfgGhatIsu",
+  "areas": 7,
+  "sections": 9,
+  "objects": 90,
+  "formulas": 26
+ },
+ {
+  "report": "ItemStkRpt",
+  "areas": 11,
+  "sections": 15,
+  "objects": 89,
+  "formulas": 24
+ },
+ {
+  "report": "Gstr_3",
+  "areas": 9,
+  "sections": 13,
+  "objects": 87,
+  "formulas": 27
+ },
+ {
+  "report": "ReparingCustIsu",
+  "areas": 7,
+  "sections": 8,
+  "objects": 87,
+  "formulas": 27
+ },
+ {
+  "report": "AcWithWtGold",
+  "areas": 13,
+  "sections": 18,
+  "objects": 81,
+  "formulas": 51
+ },
+ {
+  "report": "AcWithWtSumm",
+  "areas": 13,
+  "sections": 18,
+  "objects": 81,
+  "formulas": 51
+ },
+ {
+  "report": "JmUdFineSlSum",
+  "areas": 9,
+  "sections": 11,
+  "objects": 80,
+  "formulas": 37
+ },
+ {
+  "report": "GroupStkRpt",
+  "areas": 11,
+  "sections": 15,
+  "objects": 78,
+  "formulas": 20
+ },
+ {
+  "report": "HedgingFixVch",
+  "areas": 7,
+  "sections": 15,
+  "objects": 78,
+  "formulas": 29
+ },
+ {
+  "report": "ProdStkRpt",
+  "areas": 11,
+  "sections": 15,
+  "objects": 78,
+  "formulas": 20
+ },
+ {
+  "report": "CustRepRecBill",
+  "areas": 7,
+  "sections": 8,
+  "objects": 77,
+  "formulas": 14
+ },
+ {
+  "report": "TaxInOutRpt",
+  "areas": 11,
+  "sections": 16,
+  "objects": 77,
+  "formulas": 17
+ },
+ {
+  "report": "TaxSummUae",
+  "areas": 11,
+  "sections": 16,
+  "objects": 77,
+  "formulas": 17
+ },
+ {
+  "report": "AcPurcRpt",
+  "areas": 11,
+  "sections": 13,
+  "objects": 76,
+  "formulas": 18
+ },
+ {
+  "report": "AcPurcSummRpt",
+  "areas": 11,
+  "sections": 13,
+  "objects": 76,
+  "formulas": 18
+ },
+ {
+  "report": "ConsiBill",
+  "areas": 9,
+  "sections": 10,
+  "objects": 75,
+  "formulas": 19
+ },
+ {
+  "report": "InTax_PurcRpt",
+  "areas": 9,
+  "sections": 14,
+  "objects": 75,
+  "formulas": 26
+ },
+ {
+  "report": "OutTax_SaleRpt",
+  "areas": 9,
+  "sections": 14,
+  "objects": 75,
+  "formulas": 26
+ },
+ {
+  "report": "SalesSumm",
+  "areas": 11,
+  "sections": 12,
+  "objects": 75,
+  "formulas": 10
+ },
+ {
+  "report": "AprBill",
+  "areas": 9,
+  "sections": 10,
+  "objects": 72,
+  "formulas": 19
+ },
+ {
+  "report": "JadtarInOut",
+  "areas": 15,
+  "sections": 17,
+  "objects": 71,
+  "formulas": 16
+ },
+ {
+  "report": "KrDesignIsuVch",
+  "areas": 9,
+  "sections": 10,
+  "objects": 71,
+  "formulas": 19
+ },
+ {
+  "report": "TagStkRptDmSum",
+  "areas": 9,
+  "sections": 10,
+  "objects": 71,
+  "formulas": 19
+ },
+ {
+  "report": "ItmStkWithOthWt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 70,
+  "formulas": 51
+ },
+ {
+  "report": "StkInOutVch",
+  "areas": 9,
+  "sections": 10,
+  "objects": 70,
+  "formulas": 19
+ },
+ {
+  "report": "TagCanBill",
+  "areas": 9,
+  "sections": 10,
+  "objects": 70,
+  "formulas": 19
+ },
+ {
+  "report": "EmpIsuRecVch",
+  "areas": 9,
+  "sections": 11,
+  "objects": 69,
+  "formulas": 19
+ },
+ {
+  "report": "DhrnIntRec",
+  "areas": 5,
+  "sections": 6,
+  "objects": 68,
+  "formulas": 14
+ },
+ {
+  "report": "DhrnKhataVahi",
+  "areas": 11,
+  "sections": 12,
+  "objects": 66,
+  "formulas": 20
+ },
+ {
+  "report": "ItemOutword",
+  "areas": 13,
+  "sections": 14,
+  "objects": 66,
+  "formulas": 10
+ },
+ {
+  "report": "AcPurcWhRpt",
+  "areas": 9,
+  "sections": 11,
+  "objects": 65,
+  "formulas": 17
+ },
+ {
+  "report": "AcSaleWhRpt",
+  "areas": 9,
+  "sections": 11,
+  "objects": 65,
+  "formulas": 17
+ },
+ {
+  "report": "AprInOut",
+  "areas": 13,
+  "sections": 14,
+  "objects": 65,
+  "formulas": 17
+ },
+ {
+  "report": "CounterSale",
+  "areas": 13,
+  "sections": 14,
+  "objects": 65,
+  "formulas": 10
+ },
+ {
+  "report": "ItemInword",
+  "areas": 13,
+  "sections": 14,
+  "objects": 65,
+  "formulas": 10
+ },
+ {
+  "report": "RojMelJmaUdhar",
+  "areas": 7,
+  "sections": 12,
+  "objects": 65,
+  "formulas": 22
+ },
+ {
+  "report": "Form12",
+  "areas": 9,
+  "sections": 12,
+  "objects": 63,
+  "formulas": 23
+ },
+ {
+  "report": "RtlHuidPrint",
+  "areas": 9,
+  "sections": 10,
+  "objects": 62,
+  "formulas": 19
+ },
+ {
+  "report": "SlTaxRpt",
+  "areas": 13,
+  "sections": 18,
+  "objects": 62,
+  "formulas": 17
+ },
+ {
+  "report": "WhHuidPrint",
+  "areas": 9,
+  "sections": 10,
+  "objects": 62,
+  "formulas": 19
+ },
+ {
+  "report": "PrTaxRpt",
+  "areas": 11,
+  "sections": 16,
+  "objects": 61,
+  "formulas": 17
+ },
+ {
+  "report": "TagHuIdRpt",
+  "areas": 9,
+  "sections": 10,
+  "objects": 61,
+  "formulas": 11
+ },
+ {
+  "report": "AprPan",
+  "areas": 13,
+  "sections": 14,
+  "objects": 60,
+  "formulas": 19
+ },
+ {
+  "report": "DhrnKhataVahiSumm",
+  "areas": 11,
+  "sections": 12,
+  "objects": 60,
+  "formulas": 17
+ },
+ {
+  "report": "JdtProcessRec",
+  "areas": 9,
+  "sections": 10,
+  "objects": 60,
+  "formulas": 11
+ },
+ {
+  "report": "PurcGroupWise",
+  "areas": 9,
+  "sections": 10,
+  "objects": 59,
+  "formulas": 5
+ },
+ {
+  "report": "SalesGroupWise",
+  "areas": 9,
+  "sections": 10,
+  "objects": 59,
+  "formulas": 5
+ },
+ {
+  "report": "SalesItem",
+  "areas": 9,
+  "sections": 10,
+  "objects": 59,
+  "formulas": 5
+ },
+ {
+  "report": "SalesRtnItem",
+  "areas": 9,
+  "sections": 10,
+  "objects": 59,
+  "formulas": 5
+ },
+ {
+  "report": "SafeStkSumm",
+  "areas": 11,
+  "sections": 13,
+  "objects": 57,
+  "formulas": 20
+ },
+ {
+  "report": "TagWtChangSplit",
+  "areas": 11,
+  "sections": 12,
+  "objects": 56,
+  "formulas": 13
+ },
+ {
+  "report": "DhrnIssueImg",
+  "areas": 5,
+  "sections": 7,
+  "objects": 55,
+  "formulas": 15
+ },
+ {
+  "report": "PurcReport",
+  "areas": 11,
+  "sections": 14,
+  "objects": 55,
+  "formulas": 12
+ },
+ {
+  "report": "SaleReport",
+  "areas": 11,
+  "sections": 14,
+  "objects": 55,
+  "formulas": 12
+ },
+ {
+  "report": "JadtarRec",
+  "areas": 9,
+  "sections": 10,
+  "objects": 54,
+  "formulas": 11
+ },
+ {
+  "report": "LbrWorkRpt",
+  "areas": 15,
+  "sections": 15,
+  "objects": 54,
+  "formulas": 34
+ },
+ {
+  "report": "WhSalesBillSumm",
+  "areas": 15,
+  "sections": 15,
+  "objects": 54,
+  "formulas": 34
+ },
+ {
+  "report": "WhSalesIsuRec",
+  "areas": 15,
+  "sections": 15,
+  "objects": 54,
+  "formulas": 34
+ },
+ {
+  "report": "WhSalesSumm",
+  "areas": 15,
+  "sections": 15,
+  "objects": 54,
+  "formulas": 34
+ },
+ {
+  "report": "ItemInOut",
+  "areas": 11,
+  "sections": 12,
+  "objects": 53,
+  "formulas": 8
+ },
+ {
+  "report": "AcSumm",
+  "areas": 11,
+  "sections": 13,
+  "objects": 52,
+  "formulas": 33
+ },
+ {
+  "report": "ItemInOutSumm",
+  "areas": 11,
+  "sections": 12,
+  "objects": 52,
+  "formulas": 8
+ },
+ {
+  "report": "SaleRtnReport",
+  "areas": 11,
+  "sections": 13,
+  "objects": 52,
+  "formulas": 12
+ },
+ {
+  "report": "TagStkSummRpt",
+  "areas": 13,
+  "sections": 14,
+  "objects": 50,
+  "formulas": 12
+ },
+ {
+  "report": "AprPartyWise",
+  "areas": 9,
+  "sections": 10,
+  "objects": 49,
+  "formulas": 8
+ },
+ {
+  "report": "BulCustBooking",
+  "areas": 11,
+  "sections": 12,
+  "objects": 49,
+  "formulas": 5
+ },
+ {
+  "report": "CntrTagStkRpt",
+  "areas": 13,
+  "sections": 14,
+  "objects": 48,
+  "formulas": 11
+ },
+ {
+  "report": "CustRepIsu",
+  "areas": 7,
+  "sections": 8,
+  "objects": 48,
+  "formulas": 8
+ },
+ {
+  "report": "GoldInterest",
+  "areas": 7,
+  "sections": 9,
+  "objects": 48,
+  "formulas": 60
+ },
+ {
+  "report": "KrRepRec",
+  "areas": 7,
+  "sections": 8,
+  "objects": 48,
+  "formulas": 9
+ },
+ {
+  "report": "PartyInterest",
+  "areas": 7,
+  "sections": 9,
+  "objects": 48,
+  "formulas": 60
+ },
+ {
+  "report": "PurcItem",
+  "areas": 11,
+  "sections": 12,
+  "objects": 48,
+  "formulas": 6
+ },
+ {
+  "report": "AcLedgerSelected",
+  "areas": 11,
+  "sections": 16,
+  "objects": 47,
+  "formulas": 32
+ },
+ {
+  "report": "DhrnIssue",
+  "areas": 5,
+  "sections": 6,
+  "objects": 47,
+  "formulas": 15
+ },
+ {
+  "report": "JadtarIssue",
+  "areas": 9,
+  "sections": 10,
+  "objects": 47,
+  "formulas": 8
+ },
+ {
+  "report": "OrdDetlRpt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 47,
+  "formulas": 4
+ },
+ {
+  "report": "UserDtlRpt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 47,
+  "formulas": 47
+ },
+ {
+  "report": "AcOsArea",
+  "areas": 11,
+  "sections": 14,
+  "objects": 46,
+  "formulas": 19
+ },
+ {
+  "report": "CntrTagSumRpt",
+  "areas": 13,
+  "sections": 14,
+  "objects": 46,
+  "formulas": 11
+ },
+ {
+  "report": "WhSalesEmp",
+  "areas": 11,
+  "sections": 11,
+  "objects": 46,
+  "formulas": 35
+ },
+ {
+  "report": "Form8",
+  "areas": 7,
+  "sections": 10,
+  "objects": 45,
+  "formulas": 19
+ },
+ {
+  "report": "ItmStkBalance",
+  "areas": 5,
+  "sections": 6,
+  "objects": 45,
+  "formulas": 48
+ },
+ {
+  "report": "ItmStkWithGrid",
+  "areas": 5,
+  "sections": 6,
+  "objects": 45,
+  "formulas": 48
+ },
+ {
+  "report": "LedrAdjVch",
+  "areas": 7,
+  "sections": 9,
+  "objects": 45,
+  "formulas": 23
+ },
+ {
+  "report": "PartyIntSumm",
+  "areas": 7,
+  "sections": 8,
+  "objects": 45,
+  "formulas": 62
+ },
+ {
+  "report": "AcGroupRpt",
+  "areas": 11,
+  "sections": 12,
+  "objects": 44,
+  "formulas": 20
+ },
+ {
+  "report": "AcWithWt",
+  "areas": 9,
+  "sections": 10,
+  "objects": 44,
+  "formulas": 33
+ },
+ {
+  "report": "EmpSaleReport",
+  "areas": 13,
+  "sections": 15,
+  "objects": 44,
+  "formulas": 10
+ },
+ {
+  "report": "TagStkItemSumRpt",
+  "areas": 11,
+  "sections": 12,
+  "objects": 44,
+  "formulas": 13
+ },
+ {
+  "report": "AcOsWithAdd",
+  "areas": 13,
+  "sections": 14,
+  "objects": 43,
+  "formulas": 19
+ },
+ {
+  "report": "DhiranitemRpt",
+  "areas": 11,
+  "sections": 13,
+  "objects": 43,
+  "formulas": 20
+ },
+ {
+  "report": "ItemLedger",
+  "areas": 7,
+  "sections": 9,
+  "objects": 43,
+  "formulas": 40
+ },
+ {
+  "report": "KrDmWtInOut",
+  "areas": 9,
+  "sections": 10,
+  "objects": 43,
+  "formulas": 14
+ },
+ {
+  "report": "SalarySlip",
+  "areas": 7,
+  "sections": 10,
+  "objects": 43,
+  "formulas": 21
+ },
+ {
+  "report": "SalesRtnSumm",
+  "areas": 7,
+  "sections": 8,
+  "objects": 43,
+  "formulas": 8
+ },
+ {
+  "report": "TagStkRpt",
+  "areas": 13,
+  "sections": 14,
+  "objects": 42,
+  "formulas": 11
+ },
+ {
+  "report": "AcLedger",
+  "areas": 7,
+  "sections": 11,
+  "objects": 41,
+  "formulas": 30
+ },
+ {
+  "report": "BulCustAdjust",
+  "areas": 7,
+  "sections": 8,
+  "objects": 41,
+  "formulas": 7
+ },
+ {
+  "report": "MembGoldRpt",
+  "areas": 11,
+  "sections": 12,
+  "objects": 41,
+  "formulas": 6
+ },
+ {
+  "report": "MembRptAdd",
+  "areas": 11,
+  "sections": 13,
+  "objects": 41,
+  "formulas": 9
+ },
+ {
+  "report": "AcSummLdr",
+  "areas": 9,
+  "sections": 10,
+  "objects": 40,
+  "formulas": 17
+ },
+ {
+  "report": "CashBankBill",
+  "areas": 7,
+  "sections": 9,
+  "objects": 40,
+  "formulas": 20
+ },
+ {
+  "report": "CashBankBillAc",
+  "areas": 7,
+  "sections": 9,
+  "objects": 40,
+  "formulas": 20
+ },
+ {
+  "report": "OthItmLoose",
+  "areas": 11,
+  "sections": 12,
+  "objects": 40,
+  "formulas": 10
+ },
+ {
+  "report": "OthItmStud",
+  "areas": 11,
+  "sections": 12,
+  "objects": 40,
+  "formulas": 10
+ },
+ {
+  "report": "VpAdjustBill",
+  "areas": 7,
+  "sections": 9,
+  "objects": 40,
+  "formulas": 20
+ },
+ {
+  "report": "MembBonus",
+  "areas": 9,
+  "sections": 10,
+  "objects": 39,
+  "formulas": 9
+ },
+ {
+  "report": "MembSumm",
+  "areas": 9,
+  "sections": 10,
+  "objects": 39,
+  "formulas": 9
+ },
+ {
+  "report": "OrderCancelVch",
+  "areas": 7,
+  "sections": 9,
+  "objects": 39,
+  "formulas": 20
+ },
+ {
+  "report": "PurcSumm",
+  "areas": 7,
+  "sections": 8,
+  "objects": 39,
+  "formulas": 8
+ },
+ {
+  "report": "SalesWithOrder",
+  "areas": 7,
+  "sections": 8,
+  "objects": 39,
+  "formulas": 10
+ },
+ {
+  "report": "BullBookBill",
+  "areas": 7,
+  "sections": 9,
+  "objects": 38,
+  "formulas": 20
+ },
+ {
+  "report": "MembRpt",
+  "areas": 11,
+  "sections": 12,
+  "objects": 38,
+  "formulas": 6
+ },
+ {
+  "report": "SchmAdj",
+  "areas": 7,
+  "sections": 9,
+  "objects": 38,
+  "formulas": 18
+ },
+ {
+  "report": "SchmRecVch",
+  "areas": 7,
+  "sections": 7,
+  "objects": 38,
+  "formulas": 17
+ },
+ {
+  "report": "CustRepRec",
+  "areas": 7,
+  "sections": 8,
+  "objects": 36,
+  "formulas": 9
+ },
+ {
+  "report": "DharnDue",
+  "areas": 5,
+  "sections": 6,
+  "objects": 36,
+  "formulas": 48
+ },
+ {
+  "report": "TagReNumberVch",
+  "areas": 7,
+  "sections": 8,
+  "objects": 36,
+  "formulas": 8
+ },
+ {
+  "report": "DhrnReceivedSumm",
+  "areas": 9,
+  "sections": 10,
+  "objects": 34,
+  "formulas": 11
+ },
+ {
+  "report": "MembCommRpt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 33,
+  "formulas": 8
+ },
+ {
+  "report": "TagItmSumm",
+  "areas": 7,
+  "sections": 8,
+  "objects": 33,
+  "formulas": 13
+ },
+ {
+  "report": "ContraBill",
+  "areas": 7,
+  "sections": 9,
+  "objects": 32,
+  "formulas": 16
+ },
+ {
+  "report": "CounterTrfr",
+  "areas": 9,
+  "sections": 10,
+  "objects": 32,
+  "formulas": 8
+ },
+ {
+  "report": "FineJvBill",
+  "areas": 7,
+  "sections": 9,
+  "objects": 32,
+  "formulas": 16
+ },
+ {
+  "report": "OrdDesignSumm",
+  "areas": 7,
+  "sections": 8,
+  "objects": 32,
+  "formulas": 7
+ },
+ {
+  "report": "OrdDetlPanding",
+  "areas": 7,
+  "sections": 8,
+  "objects": 32,
+  "formulas": 6
+ },
+ {
+  "report": "AcFineGold",
+  "areas": 11,
+  "sections": 13,
+  "objects": 31,
+  "formulas": 34
+ },
+ {
+  "report": "AcFineSilver",
+  "areas": 11,
+  "sections": 13,
+  "objects": 31,
+  "formulas": 34
+ },
+ {
+  "report": "KrDmIsuRec",
+  "areas": 9,
+  "sections": 10,
+  "objects": 31,
+  "formulas": 8
+ },
+ {
+  "report": "MembDailyRecRpt",
+  "areas": 9,
+  "sections": 10,
+  "objects": 31,
+  "formulas": 6
+ },
+ {
+  "report": "DhiranIssuRec",
+  "areas": 7,
+  "sections": 8,
+  "objects": 30,
+  "formulas": 15
+ },
+ {
+  "report": "DhrnOsLetter",
+  "areas": 5,
+  "sections": 10,
+  "objects": 30,
+  "formulas": 20
+ },
+ {
+  "report": "JmUdFineHz",
+  "areas": 11,
+  "sections": 12,
+  "objects": 30,
+  "formulas": 86
+ },
+ {
+  "report": "JmUdFineHzSumm",
+  "areas": 11,
+  "sections": 12,
+  "objects": 30,
+  "formulas": 86
+ },
+ {
+  "report": "LedrInOut",
+  "areas": 11,
+  "sections": 11,
+  "objects": 30,
+  "formulas": 90
+ },
+ {
+  "report": "LedrInOutWh",
+  "areas": 11,
+  "sections": 11,
+  "objects": 30,
+  "formulas": 90
+ },
+ {
+  "report": "ReminderAll",
+  "areas": 5,
+  "sections": 6,
+  "objects": 30,
+  "formulas": 30
+ },
+ {
+  "report": "AngdiyaIsuRpt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 29,
+  "formulas": 3
+ },
+ {
+  "report": "JmUdFineSlHz",
+  "areas": 11,
+  "sections": 12,
+  "objects": 29,
+  "formulas": 86
+ },
+ {
+  "report": "DhiranReg",
+  "areas": 5,
+  "sections": 7,
+  "objects": 28,
+  "formulas": 19
+ },
+ {
+  "report": "LoanStock",
+  "areas": 5,
+  "sections": 7,
+  "objects": 28,
+  "formulas": 19
+ },
+ {
+  "report": "VpIsuRpt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 28,
+  "formulas": 3
+ },
+ {
+  "report": "AcDrList",
+  "areas": 11,
+  "sections": 14,
+  "objects": 27,
+  "formulas": 9
+ },
+ {
+  "report": "JmUdFineHzSummVch",
+  "areas": 9,
+  "sections": 10,
+  "objects": 27,
+  "formulas": 86
+ },
+ {
+  "report": "DhiranStock",
+  "areas": 5,
+  "sections": 7,
+  "objects": 26,
+  "formulas": 19
+ },
+ {
+  "report": "OrdAdjBillWise",
+  "areas": 9,
+  "sections": 10,
+  "objects": 26,
+  "formulas": 6
+ },
+ {
+  "report": "OrdAdvAdj",
+  "areas": 7,
+  "sections": 8,
+  "objects": 26,
+  "formulas": 8
+ },
+ {
+  "report": "OrdAdvRpt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 26,
+  "formulas": 3
+ },
+ {
+  "report": "BillWiseOrderAdjust",
+  "areas": 9,
+  "sections": 10,
+  "objects": 25,
+  "formulas": 7
+ },
+ {
+  "report": "AcCrList",
+  "areas": 11,
+  "sections": 12,
+  "objects": 24,
+  "formulas": 9
+ },
+ {
+  "report": "MembOpenNew",
+  "areas": 9,
+  "sections": 10,
+  "objects": 24,
+  "formulas": 4
+ },
+ {
+  "report": "RojMelItem",
+  "areas": 5,
+  "sections": 7,
+  "objects": 23,
+  "formulas": 39
+ },
+ {
+  "report": "MembVch",
+  "areas": 7,
+  "sections": 8,
+  "objects": 21,
+  "formulas": 17
+ },
+ {
+  "report": "RojMelCrDr",
+  "areas": 5,
+  "sections": 7,
+  "objects": 21,
+  "formulas": 22
+ },
+ {
+  "report": "OrderVch",
+  "areas": 3,
+  "sections": 3,
+  "objects": 18,
+  "formulas": 22
+ },
+ {
+  "report": "B2BPurcImgVch",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 24
+ },
+ {
+  "report": "B2BSaleImgVch",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 24
+ },
+ {
+  "report": "BillRecVch",
+  "areas": 3,
+  "sections": 5,
+  "objects": 17,
+  "formulas": 21
+ },
+ {
+  "report": "GhatDesignIsu",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 24
+ },
+ {
+  "report": "KrDesignIsuImg",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 24
+ },
+ {
+  "report": "OrdVchImg",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 22
+ },
+ {
+  "report": "OrderBill",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 22
+ },
+ {
+  "report": "TempPhone",
+  "areas": 11,
+  "sections": 11,
+  "objects": 17,
+  "formulas": 6
+ },
+ {
+  "report": "TourOrdImg",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 22
+ },
+ {
+  "report": "TourOrdVch",
+  "areas": 3,
+  "sections": 3,
+  "objects": 17,
+  "formulas": 22
+ },
+ {
+  "report": "RojMel",
+  "areas": 11,
+  "sections": 14,
+  "objects": 16,
+  "formulas": 37
+ },
+ {
+  "report": "AcLastVisit",
+  "areas": 7,
+  "sections": 7,
+  "objects": 15,
+  "formulas": 7
+ },
+ {
+  "report": "RojMelEstmat",
+  "areas": 9,
+  "sections": 12,
+  "objects": 15,
+  "formulas": 38
+ },
+ {
+  "report": "RojMelGr",
+  "areas": 11,
+  "sections": 14,
+  "objects": 15,
+  "formulas": 37
+ },
+ {
+  "report": "Company",
+  "areas": 5,
+  "sections": 5,
+  "objects": 14,
+  "formulas": 0
+ },
+ {
+  "report": "BalanceHz",
+  "areas": 7,
+  "sections": 9,
+  "objects": 12,
+  "formulas": 32
+ },
+ {
+  "report": "RateRpt",
+  "areas": 7,
+  "sections": 8,
+  "objects": 12,
+  "formulas": 3
+ },
+ {
+  "report": "BarPrint13",
+  "areas": 5,
+  "sections": 5,
+  "objects": 11,
+  "formulas": 9
+ },
+ {
+  "report": "EInvOthIncom",
+  "areas": 5,
+  "sections": 7,
+  "objects": 11,
+  "formulas": 35
+ },
+ {
+  "report": "EInvoice",
+  "areas": 5,
+  "sections": 7,
+  "objects": 11,
+  "formulas": 35
+ },
+ {
+  "report": "ItemPurcVch",
+  "areas": 5,
+  "sections": 7,
+  "objects": 11,
+  "formulas": 35
+ },
+ {
+  "report": "ItemSalesVch",
+  "areas": 5,
+  "sections": 7,
+  "objects": 11,
+  "formulas": 35
+ },
+ {
+  "report": "ItemSalesVchWithQr",
+  "areas": 5,
+  "sections": 7,
+  "objects": 11,
+  "formulas": 35
+ },
+ {
+  "report": "JmUdAmt",
+  "areas": 3,
+  "sections": 5,
+  "objects": 11,
+  "formulas": 23
+ },
+ {
+  "report": "ProfitLossHz",
+  "areas": 7,
+  "sections": 10,
+  "objects": 11,
+  "formulas": 81
+ },
+ {
+  "report": "SchmPassBook",
+  "areas": 5,
+  "sections": 5,
+  "objects": 11,
+  "formulas": 20
+ },
+ {
+  "report": "ItmLotPrint",
+  "areas": 5,
+  "sections": 5,
+  "objects": 10,
+  "formulas": 8
+ },
+ {
+  "report": "RojMelCash",
+  "areas": 5,
+  "sections": 6,
+  "objects": 10,
+  "formulas": 49
+ },
+ {
+  "report": "SalesBillVr",
+  "areas": 3,
+  "sections": 5,
+  "objects": 10,
+  "formulas": 25
+ },
+ {
+  "report": "TRialBalHz",
+  "areas": 9,
+  "sections": 11,
+  "objects": 10,
+  "formulas": 64
+ },
+ {
+  "report": "DiamondSf",
+  "areas": 5,
+  "sections": 5,
+  "objects": 9,
+  "formulas": 11
+ },
+ {
+  "report": "TempAdd2",
+  "areas": 5,
+  "sections": 12,
+  "objects": 8,
+  "formulas": 9
+ },
+ {
+  "report": "TempAdd3",
+  "areas": 5,
+  "sections": 12,
+  "objects": 8,
+  "formulas": 9
+ },
+ {
+  "report": "MembQr",
+  "areas": 7,
+  "sections": 8,
+  "objects": 7,
+  "formulas": 17
+ },
+ {
+  "report": "ChqPrint010",
+  "areas": 7,
+  "sections": 9,
+  "objects": 6,
+  "formulas": 10
+ },
+ {
+  "report": "ChqPrint011",
+  "areas": 7,
+  "sections": 9,
+  "objects": 6,
+  "formulas": 10
+ },
+ {
+  "report": "ChqPrint012",
+  "areas": 7,
+  "sections": 9,
+  "objects": 6,
+  "formulas": 10
+ },
+ {
+  "report": "ChqPrint013",
+  "areas": 7,
+  "sections": 9,
+  "objects": 6,
+  "formulas": 10
+ },
+ {
+  "report": "ChqPrint014",
+  "areas": 7,
+  "sections": 9,
+  "objects": 6,
+  "formulas": 10
+ },
+ {
+  "report": "ChqPrint135",
+  "areas": 7,
+  "sections": 9,
+  "objects": 6,
+  "formulas": 10
+ },
+ {
+  "report": "SaleOrnaIsu",
+  "areas": 3,
+  "sections": 5,
+  "objects": 6,
+  "formulas": 15
+ },
+ {
+  "report": "LoanWisePacket",
+  "areas": 3,
+  "sections": 5,
+  "objects": 5,
+  "formulas": 18
+ },
+ {
+  "report": "SchmMonthRpt",
+  "areas": 5,
+  "sections": 5,
+  "objects": 5,
+  "formulas": 2
+ },
+ {
+  "report": "SalesBillOs",
+  "areas": 3,
+  "sections": 3,
+  "objects": 3,
+  "formulas": 32
+ },
+ {
+  "report": "BarPrint10",
+  "areas": 3,
+  "sections": 5,
+  "objects": 1,
+  "formulas": 10
+ },
+ {
+  "report": "GhatTagPrnt",
+  "areas": 3,
+  "sections": 5,
+  "objects": 1,
+  "formulas": 10
+ },
+ {
+  "report": "QrPrint10",
+  "areas": 3,
+  "sections": 5,
+  "objects": 1,
+  "formulas": 10
+ },
+ {
+  "report": "WhSalesImage",
+  "areas": 3,
+  "sections": 3,
+  "objects": 1,
+  "formulas": 41
+ }
+]

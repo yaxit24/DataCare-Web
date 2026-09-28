@@ -1,0 +1,24 @@
+{
+ "form": "UT_USER_REQUEST",
+ "loc": 460,
+ "gridColumns": {},
+ "inlineSql": [
+  "DELETE FROM USER_REQUEST WHERE CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT A.CO_BOOK,A.VCH_NO,A.VCH_DATE,B.AC_CODE,B.AC_NAME,A.MAIN_USER FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' AND A.AC_CODE = ' ? ' GROUP BY A.CO_BOOK,A.VCH_NO,A.VCH_DATE,B.AC_CODE,B.AC_NAME,A.MAIN_USER UNION ALL SELECT C.CO_BOOK,C.VCH_NO,C.VCH_DATE,D.AC_CODE,D.AC_NAME,C.MAIN_USER FROM MAIN_STOCK AS C LEFT JOIN AC_MAST AS D ON C.CO_CODE = D.CO_CODE AND C.AC_CODE = D.AC_CODE WHERE C.CO_CODE = ' ? ' AND C.LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND C.CO_BOOK = ' ? ' AND C.VCH_NO = ' ? ' AND C.AC_CODE = ' ? ' GROUP BY C.CO_BOOK,C.VCH_NO,C.VCH_DATE,D.AC_CODE,D.AC_NAME,C.MAIN_USER",
+  "INSERT INTO USER_REQUEST(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,VCH_DATE,AC_CODE,AC_NAME,TOT_AMT,TOT_FINE,ITM_TYPE,EMP_CODE,USER_NAME,EDIT_USER,EDIT_RMARK,REQ_TIME,REQ_TYPE,PARMATION_TYPE) VALUES(' ? ',' ? ',' ? ',' ? CO_BOOK ? ',' ? VCH_NO ? ',' ? VCH_DATE ? MM/dd/yyyy ? ', ? ' ? ',' ? AC_NAME ? ',0,0,'','',' ? MAIN_USER ? ',' ? ', ' ? ',' ? MM/dd/yyyy HH:MM ? ',' ? E ? D ? ','P')"
+ ],
+ "keyboard": {
+  "Esc": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Please Insert Reseon For Edit Or Delete in Remarks...",
+   "when": "Operators.CompareString(tItDesc.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Request Sent Successfully...",
+   "when": ""
+  }
+ ]
+}

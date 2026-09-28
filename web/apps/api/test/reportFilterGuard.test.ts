@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
+import { issueAccess } from '../src/modules/auth/jwt.js';
 import {
   REPORT_FILTER_BINDINGS,
   REPORT_FILTER_KEYS,
   supportedFilters,
 } from '../src/modules/reports/reportFilters.js';
+
+const SECRET = 'test-random-signing-key-with-more-than-thirty-two-characters';
+const SESSION_ID = 'report-filter-session';
 
 /**
  * The global report-filter guard.
@@ -14,24 +18,79 @@ import {
  * operator would have read a whole-year day book as though it were narrowed to one city — the precise failure
  * the "refuse, never drop" design is meant to prevent.
  *
- * The guard is a `preHandler` on every `/reports/*` route, so coverage does not depend on a builder
- * remembering to opt in. These tests run before authentication succeeds, which is fine: the assertion is that
- * the request is rejected with a FILTER error rather than reaching a builder that would ignore the filter.
+ * The guard runs after central authentication and per-form authorization but before route handlers, so
+ * coverage does not depend on a builder remembering to opt in and invalid filters cannot preempt 401/403.
  */
 describe('global report filter guard', () => {
   const app = async () =>
     buildApp({
-      // No query ever runs: the guard rejects first, or auth does. Neither path touches the database.
-      prisma: { $transaction: (fn: (t: unknown) => unknown) => fn({}) },
-      secret: 'test-random-signing-key-with-more-than-thirty-two-characters',
+      prisma: {
+        $transaction: (fn: (tx: unknown) => unknown) =>
+          fn({
+            $executeRawUnsafe: async () => 1,
+            $queryRawUnsafe: async (sqlValue: unknown) => {
+              const sql = String(sqlValue);
+              if (sql.includes('FROM "auth_session"')) {
+                return [
+                  {
+                    tenantId: 'tenant-a',
+                    sessionId: SESSION_ID,
+                    loginName: 'ADMIN',
+                    loginCoCode: '01',
+                    coCode: '01',
+                    lcCode: '01',
+                    coYear: '2024-2025',
+                    contextEpoch: '1', revoked: false, unexpired: true,
+            ledgerContext: { version: 'server-session-ledger-context-v1', status: 'unknown', mode: null, reason: 'vendor-authority-unresolved' },
+            refreshJtiHash: '0'.repeat(64),
+                    expiresAt: new Date(Date.now() + 60_000),
+                    revokedAt: null,
+                    revokeReason: null,
+                  },
+                ];
+              }
+              if (sql.includes('FROM "LOGIN_MAST"')) {
+                return [
+                  {
+                    CO_CODE: '01',
+                    LOGIN_NAME: 'ADMIN',
+                    LOGIN_PWD: 'unused',
+                    LOGIN_CATG: 'ADMIN',
+                    USER_UPDATE: 'Y',
+                    USER_DELETE: 'Y',
+                    USER_PRINT: 'Y',
+                    PASSWORD_RESET_REQUIRED: 'N',
+                  },
+                ];
+              }
+              // Authorized report builders reached by supported/blank/no-filter cases see an empty fixture.
+              return [];
+            },
+          }),
+      },
+      secret: SECRET,
       secureCookies: true,
       defaultTenantId: 'tenant-a',
       allowTenantHeader: false,
     });
 
   const ask = async (url: string) => {
+    const access = await issueAccess(
+      {
+        sub: 'ADMIN',
+        tenantId: 'tenant-a',
+        loginCoCode: '01',
+        coCode: '01',
+        lcCode: '01',
+        coYear: '2024-2025',
+        sid: SESSION_ID,
+        contextEpoch: '1',
+        rights: { userUpdate: true, userDelete: true, userPrint: true },
+      },
+      SECRET,
+    );
     const a = await app();
-    const r = await a.inject({ method: 'GET', url });
+    const r = await a.inject({ method: 'GET', url, headers: { cookie: `access=${access}` } });
     await a.close();
     return r;
   };
@@ -72,8 +131,8 @@ describe('global report filter guard', () => {
   });
 
   it('does not interfere when no shared filter is supplied', async () => {
-    // Without a filter the guard must be transparent, so an unauthenticated request fails on AUTH (401/403)
-    // rather than being rejected as a filter error.
+    // Without a filter the guard must be transparent, so the authorized report proceeds rather than being
+    // rejected as a filter error.
     const r = await ask('/reports/day-book');
     expect(r.statusCode).not.toBe(400);
     if (r.statusCode >= 400) {
@@ -82,8 +141,8 @@ describe('global report filter guard', () => {
   });
 
   it('lets a supported dimension through the guard', async () => {
-    // grCode is honoured by stock-valuation, so the guard must not reject it; the request then proceeds to
-    // authentication.
+    // grCode is honoured by stock-valuation, so the guard must not reject it and the authorized request
+    // proceeds to its report builder.
     const r = await ask('/reports/stock-valuation?grCode=GO');
     expect(r.statusCode).not.toBe(400);
   });

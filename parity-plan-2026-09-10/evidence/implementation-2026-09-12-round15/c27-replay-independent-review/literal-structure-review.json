@@ -1,0 +1,156 @@
+{
+  "kind": "read-only-data-structure-and-hash-comparison-no-kernel-execution",
+  "cases": [
+    {
+      "case": "C01",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 3,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C02",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C03",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C04",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 5,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C05",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 5,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C06",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C07",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C08",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C09",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C10",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C11",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C12",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C13",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C14",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C15",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    },
+    {
+      "case": "C16",
+      "rawHeaderKeys": 102,
+      "rawIncomingKeys": 79,
+      "phasesChecked": 4,
+      "expectedNonRawValuesUnchanged": true
+    }
+  ],
+  "phaseSnapshots": 65,
+  "importedKernelComparisons": [
+    {
+      "name": "saleReturnIncoming.ts",
+      "stagedSha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "activeSha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "byteIdentical": true
+    },
+    {
+      "name": "saleReturnIncomingProjection.ts",
+      "stagedSha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e",
+      "activeSha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e",
+      "byteIdentical": true
+    },
+    {
+      "name": "saleReturnIncomingAggregate.ts",
+      "stagedSha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "activeSha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "byteIdentical": true
+    },
+    {
+      "name": "saleReturnBillProjection.ts",
+      "stagedSha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9",
+      "activeSha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9",
+      "byteIdentical": true
+    },
+    {
+      "name": "saleReturnIncomingSaveProjection.ts",
+      "stagedSha256": "7278d4ef822b5cc6c0e48620a824ec890f69f948ee2023137a44fbd46f05d138",
+      "activeSha256": "7278d4ef822b5cc6c0e48620a824ec890f69f948ee2023137a44fbd46f05d138",
+      "byteIdentical": true
+    },
+    {
+      "name": "saleReturnHeaderFloat.ts",
+      "stagedSha256": "f7d0db544f76a165ed112bd9d87557db59a482f5e57b755b0c3d8d10c47c1327",
+      "activeSha256": "f7d0db544f76a165ed112bd9d87557db59a482f5e57b755b0c3d8d10c47c1327",
+      "byteIdentical": true
+    }
+  ]
+}

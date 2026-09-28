@@ -1,0 +1,106 @@
+{
+  "id": "X11-design-components-lifecycle-2026-09-11",
+  "parents": [
+    "P03-03",
+    "X11"
+  ],
+  "status": "partial-engineering-verified",
+  "capturedAtUtc": "2026-09-10T21:25:53.381155+00:00",
+  "gitHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "workingTree": "dirty development tree; scoped hashes only, not a release certificate",
+  "scopedFilesSha256": {
+    "apps/api/src/modules/masters/designBook.ts": "a8e6c67759b16dd3e2240de7c19a83eab8d01fe29f30b6044b0c5cf47dc17396",
+    "apps/api/test/designComponents.db.test.ts": "67d9549045e647d1131a74c4228872f7799b5ae3fd8c30fbac1d9f3e778521d3",
+    "apps/api/test/designBook.routes.db.test.ts": "12e4607b93ad582ea9f306b3673a8aca7715333479bf3add2a26456a97608967",
+    "apps/api/test/designBook.db.test.ts": "6d5888f78a34aed17947761b032cea18492051ca6af883afbf105369a515881a",
+    "apps/web/app/(app)/masters/design-book/page.tsx": "37e909383d8315b653bd58a45f078f044ff3434c3f617391e5096bc056b89e19",
+    "apps/web/lib/designBookDraft.ts": "5434cca88bdb798baf63eb84572c665899bcb7e022858e7ec2a5b7f2376a5c5c",
+    "apps/web/test/designBookPage.test.ts": "cfa602cff9e4da9bb8226547ff91626f650578dcffe84998d96d466df558e1e8",
+    "docs/parity-evidence/X11-design-components-2026-09-11.md": "eb16f39af2eadf3be61d65f76ac4cb81b9485163989cf7a7d5e6532bc4645ce1",
+    "apps/api/test/dataExport.db.test.ts": "427083f6b848c05d794ca39a1718454088e6fa71b53b60d96f8b01b8ec100fbb",
+    "apps/api/test/tourOrderPrint.routes.db.test.ts": "e6b6409ffc897c372206cd4812938a25ffda34d2531b36bc8526514f6d426593",
+    "docs/parity-evidence/X11-design-browser-run-2026-09-11.json": "19acadc8ba2d41db25feee9c748a46baf23a16a54b1eb4e5ea54f9b2e8acdb93"
+  },
+  "scopedDigest": "7b72a771aed233e2511012704d9be7a8365150bf8fd3177170cc95289b8fa513",
+  "sourceSha256": {
+    "MS_DESIGN_BOOK.cs": "abde981d2825b4fc621a21c92305d36aea99aa3248d8f02f6d5e8644486cf9e3",
+    "MS_UPDATE.cs": "943525d918df85170ee3a4733bdf81cdc1d5b7e61b5efed27add7bc2883d8cb7"
+  },
+  "fixtureType": "synthetic, deterministic isolated test tenants",
+  "database": "disposable localhost:55433; migrations applied; forced RLS nonowner app role",
+  "engineeringEvidence": [
+    {
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- designBook.db.test.ts designComponents.db.test.ts designBook.routes.db.test.ts",
+      "passed": true,
+      "files": 3,
+      "tests": 18
+    },
+    {
+      "command": "pnpm --filter @datacare/api typecheck",
+      "passed": true
+    },
+    {
+      "command": "pnpm --filter @datacare/web typecheck",
+      "passed": true
+    },
+    {
+      "command": "pnpm --filter @datacare/web test -- designBookPage.test.ts",
+      "passed": true,
+      "files": 1,
+      "tests": 5
+    },
+    {
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test",
+      "passed": true,
+      "files": 204,
+      "tests": 1576,
+      "log": "/tmp/datacare-parity-api-full.log",
+      "scopedResults": {
+        "designBook.db.test.ts": 5,
+        "designComponents.db.test.ts": 9,
+        "designBook.routes.db.test.ts": 5,
+        "tourOrderPrint.routes.db.test.ts": 3
+      },
+      "appliesBefore": "subsequent test-only required-row/type-narrowing changes"
+    },
+    {
+      "command": "pnpm typecheck:tests",
+      "passed": true,
+      "exitCode": 0,
+      "appliesAfter": "test-only required-row/type-narrowing changes"
+    },
+    {
+      "command": "pnpm test:parity:api",
+      "passed": true,
+      "files": 204,
+      "tests": 1577,
+      "log": "../../../parity-plan-2026-09-10/evidence/implementation-2026-09-11/api-full-final.txt",
+      "appliesAfter": "all final test typing changes and Tour legacy-client loss guard"
+    }
+  ],
+  "desktopEvidence": [],
+  "realBrowserEvidence": [
+    {
+      "artifact": "X11-design-browser-run-2026-09-11.json",
+      "passed": true,
+      "mockedRequests": 0
+    }
+  ],
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "remaining": [
+    "source-triggered component and parent calculations",
+    "configured grids and item defaults",
+    "downstream order/manufacturing specification and photo adoption",
+    "legacy image migration and branch-index comparison",
+    "offline/retry/device/report/business acceptance",
+    "extend real browser evidence to complete multiparent/reorder/date/configuration matrix"
+  ],
+  "contract": "X11-design-components-2026-09-11.md",
+  "updatedAtUtc": "2026-09-10T21:50:36.039083+00:00",
+  "postSuiteTestOnlyChanges": [
+    "Checked required-row access and tuple fixture in designComponents tests.",
+    "Explicit required AC_MAST/AC_DATA export-table assertion in dataExport test.",
+    "Covered by the final full API suite: 204 files / 1577 tests passed."
+  ]
+}

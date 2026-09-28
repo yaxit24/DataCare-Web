@@ -1,0 +1,151 @@
+{
+ "form": "UT_EXPORT",
+ "controlCount": 13,
+ "byKind": {
+  "button": 10,
+  "panel": 1,
+  "label": 1,
+  "other": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "this": [
+   "btnBarData",
+   "btnOpbl",
+   "btnReSetData",
+   "btnTrfrUpdate",
+   "btnRtLImoirt",
+   "ProgressBar1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "btnRtLImoirt",
+   "type": "SimpleButton",
+   "location": "542,173",
+   "size": "106,32",
+   "tabIndex": "3",
+   "text": "&Data Trfr",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Data Transfer",
+   "kind": "label"
+  },
+  {
+   "name": "ProgressBar1",
+   "type": "ProgressBar",
+   "location": "0,323",
+   "size": "1309,23",
+   "tabIndex": "1152",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "btnTrfrUpdate",
+   "type": "SimpleButton",
+   "location": "495,394",
+   "size": "203,32",
+   "tabIndex": "1153",
+   "text": "&Update Trfr = N For This Pc",
+   "kind": "button"
+  },
+  {
+   "name": "btnReSetData",
+   "type": "SimpleButton",
+   "location": "542,218",
+   "size": "106,32",
+   "tabIndex": "1154",
+   "text": "Data &Reset",
+   "kind": "button"
+  },
+  {
+   "name": "btnOpbl",
+   "type": "SimpleButton",
+   "location": "542,263",
+   "size": "106,32",
+   "tabIndex": "1155",
+   "text": "Opbl Trfr (A)",
+   "kind": "button"
+  },
+  {
+   "name": "btnBarData",
+   "type": "SimpleButton",
+   "location": "495,447",
+   "size": "203,32",
+   "tabIndex": "1156",
+   "text": "&BarData ReTrfr",
+   "kind": "button"
+  }
+ ]
+}

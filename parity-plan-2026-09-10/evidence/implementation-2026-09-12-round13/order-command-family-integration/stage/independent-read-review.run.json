@@ -1,0 +1,83 @@
+{
+  "kind": "five-order-command-source-review",
+  "observedAtUtc": "2026-09-11T22:14:11.960050+00:00",
+  "executedTests": false,
+  "databaseAccess": false,
+  "sourceChanges": false,
+  "extractionComparison": {
+    "createPreparationAndCallbackByteIdentical": true,
+    "createCharacters": 24971,
+    "cancelCallbackIndentationOnly": true,
+    "cancelNormalizedCharacters": 2329
+  },
+  "references": [
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/implementation-contract.md",
+      "sha256": "e3dd7ad89afa3934337ce3652729a7fefc31e7224b186cd50ae318aaab55e502"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/contract-inputs.json",
+      "sha256": "551a4b0415fe62f2418710bdb0bfde4bcde4a14d05d235a30f176231411a77bc"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/order-command-independent.v1.json",
+      "sha256": "c6f86ef10f4f948c570e417f4f1a0336df196fb1085b2028c1f79a1e432c979e"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/source-inputs.json",
+      "sha256": "0a20f7956b5ee8b18100a9df4f83faf955ba6d83f9eb0c6dd3bbf31c4ea7a887"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/baseline/salesOrder.ts",
+      "sha256": "f309a2e2c5c58e080c91ba5b634dbc1c9d940b46361ea06a25d97497572ecd84"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/baseline/txn.ts",
+      "sha256": "a4169b9a5bfd4b8d86b7f2e70ba3a60e03a1292488d6752c88f3d312be54d91d"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/staged/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "a3c91053e27cbae2c1fbea06c93ad8cfba9846bcae5562b1a1e37323dc15ddd1"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/staged/order-routes.patch",
+      "sha256": "b9153c92b939fafbb48dde10dad7eb64f8c88a9fafafd4c9a051229d0f39c64c"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/staged/txn.ts.preview",
+      "sha256": "ee608103ab3933bb588d76d48c8166ba2401f67fa29bb8fbd7757ba770bf1149"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/staged/web/apps/api/test/orderSessionCommands.test.ts",
+      "sha256": "36884796c08a915ab3e3e31be7ba4fcb2864b47dcf6b2f8166f0cf4b7c123669"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/vouchers/numbering.ts",
+      "sha256": "ccf924ae90087c682e8ea915dcaa018cc59e250e9c1825b68600dc20fb2f09db"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/vouchers/lifecycle.ts",
+      "sha256": "346f7d64fb293666a6b430414844c5fba5ca635a71946244df46b383136a0c8b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "05ee74b06728d71e44d6dcbf7d6bd927a7024bae47557912e536b6f6a70baf1c"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/order-command-next/independent-read-review.md",
+      "sha256": "faf3855d2cee986463f7874e48aae9552c99b287c1dfdce84902d291d4b668f8"
+    }
+  ]
+}

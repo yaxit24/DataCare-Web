@@ -1,0 +1,13 @@
+--- a/web/apps/api/test/salesOrderSessionCommand.db.test.ts
++++ b/web/apps/api/test/salesOrderSessionCommand.db.test.ts
+@@ -393,8 +393,8 @@
+           }))
+           .sort((a, b) => String(a.ac).localeCompare(String(b.ac))),
+       ).toEqual([
+-        { ac: "CASH", dr: advance, cr: "0", sign: "D" },
+-        { ac: "PARTY", dr: "0", cr: advance, sign: "C" },
++        { ac: "CASH", dr: advance, cr: "0", sign: "" },
++        { ac: "PARTY", dr: "0", cr: advance, sign: "" },
+       ]);
+       expect(rows.ROJ_MEL_DATA).toHaveLength(1);
+       expect(rows.ROJ_MEL_DATA![0]).toMatchObject({

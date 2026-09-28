@@ -1,0 +1,3486 @@
+[
+  {
+    "key": "THEME",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsCoTheme"
+    ],
+    "desktopReaderForms": [
+      "BtmSchm",
+      "MS_ACCT",
+      "MS_AC_GROUP",
+      "MS_ADD_MAST",
+      "MS_AUTO_ITEM",
+      "MS_BOOK",
+      "MS_BOOKLIST",
+      "MS_COMPANY",
+      "MS_DESIGN_BOOK",
+      "MS_DM",
+      "MS_EMP",
+      "MS_GOLD_MAST",
+      "MS_GROUP",
+      "MS_HELP",
+      "MS_ITEM",
+      "MS_LBR_TYPE",
+      "MS_LOCT",
+      "MS_MEMB",
+      "MS_MFG_MAST",
+      "MS_POINT",
+      "MS_PRODUCT",
+      "MS_RATE",
+      "MS_STK_LIMIT",
+      "MS_STYLE",
+      "MS_TAX",
+      "MS_TRADE",
+      "MS_UPDATE",
+      "MS_USER",
+      "MS_WINDOW_SET",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BALANCE",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_CONSI_APR",
+      "RP_CUST",
+      "RP_CUST_CRM",
+      "RP_DAY_WORK",
+      "RP_DHRN_LOAN",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_GRAPH",
+      "RP_GST",
+      "RP_HUID",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MFG",
+      "RP_MFG_LEDR",
+      "RP_MFG_ZOOM",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_PHY_STOCK",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_LEVEL",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TAG_IMAGE",
+      "RP_TAX",
+      "RP_TOUR_ZOOM",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_CARD_REC",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_EMP_JV",
+      "TR_FINE_SL_PR",
+      "TR_FN_INOUT",
+      "TR_GOLD_BOOK",
+      "TR_INOUT",
+      "TR_ITM_LOT",
+      "TR_ITM_OPBL",
+      "TR_JDT_REC",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ADJ",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_MLT_PRO",
+      "TR_OTH_COMM",
+      "TR_OTH_PURC",
+      "TR_PHYSTK",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_UPI_REC",
+      "TR_VP",
+      "TR_VP_ADJ",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_AI_TRFR",
+      "UT_BANK",
+      "UT_BKP",
+      "UT_CUST_ENTRY",
+      "UT_EXPORT",
+      "UT_E_INVOICE",
+      "UT_IMPORT",
+      "UT_REMINDER",
+      "UT_SETTING",
+      "UT_SETTING_MAIN",
+      "UT_SET_ADMIN",
+      "UT_SMS",
+      "UT_TAG_PRINT",
+      "UT_USER_REQUEST",
+      "UT_VCH_RE_NUMBR",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 152,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TAG_RPT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTagRpt"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE_RTN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_WH_SALE_RTN"
+    ],
+    "desktopReaderCount": 7,
+    "typedAliases": [
+      "tagReport"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "FINE_STK_TYPE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsFineStkType"
+    ],
+    "desktopReaderForms": [
+      "RP_STOCK_FINE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "fineStockType"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/reports/reports.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "RATE_MAST_OPEN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsRateMastOpen"
+    ],
+    "desktopReaderForms": [
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LBR_RATE_GEN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsLbrGen"
+    ],
+    "desktopReaderForms": [
+      "TR_KR_ISU",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 10,
+    "typedAliases": [
+      "labourRateGeneration"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts",
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "VB_IMPORT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsVbImport"
+    ],
+    "desktopReaderForms": [
+      "Ac_Ledr",
+      "MS_ACCT",
+      "MS_ADD_MAST",
+      "MS_COMPANY",
+      "MS_UPDATE",
+      "Module_Schm",
+      "RP_ADDRESS",
+      "RP_OS",
+      "TR_APR_ISU",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_RTN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_WH_SALE_RTN",
+      "UT_IMPORT",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 22,
+    "typedAliases": [
+      "vbImport"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SL_ROW_CHANGE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsSlRowChange"
+    ],
+    "desktopReaderForms": [
+      "Mfg_Module",
+      "TR_KR_ISU",
+      "TR_PR_SL_UAE",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_TOUR_SALE",
+      "TR_VP",
+      "TR_WH_SALE",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 10,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DHRN_INT_TYPE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsDhrnIntType"
+    ],
+    "desktopReaderForms": [
+      "RP_DHRN_OS",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [
+      "dhrnIntType"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "INT_YEAR_DAYS",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsIntYearDays"
+    ],
+    "desktopReaderForms": [
+      "RP_DHRN_OS",
+      "RP_INOUT",
+      "RP_OS",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_WH_SALE"
+    ],
+    "desktopReaderCount": 7,
+    "typedAliases": [
+      "intYearDays"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OP_DHRN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOpDhiran"
+    ],
+    "desktopReaderForms": [
+      "Ac_Ledr",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "openingDhrn"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "INT_DAY",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsIntDayCalc"
+    ],
+    "desktopReaderForms": [
+      "TR_DHRN_INTREC",
+      "TR_DHRN_REC"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "intDay"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "HELP_SERCH",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsHelpSearch"
+    ],
+    "desktopReaderForms": [
+      "MS_HELP",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WEIGHT_PORT",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsWeightPort"
+    ],
+    "desktopReaderForms": [
+      "MS_DESIGN_BOOK",
+      "TR_TAG_OPBL"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "weightPort"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/integrations/readiness.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LDR_SUMM",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsLdrSumm"
+    ],
+    "desktopReaderForms": [
+      "RP_BAL_ZOOM",
+      "RP_LEDR",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "ledgerSummary"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/accounting/accounting.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SL_AMT_TYPE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsSlAmtType"
+    ],
+    "desktopReaderForms": [
+      "RP_TAG_ESTMATE",
+      "TR_PR_SL_UAE",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_PR_ITEM",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 9,
+    "typedAliases": [
+      "saleAmountType"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SMS_LINK",
+    "webStatus": "inert",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [
+      "smsGateway"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OP_LOAN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOpLoan"
+    ],
+    "desktopReaderForms": [
+      "Ac_Ledr",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "openingLoan"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LOAN_INT_TYPE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsLoanIntType"
+    ],
+    "desktopReaderForms": [
+      "RP_DHRN_OS",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_REC",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [
+      "loanIntType"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TRAD_FINE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsTradFine"
+    ],
+    "desktopReaderForms": [
+      "Ac_Ledr"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LBR_ROF",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsLbrRof"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "TR_JDT_REC",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_VP",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 26,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "REMINDER_OPEN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsReminderOpen"
+    ],
+    "desktopReaderForms": [
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ITM_RATE_ROF",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsItmRateRof"
+    ],
+    "desktopReaderForms": [
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_DHRN_ISU",
+      "TR_KR_ISU",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 11,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ADMIN_SMS",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsAdminSms"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [
+      "adminSms"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CUST_SMS",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsCustSms"
+    ],
+    "desktopReaderForms": [
+      "TR_BILL_TO",
+      "TR_CASH",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_PR_ITEM",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 10,
+    "typedAliases": [
+      "customerSms"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PURC_WITH_LBR",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsPurcWithLbr"
+    ],
+    "desktopReaderForms": [
+      "Ac_Ledr",
+      "Ac_Rojmel",
+      "Mfg_Module",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [
+      "purchaseWithLabour"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DHIRN_COMPOUND",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsDhrnCompound"
+    ],
+    "desktopReaderForms": [
+      "RP_DHRN_OS",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_REC"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "dhrnCompound"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "GRID_SCROLL",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsGridScroll"
+    ],
+    "desktopReaderForms": [
+      "MS_DESIGN_BOOK",
+      "TR_AC_OPBL",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_EMP_JV",
+      "TR_FINE_SL_PR",
+      "TR_FN_INOUT",
+      "TR_GOLD_BOOK",
+      "TR_INOUT",
+      "TR_ITM_LOT",
+      "TR_ITM_OPBL",
+      "TR_JDT_REC",
+      "TR_KR_ISU",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ADJ",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_MLT_PRO",
+      "TR_OTH_COMM",
+      "TR_OTH_PURC",
+      "TR_PHYSTK",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_VP",
+      "TR_VP_ADJ",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_CUST_ENTRY",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 60,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "STK_RPT_TYPE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsStkRptType"
+    ],
+    "desktopReaderForms": [
+      "RP_STOCK",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "stockReportGrossWeight"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/reports/reports.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TOUCH_AUTO_SAVE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTchAutoSave"
+    ],
+    "desktopReaderForms": [
+      "TR_BUL_SALE",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [
+      "touchAutoSave"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts",
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PAN_CARD_VAL",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsPanCardVal"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "TR_SALE_HM",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "panCardVal"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/finance/tender.ts",
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DHRN_PRC",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsDhrnPrc"
+    ],
+    "desktopReaderForms": [
+      "TR_DHRN_ISU",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "dhrnDefaultRate"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/dhrn/dhrn.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DUP_PRINT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsSlDupPrint"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "TR_BUL_SALE",
+      "TR_CASH",
+      "TR_FINE_SL_PR",
+      "TR_JDT_REC",
+      "TR_KR_ISU",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_PURC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 23,
+    "typedAliases": [
+      "duplicatePrint"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TAX_CODE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsTaxCode"
+    ],
+    "desktopReaderForms": [
+      "TR_BUL_SALE",
+      "TR_FINE_SL_PR",
+      "TR_PR_SL_UAE",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN_UAE",
+      "TR_TOUR_ORD"
+    ],
+    "desktopReaderCount": 9,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "IP_WITH_PC",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsIpWith"
+    ],
+    "desktopReaderForms": [
+      "UT_EXPORT"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [
+      "exportDatabaseTarget"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/ops/backup.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CO_STK_MERGE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsCoStockMerge"
+    ],
+    "desktopReaderForms": [
+      "BtmSchm",
+      "MS_DESIGN_BOOK",
+      "RP_HUID",
+      "RP_INOUT",
+      "RP_PHY_STOCK",
+      "RP_ROJMEL",
+      "RP_STOCK",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TOUR_ZOOM",
+      "TR_APR_ISU",
+      "TR_FN_INOUT",
+      "TR_PHYSTK",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_OPBL",
+      "TR_TOUR"
+    ],
+    "desktopReaderCount": 22,
+    "typedAliases": [
+      "companyStockMerge"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/stock/stock.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "STK_RPT_VIEW",
+    "webStatus": "inert",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PR_AMT_TYPE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsPrAmtType"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [
+      "purchaseAmountType"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CARD_COM_ADJ",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsCardComAdj"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SL_PR_ITEM",
+      "TR_TOUR_ORD"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [
+      "cardCommissionAdjustment"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/finance/finance.ts",
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CASH_PURC_AC",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsCashPurcAc"
+    ],
+    "desktopReaderForms": [
+      "TR_PURC",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "cashPurchaseAccount"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "EMP_CODE_MANDATORY",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsEmpCodeMendetry"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_FINE_SL_PR",
+      "TR_INOUT",
+      "TR_ITM_LOT",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ADJ",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MLT_PRO",
+      "TR_PHYSTK",
+      "TR_PR_SL_HEDG",
+      "TR_PURC",
+      "TR_SALE",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 33,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "STOCK_RPT_TYPE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsStockRptView"
+    ],
+    "desktopReaderForms": [
+      "Ac_Stock",
+      "MS_UPDATE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "stockWeightSource"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LAST_DAY_LOCK",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsLastDayLock"
+    ],
+    "desktopReaderForms": [
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [
+      "lastDayLock"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CASH_LIMIT",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsCashLimit"
+    ],
+    "desktopReaderForms": [
+      "TR_BILL_TO",
+      "TR_CASH",
+      "TR_SALE",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "TR_TOUR_ORD",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 10,
+    "typedAliases": [
+      "cashLimit"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/finance/finance.ts",
+      "web/apps/api/src/modules/finance/tender.ts",
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DHRN_WAPP",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsDhrnWapp"
+    ],
+    "desktopReaderForms": [
+      "TR_DHRN_ISU",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "dhrnWhatsapp"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SCHM_WAPP",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsSchmWapp"
+    ],
+    "desktopReaderForms": [
+      "TR_MEMB_ENT",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "schemeWhatsapp"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LEDR_BILL_COL",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsLedrBillColShow"
+    ],
+    "desktopReaderForms": [
+      "RP_LEDR",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ALL_ROF_REMOVE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsAllRofRemove"
+    ],
+    "desktopReaderForms": [
+      "TR_FINE_SL_PR",
+      "TR_OTH_PURC",
+      "TR_PR_SL_UAE",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 10,
+    "typedAliases": [
+      "allRoundingRemoved"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CO_CODE",
+    "webStatus": "honoured",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "BTN_NAME",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsMainBtn"
+    ],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "COUNTRY_CODE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsCountryCode"
+    ],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LBR_TYPE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsLbrType"
+    ],
+    "desktopReaderForms": [
+      "MS_DESIGN_BOOK",
+      "TR_APR_ISU",
+      "TR_BUL_SALE",
+      "TR_FN_INOUT",
+      "TR_INOUT",
+      "TR_JDT_REC",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_VP",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING",
+      "UT_TAG_PRINT"
+    ],
+    "desktopReaderCount": 34,
+    "typedAliases": [
+      "labourType"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/inout/fineInout.ts",
+      "web/apps/api/src/modules/masters/designBook.ts",
+      "web/apps/api/src/modules/purchase/purchase.ts",
+      "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+      "web/apps/api/src/modules/repair/repairCustomerIssue.ts",
+      "web/apps/api/src/modules/repair/repairKarigarReceipt.ts",
+      "web/apps/api/src/modules/repair/repairReceipt.ts",
+      "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "web/apps/api/src/modules/sales/sales.ts",
+      "web/apps/api/src/modules/sales/salesOrder.ts",
+      "web/apps/api/src/modules/sales/salesReturn.ts",
+      "web/apps/api/src/modules/sales/vpParcel.ts",
+      "web/apps/api/src/modules/sales/wholesaleSaleReturn.ts",
+      "web/apps/api/src/modules/stock/tagOps.ts",
+      "web/apps/api/src/modules/tour/tour.ts",
+      "web/apps/web/app/(app)/txn/labour-sale/page.tsx",
+      "web/apps/web/app/(app)/txn/purchase/page.tsx",
+      "web/apps/web/app/(app)/txn/repair-customer-issue/page.tsx",
+      "web/apps/web/app/(app)/txn/repair-karigar-receipt/page.tsx",
+      "web/apps/web/app/(app)/txn/repair-receipt/page.tsx",
+      "web/apps/web/app/(app)/txn/sales-order/page.tsx",
+      "web/apps/web/app/(app)/txn/sales/page.tsx",
+      "web/apps/web/app/(app)/txn/vp-parcel/page.tsx",
+      "web/apps/web/app/(app)/txn/wholesale-sale-return/page.tsx",
+      "web/apps/web/lib/lineRecalc.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "AC_LC_CODE_LEN",
+    "webStatus": "honoured",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [
+      "accountCodeLength"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/masters/master.service.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LOCK_DATE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsLockDt"
+    ],
+    "desktopReaderForms": [
+      "MS_COMPANY",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_CARD_REC",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_EMP_JV",
+      "TR_FINE_SL_PR",
+      "TR_FN_INOUT",
+      "TR_GOLD_BOOK",
+      "TR_INOUT",
+      "TR_ITM_LOT",
+      "TR_JDT_REC",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ADJ",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_MLT_PRO",
+      "TR_OTH_COMM",
+      "TR_OTH_PURC",
+      "TR_PHYSTK",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_VP",
+      "TR_VP_ADJ",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_BANK",
+      "UT_CUST_ENTRY",
+      "UT_REMINDER",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 63,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TAX_ROF",
+    "webStatus": "honoured",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "RATE_PAR",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsRatePar"
+    ],
+    "desktopReaderForms": [
+      "TR_BUL_SALE",
+      "TR_FINE_SL_PR",
+      "TR_PR_SL_HEDG",
+      "TR_SALE_LBR",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 9,
+    "typedAliases": [
+      "rateBasis"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/sales/rateCut.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OZ_CON_VAL",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsSlPrOzConv"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "ounceConversion"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/integrations/rates.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "FX_RATE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsFxRate"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "fxRate"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "FX_CODE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsFxCode"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "UT_SETTING"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "fxCode"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "COUNTRY_ID",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsCountryId"
+    ],
+    "desktopReaderForms": [
+      "Module_Save",
+      "RP_TAG_IMAGE",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_SALE",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_ISU",
+      "TR_FINE_SL_PR",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MLT_PRO",
+      "TR_OTH_PURC",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_PR_ITEM",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 35,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "MFG_ONE_FORM",
+    "webStatus": "honoured",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CO_CODE",
+    "webStatus": "honoured",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "COUNTER_STK",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsCntrStk"
+    ],
+    "desktopReaderForms": [
+      "TR_PURC",
+      "TR_SALE_RTN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "APR_IMG_PRINT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsAprImgPrint"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "BILL_PROFIT",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsBillProfit"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "TR_SALE_LBR",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "BRANCH_ALL_AC_SHOW",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsAllBranchAcShow"
+    ],
+    "desktopReaderForms": [
+      "MS_ACCT",
+      "MS_AUTO_ITEM",
+      "MS_LOCT",
+      "MS_PRODUCT",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BILL_PROFIT",
+      "RP_DAY_WORK",
+      "RP_DHRN_LOAN",
+      "RP_DHRN_OS",
+      "RP_GST",
+      "RP_INOUT",
+      "RP_LEDR",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_REMINDER",
+      "RP_SLPR_ZOOM",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_CARD_REC",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_EMP_JV",
+      "TR_FINE_SL_PR",
+      "TR_GOLD_BOOK",
+      "TR_ITM_LOT",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MLT_PRO",
+      "TR_OTH_COMM",
+      "TR_OTH_PURC",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_UPI_REC",
+      "TR_VP",
+      "TR_VP_ADJ",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 68,
+    "typedAliases": [
+      "branchAllAccountShow"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "COUNTRY_ID",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsCountryId"
+    ],
+    "desktopReaderForms": [
+      "Module_Save",
+      "RP_TAG_IMAGE",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_SALE",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_ISU",
+      "TR_FINE_SL_PR",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MLT_PRO",
+      "TR_OTH_PURC",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_PR_ITEM",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 35,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "CUR_DAY_POSTING",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsCurDayPosting"
+    ],
+    "desktopReaderForms": [
+      "Ac_Stock",
+      "MS_UPDATE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "stockRefreshFromDateOnly"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DEFAULT_REMINDER",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsDefaultReminder"
+    ],
+    "desktopReaderForms": [
+      "RP_REMINDER",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DESIGN_HELP",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsDesignHelp"
+    ],
+    "desktopReaderForms": [
+      "RP_TAG",
+      "RP_TAG_IMAGE",
+      "TR_APR_ISU",
+      "TR_PR_SL_UAE",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_RTN",
+      "TR_TAG_CAN",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN",
+      "UT_TAG_PRINT"
+    ],
+    "desktopReaderCount": 13,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "DHRN_IMG_PRINT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsDhrnImgPrint"
+    ],
+    "desktopReaderForms": [
+      "TR_DHRN_ISU",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "EMP_AS_USER",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsEmpAsUser"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_CARD_REC",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_EMP_JV",
+      "TR_FINE_SL_PR",
+      "TR_FN_INOUT",
+      "TR_GOLD_BOOK",
+      "TR_INOUT",
+      "TR_ITM_LOT",
+      "TR_JDT_REC",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ADJ",
+      "TR_MEMB_ENT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_MLT_PRO",
+      "TR_OTH_COMM",
+      "TR_OTH_PURC",
+      "TR_PHYSTK",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR_ORD",
+      "TR_VP",
+      "TR_VP_ADJ",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 57,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ESTMATE_BANK_LOCK",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsEstmateBankLock"
+    ],
+    "desktopReaderForms": [
+      "TR_FN_INOUT",
+      "TR_JDT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_SPLIT",
+      "TR_TOUR_ORD",
+      "TR_VP",
+      "TR_WH_SALE_RTN",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 23,
+    "typedAliases": [
+      "estimateBankLocked"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ESTMATE_TAX",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTaxWithEstmate"
+    ],
+    "desktopReaderForms": [
+      "TR_FINE_SL_PR",
+      "TR_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "estimateTax"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "FONT_CHANGE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsFontChange"
+    ],
+    "desktopReaderForms": [
+      "MS_ACCT",
+      "MS_AC_GROUP",
+      "MS_ADD_MAST",
+      "MS_BOOK",
+      "MS_BOOKLIST",
+      "MS_COMPANY",
+      "MS_DESIGN_BOOK",
+      "MS_DM",
+      "MS_EMP",
+      "MS_GROUP",
+      "MS_HELP",
+      "MS_ITEM",
+      "MS_LBR_TYPE",
+      "MS_LOCT",
+      "MS_MEMB",
+      "MS_POINT",
+      "MS_PRODUCT",
+      "MS_STK_LIMIT",
+      "MS_STYLE",
+      "MS_TAX",
+      "MS_USER",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BALANCE",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_CONSI_APR",
+      "RP_CUST",
+      "RP_CUST_CRM",
+      "RP_DAY_WORK",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_GST",
+      "RP_HUID",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MFG_LEDR",
+      "RP_MFG_ZOOM",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_PHY_STOCK",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_LEVEL",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TAG_IMAGE",
+      "RP_TOUR_ZOOM",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_MEMB_ENT",
+      "TR_MFG_ISU_REC",
+      "UT_AI_TRFR",
+      "UT_E_INVOICE",
+      "UT_SETTING_MAIN",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 71,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "FONT_NAME",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsFontName"
+    ],
+    "desktopReaderForms": [
+      "MS_ACCT",
+      "MS_AC_GROUP",
+      "MS_ADD_MAST",
+      "MS_BOOK",
+      "MS_BOOKLIST",
+      "MS_COMPANY",
+      "MS_DESIGN_BOOK",
+      "MS_DM",
+      "MS_EMP",
+      "MS_GROUP",
+      "MS_HELP",
+      "MS_ITEM",
+      "MS_LBR_TYPE",
+      "MS_LOCT",
+      "MS_MEMB",
+      "MS_POINT",
+      "MS_PRODUCT",
+      "MS_STK_LIMIT",
+      "MS_STYLE",
+      "MS_TAX",
+      "MS_USER",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BALANCE",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_CONSI_APR",
+      "RP_CUST",
+      "RP_CUST_CRM",
+      "RP_DAY_WORK",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MFG_LEDR",
+      "RP_MFG_ZOOM",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_PHY_STOCK",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_LEVEL",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TAG_IMAGE",
+      "RP_TOUR_ZOOM",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_MEMB_ENT",
+      "TR_MFG_ISU_REC",
+      "UT_AI_TRFR",
+      "UT_E_INVOICE",
+      "UT_SETTING_MAIN",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 69,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "FONT_SIZE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsFontSize"
+    ],
+    "desktopReaderForms": [
+      "MS_ACCT",
+      "MS_AC_GROUP",
+      "MS_ADD_MAST",
+      "MS_BOOK",
+      "MS_BOOKLIST",
+      "MS_COMPANY",
+      "MS_DESIGN_BOOK",
+      "MS_DM",
+      "MS_EMP",
+      "MS_GROUP",
+      "MS_HELP",
+      "MS_ITEM",
+      "MS_LBR_TYPE",
+      "MS_LOCT",
+      "MS_MEMB",
+      "MS_POINT",
+      "MS_PRODUCT",
+      "MS_STK_LIMIT",
+      "MS_STYLE",
+      "MS_TAX",
+      "MS_USER",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BALANCE",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_CONSI_APR",
+      "RP_CUST",
+      "RP_CUST_CRM",
+      "RP_DAY_WORK",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MFG_LEDR",
+      "RP_MFG_ZOOM",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_PHY_STOCK",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_LEVEL",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TAG_IMAGE",
+      "RP_TOUR_ZOOM",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_MEMB_ENT",
+      "TR_MFG_ISU_REC",
+      "UT_AI_TRFR",
+      "UT_E_INVOICE",
+      "UT_SETTING_MAIN",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 69,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "FONT_STYLE_TYPE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsFontStyle"
+    ],
+    "desktopReaderForms": [
+      "MS_ACCT",
+      "MS_AC_GROUP",
+      "MS_ADD_MAST",
+      "MS_BOOK",
+      "MS_BOOKLIST",
+      "MS_COMPANY",
+      "MS_DESIGN_BOOK",
+      "MS_DM",
+      "MS_EMP",
+      "MS_GROUP",
+      "MS_HELP",
+      "MS_ITEM",
+      "MS_LBR_TYPE",
+      "MS_LOCT",
+      "MS_MEMB",
+      "MS_POINT",
+      "MS_PRODUCT",
+      "MS_STK_LIMIT",
+      "MS_STYLE",
+      "MS_TAX",
+      "MS_USER",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BALANCE",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_CONSI_APR",
+      "RP_CUST",
+      "RP_CUST_CRM",
+      "RP_DAY_WORK",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MFG_LEDR",
+      "RP_MFG_ZOOM",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_PHY_STOCK",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_LEVEL",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TAG_IMAGE",
+      "RP_TOUR_ZOOM",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_MEMB_ENT",
+      "TR_MFG_ISU_REC",
+      "UT_AI_TRFR",
+      "UT_E_INVOICE",
+      "UT_SETTING_MAIN",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 69,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "F_DISC_DATE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsFDiscDt"
+    ],
+    "desktopReaderForms": [
+      "MS_AUTO_ITEM",
+      "TR_SALE",
+      "TR_WH_SALE"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "GRID_ROW_HIGHT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsGridRowHeight"
+    ],
+    "desktopReaderForms": [
+      "MS_ACCT",
+      "MS_AC_GROUP",
+      "MS_ADD_MAST",
+      "MS_BOOK",
+      "MS_BOOKLIST",
+      "MS_COMPANY",
+      "MS_DESIGN_BOOK",
+      "MS_DM",
+      "MS_EMP",
+      "MS_GROUP",
+      "MS_HELP",
+      "MS_ITEM",
+      "MS_LBR_TYPE",
+      "MS_LOCT",
+      "MS_MEMB",
+      "MS_POINT",
+      "MS_PRODUCT",
+      "MS_STK_LIMIT",
+      "MS_STYLE",
+      "MS_TAX",
+      "MS_USER",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BALANCE",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_CONSI_APR",
+      "RP_CUST_CRM",
+      "RP_DAY_WORK",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MFG_LEDR",
+      "RP_MFG_ZOOM",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_PHY_STOCK",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_LEVEL",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TAG_IMAGE",
+      "RP_TOUR_ZOOM",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_MEMB_ENT",
+      "TR_MFG_ISU_REC",
+      "UT_AI_TRFR",
+      "UT_E_INVOICE",
+      "UT_SETTING_MAIN",
+      "UT_SMS",
+      "UT_WAPP_WITH_API",
+      "UT_WHATSAPP"
+    ],
+    "desktopReaderCount": 68,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ITM_FINE_LOCK",
+    "webStatus": "unknown",
+    "desktopGlobals": [
+      "MsItmFineLock"
+    ],
+    "desktopReaderForms": [
+      "TR_PURC",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "itemFineLocked"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ITM_WITH_LOT_STK",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsItmWitLotStk"
+    ],
+    "desktopReaderForms": [
+      "Ac_Tax",
+      "MS_ITEM",
+      "RP_STOCK",
+      "TR_INOUT",
+      "TR_MFG_KR_ISU_REC",
+      "TR_PURC",
+      "TR_SALE",
+      "TR_TAG_CAN",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 10,
+    "typedAliases": [
+      "itemWithLotStock"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "KR_DESIGN_IMG_PRINT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsKrDesignImgPrint"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "TR_MFG_ORD_ISU",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LBR_WITH_GHT",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsLbrWithGht"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "TR_BUL_SALE",
+      "TR_ITM_LOT",
+      "TR_MFG_ORD_ISU",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_VP",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 23,
+    "typedAliases": [
+      "labourIncludesGhat"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts",
+      "web/apps/api/src/modules/sales/sales.ts",
+      "web/apps/web/lib/lineRecalc.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "LEN_IMG_PATH",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsLenImgPath"
+    ],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "MAIN_FONT_CHANGE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsMainFontChange"
+    ],
+    "desktopReaderForms": [
+      "BtmSchm",
+      "MS_ACCT",
+      "MS_AC_GROUP",
+      "MS_ADD_MAST",
+      "MS_AUTO_ITEM",
+      "MS_BOOK",
+      "MS_BOOKLIST",
+      "MS_COMPANY",
+      "MS_DESIGN_BOOK",
+      "MS_DM",
+      "MS_EMP",
+      "MS_GOLD_MAST",
+      "MS_GROUP",
+      "MS_HELP",
+      "MS_ITEM",
+      "MS_LBR_TYPE",
+      "MS_LOCT",
+      "MS_MEMB",
+      "MS_MFG_MAST",
+      "MS_POINT",
+      "MS_PRODUCT",
+      "MS_RATE",
+      "MS_STK_LIMIT",
+      "MS_STYLE",
+      "MS_TAX",
+      "MS_TRADE",
+      "MS_UPDATE",
+      "MS_USER",
+      "MS_WINDOW_SET",
+      "RP_ADDRESS",
+      "RP_ALL",
+      "RP_BALANCE",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_CONSI_APR",
+      "RP_CUST",
+      "RP_DAY_WORK",
+      "RP_DHRN_LOAN",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_GRAPH",
+      "RP_GST",
+      "RP_HUID",
+      "RP_INOUT",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_ORD_TRACK",
+      "RP_OS",
+      "RP_OTH_DETL",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_LEVEL",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TAG_IMAGE",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_AC_OPBL",
+      "TR_APR_ISU",
+      "TR_BILL_TO",
+      "TR_BUL_BOOKING",
+      "TR_BUL_SALE",
+      "TR_CARD_REC",
+      "TR_CASH",
+      "TR_CONTRA",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_EMP_JV",
+      "TR_FINE_SL_PR",
+      "TR_GOLD_BOOK",
+      "TR_INOUT",
+      "TR_ITM_LOT",
+      "TR_ITM_OPBL",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MEMB_ADJ",
+      "TR_MEMB_ENT",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_OTH_COMM",
+      "TR_OTH_PURC",
+      "TR_PHYSTK",
+      "TR_PR_SL_HEDG",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_ORD_ADJ",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_TOUR_SALE",
+      "TR_VP",
+      "TR_VP_ADJ",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_AI_TRFR",
+      "UT_BANK",
+      "UT_BKP",
+      "UT_REMINDER",
+      "UT_SETTING",
+      "UT_SETTING_MAIN",
+      "UT_SET_ADMIN",
+      "UT_TAG_PRINT"
+    ],
+    "desktopReaderCount": 125,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "MOBILE_HELP",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsMobileHelp"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "TR_SALE_ORD",
+      "TR_TOUR_ORD",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "NEGATIVE_STK_SALE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsNegativeStkSale"
+    ],
+    "desktopReaderForms": [
+      "TR_BUL_SALE",
+      "TR_KR_ISU",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_PR_ITEM",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 7,
+    "typedAliases": [
+      "negativeStockSale"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OLD_GOLD_TYPE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOldGoldType"
+    ],
+    "desktopReaderForms": [
+      "Ac_Stock"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OLD_PURC_TOUCH",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOldPurcTchGen"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_WH_SALE_RTN",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [
+      "oldPurchaseTouchGenerated"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OPBL_TRFR_BTN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOpblTrfrBtn"
+    ],
+    "desktopReaderForms": [
+      "MS_COMPANY",
+      "UT_EXPORT"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ORD_IMG_PRINT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOrdImgPrint"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE_ORD",
+      "TR_TOUR_ORD",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "ORD_TAG_STK_LESS",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOrdTagLessInStk"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE_ORD",
+      "TR_TOUR_ORD",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "orderReducesTagStock"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OS_BILL_ORNA_ISU",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsOsBillOrnaIsu"
+    ],
+    "desktopReaderForms": [
+      "BtmSchm",
+      "TR_BILL_TO",
+      "TR_MLT_PRO",
+      "TR_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OS_BILL_SMS",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOsBillSms"
+    ],
+    "desktopReaderForms": [
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_PR_ITEM",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 7,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OS_FINE_INT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsFineInt"
+    ],
+    "desktopReaderForms": [
+      "TR_WH_SALE"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "OTH_ITM_WT_REMOVE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsOthItmWtRemove"
+    ],
+    "desktopReaderForms": [
+      "MS_ITEM",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "otherItemWeightRemoved"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PRINT_FORM_BTN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsPrintFormBtn"
+    ],
+    "desktopReaderForms": [
+      "MS_PRINT",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PROFIT_RPT_TYPE",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsBalanceSheetType"
+    ],
+    "desktopReaderForms": [
+      "Ac_Final",
+      "RP_BALANCE",
+      "RP_BAL_ZOOM",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PR_RATE_ROF",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsPrRateRof"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PR_TDS_TAX",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsPrTdsTax"
+    ],
+    "desktopReaderForms": [
+      "TR_FN_INOUT",
+      "TR_PURC",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [
+      "purchaseTdsEnabled"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PURC_LOT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsPurcLot"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 6,
+    "typedAliases": [
+      "purchaseLot"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "PURC_WITH_HMTAX",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsPurcWithHmTax"
+    ],
+    "desktopReaderForms": [
+      "MS_COMPANY",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_DAY_WORK",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_HUID",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TRADING",
+      "RP_USER",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_ORD",
+      "TR_TOUR_ORD",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 31,
+    "typedAliases": [
+      "purchaseWithHallmarkTax"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/purchase/purchase.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "QR_CODE_GEN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsQrCodeGen"
+    ],
+    "desktopReaderForms": [
+      "TR_ITM_LOT",
+      "TR_PHYSTK",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "UT_SETTING_MAIN",
+      "UT_TAG_PRINT"
+    ],
+    "desktopReaderCount": 7,
+    "typedAliases": [
+      "qrCodeGeneration"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "RPT_TOT_SHOW",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsRptTotShow"
+    ],
+    "desktopReaderForms": [
+      "RP_LEDR",
+      "RP_MFG_LEDR",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SALES_WITH_HMTAX",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsSalesWithHmTax"
+    ],
+    "desktopReaderForms": [
+      "MS_COMPANY",
+      "RP_BAL_ZOOM",
+      "RP_BILL_PROFIT",
+      "RP_CASH_BANK",
+      "RP_DAY_WORK",
+      "RP_DHRN_OS",
+      "RP_EMP",
+      "RP_HUID",
+      "RP_INOUT",
+      "RP_JDTR_ZOOM",
+      "RP_LC_INOUT",
+      "RP_LC_SALE",
+      "RP_LEDR",
+      "RP_MOVEMENT",
+      "RP_ORDER",
+      "RP_REMINDER",
+      "RP_ROJMEL",
+      "RP_SLPR_ZOOM",
+      "RP_STK_MOVE",
+      "RP_STOCK",
+      "RP_STOCK_FINE",
+      "RP_STOCK_VALUE",
+      "RP_TAG",
+      "RP_TAG_ESTMATE",
+      "RP_TRADING",
+      "RP_USER",
+      "UT_SETTING_MAIN",
+      "UT_WINDOW"
+    ],
+    "desktopReaderCount": 28,
+    "typedAliases": [
+      "salesWithHallmarkTax"
+    ],
+    "aliasConsumerCandidates": [
+      "web/apps/api/src/modules/sales/sales.ts"
+    ],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SILVER_THREE_DIGIT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsSilverWt3Digit"
+    ],
+    "desktopReaderForms": [
+      "RP_LEDR",
+      "RP_MFG_LEDR",
+      "TR_BUL_SALE",
+      "TR_FINE_SL_PR",
+      "TR_KR_ISU",
+      "TR_MFG_GHAT_REC",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE_LBR",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 11,
+    "typedAliases": [
+      "silverThreeDigit"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SL_BILL_IMG",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsSlBillImg"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "TR_SALE_HM",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SL_MRP_TAX_REVERC",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsMrpTaxReverc"
+    ],
+    "desktopReaderForms": [
+      "TR_PR_SL_UAE",
+      "TR_SALE"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SL_NWT_LOCK",
+    "webStatus": "unknown",
+    "desktopGlobals": [
+      "MsSlNwtLock"
+    ],
+    "desktopReaderForms": [
+      "TR_BUL_SALE",
+      "TR_FN_INOUT",
+      "TR_PR_SL_UAE",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "TR_WH_SALE_RTN",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 11,
+    "typedAliases": [
+      "saleNetWeightLocked"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SL_TAG_WT_DIFF",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsSlAndTagWtDiff"
+    ],
+    "desktopReaderForms": [
+      "Ac_Stock",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "saleTagWeightDiffReconciled"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "SL_TDS_TAX",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsSlTdsTax"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "STK_LMIT_WITH_DESIGN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsStkLimitWithDesign"
+    ],
+    "desktopReaderForms": [
+      "MS_STK_LIMIT",
+      "TR_PURC",
+      "TR_SALE_ORD",
+      "TR_TAG_OPBL",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 5,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TAG_AUTO_PRINT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTagRowAutoPrint"
+    ],
+    "desktopReaderForms": [
+      "TR_TAG_OPBL",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TAG_ENTRY_DESIGN_GEN",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsDesignMastHelp"
+    ],
+    "desktopReaderForms": [
+      "TR_PURC",
+      "TR_TAG_OPBL",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TAG_VCH_AUTO_SAVE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTagVchAutoSave"
+    ],
+    "desktopReaderForms": [
+      "MS_DESIGN_BOOK",
+      "TR_PURC",
+      "TR_TAG_OPBL",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TILE_MENU",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTileMenuShow"
+    ],
+    "desktopReaderForms": [
+      "MS_WINDOW_SET",
+      "UT_WINDOW"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TOT_AMT_ROF",
+    "webStatus": "honoured",
+    "desktopGlobals": [
+      "MsTotAmtRof"
+    ],
+    "desktopReaderForms": [
+      "TR_FN_INOUT",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_RTN_UAE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 8,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "TOT_FINE_STK_TYPE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTotFineStkType"
+    ],
+    "desktopReaderForms": [
+      "RP_BAL_ZOOM",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [
+      "totalFineStockType"
+    ],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "T_DISC_DATE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsTDiscDt"
+    ],
+    "desktopReaderForms": [
+      "MS_AUTO_ITEM",
+      "TR_SALE",
+      "TR_WH_SALE"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "USER_KR_TOUCH_HIDE",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsUserKrTouchHide"
+    ],
+    "desktopReaderForms": [
+      "TR_PURC",
+      "TR_TAG_OPBL",
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "VCH_DESC_HELP_LENT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsVchDescHelpLenth"
+    ],
+    "desktopReaderForms": [
+      "TR_APR_ISU",
+      "TR_BUL_SALE",
+      "TR_CARD_REC",
+      "TR_CASH",
+      "TR_DHRN_INTREC",
+      "TR_DHRN_ISU",
+      "TR_DHRN_REC",
+      "TR_FN_INOUT",
+      "TR_INOUT",
+      "TR_JDT_REC",
+      "TR_KR_ISU",
+      "TR_LEDR_ADJ",
+      "TR_LOCT_AMT",
+      "TR_MFG_GHAT_REC",
+      "TR_MFG_ISU_REC",
+      "TR_MFG_ITEM",
+      "TR_MFG_KR_ISU_REC",
+      "TR_MFG_ORD_ISU",
+      "TR_MFG_ORD_REC",
+      "TR_MFG_WITH_LOT",
+      "TR_OTH_PURC",
+      "TR_PR_SL_UAE",
+      "TR_PURC",
+      "TR_PURC_HM",
+      "TR_REP_REC",
+      "TR_SALE",
+      "TR_SALE_HM",
+      "TR_SALE_LBR",
+      "TR_SALE_ORD",
+      "TR_SALE_RTN",
+      "TR_SALE_RTN_UAE",
+      "TR_SL_EBILL",
+      "TR_SL_PR_ITEM",
+      "TR_TAG_CAN",
+      "TR_TAG_OPBL",
+      "TR_TAG_SPLIT",
+      "TR_TAG_WT_DIFF",
+      "TR_TOUR",
+      "TR_TOUR_ORD",
+      "TR_WH_SALE_RTN",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 41,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WAPP_DELAY",
+    "webStatus": "inert",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WAPP_IMG_GWT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsWappImgGwt"
+    ],
+    "desktopReaderForms": [
+      "RP_TAG_IMAGE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 2,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WAPP_SL_PRINT",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsWappSlPrint"
+    ],
+    "desktopReaderForms": [
+      "TR_SALE",
+      "TR_SALE_HM",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 3,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WAP_DELAY",
+    "webStatus": "inert",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WEB_IMAGE",
+    "webStatus": "inert",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WEB_PATH",
+    "webStatus": "inert",
+    "desktopGlobals": [],
+    "desktopReaderForms": [],
+    "desktopReaderCount": 0,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "WH_BILL_IMG",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsWhBillImg"
+    ],
+    "desktopReaderForms": [
+      "TR_BUL_SALE",
+      "TR_TOUR_SALE",
+      "TR_WH_SALE",
+      "UT_SETTING_MAIN"
+    ],
+    "desktopReaderCount": 4,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "YEAR_GOLD_SL",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsYearGoldSl"
+    ],
+    "desktopReaderForms": [
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  },
+  {
+    "key": "YEAR_SILVER_SL",
+    "webStatus": "inert",
+    "desktopGlobals": [
+      "MsYearSilverSl"
+    ],
+    "desktopReaderForms": [
+      "UT_SET_ADMIN"
+    ],
+    "desktopReaderCount": 1,
+    "typedAliases": [],
+    "aliasConsumerCandidates": [],
+    "certification": "unverified; requires mode-specific effect tests"
+  }
+]

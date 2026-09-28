@@ -1,0 +1,65 @@
+{
+ "form": "MS_RATE",
+ "tables": [
+  "BOOK_IDTL",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "LOCT_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "RATE_MAST": [
+    "ADD_DATE",
+    "ADD_USER",
+    "AND_TRFR",
+    "CASH_AMT",
+    "CO_CODE",
+    "CO_YEAR",
+    "DOLLAR_GL_RATE",
+    "DOLLAR_SL_RATE",
+    "EMP_CODE",
+    "FINE_GL_PR_RATE",
+    "FINE_GL_RATE",
+    "FINE_SL_PR_RATE",
+    "FINE_SL_RATE",
+    "GR_CODE",
+    "GR_NAME",
+    "GR_PR_RATE",
+    "GR_PR_TOUCH",
+    "GR_RATE",
+    "GR_TAX_PRC",
+    "GR_TAX_RATE",
+    "GR_TOUCH",
+    "GR_TYPE",
+    "LC_CODE",
+    "MAIN_USER",
+    "OP_GL_RATE",
+    "SR_NO",
+    "VCH_DATE"
+   ]
+  },
+  "UPDATE": [
+   "GROUP_MAST"
+  ],
+  "DELETE": [
+   "RATE_MAST"
+  ]
+ },
+ "selectTables": [
+  "BOOK_IDTL",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "LOCT_MAST",
+  "RATE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 6,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 2516
+}

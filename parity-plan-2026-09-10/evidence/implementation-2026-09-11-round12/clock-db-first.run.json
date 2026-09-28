@@ -1,0 +1,20 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "exec",
+    "vitest",
+    "run",
+    "test/savedSaleReturnClock.db.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T17:54:06.036354+00:00",
+  "finishedAtUtc": "2026-09-11T17:54:11.712355+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/clock-db-first.txt"
+}

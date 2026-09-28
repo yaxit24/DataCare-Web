@@ -16,6 +16,10 @@ import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
+import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
+import { fineFor, labourCharge } from '@datacare/core';
 
 interface Line {
   itCode: string;
@@ -159,6 +163,35 @@ export default function PurchaseEntryPage() {
   const [interState, setInterState] = useState(false);
   const [urd, setUrd] = useState(false);
   const [lines, setLines] = useState<Line[]>([blank()]);
+  /**
+   * P4: `ITM_FINE_LOCK` — the desktop sets the fine cell's entry box read-only when this is on
+   * (TR_PURC.cs:7145-7148, `TEXT_PR.ReadOnly = true`), so the computed fine cannot be overtyped.
+   * There is nothing for the server to enforce: the value still posts, it just may not be retyped.
+   * Blank default 'N' per MS_OPNCOMP.cs.
+   */
+  const companySettings = useCompanySettings();
+  const fineLocked = companyFlag(companySettings, 'ITM_FINE_LOCK', 'N');
+  // Desktop TR_PURC carries TWO sub-detail grids: MSG_IDTL (34 cols, tag side) and MSG_PR_IDTL
+  // (25 cols, purchase side). `purchase.ts:133` already accepts `stones` per line and persists it
+  // at `:953`; this page sent nothing, so the whole stone workflow was unreachable.
+  const stones = useSubDetail(lines.length);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => {
+      setLines((rows) => [...rows, blank()]);
+      stones.appendLine();
+    },
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      stones.removeLine(row);
+      return true;
+    },
+    onEscape: () => {},
+  });
   // The desktop's image buttons act on the CURRENT grid row, so the row that last held focus
   // owns the photograph. It persists after blur so clicking the panel does not clear it.
   const [imageRow, setImageRow] = useState(0);
@@ -203,9 +236,22 @@ export default function PurchaseEntryPage() {
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
 
   const calc = (l: Line) => {
-    const fine = r2((n(l.netWt) * n(l.touch)) / 100);
+    const fine = fineFor('purchaseItem', {
+      netWt: n(l.netWt),
+      touch: n(l.touch),
+      ghtWt: n(l.ghtWt),
+      westPct: n(l.westPct),
+    });
     const metal = r2(fine * n(l.rate));
-    const mk = r2(n(l.netWt) * n(l.making));
+    // P5: per-gram labour is (net + ghat) x rate unless the company switches ghat off
+    // (LBR_WITH_GHT, blank default 'Y'). This page sends ghtWt to the server, so computing the
+    // preview from netWt alone understated labour by ghat x rate against what actually posts.
+    const mk = labourCharge('per_gram', {
+      netWt: n(l.netWt),
+      ghatWt: n(l.ghtWt),
+      withGhat: true,
+      rate: n(l.making),
+    });
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
@@ -277,6 +323,14 @@ export default function PurchaseEntryPage() {
         huid: String(line.huid ?? '') || undefined,
       }));
       setLines(loadedLines.length ? loadedLines : [blank()]);
+      // Repopulate the stone sub-detail per line. Without this the API returns the stones and the
+      // screen still shows none, so an unchanged save posts an empty array and deletes them —
+      // the reader fix alone does not close the loss, the round trip has to be closed at both ends.
+      stones.load(
+        (view.lines ?? []).map((line: any) =>
+          (line.stones ?? []).map((stone: any) => stoneRowFromApi(stone)),
+        ),
+      );
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -346,8 +400,13 @@ export default function PurchaseEntryPage() {
         interState,
         discountAmount: discountAmount ? Number(discountAmount) : undefined,
         lines: lines
-          .filter((l) => l.itCode && (l.netWt || l.rate))
-          .map((l) => ({
+          // The ORIGINAL index is carried through the filter on purpose: stones are keyed by the
+          // line the operator entered them against, and empty lines are dropped below, so a
+          // filtered position would attach a stone block to the wrong item.
+          .map((l, sourceIndex) => ({ l, sourceIndex }))
+          .filter(({ l }) => l.itCode && (l.netWt || l.rate))
+          .map(({ l, sourceIndex }) => ({
+            stones: stones.inputsFor(sourceIndex),
             itCode: l.itCode,
             tagNo: l.tagNo || undefined,
             vchSrno: l.vchSrno,
@@ -541,7 +600,7 @@ export default function PurchaseEntryPage() {
               testId="purchase-grid-mode"
             />
           </div>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -645,6 +704,7 @@ export default function PurchaseEntryPage() {
                       row={i}
                       baseColumns={0}
                       setValue={(row, key, value) => setLine(row, key, value)}
+                      readOnlyFields={fineLocked ? (['fineWt'] as const) : undefined}
                     />
                     <td className="num">{c.fine.toLocaleString('en-IN')}</td>
                     <td className="num">{c.net.toLocaleString('en-IN')}</td>
@@ -652,7 +712,10 @@ export default function PurchaseEntryPage() {
                       <button
                         type="button"
                         className="danger"
-                        onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))}
+                        onClick={() => {
+                          setLines((ls) => ls.filter((_, j) => j !== i));
+                          stones.removeLine(i);
+                        }}
                       >
                         ×
                       </button>
@@ -662,6 +725,35 @@ export default function PurchaseEntryPage() {
               })}
             </tbody>
           </table>
+          {/* Sub-detail for the line the operator last touched, mirroring the desktop's
+              RowColChange filtering (TR_SALE.cs:16791-16876). A line selector is offered because
+              the web grid has no notion of a "current row" the way MSFlexGrid does. */}
+          <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
+            <div className="field">
+              <label>Stones for item line</label>
+              <select
+                value={stones.activeLine}
+                onChange={(e) => stones.setActiveLine(Number(e.target.value))}
+              >
+                {lines.map((l, i) => (
+                  <option key={i} value={i}>
+                    {i + 1}
+                    {l.itCode ? ` — ${l.itCode}` : ''}
+                    {l.tagNo ? ` / ${l.tagNo}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <span className="muted">{stones.totalRows} stone row(s) on this voucher</span>
+            </div>
+          </div>
+          <SubDetailGrid
+            rows={stones.rowsFor(stones.activeLine)}
+            onRowsChange={(rows) => stones.setRowsFor(stones.activeLine, rows)}
+            parentLabel={`item line ${stones.activeLine + 1}`}
+            desktopSource="TR_PURC / MSG_IDTL (34 cols) + MSG_PR_IDTL (25 cols)"
+          />
           <details style={{ marginTop: 8 }}>
             <summary>Desktop header fields</summary>
             <div className="row">

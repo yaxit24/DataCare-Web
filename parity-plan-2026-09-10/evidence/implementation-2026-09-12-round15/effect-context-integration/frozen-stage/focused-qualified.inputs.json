@@ -1,0 +1,28 @@
+{
+  "inputs": [
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "a90fc33418afa2b9cbf4768524b021135b965ecdf993457505bfae3ac44a8428"
+    },
+    {
+      "path": "web/packages/core/vitest.config.ts",
+      "sha256": "eaba02610ce8aae0654be5cef3be9114870534572c98a9dff633418469885b05"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnEffectContext.test.ts",
+      "sha256": "2858274fbafc58be6b23e69978946577be6faec5c77442556abd4a558237af0f"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnEffectContext.ts",
+      "sha256": "6b1aa627f58ba1b458ea3bb6d0c378d0b95c57e881d8c85ec510be1efcb71c9b"
+    },
+    {
+      "path": "web/packages/core/src/savedSaleReturnClock.ts",
+      "sha256": "6e943c3ab5512738c1db33da6c98e1db402eba2e7c8f9bdbc67534767ae94dec"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnEffectContext.independent.json",
+      "sha256": "1c3285b2a7d4f9d75c2e442cc560a1e0960784cf8095fd640f89149614a8fe1c"
+    }
+  ]
+}

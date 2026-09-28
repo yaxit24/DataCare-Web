@@ -1,0 +1,34 @@
+✔ conditional local aliases retain nested JSON path through actual route input helper and row column (283.294167ms)
+✔ interfaces, comments, unused aliases and uncalled functions do not count as consumed fields (4.531167ms)
+✔ an unused request mapping or a condition-only field is not a sent value (3.920792ms)
+✔ a later static assignment replacing a request value removes the old provenance (2.651667ms)
+✔ a route dropping lines, a wrong endpoint or a different imported writer cannot establish a trace (19.4815ms)
+✔ request helper body must forward the request, and imported writer aliases retain export identity (34.722584ms)
+✔ same leaf under another collection is not the requested nested input (35.6145ms)
+✔ changing the writer nested property breaks the trace even if an inert interface retains it (10.107459ms)
+✔ an unrelated exported reader cannot satisfy the actual route writer consumption (8.135625ms)
+✔ dynamic nested output keys remain explicit unsupported evidence rather than successful mappings (7.877208ms)
+✔ dynamic endpoints are explicitly unsupported rather than guessed from the page writer map (1.777125ms)
+✔ dynamic writer input keys are unsupported, while static string keys remain traceable (4.004209ms)
+✔ lexically shadowed aliases do not borrow another function input mapping (16.054834ms)
+✔ four real wholesale aliases each reach the registered route and issued row column (3935.836958ms)
+✔ imported typed .ts tuple alias contributes only descriptors used in returned JSX (48.306334ms)
+✔ unused imports, type-only imports and uncalled helper JSX do not become surface (6.8125ms)
+✔ removing only the rendered map removes the imported candidates (3.36425ms)
+✔ object descriptors recognize labels after key/column and classify identities (8.805125ms)
+✔ factory literal selector and conditional flatMap retain provenance, not current visibility claims (5.843583ms)
+✔ unknown selector reports both conditional branches; unconditional empty filter counts none (3.267416ms)
+✔ false JSX condition is excluded and unknown runtime condition is recorded (16.305083ms)
+✔ unsupported dynamic factories remain explicit and do not invent fields (2.455458ms)
+✔ a flatMap that rewrites field identity is unsupported, not credited as original inputs (3.198959ms)
+✔ read-only mapped controls remain display-only and a type-only binding stays unresolved (18.031042ms)
+✔ same-named unused descriptor on another file cannot satisfy the rendered unknown binding (2.761458ms)
+✔ real Design/Tour imported fields are traced without changing wholesale nested mapping (165.130166ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5387.634209

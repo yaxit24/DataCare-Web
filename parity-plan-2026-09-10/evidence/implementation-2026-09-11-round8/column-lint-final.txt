@@ -1,0 +1,18 @@
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/masters/columnSettings.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/masters/configs.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/masters/master.service.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/app/(app)/masters/styles/page.tsx
+  96:13  error  The ref value 'epoch.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'epoch.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+✖ 5 problems (1 error, 4 warnings)
+

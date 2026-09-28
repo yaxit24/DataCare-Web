@@ -1,0 +1,523 @@
+{
+ "report": "RojMelItem",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 235,
+     "objects": []
+    },
+    {
+     "name": "Section2",
+     "kind": "ReportHeader",
+     "height": 305,
+     "objects": [
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 100,
+       "top": 0,
+       "width": 2318,
+       "height": 172,
+       "text": "Book Name"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 3165,
+       "top": 0,
+       "width": 680,
+       "height": 172,
+       "text": "ItCode"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 3772,
+       "top": 0,
+       "width": 353,
+       "height": 240,
+       "text": "Pcs"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 4200,
+       "top": 0,
+       "width": 630,
+       "height": 240,
+       "text": "NetWt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 4860,
+       "top": 0,
+       "width": 660,
+       "height": 240,
+       "text": "Ot amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 5535,
+       "top": 0,
+       "width": 645,
+       "height": 240,
+       "text": "L amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 6145,
+       "top": 0,
+       "width": 830,
+       "height": 240,
+       "text": "It Amt"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 7100,
+       "top": 0,
+       "width": 820,
+       "height": 240,
+       "text": "Net Amt"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line4",
+       "left": 75,
+       "top": 285,
+       "width": 7800,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupHeader",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "GroupHeader",
+     "height": 255,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 60,
+       "top": 0,
+       "width": 2840,
+       "height": 226,
+       "dataSource": "{BOOK_MAST.BOOK_NAME}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 30,
+       "top": 255,
+       "width": 7965,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 240,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 60,
+       "top": 0,
+       "width": 3105,
+       "height": 187,
+       "dataSource": "{@CrAcName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 3240,
+       "top": 0,
+       "width": 600,
+       "height": 226,
+       "dataSource": "{@ItName}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 3835,
+       "top": 0,
+       "width": 290,
+       "height": 213,
+       "dataSource": "{ROJ_MEL_DATA.ITM_PCS}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 4287,
+       "top": 0,
+       "width": 543,
+       "height": 213,
+       "dataSource": "{ROJ_MEL_DATA.ITM_NWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 4977,
+       "top": 0,
+       "width": 543,
+       "height": 213,
+       "dataSource": "{ROJ_MEL_DATA.OTH_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field11",
+       "left": 5650,
+       "top": 0,
+       "width": 530,
+       "height": 213,
+       "dataSource": "{ROJ_MEL_DATA.LBR_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 6293,
+       "top": 0,
+       "width": 682,
+       "height": 213,
+       "dataSource": "{ROJ_MEL_DATA.ITM_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 7143,
+       "top": 0,
+       "width": 777,
+       "height": 213,
+       "dataSource": "{ROJ_MEL_DATA.CR_AMT}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 3165,
+       "top": 240,
+       "width": 4845,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "GroupFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section6",
+     "kind": "GroupFooter",
+     "height": 216,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 3765,
+       "top": 0,
+       "width": 360,
+       "height": 216,
+       "dataSource": "Sum ({ROJ_MEL_DATA.ITM_PCS}, {ROJ_MEL_DATA.CO_BOOK})"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 6720,
+       "top": 0,
+       "width": 1230,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 6738,
+       "top": 0,
+       "width": 1182,
+       "height": 216,
+       "dataSource": "Sum ({ROJ_MEL_DATA.CR_AMT}, {ROJ_MEL_DATA.CO_BOOK})"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section8",
+     "kind": "ReportFooter",
+     "height": 65,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "CrAcName",
+   "ref": "{@CrAcName}",
+   "type": "StringField",
+   "text": "IF MID ({AC_MAST.AC_NAME},1,5) = 'ORDER' THEN {ROJ_MEL_DATA.VCH_NO} + ' - ' + {ROJ_MEL_DATA.AC_NAME} ELSE IF MID ({AC_MAST.AC_NAME},1,5) = 'KASAR' THEN {ROJ_MEL_DATA.VCH_NO} + ' - KSR :' + {ROJ_MEL_DA"
+  },
+  {
+   "name": "ItName",
+   "ref": "{@ItName}",
+   "type": "StringField",
+   "text": "{ROJ_MEL_DATA.IT_CODE}"
+  },
+  {
+   "name": "CrAcName",
+   "ref": "{@CrAcName}",
+   "type": "StringField",
+   "text": "IF ISNULL({ROJ_MEL_DATA.MEMB_CODE}) THEN IF MID ({AC_MAST.AC_NAME},1,5) = 'ORDER' THEN {ROJ_MEL_DATA.VCH_NO} + ' - ADV - ' + {ROJ_MEL_DATA.IT_DESC} ELSE {ROJ_MEL_DATA.VCH_NO} + ' - ' + {AC_MAST.AC_NAM"
+  },
+  {
+   "name": "ItType",
+   "ref": "{@ItType}",
+   "type": "StringField",
+   "text": "if {ROJ_MEL_DATA.IT_TYPE} = 'G' THEN 'GOLD FINE' ELSE 'SILVER FINE'"
+  },
+  {
+   "name": "DrAcName",
+   "ref": "{@DrAcName}",
+   "type": "StringField",
+   "text": "IF {ROJ_MEL_DATA.AC_NAME} <> '' THEN {ROJ_MEL_DATA.VCH_NO} + ' - ' + {ROJ_MEL_DATA.AC_NAME} ELSE {ROJ_MEL_DATA.VCH_NO} + ' - ' + {AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "DrAcName",
+   "ref": "{@DrAcName}",
+   "type": "StringField",
+   "text": "{ROJ_MEL_DATA.VCH_NO} + ' - ' + {AC_MAST.AC_NAME}"
+  },
+  {
+   "name": "ItType",
+   "ref": "{@ItType}",
+   "type": "StringField",
+   "text": "if {ROJ_MEL_DATA.IT_TYPE} = 'G' THEN 'GOLD FINE' ELSE 'SILVER FINE'"
+  },
+  {
+   "name": "CashAcCode",
+   "ref": "{@CashAcCode}",
+   "type": "StringField",
+   "text": "'25103002'"
+  },
+  {
+   "name": "ClosingCashAmt",
+   "ref": "{@ClosingCashAmt}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar OpenCrAmt; NumberVar OpenDrAmt; NumberVar ClosingBal; ClosingBal := OpenDrAmt - OpenCrAmt + Sum ({@DrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\") - Sum ({@CrAmt}, {ROJ_MEL_D"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1}+' '+{CO_MAST.CO_ADD2}+' '+{CO_MAST.CO_ADD3} + {CO_MAST.CO_CITY}+' '+{CO_MAST.CO_PIN}"
+  },
+  {
+   "name": "Company",
+   "ref": "{@Company}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "CrAmt",
+   "ref": "{@CrAmt}",
+   "type": "NumberField",
+   "text": "if {ROJ_MEL_DATA.AC_CODE} <> {@CashAcCode} and {ROJ_MEL_DATA.VCH_DATE} >= {@FromDate} then {ROJ_MEL_DATA.DR_AMT}"
+  },
+  {
+   "name": "CurCrAmt",
+   "ref": "{@CurCrAmt}",
+   "type": "NumberField",
+   "text": "{ROJ_MEL_DATA.CR_AMT}"
+  },
+  {
+   "name": "CurDrAmt",
+   "ref": "{@CurDrAmt}",
+   "type": "NumberField",
+   "text": "{ROJ_MEL_DATA.DR_AMT}"
+  },
+  {
+   "name": "CurDrCr",
+   "ref": "{@CurDrCr}",
+   "type": "NumberField",
+   "text": "{ROJ_MEL_DATA.DR_AMT}-{ROJ_MEL_DATA.CR_AMT}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "DataType",
+   "ref": "{@DataType}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "DayClosingAmt",
+   "ref": "{@DayClosingAmt}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DayClosingCr",
+   "ref": "{@DayClosingCr}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "DayClosingDr",
+   "ref": "{@DayClosingDr}",
+   "type": "NumberField",
+   "text": "if {@OpenCashAmt}+Sum ({@CurDrCr}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\") >=0 then {@OpenDrAmt}+Sum ({ROJ_MEL_DATA.CR_AMT}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")-Sum ({ROJ_MEL_DATA.DR_AMT}, {ROJ_MEL_DATA.VCH_D"
+  },
+  {
+   "name": "DayCrClBal",
+   "ref": "{@DayCrClBal}",
+   "type": "NumberField",
+   "text": "Sum ({ROJ_MEL_DATA.CR_AMT}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")"
+  },
+  {
+   "name": "DayDrClBal",
+   "ref": "{@DayDrClBal}",
+   "type": "NumberField",
+   "text": "Sum ({ROJ_MEL_DATA.DR_AMT}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")"
+  },
+  {
+   "name": "DrAmt",
+   "ref": "{@DrAmt}",
+   "type": "NumberField",
+   "text": "if {ROJ_MEL_DATA.AC_CODE} <> {@CashAcCode} and {ROJ_MEL_DATA.VCH_DATE} >= {@FromDate} then {ROJ_MEL_DATA.CR_AMT}"
+  },
+  {
+   "name": "DrClBalance",
+   "ref": "{@DrClBalance}",
+   "type": "NumberField",
+   "text": "Sum ({@CurDrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")"
+  },
+  {
+   "name": "DrCrAmt",
+   "ref": "{@DrCrAmt}",
+   "type": "UnknownField",
+   "text": "WhilePrintingRecords; numbervar DailyOpBal := numbervar DailyOpBal + ({ROJ_MEL_DATA.CR_WT}-{ROJ_MEL_DATA.DR_AMT}) ; numbervar DailyClBal := numbervar DailyClBal + ({ROJ_MEL_DATA.CR_AMT}-{ROJ_MEL_DATA."
+  },
+  {
+   "name": "FromDate",
+   "ref": "{@FromDate}",
+   "type": "DateField",
+   "text": "Date(2007,04,02)"
+  },
+  {
+   "name": "GetOpenBal",
+   "ref": "{@GetOpenBal}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar OpenDrAmt; NumberVar OpenCrAmt; if {ROJ_MEL_DATA.VCH_DATE} <{@FromDate} and not InRepeatedGroupHeader then if Sum ({@OpeningBal}) > 0 then OpenCrAmt := Sum ({@OpeningBa"
+  },
+  {
+   "name": "GetOpenCash",
+   "ref": "{@GetOpenCash}",
+   "type": "NumberField",
+   "text": "WhilePrintingRecords; NumberVar OpenCrAmt := 0; NumberVar OpenDrAmt := 0; numbervar DailyOpBal := {@OpenCashAmt} ; numbervar DailyClBal := {@OpenCashAmt}"
+  },
+  {
+   "name": "MainCrTot",
+   "ref": "{@MainCrTot}",
+   "type": "NumberField",
+   "text": "if {@OpenCashAmt} > 0 then Sum ({@CurCrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\") + {@OpenCashAmt} else Sum ({@CurCrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")"
+  },
+  {
+   "name": "MainDrTot",
+   "ref": "{@MainDrTot}",
+   "type": "NumberField",
+   "text": "if {@OpenCashAmt} < 0 then Sum ({@CurDrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")- {@OpenCashAmt} else Sum ({@CurDrAmt}, {ROJ_MEL_DATA.VCH_DATE}, \"daily\")"
+  },
+  {
+   "name": "OpenCashAmt",
+   "ref": "{@OpenCashAmt}",
+   "type": "NumberField",
+   "text": "0"
+  },
+  {
+   "name": "OpenCrAmt",
+   "ref": "{@OpenCrAmt}",
+   "type": "NumberField",
+   "text": "{@OpenCashAmt}"
+  },
+  {
+   "name": "OpenDrAmt",
+   "ref": "{@OpenDrAmt}",
+   "type": "NumberField",
+   "text": "{@OpenCashAmt}"
+  },
+  {
+   "name": "OpeningBal",
+   "ref": "{@OpeningBal}",
+   "type": "NumberField",
+   "text": "if {ROJ_MEL_DATA.VCH_DATE} < {@FromDate} and {ROJ_MEL_DATA.AC_CODE} = {@CashAcCode} then {ROJ_MEL_DATA.CR_AMT}-{ROJ_MEL_DATA.DR_AMT}"
+  },
+  {
+   "name": "RjCrAmt",
+   "ref": "{@RjCrAmt}",
+   "type": "NumberField",
+   "text": "1"
+  },
+  {
+   "name": "RjDrAmt",
+   "ref": "{@RjDrAmt}",
+   "type": "NumberField",
+   "text": "1"
+  },
+  {
+   "name": "RptTitel",
+   "ref": "{@RptTitel}",
+   "type": "StringField",
+   "text": "'ROJMEL OF ' & {ROJ_MEL_DATA.VCH_DATE}"
+  },
+  {
+   "name": "RunDayCl",
+   "ref": "{@RunDayCl}",
+   "type": "NumberField",
+   "text": ""
+  },
+  {
+   "name": "TotDrCr",
+   "ref": "{@TotDrCr}",
+   "type": "NumberField",
+   "text": "{@OpenCashAmt} + {@RjDrAmt}-{@RjCrAmt}"
+  }
+ ],
+ "sectionCount": 7,
+ "objectCount": 23,
+ "formulaCount": 39
+}

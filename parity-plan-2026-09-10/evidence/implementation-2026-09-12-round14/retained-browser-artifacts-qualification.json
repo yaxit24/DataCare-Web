@@ -1,0 +1,658 @@
+{
+  "kind": "round14-browser-artifact-retention/v1",
+  "status": "verified",
+  "retained": true,
+  "verifiedAtUtc": "2026-09-12T01:57:15.387356+00:00",
+  "contractSha256": "3fc625b7dc3b78fc9b230b06b4478b082881af106c1a527d05c4af10e66043b0",
+  "verifierSha256": "e78d78f631678e032d5e8202c7d0fc33b7d66215aa21cd1e0bf40010f21afacb",
+  "sources": [
+    {
+      "path": "web/apps/api/src/modules/ops/releaseCertification.ts",
+      "sha256": "35b19dfe89e0fc103e01c25a81c9779267a60d2064ec81079cc1c666d5ebce77"
+    },
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "fa51a775930b7c3c9c21c393961ff2dc651210b7c65f79c624739c5f999b3019"
+    },
+    {
+      "path": "web/apps/web/test/parity-real-stack-evidence.mjs",
+      "sha256": "e899d6ea9bf797d86006f815146d58534fb95c0dd3b180af71d6fef3ace37438"
+    },
+    {
+      "path": "web/apps/web/test/session-context.journey.mjs",
+      "sha256": "98edbb25e246dcf59aeae669d4551779048ed721a2a3e4cff4918d2d6f1b1539"
+    },
+    {
+      "path": "web/apps/web/test/session-context-lifecycle.journey.mjs",
+      "sha256": "3037c004c16d3634507bdb1c5553c3c320bf441215693ad38e11df57fa40b708"
+    },
+    {
+      "path": "web/apps/web/test/session-context.real-stack.additive.mjs",
+      "sha256": "7b0cafbfe88b39ef8deb7a2b8987463285350e30e7adf59275f91309b78a06c4"
+    },
+    {
+      "path": "web/apps/web/test/session-context-response-observation.mjs",
+      "sha256": "c0282d1be8d7e8f107c9dca7d222e9580d7fea5e144e5dd01c80168600cbaf29"
+    },
+    {
+      "path": "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+      "sha256": "1744ece8ab2ce1e9114a32b5ebd22d12be56fedcab92f93e607bd306e41db828"
+    },
+    {
+      "path": "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+      "sha256": "4b52fdec40647f4615c03fc3d880953f58eef15c1f3df93038565c60b37415b4"
+    },
+    {
+      "path": "web/apps/web/test/sales-return-labour-replay.journey.mjs",
+      "sha256": "d902006a7ebee58a5143a9382c39c84c0dfafa32144350b19314804a8b1df04a"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+      "sha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+      "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "sha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b"
+    }
+  ],
+  "runs": [
+    {
+      "kind": "baseline",
+      "run": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-bound.run.json",
+        "sha256": "b5f2a8a46629a633e75a04c6e13d42570c411d5259ae2b71b6ab9cfdabb465d6"
+      },
+      "log": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-bound.txt",
+        "sha256": "454c3ec596d21d1cacee79b20349e8bcf214413a20241a74e3f59a042877d25f"
+      },
+      "inputManifest": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-bound.inputs.json",
+        "sha256": "d4626d1100e44eddabb413370291a5d97b0e573a22b8ba410a950a38ac965f61"
+      },
+      "result": {
+        "path": "web/test-results/parity-real-stack-round14-bound/result.json",
+        "sha256": "2c7d7ffe161c6e9b60fc79b84c3390b5c6480f1c409f6e1e9ae536a8e88f9e84"
+      },
+      "verification": {
+        "baselineJourneys": 17,
+        "labourChecks": 12,
+        "mockedRequests": 0,
+        "mockedResponses": 0,
+        "interceptionIndicators": 0,
+        "cleanupQualification": "Completed exit-zero run required; result precedes outer cleanup."
+      },
+      "publicArtifacts": [
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/column-settings-conflict.png",
+          "sha256": "b9b1325980b66e3b1c48bb5fd0e01e007ebea1bdd23a7b290c1f7bca6fd7564a"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/column-settings-family-qualified.png",
+          "sha256": "156e2eb961597eae035ed38df8e5c15f7844a94069d6cc04879341d9b206289a"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/column-settings-read-only.png",
+          "sha256": "3bb24b609b7ccbc9acc7b7f31a94eedf0e5e57289167d7af6cb5bdaeaa9ac03f"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/credit-note-diamond-detail.png",
+          "sha256": "91df218dc908b9a57859df674a7801620bff77a37f652dcda8c1be97d9cc6029"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/credit-note-imported-components.png",
+          "sha256": "d9529871cf8dab884fb648e2653083241285d06e5d5a11aa724d7b461b93f0fc"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/credit-note-ruby-detail.png",
+          "sha256": "9cbba4561f17d35c7a16e7ea36e7e1b06d8935bd167a6bd58218c87cde456ecb"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/design-book-calculations-round2.png",
+          "sha256": "ad6ceb039fa0cd58f96bfb9672f301b87bc99de3873b32aba95ca77149b10c40"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/design-book-components.png",
+          "sha256": "76d6e68478882f9b5ceca73103ee4b0fe426986ac22ea66a879ccb26157bbab8"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/design-repeat-identities-round3.png",
+          "sha256": "eb2b9b9f062178dafee3b3db0e201c3357e876124daf1895c6a9f68a54960e07"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/design-weight-enter-round3.png",
+          "sha256": "8527d48ac789409b4a1266009fa69f6f12affc0024dfe881e12ac142e3a4b82d"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/generic-image-parent-identity-round5.png",
+          "sha256": "db35493a01c53130729c9f7b17efe09006f8bc2271738be399d0228a90d535d6"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/generic-image-synthetic-camera-round5.png",
+          "sha256": "091b2dc13eb7ba606b97db0c03cce6612290baee8ddf2c084ecb7deca8aab6af"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/generic-image-upload-conflict-round5.png",
+          "sha256": "262d30842eaba870f123b8370a2df537fcbf730bb7ec9d6515265c802052d6b6"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/mfg-lot-issue-saved-source.png",
+          "sha256": "aa8e01ca1d3270c3a1a7ca959beb616dd29e768bde0b36b2dc499d24f6d7fc10"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/mfg-lot-receive-saved-source.png",
+          "sha256": "b532e979be85398f24bf23795c06985eaaaa7e49258ded9dd2a25f691d7fe8fb"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/order-image-concurrent-change-refused.png",
+          "sha256": "9045e4d883050184ff495792413c8d38a3e59c6ff77cf4f994c9a8d72ceedd21"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/order-image-missing-import-recovered.png",
+          "sha256": "4df5e7f6a8a2b282f1dadfa143c368baeb98876f7ba913cbb9e171869e7830b6"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/order-image-sales-design-readonly.png",
+          "sha256": "9be3e9a1d2d71690faea789df6d23f1627c29465a17cfdec6c2902bab6a6e31f"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/order-image-tour-custom.png",
+          "sha256": "159a77fad5510b09a82638d30f5870f5d92155c1c54de7c04ff3c2a2c9580697"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/repair-image-cancel-late-load-round5.png",
+          "sha256": "cfdffc7288890edf7031aaacd42a6e6c57d60e8be0115ba7b857d6325af9fabf"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/repair-image-receipt-saved-serial-round5.png",
+          "sha256": "a420f7d25ea2afb84128f3525a8ceeae13e526a5585b92fd05634d9cea3c2239"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/repair-image-source-conflict-round5.png",
+          "sha256": "dde63bc88e245fd9bc2904fce6f911d0ebb0a88c72f74654640eef9743db6ed7"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/result.json",
+          "sha256": "2c7d7ffe161c6e9b60fc79b84c3390b5c6480f1c409f6e1e9ae536a8e88f9e84"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-design-blank-existing-round4.png",
+          "sha256": "696e888fa552be0d6fa7a85ec18f9a6cb564c8d816a4a70acda6c50bf96df051"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-design-blank-new-round4.png",
+          "sha256": "039d9dd6097694e4b30c524b222245aa027eaad9e81146a7367b7838519315da"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-design-loaded-round4.png",
+          "sha256": "0336f5af0be604dca2f86e105805354f4a3e99e58af18295672ef077d4eb5fba"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-design-picker-round4.png",
+          "sha256": "8a35fbc98d070e53fae0639011c4d4784a6804223119af2d2b5116b731165d85"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-order-imported-manual.png",
+          "sha256": "72c51a6981b725adb6bbbbcbfba0f5775537d7d632dfb670e51eaa2fb8b00660"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-order-loaded-components.png",
+          "sha256": "63e406a7421bb5781767543028a8df168bc31a2823cb9539770302b7c3e6a0fa"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-conflict.png",
+          "sha256": "ab405bbc09ffdb1e15583a023640860780f11bf12b2f15000ac87160c67adf2a"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-controls.png",
+          "sha256": "2fc4b8e6b921cc00e66c500268da3614e76f4a9faf2dd5db5b27d8c48a62dfb1"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-empty.png",
+          "sha256": "c0cb15dba1b01d9901ce8b2cff0a1b9ab7388b42da07c479ee5ec6e3499547d9"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-opened.png",
+          "sha256": "07358f7b451cf71c76a9169cca3e6e11496e2cca81741d2560d6d90e96bfd683"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-prefix-1.png",
+          "sha256": "2c55a4236eb6d31c08fb3b51713a355df46bd36087138336caae0e1b1feb623d"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-prefix-2.png",
+          "sha256": "3777a215c2e278c862970980e58adc6001f57bf633f2e4af92c67a2045fcda8d"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-totals.png",
+          "sha256": "4e74759c4d85a6e10922e4a2fc22e506ce114136a24d9588c979d5d62cf26384"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-bill-view-only.png",
+          "sha256": "03f3a05216119557b5c37bace2937ac4b35030900dd6093d0ef40471b9830d11"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-labour-history.png",
+          "sha256": "4b5438b1bca618f527bcb3760e26b8a7952c0bb470c06c6db6b23026c6617491"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-replay-conflict.png",
+          "sha256": "0f4f746837ffe6773f628347bb74341eae44b4b6c96042521328d76fa2d85c4a"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-replay-ordered.png",
+          "sha256": "ae75d11671f5bf998c5eeac2d9ee276f7393b18c8c66c8f3855df680ec05beb3"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-replay-view-only.png",
+          "sha256": "e50d8bf459dae0e5be47758c66303371738ed7faaf254d2851c4b87afada6b26"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-saved-conflict-round6.png",
+          "sha256": "a11015194dee82603d14a4abc746fcc39532b1aef4a135b3ab874e228ce15da6"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-saved-hallmark-details-round6.png",
+          "sha256": "830327b81dbeb2ceda769ecc6fd5fc600eaea4141741a9b37c88075d0036a08c"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-saved-late-load-round6.png",
+          "sha256": "b4560a075425336b38f23f558e8e5173bfaf6bb5bc6fffb85aef547ed914cdd0"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-saved-loaded-round6.png",
+          "sha256": "8a7f25b611307b2bf873e4e0c336442b41f48c00743daa4512db0d5c57d84d48"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/sales-return-saved-tagged-readonly-round6.png",
+          "sha256": "cb5521a5c1701096938bc8a8431f3d8e9748ed8c69850ef50a1fd827bb91ff23"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/tour-order-components.png",
+          "sha256": "9ee8abcaa27c0855df16367594db6e5f0839c9358b8755b13cf934ff5b87e829"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/tour-order-exact-values.png",
+          "sha256": "81b63ffcd868dc9ee7a9cc59edca43df49c3ab9fd73be60287b6a323e262536a"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/tour-order-labour.png",
+          "sha256": "0c9f21d203e744e8da7a9e4ad1d860d6b9d293d10d69f76a955a38e65ab2188b"
+        },
+        {
+          "path": "web/test-results/parity-real-stack-round14-bound/tour-order-loaded.png",
+          "sha256": "e11df17d819125c5df5abb47cfc00752ce0349eed64220cc4566462890aa19ae"
+        }
+      ],
+      "excludedArtifacts": []
+    },
+    {
+      "kind": "context",
+      "run": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-context-bound.run.json",
+        "sha256": "9f9ddd3a7cd0878e871ce2d49c65fa6ff3d254d974181d0e2e0c31eb33c74d10"
+      },
+      "log": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-context-bound.txt",
+        "sha256": "4573eeb1cf7832f057575a88a936d41c339ca15351684c2bf3d847d9c4be2933"
+      },
+      "inputManifest": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-context-bound.inputs.json",
+        "sha256": "79d17f19bd7e35cd478d5a6262e3e30db0220e18bebb2f9722550429ea160466"
+      },
+      "result": {
+        "path": "web/test-results/session-context-round14-bound/result.json",
+        "sha256": "1ecbc86658bf15bb0b07bdc3817ad8f270e05c02c7bc14f8f92a296cb02f543d"
+      },
+      "verification": {
+        "sessionLifecycleChecks": 14,
+        "sessionActualResponseFaults": 5,
+        "syntheticBusinessResponses": 0,
+        "journeyCleanupErrors": [],
+        "cleanupQualification": "Completed exit-zero run required; result precedes outer cleanup."
+      },
+      "publicArtifacts": [
+        {
+          "path": "web/test-results/session-context-round14-bound/next-server.log",
+          "sha256": "800f3b13ce444129fc9819609f286879fed19bcc912af7d00731df68933f6fb4"
+        },
+        {
+          "path": "web/test-results/session-context-round14-bound/result.json",
+          "sha256": "1ecbc86658bf15bb0b07bdc3817ad8f270e05c02c7bc14f8f92a296cb02f543d"
+        },
+        {
+          "path": "web/test-results/session-context-round14-bound/session-context-aba-late-response.png",
+          "sha256": "de984bee44191a953ed773aba5f49e5592cca91f85da2f634f847940c4267b03"
+        },
+        {
+          "path": "web/test-results/session-context-round14-bound/session-context-departed-drop-draft.png",
+          "sha256": "39666de29b0e4a1930c177579f79b5c9e6aefcfbb5b2e4818dd5da5e7955835f"
+        },
+        {
+          "path": "web/test-results/session-context-round14-bound/session-context-departed-success-draft.png",
+          "sha256": "bfe7cae165ea39234b7a9021d29dc65dc1c355cd95755296c720e529f5b50010"
+        },
+        {
+          "path": "web/test-results/session-context-round14-bound/session-context-recovered.png",
+          "sha256": "26493925f1d7b254b71ba5ec7082328619e99ae268240a74fd331b57102c02e3"
+        },
+        {
+          "path": "web/test-results/session-context-round14-bound/session-context-stale-draft.png",
+          "sha256": "aa6b6feb9d6fce321e83cb4c1102c05c264b9a08b9f6c188e60d36a0dfcf0859"
+        },
+        {
+          "path": "web/test-results/session-context-round14-bound/session-context-uncertain-draft.png",
+          "sha256": "2ffd5ee34ea291640c6f157b314e0368d45b74ec80dd8572ac578b1bd23f304f"
+        }
+      ],
+      "excludedArtifacts": []
+    },
+    {
+      "kind": "labour",
+      "run": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-labour-bound.run.json",
+        "sha256": "56a4a29cdfcc43ac94048357c7d5a8da36aa864a897458b91d74e7b09608ed0e"
+      },
+      "log": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-labour-bound.txt",
+        "sha256": "c56e5f7d0ace901fcd9452edc8131292d666e55e65a1a6e519d645c314a17c25"
+      },
+      "inputManifest": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-labour-bound.inputs.json",
+        "sha256": "085ed04a2f49a1280f17b409d039b63f2bdebc43571d681eb7f854adab6e66b3"
+      },
+      "result": {
+        "path": "web/test-results/labour-preview-lifecycle-round14-bound/result.json",
+        "sha256": "6a9d303536f04fcbf3befb1ff16e0c8e631d3491d64e9f7391dd4c33cfd2c407"
+      },
+      "verification": {
+        "labourLifecycleChecks": 5,
+        "labourActualResponseFaults": 4,
+        "syntheticBusinessResponses": 0,
+        "cleanupErrors": []
+      },
+      "publicArtifacts": [
+        {
+          "path": "web/test-results/labour-preview-lifecycle-round14-bound/labour-lifecycle-departure.png",
+          "sha256": "108ed0c20d02dea640b8b5c6147dbea2f6e604b5c4e94bfe979c2dbeeabf2feb"
+        },
+        {
+          "path": "web/test-results/labour-preview-lifecycle-round14-bound/labour-lifecycle-retry.png",
+          "sha256": "c39bf050490a5e123cabb5cd9b08d93a9fdb0a6867272b00234a3d0df42f73ab"
+        },
+        {
+          "path": "web/test-results/labour-preview-lifecycle-round14-bound/labour-lifecycle-stale-prefix.png",
+          "sha256": "11745543d5b0145787d68f3634e0968c3a252584db4247946244e7d13c9f6a1a"
+        },
+        {
+          "path": "web/test-results/labour-preview-lifecycle-round14-bound/next-server.log",
+          "sha256": "6572f7b2211cb3f264f687efa514a3013520bd5d2d522d7c1290342cf92a2611"
+        },
+        {
+          "path": "web/test-results/labour-preview-lifecycle-round14-bound/result.json",
+          "sha256": "6a9d303536f04fcbf3befb1ff16e0c8e631d3491d64e9f7391dd4c33cfd2c407"
+        }
+      ],
+      "excludedArtifacts": []
+    }
+  ],
+  "copiedFiles": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/column-settings-conflict.png",
+      "sha256": "b9b1325980b66e3b1c48bb5fd0e01e007ebea1bdd23a7b290c1f7bca6fd7564a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/column-settings-family-qualified.png",
+      "sha256": "156e2eb961597eae035ed38df8e5c15f7844a94069d6cc04879341d9b206289a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/column-settings-read-only.png",
+      "sha256": "3bb24b609b7ccbc9acc7b7f31a94eedf0e5e57289167d7af6cb5bdaeaa9ac03f"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/credit-note-diamond-detail.png",
+      "sha256": "91df218dc908b9a57859df674a7801620bff77a37f652dcda8c1be97d9cc6029"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/credit-note-imported-components.png",
+      "sha256": "d9529871cf8dab884fb648e2653083241285d06e5d5a11aa724d7b461b93f0fc"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/credit-note-ruby-detail.png",
+      "sha256": "9cbba4561f17d35c7a16e7ea36e7e1b06d8935bd167a6bd58218c87cde456ecb"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/design-book-calculations-round2.png",
+      "sha256": "ad6ceb039fa0cd58f96bfb9672f301b87bc99de3873b32aba95ca77149b10c40"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/design-book-components.png",
+      "sha256": "76d6e68478882f9b5ceca73103ee4b0fe426986ac22ea66a879ccb26157bbab8"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/design-repeat-identities-round3.png",
+      "sha256": "eb2b9b9f062178dafee3b3db0e201c3357e876124daf1895c6a9f68a54960e07"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/design-weight-enter-round3.png",
+      "sha256": "8527d48ac789409b4a1266009fa69f6f12affc0024dfe881e12ac142e3a4b82d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/generic-image-parent-identity-round5.png",
+      "sha256": "db35493a01c53130729c9f7b17efe09006f8bc2271738be399d0228a90d535d6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/generic-image-synthetic-camera-round5.png",
+      "sha256": "091b2dc13eb7ba606b97db0c03cce6612290baee8ddf2c084ecb7deca8aab6af"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/generic-image-upload-conflict-round5.png",
+      "sha256": "262d30842eaba870f123b8370a2df537fcbf730bb7ec9d6515265c802052d6b6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/mfg-lot-issue-saved-source.png",
+      "sha256": "aa8e01ca1d3270c3a1a7ca959beb616dd29e768bde0b36b2dc499d24f6d7fc10"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/mfg-lot-receive-saved-source.png",
+      "sha256": "b532e979be85398f24bf23795c06985eaaaa7e49258ded9dd2a25f691d7fe8fb"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/order-image-concurrent-change-refused.png",
+      "sha256": "9045e4d883050184ff495792413c8d38a3e59c6ff77cf4f994c9a8d72ceedd21"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/order-image-missing-import-recovered.png",
+      "sha256": "4df5e7f6a8a2b282f1dadfa143c368baeb98876f7ba913cbb9e171869e7830b6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/order-image-sales-design-readonly.png",
+      "sha256": "9be3e9a1d2d71690faea789df6d23f1627c29465a17cfdec6c2902bab6a6e31f"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/order-image-tour-custom.png",
+      "sha256": "159a77fad5510b09a82638d30f5870f5d92155c1c54de7c04ff3c2a2c9580697"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/repair-image-cancel-late-load-round5.png",
+      "sha256": "cfdffc7288890edf7031aaacd42a6e6c57d60e8be0115ba7b857d6325af9fabf"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/repair-image-receipt-saved-serial-round5.png",
+      "sha256": "a420f7d25ea2afb84128f3525a8ceeae13e526a5585b92fd05634d9cea3c2239"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/repair-image-source-conflict-round5.png",
+      "sha256": "dde63bc88e245fd9bc2904fce6f911d0ebb0a88c72f74654640eef9743db6ed7"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/result.json",
+      "sha256": "2c7d7ffe161c6e9b60fc79b84c3390b5c6480f1c409f6e1e9ae536a8e88f9e84"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-design-blank-existing-round4.png",
+      "sha256": "696e888fa552be0d6fa7a85ec18f9a6cb564c8d816a4a70acda6c50bf96df051"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-design-blank-new-round4.png",
+      "sha256": "039d9dd6097694e4b30c524b222245aa027eaad9e81146a7367b7838519315da"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-design-loaded-round4.png",
+      "sha256": "0336f5af0be604dca2f86e105805354f4a3e99e58af18295672ef077d4eb5fba"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-design-picker-round4.png",
+      "sha256": "8a35fbc98d070e53fae0639011c4d4784a6804223119af2d2b5116b731165d85"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-order-imported-manual.png",
+      "sha256": "72c51a6981b725adb6bbbbcbfba0f5775537d7d632dfb670e51eaa2fb8b00660"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-order-loaded-components.png",
+      "sha256": "63e406a7421bb5781767543028a8df168bc31a2823cb9539770302b7c3e6a0fa"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-conflict.png",
+      "sha256": "ab405bbc09ffdb1e15583a023640860780f11bf12b2f15000ac87160c67adf2a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-controls.png",
+      "sha256": "2fc4b8e6b921cc00e66c500268da3614e76f4a9faf2dd5db5b27d8c48a62dfb1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-empty.png",
+      "sha256": "c0cb15dba1b01d9901ce8b2cff0a1b9ab7388b42da07c479ee5ec6e3499547d9"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-opened.png",
+      "sha256": "07358f7b451cf71c76a9169cca3e6e11496e2cca81741d2560d6d90e96bfd683"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-prefix-1.png",
+      "sha256": "2c55a4236eb6d31c08fb3b51713a355df46bd36087138336caae0e1b1feb623d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-prefix-2.png",
+      "sha256": "3777a215c2e278c862970980e58adc6001f57bf633f2e4af92c67a2045fcda8d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-totals.png",
+      "sha256": "4e74759c4d85a6e10922e4a2fc22e506ce114136a24d9588c979d5d62cf26384"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-bill-view-only.png",
+      "sha256": "03f3a05216119557b5c37bace2937ac4b35030900dd6093d0ef40471b9830d11"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-labour-history.png",
+      "sha256": "4b5438b1bca618f527bcb3760e26b8a7952c0bb470c06c6db6b23026c6617491"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-replay-conflict.png",
+      "sha256": "0f4f746837ffe6773f628347bb74341eae44b4b6c96042521328d76fa2d85c4a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-replay-ordered.png",
+      "sha256": "ae75d11671f5bf998c5eeac2d9ee276f7393b18c8c66c8f3855df680ec05beb3"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-replay-view-only.png",
+      "sha256": "e50d8bf459dae0e5be47758c66303371738ed7faaf254d2851c4b87afada6b26"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-saved-conflict-round6.png",
+      "sha256": "a11015194dee82603d14a4abc746fcc39532b1aef4a135b3ab874e228ce15da6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-saved-hallmark-details-round6.png",
+      "sha256": "830327b81dbeb2ceda769ecc6fd5fc600eaea4141741a9b37c88075d0036a08c"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-saved-late-load-round6.png",
+      "sha256": "b4560a075425336b38f23f558e8e5173bfaf6bb5bc6fffb85aef547ed914cdd0"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-saved-loaded-round6.png",
+      "sha256": "8a7f25b611307b2bf873e4e0c336442b41f48c00743daa4512db0d5c57d84d48"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/sales-return-saved-tagged-readonly-round6.png",
+      "sha256": "cb5521a5c1701096938bc8a8431f3d8e9748ed8c69850ef50a1fd827bb91ff23"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/tour-order-components.png",
+      "sha256": "9ee8abcaa27c0855df16367594db6e5f0839c9358b8755b13cf934ff5b87e829"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/tour-order-exact-values.png",
+      "sha256": "81b63ffcd868dc9ee7a9cc59edca43df49c3ab9fd73be60287b6a323e262536a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/tour-order-labour.png",
+      "sha256": "0c9f21d203e744e8da7a9e4ad1d860d6b9d293d10d69f76a955a38e65ab2188b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/parity-real-stack-round14-bound/tour-order-loaded.png",
+      "sha256": "e11df17d819125c5df5abb47cfc00752ce0349eed64220cc4566462890aa19ae"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/next-server.log",
+      "sha256": "800f3b13ce444129fc9819609f286879fed19bcc912af7d00731df68933f6fb4"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/result.json",
+      "sha256": "1ecbc86658bf15bb0b07bdc3817ad8f270e05c02c7bc14f8f92a296cb02f543d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/session-context-aba-late-response.png",
+      "sha256": "de984bee44191a953ed773aba5f49e5592cca91f85da2f634f847940c4267b03"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/session-context-departed-drop-draft.png",
+      "sha256": "39666de29b0e4a1930c177579f79b5c9e6aefcfbb5b2e4818dd5da5e7955835f"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/session-context-departed-success-draft.png",
+      "sha256": "bfe7cae165ea39234b7a9021d29dc65dc1c355cd95755296c720e529f5b50010"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/session-context-recovered.png",
+      "sha256": "26493925f1d7b254b71ba5ec7082328619e99ae268240a74fd331b57102c02e3"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/session-context-stale-draft.png",
+      "sha256": "aa6b6feb9d6fce321e83cb4c1102c05c264b9a08b9f6c188e60d36a0dfcf0859"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/session-context-round14-bound/session-context-uncertain-draft.png",
+      "sha256": "2ffd5ee34ea291640c6f157b314e0368d45b74ec80dd8572ac578b1bd23f304f"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/labour-preview-lifecycle-round14-bound/labour-lifecycle-departure.png",
+      "sha256": "108ed0c20d02dea640b8b5c6147dbea2f6e604b5c4e94bfe979c2dbeeabf2feb"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/labour-preview-lifecycle-round14-bound/labour-lifecycle-retry.png",
+      "sha256": "c39bf050490a5e123cabb5cd9b08d93a9fdb0a6867272b00234a3d0df42f73ab"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/labour-preview-lifecycle-round14-bound/labour-lifecycle-stale-prefix.png",
+      "sha256": "11745543d5b0145787d68f3634e0968c3a252584db4247946244e7d13c9f6a1a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/labour-preview-lifecycle-round14-bound/next-server.log",
+      "sha256": "6572f7b2211cb3f264f687efa514a3013520bd5d2d522d7c1290342cf92a2611"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/verified-browser-artifacts/labour-preview-lifecycle-round14-bound/result.json",
+      "sha256": "6a9d303536f04fcbf3befb1ff16e0c8e631d3491d64e9f7391dd4c33cfd2c407"
+    }
+  ],
+  "qualification": "Exact result/check/fault identities and completed run records verified. No full desktop, hardware or production acceptance. Baseline zero interception and explicit fault suites remain separate."
+}

@@ -1,0 +1,70 @@
+{
+ "form": "UT_SET_ADMIN",
+ "loc": 2614,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * From CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET COUNTER_STK = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET ESTMATE_BANK_LOCK = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET OLD_PURC_TOUCH = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET NEGATIVE_STK_SALE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET SL_NWT_LOCK = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET BILL_PROFIT = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET PURC_LOT = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET YEAR_GOLD_SL = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET YEAR_SILVER_SL = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET USER_KR_TOUCH_HIDE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET STK_LMIT_WITH_DESIGN = ' ? ' WHERE CO_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Counter Wise Fild Mandatory....Set",
+   "when": ""
+  },
+  {
+   "message": "Estmate Entry Bank and Card Entry Locked....Set",
+   "when": ""
+  },
+  {
+   "message": "Old Gold Or Silver Purchase Then Touch Auto Generate....Set",
+   "when": ""
+  },
+  {
+   "message": "Negative Stock Then Sales Allow....Set",
+   "when": ""
+  },
+  {
+   "message": "If Tag Sales Entry Then Net Wt and Gr Wt Is Locked....Set",
+   "when": ""
+  },
+  {
+   "message": "Bill Profit display Set...",
+   "when": ""
+  },
+  {
+   "message": "Lot Wise Purchase and Tag Manage...",
+   "when": ""
+  },
+  {
+   "message": "Yearly Gold Sales Value Set...You Can Show This Value In Main Screen...",
+   "when": ""
+  },
+  {
+   "message": "Yearly Silver Sales Value Set...You Can Show This Value In Main Screen...",
+   "when": ""
+  },
+  {
+   "message": "Lot Wise Tag Entry and Software Open Wisth User Thne Kr Touch And Kr Fine Colum Hide...",
+   "when": ""
+  },
+  {
+   "message": "Stock Limit Master With Design (tag Labour Set With ItCode + Desigh + From To to Weight) Set...",
+   "when": ""
+  }
+ ]
+}

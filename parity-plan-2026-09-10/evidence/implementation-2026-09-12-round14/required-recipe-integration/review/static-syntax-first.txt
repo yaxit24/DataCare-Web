@@ -1,0 +1,1 @@
+First static ast.parse failed: canonical_path return expression lacked one closing parenthesis. Syntax-only correction; no test or production execution occurred. Corrected stage re-parsed below.

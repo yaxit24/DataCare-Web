@@ -1,0 +1,457 @@
+{
+  "kind": "round14-pre-browser-supplement-read-v1",
+  "observedAtUtc": "2026-09-12T01:54:26.016058+00:00",
+  "qualification": "Historical read observation only. Retention found an omitted R13 required-check input; root owns new explicit source seed/mandatory prefix and superseding browser/recipe/chain runs. This is not final browser-source coverage.",
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/40-implementation-progress-round14.md",
+      "sha256": "b71ce3e0fe820cda1e1882f63134c52ea84b28d5d09c3f3a7194fa106bf6d240"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/checkpoint-required-checks.json",
+      "sha256": "cc96bc2aeba14996d908a00042356cfbd962a3ced995d8399f537201a9664297"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/coverage-and-build-qualification.json",
+      "sha256": "ebd1b7ac9e423c91b2b46005eb82fdcb6858d3d433191568607d063212cf78d0"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/required-recipe-integration/root-superseding-labels.json",
+      "sha256": "1b0b33e71b4c209ebd9760400f922c5b81763b013ed21eb9a8ad8af1b19df44b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+      "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-labour-replay.journey.mjs",
+      "sha256": "d902006a7ebee58a5143a9382c39c84c0dfafa32144350b19314804a8b1df04a"
+    }
+  ],
+  "reviewedAvailableRequiredRunRecords": [
+    {
+      "label": "api-qualified",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-qualified.run.json",
+        "sha256": "7e90f2e981b232282cb87cbc7ee2748fe80ff01ae87c4d5ee9e612bc7ff437a7"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-qualified.inputs.json",
+        "sha256": "e6df2c3df63ddbdc5d28525346a2f9e6f6e826965de2f775cefa367b8008349a"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-qualified.txt",
+        "sha256": "3346141dcf09b279b319309b503c0c30b4ec1be8c3162a97c43ef8aeffc7643e"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1909,
+      "publicAbsences": 1
+    },
+    {
+      "label": "api-final-test-types",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-final-test-types.run.json",
+        "sha256": "23e7cfb925a0116d964c707d69f079c663717efb22478c0155ec1b7a6f2780be"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-final-test-types.inputs.json",
+        "sha256": "003cd19c0c2f06992514350965821f74494b9cb007dc8f7b0f9413688abff67d"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/api-final-test-types.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1906,
+      "publicAbsences": 1
+    },
+    {
+      "label": "core-final",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final.run.json",
+        "sha256": "29a803ae86f36416405fecb43cff3c20af99259591900af2ef3bc91aa7d70bcf"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final.inputs.json",
+        "sha256": "c217c155108d0bd5023a1a6ffb1e5356529589f5ebd58cd23edb7e41fb19d1de"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final.txt",
+        "sha256": "a48b8f60ea7f4a187c125a0821a8bf02daad15b07bc0fd61570821da5ebe1646"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1883,
+      "publicAbsences": 1
+    },
+    {
+      "label": "core-final-test-types",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final-test-types.run.json",
+        "sha256": "575f52ff257433fc6c50ed624d8265948953d238430442ed3e7aa7bcc8b64439"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final-test-types.inputs.json",
+        "sha256": "56e735aab48c38dc598e117ec4f2c3c6bd6249bfc7c1bfb4342e7bb242a47700"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-final-test-types.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1883,
+      "publicAbsences": 1
+    },
+    {
+      "label": "workspace-final-build",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-build.run.json",
+        "sha256": "2f2d7ef278d6b36a8d2bd3f39bd6fc7899ac23856996c9edaf9ace73db72a6f6"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-build.inputs.json",
+        "sha256": "88da5a32b5d5109c3eed27a34615c9c666de2e565a599bb2338762a27bd43448"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-build.txt",
+        "sha256": "bda3aca2dc13839068b254132fa48fd3ed4da1f8f1dd79478e1976695c98914b"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1883,
+      "publicAbsences": 1
+    },
+    {
+      "label": "workspace-final-lint",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-lint.run.json",
+        "sha256": "25922416595222841367bb0615bd9b5605a80e8645af2d3db6dcc225a88360c0"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-lint.inputs.json",
+        "sha256": "e6f64ae900bb699957a7243e0d4dae953e4e38b0bfdb31d4407b562099c8cc98"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/workspace-final-lint.txt",
+        "sha256": "12357d589e82f4ddbc289d39c0e8cf82d2818e93b4e4446800876868d8c40c39"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1883,
+      "publicAbsences": 1
+    },
+    {
+      "label": "web-final",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/web-final.run.json",
+        "sha256": "bd5b146f553bcf585837dc5280bb7b8ec63f14c7ef35f6063420e866bbc8ad5a"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/web-final.inputs.json",
+        "sha256": "97e79473e63d1a1f7f51e2d687a109e907fc960741a119738c6110ac03cc8df3"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/web-final.txt",
+        "sha256": "bd4af62381b8e72aeee2d1950576cccaa30f7eb62c2054ad75227a5909b009bb"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1883,
+      "publicAbsences": 1
+    },
+    {
+      "label": "browser-qualified",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-qualified.run.json",
+        "sha256": "b8f739fe38f68630d7d53a350b1f3e9cb926147360db94c7d52d3ddd7d584192"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-qualified.inputs.json",
+        "sha256": "460fde793b5697acfbfb85d4959b9b4c3c37978a3dfedcd2d92acc5096c0fa3d"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-qualified.txt",
+        "sha256": "454c3ec596d21d1cacee79b20349e8bcf214413a20241a74e3f59a042877d25f"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1909,
+      "publicAbsences": 1
+    },
+    {
+      "label": "browser-context-qualified",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-context-qualified.run.json",
+        "sha256": "4e0676b75fcd2f6489faa0e173e62f84e3a02e03b2f8f203025f722083cb202a"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-context-qualified.inputs.json",
+        "sha256": "4d3c97487e1b059b9965c648a6785f01c6fbb2498bbc4cb4113731ccdeb3dc38"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-context-qualified.txt",
+        "sha256": "06d736ac24ea33b0b4237235b4c92278fc6cedc35f9c230a3f448b5c20bdbf06"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1909,
+      "publicAbsences": 1
+    },
+    {
+      "label": "browser-labour-qualified",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-labour-qualified.run.json",
+        "sha256": "56cbc14e0b535418d8ba05efd1cbbf3a5e94ea66085a47a37c6c5787752a353d"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-labour-qualified.inputs.json",
+        "sha256": "823451d9450c3358722996425a76575d6202b5b7e37fd82f19f8d2265b371abb"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-labour-qualified.txt",
+        "sha256": "9476e9ae5fff895e8864b3d209ba0749caa850a8c5f8dcf3262d22decb7aeaee"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1909,
+      "publicAbsences": 1
+    },
+    {
+      "label": "kernel-final",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/kernel-final.run.json",
+        "sha256": "3e3def3cb29647c509c74e93b4d7652309d266c5a3bb3f5028b60a66e6d5cc8d"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/kernel-final.inputs.json",
+        "sha256": "acb0b6c9337edf14e964999249a77c6321eac0722b776ead11bb42002685358c"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/kernel-final.txt",
+        "sha256": "09ce3658bfbb067b8d396c857c51ecef710f151b0f3b267af587f8fdfedb773a"
+      },
+      "status": "failed",
+      "exitCode": 1,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1907,
+      "publicAbsences": 1
+    },
+    {
+      "label": "dead-cells-final",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/dead-cells-final.run.json",
+        "sha256": "116a897cbfcf52ba0bcd3dea7fdb7961dff062f838ed2e621574446e6b569791"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/dead-cells-final.inputs.json",
+        "sha256": "d6fd6f2df2eb28c8f86bce62423cbce4a080541425abc2e36c29151ef98678dd"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/dead-cells-final.txt",
+        "sha256": "40f4e4aea0c9c217dd80a645a2190bb2c9414db8d6fbe3af6524c8a199eb668f"
+      },
+      "status": "failed",
+      "exitCode": 1,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1907,
+      "publicAbsences": 1
+    },
+    {
+      "label": "depth-final",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/depth-final.run.json",
+        "sha256": "9c2582d56b8fb71df91f16a47eb4689b5b04c532b08298c1fd41c07a895769ec"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/depth-final.inputs.json",
+        "sha256": "04c722ee7a695175ab197b1244580ff4bf7c0e536af84b91749749e428fb6faa"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/depth-final.txt",
+        "sha256": "2db3f6c011072faefbfaa70445c7ac5de50821abef869cae927ec4cfaa97ff5d"
+      },
+      "status": "failed",
+      "exitCode": 1,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1907,
+      "publicAbsences": 1
+    },
+    {
+      "label": "scanner-final",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/scanner-final.run.json",
+        "sha256": "cb1a2ae08dd62c6b67de7e639db19ddc41880320b674891491b59c43ccac6198"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/scanner-final.inputs.json",
+        "sha256": "ced06b3bdf1e116cf7c3eff41a7855f9cddb4256e0856ef1d9f85f58830acfdf"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/scanner-final.txt",
+        "sha256": "1a45a4120498209745e5ce5e4142b6e4863c17ec25637144fc0686a479b1450e"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1907,
+      "publicAbsences": 1
+    },
+    {
+      "label": "completion-final",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/completion-final.run.json",
+        "sha256": "eb92272883f35a3771d8703b9d0563c8bcb01a1c452c3b7add77db421ded045d"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/completion-final.inputs.json",
+        "sha256": "61477302349e34d9fa5696319125753988c917c509106412bbf94654aa3c2c61"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/completion-final.txt",
+        "sha256": "750edf3a249abadc5699b69fb037f9504ef4f1d4d777828942babeef7538c29e"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1907,
+      "publicAbsences": 1
+    },
+    {
+      "label": "docs-refs-qualified",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/docs-refs-qualified.run.json",
+        "sha256": "84c464a4008dd9a6602bd431fc93497cb8f0f9d1939c4698882a714a5618ded4"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/docs-refs-qualified.inputs.json",
+        "sha256": "dffc8ffdde73a924ce44a3269bf6fc6a6db27dd120be553fb14511cc37f7f56a"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/docs-refs-qualified.txt",
+        "sha256": "34801d717b082338af908622d9eb77bbeee7865aba5e263f969e1a55c7f76ec7"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1909,
+      "publicAbsences": 1
+    },
+    {
+      "label": "checkpoint-chain-qualified",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/checkpoint-chain-qualified.run.json",
+        "sha256": "3f68e9ac173a51d4167ccde02d6d2263e7a9054255cf21fe7aecd23c803cfd18"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/checkpoint-chain-qualified.inputs.json",
+        "sha256": "0cfbef84c45cdaba910ec260efd722349428ed65ac06edbf0b177fd5b388ce4a"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/checkpoint-chain-qualified.txt",
+        "sha256": "20680e3dcc6001708b10c294a3008610d3a4b019538487388e9a32db6a1d919f"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1909,
+      "publicAbsences": 1
+    },
+    {
+      "label": "recipe-controls-qualified",
+      "record": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/recipe-controls-qualified.run.json",
+        "sha256": "11dc5b57665c9f7b53d7d3ce4e4be20f58e56706fbff529c0e48c092b7173cdc"
+      },
+      "inputManifest": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/recipe-controls-qualified.inputs.json",
+        "sha256": "1a12efa1418a83dd3f8f4849a651bef286a8af839fd544fa556ab1f535933ab4"
+      },
+      "log": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/recipe-controls-qualified.txt",
+        "sha256": "6ccc18fac2cfc8bb56e0aedfce28827aeba8ceca3b7db21d589fcb624e40bb5d"
+      },
+      "status": "passed",
+      "exitCode": 0,
+      "commandMatches": true,
+      "requiredLiteralsPresent": true,
+      "recordedLogHashMatches": true,
+      "recordedInputHashMatches": true,
+      "publicCount": 1909,
+      "publicAbsences": 1
+    }
+  ],
+  "omittedBrowserInput": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+    "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237",
+    "absentFromPriorQualifiedManifests": {
+      "browser-qualified": true,
+      "browser-context-qualified": true,
+      "browser-labour-qualified": true
+    }
+  },
+  "runtimeExecutionByReviewer": false
+}

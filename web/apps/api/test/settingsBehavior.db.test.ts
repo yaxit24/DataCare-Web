@@ -49,6 +49,7 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       'DHRN_REC_DATA',
       'CASH_DATA',
       'TEMP_BOOK_DATA',
+      'BOOK_DETL',
       'BOOK_DATA',
       'CO_SET',
     ]) {
@@ -82,6 +83,16 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       LC,
       RCT,
       DHR,
+    );
+    // P0-04: the cash-receipt path resolves its settlement account from BOOK_DETL slot 1 rather than falling
+    // back to the literal 'CASH', so the receipt book needs its slot configured.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE")
+         VALUES ($1,$2,$3,$4,1,'CASHAC')`,
+      TENANT,
+      CO,
+      LC,
+      RCT,
     );
   };
 
@@ -128,6 +139,30 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       fxCode: 'FX_CODE',
       adminSms: 'ADMIN_SMS',
       customerSms: 'CUST_SMS',
+      // CO_SET_NEW columns (P4). This helper writes to CO_SET, so a case that flips one of these
+      // must seed CO_SET_NEW itself — the mapping exists so the key set stays exhaustive and a new
+      // behaviour field cannot be added without deciding which column backs it.
+      negativeStockSale: 'NEGATIVE_STK_SALE',
+      purchaseWithHallmarkTax: 'PURC_WITH_HMTAX',
+      salesWithHallmarkTax: 'SALES_WITH_HMTAX',
+      saleNetWeightLocked: 'SL_NWT_LOCK',
+      itemFineLocked: 'ITM_FINE_LOCK',
+      labourIncludesGhat: 'LBR_WITH_GHT',
+      stockRefreshFromDateOnly: 'CUR_DAY_POSTING',
+      estimateBankLocked: 'ESTMATE_BANK_LOCK',
+      estimateTax: 'ESTMATE_TAX',
+      purchaseTdsEnabled: 'PR_TDS_TAX',
+      oldPurchaseTouchGenerated: 'OLD_PURC_TOUCH',
+      silverThreeDigit: 'SILVER_THREE_DIGIT',
+      otherItemWeightRemoved: 'OTH_ITM_WT_REMOVE',
+      orderReducesTagStock: 'ORD_TAG_STK_LESS',
+      saleTagWeightDiffReconciled: 'SL_TAG_WT_DIFF',
+      purchaseLot: 'PURC_LOT',
+      itemWithLotStock: 'ITM_WITH_LOT_STK',
+      totalFineStockType: 'TOT_FINE_STK_TYPE',
+      branchAllAccountShow: 'BRANCH_ALL_AC_SHOW',
+      duplicatePrint: 'DUP_PRINT',
+      qrCodeGeneration: 'QR_CODE_GEN',
     };
     // Ten CO_SET columns are numeric after the column-type correction, so a bare string parameter fails with
     // `42804 ... is of type double precision but expression is of type text`, and an empty string fails with
@@ -288,6 +323,31 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       fxCode: null,
       adminSms: null,
       customerSms: null,
+      // ---- CO_SET_NEW business switches (P4) ----------------------------------------------
+      // Defaults transcribed from MS_OPNCOMP.cs's blank-fill block, NOT chosen. Two are the
+      // PERMISSIVE value, which is why a uniform false was wrong: a company that never opened
+      // these settings allows negative stock and includes ghat in the labour base.
+      negativeStockSale: true,
+      labourIncludesGhat: true,
+      purchaseWithHallmarkTax: false,
+      salesWithHallmarkTax: false,
+      saleNetWeightLocked: false,
+      itemFineLocked: false,
+      stockRefreshFromDateOnly: false,
+      estimateBankLocked: false,
+      estimateTax: false,
+      purchaseTdsEnabled: false,
+      oldPurchaseTouchGenerated: false,
+      silverThreeDigit: false,
+      otherItemWeightRemoved: false,
+      orderReducesTagStock: false,
+      saleTagWeightDiffReconciled: false,
+      purchaseLot: false,
+      itemWithLotStock: false,
+      totalFineStockType: 'I',
+      branchAllAccountShow: false,
+      duplicatePrint: false,
+      qrCodeGeneration: false,
     });
   });
 

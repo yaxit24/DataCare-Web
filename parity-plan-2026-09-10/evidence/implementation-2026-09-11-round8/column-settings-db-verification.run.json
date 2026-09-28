@@ -1,0 +1,65 @@
+{
+  "schema": "datacare-column-settings-db-verification-v1",
+  "pathBase": "imodule-extracted",
+  "status": "focused-engineering-passed",
+  "desktopAcceptance": false,
+  "tests": {
+    "files": 2,
+    "passed": 58,
+    "failed": 0,
+    "skipped": 0,
+    "realDatabaseAndAuthenticatedRouteCases": 21,
+    "implementationOwnerPureCases": 37,
+    "database": "disposable localhost:55433 / app_user",
+    "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test test/columnSettings.db.test.ts test/columnSettings.test.ts"
+  },
+  "sources": [
+    {
+      "path": "web/apps/api/test/columnSettings.db.test.ts",
+      "sha256": "e4deee526856b8f211f4744092ddfdac3056648104f621403f416525bd6a988b",
+      "bytes": 29920
+    },
+    {
+      "path": "web/apps/api/test/columnSettings.test.ts",
+      "sha256": "2c334782d3c3b7d814b3c72329a63e7e09cf84d14a38f3ec183c6cbe3074807b",
+      "bytes": 4111
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/columnSettings.ts",
+      "sha256": "1750f378429fef09e22e1b85386811e9f6b6e9213de7403479d14b541a5be0a1",
+      "bytes": 11720
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/master.service.ts",
+      "sha256": "dc81d25fa3b53a17c6998007f8a14d96da57d238cac70a11023525341953156c",
+      "bytes": 25988
+    },
+    {
+      "path": "web/apps/api/src/modules/masters/configs.ts",
+      "sha256": "e3b03858a98a629385e1c0dc3c1071e354a15a590656814f743533445b845a17",
+      "bytes": 18063
+    },
+    {
+      "path": "web/apps/api/src/app.ts",
+      "sha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a",
+      "bytes": 33817
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "sha256": "f7161a49c156621f048f7105f9648018f5726c017938f9e2bb356d74905f9308",
+      "bytes": 21054
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-settings-db-first.txt",
+      "sha256": "640cb0b9a3aa73e7b87bd145a063aceff8a4abda2fbc641bc5e3e4fe58967223",
+      "bytes": 1359
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round8/column-settings-db-verification.md",
+      "sha256": "d9fd9673a634db69e23a31ad91027e9af7202c4a3cc5bfba7f2766388be12bce",
+      "bytes": 7414
+    }
+  ]
+}

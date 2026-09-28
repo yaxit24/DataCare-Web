@@ -1,0 +1,22 @@
+{
+ "form": "MS_BOOKLIST",
+ "loc": 938,
+ "gridColumns": {},
+ "inlineSql": [],
+ "keyboard": {
+  "Esc": 2,
+  "Left": 1,
+  "Right": 1,
+  "Up": 1,
+  "Down": 1,
+  "Backspace": 1,
+  "F1": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "No Record Found",
+   "when": ""
+  }
+ ]
+}

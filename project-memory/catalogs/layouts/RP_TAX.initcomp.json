@@ -1,0 +1,355 @@
+{
+ "form": "RP_TAX",
+ "controlCount": 33,
+ "byKind": {
+  "button": 11,
+  "masked": 2,
+  "textbox": 10,
+  "label": 7,
+  "panel": 2,
+  "other": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "Cr"
+  ],
+  "PanelDhrn": [
+   "btnTaxSumm",
+   "btnLdrWeight",
+   "BtnDrList",
+   "BtnGroupWise",
+   "btnWithRef",
+   "btnAreaWise"
+  ],
+  "this": [
+   "tTaxCode",
+   "tTaxName",
+   "Label5",
+   "tBookCode",
+   "tBookName",
+   "Label4",
+   "mToDt",
+   "mFromDt",
+   "PanelDhrn",
+   "tLcCode",
+   "tLcName",
+   "Label6",
+   "tAcCode",
+   "tAcName",
+   "Label3",
+   "Label2",
+   "tRefAc",
+   "tRefName",
+   "Label1",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnGroupWise",
+   "type": "QButton",
+   "location": "182,78",
+   "size": "143,37",
+   "tabIndex": "0",
+   "text": "OutPut Tax (Sale)",
+   "kind": "button"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "477,66",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "01/",
+   "kind": "masked"
+  },
+  {
+   "name": "btnWithRef",
+   "type": "QButton",
+   "location": "102,23",
+   "size": "143,37",
+   "tabIndex": "1",
+   "text": "Sales Tax",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "559,66",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "tLcCode",
+   "type": "TextBox",
+   "location": "475,96",
+   "size": "76,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnAreaWise",
+   "type": "QButton",
+   "location": "266,23",
+   "size": "143,37",
+   "tabIndex": "2",
+   "text": "Purchase Tax",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "475,124",
+   "size": "76,23",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDrList",
+   "type": "QButton",
+   "location": "344,78",
+   "size": "143,37",
+   "tabIndex": "3",
+   "text": "InPut Tax (Purc)",
+   "kind": "button"
+  },
+  {
+   "name": "tRefAc",
+   "type": "TextBox",
+   "location": "475,154",
+   "size": "76,23",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tBookCode",
+   "type": "TextBox",
+   "location": "475,184",
+   "size": "76,23",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Tax Report",
+   "kind": "label"
+  },
+  {
+   "name": "tTaxCode",
+   "type": "TextBox",
+   "location": "475,213",
+   "size": "76,23",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PanelDhrn",
+   "type": "Panel",
+   "location": "220,257",
+   "size": "712,222",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "btnLdrWeight",
+   "type": "QButton",
+   "location": "434,23",
+   "size": "143,37",
+   "tabIndex": "7",
+   "text": "In Out Tax",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "btnTaxSumm",
+   "type": "QButton",
+   "location": "266,137",
+   "size": "143,37",
+   "tabIndex": "8",
+   "text": "Tax (Summ)",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "793,3",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "408,154",
+   "size": "60,20",
+   "tabIndex": "1160",
+   "text": "Ref Ac",
+   "kind": "label"
+  },
+  {
+   "name": "tRefName",
+   "type": "TextBox",
+   "location": "557,153",
+   "size": "282,23",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "367,67",
+   "size": "102,20",
+   "tabIndex": "1162",
+   "text": "From / To Date",
+   "kind": "label"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "557,124",
+   "size": "282,23",
+   "tabIndex": "1164",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "393,124",
+   "size": "75,20",
+   "tabIndex": "1165",
+   "text": "Party Code",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "408,96",
+   "size": "60,20",
+   "tabIndex": "1176",
+   "text": "Lc Code",
+   "kind": "label"
+  },
+  {
+   "name": "tLcName",
+   "type": "TextBox",
+   "location": "557,95",
+   "size": "282,23",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "370,184",
+   "size": "97,20",
+   "tabIndex": "1289",
+   "text": "Book",
+   "kind": "label"
+  },
+  {
+   "name": "tBookName",
+   "type": "TextBox",
+   "location": "557,183",
+   "size": "282,23",
+   "tabIndex": "1290",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "370,213",
+   "size": "97,20",
+   "tabIndex": "1292",
+   "text": "Tax Code",
+   "kind": "label"
+  },
+  {
+   "name": "tTaxName",
+   "type": "TextBox",
+   "location": "557,212",
+   "size": "282,23",
+   "tabIndex": "1293",
+   "text": "",
+   "kind": "textbox"
+  }
+ ]
+}

@@ -1,0 +1,105 @@
+{
+  "kind": "round14-option-a-bar-companions-ready-v1",
+  "frozenAtUtc": "2026-09-12T01:04:24.386288+00:00",
+  "status": "staged-pure-prerequisite-verified-not-integrated",
+  "activeRepositoryEdits": false,
+  "canCommit": false,
+  "integrationFiles": [
+    "web/packages/core/src/saleReturnNBarCompanions.ts",
+    "web/packages/core/test/saleReturnNBarCompanions.test.ts",
+    "web/packages/core/test/fixtures/saleReturnNBarCompanions.independent.json"
+  ],
+  "frozenLiteralCases": 22,
+  "orderedParentAssignments": 74,
+  "finalParentTargetFields": 70,
+  "headerTargetFields": 12,
+  "focusedTestsPassed": 61,
+  "strictSourceAndTestTypes": "passed",
+  "unchangedFinalInputs": 5,
+  "unchangedSourceReferences": 6,
+  "limits": [
+    "Supplied qualified context is not self-proving authority",
+    "No calculator or inferred phase chronology",
+    "No Windows clock/date representation acceptance",
+    "No DML/endpoint/write capability or old guard changes",
+    "Complete financial/child/reference/Save/session authority remains external"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "d0fb5f82eb8ae2c7719e9f9a4690790ea3efa743f262dcd168ac2d5310f08d13"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "f9dc482ce19d295b856f763b1a77006f437f448d6b987273dffd62054e3f4de1"
+    },
+    {
+      "path": "author-fixture.py",
+      "sha256": "c3e352a93b128a904c8b35e05a0ab345df5dbb8ccd0bfc06faf04a0c85dc8e3b"
+    },
+    {
+      "path": "fixture-authorship.json",
+      "sha256": "ea3904dfed84a294c5b53d4cf41f00f22cf1a2f3e59c8ca6d7c245f9b4754e14"
+    },
+    {
+      "path": "fixture-freeze.json",
+      "sha256": "0765fe232a935fe744cde786ba01ebf8742da8d186f2ec31570dd70a17cb3ac4"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "9c37777c58519f8518c48093f9f5ee080dd439bf51b2bc7cb17a83024e11c6a4"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnNBarCompanions.ts",
+      "sha256": "0d63cb36e8b225055efd9c50cbdd005504ad802f589a14b1503f009f2e131d39"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnNBarCompanions.test.ts",
+      "sha256": "9f40da10bc5455d4d3ea612af6cddac3e3b9cd313f68310086abcaa473535eaf"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnNBarCompanions.independent.json",
+      "sha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a"
+    },
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "75310bff016b194c22167683f733bcd0991ba7d1d2a288c77763698eafecf4e8"
+    },
+    {
+      "path": "web/packages/core/vitest.config.ts",
+      "sha256": "a84b0a026850dc8c56864295e79b5499e5eb2935c04cb749e6b8554e157924d3"
+    },
+    {
+      "path": "focused-first.txt",
+      "sha256": "7c2f2ba71acc93898d34232345872f2c38180f5b7a10374a85f19624d4655293"
+    },
+    {
+      "path": "types-first.txt",
+      "sha256": "3f4ae3b7a76d810fb53660be9fe55af99a97d1114a1a67878ae57370e890bff4"
+    },
+    {
+      "path": "focused-first.inputs.json",
+      "sha256": "beb437b67626a34f35036f92d342eb2ac961113fde358d3471811499b6cb053f"
+    },
+    {
+      "path": "focused-first.run.json",
+      "sha256": "518fc8be56a64bacbe218f67efd3608681bb35d95b88aa51a0ddccc1f29467e8"
+    },
+    {
+      "path": "focused-final.txt",
+      "sha256": "7053f7377633055a029f4eb8044bdeaf7c703b128e23569ed8f337bf42afa8bc"
+    },
+    {
+      "path": "types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "focused-final.inputs.json",
+      "sha256": "a8b058043094d293dfbab0c843881fd9ad1ce026ed66e8d81b6f573287b626fb"
+    },
+    {
+      "path": "focused-final.run.json",
+      "sha256": "d0eef7378275e3939e15ada2cf22a9569677a945880e6b07f17f8550992904b1"
+    }
+  ]
+}

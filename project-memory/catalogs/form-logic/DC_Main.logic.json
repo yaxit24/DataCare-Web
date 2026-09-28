@@ -1,0 +1,50 @@
+{
+ "form": "DC_Main",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BAL_GR",
+  "BAR_DETL",
+  "BOOK_DATA",
+  "COL_MAST",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "SYS",
+  "TAG_SET",
+  "USER_MAST"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "BAL_GR",
+   "GROUP_MAST",
+   "ITEM_MAST"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "BAR_DETL",
+  "BOOK_DATA",
+  "COL_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "SYS",
+  "TAG_SET",
+  "USER_MAST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 11,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 0,
+ "calcSample": [
+  "AVG_TOUCH = 0,AVG_FINE = 0,AVG_NWT = 0 WHERE CO_CODE = '\" + MCo_code + \"'\")",
+  "AVG_TOUCH = 0,AVG_FINE = 0,AVG_NWT = 0,AVG_AMT = 0 WHERE CO_CODE = '\" + MCo_code + \"'\")",
+  "AVG_TOUCH = 0,AVG_FINE = 0,AVG_NWT = 0,AVG_RATE = 0 WHERE CO_CODE = '\" + MCo_code + \"'\")",
+  "MsNewTagNo = tPrCode + tItType + Strings.Format((object)num, \"0000\")"
+ ],
+ "loc": 2299
+}

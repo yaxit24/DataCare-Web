@@ -1,0 +1,59 @@
+{
+  "kind": "datacare.parity-integration-review/1.0",
+  "capturedAtUtc": "2026-09-10T23:18:27.131387+00:00",
+  "status": "bounded-fixes-verified",
+  "sourceFiles": [
+    {
+      "path": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "9fefdb74fbe5afe686eb8596e2db34739a23e2db4b63e43a17313fa8c528df9f"
+    },
+    {
+      "path": "web/apps/api/test/tourOrderHydration.db.test.ts",
+      "sha256": "eb3927b88dd017cea3ab8f7f1b1ea8e110e02a98a600136182c0dc63542c3844"
+    },
+    {
+      "path": "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "sha256": "93af2f8dd282458cf2519594e3ed6013073862d068a39c74381e7b527fb06268"
+    },
+    {
+      "path": "web/apps/api/test/creditNoteIrnAmounts.test.ts",
+      "sha256": "c21865660846e217d63624bcc289c8bb678634e3d365adf7946eb151a8ea73f1"
+    }
+  ],
+  "artifactFiles": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/integration-final-review.md",
+      "sha256": "fdd6737ee4fae3e85b5fbacaaba46df77ab3131293bca74a3b00b7d9fce0aef1"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/allocation-scope-db.txt",
+      "sha256": "949997408b23224e8a522ec0317372c4503b14337db0d923117037688c2571ee"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/irn-zero-amounts-unit.txt",
+      "sha256": "486bfe9efbb785266553c64c908957da430346b2853cc02cece36616126a27d7"
+    }
+  ],
+  "verification": [
+    {
+      "name": "Tour allocation source identity DB regression",
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- test/tourOrderHydration.db.test.ts",
+      "status": "passed",
+      "files": 1,
+      "tests": 12,
+      "databasePort": 55433
+    },
+    {
+      "name": "CRN and INV zero amount adapter unit regression",
+      "command": "ALLOW_SKIP_DB_TESTS=1 pnpm --filter @datacare/api test -- test/creditNoteIrnAmounts.test.ts test/einvoice.test.ts test/einvoice_gsp.test.ts",
+      "status": "passed",
+      "files": 3,
+      "tests": 19,
+      "databaseProof": false,
+      "providerCalls": 0
+    }
+  ],
+  "acceptedExecutionCards": [],
+  "wholeProductImplementationPercentage": null,
+  "limits": "Focused regression of two bounded review findings; combined verification belongs to root checkpoint17. Not full desktop, allocation/settlement, provider or production acceptance."
+}

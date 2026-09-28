@@ -1,0 +1,49 @@
+{
+  "checkpoint": "parity-plan-2026-09-10/35-implementation-checkpoint-round11.json",
+  "sources": 1513,
+  "artifacts": 214,
+  "verification": 15,
+  "api": {
+    "files": 237,
+    "tests": 2159,
+    "skipped": 0,
+    "inputProof": {
+      "snapshot": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/api-input-snapshot-final.json",
+        "sha256": "4bb7d056031df4b8af2a9745e27a6ab38bb69648c3e77a81f7da989a5c6ec0a9"
+      },
+      "verification": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/api-input-verification-final.json",
+        "sha256": "ce45e2e8981a4eeacfd18a2ed2fa9ad7c8f79684efcca491ad14b793ed28932a"
+      },
+      "inputs": 1313,
+      "changedInputs": [],
+      "addedInputs": []
+    }
+  },
+  "core": {
+    "files": 14,
+    "tests": 499,
+    "skipped": 0,
+    "inputProof": {
+      "snapshot": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-input-snapshot-complete.json",
+        "sha256": "e33c6c1fa26c7a9e8cedd17ea2f63c5802720a1fbbb370d52a64398d7da66da7"
+      },
+      "verification": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/core-input-verification-complete.json",
+        "sha256": "eefa44e8e01f88e36504154f769ff9a5ac5d80d0ec4b810958615a0ecd6cfac7"
+      },
+      "inputs": 39,
+      "changedInputs": [],
+      "addedInputs": []
+    }
+  },
+  "web": {
+    "files": 27,
+    "tests": 294,
+    "skipped": 0
+  },
+  "browserJourneys": 16,
+  "status": "validated-not-written"
+}

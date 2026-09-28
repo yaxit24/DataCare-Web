@@ -1,0 +1,22 @@
+✔ imported typed .ts tuple alias contributes only descriptors used in returned JSX (14.470583ms)
+✔ unused imports, type-only imports and uncalled helper JSX do not become surface (2.052791ms)
+✔ removing only the rendered map removes the imported candidates (1.292ms)
+✔ object descriptors recognize labels after key/column and classify identities (2.326792ms)
+✔ factory literal selector and conditional flatMap retain provenance, not current visibility claims (2.627709ms)
+✔ unknown selector reports both conditional branches; unconditional empty filter counts none (1.844958ms)
+✔ false JSX condition is excluded and unknown runtime condition is recorded (1.42525ms)
+✔ unsupported dynamic factories remain explicit and do not invent fields (0.807625ms)
+✔ a flatMap that rewrites field identity is unsupported, not credited as original inputs (1.06725ms)
+✔ read-only mapped controls remain display-only and a type-only binding stays unresolved (1.367291ms)
+✔ same-named unused descriptor on another file cannot satisfy the rendered unknown binding (0.956083ms)
+✔ real Design/Tour imported fields are traced without changing wholesale nested mapping (63.860792ms)
+✔ sales exposes supported values without editable server-owned identity columns (26.878834ms)
+✔ sales-quotation exposes supported values without editable server-owned identity columns (19.992375ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 508.768583

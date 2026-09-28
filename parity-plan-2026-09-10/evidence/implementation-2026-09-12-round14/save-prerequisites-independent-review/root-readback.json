@@ -1,0 +1,5 @@
+{
+  "artifactCount": 7,
+  "inputDifferences": [],
+  "qualification": "Review source/fixture identities retain their original bytes. Later JSON test import attributes and repository formatting do not retroactively alter review pins; actual workspace tests are separately recorded."
+}

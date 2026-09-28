@@ -1,0 +1,55 @@
+{
+ "form": "RP_ADDRESS",
+ "tables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "AD_MAST",
+  "AD_MEMB",
+  "LOCT_MAST",
+  "TEMP_ADD",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "TEMP_ADD": [
+    "AC_ADD1",
+    "AC_ADD2",
+    "AC_ADD3",
+    "AC_AREA",
+    "AC_CITY",
+    "AC_CODE",
+    "AC_EMAIL",
+    "AC_MOBILE",
+    "AC_MOBILE2",
+    "AC_NAME",
+    "AC_PARSON",
+    "AC_PHONE",
+    "AC_PIN",
+    "CO_CODE",
+    "LC_CODE"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "TEMP_ADD"
+  ]
+ },
+ "selectTables": [
+  "AC_GROUP",
+  "AC_MAST",
+  "AD_MAST",
+  "AD_MEMB",
+  "LOCT_MAST",
+  "TEMP_ADD",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 3913
+}

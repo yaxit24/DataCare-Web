@@ -1,0 +1,16 @@
+{
+  "command": [
+    "env",
+    "PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round12-isolated",
+    "pnpm",
+    "test:parity:browser"
+  ],
+  "cwd": "/tmp/datacare-round12-verification/web",
+  "startedAtUtc": "2026-09-11T18:47:31.818844+00:00",
+  "finishedAtUtc": "2026-09-11T18:47:36.106785+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-browser.txt",
+  "isolatedInputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-workspace-inputs-qualified.json",
+  "isolatedInputManifestSha256": "52177ad18ac7717c709ccb4b74cdbc325158c5984c9cbc466c7e31c927e9857d"
+}

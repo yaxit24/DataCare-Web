@@ -1,0 +1,198 @@
+{
+ "report": "Company",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "PageHeader",
+     "height": 920,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 60,
+       "top": 230,
+       "width": 941,
+       "height": 230,
+       "dataSource": "PrintDate"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 60,
+       "top": 690,
+       "width": 356,
+       "height": 230,
+       "text": "CO_CODE"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 536,
+       "top": 690,
+       "width": 2032,
+       "height": 230,
+       "text": "CO_NAME"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 2688,
+       "top": 690,
+       "width": 2032,
+       "height": 230,
+       "text": "CO_ADD1"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 4840,
+       "top": 690,
+       "width": 2032,
+       "height": 230,
+       "text": "CO_ADD2"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text5",
+       "left": 6992,
+       "top": 690,
+       "width": 1302,
+       "height": 230,
+       "text": "CO_STATE"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 8414,
+       "top": 690,
+       "width": 1302,
+       "height": 230,
+       "text": "CO_CITY"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 230,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 60,
+       "top": 0,
+       "width": 356,
+       "height": 230,
+       "dataSource": "{CO_MAST.CO_CODE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 536,
+       "top": 0,
+       "width": 2032,
+       "height": 230,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 2688,
+       "top": 0,
+       "width": 2032,
+       "height": 230,
+       "dataSource": "{CO_MAST.CO_ADD1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 4840,
+       "top": 0,
+       "width": 2032,
+       "height": 230,
+       "dataSource": "{CO_MAST.CO_ADD2}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 6992,
+       "top": 0,
+       "width": 1302,
+       "height": 230,
+       "dataSource": "{CO_MAST.CO_STATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 8414,
+       "top": 0,
+       "width": 1302,
+       "height": 230,
+       "dataSource": "{CO_MAST.CO_CITY}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 220,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageFooter",
+     "height": 690,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 9739,
+       "top": 460,
+       "width": 878,
+       "height": 230,
+       "dataSource": "PageNumber"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "formulas": [],
+ "sectionCount": 5,
+ "objectCount": 14,
+ "formulaCount": 0
+}

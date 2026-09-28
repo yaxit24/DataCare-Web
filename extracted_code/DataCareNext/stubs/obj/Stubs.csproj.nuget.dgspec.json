@@ -1,0 +1,62 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/Stubs.csproj": {}
+  },
+  "projects": {
+    "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/Stubs.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/Stubs.csproj",
+        "projectName": "DevExpressStubs",
+        "projectPath": "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/Stubs.csproj",
+        "packagesPath": "/Users/yakshitsavaliya/.nuget/packages/",
+        "outputPath": "/Users/yakshitsavaliya/Desktop/imodule-extracted/extracted_code/DataCareNext/stubs/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/yakshitsavaliya/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net472"
+        ],
+        "sources": {
+          "/opt/homebrew/Cellar/dotnet/10.0.300/libexec/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net472": {
+            "framework": "net472",
+            "targetAlias": "net472",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.300"
+      },
+      "frameworks": {
+        "net472": {
+          "framework": "net472",
+          "targetAlias": "net472",
+          "dependencies": {
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet/10.0.300/libexec/sdk/10.0.300/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

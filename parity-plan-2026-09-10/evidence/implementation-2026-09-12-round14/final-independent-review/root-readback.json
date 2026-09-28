@@ -1,0 +1,7 @@
+{
+  "reviewManifestSha256": "c0a998db817ad21924d954195a65e4eeadb5a4b1b9828c9bb7fe83ececd4692e",
+  "references": 78,
+  "changedReferences": [],
+  "retainedFiles": 7,
+  "qualification": "Independent read review, not reviewer application execution. Root application and recipe runs remain separately recorded."
+}

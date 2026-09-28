@@ -1,0 +1,404 @@
+{
+ "form": "RP_TOUR_ZOOM",
+ "controlCount": 37,
+ "byKind": {
+  "button": 5,
+  "panel": 3,
+  "masked": 2,
+  "grid": 3,
+  "textbox": 9,
+  "combo": 1,
+  "label": 11,
+  "other": 1,
+  "check": 2
+ },
+ "grids": [
+  "DGV_AC",
+  "DGV_DETL",
+  "DGV_DEL"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnCancel",
+   "BtnPrint",
+   "BtnSave",
+   "Panel1"
+  ],
+  "Panel1": [
+   "lblMobile",
+   "lblAdd1"
+  ],
+  "PnlAcSumm": [
+   "tIsuYrCd",
+   "tIsuDbCd",
+   "Label5",
+   "tIsuNo",
+   "chkItmStk",
+   "chkOnlyTagStk",
+   "cboCity",
+   "btnOk",
+   "Label1",
+   "tTagNo",
+   "Label10",
+   "tGrCode",
+   "Label9",
+   "tPrCode",
+   "Label4",
+   "tAcCode",
+   "tAcName",
+   "DGV_AC",
+   "DGV_DEL",
+   "lblCity",
+   "mToDt",
+   "mFromDt",
+   "Label3"
+  ],
+  "this": [
+   "PnlAcSumm",
+   "Label2",
+   "Cr",
+   "tDesgnNo",
+   "lblBook",
+   "PnlBotam",
+   "DGV_DETL"
+  ]
+ },
+ "controls": [
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "0",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "PnlAcSumm",
+   "type": "Panel",
+   "location": "-1,34",
+   "size": "1196,529",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "95,15",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "01/01/2020",
+   "kind": "masked"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "1",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "177,15",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "2",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "DGV_AC",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "16,78",
+   "size": "1160,440",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "tDesgnNo",
+   "type": "TextBox",
+   "location": "106,45",
+   "size": "78,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboCity",
+   "type": "ComboBox",
+   "location": "387,15",
+   "size": "98,22",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Tour Zoom Report",
+   "kind": "label"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Panel1",
+   "type": "Panel",
+   "location": "591,3",
+   "size": "327,38",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "13,46",
+   "size": "83,20",
+   "tabIndex": "1132",
+   "text": "Design No",
+   "kind": "label"
+  },
+  {
+   "name": "DGV_DETL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,79",
+   "size": "1159,473",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "chkItmStk",
+   "type": "CheckBox",
+   "location": "631,48",
+   "size": "135,19",
+   "tabIndex": "1134",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "chkOnlyTagStk",
+   "type": "CheckBox",
+   "location": "631,17",
+   "size": "135,19",
+   "tabIndex": "1135",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "lblCity",
+   "type": "Label",
+   "location": "297,14",
+   "size": "82,19",
+   "tabIndex": "1138",
+   "text": "Work Type",
+   "kind": "label"
+  },
+  {
+   "name": "lblAdd1",
+   "type": "Label",
+   "location": "23,0",
+   "size": "301,20",
+   "tabIndex": "1139",
+   "text": "Address",
+   "kind": "label"
+  },
+  {
+   "name": "lblMobile",
+   "type": "Label",
+   "location": "23,18",
+   "size": "301,20",
+   "tabIndex": "1140",
+   "text": "Mobile",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "45,12",
+   "size": "44,20",
+   "tabIndex": "1156",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "DGV_DEL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "17,78",
+   "size": "1159,438",
+   "tabIndex": "1157",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "95,45",
+   "size": "48,22",
+   "tabIndex": "1160",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "147,45",
+   "size": "148,23",
+   "tabIndex": "1161",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "17,45",
+   "size": "71,20",
+   "tabIndex": "1162",
+   "text": "Emp Code",
+   "kind": "label"
+  },
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "567,46",
+   "size": "49,22",
+   "tabIndex": "1168",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "501,47",
+   "size": "60,20",
+   "tabIndex": "1169",
+   "text": "Pr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "567,15",
+   "size": "49,22",
+   "tabIndex": "1170",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "497,15",
+   "size": "64,20",
+   "tabIndex": "1171",
+   "text": "Gr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tTagNo",
+   "type": "TextBox",
+   "location": "387,47",
+   "size": "98,22",
+   "tabIndex": "1172",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "323,46",
+   "size": "60,20",
+   "tabIndex": "1173",
+   "text": "Tag No",
+   "kind": "label"
+  },
+  {
+   "name": "btnOk",
+   "type": "QButton",
+   "location": "1094,41",
+   "size": "56,30",
+   "tabIndex": "1174",
+   "text": "&Ok",
+   "kind": "button"
+  },
+  {
+   "name": "tIsuNo",
+   "type": "TextBox",
+   "location": "835,45",
+   "size": "76,22",
+   "tabIndex": "1175",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "776,47",
+   "size": "53,20",
+   "tabIndex": "1176",
+   "text": "Isu No",
+   "kind": "label"
+  },
+  {
+   "name": "tIsuDbCd",
+   "type": "TextBox",
+   "location": "999,45",
+   "size": "76,22",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tIsuYrCd",
+   "type": "TextBox",
+   "location": "917,45",
+   "size": "76,22",
+   "tabIndex": "1178",
+   "text": "",
+   "kind": "textbox"
+  }
+ ]
+}

@@ -2,6 +2,10 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { evalCrystal } from './crystalFormula.js';
+import type { ParentChildBands } from './reportBindingContract.js';
+import { renderOrderReportLayout } from './orderReportLayout.js';
+import type { BoundSubreport } from './orderReportValues.js';
+import type { OrderReportImages } from './orderReportImages.js';
 
 /**
  * Spec-driven Crystal-report LAYOUT ENGINE. Renders the extracted RptToXml layout specs
@@ -21,12 +25,20 @@ export interface RptObject {
   height: number;
   dataSource?: string;
   text?: string;
+  suppressed?: boolean;
+  suppressWhen?: string;
+  canGrow?: boolean;
+  subreportName?: string;
+  alignment?: string;
+  font?: { name: string; points: number; bold: boolean; italic: boolean };
 }
 export interface RptSection {
   name: string;
   kind: string;
   height: number;
   objects: RptObject[];
+  suppressed?: boolean;
+  suppressWhen?: string;
 }
 export interface RptArea {
   kind: string;
@@ -40,6 +52,14 @@ export interface RptSpec {
   sectionCount: number;
   objectCount: number;
   formulaCount: number;
+  source?: { kind: string; xml: string; sha256: string };
+  groups?: string[];
+  databaseFields?: Record<string, string>;
+  runningTotals?: Record<string, string>[];
+  subreportLinks?: Record<string, string>[];
+  subreports?: Record<string, RptSpec>;
+  printOptions?: Record<string, string>;
+  imageBindingEvidence?: { section: string; object: string; field: string; proof: string };
 }
 
 const esc = (s: unknown): string =>
@@ -101,7 +121,7 @@ function renderSection(
     `<div class="band" data-kind="${esc(sec.kind)}" style="position:relative;width:100%;min-height:${h}px;">` +
     sec.objects.map((o) => renderObject(o, bound, resolve)).join('') +
     `</div>`;
-  if (sec.kind === 'Detail' && rows && rows.length)
+  if (sec.kind === 'Detail' && rows)
     return rows.map((r) => one({ ...(header || {}), ...r })).join('');
   return one(header);
 }
@@ -111,9 +131,16 @@ export function renderReportLayout(
   opts: {
     header?: Record<string, string>;
     detailRows?: Record<string, string>[];
+    parentChild?: ParentChildBands;
+    subreports?: Record<string, BoundSubreport>;
+    orderImages?: OrderReportImages;
     company?: string;
   } = {},
 ): string {
+  // The catalog's unbound layout preview remains a labelled placeholder view. Production order
+  // documents take the dedicated contract path and require all main/subreport datasets.
+  if (spec.source?.kind === 'order-xml-v1' && (opts.header || opts.detailRows))
+    return renderOrderReportLayout(spec, opts);
   const bound = opts.detailRows || (opts.header && Object.keys(opts.header).length);
   const formulas: Record<string, string> = {};
   for (const f of spec.formulas || []) if (f.name) formulas[f.name] = f.text;
@@ -127,19 +154,42 @@ export function renderReportLayout(
     }
     return b && key in b ? (b[key] ?? '') : fieldLabel(ds);
   };
-  const bands = spec.areas
-    .map((a) =>
-      a.sections
-        .map((s) =>
-          renderSection(
-            s,
-            opts.header,
-            s.kind === 'Detail' ? opts.detailRows : undefined,
-            resolveField,
-          ),
-        )
-        .join(''),
-    )
+  const sections = spec.areas.flatMap((area) => area.sections);
+  const grouped = opts.parentChild;
+  const groupNames = grouped
+    ? [...grouped.parentSections, ...grouped.childSections, ...grouped.parentFooterSections]
+    : [];
+  // The binder validates a contiguous, explicitly registered parent/component band block.
+  // Emit the entire block for one parent, then move to the next parent. Voucher totals outside
+  // the block render once. An empty child set renders no invented component/placeholder row.
+  const renderParentGroups = () =>
+    grouped!.groups
+      .map((group) => {
+        const parent = { ...opts.header, ...group.parent };
+        return groupNames
+          .map((name) => {
+            const section = sections.find((entry) => entry.name === name)!;
+            return renderSection(
+              section,
+              parent,
+              grouped!.childSections.includes(name) ? group.children : undefined,
+              resolveField,
+            );
+          })
+          .join('');
+      })
+      .join('');
+  const bands = sections
+    .map((section) => {
+      if (grouped && groupNames.includes(section.name))
+        return section.name === groupNames[0] ? renderParentGroups() : '';
+      return renderSection(
+        section,
+        opts.header,
+        section.kind === 'Detail' ? opts.detailRows : undefined,
+        resolveField,
+      );
+    })
     .join('');
   const title = spec.report;
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>

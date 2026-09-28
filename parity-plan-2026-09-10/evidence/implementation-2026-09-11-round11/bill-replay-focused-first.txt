@@ -1,0 +1,393 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/saleReturnBillReplay.db.test.ts (33 tests | 33 failed) 503ms
+   × trusted saved incoming bill phases in PostgreSQL > pins source-authored numerical expectations independently of the new service 170ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > distinguishes raw saved, loaded and opened values without changing v1 or any business rows 17ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > interleaves every genuine event in the source prefix [ { …(2) } ] 13ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > interleaves every genuine event in the source prefix [ { …(2) }, { …(2) } ] 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > empty and repeated journals preserve source event history without claiming a save 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > can replay the second stored row while aggregating the untouched first row 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > recalculates the saved-open tax cache after whole rounding without recalculating incoming rows 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > uses trusted TAX_ROF0 / ALL_ROF_REMOVEN for the tax step 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > uses trusted TAX_ROF0 / ALL_ROF_REMOVEY for the tax step 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > reads SQL NULL tax precision through Fnv and preserves the exact qualified owner 16ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains direct-Val NULL TAX_AMT while raw saved values remain inspectable 11ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains direct-Val NULL RTN_TOT_AMT while raw saved values remain inspectable 13ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains null-unselected instead of silently dropping unsupported input 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains tagged-unselected instead of silently dropping unsupported input 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains empty instead of silently dropping unsupported input 15ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains outgoing instead of silently dropping unsupported input 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains negative-tax instead of silently dropping unsupported input 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > contains duplicate-settings instead of silently dropping unsupported input 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > retains exact scoped current display labels without replacing saved percentages or customer data 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > represents missing-tax as an unavailable label without inventing rates 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > represents duplicate-bank as an unavailable label without inventing rates 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > represents duplicate-tax as an unavailable label without inventing rates 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > represents bank-alias as an unavailable label without inventing rates 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > invalidates header physically before any projection or replay 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > invalidates tax-setting physically before any projection or replay 9ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > invalidates same-value-tax-setting physically before any projection or replay 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > invalidates unselected-master physically before any projection or replay 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > invalidates tax-name physically before any projection or replay 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > invalidates bank-name physically before any projection or replay 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > preserves a complete first prefix when the following calculator event is refused 12ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > keeps closing unavailable despite a posting-book type and an unrelated earlier customer ledger balance 8ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > keeps duplicate voucher numbers isolated by configured book and tenant 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × trusted saved incoming bill phases in PostgreSQL > observes header, row settings and display masters within one real RepeatableRead snapshot 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+ ❯ test/saleReturnBillReplay.routes.db.test.ts (10 tests | 10 failed) 527ms
+   × authenticated read-only saved incoming bill replay > allows fresh own View without Edit to inspect and interleave a real bill journal 25ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text 15ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > uses the outer bill token, never a v1 row token or another stored identity 12ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > rejects anonymous/unrelated/revoked rights despite a previously obtained token 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > requires exact explicit scope, rejects aliases/arrays, and isolates another tenant 13ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > contains client policy, phase, hidden/source-copy and context authority fields 14ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > stales physical tax/name edits, then exposes authoritative reloaded labels and raw policy 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > returns recoverable complete prefix state after a failed second event with no writes 12ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > retains read-only empty and tagged saved documents without allowing partial aggregate replay 12ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+   × authenticated read-only saved incoming bill replay > validates configured books and exact saved voucher keys without falling back to other documents 10ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 43 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > pins source-authored numerical expectations independently of the new service
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > distinguishes raw saved, loaded and opened values without changing v1 or any business rows
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > interleaves every genuine event in the source prefix [ { …(2) } ]
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > interleaves every genuine event in the source prefix [ { …(2) }, { …(2) } ]
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > empty and repeated journals preserve source event history without claiming a save
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > can replay the second stored row while aggregating the untouched first row
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > recalculates the saved-open tax cache after whole rounding without recalculating incoming rows
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > uses trusted TAX_ROF0 / ALL_ROF_REMOVEN for the tax step
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > uses trusted TAX_ROF0 / ALL_ROF_REMOVEY for the tax step
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > reads SQL NULL tax precision through Fnv and preserves the exact qualified owner
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains direct-Val NULL TAX_AMT while raw saved values remain inspectable
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains direct-Val NULL RTN_TOT_AMT while raw saved values remain inspectable
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains null-unselected instead of silently dropping unsupported input
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains tagged-unselected instead of silently dropping unsupported input
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains empty instead of silently dropping unsupported input
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains outgoing instead of silently dropping unsupported input
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains negative-tax instead of silently dropping unsupported input
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > contains duplicate-settings instead of silently dropping unsupported input
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > retains exact scoped current display labels without replacing saved percentages or customer data
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > represents missing-tax as an unavailable label without inventing rates
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > represents duplicate-bank as an unavailable label without inventing rates
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > represents duplicate-tax as an unavailable label without inventing rates
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > represents bank-alias as an unavailable label without inventing rates
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > invalidates header physically before any projection or replay
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > invalidates tax-setting physically before any projection or replay
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > invalidates same-value-tax-setting physically before any projection or replay
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > invalidates unselected-master physically before any projection or replay
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > invalidates tax-name physically before any projection or replay
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > invalidates bank-name physically before any projection or replay
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > preserves a complete first prefix when the following calculator event is refused
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > keeps closing unavailable despite a posting-book type and an unrelated earlier customer ledger balance
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > keeps duplicate voucher numbers isolated by configured book and tenant
+ FAIL  test/saleReturnBillReplay.db.test.ts > trusted saved incoming bill phases in PostgreSQL > observes header, row settings and display masters within one real RepeatableRead snapshot
+PrismaClientKnownRequestError: 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ Module.seedBillFixture test/fixtures/saleReturnBillReplay.fixture.ts:119:7
+    117|       ['SILVER', 'S', 'Source silver'],
+    118|     ])
+    119|       await billInsert(owner, 'ITEM_MAST', {
+       |       ^
+    120|         tenant_id: tenantId,
+    121|         CO_CODE: '01',
+ ❯ test/saleReturnBillReplay.db.test.ts:55:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/43]⎯
+
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > allows fresh own View without Edit to inspect and interleave a real bill journal
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > uses the outer bill token, never a v1 row token or another stored identity
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > rejects anonymous/unrelated/revoked rights despite a previously obtained token
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > requires exact explicit scope, rejects aliases/arrays, and isolates another tenant
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > contains client policy, phase, hidden/source-copy and context authority fields
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > stales physical tax/name edits, then exposes authoritative reloaded labels and raw policy
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > returns recoverable complete prefix state after a failed second event with no writes
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > retains read-only empty and tagged saved documents without allowing partial aggregate replay
+ FAIL  test/saleReturnBillReplay.routes.db.test.ts > authenticated read-only saved incoming bill replay > validates configured books and exact saved voucher keys without falling back to other documents
+PrismaClientKnownRequestError: 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `22001`. Message: `ERROR: value too long for type character varying(5)`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ Module.seedBillFixture test/fixtures/saleReturnBillReplay.fixture.ts:119:7
+    117|       ['SILVER', 'S', 'Source silver'],
+    118|     ])
+    119|       await billInsert(owner, 'ITEM_MAST', {
+       |       ^
+    120|         tenant_id: tenantId,
+    121|         CO_CODE: '01',
+ ❯ test/saleReturnBillReplay.routes.db.test.ts:155:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/43]⎯
+
+ Test Files  2 failed (2)
+      Tests  43 failed (43)
+   Start at  14:38:25
+   Duration  3.12s (transform 955ms, setup 0ms, collect 1.57s, tests 1.03s, environment 0ms, prepare 57ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/saleReturnBillReplay.db.test.ts test/saleReturnBillReplay.routes.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1

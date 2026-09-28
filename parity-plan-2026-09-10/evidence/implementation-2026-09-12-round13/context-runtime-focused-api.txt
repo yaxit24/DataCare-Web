@@ -1,0 +1,508 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/sessionContextHttp.db.test.ts (24 tests | 8 failed) 1315ms
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > exact receipt recovery requires the current bearer plus the original body and performs zero additional writes 78ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > same-scope selection increments once, while stale body epoch cannot create another receipt 46ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses numeric-epoch without scope/lock/session writes or cookies 41ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses unknown-key without scope/lock/session writes or cookies 34ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses blank-location without scope/lock/session writes or cookies 34ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses null-year without scope/lock/session writes or cookies 36ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > target forced-reset refuses selection before applying an enabled last-day lock and retains current cookies/context 43ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+   × mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > invalid last-day-lock configuration refuses selection without issuing any access cookie or changing scope 43ms
+     → expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+ ❯ test/sessionContextAccess.db.test.ts (27 tests | 1 failed) 278ms
+   × read-only epoch-bearing access admission on real PostgreSQL > refuses expired persisted authority without extending expiry or changing revocation 14ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `23514`. Message: `ERROR: new row for relation "auth_session" violates check constraint "auth_session_expiry_check"
+DETAIL: Failing row contains (context-access-db, 11111111-1111-4111-8111-111111111111, operator, 01, 01, 01, 2024-2025, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 2026-09-11 20:51:48.789973+00, 2026-09-11 20:51:48.789973+00, 2026-09-11 20:51:47.790602+00, null, null, 9, {"mode": null, "reason": "legacy-session-uninitialized", "status..., null, null, null).`
+ ✓ test/app.security.db.test.ts (5 tests) 551ms
+ ✓ test/reportAuthorization.test.ts (12 tests) 114ms
+ ✓ test/dataRepairAuthority.test.ts (7 tests) 94ms
+ ✓ test/reportFilterGuard.test.ts (9 tests) 265ms
+ ✓ test/sessionContextJwt.test.ts (63 tests) 9ms
+ ✓ test/auth.jwt.test.ts (5 tests) 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/sessionContextAccess.db.test.ts > read-only epoch-bearing access admission on real PostgreSQL > refuses expired persisted authority without extending expiry or changing revocation
+PrismaClientKnownRequestError: 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `23514`. Message: `ERROR: new row for relation "auth_session" violates check constraint "auth_session_expiry_check"
+DETAIL: Failing row contains (context-access-db, 11111111-1111-4111-8111-111111111111, operator, 01, 01, 01, 2024-2025, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 2026-09-11 20:51:48.789973+00, 2026-09-11 20:51:48.789973+00, 2026-09-11 20:51:47.790602+00, null, null, 9, {"mode": null, "reason": "legacy-session-uninitialized", "status..., null, null, null).`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ test/sessionContextAccess.db.test.ts:165:9
+    163|     async (kind) => {
+    164|       if (kind === 'expired')
+    165|         await owner.$executeRawUnsafe(
+       |         ^
+    166|           `UPDATE "auth_session" SET "expires_at"=clock_timestamp()-in…
+    167|           tenant,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > exact receipt recovery requires the current bearer plus the original body and performs zero additional writes
+AssertionError: expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "CO_SET": Array [
+      Object {
+        "locator": "(1,13)",
+        "raw": "{\"THEME\": null, \"row_id\": 14255, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391758",
+      },
+      Object {
+        "locator": "(1,14)",
+        "raw": "{\"THEME\": null, \"row_id\": 14256, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391764",
+      },
+      Object {
+        "locator": "(1,15)",
+        "raw": "{\"THEME\": null, \"row_id\": 14257, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391771",
+      },
+      Object {
+        "locator": "(1,16)",
+        "raw": "{\"THEME\": null, \"row_id\": 14258, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391777",
+      },
+    ],
+    "LOGIN_MAST": Array [
+      Object {
+        "locator": "(0,13)",
+        "raw": "{\"row_id\": 1732, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391757",
+      },
+      Object {
+        "locator": "(0,14)",
+        "raw": "{\"row_id\": 1733, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391763",
+      },
+      Object {
+        "locator": "(0,15)",
+        "raw": "{\"row_id\": 1734, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391770",
+      },
+      Object {
+        "locator": "(0,16)",
+        "raw": "{\"row_id\": 1735, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391776",
+      },
+    ],
+    "audit_log": Array [
+      Object {
+        "locator": "(0,3)",
+        "raw": "{\"id\": 7491, \"ts\": \"2026-09-11T20:51:47.271736+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 200, \"co_code\": \"01\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
+        "revision": "391781",
+      },
++     Object {
++       "locator": "(0,4)",
++       "raw": "{\"id\": 7492, \"ts\": \"2026-09-11T20:51:47.285428+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 200, \"co_code\": \"02\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
++       "revision": "391784",
++     },
++     Object {
++       "locator": "(0,5)",
++       "raw": "{\"id\": 7493, \"ts\": \"2026-09-11T20:51:47.29321+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 409, \"co_code\": \"02\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
++       "revision": "391786",
++     },
+    ],
+    "auth_session": Array [
+      Object {
+        "locator": "(0,41)",
+        "raw": "{\"co_code\": \"02\", \"co_year\": \"2025-2026\", \"lc_code\": \"02\", \"tenant_id\": \"context-http-db\", \"created_at\": \"2026-09-11T20:51:47.260105+00:00\", \"expires_at\": \"2026-09-18T20:51:47.260105+00:00\", \"login_name\": \"operator\", \"revoked_at\": null, \"session_id\": \"45322dbf-4b57-4f0b-a783-d69ab2434932\", \"last_used_at\": \"2026-09-11T20:51:47.274852+00:00\", \"context_epoch\": 2, \"login_co_code\": \"01\", \"revoke_reason\": null, \"ledger_context\": {\"mode\": null, \"reason\": \"vendor-authority-unresolved\", \"status\": \"unknown\", \"version\": \"server-session-ledger-context-v1\"}, \"refresh_jti_hash\": \"e2e3f7c3d908b84764734998a3ee41a4f1254ece44efee2acd51ab02bfea2e71\", \"last_context_from_epoch\": 1, \"last_context_selection_id\": \"03135e57-552f-4e39-bedd-d9e6f94c817e\", \"last_context_request_sha256\": \"082857b51f70e6b9f1c9b0462242df42dfa35d4b1d1f4d291a40cf27c2783b4d\"}",
+        "revision": "391782",
+      },
+    ],
+  }
+
+ ❯ test/sessionContextHttp.db.test.ts:373:35
+    371|     expect(changed.json()).toEqual({ error: 'context-operation-conflic…
+    372|     assertNoIssuedCookie(changed);
+    373|     expect(await exactSnapshot()).toEqual(before);
+       |                                   ^
+    374|   });
+    375| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > same-scope selection increments once, while stale body epoch cannot create another receipt
+AssertionError: expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "CO_SET": Array [
+      Object {
+        "locator": "(1,21)",
+        "raw": "{\"THEME\": null, \"row_id\": 14263, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391839",
+      },
+      Object {
+        "locator": "(1,22)",
+        "raw": "{\"THEME\": null, \"row_id\": 14264, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391845",
+      },
+      Object {
+        "locator": "(1,23)",
+        "raw": "{\"THEME\": null, \"row_id\": 14265, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391852",
+      },
+      Object {
+        "locator": "(1,24)",
+        "raw": "{\"THEME\": null, \"row_id\": 14266, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "391858",
+      },
+    ],
+    "LOGIN_MAST": Array [
+      Object {
+        "locator": "(0,21)",
+        "raw": "{\"row_id\": 1740, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391838",
+      },
+      Object {
+        "locator": "(0,22)",
+        "raw": "{\"row_id\": 1741, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391844",
+      },
+      Object {
+        "locator": "(0,23)",
+        "raw": "{\"row_id\": 1742, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391851",
+      },
+      Object {
+        "locator": "(0,24)",
+        "raw": "{\"row_id\": 1743, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "391857",
+      },
+    ],
+    "audit_log": Array [
+      Object {
+        "locator": "(0,8)",
+        "raw": "{\"id\": 7496, \"ts\": \"2026-09-11T20:51:47.397549+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 200, \"co_code\": \"01\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
+        "revision": "391862",
+      },
++     Object {
++       "locator": "(0,9)",
++       "raw": "{\"id\": 7497, \"ts\": \"2026-09-11T20:51:47.404192+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 409, \"co_code\": \"01\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
++       "revision": "391864",
++     },
+    ],
+    "auth_session": Array [
+      Object {
+        "locator": "(0,49)",
+        "raw": "{\"co_code\": \"01\", \"co_year\": \"2024-2025\", \"lc_code\": \"01\", \"tenant_id\": \"context-http-db\", \"created_at\": \"2026-09-11T20:51:47.389451+00:00\", \"expires_at\": \"2026-09-18T20:51:47.389451+00:00\", \"login_name\": \"operator\", \"revoked_at\": null, \"session_id\": \"34030dc6-6c01-4206-9fac-f503dc3c7d7a\", \"last_used_at\": \"2026-09-11T20:51:47.389451+00:00\", \"context_epoch\": 2, \"login_co_code\": \"01\", \"revoke_reason\": null, \"ledger_context\": {\"mode\": null, \"reason\": \"vendor-authority-unresolved\", \"status\": \"unknown\", \"version\": \"server-session-ledger-context-v1\"}, \"refresh_jti_hash\": \"086c645713be6638ec898b4b9708c769277cbc7594f738c663ff3d27441d2947\", \"last_context_from_epoch\": 1, \"last_context_selection_id\": \"4ed74674-01ad-4d6b-984b-a6e13c42a43d\", \"last_context_request_sha256\": \"72417d4a624e95642e8eaef36b12813651ac077452dc85636501a42ce42d7317\"}",
+        "revision": "391861",
+      },
+    ],
+  }
+
+ ❯ test/sessionContextHttp.db.test.ts:416:35
+    414|     expect(stale.json()).toEqual({ error: 'context-stale' });
+    415|     assertNoIssuedCookie(stale);
+    416|     expect(await exactSnapshot()).toEqual(before);
+       |                                   ^
+    417|   });
+    418| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses numeric-epoch without scope/lock/session writes or cookies
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses unknown-key without scope/lock/session writes or cookies
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses blank-location without scope/lock/session writes or cookies
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > strict selection body refuses null-year without scope/lock/session writes or cookies
+AssertionError: expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "CO_SET": Array [
+      Object {
+        "locator": "(1,53)",
+        "raw": "{\"THEME\": null, \"row_id\": 14295, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392119",
+      },
+      Object {
+        "locator": "(1,54)",
+        "raw": "{\"THEME\": null, \"row_id\": 14296, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392125",
+      },
+      Object {
+        "locator": "(1,55)",
+        "raw": "{\"THEME\": null, \"row_id\": 14297, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392132",
+      },
+      Object {
+        "locator": "(1,56)",
+        "raw": "{\"THEME\": null, \"row_id\": 14298, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392138",
+      },
+    ],
+    "LOGIN_MAST": Array [
+      Object {
+        "locator": "(0,53)",
+        "raw": "{\"row_id\": 1772, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392118",
+      },
+      Object {
+        "locator": "(0,54)",
+        "raw": "{\"row_id\": 1773, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392124",
+      },
+      Object {
+        "locator": "(0,55)",
+        "raw": "{\"row_id\": 1774, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392131",
+      },
+      Object {
+        "locator": "(0,56)",
+        "raw": "{\"row_id\": 1775, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392137",
+      },
+    ],
+-   "audit_log": Array [],
++   "audit_log": Array [
++     Object {
++       "locator": "(0,11)",
++       "raw": "{\"id\": 7499, \"ts\": \"2026-09-11T20:51:47.722557+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 400, \"co_code\": \"01\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
++       "revision": "392141",
++     },
++   ],
+    "auth_session": Array [
+      Object {
+        "locator": "(0,31)",
+        "raw": "{\"co_code\": \"01\", \"co_year\": \"2024-2025\", \"lc_code\": \"01\", \"tenant_id\": \"context-http-db\", \"created_at\": \"2026-09-11T20:51:47.717412+00:00\", \"expires_at\": \"2026-09-18T20:51:47.717412+00:00\", \"login_name\": \"operator\", \"revoked_at\": null, \"session_id\": \"d9a3a839-8458-4836-8b59-00231f76dc61\", \"last_used_at\": \"2026-09-11T20:51:47.717412+00:00\", \"context_epoch\": 1, \"login_co_code\": \"01\", \"revoke_reason\": null, \"ledger_context\": {\"mode\": null, \"reason\": \"vendor-authority-unresolved\", \"status\": \"unknown\", \"version\": \"server-session-ledger-context-v1\"}, \"refresh_jti_hash\": \"03f128628b63fc878628d286f148f79a7c1a825a919c18975d1318eed61b8646\", \"last_context_from_epoch\": null, \"last_context_selection_id\": null, \"last_context_request_sha256\": null}",
+        "revision": "392140",
+      },
+    ],
+  }
+
+ ❯ test/sessionContextHttp.db.test.ts:510:37
+    508|       expect(response.json()).toEqual({ error: 'invalid-context-select…
+    509|       assertNoIssuedCookie(response);
+    510|       expect(await exactSnapshot()).toEqual(before);
+       |                                     ^
+    511|     },
+    512|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > target forced-reset refuses selection before applying an enabled last-day lock and retains current cookies/context
+AssertionError: expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "CO_SET": Array [
+      Object {
+        "locator": "(1,77)",
+        "raw": "{\"THEME\": null, \"row_id\": 14319, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392335",
+      },
+      Object {
+        "locator": "(1,81)",
+        "raw": "{\"THEME\": null, \"row_id\": 14320, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"Y\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392358",
+      },
+      Object {
+        "locator": "(1,79)",
+        "raw": "{\"THEME\": null, \"row_id\": 14321, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392348",
+      },
+      Object {
+        "locator": "(1,80)",
+        "raw": "{\"THEME\": null, \"row_id\": 14322, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392354",
+      },
+    ],
+    "LOGIN_MAST": Array [
+      Object {
+        "locator": "(0,77)",
+        "raw": "{\"row_id\": 1796, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392334",
+      },
+      Object {
+        "locator": "(0,81)",
+        "raw": "{\"row_id\": 1797, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"Y\"}",
+        "revision": "392357",
+      },
+      Object {
+        "locator": "(0,79)",
+        "raw": "{\"row_id\": 1798, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392347",
+      },
+      Object {
+        "locator": "(0,80)",
+        "raw": "{\"row_id\": 1799, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392353",
+      },
+    ],
+-   "audit_log": Array [],
++   "audit_log": Array [
++     Object {
++       "locator": "(0,17)",
++       "raw": "{\"id\": 7505, \"ts\": \"2026-09-11T20:51:47.944469+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 403, \"co_code\": \"01\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
++       "revision": "392360",
++     },
++   ],
+    "auth_session": Array [
+      Object {
+        "locator": "(0,49)",
+        "raw": "{\"co_code\": \"01\", \"co_year\": \"2024-2025\", \"lc_code\": \"01\", \"tenant_id\": \"context-http-db\", \"created_at\": \"2026-09-11T20:51:47.93604+00:00\", \"expires_at\": \"2026-09-18T20:51:47.93604+00:00\", \"login_name\": \"operator\", \"revoked_at\": null, \"session_id\": \"ff1a9a4f-4072-4830-ab4a-1c6f10cc52dd\", \"last_used_at\": \"2026-09-11T20:51:47.93604+00:00\", \"context_epoch\": 1, \"login_co_code\": \"01\", \"revoke_reason\": null, \"ledger_context\": {\"mode\": null, \"reason\": \"vendor-authority-unresolved\", \"status\": \"unknown\", \"version\": \"server-session-ledger-context-v1\"}, \"refresh_jti_hash\": \"cee303e68f3327ac5ad700bc2cac959d29e2158b9e1adf08e73057a7ddf7ebf5\", \"last_context_from_epoch\": null, \"last_context_selection_id\": null, \"last_context_request_sha256\": null}",
+        "revision": "392356",
+      },
+    ],
+  }
+
+ ❯ test/sessionContextHttp.db.test.ts:535:35
+    533|     expect(response.json()).toEqual({ error: 'target-password-reset-re…
+    534|     assertNoIssuedCookie(response);
+    535|     expect(await exactSnapshot()).toEqual(before);
+       |                                   ^
+    536|     const me = await request('GET', '/me', signed.jar);
+    537|     expect(me.statusCode, me.body).toBe(200);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  test/sessionContextHttp.db.test.ts > mounted HTTP session context lifecycle with signed cookies and PostgreSQL authority > invalid last-day-lock configuration refuses selection without issuing any access cookie or changing scope
+AssertionError: expected { auth_session: [ { …(3) } ], …(3) } to deeply equal { auth_session: [ { …(3) } ], …(3) }
+
+- Expected
++ Received
+
+  Object {
+    "CO_SET": Array [
+      Object {
+        "locator": "(1,82)",
+        "raw": "{\"THEME\": null, \"row_id\": 14323, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392374",
+      },
+      Object {
+        "locator": "(1,87)",
+        "raw": "{\"THEME\": null, \"row_id\": 14324, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-db\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"X\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392396",
+      },
+      Object {
+        "locator": "(1,84)",
+        "raw": "{\"THEME\": null, \"row_id\": 14325, \"CO_CODE\": \"01\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392387",
+      },
+      Object {
+        "locator": "(1,85)",
+        "raw": "{\"THEME\": null, \"row_id\": 14326, \"CO_CODE\": \"02\", \"FX_CODE\": null, \"FX_RATE\": null, \"INT_DAY\": null, \"LBR_ROF\": null, \"OP_DHRN\": null, \"OP_LOAN\": null, \"TAG_RPT\": null, \"TAX_ROF\": null, \"BTN_NAME\": null, \"CUST_SMS\": null, \"DHRN_PRC\": null, \"LBR_TYPE\": null, \"LDR_SUMM\": null, \"RATE_PAR\": null, \"SMS_LINK\": null, \"TAX_CODE\": null, \"ADMIN_SMS\": null, \"DHRN_WAPP\": null, \"DUP_PRINT\": null, \"LOCK_DATE\": \"2000-01-01\", \"SCHM_WAPP\": null, \"TRAD_FINE\": null, \"VB_IMPORT\": null, \"tenant_id\": \"context-http-other\", \"CASH_LIMIT\": null, \"COUNTRY_ID\": null, \"HELP_SERCH\": null, \"IP_WITH_PC\": null, \"OZ_CON_VAL\": null, \"GRID_SCROLL\": null, \"PR_AMT_TYPE\": null, \"SL_AMT_TYPE\": null, \"WEIGHT_PORT\": null, \"CARD_COM_ADJ\": null, \"CASH_PURC_AC\": null, \"COUNTRY_CODE\": null, \"CO_STK_MERGE\": null, \"ITM_RATE_ROF\": null, \"LBR_RATE_GEN\": null, \"MFG_ONE_FORM\": \"Y\", \"PAN_CARD_VAL\": null, \"STK_RPT_TYPE\": null, \"STK_RPT_VIEW\": null, \"DHRN_INT_TYPE\": null, \"FINE_STK_TYPE\": null, \"INT_YEAR_DAYS\": null, \"LAST_DAY_LOCK\": \"N\", \"LEDR_BILL_COL\": null, \"LOAN_INT_TYPE\": null, \"PURC_WITH_LBR\": null, \"REMINDER_OPEN\": null, \"SL_ROW_CHANGE\": null, \"AC_LC_CODE_LEN\": null, \"ALL_ROF_REMOVE\": null, \"DHIRN_COMPOUND\": null, \"RATE_MAST_OPEN\": null, \"STOCK_RPT_TYPE\": null, \"TOUCH_AUTO_SAVE\": null, \"EMP_CODE_MANDATORY\": null}",
+        "revision": "392393",
+      },
+    ],
+    "LOGIN_MAST": Array [
+      Object {
+        "locator": "(0,82)",
+        "raw": "{\"row_id\": 1800, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392373",
+      },
+      Object {
+        "locator": "(0,83)",
+        "raw": "{\"row_id\": 1801, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-db\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392379",
+      },
+      Object {
+        "locator": "(0,84)",
+        "raw": "{\"row_id\": 1802, \"CO_CODE\": \"01\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"N\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"Y\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392386",
+      },
+      Object {
+        "locator": "(0,85)",
+        "raw": "{\"row_id\": 1803, \"CO_CODE\": \"02\", \"LOGIN_PWD\": \"$argon2id$v=19$m=19456,t=2,p=1$UNQIHEjsslDh2aT38lSh/Q$w18b87WGJEuF8JYXGXpPSxJQDqG2tQREaaqkubXo5BY\", \"MAIN_USER\": null, \"tenant_id\": \"context-http-other\", \"LOGIN_CATG\": \"USER\", \"LOGIN_NAME\": \"operator\", \"USER_PRINT\": \"Y\", \"USER_DELETE\": \"N\", \"USER_UPDATE\": \"N\", \"PASSWORD_CHANGED_AT\": null, \"PASSWORD_RESET_REQUIRED\": \"N\"}",
+        "revision": "392392",
+      },
+    ],
+-   "audit_log": Array [],
++   "audit_log": Array [
++     Object {
++       "locator": "(0,18)",
++       "raw": "{\"id\": 7506, \"ts\": \"2026-09-11T20:51:47.987263+00:00\", \"path\": \"/context/select\", \"action\": \"POST\", \"status\": 409, \"co_code\": \"01\", \"tenant_id\": \"context-http-db\", \"login_name\": \"operator\"}",
++       "revision": "392398",
++     },
++   ],
+    "auth_session": Array [
+      Object {
+        "locator": "(0,57)",
+        "raw": "{\"co_code\": \"01\", \"co_year\": \"2024-2025\", \"lc_code\": \"01\", \"tenant_id\": \"context-http-db\", \"created_at\": \"2026-09-11T20:51:47.978139+00:00\", \"expires_at\": \"2026-09-18T20:51:47.978139+00:00\", \"login_name\": \"operator\", \"revoked_at\": null, \"session_id\": \"a6ded5bb-b6a1-4216-8202-522dd684e2fa\", \"last_used_at\": \"2026-09-11T20:51:47.978139+00:00\", \"context_epoch\": 1, \"login_co_code\": \"01\", \"revoke_reason\": null, \"ledger_context\": {\"mode\": null, \"reason\": \"vendor-authority-unresolved\", \"status\": \"unknown\", \"version\": \"server-session-ledger-context-v1\"}, \"refresh_jti_hash\": \"d0be073a2ac433daf6b5e9f78afc1040663cc4f1bb517947d572a0434535810e\", \"last_context_from_epoch\": null, \"last_context_selection_id\": null, \"last_context_request_sha256\": null}",
+        "revision": "392395",
+      },
+    ],
+  }
+
+ ❯ test/sessionContextHttp.db.test.ts:558:35
+    556|     expect(response.json()).toEqual({ error: 'last-day-lock-invalid' }…
+    557|     assertNoIssuedCookie(response);
+    558|     expect(await exactSnapshot()).toEqual(before);
+       |                                   ^
+    559|   });
+    560| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ Test Files  2 failed | 6 passed (8)
+      Tests  9 failed | 143 passed (152)
+   Start at  20:51:45
+   Duration  6.36s (transform 857ms, setup 0ms, collect 2.52s, tests 2.63s, environment 1ms, prepare 196ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/sessionContextHttp.db.test.ts test/sessionContextAccess.db.test.ts test/sessionContextJwt.test.ts test/auth.jwt.test.ts test/app.security.db.test.ts test/reportAuthorization.test.ts test/dataRepairAuthority.test.ts test/reportFilterGuard.test.ts
+PARITY_TEST_FAILED pnpm exited 1

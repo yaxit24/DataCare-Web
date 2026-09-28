@@ -1,0 +1,153 @@
+--- checkpoint_recipe_round14.py
++++ checkpoint_recipe_round15.py
+@@ -1,4 +1,4 @@
+-"""Round14-only required-proof validation; historical checkpoint rules are unchanged.
++"""Round15-only required-proof validation; historical checkpoint rules are unchanged.
+ 
+ Credential bytes are never archived. Runtime maps are hash-only, except the
+ explicit compiled kernelConformance.js public-source seed. This validates local evidence,
+@@ -11,11 +11,14 @@
+ import re
+ 
+ PLAN = 'parity-plan-2026-09-10/'
+-EVIDENCE = PLAN + 'evidence/implementation-2026-09-12-round14/'
+-PRIOR = '39-implementation-checkpoint-round13.json'
+-PRIOR_SHA = 'db25b3e107d6e67629f2d445cb2ee191ff9794220cb19dac8cfc7ac9edfababf'
++EVIDENCE = PLAN + 'evidence/implementation-2026-09-12-round15/'
++PRIOR = '41-implementation-checkpoint-round14.json'
++PRIOR_SHA = '643bf89ad0ac50729c7feff06c28dfa6bf8cca7d6318e498397cd5c57bf9ebea'
+ PRIVATE_PATHS = frozenset(('web/.env.parity-test', 'web/.env', 'web/packages/db/.env',
+                            'web/packages/db/prisma/.env', 'web/apps/api/.env'))
++# Pending root's final integrated core count; zero is a synthetic placeholder only.
++CURRENT_CORE_FILES = 26
++CURRENT_CORE_COUNT = 0
+ BROWSERS = frozenset(('browser-bound', 'browser-context-bound', 'browser-labour-bound'))
+ RED_GATES = frozenset(('kernel-final', 'dead-cells-final', 'depth-final'))
+ COMMON = ('web/package.json', 'web/pnpm-lock.yaml', 'web/tsconfig')
+@@ -56,10 +59,10 @@
+     'docs-refs-qualified': ('web/docs/', 'web/scripts/', 'web/package.json',
+                        'web/apps/api/test/'),
+     'checkpoint-chain-recorded': (PLAN + 'validate_current_review.py',),
+-    'recipe-controls-recorded': (PLAN + 'checkpoint_recipe_round14.py',
+-                              PLAN + 'test_checkpoint_recipe_round14.py'),
++    'recipe-controls-recorded': (PLAN + 'checkpoint_recipe_round15.py',
++                              PLAN + 'test_checkpoint_recipe_round15.py'),
+ }
+-# Concrete Round14 command/result contract, copied once from the reviewed candidate.
++# Concrete Round15 command/result contract, copied once from the reviewed candidate.
+ # This is independent of the mutable recipe loaded during capture.
+ EXPECTED_PROOFS = {'api-qualified': {'command': ['env',
+                                'NODE_OPTIONS=--max-old-space-size=4096',
+@@ -83,7 +86,7 @@
+                                       '--noEmit'],
+                           'requiredText': []},
+  'core-final': {'command': ['pnpm', '--filter', '@datacare/core', 'test'],
+-                'requiredText': ['Test Files  21 passed (21)', 'Tests  1059 passed (1059)']},
++                'requiredText': [f'Test Files  {CURRENT_CORE_FILES} passed ({CURRENT_CORE_FILES})', f'Tests  {CURRENT_CORE_COUNT} passed ({CURRENT_CORE_COUNT})']},
+  'core-final-test-types': {'command': ['pnpm',
+                                        '--filter',
+                                        '@datacare/core',
+@@ -102,9 +105,11 @@
+                                        '--resolveJsonModule',
+                                        '--esModuleInterop',
+                                        '--skipLibCheck',
+-                                       'test/saleReturnIncomingSaveProjection.test.ts',
+-                                       'test/saleReturnHeaderFloat.test.ts',
+-                                       'test/saleReturnNBarCompanions.test.ts'],
++                                       'test/saleReturnOtherAmountReplay.test.ts',
++                                       'test/saleReturnEffectContext.test.ts',
++                                       'test/saleReturnFinancialEffects.test.ts',
++                                       'test/saleReturnSaveGuards.test.ts',
++                                       'test/saleReturnSaveComposition.test.ts'],
+                            'requiredText': []},
+  'workspace-final-build': {'command': ['env', 'API_ORIGIN=http://127.0.0.1:4410', 'pnpm', 'build'],
+                            'requiredText': ['7 successful, 7 total']},
+@@ -117,7 +122,7 @@
+                                 'fail 0',
+                                 'skipped 0']},
+  'browser-bound': {'command': ['env',
+-                                   'PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round14-bound',
++                                   'PARITY_ARTIFACT_DIR=test-results/parity-real-stack-round15-bound',
+                                    'node',
+                                    'scripts/parity-test-env.mjs',
+                                    '--',
+@@ -126,7 +131,7 @@
+                        'requiredText': ['PARITY_REAL_STACK_PASSED:',
+                                         'resolved labour preview; zero mocked requests']},
+  'browser-context-bound': {'command': ['env',
+-                                           'SESSION_CONTEXT_ARTIFACT_DIR=test-results/session-context-round14-bound',
++                                           'SESSION_CONTEXT_ARTIFACT_DIR=test-results/session-context-round15-bound',
+                                            'node',
+                                            'scripts/parity-test-env.mjs',
+                                            '--',
+@@ -137,7 +142,7 @@
+                                                 'declared transport injections; no synthetic business '
+                                                 'response']},
+  'browser-labour-bound': {'command': ['env',
+-                                          'LABOUR_PREVIEW_ARTIFACT_DIR=test-results/labour-preview-lifecycle-round14-bound',
++                                          'LABOUR_PREVIEW_ARTIFACT_DIR=test-results/labour-preview-lifecycle-round15-bound',
+                                           'node',
+                                           'scripts/parity-test-env.mjs',
+                                           '--',
+@@ -169,8 +174,8 @@
+                                         '--self-test-checkpoint-chain'],
+                             'requiredText': ['"status": "passed"', '"errors": []', '"rejected": true']},
+  'recipe-controls-recorded': {'command': ['python3',
+-                                       '../parity-plan-2026-09-10/test_checkpoint_recipe_round14.py'],
+-                           'requiredText': ['ROUND14_RECIPE_CONTROLS_PASSED']}}
++                                       '../parity-plan-2026-09-10/test_checkpoint_recipe_round15.py'],
++                           'requiredText': ['ROUND15_RECIPE_CONTROLS_PASSED']}}
+ REQUIRED_LABELS = frozenset(MINIMUM_PREFIXES)
+ SHA = re.compile(r'[0-9a-f]{64}')
+ RUNNABLE_WEB = re.compile(r'^web/apps/web/test/.*\.(?:test|spec)\.[cm]?[jt]sx?$')
+@@ -194,7 +199,7 @@
+     if not isinstance(recipe, dict):
+         return ['Required recipe must be an object']
+     if recipe.get('priorCheckpoint') != PRIOR or recipe.get('priorCheckpointSha256') != PRIOR_SHA:
+-        errors.append('Required recipe must identify immutable checkpoint39')
++        errors.append('Required recipe must identify immutable checkpoint41')
+     checks = recipe.get('checks')
+     if not isinstance(checks, list) or not checks or any(not isinstance(r, dict) for r in checks):
+         return errors + ['Required recipe checks must be a nonempty list of objects']
+@@ -202,7 +207,7 @@
+     if any(not isinstance(x, str) for x in labels) or len(set(str(x) for x in labels)) != len(labels):
+         errors.append('Required recipe labels must be unique strings')
+     if set(str(x) for x in labels) != REQUIRED_LABELS:
+-        errors.append('Required recipe must contain the exact18 Round14 labels')
++        errors.append('Required recipe must contain the exact18 Round15 labels')
+     for row in checks:
+         label = row.get('label')
+         if not isinstance(label, str) or label not in REQUIRED_LABELS:
+@@ -351,7 +356,7 @@
+ def observe_public_inputs(root, seeds):
+     """Re-observe the same inherited public universe, including new directory members."""
+     path = root / PLAN / 'capture_implementation_checkpoint_round12_isolated.py'
+-    spec = importlib.util.spec_from_file_location('_round14_public_universe', path)
++    spec = importlib.util.spec_from_file_location('_round15_public_universe', path)
+     module = importlib.util.module_from_spec(spec)
+     spec.loader.exec_module(module)
+     seeds = set(seeds)
+@@ -369,10 +374,10 @@
+ 
+ 
+ def validate_latest_checkpoint(root, checkpoint):
+-    """Only call for the actual latest R14 checkpoint, never a historical/synthetic39."""
++    """Only call for the actual latest R15 checkpoint, never a historical/synthetic41."""
+     try:
+         if checkpoint.get('priorCheckpoint') != PRIOR or checkpoint.get('priorCheckpointSha256') != PRIOR_SHA:
+-            raise ValueError('Latest checkpoint must reference unchanged checkpoint39')
++            raise ValueError('Latest checkpoint must reference unchanged checkpoint41')
+         _identity_read(root, PLAN + PRIOR, PRIOR_SHA)
+         rows = checkpoint['sourceFiles']
+         absent = checkpoint['observedAbsentInputs']
+@@ -402,8 +407,8 @@
+             raise ValueError('Checkpoint runtime identities differ from current observation')
+         identity = checkpoint['requiredCheckRecipe']
+         if identity.get('path') != EVIDENCE + 'checkpoint-required-checks.json':
+-            raise ValueError('Latest checkpoint must identify the Round14 recipe')
++            raise ValueError('Latest checkpoint must identify the Round15 recipe')
+         recipe = json.loads(_identity_read(root, identity['path'], identity.get('sha256')))
+         return validate_required_runs(root, recipe, checkpoint['verification'], current, private, runtime)
+     except (KeyError, TypeError, ValueError, OSError, UnicodeError) as exc:
+-        return ['Round14 required recipe: ' + str(exc)]
++        return ['Round15 required recipe: ' + str(exc)]

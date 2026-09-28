@@ -1,0 +1,323 @@
+--- a/apps/web/test/sales-return-labour-replay.journey.mjs
++++ b/apps/web/test/sales-return-labour-replay.journey.mjs
+@@ -7,7 +7,7 @@
+ );
+ assert.equal(
+   createHash('sha256').update(fixtureBytes).digest('hex'),
+-  '22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc',
++  '8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b',
+ );
+ const fixture = JSON.parse(fixtureBytes);
+ const required = JSON.parse(
+@@ -237,7 +237,10 @@
+   page.on('pageerror', onError);
+   let restricted;
+   let state, current;
+-  const confirm = () => checks.push(required.checks[checks.length]);
++  const confirm = (id) => {
++    assert.equal(id, required.checks[checks.length], 'a named required checkpoint must be next');
++    checks.push(id);
++  };
+   const snap = () => snapshotSalesReturnLabourReplay(owner, tenantId);
+   const unchanged = async (before, label) => {
+     const after = await snap();
+@@ -262,7 +265,37 @@
+     const body = await response.json();
+     assert.equal(response.status(), status, JSON.stringify(body));
+     assert((response.headers()['cache-control'] || '').includes('no-store'));
++    const query = [...new URL(response.url()).searchParams];
++    assert.equal(query.length, 4, 'exact full scope, without duplicate or extra query keys');
++    assert.deepEqual(Object.fromEntries(query), scope);
+     return body;
++  };
++  const assertContext = (response, context) => {
++    assert.deepEqual(Object.keys(context).sort(), [
++      'coCode',
++      'coYear',
++      'contextEpoch',
++      'lcCode',
++      'sessionId',
++    ]);
++    assert.deepEqual(
++      { coCode: context.coCode, lcCode: context.lcCode, coYear: context.coYear },
++      { coCode: scope.coCode, lcCode: scope.lcCode, coYear: scope.coYear },
++    );
++    assert.match(
++      context.sessionId,
++      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
++    );
++    assert.match(context.contextEpoch, /^[1-9][0-9]*$/);
++    const headers = response.request().headers();
++    assert.equal(headers['x-session-context-id'], context.sessionId);
++    assert.equal(headers['x-session-context-epoch'], context.contextEpoch);
++  };
++  const assertJournal = async (events, target = page) => {
++    await el('status', target)
++      .filter({ hasText: new RegExp('^' + events.length + ' field changes previewed in order\\.') })
++      .waitFor();
++    assert.equal(await el('events', target).locator('li').count(), events.length);
+   };
+   const display = (value) => (value === '' ? '(blank)' : value === null ? 'Not stored' : value);
+   const visible = async (name, value, target = page) => {
+@@ -280,7 +313,7 @@
+           target,
+         );
+     if (phase !== 'loaded')
+-      for (const col of [20, 24, 27, 38])
++      for (const col of [9, 10, 11, 12, 15, 18, 20, 24, 27, 42, 28, 36, 38, 35])
+         await visible('total-' + col + '-' + phase, golden.incomingTotals[String(col)], target);
+   };
+   const screenRow = async (golden, target = page) => {
+@@ -308,7 +341,20 @@
+       el('open', target).click(),
+     ]);
+     const data = await result(response);
++    assertContext(response, data.context);
++    assert.equal(data.rows.length, 1);
++    assert.match(data.rows[0].initialPrefixVersion, /^[a-f0-9]{64}$/);
++    const initialRow = data.billReplay.rowReplay.rows[0];
++    assert.deepEqual(
++      {
++        visible: initialRow.visible,
++        caches: initialRow.caches,
++        editorTextByField: initialRow.editorTextByField,
++      },
++      fixture.expected.initial,
++    );
+     await el('entry', target).waitFor();
++    await assertJournal([], target);
+     if (target === page) {
+       state = data;
+       current = {
+@@ -336,6 +382,8 @@
+     const old = structuredClone(input());
+     const [response] = await Promise.all([responseFor('POST', routes.check), el('check').click()]);
+     const data = await result(response, status);
++    assertContext(response, state.context);
++    if (status === 200) assert.deepEqual(data.context, state.context);
+     assert.deepEqual(response.request().postDataJSON(), {
+       ...old,
+       fieldId: field(column),
+@@ -346,8 +394,13 @@
+       assert.equal(data.baseVersion, old.baseVersion);
+       assert.equal(data.selection.LBR_CODE, code);
+       assert.equal(data.editorText, code);
+-      await el('candidate').waitFor();
+-    } else await el('error').waitFor();
++      for (const absent of ['prefix', 'preview', 'events', 'phase', 'effects'])
++        assert.equal(Object.hasOwn(data, absent), false, 'lookup is observation only');
++      await el('candidate')
++        .filter({ hasText: 'Checked code ' + code + ' ' })
++        .waitFor();
++    } else await el('error').filter({ hasText: data.message }).waitFor();
++    await assertJournal(old.events);
+     return data;
+   };
+   const accept = async (event, golden, trigger) => {
+@@ -355,8 +408,13 @@
+     const [response] = await Promise.all([responseFor('POST', routes.append), trigger()]);
+     const data = await result(response);
+     assert.deepEqual(response.request().postDataJSON(), { ...old, event });
++    assertContext(response, state.context);
++    assert.deepEqual(data.context, state.context);
+     assert.equal(data.baseVersion, old.baseVersion);
+     assert.equal(data.rowIdentity, old.rowIdentity);
++    assert.notEqual(data.prefix.prefixVersion, old.prefixVersion);
++    assert.equal(data.effects.aggregateApplied, true);
++    assert.equal(data.effects.billApplied, true);
+     assert.deepEqual(data.prefix.events, [...old.events, event]);
+     assert.deepEqual(data.acceptedEvent, { event, status: 'applied' });
+     assert.deepEqual(data.prefix.preview, golden.preview);
+@@ -364,6 +422,7 @@
+     for (const capability of ['canSaveNumeric', 'canPreviewClosing', 'canApplySource'])
+       assert.equal(data.capabilities[capability], false);
+     current = data.prefix;
++    await assertJournal(current.events);
+     await screen('preview', golden.phase);
+     await screenRow(golden.preview);
+     return data;
+@@ -399,7 +458,7 @@
+     assert.equal(state.billReplay.savedHeader.DISC_AMT, '9999999999999999.99');
+     assert.equal(state.billReplay.savedHeader.VCH_DESC, null);
+     assert.equal(state.billReplay.savedHeader.BILL_NO, '');
+-    confirm();
++    confirm('saved-row-and-new-contract-identity');
+     assert.deepEqual(state.billReplay.phases.loaded, fixture.expected.loaded);
+     assert.deepEqual(state.billReplay.phases.opened, fixture.expected.opened);
+     assert.equal(state.capabilities.canPreview, true);
+@@ -410,10 +469,20 @@
+     await screen('opened', fixture.expected.opened);
+     await screen('preview', fixture.expected.opened);
+     await screenRow(fixture.expected.initial);
++    for (const key of [
++      'RTN_NET_AMT',
++      'NET_AMT',
++      'TAX_AMT',
++      'RTN_TOT_AMT',
++      'TOT_AMT',
++      'RTN_BILL_OS',
++      'BILL_OS',
++    ])
++      await visible('saved-' + key, state.billReplay.savedHeader[key]);
+     await el('closing')
+       .filter({ hasText: 'Customer balance requires a resolved ledger mode.' })
+       .waitFor();
+-    confirm();
++    confirm('loaded-opened-exact-bill-and-unavailable-closing');
+     assert.equal(await page.getByTestId('sale-return-replay-open').count(), 0);
+     assert.equal(await page.getByTestId('sale-return-bill-replay-open').count(), 0);
+     assert.equal(await page.getByTestId('sale-return-saved-save').isDisabled(), true);
+@@ -422,7 +491,7 @@
+       await page.getByTestId('sale-return-saved-book').getByLabel('Configured book').isDisabled(),
+       true,
+     );
+-    confirm();
++    confirm('exclusive-preview-ownership-and-no-numeric-save');
+     const candidate = await checkCode('BB');
+     await el('entry').press('Tab');
+     assert.equal(current.events.length, 0);
+@@ -436,7 +505,7 @@
+     );
+     await screen('preview', fixture.expected.opened);
+     await unchanged(before, 'state and lookup do not change saved data');
+-    confirm();
++    confirm('resolved-lookup-does-not-append-or-change-totals');
+     await accept(
+       {
+         kind: 'labourEnter',
+@@ -452,7 +521,7 @@
+     await screen('loaded', fixture.expected.loaded);
+     await screen('opened', fixture.expected.opened);
+     if (checkpoint) await checkpoint('sales-return-labour-history', page);
+-    confirm();
++    confirm('bb-then-aa-complete-prefix-bill-history');
+     await close();
+     await open();
+     await code('BB', fixture.expected.prefixes.bb);
+@@ -465,7 +534,7 @@
+     );
+     await code('AA', fixture.expected.prefixes['bb-other-aa']);
+     assert.equal(current.events.length, 3);
+-    confirm();
++    confirm('interleaved-money-and-labour-preserve-order');
+     await close();
+     await open();
+     for (let index = 0; index < 2; index++) {
+@@ -482,7 +551,16 @@
+         el('entry').press('Enter'),
+       ]);
+       const data = await result(response);
++      assertContext(response, state.context);
++      assert.deepEqual(data.context, state.context);
+       const submitted = response.request().postDataJSON();
++      assert.equal(data.baseVersion, old.baseVersion);
++      assert.equal(data.rowIdentity, old.rowIdentity);
++      assert.notEqual(data.prefix.prefixVersion, old.prefixVersion);
++      assert.deepEqual(data.acceptedEvent, { event: submitted.event, status: 'applied' });
++      assert.equal(data.effects.billApplied, true);
++      for (const capability of ['canSaveNumeric', 'canPreviewClosing', 'canApplySource'])
++        assert.equal(data.capabilities[capability], false);
+       assert.deepEqual({ ...submitted, event: undefined }, { ...old, event: undefined });
+       assert.deepEqual(
+         { ...submitted.event, observationVersion: undefined },
+@@ -497,6 +575,7 @@
+       assert.deepEqual(data.prefix.preview, fixture.expected.prefixes['same-aa'].preview);
+       assert.deepEqual(data.prefix.phase, fixture.expected.prefixes['same-aa'].phase);
+       current = data.prefix;
++      await assertJournal(current.events);
+       await screen('preview', fixture.expected.prefixes['same-aa'].phase);
+       await screenRow(fixture.expected.prefixes['same-aa'].preview);
+       assert.equal(current.events.length, index + 1);
+@@ -509,11 +588,11 @@
+         postsBefore + 1,
+       );
+     }
+-    confirm();
++    confirm('same-code-enter-appends-once-per-intent');
+     await close();
+     await open();
+     await code('TA', fixture.expected.prefixes['same-ta'], 29);
+-    confirm();
++    confirm('tag-category04-keeps-callback-without-copy-destination');
+     const retained = structuredClone(current);
+     const missing = await checkCode('MX', 13, 422);
+     assert.equal(missing.error, 'lookup-required');
+@@ -521,7 +600,7 @@
+     assert.deepEqual(current, retained);
+     await screen('preview', retained.phase);
+     await screenRow(retained.preview);
+-    confirm();
++    confirm('missing-code-retains-draft-and-prefix');
+     await close();
+     await open();
+     await code('BB', fixture.expected.prefixes.bb);
+@@ -542,12 +621,12 @@
+     await screen('preview', oldPrefix.phase);
+     await screenRow(oldPrefix.preview);
+     assert.deepEqual(current, oldPrefix);
+-    confirm();
++    confirm('historical-master-change-refuses-next-lookup-without-rebase');
+     await unchanged(
+       afterMasterChange,
+       'historical master conflict cannot edit or rebase any stored state',
+     );
+-    confirm();
++    confirm('actual-database-rows-unchanged-apart-from-declared-master-test-change');
+     await close();
+     const browser = page.context().browser();
+     assert(browser);
+@@ -562,7 +641,12 @@
+     await limited.getByRole('heading', { name: 'Open Company', exact: true }).waitFor();
+     await limited.getByRole('button', { name: 'Open', exact: true }).click();
+     await limited.waitForURL('**/dashboard');
+-    await load(limited);
++    const limitedSaved = await load(limited);
++    assert.equal(
++      limitedSaved.canUpdate,
++      false,
++      'actual saved DTO carries no own-form Update right',
++    );
+     const limitedBefore = await snap();
+     const limitedState = await open(limited);
+     assert.equal(limitedState.capabilities.canPreview, true);
+@@ -576,6 +660,9 @@
+       el('check', limited).click(),
+     ]);
+     const limitedObservation = await result(limitedCheckResponse);
++    assertContext(limitedCheckResponse, limitedState.context);
++    assert.deepEqual(limitedObservation.context, limitedState.context);
++    await assertJournal([], limited);
+     const limitedBase = {
+       baseVersion: limitedState.baseVersion,
+       rowIdentity: limitedState.rows[0].rowIdentity,
+@@ -598,6 +685,10 @@
+       el('commit', limited).click(),
+     ]);
+     const limitedResult = await result(limitedAppendResponse);
++    assertContext(limitedAppendResponse, limitedState.context);
++    assert.deepEqual(limitedResult.context, limitedState.context);
++    assert.deepEqual(limitedResult.acceptedEvent, { event: limitedEvent, status: 'applied' });
++    assert.equal(limitedResult.effects.billApplied, true);
+     assert.deepEqual(limitedAppendResponse.request().postDataJSON(), {
+       ...limitedBase,
+       event: limitedEvent,
+@@ -605,7 +696,9 @@
+     assert.deepEqual(limitedResult.prefix.preview, fixture.expected.prefixes.bb.preview);
+     assert.deepEqual(limitedResult.prefix.phase, fixture.expected.prefixes.bb.phase);
+     assert.deepEqual(limitedResult.prefix.events, [limitedEvent]);
+-    assert.equal(limitedResult.capabilities.canSaveNumeric, false);
++    for (const capability of ['canSaveNumeric', 'canPreviewClosing', 'canApplySource'])
++      assert.equal(limitedResult.capabilities[capability], false);
++    await assertJournal([limitedEvent], limited);
+     await screen('preview', fixture.expected.prefixes.bb.phase, limited);
+     await screenRow(fixture.expected.prefixes.bb.preview, limited);
+     await close(limited);
+@@ -626,7 +719,7 @@
+       limitedBefore,
+       'View-only and original panels leave stored rows unchanged after their own login',
+     );
+-    confirm();
++    confirm('view-only-preview-and-old-panels-retained');
+     assert.deepEqual(checks, required.checks, 'the exact frozen required check set must execute');
+     assert.deepEqual(errors, []);
+     const posts = requests.filter((request) => request.method() === 'POST');

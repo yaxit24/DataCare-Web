@@ -1,0 +1,257 @@
+{
+ "form": "MS_DESIGN_BOOK",
+ "loc": 5824,
+ "gridColumns": {
+  "cSrNo": 0,
+  "c1SrNo": 0,
+  "cPageNo": 1,
+  "c1ItCode": 1,
+  "cDesign": 2,
+  "c1ItName": 2,
+  "cStyle": 3,
+  "c1DmCode": 3,
+  "cGrCode": 4,
+  "c1DmName": 4,
+  "cSize": 5,
+  "c1DmColor": 5,
+  "cDieNo": 6,
+  "c1DmSize": 6,
+  "cPcs": 7,
+  "c1DmOrigin": 7,
+  "cGrWt": 8,
+  "c1DmRemark": 8,
+  "cOthWt": 9,
+  "c1DmSfNo": 9,
+  "cNetWt": 10,
+  "c1Pcs": 10,
+  "cGhtPrc": 11,
+  "c1PcsWt": 11,
+  "cGhtWt": 12,
+  "c1KrWt": 12,
+  "cTouch": 13,
+  "c1KrPrc": 13,
+  "cWestPrc": 14,
+  "c1GrWt": 14,
+  "cFine": 15,
+  "c1ConPrc": 15,
+  "cLbrPrc": 16,
+  "c1RateType": 16,
+  "cLbrType": 17,
+  "c1ItRate": 17,
+  "cLbrRate": 18,
+  "c1ItmAmt": 18,
+  "cLbrAmt": 19,
+  "c1LbrRate": 19,
+  "cOthAmt": 20,
+  "c1LbrAmt": 20,
+  "cItRate": 21,
+  "c1NetAmt": 21,
+  "cItAmt": 22,
+  "c1ConWt": 22,
+  "cTagCost": 23,
+  "c1KrConWt": 23,
+  "cPrCost": 24,
+  "c1ItType": 24,
+  "cMargin": 25,
+  "c1RowSr": 25,
+  "cMrp": 26,
+  "c1oldKrWt": 26,
+  "cImageTake": 27,
+  "c1oldGrWt": 27,
+  "cKrName": 28,
+  "c1RowValue": 28,
+  "cOldSrNo": 29,
+  "cRateType": 30,
+  "cItType": 31,
+  "cItName": 32,
+  "cEntryMod": 33,
+  "cOldGrWt": 34,
+  "cOldNtWt": 35,
+  "cOldGhatPrc": 36,
+  "cOldGhatWt": 37,
+  "cOldTouch": 38,
+  "cOldWestPrc": 39,
+  "cOldKrNetWt": 40,
+  "cOldKrTouch": 41,
+  "cOldKrWest": 42,
+  "cOldMargin": 43,
+  "cVchDate": 44,
+  "cRowValue": 45,
+  "cRowText": 46
+ },
+ "inlineSql": [
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItemNameL,A.IT_CODE as ItCodeL, B.GR_NAME AS GroupL,A.PR_CODE As PrCodeL,A.IT_TYPE As ItTypeL,A.TAG_TYPE As TagTypeL FROM ITEM_MAST AS A LEFT JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_NAME",
+  "Select * From DM_MAST WHERE CO_CODE = ' ? ' AND DM_CODE = ' ? '",
+  "SELECT A.DM_NAME As ItemNameL,A.DM_CODE as ItCodeL,B.GR_NAME As GroupL FROM DM_MAST AS A LEFT JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.DM_NAME",
+  "SELECT AC_NAME As KarigarL,AC_SHORT as CodeL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_SHORT <> '' ORDER BY AC_NAME",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT A.GR_NAME As GroupNameL,A.GR_CODE as GrCodeL, A.GR_TYPE As ItTypeL FROM GROUP_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.GR_NAME",
+  "SELECT MODEL_NAME From MODEL_MAST WHERE CO_CODE = ' ? ' AND MODEL_NAME = ' ? '",
+  "SELECT DISTINCT MODEL_NAME as StyleL From MODEL_MAST ORDER BY MODEL_NAME",
+  "SELECT AC_SHORT FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_SHORT = ' ? ' AND AC_SHORT <> ''",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT A.* FROM DESIGN_DETL AS A WHERE A.CO_CODE = ' ? ' AND A.PR_CODE = ' ? ' AND A.BOOK_NAME = ' ? ' ORDER BY A.SR_NO",
+  "SELECT A.*,B.IT_NAME FROM DESIGN_IDTL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.PR_CODE = ' ? ' AND A.BOOK_NAME = ' ? ' ORDER BY A.SR_NO,A.ISR_NO",
+  "DELETE FROM DESIGN_DETL WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? ' AND BOOK_NAME = ' ? ' AND OLD_SRNO = ? ",
+  "SELECT * FROM DESIGN_DETL WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? ' AND BOOK_NAME = ' ? ' AND OLD_SRNO = ? ",
+  "DELETE FROM DESIGN_IDTL WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? ' AND BOOK_NAME = ' ? ' AND SR_NO = ? AND ISR_NO = ? ",
+  "Select * FROM DESIGN_IDTL WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? ' AND BOOK_NAME = ' ? ' AND SR_NO = ? AND ISR_NO = ? ",
+  "SELECT * FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND TAG_NO IN (SELECT TAG_NO FROM DESIGN_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? ') AND ITM_SIGN = '-'",
+  "DELETE FROM DESIGN_DETL WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? ' AND BOOK_NAME = ' ? '",
+  "DELETE FROM DESIGN_IDTL WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? ' AND BOOK_NAME = ' ? '",
+  "SELECT BOOK_NAME As DesignBookL,PR_CODE As PrCodeL,COUNT (*) As TotDesignM FROM DESIGN_DETL WHERE CO_CODE = ' ? ' GROUP BY BOOK_NAME,PR_CODE ORDER BY BOOK_NAME,PR_CODE",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? '",
+  "SELECT BOOK_NAME FROM DESIGN_DETL WHERE CO_CODE = ' ? ' AND BOOK_NAME = ' ? '",
+  "SELECT A.BOOK_NAME,A.PR_CODE,B.PR_NAME,COUNT(*) As Design FROM DESIGN_DETL AS A LEFT JOIN PRODUCT_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.PR_CODE = B.PR_CODE WHERE A.CO_CODE = ' ? ' ? AND A.BOOK_NAME = ' ? ' ? GROUP BY A.BOOK_NAME,A.PR_CODE,B.PR_NAME ORDER BY A.BOOK_NAME,A.PR_CODE",
+  "DELETE FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? _ ? _ ? _ ? '",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? _ ? _ ? _ ? '",
+  "Select * From PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "SELECT PR_NAME As PrNameL,PR_CODE as PrCodeL FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_NAME",
+  "SELECT * FROM [{RuntimeHelpers.GetObjectValue(objectValue)}]",
+  "Please Select Product First And try..",
+  "Please Select Book Name First And try..",
+  "INSERT INTO DESIGN_DETL(CO_CODE,BOOK_NAME,PR_CODE,SR_NO,OLD_SRNO,PAGE_NO,VCH_DATE,GR_CODE, DESIGN_NO,ITM_SIZE,DIE_NO,ITM_PCS,ITM_GWT,ITM_OTH_WT,ITM_NWT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE,ITM_RATE,ITM_AMT, LBR_TYPE,LBR_PRC,LBR_RATE,LBR_AMT,OTH_AMT,TAG_COST,ITM_MRP,GHT_PRC,ITM_GHT,NET_AMT,RATE_TYPE,IT_TYPE,KR_NAME,MAIN_USER) VALUES (' ? ',' ? ',' ? ', ? , ? ,' ? ',' ? ','', ' ? ','','',0,0,0,0,0,0,0,0,0, '',0,0,0,0,0,0,0,0,0,'','','',' ? ')"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 1,
+  "Right": 2,
+  "Left": 2,
+  "Up": 2,
+  "Down": 2,
+  "Enter": 2
+ },
+ "calc": [
+  "mSG_IDTL[mSG_IDTL.Row, 12] = Strings.Format((object)(Conversion.Val(mSG_IDTL[mSG_IDTL.Row, 10]) * Conversion.Val(TEXT_IDTL.Text)), \"0.000\");",
+  "mSG_IDTL[CRow, 12] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 10]) * Conversion.Val(mSG_IDTL[CRow, 11])), \"0.000\");",
+  "mSG_IDTL[CRow, 14] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 12]) * Conversion.Val(mSG_IDTL[CRow, 13]) / 100.0), \"0.000\");",
+  "mSG_IDTL[CRow, 22] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 14]) * Conversion.Val(mSG_IDTL[CRow, 15])), \"0.000\");",
+  "mSG_IDTL[CRow, 23] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 12]) * Conversion.Val(mSG_IDTL[CRow, 15])), \"0.000\");",
+  "mSG_IDTL[CRow, 18] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 17]) * Conversion.Val(mSG_IDTL[CRow, 10])), \"0.00\");",
+  "mSG_IDTL[CRow, 18] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 17]) * Conversion.Val(mSG_IDTL[CRow, 14])), \"0.00\");",
+  "mSG_IDTL[CRow, 20] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 19]) * Conversion.Val(mSG_IDTL[CRow, 10])), \"0.00\");",
+  "mSG_IDTL[CRow, 21] = Strings.Format((object)(Conversion.Val(mSG_IDTL[CRow, 18]) + Conversion.Val(mSG_IDTL[CRow, 20])), \"0.00\");",
+  "MSG[MSG.Row, 10] = Strings.Format((object)(Conversion.Val(MSG[MSG.Row, 8]) - Conversion.Val(MSG[MSG.Row, 9])), \"0.000\");",
+  "MSG[MSG.Row, 10] = Strings.Format((object)(Conversion.Val(MSG[MSG.Row, 8]) - num3), \"0.000\");",
+  "mSG_TOT[0, 7] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 7]) + Conversion.Val(MSG[DC_Main.M, 7]))), \"0\");",
+  "mSG_TOT[0, 8] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 8]) + Conversion.Val(MSG[DC_Main.M, 8]))), \"0.000\");",
+  "mSG_TOT[0, 9] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 9]) + Conversion.Val(MSG[DC_Main.M, 9]))), \"0.000\");",
+  "mSG_TOT[0, 10] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 10]) + Conversion.Val(MSG[DC_Main.M, 10]))), \"0.000\");",
+  "mSG_TOT[0, 12] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 12]) + Conversion.Val(MSG[DC_Main.M, 12]))), \"0.000\");",
+  "mSG_TOT[0, 15] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 15]) + Conversion.Val(MSG[DC_Main.M, 15]))), \"0.000\");",
+  "mSG_TOT[0, 22] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 22]) + Conversion.Val(MSG[DC_Main.M, 22]))), \"0.00\");",
+  "mSG_TOT[0, 19] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 19]) + Conversion.Val(MSG[DC_Main.M, 19]))), \"0.00\");",
+  "mSG_TOT[0, 20] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 20]) + Conversion.Val(MSG[DC_Main.M, 20]))), \"0.00\");",
+  "mSG_TOT[0, 23] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 23]) + Conversion.Val(MSG[DC_Main.M, 23]))), \"0.00\");",
+  "mSG_TOT[0, 26] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 26]) + Conversion.Val(MSG[DC_Main.M, 26]))), \"0.000\");",
+  "mSG_TOT[0, 24] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 24]) + Conversion.Val(MSG[DC_Main.M, 24]))), \"0.00\");",
+  "NewValTot = Conversion.Val(MSG_TOT[0, 8]) + Conversion.Val(MSG_TOT[0, 10]) + Conversion.Val(MSG_TOT[0, 20]) + Conversion.Val(MSG_TOT[0, 19]) + Conversion.Val(MSG_TOT[0, 26]);",
+  "mSG[mSG.Row, 29] = Conversions.ToString(Conversion.Val(mSG[mSG.Rows - 2, 29]) + 1.0);",
+  "val[val.Row, 26] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 24]) * (1.0 + Conversion.Val(val[val.Row, 25]) / 100.0)), \"0.00\");",
+  "val[val.Row, 10] = Strings.Format((object)(Conversion.Val(val[val.Row, 8]) - Conversion.Val(val[val.Row, 9])), \"0.000\");",
+  "val[val.Row, 15] = Strings.Format((object)((Conversion.Val(val[val.Row, 10]) + Conversion.Val(val[val.Row, 12])) * (Conversion.Val(val[val.Row, 13]) + Conversion.Val(val[val.Row, 14])) / 100.0), \"0.000\");",
+  "val[val.Row, 12] = Strings.Format((object)(Conversion.Val(val[val.Row, 10]) * Conversion.Val(val[val.Row, 11]) / 100.0), \"0.000\");",
+  "val[val.Row, 15] = Strings.Format((object)(Conversion.Val(val[val.Row, 10]) + Conversion.Val(val[val.Row, 12])), \"0.000\");",
+  "if ((Conversion.Val(val[val.Row, 15]) == 0.0) & (Conversion.Val(val[val.Row, 13]) + Conversion.Val(val[val.Row, 14]) != 0.0))",
+  "val[val.Row, 22] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 15]) * Conversion.Val(val[val.Row, 21]), 0), \"0.00\");",
+  "val[val.Row, 22] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 15]) * (Conversion.Val(val[val.Row, 21]) / 1000.0), 0), \"0.00\");",
+  "val[val.Row, 22] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 15]) * (Conversion.Val(val[val.Row, 21]) / 10.0), 0), \"0.00\");",
+  "val[val.Row, 22] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 7]) * Conversion.Val(val[val.Row, 21]), 0), \"0.00\");",
+  "val[val.Row, 19] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 8]) * Conversion.Val(val[val.Row, 18]), 0), \"0.00\");",
+  "val[val.Row, 19] = Strings.Format((object)Math.Round((Conversion.Val(val[val.Row, 10]) + Conversion.Val(val[val.Row, 12])) * (Conversion.Val(val[val.Row, 18]) / 1000.0), 0), \"0.00\");",
+  "val[val.Row, 19] = Strings.Format((object)Math.Round((Conversion.Val(val[val.Row, 10]) + Conversion.Val(val[val.Row, 12])) * Conversion.Val(val[val.Row, 18]), 0), \"0.00\");",
+  "val[val.Row, 19] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 7]) * Conversion.Val(val[val.Row, 18]), 0), \"0.00\");",
+  "val[val.Row, 23] = Strings.Format((object)(Conversion.Val(val[val.Row, 22]) + Conversion.Val(val[val.Row, 19]) + Conversion.Val(val[val.Row, 20])), \"0.0\");",
+  "val[val.Row, 24] = Strings.Format((object)(Conversion.Val(val[val.Row, 22]) + Conversion.Val(val[val.Row, 19]) + Conversion.Val(val[val.Row, 20])), \"0.0\");",
+  "val[val.Row, 26] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 23]) * (1.0 + Conversion.Val(val[val.Row, 25]) / 100.0)), \"0.00\");",
+  "OldValTot = Conversion.Val(MSG_TOT[0, 8]) + Conversion.Val(MSG_TOT[0, 10]) + Conversion.Val(MSG_TOT[0, 20]) + Conversion.Val(MSG_TOT[0, 19]) + Conversion.Val(MSG_TOT[0, 26]);",
+  "if ((DC_Main.M == 1) & (Conversion.Val(MSG[DC_Main.M, 8]) + Conversion.Val(MSG[DC_Main.M, 26]) == 0.0))",
+  "if ((Operators.CompareString(tPrCode.Text, \"\", false) != 0) & (Operators.CompareString(mSG[DC_Main.i, 2], \"\", false) != 0) & (Conversion.Val(mSG[DC_Main.i, 26]) + Conversion.Val(mSG[DC_Main.i, 8]) != 0.0))",
+  "if ((Operators.CompareString(MSG[DC_Main.M, 33], \"A\", false) == 0) & (Conversion.Val(MSG[DC_Main.M, 26]) + Conversion.Val(MSG[DC_Main.M, 8]) != 0.0))"
+ ],
+ "validations": [
+  {
+   "message": "This Row Record will Removed permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"This Row Record will Removed permantley ?\", (MsgBoxStyle)36, (object)null) == 6"
+  },
+  {
+   "message": "Record is Deleted....",
+   "when": ""
+  },
+  {
+   "message": "Please Save This Voucher Then Effect....",
+   "when": ""
+  },
+  {
+   "message": "Please Save Voucher Befoure Exit...",
+   "when": "Operators.CompareString(MSG[DC_Main.M, 33], \"A\", false) == 0"
+  },
+  {
+   "message": "You Cant Save New Entry Because Your lIcence Has been Expired Please Renew lIcence....",
+   "when": "(Operators.CompareString(DC_Main.MsSoftNoUse, \"Y\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "Operators.CompareString(UsUPdate, \"Y\", false) != 0 && ((Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) =="
+  },
+  {
+   "message": "Error Found : Please Enter Book Detail First...",
+   "when": "Operators.CompareString(tVchNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Save....",
+   "when": ""
+  },
+  {
+   "message": "You Cant Delete This Voucher Because  Tag Use in Sales Transection....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Voucher now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Please Check NextImage Data ...",
+   "when": ""
+  },
+  {
+   "message": "Add New Design Book ?",
+   "when": "(int)Interaction.MsgBox((object)\"Add New Design Book ? \", (MsgBoxStyle)292, (object)\"Message\") == 6"
+  },
+  {
+   "message": "Please Check Len Connection...You Cant Save Image...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Please Select Product First And try..",
+   "when": "Operators.CompareString(tPrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Select Book Name First And try..",
+   "when": "Operators.CompareString(tVchNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Import Data In Next Software ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Data In Next Software ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Data is Import Ok....",
+   "when": ""
+  }
+ ]
+}

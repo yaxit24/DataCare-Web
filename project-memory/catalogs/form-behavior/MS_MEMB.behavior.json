@@ -1,0 +1,90 @@
+{
+ "form": "MS_MEMB",
+ "loc": 5566,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT SCHM_CODE,MEMB_CODE,MEMB_NAME FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' ORDER BY CAST(MEMB_CODE AS INT) desc",
+  "Select MEMB_CODE As CoCode From AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' ORDER BY CAST(MEMB_CODE AS INT) DESC",
+  "SELECT * from AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' AND MEMB_CODE = ' ? '",
+  "SELECT * FROM AD_MAST WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "SELECT * FROM EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT * FROM AC_MAST WHERE AC_CODE = ' ? '",
+  "SELECT * FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' AND AC_MOBILE = ' ? '",
+  "Select * From AD_MAST WHERE CO_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "SELECT SCHM_CODE as SchmCode,SCHM_NAME As SchemeNameL,SCHM_AMT AS SchmAmtR FROM AD_MAST WHERE CO_CODE = ' ? ' ORDER BY SCHM_CODE",
+  "SELECT AC_DISTRICT FROM AD_MEMB WHERE CO_CODE = ' ? ' GROUP BY AC_DISTRICT ORDER BY AC_DISTRICT",
+  "SELECT AC_CITY FROM AD_MEMB WHERE CO_CODE = ' ? ' GROUP BY AC_CITY ORDER BY AC_CITY",
+  "SELECT AC_AREA FROM AD_MEMB WHERE CO_CODE = ' ? ' GROUP BY AC_AREA ORDER BY AC_AREA",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR AS GroupL,AC_ADD1 As AddressL,AC_PHONE As PhoneL,AC_MOBILE As MobileL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT TOP 99 MEMB_CODE,MEMB_NAME FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' AND MEMB_NAME LIKE ' ? %'",
+  "DELETE FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' AND MEMB_CODE = ' ? '",
+  "SELECT * FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' AND MEMB_CODE = ' ? '",
+  "DELETE FROM IMAGE_DATA",
+  "SELECT * FROM IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "SELECT * FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' ORDER BY MEMB_CODE",
+  "Please Select AcCode For Delete.",
+  "SELECT * FROM AD_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_NO <> '00000' AND SCHM_CODE = ' ? ' AND MEMB_CODE = ' ? '",
+  "SELECT MEMB_NAME As MemberNameL,MEMB_CODE as MembCodeL, SCHM_CODE AS SchmL,AC_ADD1 As AddressL,AC_MOBILE As MobileL,MEMB_AMT As MembAmtR,ITM_GWT As GoldW FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' ORDER BY MEMB_NAME",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME",
+  "SELECT MEMB_NAME As AcNameL,MEMB_CODE as MembCodeL, SCHM_CODE AS SchmCodeL,AC_ADD1 AS AddressL,AC_CITY AS CityL FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY MEMB_NAME",
+  "select * from AD_MEMB where CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND MEMB_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_AREA AS AreaL,AC_ADD1 AS AddressL,AC_CITY AS CityL FROM AC_MAST WHERE CO_CODE = ' ? ' AND CAST(AC_CODE AS INT) > 99 ORDER BY AC_NAME",
+  "select * from AC_MAST where CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_AREA AS AreaL,AC_ADD1 AS AddressL,AC_CITY AS CityL FROM ADD_MAST WHERE CO_CODE = ' ? ' ORDER BY AC_NAME",
+  "select * from ADD_MAST where CO_CODE = ' ? ' AND AC_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "F1": 1,
+  "Enter": 34,
+  "Backspace": 1,
+  "Ctrl+E": 1,
+  "Esc": 1
+ },
+ "calc": [
+  "tAcCode.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"000\");",
+  "tAcCode.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"0000\");",
+  "tAcCode.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00000\");",
+  "tAcCode.Text = Strings.Mid(DC_Main.MLc_code, 2, 1) + Strings.Format((object)(Conversion.Val(Strings.Mid(Conversions.ToString(DC_Main.Rshlp.Rows[0][\"CoCode\"]), 2, 4)) + 1.0), \"0000\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Enter Membaer Name and Scheme Detail",
+   "when": "(Operators.CompareString(tAcCode.Text, \"\", false) == 0) | (Operators.CompareString(tAcName.Text, \"\", false) == 0) | (Operators.CompareString(tSchmCode.Text, \"\","
+  },
+  {
+   "message": "Please Select AcCode For Delete.",
+   "when": "Operators.CompareString(tAcCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Can't Delete Record This Party Code Use in Transection....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Account now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Account now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Account now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Please Check Len Connection...You Cant Save Image...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  }
+ ]
+}

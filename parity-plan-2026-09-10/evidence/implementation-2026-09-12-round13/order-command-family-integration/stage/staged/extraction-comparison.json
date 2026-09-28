@@ -1,0 +1,9 @@
+{
+  "existingTemplateLiterals": 48,
+  "allTemplateBytesAndOrderEqual": true,
+  "templateSequenceSha256": "866c6b63263e875b3e2f12de42024ebe357a70fc96d812faec04db04f9c306a3",
+  "createPreparationAndEntireRunBodyByteIdentical": true,
+  "cancelEntireCallbackUnchangedIgnoringIndentation": true,
+  "priorSalesEditTxAndGuardByteIdentical": true,
+  "limits": "Text comparison, not execution or an AST/compiler proof. Return/transaction ownership changes are explicit in patch."
+}

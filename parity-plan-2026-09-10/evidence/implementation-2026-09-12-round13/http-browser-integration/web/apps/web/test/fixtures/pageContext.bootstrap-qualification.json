@@ -1,0 +1,35 @@
+{
+  "version": "page-session-bootstrap-qualification-v1",
+  "status": "literal-unexecuted",
+  "baseFixtureSha256": "c4b96577f329ff64670b1b7124f0924dddf0c8c7c720bf62c8c31d4e5cec0515",
+  "reason": "Root requested an idempotent /me-only retry for React StrictMode duplicate bootstrap; ordinary business requests retain strict obsolete refusal.",
+  "cases": [
+    {
+      "id": "A17",
+      "scenario": "Two concurrent unbound loadPageSession calls: first/me pinsA, second obsolete/me getsone currentA retry",
+      "expected": {
+        "requests": 3,
+        "bothReturn": "A",
+        "pageStatus": "ready"
+      }
+    },
+    {
+      "id": "A18",
+      "scenario": "A stale page during initial/me response processing never retries",
+      "expected": {
+        "requests": 1,
+        "error": "context-stale",
+        "pageStatus": "stale"
+      }
+    },
+    {
+      "id": "A19",
+      "scenario": "Context changes again during the one obsolete bootstrap retry",
+      "expected": {
+        "requests": 2,
+        "error": "context-response-obsolete",
+        "pageStatus": "ready"
+      }
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "kind": "session-context-migration-independent-cases/v1",
+  "scope": "Canonical historical auth_session baseline; exact staged migration in a uniquely named disposable database. No execution or mainrepo mutations.",
+  "baseline": "baseline.sql",
+  "expectedLegacyRows": 2,
+  "seededTenants": [
+    "migration-alpha",
+    "migration-beta"
+  ],
+  "cases": [
+    {
+      "id": "M01",
+      "reason": "Legacy rows backfill to1/legacy-unknown with receipts absent",
+      "setupSql": "",
+      "expected": "success",
+      "checksSql": "SELECT count(*)=2 AND bool_and(context_epoch=1 AND ledger_context='{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"legacy-session-uninitialized\"}'::jsonb AND last_context_selection_id IS NULL AND last_context_request_sha256 IS NULL AND last_context_from_epoch IS NULL) FROM public.auth_session;"
+    },
+    {
+      "id": "M02",
+      "reason": "Compatible partial columns preserve every nonNULL epoch/reason and backfill onlyNULL",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET context_epoch=7,ledger_context='{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"scope-incomplete\"}'::jsonb WHERE tenant_id='migration-alpha';",
+      "expected": "success",
+      "checksSql": "SELECT count(*)=2 AND bool_and(CASE tenant_id WHEN 'migration-alpha' THEN context_epoch=7 AND ledger_context='{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"scope-incomplete\"}'::jsonb WHEN 'migration-beta' THEN context_epoch=1 AND ledger_context='{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"legacy-session-uninitialized\"}'::jsonb ELSE false END) FROM public.auth_session;"
+    },
+    {
+      "id": "M03",
+      "reason": "Maximum valid epoch and coherent receipt remain unchanged",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET context_epoch=9223372036854775807,ledger_context='{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"vendor-authority-unresolved\"}'::jsonb,last_context_selection_id='12345678-1234-4234-8234-123456789abc',last_context_request_sha256='cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',last_context_from_epoch=9223372036854775806 WHERE tenant_id='migration-alpha';",
+      "expected": "success",
+      "checksSql": "SELECT context_epoch=9223372036854775807 AND last_context_from_epoch=9223372036854775806 AND last_context_selection_id='12345678-1234-4234-8234-123456789abc' FROM public.auth_session WHERE tenant_id='migration-alpha';"
+    },
+    {
+      "id": "M04",
+      "reason": "Matching NOT VALID new check is validated afterNULL backfill",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; ALTER TABLE public.auth_session ADD CONSTRAINT auth_session_context_epoch_v1_check CHECK (context_epoch>0) NOT VALID;",
+      "expected": "success",
+      "checksSql": "SELECT convalidated FROM pg_constraint WHERE conrelid='public.auth_session'::regclass AND conname='auth_session_context_epoch_v1_check';"
+    },
+    {
+      "id": "M05",
+      "reason": "Wrong epoch type refuses without casting source text",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch text; UPDATE public.auth_session SET context_epoch='9223372036854775808';",
+      "expected": "failure",
+      "messageIncludes": "context_epoch has an incompatible type"
+    },
+    {
+      "id": "M06",
+      "reason": "Wrong receipt width refuses rather than truncating long IDs",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN last_context_selection_id varchar(255); UPDATE public.auth_session SET last_context_selection_id='12345678-1234-4234-8234-123456789abc-extra';",
+      "expected": "failure",
+      "messageIncludes": "last_context_selection_id has an incompatible type"
+    },
+    {
+      "id": "M07",
+      "reason": "Wrong legacy column width is refused, not silently narrowed",
+      "setupSql": "ALTER TABLE public.auth_session ALTER COLUMN login_name TYPE varchar(256);",
+      "expected": "failure",
+      "messageIncludes": "login_name has an incompatible type"
+    },
+    {
+      "id": "M08",
+      "reason": "A wrong epoch default is rejected before backfill",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint DEFAULT 0;",
+      "expected": "failure",
+      "messageIncludes": "context_epoch has an incompatible default"
+    },
+    {
+      "id": "M09",
+      "reason": "A known-mode default is not evaluated or accepted",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN ledger_context jsonb DEFAULT '{\"version\":\"server-session-ledger-context-v1\",\"status\":\"resolved\",\"mode\":\"A\",\"reason\":\"legacy-session-uninitialized\"}'::jsonb;",
+      "expected": "failure",
+      "messageIncludes": "ledger_context has an incompatible default"
+    },
+    {
+      "id": "M10",
+      "reason": "Weaker same-named check is refused rather than trusted",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; ALTER TABLE public.auth_session ADD CONSTRAINT auth_session_context_epoch_v1_check CHECK (context_epoch>=0);",
+      "expected": "failure",
+      "messageIncludes": "constraint auth_session_context_epoch_v1_check is incompatible"
+    },
+    {
+      "id": "M11",
+      "reason": "Existing zero epoch is not overwritten with1",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET context_epoch=0;",
+      "expected": "failure",
+      "messageIncludes": "invalid non-NULL values for auth_session_context_epoch_v1_check"
+    },
+    {
+      "id": "M12",
+      "reason": "Ledger extra JSON key is refused",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET ledger_context='{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"legacy-session-uninitialized\",\"extra\":\"not-allowed\"}'::jsonb;",
+      "expected": "failure",
+      "messageIncludes": "invalid non-NULL values for auth_session_ledger_context_v1_check"
+    },
+    {
+      "id": "M13",
+      "reason": "JSON null is not SQLNULL and must not be backfilled",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET ledger_context='null'::jsonb;",
+      "expected": "failure",
+      "messageIncludes": "invalid non-NULL values for auth_session_ledger_context_v1_check"
+    },
+    {
+      "id": "M14",
+      "reason": "Partial receipt cannot be repaired by inventing missing members",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET context_epoch=2,last_context_selection_id='12345678-1234-4234-8234-123456789abc';",
+      "expected": "failure",
+      "messageIncludes": "invalid non-NULL values for auth_session_context_receipt_v1_check"
+    },
+    {
+      "id": "M15",
+      "reason": "Receipt without current epoch refuses instead of backfilling1",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET last_context_selection_id='12345678-1234-4234-8234-123456789abc',last_context_request_sha256='cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',last_context_from_epoch=1;",
+      "expected": "failure",
+      "messageIncludes": "receipt has no existing current epoch"
+    },
+    {
+      "id": "M16",
+      "reason": "Receipt from current epoch is incoherent",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET context_epoch=1,last_context_selection_id='12345678-1234-4234-8234-123456789abc',last_context_request_sha256='cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',last_context_from_epoch=1;",
+      "expected": "failure",
+      "messageIncludes": "invalid non-NULL values for auth_session_context_receipt_v1_check"
+    },
+    {
+      "id": "M17",
+      "reason": "UUIDv1 receipt is outside current transport profile",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET context_epoch=2,last_context_selection_id='12345678-1234-4234-8234-123456789abc',last_context_request_sha256='cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',last_context_from_epoch=1; UPDATE public.auth_session SET last_context_selection_id='12345678-1234-1234-8234-123456789abc';",
+      "expected": "failure",
+      "messageIncludes": "invalid non-NULL values for auth_session_context_receipt_v1_check"
+    },
+    {
+      "id": "M18",
+      "reason": "Uppercase receipt hash is refused",
+      "setupSql": "ALTER TABLE public.auth_session ADD COLUMN context_epoch bigint, ADD COLUMN ledger_context jsonb, ADD COLUMN last_context_selection_id varchar(36), ADD COLUMN last_context_request_sha256 char(64), ADD COLUMN last_context_from_epoch bigint; UPDATE public.auth_session SET context_epoch=2,last_context_selection_id='12345678-1234-4234-8234-123456789abc',last_context_request_sha256='cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',last_context_from_epoch=1; UPDATE public.auth_session SET last_context_request_sha256='AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';",
+      "expected": "failure",
+      "messageIncludes": "invalid non-NULL values for auth_session_context_receipt_v1_check"
+    },
+    {
+      "id": "M19",
+      "reason": "Missing original expiry check is an unsupported baseline",
+      "setupSql": "ALTER TABLE public.auth_session DROP CONSTRAINT auth_session_expiry_check;",
+      "expected": "failure",
+      "messageIncludes": "missing the existing expiry check"
+    },
+    {
+      "id": "M20",
+      "reason": "Weakened original expiry check is refused",
+      "setupSql": "ALTER TABLE public.auth_session DROP CONSTRAINT auth_session_expiry_check; ALTER TABLE public.auth_session ADD CONSTRAINT auth_session_expiry_check CHECK (expires_at>=created_at);",
+      "expected": "failure",
+      "messageIncludes": "expiry check differs from the required validated baseline"
+    },
+    {
+      "id": "M21",
+      "reason": "Unvalidated original expiry check is refused",
+      "setupSql": "ALTER TABLE public.auth_session DROP CONSTRAINT auth_session_expiry_check; ALTER TABLE public.auth_session ADD CONSTRAINT auth_session_expiry_check CHECK (expires_at>created_at) NOT VALID;",
+      "expected": "failure",
+      "messageIncludes": "expiry check differs from the required validated baseline"
+    },
+    {
+      "id": "M22",
+      "reason": "Existing user trigger must not be invoked by backfill",
+      "setupSql": "CREATE FUNCTION public.fixture_session_touch() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RAISE EXCEPTION 'fixture trigger must not execute'; END$$; CREATE TRIGGER fixture_session_touch BEFORE UPDATE ON public.auth_session FOR EACH ROW EXECUTE FUNCTION public.fixture_session_touch();",
+      "expected": "failure",
+      "messageIncludes": "inheritance, user triggers, or rewrite rules require separate review"
+    },
+    {
+      "id": "M23",
+      "reason": "Existing UPDATE rule requires explicit review",
+      "setupSql": "CREATE RULE fixture_session_rule AS ON UPDATE TO public.auth_session DO ALSO NOTIFY fixture_session_update;",
+      "expected": "failure",
+      "messageIncludes": "inheritance, user triggers, or rewrite rules require separate review"
+    },
+    {
+      "id": "M24",
+      "reason": "Inherited child cannot be implicitly changed by parent UPDATE",
+      "setupSql": "CREATE TABLE public.fixture_session_child () INHERITS(public.auth_session);",
+      "expected": "failure",
+      "messageIncludes": "inheritance, user triggers, or rewrite rules require separate review"
+    },
+    {
+      "id": "M25",
+      "reason": "Disabled forced RLS is not an accepted baseline",
+      "setupSql": "ALTER TABLE public.auth_session NO FORCE ROW LEVEL SECURITY;",
+      "expected": "failure",
+      "messageIncludes": "ordinary table with enabled, forced tenant RLS"
+    },
+    {
+      "id": "M26",
+      "reason": "A weaker tenant policy must not be trusted",
+      "setupSql": "ALTER POLICY tenant_isolation ON public.auth_session USING (true) WITH CHECK (true);",
+      "expected": "failure",
+      "messageIncludes": "tenant_isolation policy differs from the required baseline"
+    },
+    {
+      "id": "M27",
+      "reason": "Reordered primary key is refused without rebuilding it",
+      "setupSql": "ALTER TABLE public.auth_session DROP CONSTRAINT auth_session_pkey; ALTER TABLE public.auth_session ADD CONSTRAINT auth_session_pkey PRIMARY KEY (session_id,tenant_id);",
+      "expected": "failure",
+      "messageIncludes": "primary key must remain (tenant_id,session_id)"
+    },
+    {
+      "id": "M28",
+      "reason": "Absent legacy column is refused rather than recreated",
+      "setupSql": "ALTER TABLE public.auth_session DROP COLUMN co_year;",
+      "expected": "failure",
+      "messageIncludes": "missing legacy column co_year"
+    }
+  ],
+  "requiredHarnessChecks": [
+    "Connection URL loopback/55433/approved migration owner and bootstrap database validated before CREATE DATABASE. Never print credentials.",
+    "Generated target name starts datacare_context_migration_; verify unique database owner/comment before applying or dropping. Exact SQL BEGIN/COMMIT is not rewritten.",
+    "Setup must succeed before the case is credited; migration failure must match the explicit intended rejection message.",
+    "Every failure leaves complete table/schema/default/constraint/row/raw+xmin+ctid snapshots exactly unchanged from after setup.",
+    "Success leaves all legacy business/auth values unchanged, including nullable year, microsecond times, refresh hash and revoked/expiry state; retains table/PK/index/expiry/policy/RLS/owner/ACL identity.",
+    "Success permits intentional context backfill row versions to change; rerunning successful migration must leave complete post-migration physical snapshots unchanged.",
+    "Success checksSql must output exactly one true boolean, not merely exit0.",
+    "After success, app_user sees only its bound seeded tenant under forced RLS; no role creation or runtime table mutation.",
+    "Database cleanup only occurs if generated name/owner/comment still match; preserve failing logs and never drop an unrelated database."
+  ],
+  "notClaimed": [
+    "No live runtime migration",
+    "No fresh authenticated session/epoch/JWT/mode/closing behavior",
+    "No arbitrary inherited or triggered schema supported",
+    "No database verification yet"
+  ]
+}

@@ -1,0 +1,12 @@
+src/saleReturnBillProjection.ts(42,19): error TS2339: Property 'clone' does not exist on type 'typeof import("/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal")'.
+src/saleReturnBillProjection.ts(100,10): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ readonly taxName: string | null; readonly bankAccountName: string | null; readonly cardAccountName: string | null; }'.
+  No index signature with a parameter of type 'string' was found on type '{ readonly taxName: string | null; readonly bankAccountName: string | null; readonly cardAccountName: string | null; }'.
+src/saleReturnBillProjection.ts(100,47): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ readonly taxName: string | null; readonly bankAccountName: string | null; readonly cardAccountName: string | null; }'.
+  No index signature with a parameter of type 'string' was found on type '{ readonly taxName: string | null; readonly bankAccountName: string | null; readonly cardAccountName: string | null; }'.
+test/saleReturnBillProjection.test.ts(275,39): error TS2339: Property 'precision' does not exist on type 'typeof import("/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal")'.
+test/saleReturnBillProjection.test.ts(277,15): error TS2339: Property 'set' does not exist on type 'typeof import("/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal")'.
+test/saleReturnBillProjection.test.ts(288,22): error TS2339: Property 'precision' does not exist on type 'typeof import("/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal")'.
+test/saleReturnBillProjection.test.ts(290,15): error TS2339: Property 'set' does not exist on type 'typeof import("/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal")'.
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 2: tsc --noEmit --strict --noUncheckedIndexedAccess --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck test/saleReturnBillProjection.test.ts

@@ -1,0 +1,246 @@
+﻿html {
+    height: 100%;
+}
+
+body {
+    background: #ff6a00;
+    /*background: rgb(0,91,117);
+    background: linear-gradient(328deg, rgba(0,91,117,0.01) 0%, rgba(3,163,195,0.1) 100%);
+    background: -webkit-linear-gradient(to right, #e67817 60%, #B02A30);
+    background: linear-gradient(to bottom right, #e67817 60%, #B02A30);*/
+    font-family: Assistant, sans-serif;
+    display: flex;
+    margin: auto;
+    min-height: 90vh;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    height: 100%;
+    width: 100%;
+}
+.top {
+    background-color: #ff6a00;
+    height: 4.5rem;
+    width: 100%;
+    position: absolute;
+    padding-top: 20px;
+}
+.card {
+    background-color: none;
+    height: 100%;
+    width:100%;
+    text-align:center;
+}
+.toplbl {
+    padding: 2%;
+    font: 35px/68px 'Muli', sans-serif;
+    font-weight: 600;
+}
+
+
+.mid {
+    background-color: white;
+    width: 100%;
+    position: fixed;
+    height: 92%;
+    overflow: scroll;
+}
+
+
+.iconline {
+    width: 100%;
+    height: 300px;
+    background-color: white;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(21, 5rem);
+    grid-row-gap: 2rem;
+}
+
+.icon {
+    background-color: white;
+    width: 100% ;
+    cursor: pointer;
+    align-content: center;
+}
+    .icon:nth-child(1) {
+        grid-column: 1;
+        text-align: center;
+        color: white;
+        font: 30px/60px 'Muli', sans-serif;
+        font-weight: 700;
+    }
+
+    .icon:nth-child(2) {
+        grid-column: 1;
+        grid-row: 2;
+        text-align: left;
+    }
+
+    .icon:nth-child(3) {
+        grid-column: 1;
+        grid-row: 3;
+        text-align: left;
+    }
+
+    .icon:nth-child(4) {
+        grid-column: 1;
+        grid-row: 4;
+        text-align: left;
+    }
+
+    .icon:nth-child(5) {
+        grid-column: 1;
+        grid-row: 5;
+        text-align: left;
+    }
+
+    .icon:nth-child(6) {
+        grid-column: 1;
+        grid-row: 6;
+        text-align: left;
+    }
+
+    .icon:nth-child(7) {
+        grid-column: 1;
+        grid-row: 7;
+        text-align: left;
+    }
+
+    .icon:nth-child(8) {
+        grid-column: 1;
+        grid-row: 8;
+        text-align: left;
+    }
+    .icon:nth-child(9) {
+        grid-column: 1;
+        grid-row: 9;
+        text-align: left;
+    }
+    .icon:nth-child(10) {
+        grid-column: 1;
+        grid-row: 10;
+        text-align: left;
+    }
+
+    .icon:nth-child(11) {
+        grid-column: 1;
+        grid-row: 11;
+        text-align: left;
+    }
+
+    .icon:nth-child(12) {
+        grid-column: 1;
+        grid-row: 12;
+        text-align: left;
+    }
+
+    .icon:nth-child(13) {
+        grid-column: 1;
+        grid-row: 13;
+        text-align: left;
+    }
+    .icon:nth-child(14) {
+        grid-column: 1;
+        grid-row: 14;
+        text-align: left;
+    }
+    .icon:nth-child(15) {
+        grid-column: 1;
+        grid-row: 15;
+        text-align: left;
+    }
+    .icon:nth-child(16) {
+        grid-column: 1;
+        grid-row: 16;
+        text-align: left;
+    }
+    .icon:nth-child(17) {
+        grid-column: 1;
+        grid-row: 17;
+        text-align: left;
+    }
+    .icon:nth-child(18) {
+        grid-column: 1;
+        grid-row: 18;
+        text-align: left;
+    }
+    .icon:nth-child(19) {
+        grid-column: 1;
+        grid-row: 19;
+        text-align: left;
+    }
+
+
+.bottom {
+   
+    background-color: #dbedf7;
+    height: 130px;
+    width: 100%;
+    border-radius: 10px;
+    position: fixed;
+    bottom: 0;
+}
+.left-buttom {
+    margin-top: 3%;
+    margin-left: -7%;
+    height: 80px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.right-buttom {
+    margin-right: 16%;
+    margin-top: 3%;
+    float: right;
+    height: 80px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.mid-buttom {
+    margin-left: 20%;
+    cursor: pointer;
+    height: 80px;
+    width: 80px;
+}
+
+.acclbl {
+    font-size: 35px;
+    position: absolute;
+    top: 18%;
+    left:3%;
+    color: #5b5a5a;
+    font-weight: 600;
+}
+
+.mainline {
+    height: 5rem;
+    position: relative;
+}
+
+.textbox {
+    border: 2px solid;
+    position: relative;
+    left: 22%;
+    font: 40px/72px 'Muli', sans-serif;
+    color: #005B75;
+    width: 73%;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+    padding-left: 3%;
+    text-transform: uppercase;
+}
+.drop {
+    position: relative;
+    left: 22%;
+    text-transform: uppercase;
+    font: 40px/72px 'Muli', sans-serif;
+    border: 2px solid;
+    background: #ffffff;
+    color: #005B75;
+    width: 73%;
+    height:5rem;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+}

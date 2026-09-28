@@ -1,0 +1,2899 @@
+{
+ "kind": "datacare.parity-bundle/1.0",
+ "side": "web",
+ "capturedAt": "2026-07-31T21:47:06.965Z",
+ "source": {
+  "engine": "postgres",
+  "database": "datacare"
+ },
+ "scope": {
+  "coCode": "01",
+  "lcCode": "00"
+ },
+ "cases": [
+  {
+   "caseId": "sale-027-00001",
+   "description": "",
+   "voucher": {
+    "book": "027",
+    "vchNo": "00001"
+   },
+   "tables": {
+    "AC_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "DR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "FINE_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "IT_DESC",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CLR_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "FINE_RATE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "PARTY_AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LDR_NAME",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "144469",
+       "00001",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "TSSL",
+       "2024-04-06T00:00:00.000Z",
+       "01002024-202502700000101",
+       "SALES",
+       "",
+       null,
+       "",
+       "000888",
+       "00004",
+       "0",
+       "1560.67",
+       "A",
+       "D",
+       null,
+       null,
+       "2024-04-06T00:00:00.000Z",
+       "00000",
+       "2024-04-06T00:00:00.000Z",
+       "A",
+       "N",
+       null,
+       "0",
+       "000888",
+       ""
+      ],
+      [
+       "parity-replay",
+       "144470",
+       "00001",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "TSSL",
+       "2024-04-06T00:00:00.000Z",
+       "01002024-202502700000102",
+       "SALES",
+       "",
+       null,
+       "",
+       "00004",
+       "000888",
+       "1515.21",
+       "0",
+       "A",
+       "C",
+       null,
+       null,
+       "2024-04-06T00:00:00.000Z",
+       "00000",
+       "2024-04-06T00:00:00.000Z",
+       "A",
+       "N",
+       null,
+       "0",
+       "00004",
+       ""
+      ],
+      [
+       "parity-replay",
+       "144471",
+       "00001",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "TSSL",
+       "2024-04-06T00:00:00.000Z",
+       "01002024-202502700000103",
+       "SALES",
+       "",
+       null,
+       "",
+       "00085",
+       "000888",
+       "45.46",
+       "0",
+       "A",
+       "C",
+       null,
+       null,
+       "2024-04-06T00:00:00.000Z",
+       "00000",
+       "2024-04-06T00:00:00.000Z",
+       "A",
+       "N",
+       null,
+       "0",
+       "00085",
+       ""
+      ]
+     ]
+    },
+    "BILL_OS_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TIME",
+       "type": "timestamp without time zone",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "REC_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "KASAR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "BILL_GOLD",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "REC_GOLD",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "KASAR_GOLD",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "BILL_SILVER",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "REC_SILVER",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "KASAR_SILVER",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "BILL_LC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_YRCD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_DBCD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_SRNO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "NEW_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OLD_ADJ_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "OLD_ADJ_GOLD",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "OLD_ADJ_SILVER",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "OLD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "USER_DELETE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "USER_UPDATE",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       1,
+       "2024-04-06T00:00:00.000Z",
+       "2024-04-06T03:14:02.218Z",
+       "TSSL",
+       "O",
+       "O",
+       "SALES",
+       "000888",
+       null,
+       "1560.67",
+       "0",
+       "0",
+       0,
+       0,
+       "0",
+       0,
+       0,
+       "0",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       "00001",
+       "parity-replay",
+       "N",
+       "A",
+       1,
+       "00001",
+       null,
+       "0",
+       0,
+       0,
+       null,
+       null,
+       null
+      ]
+     ]
+    },
+    "MAIN_STOCK": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "VCH_SRNO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "ISR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "STK_DATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "IT_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAG_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TBL_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "TR_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_SIGN",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_QTY",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_PCS",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_NWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_TOUCH",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_WEST",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_FINE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_MRP",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "NET_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "KR_NWT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "KR_TOUCH",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "KR_WEST",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "KR_FINE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "KR_LBR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "KR_OTH_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "KR_COST",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DESIGN_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ITM_SIZE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_DESC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "GHT_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "ITM_LOT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_DISC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "GRID_SCROLL",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_COLOR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OTH_FINE",
+       "type": "numeric",
+       "scale": 3
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "71240",
+       0,
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       1,
+       null,
+       "2024-04-06T00:00:00.000Z",
+       null,
+       "TSSL",
+       "SALES",
+       "000888",
+       "MA925",
+       "N",
+       null,
+       "S",
+       "-",
+       "10.36",
+       "1",
+       "10.36",
+       "10.36",
+       "0",
+       null,
+       "10.36",
+       "0",
+       "0",
+       null,
+       "1087",
+       null,
+       null,
+       "1087",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       "A",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "parity-replay",
+       "71241",
+       0,
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       2,
+       null,
+       "2024-04-06T00:00:00.000Z",
+       null,
+       "TSSL",
+       "SALES",
+       "000888",
+       "ORS",
+       "N",
+       null,
+       "S",
+       "-",
+       "4.6",
+       "1",
+       "4.6",
+       "4.6",
+       "0",
+       null,
+       "4.6",
+       "77",
+       "354.2",
+       null,
+       "74.01",
+       null,
+       null,
+       "428.21",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       "A",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     ]
+    },
+    "ROJ_MEL_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LEDR_KEY",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "LD_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "DR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SIGN",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_PCS",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_NWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_TOUCH",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_WEST",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_FINE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "NET_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "IT_DESC",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "IT_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MEMB_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SCHM_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "REF_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TYPE",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       "01002024-20250270000101         1",
+       "2024-04-06T00:00:00.000Z",
+       "TSSL",
+       "SALES",
+       "00004",
+       "REPLAY PARTY",
+       "000888",
+       "1087",
+       "0",
+       "S",
+       "-",
+       "1",
+       "10.36",
+       "10.36",
+       "0",
+       "0",
+       "0",
+       "0",
+       "1087",
+       "0",
+       "1087",
+       "0",
+       "1087",
+       "SILVER PAYAL",
+       "MA925",
+       null,
+       null,
+       null,
+       "A"
+      ],
+      [
+       "parity-replay",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       "01002024-20250270000101         2",
+       "2024-04-06T00:00:00.000Z",
+       "TSSL",
+       "SALES",
+       "00004",
+       "REPLAY PARTY",
+       "000888",
+       "428.21",
+       "0",
+       "S",
+       "-",
+       "1",
+       "4.6",
+       "4.6",
+       "0",
+       "0",
+       "0",
+       "77",
+       "428.21",
+       "16.09",
+       "74.01",
+       "0",
+       "428",
+       "SILVER ORNAMENT",
+       "ORS",
+       null,
+       null,
+       null,
+       "A"
+      ],
+      [
+       "parity-replay",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       "01002024-20250270000102",
+       "2024-04-06T00:00:00.000Z",
+       "TSSL",
+       "SALES",
+       "000888",
+       "REPLAY PARTY",
+       "00004",
+       "0",
+       "1560.67",
+       "A",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "",
+       "",
+       null,
+       null,
+       null,
+       "A"
+      ],
+      [
+       "parity-replay",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       "01002024-20250270000104",
+       "2024-04-06T00:00:00.000Z",
+       "TSSL",
+       "SALES",
+       "00085",
+       "REPLAY PARTY",
+       "000888",
+       "45.46",
+       "0",
+       "A",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "",
+       "",
+       null,
+       null,
+       null,
+       "A"
+      ]
+     ]
+    },
+    "SL_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "IRN_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TIME",
+       "type": "timestamp without time zone",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "NET_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "DISC_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "DISC_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TAX_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAX_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "TAX_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ROF_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TOT_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ADV_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OLD_GL_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OLD_SL_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CASH_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "CARD_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "CHQ_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "SCHM_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "CASH_PAID",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "KASAR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "BILL_OS",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "OS_ADJ_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CR_DAYS",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "CARD_AC",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "BANK_AC",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "CHQ_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BANK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "VCH_DESC",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TIME",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "OLD_GL",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OLD_SL",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ADD1",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ADD2",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ADD3",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CITY",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MOBILE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_GST_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "IGST_TAX",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "CGST_TAX",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "SGST_TAX",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OLD_VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "NEW_VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SCHM_AC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CARD_ADJ",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISU_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISU_LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISU_YRCD",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ISU_DBCD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RTN_NET_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RTN_TOT_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RTN_CHQ_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RTN_CARD_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RTN_CASH_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RTN_KASAR_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RTN_BILL_OS",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TCS_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "TCS_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "TCS_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "HM_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_TAX_PRC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_TAX_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_TAX_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TDS_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "TDS_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "TDS_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "CARD_COM_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "USER_UPDATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "USER_DELETE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "POINT_VAL",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "ACK_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ACK_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "ORNA_ISU",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MOB_ENTRY_SAVE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "UPI_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "CRNT_ADJ_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "PARTY_FINE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OZ_RATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OZ_CONV",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "FX_RATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "FX_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MTL_RATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TOT_TAX_FREE_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ZERO_RATED_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RATE_UNFIX",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "25143",
+       "00001",
+       null,
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "2024-04-06T00:00:00.000Z",
+       "2024-04-06T03:14:02.218Z",
+       "00001",
+       "00001",
+       "000888",
+       "REPLAY PARTY",
+       "1515.21",
+       "0",
+       "0",
+       "10",
+       "3",
+       "45.46",
+       "0",
+       "1560.67",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       1560.67,
+       null,
+       null,
+       "",
+       "",
+       "",
+       "",
+       null,
+       "",
+       null,
+       "0",
+       "0",
+       "",
+       "",
+       "",
+       "",
+       "",
+       "L",
+       0,
+       22.73,
+       22.73,
+       "N",
+       null,
+       null,
+       "parity-replay",
+       "",
+       "N",
+       "",
+       "00",
+       "",
+       "",
+       null,
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "",
+       "",
+       "0",
+       "0",
+       "0",
+       "N",
+       "N",
+       0,
+       null,
+       null,
+       "W",
+       "Y",
+       "0",
+       "1161.01",
+       "0",
+       "0",
+       null,
+       null,
+       "0",
+       "0",
+       "0",
+       "",
+       "0",
+       null,
+       null,
+       "N"
+      ]
+     ]
+    },
+    "SL_DETL": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "VCH_SRNO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "TAG_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "IT_TAX_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "OLD_SRNO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "VCH_TIME",
+       "type": "timestamp without time zone",
+       "scale": null
+      },
+      {
+       "name": "VCH_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "INOUT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ENTRY_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "IT_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "LOT_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DESIGN_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "TBL_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_SIZE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_PCS",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "BAG_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_GWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_OTH_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_NWT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_GHT_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_TOUCH",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "ITM_WEST_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "ITM_FINE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "LBR_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "LBR_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "LBR_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LBR_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "OTH_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_RATE",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TAG_COST",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_MRP",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TOT_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TAX_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "NET_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "ITM_REMARK",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "KR_NET_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "KR_TOUCH",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "KR_WEST_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "KR_FINE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "KR_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RATE_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "IT_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "PR_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HD_VCH_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DATA_TRFR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "OLD_VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "NEW_VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "MAIN_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ADD_USER",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISU_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISU_LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISU_YRCD",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ISU_DBCD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISU_SRNO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "ITM_GHT_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "GHT_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_ID",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_ID2",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_ID3",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_ID4",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "HM_ID_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "HM_ID2_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "HM_ID3_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "HM_ID4_WT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "HM_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "IT_DISC_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAG_GWT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAG_NWT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "FINE_RATE",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "DISC_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "DISC_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TAX_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAXABL_RATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_IGST_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_CGST_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_SGST_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "GRAND_TOTAL",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_COLOR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "EMP_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ORD_TAG_STK_ADD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "DESIGN_IMG_ID",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "RATE_WITH",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_LOT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "MCX_RATE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "PRM_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "PRM_DISC",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ITM_STYLE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAX_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAX_FREE_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAX_RVRS",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ORD_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "ORD_LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ORD_YRCD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ORD_DBCD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ORD_SRNO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "IT_LBR_TAX",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "POINT_VAL",
+       "type": "double precision",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "14126",
+       0,
+       "N",
+       "32.6",
+       "00001",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       1,
+       1,
+       "2024-04-06T00:00:00.000Z",
+       "2024-04-06T03:14:02.218Z",
+       "TSSL",
+       "O",
+       "S",
+       "SALES",
+       "000888",
+       "MA925",
+       null,
+       "",
+       "001",
+       "",
+       "1",
+       "0",
+       "10.36",
+       "0",
+       "10.36",
+       "0",
+       "0",
+       "0",
+       "10.36",
+       "0",
+       "0",
+       "N",
+       "1087",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "1087",
+       "3",
+       "1087",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "",
+       "",
+       "S",
+       "",
+       "00001",
+       "N",
+       null,
+       null,
+       "parity-replay",
+       "parity-replay",
+       "",
+       "00",
+       "",
+       "",
+       0,
+       "0",
+       "0",
+       "",
+       "",
+       "",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       null,
+       "10.36",
+       "10.36",
+       null,
+       "0",
+       "0",
+       null,
+       null,
+       "0",
+       "16.3",
+       "16.3",
+       null,
+       null,
+       "",
+       "",
+       "",
+       "",
+       "",
+       null,
+       null,
+       null,
+       "",
+       null,
+       null,
+       null,
+       "",
+       "00",
+       "",
+       "",
+       0,
+       null,
+       null
+      ],
+      [
+       "parity-replay",
+       "14127",
+       0,
+       "N",
+       "12.84",
+       "00001",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       2,
+       2,
+       "2024-04-06T00:00:00.000Z",
+       "2024-04-06T03:14:02.218Z",
+       "TSSL",
+       "O",
+       "S",
+       "SALES",
+       "000888",
+       "ORS",
+       null,
+       "",
+       "001",
+       "",
+       "1",
+       "0",
+       "4.6",
+       "0",
+       "4.6",
+       "0",
+       "0",
+       "0",
+       "4.6",
+       "0",
+       "16.09",
+       "N",
+       "74.01",
+       "0",
+       "77",
+       "354.2",
+       "0",
+       "0",
+       "428",
+       "3",
+       "428",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "",
+       "",
+       "S",
+       "",
+       "00001",
+       "N",
+       null,
+       null,
+       "parity-replay",
+       "parity-replay",
+       "",
+       "00",
+       "",
+       "",
+       0,
+       "0",
+       "0",
+       "",
+       "",
+       "",
+       "",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       null,
+       "4.6",
+       "4.6",
+       null,
+       "0",
+       "0",
+       null,
+       null,
+       "0",
+       "6.42",
+       "6.42",
+       null,
+       null,
+       "",
+       "",
+       "",
+       "",
+       "",
+       null,
+       null,
+       null,
+       "",
+       null,
+       null,
+       null,
+       "",
+       "00",
+       "",
+       "",
+       0,
+       null,
+       null
+      ]
+     ]
+    },
+    "TAX_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_YEAR",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "SR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TRAN_TYPE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "AC_CODE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "TAX_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "TAX_TYPE",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "TAX_PRC",
+       "type": "numeric",
+       "scale": 4
+      },
+      {
+       "name": "NET_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TAX_AMT",
+       "type": "numeric",
+       "scale": 3
+      },
+      {
+       "name": "DISC_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TOT_AMT",
+       "type": "numeric",
+       "scale": 2
+      },
+      {
+       "name": "TAX_SIGN",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "PARTY_NAME",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "R_CHARG",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ISR_NO",
+       "type": "double precision",
+       "scale": null
+      },
+      {
+       "name": "TAX_FREE_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "ZERO_RATED_AMT",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_DATE",
+       "type": "date",
+       "scale": null
+      },
+      {
+       "name": "BILL_DBCD",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "BILL_NO",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_SRNO",
+       "type": "character varying",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "29761",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       1,
+       "SALES",
+       "S",
+       "2024-04-06T00:00:00.000Z",
+       "000888",
+       "10",
+       "N",
+       "1.5",
+       "1515.21",
+       "22.73",
+       "0",
+       "1560.67",
+       "+",
+       "REPLAY PARTY",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "parity-replay",
+       "29762",
+       "01",
+       "00",
+       "2024-2025",
+       "027",
+       "00001",
+       2,
+       "SALES",
+       "S",
+       "2024-04-06T00:00:00.000Z",
+       "000888",
+       "10",
+       "N",
+       "1.5",
+       "1515.21",
+       "22.73",
+       "0",
+       "1560.67",
+       "+",
+       "REPLAY PARTY",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     ]
+    },
+    "TEMP_BOOK_DATA": {
+     "columns": [
+      {
+       "name": "tenant_id",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "row_id",
+       "type": "bigint",
+       "scale": 0
+      },
+      {
+       "name": "CO_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "LC_CODE",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "CO_BOOK",
+       "type": "character varying",
+       "scale": null
+      },
+      {
+       "name": "VCH_NO",
+       "type": "text",
+       "scale": null
+      },
+      {
+       "name": "BOOK_NAME",
+       "type": "text",
+       "scale": null
+      }
+     ],
+     "rows": [
+      [
+       "parity-replay",
+       "105586",
+       "01",
+       "00",
+       "027",
+       "00001",
+       "Silver Tax Invoice Old"
+      ]
+     ]
+    }
+   }
+  }
+ ]
+}

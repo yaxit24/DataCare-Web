@@ -1,0 +1,184 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/saleReturnIncomingReplay.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/saleReturnIncomingReplay.db.test.ts (43 tests | 3 failed) 164849ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > hydrates exact raw identities, rawNULL/blank/decimals/microseconds, eight caches and an empty journal without recalculation or business writes 2874ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column19 without persisting it 828ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column20 without persisting it 1355ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column21 without persisting it 791ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column23 without persisting it 929ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column24 without persisting it 1780ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column25 without persisting it 912ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column26 without persisting it 887ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column27 without persisting it 1407ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column28 without persisting it 1429ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column36 without persisting it 1857ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column37 without persisting it 2125ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column38 without persisting it 1332ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > replays independent source prefixes: rate-then-manual-labour 2269ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > replays independent source prefixes: manual-labour-then-rate 952ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > replays independent source prefixes: equal-manual-total-then-same-valued-other 1149ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > returns the last-valid transient prefix on a calculator failure and preserves all business tables 1143ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > contains hidden, known unsupported and malformed events without widening the twelve-field profile 3107ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > retains an overlong saved editor verbatim, refuses echoing it, and permits explicit shorter correction 2292ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"TAG_NO":"TAG-17"} 2257ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"TAG_NO":null} 2878ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"ENTRY_TYPE":"R"} 2535ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"INOUT_TYPE":"O"} 4698ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"APR_ISU":"Y"} 4649ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > keeps unsupported historical profile readable but refuses preview {"EMP_ISU":"Y"} 5528ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > does not admit SL_DETL companion state or touch it 3094ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > does not admit SL_IDTL companion state or touch it 1803ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > does not admit BAR_DETL companion state or touch it 817ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > does not admit BAR_IDTL companion state or touch it 1998ms
+   × saved incoming Return trusted replay in a real read-only observation > does not admit DM_DATA companion state or touch it 1820ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `23502`. Message: `Failing row contains (return-replay-r9, 01, 01, 2024-2025, R91, 00017, null, 31, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null).`
+   ✓ saved incoming Return trusted replay in a real read-only observation > returns NULL numeric projection diagnostics and contains period/document restrictions 11814ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > separates complete book/tenant identities, exact five-digit keys and missing vouchers 10602ms
+   × saved incoming Return trusted replay in a real read-only observation > uses SQL numeric order with the same JSONB serial representation for scientific-range saved rows 16435ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 9131 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+   × saved incoming Return trusted replay in a real read-only observation > contains discovered item alias gold and observes its physical identity 8934ms
+     → 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Can't reach database server at `127.0.0.1:55433`
+
+Please make sure your database server is running at `127.0.0.1:55433`.
+   ✓ saved incoming Return trusted replay in a real read-only observation > contains discovered item alias GOLD  and observes its physical identity 14329ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > contains a normalized company alias but ignores genuinely different company masters 7427ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > invalidates the full observation after header change 3407ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > invalidates the full observation after sibling change 3678ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > invalidates the full observation after setting change 4713ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > invalidates the full observation after master same-value change 6039ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > versions master inputs independently of the metadata/configuration tokens and detects extant-row ABA 8956ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > observes an initially absent override recurrence without claiming a durable tombstone 3843ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > reads document/configuration/master inside one actual RepeatableRead snapshot despite an interleaved owner commit 2691ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/saleReturnIncomingReplay.db.test.ts > saved incoming Return trusted replay in a real read-only observation > does not admit DM_DATA companion state or touch it
+PrismaClientKnownRequestError: 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `23502`. Message: `Failing row contains (return-replay-r9, 01, 01, 2024-2025, R91, 00017, null, 31, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null).`
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ insert test/saleReturnIncomingReplay.db.test.ts:91:5
+     89|       .map((k) => `"${k}"`)
+     90|       .join(',');
+     91|     await sql(
+       |     ^
+     92|       `INSERT INTO "${table}" (${columns}) SELECT ${columns} FROM json…
+     93|       JSON.stringify(values),
+ ❯ test/saleReturnIncomingReplay.db.test.ts:393:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  test/saleReturnIncomingReplay.db.test.ts > saved incoming Return trusted replay in a real read-only observation > uses SQL numeric order with the same JSONB serial representation for scientific-range saved rows
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 9131 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ snapshot src/modules/sales/savedSaleReturn.ts:267:74
+    265|   );
+    266|   const itemCodes = [...new Set(tables.SL_DETL_RTN.map((row) => trimme…
+    267|   const itemNames: Array<{ code: string | null; name: string | null }>…
+       |                                                                          ^
+    268|     `SELECT "IT_CODE"::text AS code,"IT_NAME"::text AS name FROM "ITEM…
+    269|     scope.tenantId,
+ ❯ observe src/modules/sales/saleReturnIncomingReplay.ts:257:17
+ ❯ withTenant.isolationLevel src/modules/sales/saleReturnIncomingReplay.ts:419:22
+ ❯ Proxy._transactionWithCallback ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:722:18
+ ❯ Module.getSaleReturnIncomingReplayState src/modules/sales/saleReturnIncomingReplay.ts:416:12
+ ❯ test/saleReturnIncomingReplay.db.test.ts:466:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  test/saleReturnIncomingReplay.db.test.ts > saved incoming Return trusted replay in a real read-only observation > contains discovered item alias gold and observes its physical identity
+PrismaClientKnownRequestError: 
+Invalid `prisma.$executeRawUnsafe()` invocation:
+
+
+Can't reach database server at `127.0.0.1:55433`
+
+Please make sure your database server is running at `127.0.0.1:55433`.
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ cleanup test/saleReturnIncomingReplay.db.test.ts:98:7
+     96|   const cleanup = async () => {
+     97|     for (const table of tables)
+     98|       await sql(`DELETE FROM "${table}" WHERE tenant_id IN($1,$2)`, te…
+       |       ^
+     99|   };
+    100|   const snapshot = async () => {
+ ❯ test/saleReturnIncomingReplay.db.test.ts:167:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 40 passed (43)
+   Start at  12:14:47
+   Duration  169.16s (transform 1.39s, setup 0ms, collect 2.32s, tests 164.85s, environment 0ms, prepare 323ms)
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 test: `vitest run "test/saleReturnIncomingReplay.db.test.ts"`
+Exit status 1
+PARITY_TEST_FAILED pnpm exited 1

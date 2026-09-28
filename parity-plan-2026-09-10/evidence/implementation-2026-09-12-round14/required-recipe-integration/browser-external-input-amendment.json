@@ -1,0 +1,21 @@
+{
+  "reason": "Baseline labour journey directly reads the frozen R13 required-checks JSON, omitted from earlier public run captures. Retention verifier correctly refused; all content assertions passed separately. Preserve earlier runs and verifier failure; seed this dependency and enforce it for all three superseding browser proofs.",
+  "dependency": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-preview-browser/browser-required-checks.json",
+    "sha256": "9c835a71e32e64d4b9bdd8999320e299cc875f1ee60e4aa01413c9a6c0596237"
+  },
+  "beforeHelperSha256": "e699ab1cbc9cdc8ad46d163b85ee78c1ab4cc47f9a2e820664e96fea11a249e7",
+  "afterHelperSha256": "922259c920036723be4057af352f1499826289028be7bb2074f9a926c561e331",
+  "labelReplacements": {
+    "browser-qualified": "browser-bound",
+    "browser-context-qualified": "browser-context-bound",
+    "browser-labour-qualified": "browser-labour-bound",
+    "recipe-controls-qualified": "recipe-controls-bound",
+    "checkpoint-chain-qualified": "checkpoint-chain-bound"
+  },
+  "browserArtifactFolderSuffixChange": "round14-qualified to round14-bound",
+  "applicationCodeOrExpectedResultsChanged": false,
+  "apiQualification": "api-qualified consumes browser producer source text, not this journey-required JSON; API result remains required without rerun.",
+  "unchangedRequirements": "18 required semantic checks; commands retain same programs/flags and exact outcome literals. Only browser folder labels and two cheap control/chain proof names superseded.",
+  "metadataCreationCorrection": "Initial metadata-only dependency read used a relative parent path and failed after correct helper/recipe edits. Absolute workspace root resolves the unchanged dependency. No runtime source or result changes were made."
+}

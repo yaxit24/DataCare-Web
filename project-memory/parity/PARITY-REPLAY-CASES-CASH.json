@@ -1,0 +1,20 @@
+[
+  {
+    "caseId": "cashrec-001-00001",
+    "book": "001",
+    "vchNo": "00001",
+    "desktopVchNo": "00001"
+  },
+  {
+    "caseId": "cashpay-002-00029",
+    "book": "002",
+    "vchNo": "00029",
+    "desktopVchNo": "00029"
+  },
+  {
+    "caseId": "scheme-074-00001",
+    "book": "074",
+    "vchNo": "00001",
+    "desktopVchNo": "00001"
+  }
+]

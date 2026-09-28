@@ -1,0 +1,155 @@
+{
+ "form": "RP_TAG_ESTMATE",
+ "loc": 7033,
+ "gridColumns": {
+  "cSrNo": 0,
+  "c1SrNo": 0,
+  "cTagNo": 1,
+  "c1ItCode": 1,
+  "cItCode": 2,
+  "c1ItName": 2,
+  "cCounter": 3,
+  "c1Pcs": 3,
+  "cDesign": 4,
+  "c1GrWt": 4,
+  "cSize": 5,
+  "c1ConPrc": 5,
+  "cBagWt": 6,
+  "c1RateType": 6,
+  "cPcs": 7,
+  "c1ItRate": 7,
+  "cGrWt": 8,
+  "c1ItmAmt": 8,
+  "cOthWt": 9,
+  "c1LbrRate": 9,
+  "cNetWt": 10,
+  "c1LbrAmt": 10,
+  "cGhtPrc": 11,
+  "c1NetAmt": 11,
+  "cGhtWt": 12,
+  "c1ConWt": 12,
+  "cTouch": 13,
+  "c1KrWt": 13,
+  "cWestPrc": 14,
+  "c1KrConWt": 14,
+  "cFine": 15,
+  "c1ItType": 15,
+  "cItRate": 16,
+  "c1RowSr": 16,
+  "cItAmt": 17,
+  "cLbrPrc": 18,
+  "cLbrType": 19,
+  "cLbrRate": 20,
+  "cLbrAmt": 21,
+  "cOthAmt": 22,
+  "cPrCost": 23,
+  "cMrp": 24,
+  "cTotAmt": 25,
+  "cTaxPrc": 26,
+  "cNetAmt": 27,
+  "cRateType": 28,
+  "cVchSrNo": 29,
+  "cDesignImgId": 30
+ },
+ "inlineSql": [
+  "Select A.TAG_NO,A.VCH_SRNO,B.VCH_DATE FROM MAIN_STOCK AS A LEFT JOIN BAR_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.TAG_NO = B.TAG_NO AND A.VCH_SRNO = B.VCH_SRNO WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.TAG_NO = ' ? ' ? AND A.VCH_SRNO = ? GROUP BY A.TAG_NO,A.VCH_SRNO,B.VCH_DATE HAVING SUM(CASE WHEN A.ITM_SIGN ='+' THEN A.VCH_SRNO ELSE - A.VCH_SRNO END) > 0 ORDER BY B.VCH_DATE DESC",
+  "Select A.TAG_NO AS TagNoL,B.IT_NAME As ItNameL,A.IT_CODE as ItCodeL,C.DESIGN_NO AS DesignNoL,C.ITM_GWT AS GrWtW,C.ITM_NWT AS NetWtW,C.ITM_MRP as MrpR,C.VCH_SRNO,C.VCH_DATE From (MAIN_STOCK AS A LEFT JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' GROUP BY A.TAG_NO,B.IT_NAME,A.IT_CODE,C.DESIGN_NO,C.ITM_GWT,C.ITM_NWT,C.ITM_MRP,C.VCH_SRNO,C.VCH_DATE HAVING SUM(CASE WHEN ITM_SIGN = '+' THEN A.VCH_SRNO ELSE -A.VCH_SRNO END) > 0 ORDER BY A.TAG_NO,C.VCH_DATE DESC",
+  "SELECT A.*,B.IT_NAME,B.GR_CODE,C.GR_RATE FROM (BAR_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE)LEFT JOIN GROUP_MAST AS C ON B.CO_CODE = C.CO_CODE AND B.GR_CODE = C.GR_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.TAG_NO = ' ? ' ORDER BY VCH_DATE DESC",
+  "SELECT A.*,B.IT_NAME FROM BAR_IDTL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.TAG_NO = ' ? ' AND A.VCH_SRNO = ? ",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? ' AND IMAGE_TYPE = 'D'",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "In ? SELECT A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,A.TAG_NO As TagNo,A.IT_CODE As ItCode,A.TBL_CODE As Counter,A.DESIGN_NO As Design,A.ITM_SIZE As Size,A.ITM_PCS as Pcs,A.ITM_GWT As Grwt,A.ITM_NWT AS NetWt,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt, A.ITM_MRP As Mrp,A.KR_NAME As KrName,A.CO_BOOK As Book,A.BOOK_NAME As BookName,A.AC_CODE As AcCode,A.VCH_SRNO As TagId from BAR_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> '' AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? '",
+  "Out ? SELECT A.VCH_TYPE As VchTyp,A.VCH_NO VchNo,A.VCH_DATE As VchDate,A.TAG_NO As TagNo,C.DESIGN_NO AS Design,A.IT_CODE As ItCode,A.TBL_CODE As Counter,C.ITM_SIZE As Size,A.ITM_PCS as Pcs,A.ITM_GWT As Grwt,A.ITM_NWT AS NetWt,A.LBR_AMT LbrAmt,A.OTH_AMT OthAmt, A.ITM_MRP As Mrp,C.KR_NAME As KrName,A.CO_BOOK As Book,A.BOOK_NAME As BookName,A.AC_CODE As AcCode,A.VCH_SRNO As TagId from (MAIN_STOCK AS A LEFT JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE AND A.LC_CODE = C.LC_CODE AND A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO) LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> '' AND A.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.ITM_SIGN = '-'",
+  "Stock ? SELECT A.TAG_NO As TagNo,C.DESIGN_NO As Design,C.TBL_CODE As Counter,B.IT_NAME As ItmName,C.ITM_SIZE As Size,C.ITM_PCS as Pcs,C.ITM_GWT As Grwt,C.ITM_NWT AS NetWt,(D.GR_RATE) As Rate,C.LBR_PRC As LbrPrc,C.LBR_RATE As LRate,C.LBR_AMT LbrAmt,C.OTH_AMT OthAmt,C.ITM_MRP As Mrp,C.KR_NAME As Krgr,C.VCH_SRNO As TagId,C.CO_BOOK As Book,C.VCH_NO As VchNo from ((MAIN_STOCK AS A INNER JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE And A.TAG_NO = C.TAG_NO And A.VCH_SRNO = C.VCH_SRNO And A.IT_CODE = C.IT_CODE)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE)LEFT JOIN GROUP_MAST AS D ON B.CO_CODE = D.CO_CODE AND B.GR_CODE = D.GR_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.TAG_NO <> '' AND C.STK_DATE <= ' ? MM/dd/yyyy ? '",
+  "DELETE FROM TAG_STOCK_PRINT",
+  "DELETE FROM TAG_STOCK_PRINT WHERE CO_CODE = ' ? '",
+  "INSERT INTO TAG_STOCK_PRINT(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,VCH_TYPE,INOUT_TYPE,BOOK_NAME, IT_CODE,TAG_NO,VCH_SRNO,ITM_SIGN,DESIGN_NO,ITM_SIZE,TBL_CODE,ITM_QTY,ITM_PCS,ITM_GWT,ITM_NWT,ITM_FINE,DATA_TYPE) SELECT CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,VCH_TYPE,INOUT_TYPE,BOOK_NAME, IT_CODE,TAG_NO,VCH_SRNO,'+',DESIGN_NO,ITM_SIZE,TBL_CODE,1,ITM_PCS,ITM_GWT,ITM_NWT,ITM_FINE,'A' FROM BAR_DETL WHERE CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO =' ? ' AND VCH_SRNO = ? ",
+  "SELECT * FROM TAG_STOCK_PRINT",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? TagNo ? ' AND VCH_SRNO = ? TagId ? ",
+  "DELETE FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "Select * From PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "SELECT PR_NAME As PrNameL,PR_CODE as PrCodeL FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_NAME",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME",
+  "DELETE FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? TagNo ? ' AND VCH_SRNO = ? TagId ? ",
+  "SELECT A.TAG_NO As TagNo,A.VCH_SRNO As TagId from MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' and A.TAG_NO <> 'N' AND A.ITM_SIGN = '-'",
+  "UPDATE TAG_IMAGE_DATA SET MOB_IMAGE = ' ? ',CONV_IMAGE = 'Y' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ? VCH_SRNO ? ",
+  "UPDATE TAG_IMAGE_DATA SET CONV_IMAGE = 'N' WHERE CONV_IMAGE IS NULL",
+  "SELECT A.TAG_NO,A.VCH_SRNO FROM TAG_IMAGE_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CONV_IMAGE = 'N'",
+  "No Data Found In Data Grid Pleas Select Data First And Try",
+  "DELETE FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TagNo ? ' AND VCH_SRNO = ? TagId ? ",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TagNo ? ' AND VCH_SRNO = ? TagId ? ",
+  "SELECT BOOK_NAME ,CO_BOOK ,BOOK_TYPE,ITM_TYPE,MAIN_BOOK,BOOK_SNAME,BOOK_INOUT,MENU_NAME FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? Book ? '",
+  "UPDATE TAG_IMAGE_DATA SET IMG_IMPORT = 'N' WHERE IMG_IMPORT IS NULL",
+  "UPDATE TAG_IMAGE_DATA SET IMG_IMPORT = 'Y' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ? VCH_SRNO ? ",
+  "SELECT TOP 250 A.TAG_NO,A.VCH_SRNO FROM TAG_IMAGE_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.IMG_IMPORT = 'N' ORDER BY TAG_NO",
+  "SELECT MOB_IMAGE FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ? VCH_SRNO ? "
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 2
+ },
+ "calc": [
+  "((DataGridView)dGV_DETL)[16, 0].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[16, 0].Value)) / 10.0, 2), \"0.00\");",
+  "nTotAmt.Text = Strings.Format((object)(Conversion.Val(nNetAmt.Text) + Conversion.Val(nTaxAmt.Text)), \"0.00\");",
+  "if ((Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[16, 0].Value)) != 0.0) & (Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[8, 0].Value)) + Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, 0].Value)) != 0.0))",
+  "((DataGridView)dGV_DETL)[17, 0].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, 0].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[16, 0].Value)), 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[20, 0].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[16, 0].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[18, 0].Value)) / 100.0, 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[21, 0].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, 0].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[20, 0].Value)), 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[21, 0].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[8, 0].Value)) * Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[20, 0].Value)), 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[27, 0].Value = Strings.Format((object)Math.Round(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[25, 0].Value)) / (Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[26, 0].Value)) + 100.0) * 100.0, 0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[20, 0].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[21, 0].Value)) / Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[7, 0].Value))), \"0.00\");",
+  "((DataGridView)dGV_DETL)[20, 0].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[21, 0].Value)) / Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[8, 0].Value)) * 1000.0), \"0.00\");",
+  "((DataGridView)dGV_DETL)[20, 0].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[21, 0].Value)) / Conversion.Val(RuntimeHelpers.GetObjectValue(((DataGridView)dGV_DETL)[8, 0].Value))), \"0.00\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Please Check Len Connection...You Cant Save Image...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Are You Sure To Delete Sales Tag Image From Database...?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are You Sure To Delete Sales Tag Image From Database...?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) != 6"
+  },
+  {
+   "message": "Image Is Deleted...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Convert Server Image To Small Size?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are You Sure To Convert Server Image To Small Size?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) != 6"
+  },
+  {
+   "message": "Image Convert Process is Complite...",
+   "when": ""
+  },
+  {
+   "message": "No Data Found In Data Grid Pleas Select Data First And Try",
+   "when": "((ColumnView)GridView1).GetFocusedDataSourceRowIndex() < 0"
+  },
+  {
+   "message": "Image Import Process is Complite...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Import Image to Pc Folder now?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are You Sure To Import Image to Pc Folder now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) != 6"
+  },
+  {
+   "message": "Image Is Import Process is Complite...",
+   "when": ""
+  }
+ ]
+}

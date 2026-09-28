@@ -35,6 +35,7 @@ import {
 import { schemePassbookData } from '../src/modules/scheme/passbook.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 import { footprintOf, ledgerLegs, voucherTables } from './support/footprint.js';
+import { fineFor } from '@datacare/core';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -176,6 +177,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       'GROUP_MAST',
       'TAX_MAST',
       'AC_MAST',
+      'YEAR_MAST',
       'CO_SET_NEW',
       'CO_SET',
     ]) {
@@ -184,6 +186,12 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
   };
 
   const seed = async (): Promise<void> => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES($1,$2,$3,'2024-04-01','2025-03-31')`,
+      TENANT,
+      CO,
+      YEAR,
+    );
     await owner.$executeRawUnsafe(
       `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
       TENANT,
@@ -234,7 +242,12 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
        VALUES ($1,$2,$3,'SRT',1,'CTRL','SALES RETURNE','I'),
               ($1,$2,$3,'SRT',2,'CASH','SALES RETURNE','I'),
-              ($1,$2,$3,'SRT',3,'ROUND','SALES RETURNE','I')`,
+              ($1,$2,$3,'SRT',3,'ROUND','SALES RETURNE','I'),
+              -- P0-04: the scheme/member books settle to their configured slot 1. Real book 074's leg-02 rows
+              -- name 00001, so the slot has to exist here too — the module no longer falls back to a literal.
+              ($1,$2,$3,'074',1,'CASHAC','MEMB ENTRY','I'),
+              ($1,$2,$3,'075',1,'CASHAC','MEMB MATURITY','O'),
+              ($1,$2,$3,'076',1,'CASHAC','MEMB ADJUST','O')`,
       TENANT,
       CO,
       LC,
@@ -726,7 +739,11 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(asNumber(row!.memb)).toBe(0);
     // LD_CODE is the account the money ARRIVED IN, not the scheme liability. Verified across the
     // real rows: 00001 CASH ON HAND 7162, 000754 OLD AXIS BANK 714, 000418 OLD HDFC 163.
-    expect(row!.LD_CODE).toBe('CASH');
+    //
+    // P0-04: this used to read the literal 'CASH' because the module fell back to it. It now reads the
+    // book's CONFIGURED slot-1 account, which is what those real rows actually contain — the fixture seeds
+    // 'CASHAC' as book 074 slot 1 above, and that is what arrives here.
+    expect(row!.LD_CODE).toBe('CASHAC');
   });
 
   it('forwards the desktop grid inputs the route used to drop (BANK_NAME/EMP_CODE/MONTH_CODE/WITH_UPI)', async () => {
@@ -748,6 +765,185 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(row!.EMP_CODE).toBe('E7');
     expect(row!.MONTH_CODE).toBe('03');
     expect(row!.WITH_UPI).toBe('Y');
+  });
+
+  it('writes desktop UPI_DATA split rows and UPI-specific ledger/day-book rows', async () => {
+    await schemeInstallment(
+      runtime,
+      installmentInput({
+        mode: 'upi',
+        bankAc: 'UPI1',
+        bankName: 'PhonePe Settlement',
+        empCode: 'E7',
+        monthCode: '04',
+        chqNo: 'UPI-REF',
+        withUpi: true,
+        upiLines: [
+          {
+            srNo: 1,
+            upiAcCode: 'UPI1',
+            upiAcName: 'PhonePe Settlement',
+            upiType: 'PHONEPE',
+            upiId: 'TXN-1',
+            amount: 200,
+          },
+          {
+            srNo: 2,
+            upiAcCode: 'UPI2',
+            upiAcName: 'GPay Settlement',
+            upiType: 'GPAY',
+            upiId: 'TXN-2',
+            amount: 300,
+          },
+        ],
+      }),
+    );
+
+    const [detail] = (await owner.$queryRawUnsafe(
+      `SELECT "REC_AC","WITH_UPI","UPI_NAME","MEMB_AMT"::float amount FROM "AD_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(detail).toMatchObject({
+      REC_AC: 'UPI1',
+      WITH_UPI: 'Y',
+      UPI_NAME: 'PhonePe Settlement / PHONEPE / TXN-1',
+      amount: 500,
+    });
+
+    const upiRows = (await owner.$queryRawUnsafe(
+      `SELECT "SR_NO"::int sr,"ISR_NO"::int isr,"SCHM_CODE","AC_CODE","UPI_AC_CODE",
+              "UPI_AC_NAME","UPI_TYPE","UPI_ID","UPI_AMT"::float amt,"HD_VCH_NO","MAIN_USER"
+         FROM "UPI_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'
+        ORDER BY "SR_NO","ISR_NO"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(upiRows).toEqual([
+      {
+        sr: 1,
+        isr: 1,
+        SCHM_CODE: 'S01',
+        AC_CODE: '00001',
+        UPI_AC_CODE: 'UPI1',
+        UPI_AC_NAME: 'PhonePe Settlement',
+        UPI_TYPE: 'PHONEPE',
+        UPI_ID: 'TXN-1',
+        amt: 200,
+        HD_VCH_NO: '00041',
+        MAIN_USER: 'scheme-owner',
+      },
+      {
+        sr: 1,
+        isr: 2,
+        SCHM_CODE: 'S01',
+        AC_CODE: '00001',
+        UPI_AC_CODE: 'UPI2',
+        UPI_AC_NAME: 'GPay Settlement',
+        UPI_TYPE: 'GPAY',
+        UPI_ID: 'TXN-2',
+        amt: 300,
+        HD_VCH_NO: '00041',
+        MAIN_USER: 'scheme-owner',
+      },
+    ]);
+
+    const ledger = (await owner.$queryRawUnsafe(
+      `SELECT "LEDR_KEY","AC_CODE","LD_CODE","DR_AMT"::float dr,"CR_AMT"::float cr,"CHQ_NO"
+         FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'
+        ORDER BY "LEDR_KEY"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(ledger).toHaveLength(4);
+    expect(ledger.map((r) => String(r.LEDR_KEY).slice(21))).toEqual([
+      '01         1         1',
+      '01         1         2',
+      '02         1         1',
+      '02         1         2',
+    ]);
+    expect(
+      ledger.map((r) => [r.AC_CODE, r.LD_CODE, asNumber(r.dr), asNumber(r.cr), r.CHQ_NO]),
+    ).toEqual([
+      ['SCHEME', 'UPI1', 0, 200, 'TXN-1'],
+      ['SCHEME', 'UPI2', 0, 300, 'TXN-2'],
+      ['UPI1', 'SCHEME', 200, 0, 'TXN-1'],
+      ['UPI2', 'SCHEME', 300, 0, 'TXN-2'],
+    ]);
+    expect(await ledgerBalance('074')).toEqual([500, 500]);
+
+    const rojmel = (await owner.$queryRawUnsafe(
+      `SELECT "LEDR_KEY","AC_CODE","AC_NAME","LD_CODE","DR_AMT"::float dr,"CR_AMT"::float cr,
+              "SCHM_CODE","MEMB_CODE","REF_NO"
+         FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'
+        ORDER BY "LEDR_KEY"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(rojmel.map((r) => String(r.LEDR_KEY).slice(21))).toEqual([
+      '01         1',
+      '02         1         1',
+      '02         1         2',
+    ]);
+    expect(
+      rojmel.map((r) => [
+        r.AC_CODE,
+        r.AC_NAME,
+        r.LD_CODE,
+        asNumber(r.dr),
+        asNumber(r.cr),
+        r.REF_NO,
+      ]),
+    ).toEqual([
+      ['SCHEME', '', '9999', 0, 500, ''],
+      ['UPI1', 'PhonePe Settlement', 'SCHEME', 200, 0, 'TXN-1'],
+      ['UPI2', 'GPay Settlement', 'SCHEME', 300, 0, 'TXN-2'],
+    ]);
+
+    await expect(getSchemeInstallment(runtime, scope('074'), 8)).resolves.toMatchObject({
+      voucherNo: '00008',
+      bankAc: 'UPI1',
+      monthCode: '04',
+      withUpi: true,
+      upiName: 'PhonePe Settlement / PHONEPE / TXN-1',
+      upiLines: [
+        {
+          srNo: 1,
+          upiAcCode: 'UPI1',
+          upiAcName: 'PhonePe Settlement',
+          upiType: 'PHONEPE',
+          upiId: 'TXN-1',
+          amount: 200,
+        },
+        {
+          srNo: 2,
+          upiAcCode: 'UPI2',
+          upiAcName: 'GPay Settlement',
+          upiType: 'GPAY',
+          upiId: 'TXN-2',
+          amount: 300,
+        },
+      ],
+    });
+  });
+
+  it('rejects UPI split totals that do not match the member installment amount', async () => {
+    await expect(
+      schemeInstallment(
+        runtime,
+        installmentInput({
+          mode: 'upi',
+          bankAc: 'UPI1',
+          withUpi: true,
+          upiLines: [
+            { srNo: 1, upiAcCode: 'UPI1', upiType: 'PHONEPE', upiId: 'SHORT', amount: 499 },
+          ],
+        }),
+      ),
+    ).rejects.toThrow(/UPI split total 499 must equal member amount 500/);
+
+    const [row] = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "UPI_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='074' AND "VCH_NO"='00008'`,
+      TENANT,
+    )) as Array<{ n: number }>;
+    expect(row!.n).toBe(0);
   });
 
   it('posts a whole collection round as ONE voucher with a ledger pair per line', async () => {
@@ -1494,5 +1690,177 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       touchedB,
       'but with no money received there is nothing to post, so the ledger must be untouched',
     ).not.toContain('AC_DATA');
+  });
+  it('persists the desktop TR_SALE_LBR grid on a labour invoice line', async () => {
+    // P7: LabourLine carried 6 fields while LBR_ISU_DETL has 113 columns and the desktop MSG grid has
+    // 30. The operator could bill labour but none of the weight, touch, karigar or tag detail was
+    // stored. This asserts the WRITER, because a field on the contract that the writer ignores is a
+    // dead cell — the defect that put 12 fake columns on hallmark-sale before it was caught.
+    const created = await createLabourInvoice(runtime, {
+      scope: scope('LBR'),
+      acCode: 'CUST',
+      vchDate: DAY,
+      mainUser: 'grid-owner',
+      lines: [
+        {
+          itCode: 'GOLD',
+          pcs: 2,
+          grossWt: 12.5,
+          otherWt: 0.5,
+          netWt: 12,
+          ghtWt: 1,
+          touch: 91.6,
+          westPct: 0.5,
+          rate: 6000,
+          labourType: 'G',
+          labourRate: 50,
+          labourPct: 3,
+          otherAmount: 25,
+          mrp: 90000,
+          tagCost: 120,
+          designNo: 'D-LBR-1',
+          // Alphanumeric on purpose: a HUID with letters must survive.
+          hallmarkId: 'HUID77XZ',
+          tblCode: '007',
+          itmSize: '16',
+          itmColor: 'YG',
+          bagWt: 0.08,
+          karigarName: 'KR-1',
+          karigarNetWt: 11.8,
+          karigarTouch: 90,
+          karigarWestPct: 1,
+          karigarFine: 10.7,
+          karigarLbrRate: 40,
+          karigarLbrAmt: 472,
+          employeeCode: 'E9',
+          metalAmount: 1000,
+          labourAmount: 600,
+        },
+      ],
+    });
+    const row = (
+      (await owner.$queryRawUnsafe(
+        `SELECT * FROM "LBR_ISU_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2 AND "SR_NO"=1`,
+        TENANT,
+        String(created.vchNo).padStart(5, '0'),
+      )) as Array<Record<string, unknown>>
+    )[0]!;
+
+    expect(String(row.HM_ID)).toBe('HUID77XZ');
+    expect(String(row.DESIGN_NO)).toBe('D-LBR-1');
+    expect(String(row.TBL_CODE)).toBe('007');
+    expect(String(row.ITM_COLOR)).toBe('YG');
+    expect(String(row.KR_NAME)).toBe('KR-1');
+    expect(String(row.EMP_CODE)).toBe('E9');
+    expect(Number(row.ITM_GWT)).toBe(12.5);
+    expect(Number(row.ITM_OTH_WT)).toBe(0.5);
+    expect(Number(row.ITM_GHT_WT)).toBe(1);
+    expect(Number(row.ITM_TOUCH)).toBe(91.6);
+    expect(Number(row.ITM_WEST_PRC)).toBe(0.5);
+    expect(Number(row.BAG_WT)).toBe(0.08);
+    expect(Number(row.ITM_RATE)).toBe(6000);
+    expect(Number(row.LBR_RATE)).toBe(50);
+    expect(Number(row.LBR_PRC)).toBe(3);
+    expect(Number(row.OTH_AMT)).toBe(25);
+    expect(Number(row.ITM_MRP)).toBe(90000);
+    expect(Number(row.TAG_COST)).toBe(120);
+    expect(Number(row.KR_NET_WT)).toBe(11.8);
+    expect(Number(row.KR_LBR_AMT)).toBe(472);
+    // Fine follows the SHARED desktop policy, (net + ghat) x (touch + wastage) / 100, so a labour
+    // bill agrees with every other voucher family rather than using a local formula.
+    expect(Number(row.ITM_FINE)).toBe(
+      fineFor('sale', { netWt: 12, ghtWt: 1, touch: 91.6, westPct: 0.5 }),
+    );
+  });
+  it('writes the labour-invoice RECEIVE side, which had no writer at all', async () => {
+    // P8: TR_SALE_LBR has TWO item grids — mSG (labour billed -> LBR_ISU_DETL) and mSG_PR (metal
+    // received -> LBR_REC_DETL, 95 columns). The web wrote only the first. LBR_REC_DETL was already
+    // listed in LABOUR_WRITE_TABLES, so deletes cleaned up a table nothing ever populated: the mirror
+    // image of the write-without-read defect, declared-but-never-written.
+    const created = await createLabourInvoice(runtime, {
+      scope: scope('LBR'),
+      acCode: 'CUST',
+      vchDate: DAY,
+      mainUser: 'receive-owner',
+      lines: [{ itCode: 'GOLD', pcs: 1, netWt: 5, metalAmount: 500, labourAmount: 100 }],
+      receiveLines: [
+        {
+          itCode: 'GOLD',
+          sign: '+',
+          pcs: 1,
+          grossWt: 8.2,
+          netWt: 8,
+          otherWt: 0.2,
+          bagWt: 0.05,
+          ghtWt: 0.4,
+          touch: 88,
+          westPct: 1,
+          lessTouch: 2,
+          rate: 5900,
+          amount: 47200,
+          labourPct: 1.5,
+          labourType: 'G',
+          labourRate: 30,
+          labourAmount: 240,
+          otherAmount: 15,
+          otherRate: 12,
+          otherFine: 0.3,
+          mrp: 60000,
+          netAmount: 47455,
+          totalAmount: 47455,
+          taxPct: 3,
+          tblCode: '004',
+          designNo: 'D-REC-1',
+          remark: 'old chain in',
+        },
+      ],
+    });
+
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT * FROM "LBR_REC_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+      TENANT,
+      String(created.vchNo).padStart(5, '0'),
+    )) as Array<Record<string, unknown>>;
+    expect(rows.length).toBe(1);
+    const row = rows[0]!;
+    expect(String(row.ITM_SIGN)).toBe('+');
+    expect(String(row.DESIGN_NO)).toBe('D-REC-1');
+    expect(String(row.TBL_CODE)).toBe('004');
+    expect(String(row.ITM_REMARK)).toBe('old chain in');
+    expect(Number(row.ITM_GWT)).toBe(8.2);
+    expect(Number(row.ITM_OTH_WT)).toBe(0.2);
+    expect(Number(row.BAG_WT)).toBe(0.05);
+    expect(Number(row.LESS_TOUCH)).toBe(2);
+    expect(Number(row.ITM_OTH_RATE)).toBe(12);
+    expect(Number(row.ITM_OTH_FINE)).toBe(0.3);
+    expect(Number(row.LBR_AMT)).toBe(240);
+    expect(Number(row.TOT_AMT)).toBe(47455);
+    expect(Number(row.TAX_PRC)).toBe(3);
+    // Metal coming in uses the desktop OLD-GOLD policy, which subtracts less-touch from
+    // (touch + wastage) — so this agrees with the purchase screen instead of a second local formula.
+    expect(Number(row.ITM_FINE)).toBe(
+      fineFor('purchaseOldGold', {
+        netWt: 8,
+        ghtWt: 0.4,
+        touch: 88,
+        westPct: 1,
+        lesTouch: 2,
+      }),
+    );
+
+    // A cash-settled bill must NOT create receive rows, so the footprint stays honest.
+    const cashOnly = await createLabourInvoice(runtime, {
+      scope: scope('LBR'),
+      acCode: 'CUST',
+      vchDate: DAY,
+      mainUser: 'receive-owner',
+      lines: [{ itCode: 'GOLD', pcs: 1, netWt: 1, metalAmount: 100, labourAmount: 20 }],
+    });
+    const none = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int AS n FROM "LBR_REC_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      String(cashOnly.vchNo).padStart(5, '0'),
+    )) as Array<{ n: number }>;
+    expect(none[0]!.n).toBe(0);
   });
 });

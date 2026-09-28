@@ -1,0 +1,157 @@
+{
+  "kind": "prospective-session-context-contract-staging-v1",
+  "createdAt": "2026-09-11T18:19:20.485058+00:00",
+  "status": "proposed-not-implemented",
+  "artifact": {
+    "path": "/tmp/datacare-session-context-next/implementation-contract.md",
+    "sha256": "e6852f3a05b8dd93198566ebbb0b67d074ecfca607843574c9da51ff078f64fc"
+  },
+  "scope": "Only /tmp contract artifacts; no repository edits, DB/compiler/browser runs, or tests executed.",
+  "review": {
+    "sourceRead": "completed",
+    "independentLifecycleReview": "pending; reviewer prioritized root isolated-test external-input audit",
+    "acceptance": "none"
+  },
+  "proposedLifecycleCases": 24,
+  "sourceInputs": [
+    {
+      "path": "web/apps/api/src/modules/auth/session.ts",
+      "capturedSha256": "17765f43964137139d582695cc0d10e3713227b8e118070e6f3e4a07fdb63bf0",
+      "currentSha256": "17765f43964137139d582695cc0d10e3713227b8e118070e6f3e4a07fdb63bf0",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "capturedSha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e",
+      "currentSha256": "7eca43829be9e9034be1779cf33760d94deb92dd55d6ec99d67b2a6d1310535e",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/lastDayLock.ts",
+      "capturedSha256": "d7fa20f7c174b2c8ac1fba41a6e38a23cd219295242e4621379cc25f1c8bd096",
+      "currentSha256": "d7fa20f7c174b2c8ac1fba41a6e38a23cd219295242e4621379cc25f1c8bd096",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/app.ts",
+      "capturedSha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a",
+      "currentSha256": "919f79ce65b1580b35f7a1bc5be7aeab8374a52c6c002bfa4b704b8c0b7c793a",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/jwt.ts",
+      "capturedSha256": "4bd2d709bcd6ec64d3734822972932aed4bcd1797422815caf4a8eaa90de3169",
+      "currentSha256": "4bd2d709bcd6ec64d3734822972932aed4bcd1797422815caf4a8eaa90de3169",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/auth.service.ts",
+      "capturedSha256": "cb6269a6b3793d9dc7163bbd1f144336f12da461cdec7177e620b5f5f74f026e",
+      "currentSha256": "cb6269a6b3793d9dc7163bbd1f144336f12da461cdec7177e620b5f5f74f026e",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/passwordAccount.ts",
+      "capturedSha256": "f566af63d2048bd64f69c7e04aaede8102a5a789a11750a8450d7016cda5ce56",
+      "currentSha256": "f566af63d2048bd64f69c7e04aaede8102a5a789a11750a8450d7016cda5ce56",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "capturedSha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34",
+      "currentSha256": "6d1fa83af6c80633fe49833ce3ba6e375f76f3334b56050d513280aaba09de34",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/formRights.ts",
+      "capturedSha256": "a65d249274d56053edc9efa3a3c0618c4dcd65e61d9f46b18782c26856224861",
+      "currentSha256": "a65d249274d56053edc9efa3a3c0618c4dcd65e61d9f46b18782c26856224861",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/routePolicy.ts",
+      "capturedSha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e",
+      "currentSha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e",
+      "matches": true
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "capturedSha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754",
+      "currentSha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754",
+      "matches": true
+    },
+    {
+      "path": "web/packages/db/prisma/migrations/20260715030000_authoritative_scope_rbac_sessions/migration.sql",
+      "capturedSha256": "4d011ad562511873982957325ffc47b62ca5d824a25b312495c531c185ae873c",
+      "currentSha256": "4d011ad562511873982957325ffc47b62ca5d824a25b312495c531c185ae873c",
+      "matches": true
+    },
+    {
+      "path": "web/packages/db/src/tenant.ts",
+      "capturedSha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32",
+      "currentSha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32",
+      "matches": true
+    },
+    {
+      "path": "web/packages/core/src/sessionLedgerMode.ts",
+      "capturedSha256": "651c63fcc715b995d924d79ddb756d8fca504fcee4ae8cf9c64b4ad883844493",
+      "currentSha256": "651c63fcc715b995d924d79ddb756d8fca504fcee4ae8cf9c64b4ad883844493",
+      "matches": true
+    },
+    {
+      "path": "web/apps/web/components/Shell.tsx",
+      "capturedSha256": "96565f34433a6e7f6c7378e0788e544e4126febc0a72bfdbcc9a33e8d1fa2960",
+      "currentSha256": "96565f34433a6e7f6c7378e0788e544e4126febc0a72bfdbcc9a33e8d1fa2960",
+      "matches": true
+    },
+    {
+      "path": "web/apps/web/components/BusinessScope.tsx",
+      "capturedSha256": "ffe8f4922dd0c65e7dc9bbb91ae8cdd10b67edd8b1349ef57388ee64d2119213",
+      "currentSha256": "ffe8f4922dd0c65e7dc9bbb91ae8cdd10b67edd8b1349ef57388ee64d2119213",
+      "matches": true
+    },
+    {
+      "path": "web/apps/web/app/(app)/layout.tsx",
+      "capturedSha256": "2e652cbd457a1ca86eddd937d87ac7456937dc0ffa04d137f4ba4103e78631e1",
+      "currentSha256": "2e652cbd457a1ca86eddd937d87ac7456937dc0ffa04d137f4ba4103e78631e1",
+      "matches": true
+    },
+    {
+      "path": "web/apps/web/app/select/page.tsx",
+      "capturedSha256": "0364bca395bd87d0470df8c812f091a3f454316ec30d8a3f8431a42264e9a903",
+      "currentSha256": "0364bca395bd87d0470df8c812f091a3f454316ec30d8a3f8431a42264e9a903",
+      "matches": true
+    },
+    {
+      "path": "web/apps/web/lib/api.ts",
+      "capturedSha256": "7b07a3387e30d3a685d2974ad63f172ae381d6cebe1de7b1e1ddd147dfc7b5dc",
+      "currentSha256": "7b07a3387e30d3a685d2974ad63f172ae381d6cebe1de7b1e1ddd147dfc7b5dc",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/test/app.security.db.test.ts",
+      "capturedSha256": "e372676ca0aec3ce4561e899efe2c8bbb62d398ef8c526590e4fef78d5c23155",
+      "currentSha256": "e372676ca0aec3ce4561e899efe2c8bbb62d398ef8c526590e4fef78d5c23155",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/test/auth.session.test.ts",
+      "capturedSha256": "80587a3473c566fec5e5918e537938fea1458893f61f7d81fddb068fb34c6c4d",
+      "currentSha256": "80587a3473c566fec5e5918e537938fea1458893f61f7d81fddb068fb34c6c4d",
+      "matches": true
+    },
+    {
+      "path": "web/apps/api/test/settingsBehavior.db.test.ts",
+      "capturedSha256": "b3cf0a8e5325ee3254ca8df5a8f38134ec265897f4fc09e4dd2751383dfac508",
+      "currentSha256": "b3cf0a8e5325ee3254ca8df5a8f38134ec265897f4fc09e4dd2751383dfac508",
+      "matches": true
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "capturedSha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "currentSha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "matches": true
+    }
+  ],
+  "allSourceInputsStillMatch": true
+}

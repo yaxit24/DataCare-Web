@@ -4,15 +4,24 @@ import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 interface Line {
+  goldFine: string;
   acCode: string;
   debit: string;
   credit: string;
   fineWt: string;
   itType: string;
 }
-const blank = (): Line => ({ acCode: '', debit: '', credit: '', fineWt: '', itType: 'A' });
+const blank = (): Line => ({
+  acCode: '',
+  debit: '',
+  credit: '',
+  fineWt: '',
+  itType: 'A',
+  goldFine: '',
+});
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
@@ -21,6 +30,19 @@ export default function AcOpeningPage() {
   const [coBook, setCoBook] = useState('');
   const [vchDate, setVchDate] = useState('');
   const [lines, setLines] = useState<Line[]>([blank(), blank()]);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [result, setResult] = useState<{ vchNo: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -48,6 +70,8 @@ export default function AcOpeningPage() {
         lcCode,
         vchDate: vchDate || undefined,
         lines: validLines.map((l) => ({
+          // P3: an opening balance can carry fine gold beside the money amount.
+          goldFine: n(l.goldFine) || undefined,
           acCode: l.acCode,
           drAmt: Number(l.debit || 0),
           crAmt: Number(l.credit || 0),
@@ -90,7 +114,7 @@ export default function AcOpeningPage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Opening Balances</h2>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Account</th>
@@ -98,6 +122,7 @@ export default function AcOpeningPage() {
                 <th className="num">Credit</th>
                 <th className="num">Fine Wt</th>
                 <th>Type</th>
+                <th className="num">Gold Fine</th>
                 <th></th>
               </tr>
             </thead>

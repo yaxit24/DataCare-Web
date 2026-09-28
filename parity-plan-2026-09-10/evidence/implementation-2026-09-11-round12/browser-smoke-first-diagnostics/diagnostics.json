@@ -1,0 +1,1705 @@
+{
+  "error": "AssertionError [ERR_ASSERTION]: Ctrl+F2 must open /reports/order-lot-zoom\n+ actual - expected\n\n+ '/dashboard'\n- '/reports/order-lot-zoom'\n\n    at ctrlChord (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:1321:12)\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:472:9)\n    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/browser.smoke.mjs:1332:3",
+  "url": "http://127.0.0.1:4111/dashboard",
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/books. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/labour-update. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/opening-balance. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/auto-item. Falling back to browser navigation. TypeError: network error",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/employees. Falling back to browser navigation. TypeError: network error",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/design-book. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/companies. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/messages. Falling back to browser navigation. TypeError: network error",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/companies. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/messages. Falling back to browser navigation. TypeError: network error",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/companies. Falling back to browser navigation. TypeError: network error",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/diamonds. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/design-book. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/models. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/locations. Falling back to browser navigation. TypeError: network error",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/designs. Falling back to browser navigation. TypeError: network error",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/taxes. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/rates. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/opening-balance. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/groups. Falling back to browser navigation. TypeError: Failed to fetch\n    at h (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:66412)\n    at p (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:65198)\n    at http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:80641\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42312)\n    at s.c (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:43017)\n    at Object.a [as task] (http://127.0.0.1:4111/_next/static/chunks/2427-d2da61d116b0074c.js:1:42374)",
+    "Failed to fetch RSC payload for http://127.0.0.1:4111/masters/auto-item. Falling back to browser navigation. TypeError: network error"
+  ],
+  "requestFailures": [
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/auto-item?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour-update?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/_next/static/chunks/app/(app)/masters/party/page-136f4ec2489aecef.js",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/_next/static/chunks/app/(app)/company/balance-transfer/page-47b487fdd9350a19.js",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/opening-balance?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/api/context/books",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/design-book?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/rojmel?_rsc=gqn2m",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1c3vo",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/_next/static/chunks/app/(app)/masters/labour-update/page-e7a9bffe72c518e4.js",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/design-book?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1bvwj",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=107n2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1rcud",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=8f1ip",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=3lmdd",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/api/repair-karigar-receipts/open-lines?coBook=RKR&acCode=KAR&q=&limit=20",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1fhnx",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1rjz2",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1y6vt",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/opening-balance?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/_next/static/chunks/app/(app)/masters/party/page-136f4ec2489aecef.js",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/_next/static/chunks/app/(app)/company/balance-transfer/page-47b487fdd9350a19.js",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/auto-item?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=1qv2x",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/sales-register?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/trial-balance?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/sales-register?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/trial-balance?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/sales-register?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/trial-balance?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/cash-book?_rsc=ncetc",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/models?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/states?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/points?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/labour?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/touch?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/mfg?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/conversions?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/messages?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/companies?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/sales-register?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/trial-balance?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/accounts?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/customers?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/items?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/groups?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/taxes?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/reports/order-lot-zoom?_rsc=ncetc",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/rates?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/employees?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/books?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/products?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/locations?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/designs?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://127.0.0.1:4111/masters/diamonds?_rsc=sheco",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "serverLog": "   ▲ Next.js 15.1.6\n   - Local:        http://localhost:4111\n   - Network:      http://127.0.2.2:4111\n\n ✓ Starting...\n ✓ Ready in 3.5s\n",
+  "captureErrors": []
+}

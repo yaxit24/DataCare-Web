@@ -1,0 +1,184 @@
+{
+ "form": "TR_DHRN_ISU",
+ "loc": 6896,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cPacketNo": 1,
+  "cCustName": 2,
+  "cItCode": 3,
+  "cItName": 4,
+  "cPcs": 5,
+  "cGrWt": 6,
+  "cOthWt": 7,
+  "cNetWt": 8,
+  "cTouch": 9,
+  "cWestPrc": 10,
+  "cFine": 11,
+  "cRate": 12,
+  "cItAmt": 13,
+  "cNetAmt": 14,
+  "cItType": 15,
+  "cRateType": 16,
+  "cItDesc": 17,
+  "cOldGwt": 18,
+  "cOldNwt": 19,
+  "cOldTouch": 20,
+  "cOldWest": 21,
+  "cOldRate": 22,
+  "cDhrnNo": 23,
+  "cDhrnYrCd": 24,
+  "cDhrnDbCd": 25,
+  "cPacketRec": 26
+ },
+ "inlineSql": [
+  "Select A.AC_NAME AS AcNameL,A.PACKET_NO As PacketNoL,A.GOLD_DESC as ItemDescL,A.VCH_NO AS VchNoL,A.CO_BOOK as BookL,A.CO_YEAR As YearL,A.GOLD_WT AS WeightW,A.DHRN_AMT As DhrnAmtR FROM DHRN_ISU_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND BOOK_NAME = 'DHIRAN ISSUE' AND A.ISU_REC = 'N' ORDER BY A.CO_YEAR,A.CO_BOOK,A.VCH_NO",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItemNameL,A.IT_CODE as ItCodeL, B.GR_NAME AS GroupL,A.PR_CODE As PrCodeL,A.IT_TYPE As ItTypeL,A.TAG_TYPE As TagTypeL FROM ITEM_MAST AS A LEFT JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_NAME",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "Select MAX(VCH_NO) As VchNo From DHRN_ISU_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT MAX(VCH_NO) AS VchNo From TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM DHRN_ISU_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT * FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT EMP_NAME FROM EMP_MAST WHERE CO_CODE =' ? ' AND EMP_CODE = ' ? '",
+  "SELECT A.*,B.IT_NAME,B.RATE_TYPE,B.IT_TYPE FROM DHRN_ISU_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' ORDER BY A.SR_NO",
+  "SELECT MAX(VCH_NO) AS VchNo From DHRN_ISU_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM DHRN_ISU_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM DHRN_ISU_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT * FROM DHRN_ISU_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "UPDATE DHRN_ISU_DATA Set DHRN_ISU_DATA.ISU_REC = 'Y' FROM DHRN_ISU_DATA,DHRN_ISU_DETL AS B WHERE DHRN_ISU_DATA.CO_CODE = B.CO_CODE AND DHRN_ISU_DATA.LC_CODE = B.LC_CODE AND DHRN_ISU_DATA.CO_YEAR = B.DHRN_YRCD AND DHRN_ISU_DATA.CO_BOOK = B.DHRN_DBCD AND DHRN_ISU_DATA.VCH_NO = B.DHRN_NO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM ROJ_MEL_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM DHRN_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM AC_IMAGE WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "SELECT * FROM IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND SCHM_CODE = ' ? ' AND TAG_NO = ' ? ' AND SR_NO = ? ",
+  "SELECT * FROM AC_IMAGE WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "INSERT INTO DELETE_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,DELETE_DATE,VCH_TYPE,VCH_TIME,DELETE_TIME, BOOK_NAME,AC_CODE,AC_NAME,VCH_VAL_DR,VCH_VAL_CR,FINE_TYPE,VCH_FINE_DR,VCH_FINE_CR,HD_VCH_NO,MAIN_USER,DELETE_USER,VCH_DESC) SELECT A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,1,VCH_DATE,' ? MM/dd/yyyy ? ',B.BOOK_SNAME,VCH_TIME,' ? MM/dd/yyyy HH:mm:ss ? ', B.BOOK_NAME,AC_CODE,AC_NAME,DHRN_AMT,0,'A',0,0,HD_VCH_NO,A.MAIN_USER,' ? ',SUBSTRING(GOLD_DESC,1,149) FROM DHRN_ISU_DATA AS A LEFT JOIN BOOK_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_BOOK = B.CO_BOOK WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "UPDATE DHRN_ISU_DATA SET DHRN_ISU_DATA.ISU_REC = 'N' FROM DHRN_ISU_DATA,DHRN_ISU_DETL AS B WHERE DHRN_ISU_DATA.CO_CODE = B.CO_CODE AND DHRN_ISU_DATA.LC_CODE = B.LC_CODE AND DHRN_ISU_DATA.CO_YEAR = B.DHRN_YRCD AND DHRN_ISU_DATA.CO_BOOK = B.DHRN_DBCD AND DHRN_ISU_DATA.VCH_NO = B.DHRN_NO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "DELETE FROM REMARK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT AC_EMAIL,AC_MOBILE FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.VCH_NO As VchNoL,replace(convert(NVARCHAR,A.VCH_DATE, 103), ' ', '/') AS VchDateL,A.DHRN_BILL As RefNoL,B.AC_NAME As PartyNameL,A.AC_NAME As VchNameL,A.MAIN_USER As UserL FROM DHRN_ISU_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' ORDER BY A.VCH_NO",
+  "SELECT VCH_NO FROM DHRN_ISU_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL,B.AC_GR_NAME AS GroupL,A.AC_AREA As AreaL,A.AC_ADD1 As AddressL,A.AC_CITY As CityL,A.AC_MOBILE As MobileL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' ? LOAN REC ? AND A.AC_GR IN('01','03','04') ? AND A.AC_GR = '15' ? ORDER BY A.LC_CODE,A.AC_NAME",
+  "SELECT C.AC_NAME As AcNameL,C.AC_CODE As AcCodeL,D.AC_GR_NAME AS GroupL,C.AC_AREA As AreaL,C.AC_ADD1 As AddressL,C.AC_CITY As CityL,C.AC_MOBILE As MobileL FROM AC_MAST AS C LEFT JOIN AC_GROUP AS D ON C.CO_CODE = D.CO_CODE AND C.AC_GR = D.AC_GR WHERE C.CO_CODE = ' ? ' AND CAST(C.AC_CODE AS INT) < 100 UNION ALL SELECT A.AC_NAME,A.AC_CODE,B.AC_GR_NAME,A.AC_AREA,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ? LOAN REC ? AND A.AC_GR IN('01','03','04') ? AND A.AC_GR = '15' ? AND CAST(A.AC_CODE AS INT) >=200 ORDER BY C.AC_NAME",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME",
+  "SELECT VCH_DESC As VchDescL FROM DHRN_ISU_DATA WHERE VCH_DESC <> '' AND LEN(VCH_DESC) < ? AND VCH_DESC <> '' GROUP BY VCH_DESC ORDER BY VCH_DESC",
+  "SELECT B.ISU_NO AS IsuNoL,A.DHRN_BILL AS RefNoL,FORMAT(A.VCH_DATE,'dd/MM/yyyy') AS IsuDateM,C.AC_NAME,A.DHRN_AMT AS DhiranAmtR,A.INT_PRC AS InterestR,B.ISU_YRCD AS YearM, B.ISU_DBCD As BookM,sum(B.DHRN_REC_AMT)As DhrnRecR,A.GOLD_DESC As ItemDesc FROM (DHRN_ISU_DATA AS A LEFT JOIN DHRN_DATA AS B ON A.CO_CODE = B.CO_CODE AND A.CO_YEAR = B.ISU_YRCD AND A.CO_BOOK = B.ISU_DBCD AND A.VCH_NO = B.ISU_NO) LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE AND A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.AC_CODE =' ? ' GROUP BY A.VCH_DATE,B.ISU_NO,A.DHRN_AMT,A.INT_PRC,C.AC_NAME,B.ISU_DBCD,B.ISU_YRCD,A.DHRN_BILL,A.GOLD_DESC HAVING SUM(B.DHRN_REC_AMT) < A.DHRN_AMT ORDER BY A.VCH_DATE,B.ISU_NO",
+  "Select A.* from DHRN_ISU_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK =' ? ' AND A.VCH_NO = ' ? ' AND A.AC_CODE =' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 3,
+  "Up": 2,
+  "Down": 2,
+  "Enter": 20,
+  "Right": 1,
+  "Left": 1
+ },
+ "calc": [
+  "mSG[CRow, 8] = Strings.Format((object)(Conversion.Val(mSG[CRow, 6]) - Conversion.Val(mSG[CRow, 7])), \"0.000\");",
+  "mSG[CRow, 11] = Strings.Format((object)(Conversion.Val(mSG[CRow, 8]) * (Conversion.Val(mSG[CRow, 9]) + Conversion.Val(mSG[CRow, 10])) / 100.0), \"0.000\");",
+  "if ((Conversion.Val(mSG[CRow, 12]) != 0.0) & (Conversion.Val(mSG[CRow, 11]) + Conversion.Val(mSG[CRow, 5]) != 0.0))",
+  "mSG[CRow, 13] = Strings.Format((object)Math.Round(Conversion.Val(mSG[CRow, 5]) * Conversion.Val(mSG[CRow, 12]), 0), \"0.00\");",
+  "mSG[CRow, 13] = Strings.Format((object)Math.Round(Conversion.Val(mSG[CRow, 11]) * (Conversion.Val(mSG[CRow, 12]) / 10.0), 0), \"0.00\");",
+  "mSG[CRow, 13] = Strings.Format((object)Math.Round(Conversion.Val(mSG[CRow, 11]) * (Conversion.Val(mSG[CRow, 12]) / 1000.0), 0), \"0.00\");",
+  "mSG[CRow, 13] = Strings.Format((object)Math.Round(Conversion.Val(mSG[CRow, 11]) * Conversion.Val(mSG[CRow, 12]), 0), \"0.00\");",
+  "mSG[mSG.Row, 12] = Strings.Format((object)Math.Round(Conversion.Val(TEXT_ENTRY.Text) / Conversion.Val(mSG[mSG.Row, 5]), DC_Main.MsItmRateRof), \"0.00\");",
+  "mSG[mSG.Row, 12] = Strings.Format((object)Math.Round(Conversion.Val(TEXT_ENTRY.Text) / Conversion.Val(mSG[mSG.Row, 11]) * 10.0, DC_Main.MsItmRateRof), \"0.00\");",
+  "mSG[mSG.Row, 12] = Strings.Format((object)Math.Round(Conversion.Val(TEXT_ENTRY.Text) / Conversion.Val(mSG[mSG.Row, 11]) * 1000.0, DC_Main.MsItmRateRof), \"0.00\");",
+  "mSG[mSG.Row, 12] = Strings.Format((object)Math.Round(Conversion.Val(TEXT_ENTRY.Text) / Conversion.Val(mSG[mSG.Row, 11]), DC_Main.MsItmRateRof), \"0.00\");",
+  "mSG_TOT[0, 5] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 5]) + Conversion.Val(MSG[DC_Main.M, 5]))), \"0\");",
+  "mSG_TOT[0, 6] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 6]) + Conversion.Val(MSG[DC_Main.M, 6]))), \"0.000\");",
+  "mSG_TOT[0, 7] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 7]) + Conversion.Val(MSG[DC_Main.M, 7]))), \"0.000\");",
+  "mSG_TOT[0, 8] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 8]) + Conversion.Val(MSG[DC_Main.M, 8]))), \"0.000\");",
+  "mSG_TOT[0, 11] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 11]) + Conversion.Val(MSG[DC_Main.M, 11]))), \"0.000\");",
+  "mSG_TOT[0, 13] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 13]) + Conversion.Val(MSG[DC_Main.M, 13]))), \"0.00\");",
+  "mSG_TOT[0, 14] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 14]) + Conversion.Val(MSG[DC_Main.M, 14]))), \"0.00\");",
+  "tVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "tHdVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "nMonthlyInt.Text = Strings.Format((object)(Conversion.Val(nIntPrc.Text) / 12.0), \"0.00\");",
+  "nIntDays.Text = Conversions.ToString(Conversion.Val((object)Conversions.ToDate(mToDate.Text)) - Conversion.Val((object)Conversions.ToDate(mVchDate.Text)));",
+  "DC_Main.MsImageNo = Conversions.ToString(Conversion.Val(DC_Main.MCo_code)) + DC_Main.MLc_code + DC_Main.MCo_year + tVchNo.Text + tAcCode.Text + Conversions.ToString(Conversion.Val(MSG[1, 0]));",
+  "OldValTot = Conversion.Val(MSG_TOT[0, 6]) + Conversion.Val(MSG_TOT[0, 8]);",
+  "NewValTot = Conversion.Val(MSG_TOT[0, 6]) + Conversion.Val(MSG_TOT[0, 8]);",
+  "WappMsg = \"Dear : \" + tAcName.Text + \" Loan No = \" + tVchNo.Text + \" Loan Amt :\" + Conversions.ToString(Conversion.Val(nDhrnAmt.Text)) + \" Month Int % : \" + nMonthlyInt.Text + \" Item Detail : \" + GoldDesc + \" REGARD \" + DC_Main.MCo_Name + \" Have a Nice Day... \";",
+  "WappMsg = \"Dear : \" + tAcName.Text + \" Dhiran No = \" + tVchNo.Text + \" Dhiran Amt :\" + Conversions.ToString(Conversion.Val(nDhrnAmt.Text)) + \" Month Int % : \" + nMonthlyInt.Text + \" Item Detail : \" + GoldDesc + \" REGARD \" + DC_Main.MCo_Name + \" Have a Nice Day... \";",
+  "DC_Main.MsImageNo = Conversions.ToString(Conversion.Val(DC_Main.MCo_code)) + DC_Main.MLc_code + DC_Main.MCo_year + tVchNo.Text + tAcCode.Text + Conversions.ToString(Conversion.Val(MSG[DC_Main.i, 0]));",
+  "string text = Strings.Format((object)(Conversion.Val(tVchNo.Text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) + 1.0), \"00000\");",
+  "nIntDays.Text = Conversions.ToString(Conversion.Val(cboIntMonth.Text) * 30.0);",
+  "nIntAmt.Text = Strings.Format((object)Math.Round(Conversion.Val(nMonthIntAmt.Text) * Conversion.Val(cboIntMonth.Text), 3), \"0.000\");",
+  "nIntAmt.Text = Strings.Format((object)Math.Round(Conversion.Val(nDhrnAmt.Text) * Conversion.Val(nIntPrc.Text) / 100.0 * (30.0 * Conversion.Val(cboIntMonth.Text)) / DC_Main.MsIntYearDays, 3), \"0.000\");",
+  "nIntAmt.Text = Strings.Format((object)Math.Round(Conversion.Val(nMonthIntAmt.Text) * Conversion.Val(cboIntMonth.Text), 0), \"0.00\");",
+  "nIntAmt.Text = Strings.Format((object)Math.Round(Conversion.Val(nDhrnAmt.Text) * Conversion.Val(nIntPrc.Text) / 100.0 * (30.0 * Conversion.Val(cboIntMonth.Text)) / DC_Main.MsIntYearDays, 0), \"0.00\");",
+  "CustClAmt = CustOpAmt + Conversion.Val(nRecAmt.Text);",
+  "CustClAmt = Conversion.Val(nRecAmt.Text) - Math.Abs(CustOpAmt);",
+  "DC_Main.MsImageNo = Conversions.ToString(Conversion.Val(DC_Main.MCo_code)) + DC_Main.MLc_code + DC_Main.MCo_year + tVchNo.Text + tAcCode.Text + Conversions.ToString(Conversion.Val(MSG[MSG.Row, 0]));",
+  "nIntPrc.Text = Strings.Format((object)(Conversion.Val(nMonthlyInt.Text) * 12.0), \"0.00\");",
+  "nRecAmt.Text = Strings.Format((object)(Conversion.Val(nIntAmt.Text) + Conversion.Val(nOtherCharges.Text)), \"0.00\");"
+ ],
+ "validations": [
+  {
+   "message": "This Row Record will Removed permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"This Row Record will Removed permantley ?\", (MsgBoxStyle)36, (object)null) == 6"
+  },
+  {
+   "message": "Record is Deleted....",
+   "when": ""
+  },
+  {
+   "message": "You Cant Save New Entry Because Your lIcence Has been Expired Please Renew lIcence....",
+   "when": "(Operators.CompareString(DC_Main.MsSoftNoUse, \"Y\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "You Cant Save This Voucher Becouse This Company Type is B......",
+   "when": "(Operators.CompareString(DC_Main.MCo_Type, \"B\", false) == 0) & (Operators.CompareString(EntryMode, \"A\", false) == 0)"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "Operators.CompareString(UsUPdate, \"Y\", false) != 0 && ((Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) =="
+  },
+  {
+   "message": "Please Insert Party and try",
+   "when": "Operators.CompareString(tAcCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert VchNo and try",
+   "when": "Operators.CompareString(tVchNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Voucher now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Last Record...",
+   "when": "Conversion.Val(tVchNo.Text) >= Conversion.Val(LastVchNo)"
+  },
+  {
+   "message": "Creat New Addres ?",
+   "when": "(int)Interaction.MsgBox((object)\"Creat New Addres ?\", (MsgBoxStyle)292, (object)null) == 6"
+  },
+  {
+   "message": "Please Check Len Connection...You Cant Save Image...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  }
+ ]
+}

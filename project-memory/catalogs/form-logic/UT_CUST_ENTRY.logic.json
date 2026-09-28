@@ -1,0 +1,42 @@
+{
+ "form": "UT_CUST_ENTRY",
+ "tables": [
+  "AC_MAST",
+  "ADD_MAST",
+  "BAR_DETL",
+  "CUST_DATA",
+  "CUST_DETL",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "CUST_DATA",
+   "CUST_DETL"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "ADD_MAST",
+  "BAR_DETL",
+  "CUST_DATA",
+  "CUST_DETL",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "MAIN_STOCK",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 14,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 3023
+}

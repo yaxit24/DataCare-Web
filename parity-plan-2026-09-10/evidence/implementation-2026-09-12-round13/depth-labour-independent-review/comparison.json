@@ -1,0 +1,621 @@
+{
+  "kind": "recorded-depth-fieldset-independent-comparison-v1",
+  "method": "JSON set/count comparison and bounded source reading only; no scanner or application execution",
+  "earlierTotals": {
+    "inputInterfaces": 168,
+    "inputFields": 2390,
+    "reachableFromUi": 2284,
+    "apiOnlyUnreachable": 106,
+    "reachablePct": 95.6
+  },
+  "laterTotals": {
+    "inputInterfaces": 169,
+    "inputFields": 2394,
+    "reachableFromUi": 2288,
+    "apiOnlyUnreachable": 106,
+    "reachablePct": 95.6
+  },
+  "earlierInterfaceCount": 168,
+  "unchangedCommonInterfaceCount": 168,
+  "addedInterfaces": [
+    {
+      "interface": "SaleReturnLabourPrefixInput",
+      "file": "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "module": "sales",
+      "fieldCount": 4,
+      "reachableCount": 4,
+      "apiOnlyCount": 0,
+      "apiOnlyFields": [],
+      "desktopProvenance": {}
+    }
+  ],
+  "removedInterfaces": [],
+  "changedCommonInterfaceRecords": [],
+  "apiOnlyAdded": [],
+  "apiOnlyRemoved": [],
+  "apiOnlyTriples": [
+    [
+      "web/apps/api/src/modules/bullion/bullion.ts",
+      "BullionBookingInput",
+      "payableAc"
+    ],
+    [
+      "web/apps/api/src/modules/bullion/bullion.ts",
+      "DeleteBullionBookingInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "FineSalePurchaseInput",
+      "finePurchaseAc"
+    ],
+    [
+      "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+      "FineSalePurchaseInput",
+      "fineSalesAc"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DeleteDhrnInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DeleteDhrnInput",
+      "headerTable"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnIssueInput",
+      "entryType"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnIssueInput",
+      "expectedBookInout"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnIssueInput",
+      "expectedMainBook"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnIssueInput",
+      "ledgerMode"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnReceiptInput",
+      "entryType"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnReceiptInput",
+      "expectedBookInout"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnReceiptInput",
+      "expectedMainBook"
+    ],
+    [
+      "web/apps/api/src/modules/dhrn/dhrn.ts",
+      "DhrnReceiptInput",
+      "ledgerMode"
+    ],
+    [
+      "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "IrnItemInput",
+      "assAmt"
+    ],
+    [
+      "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "IrnItemInput",
+      "gstRt"
+    ],
+    [
+      "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "IrnItemInput",
+      "qty"
+    ],
+    [
+      "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "IrnItemInput",
+      "unit"
+    ],
+    [
+      "web/apps/api/src/modules/einvoice/einvoice.ts",
+      "IrnItemInput",
+      "unitPrice"
+    ],
+    [
+      "web/apps/api/src/modules/finance/acOpening.ts",
+      "DeleteAcOpeningInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "DeleteBatchReceiptInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/finance/billToBill.ts",
+      "DeleteBillSettlementInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/finance/employeeJv.ts",
+      "EmployeeJvInput",
+      "pfAc"
+    ],
+    [
+      "web/apps/api/src/modules/finance/employeeJv.ts",
+      "EmployeeJvInput",
+      "tdsAc"
+    ],
+    [
+      "web/apps/api/src/modules/finance/finance.ts",
+      "DeleteFinanceInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/finance/finance.ts",
+      "DeleteFinanceInput",
+      "headerTable"
+    ],
+    [
+      "web/apps/api/src/modules/finance/finance.ts",
+      "PaymentInput",
+      "lineNo"
+    ],
+    [
+      "web/apps/api/src/modules/finance/finance.ts",
+      "ReceiptInput",
+      "lineNo"
+    ],
+    [
+      "web/apps/api/src/modules/integrations/deviceBridge.ts",
+      "ScaleReadingInput",
+      "timestamp"
+    ],
+    [
+      "web/apps/api/src/modules/integrations/deviceBridge.ts",
+      "ScaleReadingInput",
+      "unit"
+    ],
+    [
+      "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "DeleteKarigarInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/manufacturing/karigar.ts",
+      "IssueInput",
+      "accountGstType"
+    ],
+    [
+      "web/apps/api/src/modules/manufacturing/meltingPro.ts",
+      "MeltingProInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "DeleteMfgInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "MfgIssueInput",
+      "irType"
+    ],
+    [
+      "web/apps/api/src/modules/manufacturing/mfg.ts",
+      "MfgIssueInput",
+      "postStock"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "DeleteSchemeInstallmentInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "DeleteSchemeMaturityInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "SchemeGoldAdjustLineInput",
+      "saleBillHeaderVoucherNo"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "SchemeGoldAdjustLineInput",
+      "saleBillLcCode"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "SchemeInstallmentInput",
+      "liabAc"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "SchemeInstallmentInput",
+      "upiLines"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "SchemeInstallmentLine",
+      "liabAc"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "SchemeInstallmentLine",
+      "upiLines"
+    ],
+    [
+      "web/apps/api/src/modules/membership/scheme.ts",
+      "SchemeMaturityInput",
+      "liabAc"
+    ],
+    [
+      "web/apps/api/src/modules/ops/requestContext.ts",
+      "RequestLogInput",
+      "companyCode"
+    ],
+    [
+      "web/apps/api/src/modules/ops/requestContext.ts",
+      "RequestLogInput",
+      "correlationId"
+    ],
+    [
+      "web/apps/api/src/modules/ops/requestContext.ts",
+      "RequestLogInput",
+      "durationMs"
+    ],
+    [
+      "web/apps/api/src/modules/ops/requestContext.ts",
+      "RequestLogInput",
+      "locationCode"
+    ],
+    [
+      "web/apps/api/src/modules/posting/posting.ts",
+      "ReverseInput",
+      "deleteLog"
+    ],
+    [
+      "web/apps/api/src/modules/purchase/purchase.ts",
+      "DeletePurchaseInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/purchase/purchase.ts",
+      "PurchaseInput",
+      "consiLcCode"
+    ],
+    [
+      "web/apps/api/src/modules/purchase/purchase.ts",
+      "PurchaseInput",
+      "saleBillLc"
+    ],
+    [
+      "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+      "DeletePurchaseReturnInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/rbac/authorization.ts",
+      "FormAuthorizationInput",
+      "adminOnly"
+    ],
+    [
+      "web/apps/api/src/modules/sales/billProfit.ts",
+      "ProfitLineInput",
+      "avgTouch"
+    ],
+    [
+      "web/apps/api/src/modules/sales/billProfit.ts",
+      "ProfitLineInput",
+      "itmMrp"
+    ],
+    [
+      "web/apps/api/src/modules/sales/billProfit.ts",
+      "ProfitLineInput",
+      "krFine"
+    ],
+    [
+      "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "LabourInvoiceInput",
+      "labourAc"
+    ],
+    [
+      "web/apps/api/src/modules/sales/labourInvoice.ts",
+      "LabourInvoiceInput",
+      "receiveLines"
+    ],
+    [
+      "web/apps/api/src/modules/sales/rateCut.ts",
+      "ComputedLine",
+      "itmAmt"
+    ],
+    [
+      "web/apps/api/src/modules/sales/rateCut.ts",
+      "DeleteRateCutInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/sales/rateCut.ts",
+      "RateCutInput",
+      "hdVchNo"
+    ],
+    [
+      "web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "SaleReturnIncomingLabourReadInput",
+      "enteredCode"
+    ],
+    [
+      "web/apps/api/src/modules/sales/sales.ts",
+      "DeleteSaleInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/sales/sales.ts",
+      "SaleLineInput",
+      "tagLabourAmount"
+    ],
+    [
+      "web/apps/api/src/modules/sales/sales.ts",
+      "SaleLineInput",
+      "tagLabourPct"
+    ],
+    [
+      "web/apps/api/src/modules/sales/sales.ts",
+      "SaleLineInput",
+      "tagLabourRate"
+    ],
+    [
+      "web/apps/api/src/modules/sales/sales.ts",
+      "SaleLineInput",
+      "tagOtherAmount"
+    ],
+    [
+      "web/apps/api/src/modules/sales/salesOrder.ts",
+      "SalesOrderInput",
+      "orderMainBook"
+    ],
+    [
+      "web/apps/api/src/modules/sales/salesOrder.ts",
+      "SalesOrderInput",
+      "requireDesignSelection"
+    ],
+    [
+      "web/apps/api/src/modules/sales/salesReturn.ts",
+      "DeleteSaleReturnInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/sales/settlement.ts",
+      "SettlementInput",
+      "crFine"
+    ],
+    [
+      "web/apps/api/src/modules/sales/settlement.ts",
+      "SettlementInput",
+      "drFine"
+    ],
+    [
+      "web/apps/api/src/modules/sales/settlement.ts",
+      "SettlementInput",
+      "ratePar"
+    ],
+    [
+      "web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "DesktopAccountBalanceInput",
+      "accountCode"
+    ],
+    [
+      "web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "DesktopAccountBalanceInput",
+      "cutoffLocalSecond"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "FineJvRojmelLine",
+      "creditFine"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "FineJvRojmelLine",
+      "debitFine"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "FineJvRojmelLine",
+      "ldCode"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "FineJvRojmelLine",
+      "lineNo"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "KarigarRojmelLine",
+      "contraAc"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "KarigarRojmelLine",
+      "lineNo"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "OrderOldMetalLine",
+      "lineNo"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "RojmelLine",
+      "lineNo"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "RojmelLine",
+      "revenueAc"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "SchemeAdjRojmelLine",
+      "bonusAc"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "SchemeAdjRojmelLine",
+      "lineNo"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "SchemeAdjRojmelLine",
+      "memberName"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "SchemeAdjRojmelLine",
+      "settledAgainstBillAmount"
+    ],
+    [
+      "web/apps/api/src/modules/shared/rojmel.ts",
+      "SchemeAdjRojmelLine",
+      "settlementAc"
+    ],
+    [
+      "web/apps/api/src/modules/stock/stockInout.ts",
+      "StockInoutInput",
+      "fromVchNo"
+    ],
+    [
+      "web/apps/api/src/modules/stock/stockInout.ts",
+      "StockInoutInput",
+      "stockTransferred"
+    ],
+    [
+      "web/apps/api/src/modules/stock/stockInout.ts",
+      "StockInoutInput",
+      "toVchNo"
+    ],
+    [
+      "web/apps/api/src/modules/stock/tagOps.ts",
+      "TagCancelLine",
+      "itmPolish"
+    ],
+    [
+      "web/apps/api/src/modules/stock/tagOps.ts",
+      "TagCancelLine",
+      "tagLot"
+    ],
+    [
+      "web/apps/api/src/modules/stock/tagOps.ts",
+      "TagCancelLine",
+      "toTblCode"
+    ],
+    [
+      "web/apps/api/src/modules/stock/tagOps.ts",
+      "TagWeightDiffInput",
+      "diffAc"
+    ],
+    [
+      "web/apps/api/src/modules/stock/tagOps.ts",
+      "TagWeightDiffInput",
+      "labourAc"
+    ],
+    [
+      "web/apps/api/src/modules/stock/tagOps.ts",
+      "TagWeightDiffInput",
+      "stockAdjAc"
+    ],
+    [
+      "web/apps/api/src/modules/tour/tour.ts",
+      "DeleteTourInput",
+      "deleteUser"
+    ],
+    [
+      "web/apps/api/src/modules/utilities/dataRepair.ts",
+      "RepairApplyInput",
+      "loginCoCode"
+    ],
+    [
+      "web/apps/api/src/modules/utilities/windowTiles.ts",
+      "WindowTileInput",
+      "mainName"
+    ],
+    [
+      "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "FieldAuditInput",
+      "editingUser"
+    ],
+    [
+      "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "FieldAuditInput",
+      "ignore"
+    ],
+    [
+      "web/apps/api/src/modules/vouchers/fieldAudit.ts",
+      "FieldAuditInput",
+      "originalUser"
+    ]
+  ],
+  "qualifiedNewMentionedFields": [
+    {
+      "file": "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "interface": "SaleReturnLabourPrefixInput",
+      "field": "baseVersion"
+    },
+    {
+      "file": "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "interface": "SaleReturnLabourPrefixInput",
+      "field": "rowIdentity"
+    },
+    {
+      "file": "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "interface": "SaleReturnLabourPrefixInput",
+      "field": "prefixVersion"
+    },
+    {
+      "file": "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "interface": "SaleReturnLabourPrefixInput",
+      "field": "events"
+    }
+  ],
+  "earlierFrozenRound12Comparison": {
+    "basis": "Retained depth-input-delta-qualification.json only; full frozen104 set not independently compared here",
+    "totals": {
+      "inputInterfaces": 166,
+      "inputFields": 2382,
+      "reachableFromUi": 2278,
+      "apiOnlyUnreachable": 104,
+      "reachablePct": 95.6
+    },
+    "recordedAddedApiOnly": [
+      [
+        "FormAuthorizationInput",
+        "adminOnly"
+      ],
+      [
+        "SaleReturnIncomingLabourReadInput",
+        "enteredCode"
+      ]
+    ],
+    "recordedRemovedApiOnly": []
+  },
+  "gate": {
+    "observed": 106,
+    "budget": 96,
+    "status": "failed"
+  },
+  "limits": [
+    "API-only triples and per-interface records are explicit in JSON; mentioned-field names of all old interfaces are not enumerated, so no independent claim about their exact complete property inventories.",
+    "Name occurrence is a static heuristic, not request flow, operator editability, persistence, arithmetic or functional parity.",
+    "The same current scanner was used for the earlier controlled frozen-source comparison; no historical scanner rerun is inferred."
+  ]
+}

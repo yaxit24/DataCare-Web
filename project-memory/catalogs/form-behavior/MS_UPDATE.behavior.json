@@ -1,0 +1,171 @@
+{
+ "form": "MS_UPDATE",
+ "loc": 33075,
+ "gridColumns": {},
+ "inlineSql": [
+  "Opbl Update as par Ledger",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "UPDATE BOOK_DATA SET DATA_TYPE = 'A' WHERE DATA_TYPE IS NULL OR DATA_TYPE = ''",
+  "UPDATE BOOK_DETL SET DATA_TYPE = 'A' WHERE DATA_TYPE IS NULL OR DATA_TYPE = ''",
+  "UPDATE CASH_DATA SET CLR_DATE = VCH_DATE WHERE CLR_DATE IS NULL",
+  "DELETE FROM BANK_RECONCILE",
+  "INSERT INTO BANK_RECONCILE(CO_CODE,LC_CODE,LEDR_KEY,CLR_DATE) SELECT A.CO_CODE,A.LC_CODE,LEDR_KEY,CLR_DATE FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND B.AC_GR IN ('02','22','23')",
+  "SELECT CO_BOOK,BOOK_TBL_NAME FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CUR_USE = 'Y' AND BOOK_TBL_NAME <> '' GROUP BY CO_BOOK,BOOK_TBL_NAME ORDER BY CO_BOOK",
+  "SELECT * FROM BANK_RECONCILE WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY LEDR_KEY",
+  "UPDATE AC_DATA SET CLR_DATE = NULL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEDR_KEY = ' ? LEDR_KEY ? '",
+  "UPDATE AC_DATA SET CLR_DATE = ' ? CLR_DATE ? MM/dd/yyyy ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEDR_KEY = ' ? LEDR_KEY ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK NOT IN ('888','000')",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK <> '888'",
+  "DELETE FROM ROJ_MEL_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM TAX_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM DHRN_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM SL_ORD_ADJ WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_DATE < ' ? MM/dd/yyyy ? '",
+  "UPDATE A SET A.DHRN_REC_AMT = B.DhrnRec, A.UNCHAK_DHRN_REC = B.UnchakRec FROM DHRN_ISU_DATA AS A INNER JOIN(Select CO_CODE, ISU_LC, ISU_YRCD, ISU_DBCD, ISU_NO, SUM(DHRN_REC_AMT) As DhrnRec, SUM(UNCHAK_DHRN_REC) As UnchakRec FROM DHRN_DATA GROUP BY CO_CODE, ISU_LC, ISU_YRCD, ISU_DBCD, ISU_NO) As B On A.CO_CODE = B.CO_CODE And A.LC_CODE = B.ISU_LC And A.CO_YEAR = B.ISU_YRCD And A.CO_BOOK = B.ISU_DBCD And A.VCH_NO = B.ISU_NO And A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? '",
+  "UPDATE BUL_DATA SET ADJ_WT = 0 WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND BOOK_NAME = 'BUL SALE'",
+  "UPDATE BUL_DATA SET OLD_SRNO = SR_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND BOOK_NAME = 'BUL SALE' AND OLD_SRNO = 0",
+  "UPDATE A SET A.ADJ_WT = B.ItmNwt FROM BUL_DATA AS A INNER JOIN(Select CO_CODE, ISU_LC_CODE, ISU_YRCD, ISU_DBCD, ISU_NO,ISU_SRNO, SUM(ITM_GWT+ADJ_WT) As ItmNwt FROM RATE_CUT_ISU GROUP BY CO_CODE, ISU_LC_CODE, ISU_YRCD, ISU_DBCD, ISU_NO,ISU_SRNO) As B On A.CO_CODE = B.CO_CODE And A.LC_CODE = B.ISU_LC_CODE And A.CO_YEAR = B.ISU_YRCD And A.CO_BOOK = B.ISU_DBCD And A.VCH_NO = B.ISU_NO AND A.OLD_SRNO = B.ISU_SRNO And A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? '",
+  "UPDATE BUL_DATA SET ADJ_WT = 0 WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND BOOK_NAME = 'BUL PURC'",
+  "UPDATE BUL_DATA SET OLD_SRNO = SR_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND BOOK_NAME = 'BUL PURC' AND OLD_SRNO = 0",
+  "DELETE FROM AD_OS WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "SELECT TAG_NO,ITM_NWT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE,VCH_SRNO FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND (ITM_TOUCH + ITM_WEST_PRC) <> 0 AND ITM_FINE <= 0 ORDER BY TAG_NO",
+  "UPDATE BAR_DETL SET ITM_FINE = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ? VCH_SRNO ? ",
+  "UPDATE SL_DETL_RTN SET ITM_FINE = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ? VCH_SRNO ? ",
+  "UPDATE BAR_DETL SET TAG_SRNO = 1 WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO <> 'N' AND LEN(TAG_NO) > 1 AND CO_BOOK = '218'",
+  "UPDATE BAR_DETL SET TAG_NO = 'N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO = ''",
+  "UPDATE BAR_DETL SET TAG_SRNO = RIGHT(TAG_NO,4) WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO <> 'N' AND LEN(TAG_NO) > 6 AND TAG_SRNO = 0 AND ISNUMERIC(RIGHT(TAG_NO, 4)) = 1",
+  "UPDATE BAR_DETL SET TAG_SRNO = RIGHT(TAG_NO,5) WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO <> 'N' AND LEN(TAG_NO) > 7 AND TAG_SRNO = 0 AND ISNUMERIC(RIGHT(TAG_NO, 5)) = 1",
+  "UPDATE BAR_DETL SET KR_NET_WT = ITM_NWT WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND KR_NET_WT = 0",
+  "UPDATE BAR_DETL SET KR_NET_WT = ? ITM_NWT ? , KR_TOUCH = ? ITM_TOUCH ? ,KR_WEST_PRC = ? ITM_WEST_PRC ? ,KR_FINE = ? ITM_FINE ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ? VCH_SRNO ? ",
+  "UPDATE A SET A.KR_FINE = B.KR_FINE FROM RATE_CUT_ISU As A, BAR_DETL As B WHERE A.CO_CODE = B.CO_CODE And A.LC_CODE = B.LC_CODE And A.TAG_NO = B.TAG_NO And A.VCH_SRNO = B.VCH_SRNO And A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? '",
+  "UPDATE A SET A.KR_FINE = B.KR_FINE FROM SL_DETL As A, BAR_DETL As B WHERE A.CO_CODE = B.CO_CODE And A.LC_CODE = B.LC_CODE And A.TAG_NO = B.TAG_NO And A.VCH_SRNO = B.VCH_SRNO And A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? '",
+  "UPDATE A SET A.DATA_TYPE = C.DATA_TYPE FROM BAR_DETL As A, SL_DETL As B, BOOK_DATA AS C WHERE B.CO_CODE = A.CO_CODE And B.LC_CODE = A.LC_CODE And B.TAG_NO = A.TAG_NO And B.VCH_SRNO = A.VCH_SRNO And B.CO_CODE = C.CO_CODE And B.LC_CODE = C.LC_CODE And B.CO_BOOK = C.CO_BOOK And B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? '",
+  "UPDATE A SET A.DATA_TYPE = C.DATA_TYPE FROM BAR_DETL As A, RATE_CUT_ISU As B, BOOK_DATA AS C WHERE B.CO_CODE = A.CO_CODE And B.LC_CODE = A.LC_CODE And B.TAG_NO = A.TAG_NO And B.VCH_SRNO = A.VCH_SRNO And B.CO_CODE = C.CO_CODE And B.LC_CODE = C.LC_CODE And B.CO_BOOK = C.CO_BOOK And B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? '",
+  "UPDATE A SET A.DATA_TYPE = C.DATA_TYPE FROM BAR_DETL As A, BAR_CAN_DETL As B, BOOK_DATA AS C WHERE B.CO_CODE = A.CO_CODE And B.LC_CODE = A.LC_CODE And B.TAG_NO = A.TAG_NO And B.VCH_SRNO = A.VCH_SRNO And B.CO_CODE = C.CO_CODE And B.LC_CODE = C.LC_CODE And B.CO_BOOK = C.CO_BOOK And B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.BOOK_NAME IN ('TAG CANCEL')",
+  "UPDATE A SET A.DATA_TYPE = C.DATA_TYPE FROM BAR_DETL As A, LBR_ISU_DETL As B, BOOK_DATA AS C WHERE B.CO_CODE = A.CO_CODE And B.LC_CODE = A.LC_CODE And B.TAG_NO = A.TAG_NO And B.VCH_SRNO = A.VCH_SRNO And B.CO_CODE = C.CO_CODE And B.LC_CODE = C.LC_CODE And B.CO_BOOK = C.CO_BOOK And B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? '",
+  "UPDATE A SET A.DATA_TYPE = C.DATA_TYPE FROM BAR_DETL As A, SL_ORD_DETL As B, BOOK_DATA AS C WHERE B.CO_CODE = A.CO_CODE And B.LC_CODE = A.LC_CODE And B.TAG_NO = A.TAG_NO And B.VCH_SRNO = A.VCH_SRNO And B.CO_CODE = C.CO_CODE And B.LC_CODE = C.LC_CODE And B.CO_BOOK = C.CO_BOOK And B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? '",
+  "UPDATE A SET A.DATA_TYPE = C.DATA_TYPE FROM BAR_DETL As A, KR_DETL As B, BOOK_DATA AS C WHERE B.CO_CODE = A.CO_CODE And B.LC_CODE = A.LC_CODE And B.TAG_NO = A.TAG_NO And B.VCH_SRNO = A.VCH_SRNO And B.CO_CODE = C.CO_CODE And B.LC_CODE = C.LC_CODE And B.CO_BOOK = C.CO_BOOK And B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? '",
+  "UPDATE BAR_DETL SET EMP_ISU = 'N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND (EMP_ISU = '' OR EMP_ISU IS NULL)",
+  "UPDATE BAR_DETL SET DATA_TYPE = 'A' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND (DATA_TYPE = '' OR DATA_TYPE IS NULL)",
+  "UPDATE LBR_ISU_DETL SET TAG_NO = 'N' WHERE CO_CODE = ' ? ' AND (TAG_NO = '' OR TAG_NO IS NULL)",
+  "UPDATE KR_DETL SET TAG_NO = 'N' WHERE CO_CODE = ' ? ' AND (TAG_NO = '' OR TAG_NO IS NULL)",
+  "UPDATE APR_DETL SET TAG_NO = 'N' WHERE CO_CODE = ' ? ' AND (TAG_NO = '' OR TAG_NO IS NULL)",
+  "UPDATE BAR_DETL SET APR_ISU = 'N' WHERE CO_CODE = ' ? ' AND (APR_ISU = '' OR APR_ISU IS NULL)",
+  "UPDATE BAR_CAN_DETL SET TAG_NO = 'N' WHERE CO_CODE = ' ? ' AND (TAG_NO = '' OR TAG_NO IS NULL)",
+  "UPDATE BAR_CAN_DETL SET TAG_NO = 'N' WHERE CO_CODE = ' ? ' AND LEN(TAG_NO) <= 5 AND TAG_NO <> 'N'",
+  "SELECT A.CO_YEAR,A.CO_BOOK,A.VCH_NO,A.OLD_SRNO,A.TAG_NO,A.IT_CODE,B.PR_CODE,B.IT_TYPE,B.TAG_TYPE,A.VCH_SRNO FROM BAR_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.VCH_SRNO = 0 OR A.PR_CODE = '' OR A.IT_TYPE = ''"
+ ],
+ "keyboard": {
+  "Enter": 2,
+  "Ctrl+O": 1,
+  "Esc": 1
+ },
+ "calc": [
+  "num = Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[DC_Main.M][\"ITM_NWT\"])) * (Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[DC_Main.M][\"ITM_TOUCH\"])) + Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[DC_Main.M][\"ITM_WEST_PRC\"]))) / 100.0;"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Account Refersh Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "Stock Refresh Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "Field Is Update ok....Please Re open Software",
+   "when": ""
+  },
+  {
+   "message": "Approval Refersh Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "Image Data Carete Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "Crm Data Carete Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "Yor Crm Pack Is Not Active...",
+   "when": ""
+  },
+  {
+   "message": "Old Field Is Update ok....Please Re open Software",
+   "when": ""
+  },
+  {
+   "message": "Sales Tag VchSrno(TagId) 0 Then VchSrNo(TagId) Update (Please Tack Backup Before Run The Process..)?",
+   "when": "(int)Interaction.MsgBox((object)\"Sales Tag VchSrno(TagId) 0 Then VchSrNo(TagId) Update (Please Tack Backup Before Run The Process..)?\", (MsgBoxStyle)260, (objec"
+  },
+  {
+   "message": "Sales VchSrno Is Update Please Stock Refres and Check....",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To to Delete All Tag Stock And Item Oppning Loose Stock Delete From This Company..And Sales Tag Item Transfer To Item Wise...?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To to Delete All Tag Stock And Item Oppning Loose Stock Delete From This Company..And Sales Tag Item Transfer To I"
+  },
+  {
+   "message": "All Tag Are Reset Compalit.....",
+   "when": ""
+  },
+  {
+   "message": "SrNo Mast Update Ok....",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To to update Bar_Idtl Srno?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To to update Bar_Idtl Srno?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Bar idt Srno update Compalit.....",
+   "when": ""
+  },
+  {
+   "message": "Sales Bill Ma Tag wise Item No Weight Change Then Tag No Main Weight Sales Ma updat karva mate ...You Want to Update It ?",
+   "when": "(int)Interaction.MsgBox((object)\"Sales Bill Ma Tag wise Item No Weight Change Then Tag No Main Weight Sales Ma updat karva mate ...You Want to Update It ?\", (Ms"
+  },
+  {
+   "message": "Sales Tag Net Wt Update is ok....",
+   "when": ""
+  },
+  {
+   "message": "Kr Fine Update Ok....",
+   "when": ""
+  },
+  {
+   "message": "Mfg Refresh Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To to Update Opning Balance As Pr Ledger Opning Balance If You update then cant Recover old opning balance?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To to Update Opning Balance As Pr Ledger Opning Balance If You update then cant Recover old opning balance?\", (Msg"
+  },
+  {
+   "message": "Opning Balance is Update Please Data Refresh...",
+   "when": ""
+  },
+  {
+   "message": "Scheme Data Carete Process Complete.",
+   "when": ""
+  },
+  {
+   "message": "Sales With Tag But Not In Tag Stock(BarDetl) Then Sales Tag ='' Update... (Please Tack Backup Before Run The Process..)?",
+   "when": "(int)Interaction.MsgBox((object)\"Sales With Tag But Not In Tag Stock(BarDetl) Then Sales Tag ='' Update... (Please Tack Backup Before Run The Process..)?\", (Msg"
+  },
+  {
+   "message": "Data are Update....",
+   "when": ""
+  },
+  {
+   "message": "Stock Type A Set Process..?",
+   "when": "(int)Interaction.MsgBox((object)\"Stock Type A Set Process..?\", (MsgBoxStyle)260, (object)DC_Main.MsgTitle) == 6"
+  }
+ ]
+}

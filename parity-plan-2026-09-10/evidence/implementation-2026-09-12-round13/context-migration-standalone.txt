@@ -1,0 +1,63 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+PASS M01 success
+PASS M02 success
+PASS M03 success
+PASS M04 success
+PASS M05 failure
+PASS M06 failure
+PASS M07 failure
+PASS M08 failure
+PASS M09 failure
+PASS M10 failure
+PASS M11 failure
+PASS M12 failure
+PASS M13 failure
+PASS M14 failure
+PASS M15 failure
+PASS M16 failure
+PASS M17 failure
+PASS M18 failure
+PASS M19 failure
+PASS M20 failure
+PASS M21 failure
+PASS M22 failure
+PASS M23 failure
+PASS M24 failure
+PASS M25 failure
+PASS M26 failure
+PASS M27 failure
+PASS M28 failure
+PASS 28 disposable migration cases; all owned databases removed

@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "recordedAtUtc": "2026-09-12T01:57:41.603375+00:00",
+  "verifierSha256": "e78d78f631678e032d5e8202c7d0fc33b7d66215aa21cd1e0bf40010f21afacb",
+  "contractSha256": "3fc625b7dc3b78fc9b230b06b4478b082881af106c1a527d05c4af10e66043b0",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/bound/verify_retain_browsers.py"
+      ],
+      "exitCode": 0,
+      "log": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/bound/verify-first.txt",
+        "sha256": "d79aebe7c12c1b836259797d7e9065f93b46855d4c77a3cd4ecbed16b3b87b59"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/bound/verify_retain_browsers.py",
+        "--retain"
+      ],
+      "exitCode": 0,
+      "log": {
+        "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/bound/retain-first.txt",
+        "sha256": "88d9d236fdcc6eede422c388cb9e7f5a3511b5efb666396cab3cb65d38b4adfa"
+      }
+    }
+  ],
+  "qualification": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/retained-browser-artifacts-qualification.json",
+    "sha256": "9256708cca7d2b97451f9724fc05f029ed28d55eb7f079331a8d7207e13b6e8c"
+  },
+  "copiedFileCount": 63,
+  "copiedByFolder": {
+    "parity-real-stack-round14-bound": 50,
+    "session-context-round14-bound": 8,
+    "labour-preview-lifecycle-round14-bound": 5
+  },
+  "results": [
+    {
+      "path": "web/test-results/parity-real-stack-round14-bound/result.json",
+      "sha256": "2c7d7ffe161c6e9b60fc79b84c3390b5c6480f1c409f6e1e9ae536a8e88f9e84"
+    },
+    {
+      "path": "web/test-results/session-context-round14-bound/result.json",
+      "sha256": "1ecbc86658bf15bb0b07bdc3817ad8f270e05c02c7bc14f8f92a296cb02f543d"
+    },
+    {
+      "path": "web/test-results/labour-preview-lifecycle-round14-bound/result.json",
+      "sha256": "6a9d303536f04fcbf3befb1ff16e0c8e631d3491d64e9f7391dd4c33cfd2c407"
+    }
+  ],
+  "historicalFailure": {
+    "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/browser-retention-verifier/verify-first.record.json",
+    "sha256": "956d7b1b7d91fd77bb63f3e665ff878a736e9e968918b340f016b51d6ccd33a6"
+  },
+  "limits": "Read-only verification and public artifact retention only; no browser/DB/product execution. Earlier missing-input failure retained; no historical run upgraded."
+}

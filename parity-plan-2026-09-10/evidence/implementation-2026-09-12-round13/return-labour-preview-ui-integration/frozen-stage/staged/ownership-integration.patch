@@ -1,0 +1,53 @@
+--- a/apps/web/lib/salesReturnBillReplay.ts
++++ b/apps/web/lib/salesReturnBillReplay.ts
+@@ -373,7 +373,7 @@
+   return value as ReturnBillReplayResult;
+ }
+ 
+-export type SavedReturnPreviewKind = 'row' | 'bill';
++export type SavedReturnPreviewKind = 'row' | 'bill' | 'labour';
+ type PreviewContext = { context: number; generation: number };
+ /** Synchronous ownership closes same-render races; an old close cannot release a new preview. */
+ export class SavedReturnPreviewOwnership {
+--- a/apps/web/components/SaleReturnSavedPanel.tsx
++++ b/apps/web/components/SaleReturnSavedPanel.tsx
+@@ -26,6 +26,7 @@
+ import { LookupPicker } from './LookupPicker';
+ import { SaleReturnReplayPanel } from './SaleReturnReplayPanel';
+ import { SaleReturnBillReplayPanel } from './SaleReturnBillReplayPanel';
++import { SaleReturnLabourReplayPanel } from './SaleReturnLabourReplayPanel';
+ import {
+   SavedReturnPreviewOwnership,
+   type SavedReturnPreviewKind,
+@@ -646,7 +647,7 @@
+               Saved amounts, source identities and other fields remain read-only.
+             </span>
+           </div>
+-          {previewKind !== 'bill' && (
++          {(previewKind === null || previewKind === 'row') && (
+             <SaleReturnReplayPanel
+               key={`row:${selected.context}:${selected.generation}`}
+               document={selected.document}
+@@ -655,12 +656,21 @@
+               onReload={() => reloadPreview(selected)}
+             />
+           )}
+-          {previewKind !== 'row' && (
++          {(previewKind === null || previewKind === 'bill') && (
+             <SaleReturnBillReplayPanel
+               key={`bill:${selected.context}:${selected.generation}`}
+               document={selected.document}
+               disabled={dirty || busy || selected.needsReload}
+               onActivityChange={(active) => previewActivity(selected, 'bill', active)}
++              onReload={() => reloadPreview(selected)}
++            />
++          )}
++          {(previewKind === null || previewKind === 'labour') && (
++            <SaleReturnLabourReplayPanel
++              key={`labour:${selected.context}:${selected.generation}`}
++              document={selected.document}
++              disabled={dirty || busy || selected.needsReload}
++              onActivityChange={(active) => previewActivity(selected, 'labour', active)}
+               onReload={() => reloadPreview(selected)}
+             />
+           )}

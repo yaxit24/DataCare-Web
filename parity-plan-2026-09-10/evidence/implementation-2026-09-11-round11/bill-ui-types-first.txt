@@ -1,0 +1,40 @@
+
+> @datacare/web@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+> tsc --noEmit
+
+lib/salesReturnBillReplay.ts(277,11): error TS2339: Property 'profile' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(278,11): error TS2339: Property 'headerProjectionVersion' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(279,18): error TS2339: Property 'savedHeader' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(280,22): error TS2339: Property 'taxPolicy' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(281,27): error TS2339: Property 'diagnostics' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(282,19): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(283,22): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(284,19): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(285,22): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(286,18): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(287,11): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(288,11): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(291,36): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(295,11): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(298,13): error TS2339: Property 'taxPolicy' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(342,11): error TS2339: Property 'rowIdentity' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(343,21): error TS2339: Property 'baseline' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(344,21): error TS2339: Property 'preview' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(345,18): error TS2339: Property 'baseline' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(346,19): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(347,22): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(348,18): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(349,18): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(350,18): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(351,18): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(352,18): error TS2339: Property 'phases' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(353,19): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(354,22): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(355,11): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(356,11): error TS2339: Property 'capabilities' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(357,26): error TS2339: Property 'events' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(358,11): error TS2339: Property 'events' does not exist on type 'ReturnBillIdentity'.
+lib/salesReturnBillReplay.ts(361,9): error TS2339: Property 'events' does not exist on type 'ReturnBillIdentity'.
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/web@0.0.0 typecheck: `tsc --noEmit`
+Exit status 1

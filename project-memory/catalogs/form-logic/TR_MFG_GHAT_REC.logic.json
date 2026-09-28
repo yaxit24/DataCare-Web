@@ -1,0 +1,90 @@
+{
+ "form": "TR_MFG_GHAT_REC",
+ "tables": [
+  "AC_DATA",
+  "AC_MAST",
+  "APR_DETL",
+  "DELETE_DATA",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "KR_DATA",
+  "MAIN_STOCK",
+  "MFG_DATA",
+  "MFG_DETL",
+  "MFG_ISU_REC",
+  "MFG_MAST",
+  "REMARK_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DELETE_DATA": [
+    "AC_CODE",
+    "AC_NAME",
+    "BOOK_NAME",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "DELETE_DATE",
+    "DELETE_TIME",
+    "DELETE_USER",
+    "FINE_TYPE",
+    "HD_VCH_NO",
+    "LC_CODE",
+    "MAIN_USER",
+    "SR_NO",
+    "VCH_DATE",
+    "VCH_DESC",
+    "VCH_FINE_CR",
+    "VCH_FINE_DR",
+    "VCH_NO",
+    "VCH_TIME",
+    "VCH_TYPE",
+    "VCH_VAL_CR",
+    "VCH_VAL_DR"
+   ]
+  },
+  "UPDATE": [
+   "APR_DETL",
+   "MFG_DETL"
+  ],
+  "DELETE": [
+   "AC_DATA",
+   "MAIN_STOCK",
+   "MFG_DATA",
+   "MFG_DETL",
+   "MFG_ISU_REC",
+   "REMARK_DATA",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_MAST",
+  "APR_DETL",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "KR_DATA",
+  "MAIN_STOCK",
+  "MFG_DATA",
+  "MFG_DETL",
+  "MFG_ISU_REC",
+  "MFG_MAST",
+  "REMARK_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 29,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [
+  "CustClAmt = Conversion.Val(mSG2_TOTAL[5, 3]) - Math.Abs(CustOpAmt)",
+  "CustClAmt = CustOpAmt + Conversion.Val(mSG2_TOTAL[5, 3])"
+ ],
+ "loc": 6177
+}

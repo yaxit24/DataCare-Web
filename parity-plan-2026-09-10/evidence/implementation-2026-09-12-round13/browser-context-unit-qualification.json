@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-09-11T21:04:13.950475+00:00",
+  "file": "web/apps/web/test/contextSelection.test.ts",
+  "beforeSha256": "42713342962d92eea2c29e5f90daa054bde7fb5d6886a3fa08f2992707d9883a",
+  "afterSha256": "747d7e9dd723408e1a2796687a999fcadac379e02a4cc44e9798f24cc2ccdef6",
+  "reason": "Successful selection now marks the retained page stale with exact observed successor before navigation; original pre-integration ready assertion was obsolete. Old descriptor, pending body, persisted operation and header assertions unchanged. First failed run preserved."
+}

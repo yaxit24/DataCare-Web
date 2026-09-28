@@ -1,0 +1,40 @@
+# TR_MFG_ORD_ISU
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_MFG_ORD_ISU.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** DELETE_DATA
+- **UPDATE:** SL_ORD_DETL
+
+## Tables deleted / reversed
+- **DELETE:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, MFG_DETL, MFG_ISU_REC, REMARK_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- APR_DATA, ITEM_MAST, MFG_DETL, APR_DETL, TEMP_BOOK_DATA, AC_MAST, SL_ORD_DETL, APR_IDTL, EMP_MAST, MAIN_STOCK, DM_MAST, DM_SIZE, TABLE_MAST, MFG_ISU_REC, TAG_IMAGE_DATA, RATE_MAST, SL_ORD_IDTL, USER_SET, REMARK_DATA, TOUCH_MAST
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L4654: DELETE APR_DETL
+- L5859: DELETE APR_DATA
+- L5860: DELETE APR_DETL
+- L5861: DELETE APR_IDTL
+- L5864: DELETE TEMP_BOOK_DATA
+- L6125: DELETE MFG_DETL
+- L6233: DELETE MAIN_STOCK
+- L6237: UPDATE SL_ORD_DETL
+- L6240: DELETE MFG_ISU_REC
+- L6243: DELETE MAIN_STOCK
+- L6301: INSERT DELETE_DATA
+- L6305: UPDATE SL_ORD_DETL
+- L6308: DELETE REMARK_DATA
+- L6309: DELETE TEMP_BOOK_DATA
+- L6310: DELETE MAIN_STOCK
+- L6311: DELETE MFG_ISU_REC
+- L6312: DELETE MFG_DETL
+- L6313: DELETE APR_DATA
+- L6314: DELETE APR_DETL
+- L6315: DELETE APR_IDTL
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

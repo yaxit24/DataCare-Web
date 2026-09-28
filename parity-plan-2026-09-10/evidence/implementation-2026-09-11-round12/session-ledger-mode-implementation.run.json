@@ -1,0 +1,147 @@
+{
+  "status": "frozen-bounded-core-verified",
+  "profile": "trusted-bootstrap-and-commands-abc-v1",
+  "scope": "pure source bootstrap and semantic command resolver only",
+  "finalVerification": {
+    "tests": 104,
+    "files": 1,
+    "skips": 0,
+    "runtimeSeconds": 2.762,
+    "strictTestTypes": {
+      "exitCode": 0,
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "isolatedModules": true
+    },
+    "directInputsUnchanged": true,
+    "logs": [
+      "session-ledger-mode-tests-final.txt",
+      "session-ledger-mode-test-types-final.txt"
+    ]
+  },
+  "historicalEvidence": "First type narrowing and test setup failures, below-limit experiment, confirmed resource defect and stale temporary compilation log are preserved and explained in the implementation note.",
+  "notVerified": [
+    "desktop executable behavior",
+    "registration authority",
+    "Windows key classification",
+    "authenticated session integration",
+    "database or HTTP",
+    "browser",
+    "financial writes",
+    "end-to-end desktop parity"
+  ],
+  "references": [
+    {
+      "path": "web/packages/core/src/sessionLedgerMode.ts",
+      "sha256": "651c63fcc715b995d924d79ddb756d8fca504fcee4ae8cf9c64b4ad883844493"
+    },
+    {
+      "path": "web/packages/core/test/sessionLedgerMode.test.ts",
+      "sha256": "e93a9c610aa258b0d48fdc2307491388681453861835890d5f9fc06e6fe53cd5"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/session-ledger-mode.v1.json",
+      "sha256": "f6974c2f079073bba1cfb04305d824fb72c9e651c308999a72c01ea1962645f5"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MDI_FORM.cs",
+      "sha256": "cb91085c50d07a07ae5c5a8e6982ef6f9a2c533e2b55d61fc8c35f093f5dfbbc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round11/x13-session-ledger-mode-next-contract.md",
+      "sha256": "180b315ae44c23c663a7d4a95ca1d5ddc98b4f460bb932db7735216f78ac93b0"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-implementation.md",
+      "sha256": "04d64ca96be61fb6b5899f67678d7224d9b293ffc6005241eea7e302171d1133"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-independent-vectors.v1.json",
+      "sha256": "f6974c2f079073bba1cfb04305d824fb72c9e651c308999a72c01ea1962645f5"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-vector-authorship.json",
+      "sha256": "88b32329b930b5402ee0f58c5eb53afd4ed8b1d3af00d8d17f8bdce10e6d7ae7"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-independent-vectors-review.md",
+      "sha256": "31f8da60e54986c52106c4264f8202c93c4335192a7ab41298f2e8affc9ef69a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-inputs-final.json",
+      "sha256": "a866e2f4bb5b7fa94a106c3a279e4d5fcc30fd74d2869ea89ac4c4145f56b680"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-input-verification-final.json",
+      "sha256": "a1fdbe84de641ab9dc1092f7495a1eca47faa254879c13051608b2c1bc0e86d0"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-next-adapter-seam.md",
+      "sha256": "5eafc9da9d63a538b3ddb84dff3efd542f47539244c8d8840ef2a21e665640a4"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-next-adapter-seam.refs.json",
+      "sha256": "bd1beabd0eef4331cf8341247dfa2a36c8bfd9d92d3df2548490da817cd30532"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-output-boundary-confirmed.txt",
+      "sha256": "6cf8c326386fc51b1c9e162856bf98771be4b4feb8cbbed3423ed253649e0b5d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-output-boundary-corrected.txt",
+      "sha256": "6cf8c326386fc51b1c9e162856bf98771be4b4feb8cbbed3423ed253649e0b5d"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-output-boundary-first.txt",
+      "sha256": "6b76367cca11cbe54ef1025ee4796107f5d9f8edf9bdb2878a32225a64643446"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-output-boundary-reproduced.txt",
+      "sha256": "b6304b6e63dc0d9f86929cee1a649bfa18a3c7226f6d17d71d5c80dc5a020ce5"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-output-boundary-verified.txt",
+      "sha256": "a77e14f6b4ef449c603ac09f554507e6bf878fcd34cfff41cb227cee40c6f322"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-source-types-corrected.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-source-types-first.txt",
+      "sha256": "ecb0fc18f9b71b8cc6d30ec505b157e1562db6eacd267bed6cbf5f4037df4b34"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-test-types-corrected.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-test-types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-test-types-first.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-tests-corrected.txt",
+      "sha256": "619f516d1c41228e02137bdc3a780ec2cb01bcedf416ddcbe4897d47468fdf8f"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-tests-final.txt",
+      "sha256": "12cb938d6e3085d8dab6f04582a7db05d641cd6245f9c36cdf468f1e13fffb8a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/session-ledger-mode-tests-first.txt",
+      "sha256": "193aecce2ae620f06b5c17fea4dcb6370c4d21fbf3f3950840eeffc5287f35eb"
+    }
+  ]
+}

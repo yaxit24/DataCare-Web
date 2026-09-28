@@ -1,0 +1,39 @@
+{
+ "form": "RP_BILL_PROFIT",
+ "tables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "PRODUCT_MAST",
+  "RATE_MAST",
+  "SL_DETL",
+  "SL_PR_DETL",
+  "TABLE_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BOOK_DATA",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "PRODUCT_MAST",
+  "RATE_MAST",
+  "SL_DETL",
+  "SL_PR_DETL",
+  "TABLE_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 5,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 6122
+}

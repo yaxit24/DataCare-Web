@@ -1,9 +1,11 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { post, ApiError } from '../lib/api';
 import { LookupPicker } from './LookupPicker';
 import { PartyBalance } from './PartyBalance';
 import { RateTicker } from './RateTicker';
+import { useGridKeyboard } from './GridKeyboard';
 
 interface MLine {
   partyAc: string;
@@ -24,6 +26,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [mode, setMode] = useState('cash');
   const [bankAc, setBankAc] = useState('');
   const [chqNo, setChqNo] = useState('');
+  const [chqPrintName, setChqPrintName] = useState('');
   const [pan, setPan] = useState('');
   const [kasar, setKasar] = useState('');
   const [empCode, setEmpCode] = useState('');
@@ -32,6 +35,19 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [upiId, setUpiId] = useState('');
   const [multi, setMulti] = useState(false);
   const [mlines, setMlines] = useState<MLine[]>([mblank()]);
+  // P1-5: mounted once here so both /txn/payment and /txn/receipt honour the keyboard contract.
+  // Only the multi-line mode renders a grid; the single-party mode has no rows to navigate.
+  const handleGridKey = useGridKeyboard({
+    rowCount: mlines.length,
+    onAppendRow: () => setMlines((rows) => [...rows, mblank()]),
+    onRemoveRow: (row) => {
+      setMlines((rows) =>
+        rows.length === 1 ? [mblank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [res, setRes] = useState<any>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -129,10 +145,20 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             </div>
           )}
           {mode === 'cheque' && (
-            <div className="field">
-              <label>Cheque No</label>
-              <input value={chqNo} onChange={(e) => setChqNo(e.target.value)} />
-            </div>
+            <>
+              <div className="field">
+                <label>Cheque No</label>
+                <input value={chqNo} onChange={(e) => setChqNo(e.target.value)} />
+              </div>
+              <div className="field" style={{ minWidth: 260 }}>
+                <label>Chq Ac Name</label>
+                <input
+                  value={chqPrintName}
+                  onChange={(e) => setChqPrintName(e.target.value)}
+                  placeholder="name to print on cheque"
+                />
+              </div>
+            </>
           )}
           <div className="field">
             <label>Employee</label>
@@ -146,7 +172,11 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                   entity="accounts"
                   value={partyAc}
                   onChange={setPartyAc}
-                  onPick={(r) => setPartyName(String(r.name || ''))}
+                  onPick={(r) => {
+                    const name = String(r.name || '');
+                    setPartyName(name);
+                    if (!chqPrintName.trim()) setChqPrintName(name);
+                  }}
                 />
               </div>
               <div className="field">
@@ -202,7 +232,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
 
         {multi && (
           <div style={{ overflow: 'auto', marginTop: 8 }}>
-            <table className="grid">
+            <table className="grid" onKeyDown={handleGridKey}>
               <thead>
                 <tr>
                   <th>Party</th>
@@ -317,6 +347,14 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             >
               View {title} Voucher
             </button>
+            {mode === 'cheque' && (
+              <Link
+                className="ghost"
+                href={`/txn/cheque-print?payee=${encodeURIComponent((chqPrintName || partyName).trim())}&amount=${encodeURIComponent(String(amount || res.total || ''))}&chqNo=${encodeURIComponent(chqNo.trim())}&acPayee=true`}
+              >
+                Cheque Print
+              </Link>
+            )}
           </div>
         </div>
       )}

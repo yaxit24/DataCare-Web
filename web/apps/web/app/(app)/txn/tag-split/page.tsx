@@ -4,6 +4,9 @@ import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { ParityContainmentNotice } from '../../../../components/ParityContainmentNotice';
+import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /**
  * Tag Split (TR_TAG_SPLIT) — split one parent stock tag into several child tags. POSTs to
@@ -52,12 +55,26 @@ const blankChild = (): Child => ({
 const N = (v: string): number => Number(v || 0);
 const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
 const childFine = (c: Child): number => r3((N(c.netWt) * N(c.touch)) / 100); // net·touch/100
+const containment = parityContainmentRule('tag-split');
 
 export default function TagSplitPage() {
   const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [parent, setParent] = useState<Parent>(blankParent());
   const [children, setChildren] = useState<Child[]>([blankChild(), blankChild()]);
+  // P1-5: desktop grids are keyboard-first — arrows move, Enter advances and appends at the end,
+  // Ctrl/Cmd+D removes a row (TR_SALE.cs:12250-12320).
+  const handleChildGridKey = useGridKeyboard({
+    rowCount: children.length,
+    onAppendRow: () => setChildren((current) => [...current, blankChild()]),
+    onRemoveRow: (row) => {
+      setChildren((current) =>
+        current.length === 1 ? [blankChild()] : current.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [res, setRes] = useState<{ vchNo: number; children: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -73,6 +90,7 @@ export default function TagSplitPage() {
   const balanced = Math.abs(remaining) <= 0.01;
   const validChildren = children.filter((c) => c.tagNo && c.itCode);
   const canSubmit =
+    !containment.blocked &&
     !busy &&
     !!parent.tagNo &&
     !!parent.itCode &&
@@ -84,6 +102,10 @@ export default function TagSplitPage() {
     e.preventDefault();
     setErr('');
     setRes(null);
+    if (containment.blocked) {
+      setErr(parityContainmentMessage('tag-split'));
+      return;
+    }
     setBusy(true);
     try {
       const body = {
@@ -123,6 +145,7 @@ export default function TagSplitPage() {
   return (
     <div>
       <h1>Tag Split</h1>
+      <ParityContainmentNotice operation="tag-split" />
       <p className="muted">
         Split one stock tag into several child tags. The parent posts a stock-out movement
         (MAIN_STOCK, VCH_TYPE &lsquo;TGSPL&rsquo;) and each child a stock-in — no money ledger.
@@ -222,7 +245,7 @@ export default function TagSplitPage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Child Tags</h2>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleChildGridKey}>
             <thead>
               <tr>
                 <th>Tag</th>

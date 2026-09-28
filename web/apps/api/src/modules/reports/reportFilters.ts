@@ -85,8 +85,11 @@ export type ReportFilterKey = (typeof REPORT_FILTER_KEYS)[number];
  */
 /** The four dimensions that live on a report's own voucher table rather than on a joined master. */
 export type DataFilterColumn = 'AC_CODE' | 'LC_CODE' | 'CO_BOOK' | 'EMP_CODE';
+/** The three dimensions exposed by the desktop item-master controls. */
+export type ItemFilterColumn = 'GR_CODE' | 'PR_CODE' | 'IT_TYPE';
 
 const ALL_DATA_COLUMNS: readonly DataFilterColumn[] = ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'];
+const ALL_ITEM_COLUMNS: readonly ItemFilterColumn[] = ['GR_CODE', 'PR_CODE', 'IT_TYPE'];
 
 export interface FilterBinding {
   /**
@@ -102,10 +105,12 @@ export interface FilterBinding {
    * which is correct only for tables that really have all four.
    */
   dataColumns?: readonly DataFilterColumn[];
-  /** Alias of `AC_MAST` (area, city, state). */
+  /** Alias of `AC_MAST` (area, city, state unless partyState is false). */
   party?: string;
   /** Alias of `ITEM_MAST` (group, product, item type). */
   item?: string;
+  /** Item-master dimensions present in this desktop formula. Defaults to all three. */
+  itemColumns?: readonly ItemFilterColumn[];
   /** Alias of `AD_MEMB` where the report filters scheme members instead of accounts. */
   member?: string;
   /**
@@ -118,6 +123,8 @@ export interface FilterBinding {
    * `AC_ANGDIYA` here — the same control, a different dimension.
    */
   grCodeDataColumn?: string;
+  /** False when the desktop formula uses party city/area but has no state predicate. Defaults to true. */
+  partyState?: boolean;
   /** Alias of `SL_ORD_DATA` (or any table carrying `AC_NAME`) for the customer-name filter. */
   custNameAlias?: string;
 }
@@ -139,6 +146,7 @@ export function unsupportedFilters(f: ReportFilters, b: FilterBinding): ReportFi
     if (val(f[key]) && !ok) out.push(key);
   };
   const dataCols = new Set(b.dataColumns ?? ALL_DATA_COLUMNS);
+  const itemCols = new Set(b.itemColumns ?? ALL_ITEM_COLUMNS);
   const hasData = (c: DataFilterColumn) => Boolean(b.data) && dataCols.has(c);
   // The party filter may target a different column (schemes use MEMB_CODE), which is always considered
   // present when the binding names it explicitly.
@@ -148,10 +156,10 @@ export function unsupportedFilters(f: ReportFilters, b: FilterBinding): ReportFi
   need('empCode', hasData('EMP_CODE'));
   need('area', Boolean(b.party || b.member));
   need('city', Boolean(b.party || b.member));
-  need('state', Boolean(b.party));
-  need('grCode', Boolean(b.item || b.grCodeDataColumn));
-  need('prCode', Boolean(b.item));
-  need('itType', Boolean(b.item));
+  need('state', Boolean(b.party) && b.partyState !== false);
+  need('grCode', Boolean((b.item && itemCols.has('GR_CODE')) || b.grCodeDataColumn));
+  need('prCode', Boolean(b.item && itemCols.has('PR_CODE')));
+  need('itType', Boolean(b.item && itemCols.has('IT_TYPE')));
   need('custName', Boolean(b.custNameAlias));
   return out;
 }
@@ -186,20 +194,21 @@ export function filterWhere(f: ReportFilters, b: FilterBinding, params: unknown[
     if (val(f.area)) push(`${geo}."AC_AREA"`, val(f.area));
     if (val(f.city)) push(`${geo}."AC_CITY"`, val(f.city));
   }
-  if (b.party && val(f.state)) push(`${b.party}."AC_STATE"`, val(f.state));
+  if (b.party && b.partyState !== false && val(f.state)) push(`${b.party}."AC_STATE"`, val(f.state));
   if (val(f.grCode)) {
     // The rate-cut family binds this control to AC_ANGDIYA on the data table instead of the item group.
     if (b.grCodeDataColumn && b.data) {
       push(`${b.data}."${b.grCodeDataColumn}"`, val(f.grCode));
-    } else if (b.item) {
+    } else if (b.item && new Set(b.itemColumns ?? ALL_ITEM_COLUMNS).has('GR_CODE')) {
       push(`${b.item}."GR_CODE"`, val(f.grCode));
     }
   }
   if (b.item) {
+    const itemCols = new Set(b.itemColumns ?? ALL_ITEM_COLUMNS);
     // `tItCode` drives PR_CODE — the product code, despite the control's name.
-    if (val(f.prCode)) push(`${b.item}."PR_CODE"`, val(f.prCode));
+    if (val(f.prCode) && itemCols.has('PR_CODE')) push(`${b.item}."PR_CODE"`, val(f.prCode));
     // IT_TYPE holds a single character; the desktop stores Strings.Mid(cboItemTyp.Text, 1, 1).
-    if (val(f.itType)) push(`${b.item}."IT_TYPE"`, val(f.itType).slice(0, 1));
+    if (val(f.itType) && itemCols.has('IT_TYPE')) push(`${b.item}."IT_TYPE"`, val(f.itType).slice(0, 1));
   }
   if (b.custNameAlias && val(f.custName)) {
     push(`${b.custNameAlias}."AC_NAME"`, val(f.custName));
@@ -264,6 +273,23 @@ export class ReportFilterError extends Error {
  *    `EMP_CODE`, `RATE_MAST` has no `AC_CODE`.
  */
 export const REPORT_FILTER_BINDINGS: Record<string, FilterBinding> = {
+  'last-visit': { data: 'a', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'a' },
+  'address-print': { data: 'a', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'a' },
+  'entry-check': { data: 'a', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'c' },
+  'user-report': { data: 'v', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'ac' },
+  'dhiran-report': { data: 'i', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'm' },
+  'loan-report': { data: 'i', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'm' },
+  'approval-report': { data: 'a', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', item: 'i' },
+  'vp-report': { data: 'r', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', grCodeDataColumn: 'AC_ANGDIYA' },
+  'bullion-report': { data: 'b', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', item: 'i' },
+  'karigar-report': { data: 'd', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'm', item: 'i' },
+  'repair-report': { data: 'd', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'], party: 'm', item: 'i' },
+  'branch-inout': { item: 'b' },
+  'other-item-report': { data: 'd', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'a', partyState: false, item: 'i' },
+  'design-move': { item: 'c' },
+  'old-stock': { data: 'a', dataColumns: ['LC_CODE'], item: 'c', itemColumns: ['IT_TYPE'] },
+  'tour-report': { item: 'g', itemColumns: ['GR_CODE', 'PR_CODE'] },
+  'tour-tag': { item: 'g', itemColumns: ['GR_CODE', 'PR_CODE'] },
   // FROM "BAR_DETL" a … LEFT JOIN "ITEM_MAST" b — the tag estimate's own aliases.
   'tag-estimate': { data: 'a', item: 'b' },
   // FROM "SL_DETL_RTN" r LEFT JOIN "AC_MAST" m — both real outer joins.

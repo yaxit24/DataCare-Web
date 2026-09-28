@@ -1,0 +1,625 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report Name="" FileName="D:\a\datacare-rpt-extract\datacare-rpt-extract\reports\QrPrint10.rpt" HasSavedData="False">
+  <Embedinfo />
+  <Summaryinfo KeywordsinReport="" ReportAuthor="" ReportComments="" ReportSubject="" ReportTitle="" />
+  <ReportOptions EnableSaveDataWithReport="False" EnableSavePreviewPicture="False" EnableSaveSummariesWithReport="True" EnableUseDummyData="False" initialDataContext="" initialReportPartName="" />
+  <PrintOptions PageContentHeight="9596" PageContentWidth="6435" PaperOrientation="Portrait" PaperSize="PaperA4" PaperSource="Manual" PrinterDuplex="Default" PrinterName="">
+    <PageMargins bottomMargin="6768" leftMargin="3168" rightMargin="2304" topMargin="475" />
+    <PageMarginConditionFormulas />
+  </PrintOptions>
+  <SubReports>
+    <Report Name="SubTagPrint.rpt">
+      <Database>
+        <TableLinks />
+        <Tables>
+          <Table Alias="BAR_IDTL" ClassName="CrystalReports.Table" Name="BAR_IDTL">
+            <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+            <Fields>
+              <Field Description="" FormulaForm="{BAR_IDTL.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="BAR_IDTL.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{BAR_IDTL.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="BAR_IDTL.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{BAR_IDTL.CO_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="20" LongName="BAR_IDTL.CO_YEAR" Name="CO_YEAR" ShortName="CO_YEAR" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{BAR_IDTL.CO_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.CO_BOOK" Name="CO_BOOK" ShortName="CO_BOOK" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{BAR_IDTL.VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="BAR_IDTL.VCH_NO" Name="VCH_NO" ShortName="VCH_NO" Type="crFieldValueTypeStringField" UseCount="2" />
+              <Field Description="" FormulaForm="{BAR_IDTL.SR_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.SR_NO" Name="SR_NO" ShortName="SR_NO" Type="crFieldValueTypeInt32sField" UseCount="2" />
+              <Field Description="" FormulaForm="{BAR_IDTL.ISR_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.ISR_NO" Name="ISR_NO" ShortName="ISR_NO" Type="crFieldValueTypeInt32sField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.VCH_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.VCH_DATE" Name="VCH_DATE" ShortName="VCH_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.VCH_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="BAR_IDTL.VCH_TYPE" Name="VCH_TYPE" ShortName="VCH_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.INOUT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.INOUT_TYPE" Name="INOUT_TYPE" ShortName="INOUT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.ENTRY_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.ENTRY_TYPE" Name="ENTRY_TYPE" ShortName="ENTRY_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.BOOK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="BAR_IDTL.BOOK_NAME" Name="BOOK_NAME" ShortName="BOOK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="BAR_IDTL.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.TAG_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="BAR_IDTL.TAG_NO" Name="TAG_NO" ShortName="TAG_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.VCH_SRNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.VCH_SRNO" Name="VCH_SRNO" ShortName="VCH_SRNO" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="BAR_IDTL.IT_CODE" Name="IT_CODE" ShortName="IT_CODE" Type="crFieldValueTypeStringField" UseCount="1" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.IT_TYPE" Name="IT_TYPE" ShortName="IT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.DM_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="BAR_IDTL.DM_CODE" Name="DM_CODE" ShortName="DM_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.DM_SIZE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="BAR_IDTL.DM_SIZE" Name="DM_SIZE" ShortName="DM_SIZE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.DM_SFNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="BAR_IDTL.DM_SFNO" Name="DM_SFNO" ShortName="DM_SFNO" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.DM_LEB}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="BAR_IDTL.DM_LEB" Name="DM_LEB" ShortName="DM_LEB" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_PCS}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.IT_PCS" Name="IT_PCS" ShortName="IT_PCS" Type="crFieldValueTypeInt32sField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_PCS_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_PCS_WT" Name="IT_PCS_WT" ShortName="IT_PCS_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_WT" Name="KR_WT" ShortName="KR_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_LESS_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_LESS_PRC" Name="KR_LESS_PRC" ShortName="KR_LESS_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_GWT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_GWT" Name="IT_GWT" ShortName="IT_GWT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_CON_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_CON_PRC" Name="IT_CON_PRC" ShortName="IT_CON_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_CON_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_CON_WT" Name="IT_CON_WT" ShortName="IT_CON_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_RATE_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="BAR_IDTL.IT_RATE_TYPE" Name="IT_RATE_TYPE" ShortName="IT_RATE_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_RATE" Name="IT_RATE" ShortName="IT_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_AMT" Name="IT_AMT" ShortName="IT_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_LBR_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_LBR_RATE" Name="IT_LBR_RATE" ShortName="IT_LBR_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_LBR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_LBR_AMT" Name="IT_LBR_AMT" ShortName="IT_LBR_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.IT_NET_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.IT_NET_AMT" Name="IT_NET_AMT" ShortName="IT_NET_AMT" Type="crFieldValueTypeNumberField" UseCount="1" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_CON_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_CON_PRC" Name="KR_CON_PRC" ShortName="KR_CON_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_CON_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_CON_WT" Name="KR_CON_WT" ShortName="KR_CON_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_RATE" Name="KR_RATE" ShortName="KR_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_AMT" Name="KR_AMT" ShortName="KR_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_LBR_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_LBR_RATE" Name="KR_LBR_RATE" ShortName="KR_LBR_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_LBR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_LBR_AMT" Name="KR_LBR_AMT" ShortName="KR_LBR_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.KR_NET_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="BAR_IDTL.KR_NET_AMT" Name="KR_NET_AMT" ShortName="KR_NET_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+              <Field Description="" FormulaForm="{BAR_IDTL.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="BAR_IDTL.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+            </Fields>
+          </Table>
+        </Tables>
+      </Database>
+      <DataDefinition>
+        <GroupSelectionFormula />
+        <RecordSelectionFormula> (   (   (   (   (  {BAR_IDTL.CO_CODE} = {?Pm-TAG_PRINT_DATA.CO_CODE}  AND  {BAR_IDTL.LC_CODE} = {?Pm-TAG_PRINT_DATA.LC_CODE}  )   AND  {BAR_IDTL.CO_YEAR} = {?Pm-TAG_PRINT_DATA.CO_YEAR}  )   AND  {BAR_IDTL.CO_BOOK} = {?Pm-TAG_PRINT_DATA.CO_BOOK}  )   AND  {BAR_IDTL.VCH_NO} = {?Pm-TAG_PRINT_DATA.VCH_NO}  )   AND  {BAR_IDTL.SR_NO} = {?Pm-TAG_PRINT_DATA.SR_NO}  )  </RecordSelectionFormula>
+        <Groups />
+        <SortFields />
+        <FormulaFieldDefinitions>
+          <FormulaFieldDefinition FormulaName="{@OthAmt}" Kind="FormulaField" Name="OthAmt" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">{BAR_IDTL.IT_AMT}
+</FormulaFieldDefinition>
+          <FormulaFieldDefinition FormulaName="{@OtherDetl}" Kind="FormulaField" Name="OtherDetl" NumberOfBytes="280" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{BAR_IDTL.IT_CODE} &amp; " / " &amp; totext({BAR_IDTL.IT_NET_AMT},0)
+</FormulaFieldDefinition>
+        </FormulaFieldDefinitions>
+        <GroupNameFieldDefinitions />
+        <ParameterFieldDefinitions>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-TAG_PRINT_DATA.CO_CODE}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-TAG_PRINT_DATA.CO_CODE" NumberOfBytes="510" ParameterFieldName="Pm-TAG_PRINT_DATA.CO_CODE" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Pm-TAG_PRINT_DATA.CO_CODE" ReportName="SubTagPrint.rpt" ValueType="StringField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-TAG_PRINT_DATA.LC_CODE}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-TAG_PRINT_DATA.LC_CODE" NumberOfBytes="510" ParameterFieldName="Pm-TAG_PRINT_DATA.LC_CODE" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Pm-TAG_PRINT_DATA.LC_CODE" ReportName="SubTagPrint.rpt" ValueType="StringField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-TAG_PRINT_DATA.CO_YEAR}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-TAG_PRINT_DATA.CO_YEAR" NumberOfBytes="510" ParameterFieldName="Pm-TAG_PRINT_DATA.CO_YEAR" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Pm-TAG_PRINT_DATA.CO_YEAR" ReportName="SubTagPrint.rpt" ValueType="StringField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-TAG_PRINT_DATA.CO_BOOK}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-TAG_PRINT_DATA.CO_BOOK" NumberOfBytes="510" ParameterFieldName="Pm-TAG_PRINT_DATA.CO_BOOK" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Pm-TAG_PRINT_DATA.CO_BOOK" ReportName="SubTagPrint.rpt" ValueType="StringField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-TAG_PRINT_DATA.VCH_NO}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-TAG_PRINT_DATA.VCH_NO" NumberOfBytes="510" ParameterFieldName="Pm-TAG_PRINT_DATA.VCH_NO" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Pm-TAG_PRINT_DATA.VCH_NO" ReportName="SubTagPrint.rpt" ValueType="StringField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+          <ParameterFieldDefinition AllowCustomCurrentValues="True" EditMask="" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Pm-TAG_PRINT_DATA.SR_NO}" HasCurrentValue="False" IsOptionalPrompt="False" Kind="ParameterField" Name="Pm-TAG_PRINT_DATA.SR_NO" NumberOfBytes="8" ParameterFieldName="Pm-TAG_PRINT_DATA.SR_NO" ParameterFieldUsage="InUse, DataFetching" ParameterType="ReportParameter" ParameterValueKind="NumberParameter" PromptText="Pm-TAG_PRINT_DATA.SR_NO" ReportName="SubTagPrint.rpt" ValueType="NumberField">
+            <ParameterDefaultValues />
+            <ParameterInitialValues />
+            <ParameterCurrentValues />
+          </ParameterFieldDefinition>
+        </ParameterFieldDefinitions>
+        <RunningTotalFieldDefinitions />
+        <SQLExpressionFields />
+        <SummaryFields />
+      </DataDefinition>
+      <CustomFunctions />
+      <SubReportLinks>
+        <SubReportLink LinkedParameterName="{?Pm-TAG_PRINT_DATA.CO_CODE}" MainReportFieldName="{TAG_PRINT_DATA.CO_CODE}" SubreportFieldName="{BAR_IDTL.CO_CODE}" />
+        <SubReportLink LinkedParameterName="{?Pm-TAG_PRINT_DATA.LC_CODE}" MainReportFieldName="{TAG_PRINT_DATA.LC_CODE}" SubreportFieldName="{BAR_IDTL.LC_CODE}" />
+        <SubReportLink LinkedParameterName="{?Pm-TAG_PRINT_DATA.CO_YEAR}" MainReportFieldName="{TAG_PRINT_DATA.CO_YEAR}" SubreportFieldName="{BAR_IDTL.CO_YEAR}" />
+        <SubReportLink LinkedParameterName="{?Pm-TAG_PRINT_DATA.CO_BOOK}" MainReportFieldName="{TAG_PRINT_DATA.CO_BOOK}" SubreportFieldName="{BAR_IDTL.CO_BOOK}" />
+        <SubReportLink LinkedParameterName="{?Pm-TAG_PRINT_DATA.VCH_NO}" MainReportFieldName="{TAG_PRINT_DATA.VCH_NO}" SubreportFieldName="{BAR_IDTL.VCH_NO}" />
+        <SubReportLink LinkedParameterName="{?Pm-TAG_PRINT_DATA.SR_NO}" MainReportFieldName="{TAG_PRINT_DATA.SR_NO}" SubreportFieldName="{BAR_IDTL.SR_NO}" />
+      </SubReportLinks>
+      <ReportDefinition>
+        <Areas>
+          <Area Kind="ReportHeader" Name="Area1">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="True" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="220" Kind="ReportHeader" Name="Section1">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+              <Section Height="920" Kind="ReportHeader" Name="Section2">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="Detail" Name="Area2">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="172" Kind="Detail" Name="Section3">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects>
+                  <FieldObject Name="Field1" Kind="FieldObject" Top="0" Left="0" Width="720" Height="150" DataSource="{@OtherDetl}">
+                    <Color Name="Black" A="255" R="0" G="0" B="0" />
+                    <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="10" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="6" SizeinPoints="6" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                    <FontColorConditionFormulas />
+                    <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                      <BorderConditionFormulas />
+                      <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                      <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                    </Border>
+                    <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                    <ObjectFormatConditionFormulas />
+                  </FieldObject>
+                </ReportObjects>
+              </Section>
+            </Sections>
+          </Area>
+          <Area Kind="ReportFooter" Name="Area3">
+            <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+            <Sections>
+              <Section Height="350" Kind="ReportFooter" Name="Section4">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+              <Section Height="690" Kind="ReportFooter" Name="Section5">
+                <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+                  <SectionAreaConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                </SectionFormat>
+                <ReportObjects />
+              </Section>
+            </Sections>
+          </Area>
+        </Areas>
+      </ReportDefinition>
+    </Report>
+  </SubReports>
+  <Database>
+    <TableLinks>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{TAG_PRINT_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{TAG_PRINT_DATA.IT_CODE}" Kind="DatabaseField" Name="IT_CODE" NumberOfBytes="14" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{ITEM_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{ITEM_MAST.IT_CODE}" Kind="DatabaseField" Name="IT_CODE" NumberOfBytes="12" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{TAG_PRINT_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{CO_MAST.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+        </DestinationFields>
+      </TableLink>
+      <TableLink JoinType="LeftOuter">
+        <SourceFields>
+          <Field FormulaName="{TAG_PRINT_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{TAG_PRINT_DATA.LC_CODE}" Kind="DatabaseField" Name="LC_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{TAG_PRINT_DATA.TAG_NO}" Kind="DatabaseField" Name="TAG_NO" NumberOfBytes="32" ValueType="StringField" />
+          <Field FormulaName="{TAG_PRINT_DATA.VCH_SRNO}" Kind="DatabaseField" Name="VCH_SRNO" NumberOfBytes="8" ValueType="NumberField" />
+        </SourceFields>
+        <DestinationFields>
+          <Field FormulaName="{IMAGE_DATA.CO_CODE}" Kind="DatabaseField" Name="CO_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{IMAGE_DATA.LC_CODE}" Kind="DatabaseField" Name="LC_CODE" NumberOfBytes="6" ValueType="StringField" />
+          <Field FormulaName="{IMAGE_DATA.TAG_NO}" Kind="DatabaseField" Name="TAG_NO" NumberOfBytes="42" ValueType="StringField" />
+          <Field FormulaName="{IMAGE_DATA.VCH_SRNO}" Kind="DatabaseField" Name="VCH_SRNO" NumberOfBytes="8" ValueType="NumberField" />
+        </DestinationFields>
+      </TableLink>
+    </TableLinks>
+    <Tables>
+      <Table Alias="TAG_PRINT_DATA" ClassName="CrystalReports.Table" Name="TAG_PRINT_DATA">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="TAG_PRINT_DATA.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="TAG_PRINT_DATA.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.CO_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="20" LongName="TAG_PRINT_DATA.CO_YEAR" Name="CO_YEAR" ShortName="CO_YEAR" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.CO_BOOK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.CO_BOOK" Name="CO_BOOK" ShortName="CO_BOOK" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="TAG_PRINT_DATA.VCH_NO" Name="VCH_NO" ShortName="VCH_NO" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.SR_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.SR_NO" Name="SR_NO" ShortName="SR_NO" Type="crFieldValueTypeInt32sField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.OLD_SRNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.OLD_SRNO" Name="OLD_SRNO" ShortName="OLD_SRNO" Type="crFieldValueTypeInt32sField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.VCH_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.VCH_DATE" Name="VCH_DATE" ShortName="VCH_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.STK_DATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.STK_DATE" Name="STK_DATE" ShortName="STK_DATE" Type="crFieldValueTypeDateField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.VCH_TIME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.VCH_TIME" Name="VCH_TIME" ShortName="VCH_TIME" Type="crFieldValueTypeDateTimeField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.VCH_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="TAG_PRINT_DATA.VCH_TYPE" Name="VCH_TYPE" ShortName="VCH_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.INOUT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.INOUT_TYPE" Name="INOUT_TYPE" ShortName="INOUT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ENTRY_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.ENTRY_TYPE" Name="ENTRY_TYPE" ShortName="ENTRY_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.BOOK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.BOOK_NAME" Name="BOOK_NAME" ShortName="BOOK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.AC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="18" LongName="TAG_PRINT_DATA.AC_CODE" Name="AC_CODE" ShortName="AC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.IT_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="14" LongName="TAG_PRINT_DATA.IT_CODE" Name="IT_CODE" ShortName="IT_CODE" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.TAG_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.TAG_NO" Name="TAG_NO" ShortName="TAG_NO" Type="crFieldValueTypeStringField" UseCount="3" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.LOT_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.LOT_NO" Name="LOT_NO" ShortName="LOT_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.DESIGN_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.DESIGN_NO" Name="DESIGN_NO" ShortName="DESIGN_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.TBL_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.TBL_CODE" Name="TBL_CODE" ShortName="TBL_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_SIZE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.ITM_SIZE" Name="ITM_SIZE" ShortName="ITM_SIZE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_PCS}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.ITM_PCS" Name="ITM_PCS" ShortName="ITM_PCS" Type="crFieldValueTypeInt32sField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.BAG_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.BAG_WT" Name="BAG_WT" ShortName="BAG_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_GWT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_GWT" Name="ITM_GWT" ShortName="ITM_GWT" Type="crFieldValueTypeNumberField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_OTH_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_OTH_WT" Name="ITM_OTH_WT" ShortName="ITM_OTH_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_NWT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_NWT" Name="ITM_NWT" ShortName="ITM_NWT" Type="crFieldValueTypeNumberField" UseCount="3" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_GHT_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_GHT_PRC" Name="ITM_GHT_PRC" ShortName="ITM_GHT_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_GHT_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_GHT_WT" Name="ITM_GHT_WT" ShortName="ITM_GHT_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_TOUCH}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_TOUCH" Name="ITM_TOUCH" ShortName="ITM_TOUCH" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_WEST_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_WEST_PRC" Name="ITM_WEST_PRC" ShortName="ITM_WEST_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_FINE" Name="ITM_FINE" ShortName="ITM_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.LBR_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.LBR_PRC" Name="LBR_PRC" ShortName="LBR_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.LBR_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.LBR_RATE" Name="LBR_RATE" ShortName="LBR_RATE" Type="crFieldValueTypeNumberField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.LBR_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.LBR_TYPE" Name="LBR_TYPE" ShortName="LBR_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.LBR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.LBR_AMT" Name="LBR_AMT" ShortName="LBR_AMT" Type="crFieldValueTypeNumberField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.OTH_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.OTH_AMT" Name="OTH_AMT" ShortName="OTH_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_RATE" Name="ITM_RATE" ShortName="ITM_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_AMT" Name="ITM_AMT" ShortName="ITM_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.TAG_COST}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.TAG_COST" Name="TAG_COST" ShortName="TAG_COST" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_MARGIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_MARGIN" Name="ITM_MARGIN" ShortName="ITM_MARGIN" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_MRP}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ITM_MRP" Name="ITM_MRP" ShortName="ITM_MRP" Type="crFieldValueTypeNumberField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ITM_REMARK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="TAG_PRINT_DATA.ITM_REMARK" Name="ITM_REMARK" ShortName="ITM_REMARK" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.SF_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.SF_NO" Name="SF_NO" ShortName="SF_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="TAG_PRINT_DATA.KR_NAME" Name="KR_NAME" ShortName="KR_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_OTH_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_OTH_WT" Name="KR_OTH_WT" ShortName="KR_OTH_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_NET_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_NET_WT" Name="KR_NET_WT" ShortName="KR_NET_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_GHT_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_GHT_PRC" Name="KR_GHT_PRC" ShortName="KR_GHT_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_GHT_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_GHT_WT" Name="KR_GHT_WT" ShortName="KR_GHT_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_TOUCH}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_TOUCH" Name="KR_TOUCH" ShortName="KR_TOUCH" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_WEST_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_WEST_PRC" Name="KR_WEST_PRC" ShortName="KR_WEST_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_FINE" Name="KR_FINE" ShortName="KR_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_LBR_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_LBR_RATE" Name="KR_LBR_RATE" ShortName="KR_LBR_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_LBR_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_LBR_AMT" Name="KR_LBR_AMT" ShortName="KR_LBR_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_OTH_AMT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_OTH_AMT" Name="KR_OTH_AMT" ShortName="KR_OTH_AMT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.KR_COST}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.KR_COST" Name="KR_COST" ShortName="KR_COST" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.TAG_SRNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.TAG_SRNO" Name="TAG_SRNO" ShortName="TAG_SRNO" Type="crFieldValueTypeInt32sField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.VCH_SRNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.VCH_SRNO" Name="VCH_SRNO" ShortName="VCH_SRNO" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.RATE_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.RATE_TYPE" Name="RATE_TYPE" ShortName="RATE_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.IT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.IT_TYPE" Name="IT_TYPE" ShortName="IT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.TAG_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.TAG_TYPE" Name="TAG_TYPE" ShortName="TAG_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.PR_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="TAG_PRINT_DATA.PR_CODE" Name="PR_CODE" ShortName="PR_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.APR_ISU}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.APR_ISU" Name="APR_ISU" ShortName="APR_ISU" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ORD_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="TAG_PRINT_DATA.ORD_NO" Name="ORD_NO" ShortName="ORD_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ORD_SRNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.ORD_SRNO" Name="ORD_SRNO" ShortName="ORD_SRNO" Type="crFieldValueTypeInt32sField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ORD_YRCD}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="20" LongName="TAG_PRINT_DATA.ORD_YRCD" Name="ORD_YRCD" ShortName="ORD_YRCD" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ORD_DBCD}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="TAG_PRINT_DATA.ORD_DBCD" Name="ORD_DBCD" ShortName="ORD_DBCD" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ORD_AC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="TAG_PRINT_DATA.ORD_AC" Name="ORD_AC" ShortName="ORD_AC" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.ADD_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="TAG_PRINT_DATA.ADD_USER" Name="ADD_USER" ShortName="ADD_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="TAG_PRINT_DATA.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{TAG_PRINT_DATA.HD_VCH_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="TAG_PRINT_DATA.HD_VCH_NO" Name="HD_VCH_NO" ShortName="HD_VCH_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="ITEM_MAST" ClassName="CrystalReports.Table" Name="ITEM_MAST">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{ITEM_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="ITEM_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.IT_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="ITEM_MAST.IT_CODE" Name="IT_CODE" ShortName="IT_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.IT_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="ITEM_MAST.IT_NAME" Name="IT_NAME" ShortName="IT_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.IT_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="ITEM_MAST.IT_TYPE" Name="IT_TYPE" ShortName="IT_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.TAG_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="ITEM_MAST.TAG_TYPE" Name="TAG_TYPE" ShortName="TAG_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.PR_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="ITEM_MAST.PR_CODE" Name="PR_CODE" ShortName="PR_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.GR_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.GR_CODE" Name="GR_CODE" ShortName="GR_CODE" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{ITEM_MAST.TRAD_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="ITEM_MAST.TRAD_TYPE" Name="TRAD_TYPE" ShortName="TRAD_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.UNIT_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="ITEM_MAST.UNIT_NAME" Name="UNIT_NAME" ShortName="UNIT_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.RATE_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="ITEM_MAST.RATE_TYPE" Name="RATE_TYPE" ShortName="RATE_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.HSN_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="ITEM_MAST.HSN_CODE" Name="HSN_CODE" ShortName="HSN_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.ITEM_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.ITEM_RATE" Name="ITEM_RATE" ShortName="ITEM_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.LBR_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.LBR_PRC" Name="LBR_PRC" ShortName="LBR_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.CON_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.CON_PRC" Name="CON_PRC" ShortName="CON_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.DISC_PRC}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.DISC_PRC" Name="DISC_PRC" ShortName="DISC_PRC" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.IT_TOUCH}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.IT_TOUCH" Name="IT_TOUCH" ShortName="IT_TOUCH" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.IT_WEST}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.IT_WEST" Name="IT_WEST" ShortName="IT_WEST" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.OTHER_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.OTHER_RATE" Name="OTHER_RATE" ShortName="OTHER_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.MIN_STK}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.MIN_STK" Name="MIN_STK" ShortName="MIN_STK" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="ITEM_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.AVG_TOUCH}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.AVG_TOUCH" Name="AVG_TOUCH" ShortName="AVG_TOUCH" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.AVG_FINE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.AVG_FINE" Name="AVG_FINE" ShortName="AVG_FINE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.AVG_NWT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.AVG_NWT" Name="AVG_NWT" ShortName="AVG_NWT" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.AC_ITEM}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="ITEM_MAST.AC_ITEM" Name="AC_ITEM" ShortName="AC_ITEM" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.STK_DISPLAY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="ITEM_MAST.STK_DISPLAY" Name="STK_DISPLAY" ShortName="STK_DISPLAY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.AVG_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.AVG_RATE" Name="AVG_RATE" ShortName="AVG_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.OTH_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.OTH_RATE" Name="OTH_RATE" ShortName="OTH_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.SAFE_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="ITEM_MAST.SAFE_NAME" Name="SAFE_NAME" ShortName="SAFE_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.DATA_TRFR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="ITEM_MAST.DATA_TRFR" Name="DATA_TRFR" ShortName="DATA_TRFR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.IT_LBR_RATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.IT_LBR_RATE" Name="IT_LBR_RATE" ShortName="IT_LBR_RATE" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{ITEM_MAST.IT_BAG_WT}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="ITEM_MAST.IT_BAG_WT" Name="IT_BAG_WT" ShortName="IT_BAG_WT" Type="crFieldValueTypeNumberField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="CO_MAST" ClassName="CrystalReports.Table" Name="CO_MAST">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{CO_MAST.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_NAME" Name="CO_NAME" ShortName="CO_NAME" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{CO_MAST.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_SNAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="CO_MAST.CO_SNAME" Name="CO_SNAME" ShortName="CO_SNAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD1}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD1" Name="CO_ADD1" ShortName="CO_ADD1" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD2" Name="CO_ADD2" ShortName="CO_ADD2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_ADD3}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_ADD3" Name="CO_ADD3" ShortName="CO_ADD3" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_COUNTRY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_COUNTRY" Name="CO_COUNTRY" ShortName="CO_COUNTRY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_STATE_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="CO_MAST.CO_STATE_CODE" Name="CO_STATE_CODE" ShortName="CO_STATE_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_STATE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_STATE" Name="CO_STATE" ShortName="CO_STATE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_CITY}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="52" LongName="CO_MAST.CO_CITY" Name="CO_CITY" ShortName="CO_CITY" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PIN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="CO_MAST.CO_PIN" Name="CO_PIN" ShortName="CO_PIN" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PHONE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_PHONE" Name="CO_PHONE" ShortName="CO_PHONE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PHONE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_PHONE2" Name="CO_PHONE2" ShortName="CO_PHONE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MOBILE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_MOBILE" Name="CO_MOBILE" ShortName="CO_MOBILE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MOBILE2}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_MOBILE2" Name="CO_MOBILE2" ShortName="CO_MOBILE2" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MAIL}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.CO_MAIL" Name="CO_MAIL" ShortName="CO_MAIL" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_JUD}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_JUD" Name="CO_JUD" ShortName="CO_JUD" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_LSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_LSTNO" Name="CO_LSTNO" ShortName="CO_LSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_CSTNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_CSTNO" Name="CO_CSTNO" ShortName="CO_CSTNO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_GST_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.CO_GST_NO" Name="CO_GST_NO" ShortName="CO_GST_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_PAN_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.CO_PAN_NO" Name="CO_PAN_NO" ShortName="CO_PAN_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.DHIRAN_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.DHIRAN_NO" Name="DHIRAN_NO" ShortName="DHIRAN_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_NAME}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="CO_MAST.BANK_NAME" Name="BANK_NAME" ShortName="BANK_NAME" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_AREA}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="82" LongName="CO_MAST.BANK_AREA" Name="BANK_AREA" ShortName="BANK_AREA" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_AC_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.BANK_AC_NO" Name="BANK_AC_NO" ShortName="BANK_AC_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.BANK_RTGS_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="62" LongName="CO_MAST.BANK_RTGS_NO" Name="BANK_RTGS_NO" ShortName="BANK_RTGS_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.CO_TYPE" Name="CO_TYPE" ShortName="CO_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.ALTER_YEAR}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.ALTER_YEAR" Name="ALTER_YEAR" ShortName="ALTER_YEAR" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.CO_MSG}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="202" LongName="CO_MAST.CO_MSG" Name="CO_MSG" ShortName="CO_MSG" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.REP_ADD_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.REP_ADD_TYPE" Name="REP_ADD_TYPE" ShortName="REP_ADD_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.MAIN_USER}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="32" LongName="CO_MAST.MAIN_USER" Name="MAIN_USER" ShortName="MAIN_USER" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.WORK_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.WORK_TYPE" Name="WORK_TYPE" ShortName="WORK_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{CO_MAST.METAL_TYPE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="CO_MAST.METAL_TYPE" Name="METAL_TYPE" ShortName="METAL_TYPE" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+      <Table Alias="IMAGE_DATA" ClassName="CrystalReports.Table" Name="IMAGE_DATA">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Next20" QE_DatabaseType="ODBC (RDO)" QE_LogonProperties="System.__ComObject" QE_ServerDescription="Next" QE_SQLDB="True" SSO_Enabled="False" UserName="sa" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{IMAGE_DATA.CO_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="IMAGE_DATA.CO_CODE" Name="CO_CODE" ShortName="CO_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.LC_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="6" LongName="IMAGE_DATA.LC_CODE" Name="LC_CODE" ShortName="LC_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.SR_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="IMAGE_DATA.SR_NO" Name="SR_NO" ShortName="SR_NO" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.TAG_NO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="IMAGE_DATA.TAG_NO" Name="TAG_NO" ShortName="TAG_NO" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.VCH_SRNO}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="IMAGE_DATA.VCH_SRNO" Name="VCH_SRNO" ShortName="VCH_SRNO" Type="crFieldValueTypeNumberField" UseCount="0" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.DESIGN}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="42" LongName="IMAGE_DATA.DESIGN" Name="DESIGN" ShortName="DESIGN" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.TAG_IMAGE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="-1" LongName="IMAGE_DATA.TAG_IMAGE" Name="TAG_IMAGE" ShortName="TAG_IMAGE" Type="crFieldValueTypeBlobField" UseCount="2" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.SCHM_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="IMAGE_DATA.SCHM_CODE" Name="SCHM_CODE" ShortName="SCHM_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+          <Field Description="" FormulaForm="{IMAGE_DATA.MEMB_CODE}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="12" LongName="IMAGE_DATA.MEMB_CODE" Name="MEMB_CODE" ShortName="MEMB_CODE" Type="crFieldValueTypeStringField" UseCount="0" />
+        </Fields>
+      </Table>
+    </Tables>
+  </Database>
+  <DataDefinition>
+    <GroupSelectionFormula />
+    <RecordSelectionFormula />
+    <Groups />
+    <SortFields>
+      <SortField Field="{TAG_PRINT_DATA.TAG_NO}" SortDirection="AscendingOrder" SortType="RecordSortField" />
+    </SortFields>
+    <FormulaFieldDefinitions>
+      <FormulaFieldDefinition FormulaName="{@ACName}" Kind="FormulaField" Name="ACName" NumberOfBytes="12" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{TAG_PRINT_DATA.KR_NAME}
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@ItemName}" Kind="FormulaField" Name="ItemName" NumberOfBytes="0" ValueType="UnknownField" Syntax="crFormulaSyntaxCrystal">{TAG_PRINT_DATA.DESIGN} </FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@ItmWt}" Kind="FormulaField" Name="ItmWt" NumberOfBytes="280" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">'G.'+totext({TAG_PRINT_DATA.ITM_GWT},3) 
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Labour}" Kind="FormulaField" Name="Labour" NumberOfBytes="178" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">if {TAG_PRINT_DATA.ITM_MRP} &lt;&gt;0 then
+    'MRP: ' &amp; totext({TAG_PRINT_DATA.ITM_MRP},'0')
+ELSE IF {TAG_PRINT_DATA.LBR_RATE} &lt;&gt; 0 THEN
+    'LP: ' &amp; totext({TAG_PRINT_DATA.LBR_RATE},'0')
+else IF {TAG_PRINT_DATA.LBR_AMT} &lt;&gt; 0 THEN
+    'LF: ' &amp; totext({TAG_PRINT_DATA.LBR_AMT},'0')    
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@MrpPrint}" Kind="FormulaField" Name="MrpPrint" NumberOfBytes="2" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">''
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@OtherAmt}" Kind="FormulaField" Name="OtherAmt" NumberOfBytes="280" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">'N.'+totext({TAG_PRINT_DATA.ITM_NWT},3)
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@Pcs}" Kind="FormulaField" Name="Pcs" NumberOfBytes="46" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">totext({TAG_PRINT_DATA.ITM_PCS},'0')
+</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@TagNo}" Kind="FormulaField" Name="TagNo" NumberOfBytes="36" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">'*' + {TAG_PRINT_DATA.TAG_NO} + '*'
+</FormulaFieldDefinition>
+    </FormulaFieldDefinitions>
+    <GroupNameFieldDefinitions />
+    <ParameterFieldDefinitions>
+      <ParameterFieldDefinition Name="Pm-TAG_PRINT_DATA.CO_CODE" IsLinkedToSubreport="True" ReportName="SubTagPrint.rpt" />
+      <ParameterFieldDefinition Name="Pm-TAG_PRINT_DATA.LC_CODE" IsLinkedToSubreport="True" ReportName="SubTagPrint.rpt" />
+      <ParameterFieldDefinition Name="Pm-TAG_PRINT_DATA.CO_YEAR" IsLinkedToSubreport="True" ReportName="SubTagPrint.rpt" />
+      <ParameterFieldDefinition Name="Pm-TAG_PRINT_DATA.CO_BOOK" IsLinkedToSubreport="True" ReportName="SubTagPrint.rpt" />
+      <ParameterFieldDefinition Name="Pm-TAG_PRINT_DATA.VCH_NO" IsLinkedToSubreport="True" ReportName="SubTagPrint.rpt" />
+      <ParameterFieldDefinition Name="Pm-TAG_PRINT_DATA.SR_NO" IsLinkedToSubreport="True" ReportName="SubTagPrint.rpt" />
+    </ParameterFieldDefinitions>
+    <RunningTotalFieldDefinitions />
+    <SQLExpressionFields />
+    <SummaryFields />
+  </DataDefinition>
+  <CustomFunctions />
+  <ReportDefinition>
+    <Areas>
+      <Area Kind="ReportHeader" Name="Area1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="True" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="1110" Kind="ReportHeader" Name="Section1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageHeader" Name="Area2">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="566" Kind="PageHeader" Name="Section2">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="Detail" Name="Area3">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="998" Kind="Detail" Name="Section3">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="True" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Field3" Kind="FieldObject" Top="0" Left="0" Width="0" Height="200" DataSource="{TAG_PRINT_DATA.IT_CODE}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Microsoft Sans Serif" GdiCharSet="1" GdiVerticalFont="False" Height="16" IsSystemFont="False" Italic="False" Name="Microsoft Sans Serif" OriginalFontName="Draft 12cpi" Size="10" SizeinPoints="10" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <SubreportObject Name="Subreport1" Kind="SubreportObject" Top="240" Left="2325" Width="795" Height="525" SubreportName="SubTagPrint.rpt" EnableOnDemand="False">
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="True" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </SubreportObject>
+              <FieldObject Name="Field4" Kind="FieldObject" Top="595" Left="55" Width="810" Height="160" DataSource="{@Labour}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="11" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="7" SizeinPoints="7" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas EnableSuppress="{TAG_PRINT_DATA.TAG_NO} = ''&#xD;&#xA;" />
+              </FieldObject>
+              <FieldObject Name="Field5" Kind="FieldObject" Top="25" Left="55" Width="960" Height="226" DataSource="{TAG_PRINT_DATA.TAG_NO}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="14" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field6" Kind="FieldObject" Top="240" Left="55" Width="787" Height="172" DataSource="{@ItmWt}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="13" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas EnableSuppress="{TAG_PRINT_DATA.ITM_NWT} = 0&#xD;&#xA;" />
+              </FieldObject>
+              <FieldObject Name="Field7" Kind="FieldObject" Top="240" Left="1800" Width="480" Height="172" DataSource="{@ACName}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="11" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="7" SizeinPoints="7" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <FieldObject Name="Field8" Kind="FieldObject" Top="440" Left="55" Width="800" Height="172" DataSource="{@OtherAmt}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="False" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="13" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Regular" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas EnableSuppress="{TAG_PRINT_DATA.ITM_NWT} = 0&#xD;&#xA;" />
+              </FieldObject>
+              <FieldObject Name="Field11" Kind="FieldObject" Top="25" Left="1560" Width="1650" Height="172" DataSource="{CO_MAST.CO_NAME}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="10" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="6.5" SizeinPoints="6.5" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas EnableSuppress="{TAG_PRINT_DATA.ITM_PCS} =0&#xD;&#xA;" />
+              </FieldObject>
+              <FieldObject Name="Field10" Kind="FieldObject" Top="595" Left="1800" Width="480" Height="172" DataSource="{ITEM_MAST.GR_CODE}">
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" GdiCharSet="1" GdiVerticalFont="False" Height="11" IsSystemFont="False" Italic="False" Name="Arial" OriginalFontName="Arial" Size="7" SizeinPoints="7" Strikeout="False" Style="Bold" SystemFontName="" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="LeftAlign" />
+                <ObjectFormatConditionFormulas />
+              </FieldObject>
+              <BlobFieldObject Name="Field2" Kind="BlobFieldObject" Top="45" Left="1055" Width="810" Height="720">
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </BlobFieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="ReportFooter" Name="Area4">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="False" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="1440" Kind="ReportFooter" Name="Section4">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <BlobFieldObject Name="Field1" Kind="BlobFieldObject" Top="120" Left="2520" Width="533" Height="480">
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="DefaultAlign" />
+                <ObjectFormatConditionFormulas />
+              </BlobFieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageFooter" Name="Area5">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="True" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="True" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="600" Kind="PageFooter" Name="Section5">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+    </Areas>
+  </ReportDefinition>
+</Report>

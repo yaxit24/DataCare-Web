@@ -1,0 +1,128 @@
+{
+ "report": "BarPrint10",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section1",
+     "kind": "ReportHeader",
+     "height": 220,
+     "objects": []
+    },
+    {
+     "name": "Section2",
+     "kind": "ReportHeader",
+     "height": 920,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "Detail",
+     "height": 172,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 0,
+       "top": 0,
+       "width": 720,
+       "height": 150,
+       "dataSource": "{@OtherDetl}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 350,
+     "objects": []
+    },
+    {
+     "name": "Section5",
+     "kind": "ReportFooter",
+     "height": 690,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "OthAmt",
+   "ref": "{@OthAmt}",
+   "type": "NumberField",
+   "text": "{BAR_IDTL.IT_AMT}"
+  },
+  {
+   "name": "OtherDetl",
+   "ref": "{@OtherDetl}",
+   "type": "StringField",
+   "text": "{BAR_IDTL.IT_CODE} & \" / \" & totext({BAR_IDTL.IT_AMT},0)"
+  },
+  {
+   "name": "ACName",
+   "ref": "{@ACName}",
+   "type": "StringField",
+   "text": "{TAG_PRINT_DATA.KR_NAME}"
+  },
+  {
+   "name": "ItemName",
+   "ref": "{@ItemName}",
+   "type": "UnknownField",
+   "text": "{TAG_PRINT_DATA.DESIGN}"
+  },
+  {
+   "name": "ItmWt",
+   "ref": "{@ItmWt}",
+   "type": "StringField",
+   "text": "'G.'+totext({TAG_PRINT_DATA.ITM_GWT},3)"
+  },
+  {
+   "name": "Labour",
+   "ref": "{@Labour}",
+   "type": "StringField",
+   "text": "if {TAG_PRINT_DATA.ITM_MRP} <>0 then 'MRP: ' & totext({TAG_PRINT_DATA.ITM_MRP},'0') ELSE IF {TAG_PRINT_DATA.LBR_RATE} <> 0 THEN 'LP: ' & totext({TAG_PRINT_DATA.LBR_RATE},'0') else IF {TAG_PRINT_DATA.L"
+  },
+  {
+   "name": "MrpPrint",
+   "ref": "{@MrpPrint}",
+   "type": "StringField",
+   "text": "''"
+  },
+  {
+   "name": "OtherAmt",
+   "ref": "{@OtherAmt}",
+   "type": "StringField",
+   "text": "'N.'+totext({TAG_PRINT_DATA.ITM_NWT},3)"
+  },
+  {
+   "name": "Pcs",
+   "ref": "{@Pcs}",
+   "type": "StringField",
+   "text": "totext({TAG_PRINT_DATA.ITM_PCS},'0')"
+  },
+  {
+   "name": "TagNo",
+   "ref": "{@TagNo}",
+   "type": "StringField",
+   "text": "'*' + {TAG_PRINT_DATA.TAG_NO} + '*'"
+  }
+ ],
+ "sectionCount": 5,
+ "objectCount": 1,
+ "formulaCount": 10
+}

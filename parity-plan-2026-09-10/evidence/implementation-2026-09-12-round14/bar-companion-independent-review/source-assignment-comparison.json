@@ -1,0 +1,450 @@
+{
+  "source": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+  "sourceSha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+  "tables": {
+    "barData": {
+      "assignments": [
+        {
+          "line": 13080,
+          "field": "CO_CODE",
+          "expression": "DC_Main.MCo_code"
+        },
+        {
+          "line": 13084,
+          "field": "LC_CODE",
+          "expression": "DC_Main.MLc_code"
+        },
+        {
+          "line": 13088,
+          "field": "CO_YEAR",
+          "expression": "DC_Main.MCo_year"
+        },
+        {
+          "line": 13092,
+          "field": "CO_BOOK",
+          "expression": "DC_Main.MCo_Book"
+        },
+        {
+          "line": 13096,
+          "field": "VCH_NO",
+          "expression": "tVchNo.Text"
+        },
+        {
+          "line": 13100,
+          "field": "VCH_DATE",
+          "expression": "mVchDate.Text"
+        },
+        {
+          "line": 13104,
+          "field": "STK_IT_CODE",
+          "expression": "\"\""
+        },
+        {
+          "line": 13108,
+          "field": "VCH_TIME",
+          "expression": "mVchDate.Text + \" \" + mTime.Text"
+        },
+        {
+          "line": 13112,
+          "field": "EMP_CODE",
+          "expression": "tEmpCode.Text"
+        },
+        {
+          "line": 13116,
+          "field": "VCH_DESC",
+          "expression": "tVchDesc.Text"
+        },
+        {
+          "line": 13120,
+          "field": "DATA_TRFR",
+          "expression": "\"N\""
+        },
+        {
+          "line": 13124,
+          "field": "MAIN_USER",
+          "expression": "MainUser"
+        }
+      ],
+      "orderedCount": 12,
+      "distinctCount": 12,
+      "matchesCompleteLiteralTargetKeySet": true
+    },
+    "barDetl": {
+      "assignments": [
+        {
+          "line": 13908,
+          "field": "CO_CODE",
+          "expression": "DC_Main.MCo_code"
+        },
+        {
+          "line": 13912,
+          "field": "LC_CODE",
+          "expression": "DC_Main.MLc_code"
+        },
+        {
+          "line": 13916,
+          "field": "CO_YEAR",
+          "expression": "DC_Main.MCo_year"
+        },
+        {
+          "line": 13920,
+          "field": "CO_BOOK",
+          "expression": "DC_Main.MCo_Book"
+        },
+        {
+          "line": 13924,
+          "field": "VCH_NO",
+          "expression": "tVchNo.Text"
+        },
+        {
+          "line": 13928,
+          "field": "VCH_DATE",
+          "expression": "mVchDate.Text"
+        },
+        {
+          "line": 13932,
+          "field": "STK_DATE",
+          "expression": "mVchDate.Text"
+        },
+        {
+          "line": 13936,
+          "field": "HD_VCH_NO",
+          "expression": "tHdVchNo.Text"
+        },
+        {
+          "line": 13940,
+          "field": "AC_CODE",
+          "expression": "tAcCode.Text"
+        },
+        {
+          "line": 13944,
+          "field": "VCH_TYPE",
+          "expression": "FormBookSname"
+        },
+        {
+          "line": 13948,
+          "field": "INOUT_TYPE",
+          "expression": "FormBookInOut"
+        },
+        {
+          "line": 13952,
+          "field": "ENTRY_TYPE",
+          "expression": "\"P\""
+        },
+        {
+          "line": 13956,
+          "field": "BOOK_NAME",
+          "expression": "FormMainBook"
+        },
+        {
+          "line": 13960,
+          "field": "SR_NO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 0])"
+        },
+        {
+          "line": 13964,
+          "field": "OLD_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 51])"
+        },
+        {
+          "line": 13968,
+          "field": "IT_CODE",
+          "expression": "val2[DC_Main.i, 1]"
+        },
+        {
+          "line": 13979,
+          "field": "TAG_NO",
+          "expression": "\"N\""
+        },
+        {
+          "line": 13983,
+          "field": "TAG_NO",
+          "expression": "val2[DC_Main.i, 2]"
+        },
+        {
+          "line": 13987,
+          "field": "TBL_CODE",
+          "expression": "val2[DC_Main.i, 4]"
+        },
+        {
+          "line": 13991,
+          "field": "DESIGN_NO",
+          "expression": "val2[DC_Main.i, 5]"
+        },
+        {
+          "line": 13995,
+          "field": "ITM_STYLE",
+          "expression": "val2[DC_Main.i, 6]"
+        },
+        {
+          "line": 13999,
+          "field": "ITM_SIZE",
+          "expression": "val2[DC_Main.i, 7]"
+        },
+        {
+          "line": 14003,
+          "field": "HM_ID",
+          "expression": "val2[DC_Main.i, 8]"
+        },
+        {
+          "line": 14007,
+          "field": "ITM_PCS",
+          "expression": "Conversion.Val(val2[DC_Main.i, 9])"
+        },
+        {
+          "line": 14011,
+          "field": "ITM_GWT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 10])"
+        },
+        {
+          "line": 14015,
+          "field": "ITM_OTH_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 11])"
+        },
+        {
+          "line": 14019,
+          "field": "ITM_NWT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 12])"
+        },
+        {
+          "line": 14023,
+          "field": "ITM_GHT_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 14])"
+        },
+        {
+          "line": 14027,
+          "field": "ITM_GHT_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 15])"
+        },
+        {
+          "line": 14031,
+          "field": "ITM_TOUCH",
+          "expression": "Conversion.Val(val2[DC_Main.i, 16])"
+        },
+        {
+          "line": 14035,
+          "field": "ITM_WEST_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 17])"
+        },
+        {
+          "line": 14039,
+          "field": "ITM_FINE",
+          "expression": "Conversion.Val(val2[DC_Main.i, 18])"
+        },
+        {
+          "line": 14043,
+          "field": "KR_GHT_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 15])"
+        },
+        {
+          "line": 14047,
+          "field": "KR_TOUCH",
+          "expression": "Conversion.Val(val2[DC_Main.i, 16])"
+        },
+        {
+          "line": 14051,
+          "field": "KR_WEST_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 17])"
+        },
+        {
+          "line": 14055,
+          "field": "KR_FINE",
+          "expression": "Conversion.Val(val2[DC_Main.i, 18])"
+        },
+        {
+          "line": 14059,
+          "field": "ITM_RATE",
+          "expression": "0"
+        },
+        {
+          "line": 14063,
+          "field": "ITM_AMT",
+          "expression": "0"
+        },
+        {
+          "line": 14067,
+          "field": "LBR_TYPE",
+          "expression": "val2[DC_Main.i, 22]"
+        },
+        {
+          "line": 14071,
+          "field": "LBR_CODE",
+          "expression": "val2[DC_Main.i, 29]"
+        },
+        {
+          "line": 14075,
+          "field": "LBR_PRC",
+          "expression": "Conversion.Val(val2[DC_Main.i, 30])"
+        },
+        {
+          "line": 14079,
+          "field": "LBR_RATE",
+          "expression": "Conversion.Val(val2[DC_Main.i, 31])"
+        },
+        {
+          "line": 14083,
+          "field": "LBR_AMT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 32])"
+        },
+        {
+          "line": 14087,
+          "field": "OTH_AMT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 33])"
+        },
+        {
+          "line": 14091,
+          "field": "KR_COST",
+          "expression": "Conversion.Val(val2[DC_Main.i, 34])"
+        },
+        {
+          "line": 14095,
+          "field": "TAG_COST",
+          "expression": "Conversion.Val(val2[DC_Main.i, 34])"
+        },
+        {
+          "line": 14099,
+          "field": "ITM_MRP",
+          "expression": "Conversion.Val(val2[DC_Main.i, 35])"
+        },
+        {
+          "line": 14103,
+          "field": "KR_NAME",
+          "expression": "val2[DC_Main.i, 39]"
+        },
+        {
+          "line": 14107,
+          "field": "RATE_TYPE",
+          "expression": "val2[DC_Main.i, 44]"
+        },
+        {
+          "line": 14111,
+          "field": "IT_TYPE",
+          "expression": "val2[DC_Main.i, 43]"
+        },
+        {
+          "line": 14115,
+          "field": "VCH_TIME",
+          "expression": "mVchDate.Text + \" \" + mTime.Text"
+        },
+        {
+          "line": 14119,
+          "field": "PR_CODE",
+          "expression": "val2[DC_Main.i, 52]"
+        },
+        {
+          "line": 14123,
+          "field": "TAG_TYPE",
+          "expression": "val2[DC_Main.i, 54]"
+        },
+        {
+          "line": 14127,
+          "field": "KR_LBR_RATE",
+          "expression": "0"
+        },
+        {
+          "line": 14131,
+          "field": "KR_LBR_AMT",
+          "expression": "0"
+        },
+        {
+          "line": 14135,
+          "field": "KR_OTH_AMT",
+          "expression": "0"
+        },
+        {
+          "line": 14139,
+          "field": "TAG_SRNO",
+          "expression": "0"
+        },
+        {
+          "line": 14154,
+          "field": "VCH_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 40])"
+        },
+        {
+          "line": 14158,
+          "field": "VCH_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 40])"
+        },
+        {
+          "line": 14162,
+          "field": "TAG_SRNO",
+          "expression": "Conversion.Val(val2[DC_Main.i, 56])"
+        },
+        {
+          "line": 14166,
+          "field": "APR_ISU",
+          "expression": "val2[DC_Main.i, 50]"
+        },
+        {
+          "line": 14170,
+          "field": "EMP_ISU",
+          "expression": "val2[DC_Main.i, 68]"
+        },
+        {
+          "line": 14174,
+          "field": "DESIGN_IMG_ID",
+          "expression": "val2[DC_Main.i, 69]"
+        },
+        {
+          "line": 14178,
+          "field": "HM_ID2",
+          "expression": "val2[DC_Main.i, 59]"
+        },
+        {
+          "line": 14182,
+          "field": "HM_ID3",
+          "expression": "val2[DC_Main.i, 60]"
+        },
+        {
+          "line": 14186,
+          "field": "HM_ID4",
+          "expression": "val2[DC_Main.i, 61]"
+        },
+        {
+          "line": 14190,
+          "field": "HM_ID_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 62])"
+        },
+        {
+          "line": 14194,
+          "field": "HM_ID2_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 63])"
+        },
+        {
+          "line": 14198,
+          "field": "HM_ID3_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 64])"
+        },
+        {
+          "line": 14202,
+          "field": "HM_ID4_WT",
+          "expression": "Conversion.Val(val2[DC_Main.i, 65])"
+        },
+        {
+          "line": 14213,
+          "field": "DATA_TYPE",
+          "expression": "\"A\""
+        },
+        {
+          "line": 14217,
+          "field": "DATA_TYPE",
+          "expression": "val2[DC_Main.i, 70]"
+        },
+        {
+          "line": 14221,
+          "field": "DATA_TRFR",
+          "expression": "\"N\""
+        },
+        {
+          "line": 14225,
+          "field": "MAIN_USER",
+          "expression": "MainUser"
+        }
+      ],
+      "orderedCount": 74,
+      "distinctCount": 70,
+      "matchesCompleteLiteralTargetKeySet": true
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "status": "staged-unexecuted",
+  "mainRepositoryEdits": false,
+  "executedTests": false,
+  "executedCompiler": false,
+  "databaseOrBrowserRun": false,
+  "declaredOwnedCases": {
+    "unit": 54,
+    "genericDB": 13
+  },
+  "independentSchedules": 26,
+  "peerFinancialHttpTest": "separate ownership/final pin pending",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "2bbd742b5d9db7cb6f119622f027cf66731217a40ea9a3faa41d9154c4609485",
+      "bytes": 7239
+    },
+    {
+      "path": "admission-service-extraction.patch",
+      "sha256": "7c8d6100de77ae455cc59d626c5c570ed6105b740b0a638cbab21460e58b974b",
+      "bytes": 10660
+    },
+    {
+      "path": "sales-order-put-route.patch",
+      "sha256": "1a5a6f88f90e17e2f8985e08f3aa14b1ad438c8617a983d064564c4566f168b0",
+      "bytes": 2421
+    },
+    {
+      "path": "extraction-comparison.json",
+      "sha256": "145b7d2f43fa0f0ef48814fe03d7691c517d4ba5338b2590a8922811d74cd5e8",
+      "bytes": 748
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8",
+      "bytes": 14128
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe",
+      "bytes": 5876
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "f309a2e2c5c58e080c91ba5b634dbc1c9d940b46361ea06a25d97497572ecd84",
+      "bytes": 86901
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "sha256": "a4169b9a5bfd4b8d86b7f2e70ba3a60e03a1292488d6752c88f3d312be54d91d",
+      "bytes": 284925
+    },
+    {
+      "path": "web/apps/api/test/sessionContextCommand.test.ts",
+      "sha256": "7293d6bf7d960fc6821714c693942067e88119d83cb8ce9bb15da25ac250913e",
+      "bytes": 16548
+    },
+    {
+      "path": "web/apps/api/test/sessionContextCommand.db.test.ts",
+      "sha256": "aace25ae72e70a4027a8e88c0146564d4dd3253d3a66dcf396ee805672bb3eb3",
+      "bytes": 17948
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionCommand.independent.json",
+      "sha256": "ed87f81e039273c6bd25c9a19184b7c964c7b48cbfd7a3bb39eb0c58032f4aa4",
+      "bytes": 14361
+    },
+    {
+      "path": "baseline/web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "ee079f09d0076f2339dd1307a3912c249624786566d216b1f17466af134b3acd",
+      "bytes": 5274
+    },
+    {
+      "path": "baseline/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "556d87d9eb73974f4a06eec64a0f6a6fe0096b90e59b14522176021ea10fc8d9",
+      "bytes": 84550
+    },
+    {
+      "path": "baseline/web/apps/api/src/routes/txn.ts",
+      "sha256": "5935fe23532df5248db5b03a7d6ab920375f1c30f9b19c23bf3aaf7016b3cc9c",
+      "bytes": 284080
+    }
+  ],
+  "externalReferences": [
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/inputs.json",
+      "sha256": "43c297255c2cdf5ddfc9e8b0fb9e295c82f6286a725a548f0eb91c5f57fe71d2"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/implementation-contract.md",
+      "sha256": "ef2e6acba21dca9b6696c3dbe6bac983db42587c56e70ec0a2169b7e8eaacbbe"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/session-command-independent.v1.json",
+      "sha256": "ed87f81e039273c6bd25c9a19184b7c964c7b48cbfd7a3bb39eb0c58032f4aa4"
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-review/independent-implementation-read-review.md",
+      "sha256": "3fabac25f7c1f2be4943a3b75f5759b4aa42c3d71a9fbf277009c48920f4c08a"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "kind": "staged-labour-fixture-correction",
+  "status": "frozen-unexecuted",
+  "capturedAtUtc": "2026-09-11T23:28:10.848782+00:00",
+  "reasons": [
+    "nine exact post-storage PCS text expectations",
+    "per-test client isolation for unchanged real login rate limiter",
+    "explicit malformed-header array type"
+  ],
+  "productChanges": false,
+  "newTestsAdded": 0,
+  "declaredNewTestsRemain": 57,
+  "integrationFiles": [
+    "web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+    "web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts",
+    "web/apps/api/test/saleReturnLabourReplay.test.ts"
+  ],
+  "originalOwnedStageInputsVerifiedUnchanged": true,
+  "references": [
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "sha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+      "bytes": 62711
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts",
+      "sha256": "7f1d08dbeb3930dc938a1e63fae0f97ceaae36727279ec0929a2078d794f0209",
+      "bytes": 16361
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/saleReturnLabourReplay.test.ts",
+      "sha256": "57d9c622fa47ee1778247a3527fcd15af7aced492b6d612cd55c52f39efed455",
+      "bytes": 8590
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/README.md",
+      "sha256": "4049575ddeec4cdd191a41e42f45e0f65097306d93e89c1396ac2fc35407120d",
+      "bytes": 4040
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/author-correction.py",
+      "sha256": "5b37d97c3282ced1ed5fffedc6bc747dc25082141b019f87869c343c5c426f42",
+      "bytes": 4179
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/fixture-diff-proof.json",
+      "sha256": "8ed3216f911e6e2beecb5ce2202b610182acb924801e34e4f55356e7fef23900",
+      "bytes": 2925
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api-correction/fixture-correction.patch",
+      "sha256": "ec33b29f5a9c4b6cdcbfc47c08adc6520b3a1b86eef8f4ae50bf07e3cc34a1fe",
+      "bytes": 4280
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/ready-manifest.json",
+      "sha256": "1f079021e6757104856a508093291a4534558851beda352c22d9bc62cf30c418",
+      "bytes": 13020
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/author-http-literals.py",
+      "sha256": "d357bf8230f3216fd7065dad43888950cca908da849f494e81e87ba66d975d68",
+      "bytes": 6529
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-api-focused.txt",
+      "sha256": "2fce082928add9a8ca62f8ac36f16a69e586e760930f1ee5ac47ffd9b3310df1",
+      "bytes": 27531
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-labour-complete-test-types.txt",
+      "sha256": "ce7ac494061f5a130711379379a834b9dc45b97a80dc82b09570221f6ebaae59",
+      "bytes": 782
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "bytes": 579807
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "bytes": 262459
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e",
+      "bytes": 11556
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec",
+      "bytes": 25202
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a",
+      "bytes": 33029
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "sha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+      "bytes": 62675
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts",
+      "sha256": "c1e60e77868af1ca9ad8e77316fb95333e7f25e89204171676b9be0affb40537",
+      "bytes": 16106
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/test/saleReturnLabourReplay.test.ts",
+      "sha256": "a5da84e7f4b88edc3db8b7dbedff0b629e7b0d746519cb40f27d10549437d711",
+      "bytes": 8590
+    }
+  ]
+}

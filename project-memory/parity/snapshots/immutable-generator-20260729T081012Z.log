@@ -1,0 +1,369 @@
+=== validation_audit.py ===
+form                   rules matched  top unmatched
+MS_MFG_MAST                9       1  Please Insert Transection Name First a; Please Insert BookSName First and Try.
+RP_TAG_IMAGE               9       1  Please Select Item Code or Product Nam; Please Check Len Connection...You Cant
+TR_AC_OPBL                 8       0  Plese Select Data Type A or B then Try; Please Select Data Type = A or Data Ty
+TR_TAG_OPBL               18      10  No LabCode Found Please Update Itm Sto; Duplicate Design No
+MS_ACCT                    8       2  Please Insert City Then Try....; Please Insert Mobile No Because This A
+MS_PRODUCT                14       8  Enter Table Name.; Enter Scheme Name.
+MS_USER                   10       4  Password Not Match; User Name Is Not Selected,Please Selec
+TR_SALE_ORD               16      10  Please Insert Rate In Rate Master...an; Please First Save Upi Entry... Because
+MS_DESIGN_BOOK             7       2  Please Save Voucher Befoure Exit...; Please Check NextImage Data ...
+TR_WH_SALE                15      10  Please Save Voucher First...Because Ap; Please Insert CrDays and Try......
+MS_ITEM                    6       2  You Cant Add Other Detail Column More ; Product Code Is Null Please Create Ite
+MS_UPDATE                  4       0  Field Is Update ok....Please Re open S; Old Field Is Update ok....Please Re op
+TR_FN_INOUT                8       4  Please Select Transfer Franchise And T; Please Save Voucher First Then Cancel.
+TR_SALE                   16      12  Please Insert Cr Days And Try...; This Function Not Working in Your Soft
+TR_SL_PR_ITEM             12       8  Please Select Tax Type A = Item Tax Or; Please Select Tax Reverse Type Y or N 
+TR_TOUR_SALE              14      10  This Tag Not In Employee Stock List Pl; You Have No item Stock....Please Tour 
+UT_EXPORT                  4       0  Please Insert CoType In Company Master; Process Are Complete....Please B Data 
+MS_AC_GROUP                5       2  Enter Group Code.; Enter Group Name.
+MS_AUTO_ITEM               4       1  Please Select Group First And Try ...; Please First Data Refresh Then Labour 
+MS_STYLE                  10       7  Enter Design First...; Enter Style Name First.
+
+Distinct validations 1843: rules 655, prompts 287, notices 901
+Business rules carrying desktop wording in web source: 435/655 (66.4%)
+exit=0
+=== calc_audit.py ===
+form                    calc computed  named  mapped
+TR_TAG_WT_DIFF            70       51     51      48
+TR_SALE_LBR               70       47     47      45
+TR_SL_PR_ITEM             70       45     43      38
+TR_TOUR_SALE              70       44     44      39
+TR_VP                     70       40     38      35
+TR_WH_SALE                70       39     39      36
+TR_SALE                   70       38     37      32
+TR_TAG_SPLIT              70       38     11      11
+TR_MFG_ORD_ISU            70       36     36      33
+TR_TAG_OPBL               70       36     35      31
+TR_BUL_SALE               70       35     35      34
+TR_SALE_HM                70       35     34      31
+TR_SALE_RTN               70       35     35      32
+TR_TOUR_ORD               70       35     34      31
+TR_SALE_ORD               70       34     33      30
+
+Computed grid cells 1327:
+  724 are SCREEN TOTALS — `mSG_TOT[0,n] = Val(mSG_TOT[0,n]) + Val(MSG[M,n])` mirrors the
+    main grid's columns (`mSG_TOT.Cols = MSG.Cols`) and accumulates them into row 0. These are
+    footer sums, not persisted-value formulas, so the web's bill totals cover them.
+  603 are per-line formulas — the real contract-review surface.
+Named 1250; resolved to a column 1073 (web writes 1041: 732 from a catalogued write table, 309 from a table the form's source references)
+Unresolved control names 77; named but unmapped to a column 177
+No single coverage % is published: writing a column does not prove the value was computed
+the same way. Formula equality needs a golden-vector test, tracked per form contract.
+exit=0
+=== ui_field_audit.py ===
+page             fields  gaps  uncapturable
+sales               124     0  
+purchase             85     0  
+sales-order         102     0  
+sales-return          0     0  
+tag-opening          65     0  
+karigar-issue        35     0  
+tour-issue            0     0  
+dhrn-issue           14     0  
+dhrn-receipt         34     0  
+vp-parcel            33     0  
+
+TOTAL api-accepted fields 492; capturable 492 (100.0%); gaps 0
+exit=0
+=== deep_column_audit.py ===
+{
+  "desktopTablesWritten": 122,
+  "webWritesAtAll": 111,
+  "tablesNeverWrittenByWeb": 11,
+  "totalDesktopWrittenColumns": 3669,
+  "totalWebWrittenColumns": 3280,
+  "overallColumnCoveragePct": 89.4,
+  "avgCoverageOfWrittenTablesPct": 91.3,
+  "worstCoveredWrittenTables": [
+    {
+      "table": "TAG_STOCK",
+      "pct": 0.0,
+      "missing": 25
+    },
+    {
+      "table": "POINT_DATA",
+      "pct": 63.2,
+      "missing": 7
+    },
+    {
+      "table": "TAG_STOCK_PRINT",
+      "pct": 68.9,
+      "missing": 14
+    },
+    {
+      "table": "PR_IDTL",
+      "pct": 71.1,
+      "missing": 13
+    },
+    {
+      "table": "APR_IDTL",
+      "pct": 71.7,
+      "missing": 13
+    },
+    {
+      "table": "RATE_CUT_ISU",
+      "pct": 75.0,
+      "missing": 19
+    },
+    {
+      "table": "SL_ORD_ADJ",
+      "pct": 75.0,
+      "missing": 9
+    },
+    {
+      "table": "AD_ADJ",
+      "pct": 75.7,
+      "missing": 9
+    },
+    {
+      "table": "CASH_DATA",
+      "pct": 75.8,
+      "missing": 8
+    },
+    {
+      "table": "DHRN_ISU_DATA",
+      "pct": 76.1,
+      "missing": 11
+    },
+    {
+      "table": "BAR_IDTL",
+      "pct": 77.4,
+      "missing": 12
+    },
+    {
+      "table": "DHRN_ISU_DETL",
+      "pct": 77.5,
+      "missing": 9
+    },
+    {
+      "table": "RATE_CUT_REC",
+      "pct": 78.0,
+      "missing": 13
+    },
+    {
+      "table": "POINT_MEMB",
+      "pct": 80.0,
+      "missing": 2
+    },
+    {
+      "table": "AD_DATA",
+      "pct": 81.2,
+      "missing": 6
+    },
+    {
+      "table": "APR_DATA",
+      "pct": 81.2,
+      "missing": 3
+    },
+    {
+      "table": "APR_DETL",
+      "pct": 81.6,
+      "missing": 14
+    },
+    {
+      "table": "AD_MAST",
+      "pct": 83.3,
+      "missing": 2
+    },
+    {
+      "table": "REP_DETL",
+      "pct": 83.8,
+      "missing": 12
+    },
+    {
+      "table": "POINT_MAST",
+      "pct": 84.6,
+      "missing": 2
+    }
+  ],
+  "largestUnwrittenTables": [
+    {
+      "table": "TAG_SUM_DATA",
+      "desktopColumns": 23
+    },
+    {
+      "table": "OP_LDR",
+      "desktopColumns": 18
+    },
+    {
+      "table": "MENU_DATA",
+      "desktopColumns": 9
+    },
+    {
+      "table": "TAG_SET",
+      "desktopColumns": 8
+    },
+    {
+      "table": "BOOK_IDTL",
+      "desktopColumns": 6
+    },
+    {
+      "table": "ROJMEL_BAL",
+      "desktopColumns": 5
+    },
+    {
+      "table": "WEIGHT_MAST",
+      "desktopColumns": 4
+    },
+    {
+      "table": "TAG_DATA",
+      "desktopColumns": 3
+    },
+    {
+      "table": "USER_MAST",
+      "desktopColumns": 2
+    },
+    {
+      "table": "APP_CHATMESSAGES",
+      "desktopColumns": 0
+    },
+    {
+      "table": "WEBHOOKINBOX",
+      "desktopColumns": 0
+    }
+  ]
+}
+exit=0
+=== build_parity_matrix.py ===
+{
+  "forms": 204,
+  "tables": 146,
+  "reports": 275,
+  "settings": 57,
+  "shortcuts": 13,
+  "invariants": 25,
+  "csvRows": 720,
+  "apiRoutes": 369,
+  "rawMigrationOnly": [],
+  "unmappedApiRoutes": [],
+  "phantomClaimedRoutes": [],
+  "transactionLifecycle": {
+    "full": 26,
+    "createOnly": 33,
+    "noWrite": 2
+  },
+  "approvedFormContracts": 3,
+  "draftFormContracts": 8,
+  "g5Passed": 0,
+  "g5Total": 720,
+  "g6Passed": 0,
+  "g6Total": 720,
+  "g5Harness": {
+    "runnerPath": "web/apps/api/integration/g5-compare.mjs",
+    "artifactPath": "project-memory/parity/g5/latest.json",
+    "currentMode": "DEGRADED",
+    "externalInputsRequired": [
+      "A reachable desktop SQL Server runtime containing sanitized representative shop data.",
+      "Read-only desktop source credentials in CUTOVER_SOURCE_* environment variables.",
+      "A matching migrated PostgreSQL target tenant in DATABASE_URL and G5_TARGET_TENANT.",
+      "G5_FORMS JSON identifying matching desktop and web vouchers for each form."
+    ]
+  },
+  "g6Status": {
+    "certified": false,
+    "artifactPath": "project-memory/parity/G6-STATUS.md",
+    "productionCertifiedUnits": 0,
+    "totalUnits": 720,
+    "requirements": [
+      {
+        "id": "load-local",
+        "requirement": "Repeatable load/performance evidence",
+        "status": "evidence_produced",
+        "artifactPath": "project-memory/parity/LOAD-PROFILE.md",
+        "externalInputRequired": null
+      },
+      {
+        "id": "load-production",
+        "requirement": "Production-like capacity/soak and approved SLO",
+        "status": "blocked",
+        "artifactPath": "project-memory/parity/LOAD-PROFILE.md",
+        "externalInputRequired": "Production-like multi-instance deployment/network; representative sanitized shop data volume; approved traffic mix and latency/error/capacity targets; database sizing/pool budget."
+      },
+      {
+        "id": "security-local",
+        "requirement": "Code/security review and source secret policy",
+        "status": "evidence_produced",
+        "artifactPath": "project-memory/parity/SECURITY-REVIEW.md",
+        "externalInputRequired": null
+      },
+      {
+        "id": "security-live",
+        "requirement": "End-to-end deployed security assessment",
+        "status": "blocked",
+        "artifactPath": "project-memory/parity/SECURITY-REVIEW.md",
+        "externalInputRequired": "Deployed HTTPS origin/proxy/WAF; trusted-proxy and distributed rate-limit design; CSP/HSTS/Permissions-Policy decisions; test roles; authorized independent assessor and window."
+      },
+      {
+        "id": "observability-local",
+        "requirement": "Readiness, metrics, and structured operational signals",
+        "status": "evidence_produced",
+        "artifactPath": "web/apps/api/src/modules/ops/metrics.ts",
+        "externalInputRequired": null
+      },
+      {
+        "id": "observability-live",
+        "requirement": "Production dashboards, alerts, retention, and on-call exercise",
+        "status": "blocked",
+        "artifactPath": "web/apps/api/src/modules/ops/metrics.ts",
+        "externalInputRequired": "Monitoring/log platform and credentials; alert destinations/escalation roster; retention/SLO policy; deployed endpoints; named on-call participants and exercise window."
+      },
+      {
+        "id": "backup-restore-local",
+        "requirement": "Repeatable logical backup/restore verification",
+        "status": "evidence_produced",
+        "artifactPath": "project-memory/parity/DR-RUNBOOK.md",
+        "externalInputRequired": null
+      },
+      {
+        "id": "dr-production",
+        "requirement": "Offsite backup and production-scale DR/RPO/RTO approval",
+        "status": "blocked",
+        "artifactPath": "project-memory/parity/DR-RUNBOOK.md",
+        "externalInputRequired": "Backup store/vault and credentials; encryption/KMS and retention policy; secondary topology; production-sized encrypted snapshot; approved RPO/RTO; incident commander and recovery approver."
+      },
+      {
+        "id": "device-protocol",
+        "requirement": "Device protocol validation and fallback design",
+        "status": "evidence_produced",
+        "artifactPath": "project-memory/parity/DEVICE-BRIDGE.md",
+        "externalInputRequired": null
+      },
+      {
+        "id": "device-uat",
+        "requirement": "Physical scale/printer/scanner/camera certification",
+        "status": "blocked",
+        "artifactPath": "project-memory/parity/UAT-PLAN.md",
+        "externalInputRequired": "Actual manufacturer/model/firmware/driver inventory; scale calibration/capacity/precision and USB/serial identity/settings; printer media/DPI; scanner mode; camera/browser; physical devices/workstation."
+      },
+      {
+        "id": "site-uat",
+        "requirement": "Customer-site workflow UAT",
+        "status": "blocked",
+        "artifactPath": "project-memory/parity/UAT-PLAN.md",
+        "externalInputRequired": "Named customer site; approved UAT tenant/build/data/control totals; module operators; supported workstations/browser; execution window."
+      },
+      {
+        "id": "integrations-live",
+        "requirement": "Live/sandbox external-service acceptance",
+        "status": "blocked",
+        "artifactPath": "project-memory/parity/G6-STATUS.md",
+        "externalInputRequired": "e-Invoice GSP sandbox credentials/GSTIN; WhatsApp test number/token; SMS account/key/sender; live-rate account/key; approved recipients and reconciliation owner."
+      },
+      {
+        "id": "business-signoff",
+        "requirement": "Authorized production acceptance and go-live decision",
+        "status": "blocked",
+        "artifactPath": "project-memory/parity/G6-STATUS.md",
+        "externalInputRequired": "Completed passing G5/G6 evidence and named authorized operations, finance, inventory/manufacturing, and security/deployment signers with dated signatures and authority."
+      }
+    ]
+  },
+  "outputs": [
+    "project-memory/parity/DESKTOP-WEB-PARITY-MATRIX.json",
+    "project-memory/parity/DESKTOP-WEB-PARITY-MATRIX.csv",
+    "project-memory/parity/DESKTOP-WEB-PARITY-MATRIX.md"
+  ]
+}
+exit=0

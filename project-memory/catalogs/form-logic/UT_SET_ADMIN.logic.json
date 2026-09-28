@@ -1,0 +1,27 @@
+{
+ "form": "UT_SET_ADMIN",
+ "tables": [
+  "CO_SET_NEW",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "CO_SET_NEW"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "CO_SET_NEW",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 11,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 1,
+ "calcSample": [
+  "SL_NWT_LOCK = '\" + Strings.Mid(cboSlNwtLock.Text, 1, 1) + \"' WHERE CO_CODE = '\" + DC_Main.MCo_code + \"'\""
+ ],
+ "loc": 2614
+}

@@ -1,0 +1,11 @@
+
+> @datacare/api@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> tsc -p tsconfig.json --noEmit
+
+src/modules/masters/columnSettings.ts(62,25): error TS2571: Object is of type 'unknown'.
+src/modules/masters/columnSettings.ts(62,76): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/modules/masters/columnSettings.ts(133,25): error TS18047: 'options.search' is possibly 'null'.
+src/modules/masters/columnSettings.ts(133,40): error TS2339: Property 'replace' does not exist on type '{}'.
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2

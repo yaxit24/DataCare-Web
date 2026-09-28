@@ -1,0 +1,77 @@
+{
+ "form": "RP_OS",
+ "loc": 5680,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT AC_CITY FROM AC_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_CITY ORDER BY AC_CITY",
+  "SELECT AC_AREA FROM AC_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_AREA ORDER BY AC_AREA",
+  "SELECT AC_DISTRICT FROM AC_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_DISTRICT ORDER BY AC_DISTRICT",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL,B.AC_GR_NAME AS GroupL,A.AC_AREA As AreaL,A.AC_ADD1 As AddressL,A.AC_CITY As CityL,A.AC_MOBILE As MobileL,A.MAIN_AC_CODE As MainAcL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' ORDER BY A.LC_CODE,A.AC_NAME",
+  "SELECT C.AC_NAME As AcNameL,C.AC_CODE As AcCodeL,D.AC_GR_NAME AS GroupL,C.AC_AREA As AreaL,C.AC_ADD1 As AddressL,C.AC_CITY As CityL,C.AC_MOBILE As MobileL,C.MAIN_AC_CODE As MainAcL FROM AC_MAST AS C LEFT JOIN AC_GROUP AS D ON C.CO_CODE = D.CO_CODE AND C.AC_GR = D.AC_GR WHERE C.CO_CODE = ' ? ' AND CAST(C.AC_CODE AS INT) < 100 UNION ALL SELECT A.AC_NAME,A.AC_CODE,B.AC_GR_NAME,A.AC_AREA,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE,A.MAIN_AC_CODE As MainAcL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CAST(A.AC_CODE AS INT) >=200 ORDER BY C.AC_NAME",
+  "Select * From AC_GROUP WHERE CO_CODE = ' ? ' AND AC_GR = ' ? '",
+  "SELECT AC_GR As CodeL,AC_GR_NAME as NameL FROM AC_GROUP WHERE CO_CODE = ' ? ' ORDER BY AC_GR",
+  "Select * From LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "Select LC_CODE As CodeL,LC_NAME As NameL,LC_ADD1 As AddressL,LC_CITY As CityL FROM LOCT_MAST WHERE CO_CODE = ' ? ' ORDER BY LC_CODE",
+  "DELETE FROM LEDR_AC_DATA",
+  "Select A.AC_CODE,SUM(DR_AMT-CR_AMT) AS DrAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? AND B.AC_GR = ' ? ' ? and VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.AC_CODE HAVING SUM(DR_AMT-CR_AMT) > 0 ORDER BY A.AC_CODE",
+  "Select A.AC_CODE,A.DATA_TYPE,SUM(DR_AMT-CR_AMT) AS DrAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? AND B.AC_GR = ' ? ' ? and VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? GROUP BY A.AC_CODE,A.DATA_TYPE HAVING SUM(DR_AMT-CR_AMT) > 0 ORDER BY A.AC_CODE",
+  "INSERT INTO LEDR_AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_DT,MAIN_USER,AC_CODE,CR_AMT,DR_AMT,CR_FINE_WT,DR_FINE_WT,CR_SL_FINE,DR_SL_FINE,DATA_TYPE) VALUES(' ? ',' ? ',' ? ','',null,'',' ? AC_CODE ? ',0, ? DrAmt ? 0.00 ? ,0,0,0,0,' ? ')",
+  "SELECT * FROM LEDR_AC_DATA",
+  "Select A.AC_CODE,SUM(CR_AMT-DR_AMT) AS CrAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? AND B.AC_GR = ' ? ' ? and VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.AC_CODE HAVING SUM(CR_AMT-DR_AMT) > 0 ORDER BY A.AC_CODE",
+  "Select A.AC_CODE,A.DATA_TYPE,SUM(CR_AMT-DR_AMT) AS CrAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? AND B.AC_GR = ' ? ' ? and VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? GROUP BY A.AC_CODE,A.DATA_TYPE HAVING SUM(CR_AMT-DR_AMT) > 0 ORDER BY A.AC_CODE",
+  "Select AC_CODE,'A' As DATA_TYPE,SUM(CR_AMT-DR_AMT) AS CrDrAmt FROM AC_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' and VCH_DATE < ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.AC_CODE = ' ? ' ? GROUP BY AC_CODE ORDER BY AC_CODE",
+  "Select AC_CODE,DATA_TYPE,SUM(CR_AMT-DR_AMT) AS CrDrAmt FROM AC_DATA AS A WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' and VCH_DATE < ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.AC_CODE = ' ? ' ? GROUP BY AC_CODE,DATA_TYPE ORDER BY AC_CODE",
+  "SELECT A.AC_CODE,A.AC_NAME,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE,A.AC_MOBILE2 FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.AC_CODE > '00100' ORDER BY A.AC_NAME",
+  "SELECT A.AC_CODE,A.AC_NAME,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE,A.AC_MOBILE2 FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND LEN(A.AC_CODE) <> 5 ORDER BY A.AC_NAME",
+  "Select A.AC_CODE,round(SUM(CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END),3) as GoldWt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' and VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND DATA_TYPE = ' ? ' ? AND A.AC_CODE IN ( ? ) ? AND B.AC_GR IN ( ? ) ? AND B.AC_CITY IN ( ? ) ? AND B.AC_GR = ' ? ' ? and A.IT_TYPE = 'G' AND A.FINE_WT <> 0 and A.AC_CODE <> '00045' AND A.AC_CODE <> '00050' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.AC_CODE HAVING ROUND(SUM(CASE WHEN A.SIGN='+' THEN A.FINE_WT ELSE -A.FINE_WT END),3) <> 0",
+  "Select A.AC_CODE,SUM(CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END) as SilverWt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' and VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND DATA_TYPE = ' ? ' ? AND A.AC_CODE IN ( ? ) ? AND B.AC_GR IN ( ? ) ? AND B.AC_CITY IN ( ? ) ? AND B.AC_GR = ' ? ' ? and A.IT_TYPE = 'S' AND A.FINE_WT <> 0 and A.AC_CODE <> '00045' AND A.AC_CODE <> '00050' AND A.VCH_DATE <= ' ? MM/dd/yyyy ? ' GROUP BY A.AC_CODE HAVING SUM(iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT)) <> 0",
+  "SELECT A.AC_GR,A.AC_GR_NAME FROM AC_GROUP AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.AC_GR",
+  "Select B.AC_NAME,A.AC_REF_CODE From AC_MAST AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.AC_REF_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.AC_REF_CODE = ' ? '",
+  "SELECT B.AC_NAME As AcNameL,A.AC_REF_CODE As AcCodeL,B.AC_CITY AS CityL,B.AC_ADD1 As AddressL,B.AC_MOBILE As MobileL FROM AC_MAST AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.AC_REF_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.AC_REF_CODE <> '' GROUP BY B.AC_NAME,A.AC_REF_CODE,B.AC_CITY,B.AC_ADD1,B.AC_MOBILE ORDER BY B.AC_NAME",
+  "SELECT A.AC_CITY FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' GROUP BY A.AC_CITY ORDER BY A.AC_CITY",
+  "SELECT A.AC_CODE, Case When SUM(A.CR_AMT-A.DR_AMT) < 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As DrAmt, Case When SUM(A.CR_AMT-A.DR_AMT) > 0 Then abs(SUM(A.CR_AMT-A.DR_AMT)) Else 0 End As CrAmt, Case When SUM(Case When A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrGold, Case When SUM(Case When A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrGold, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) < 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As DrSilver, Case WHEN SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END) > 0 then abs(SUM(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END )ELSE 0 END)) else 0 end As CrSilver FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE And A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND B.MAIN_AC_CODE <> '' and A.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND B.AC_REF_CODE = ' ? ' ? GROUP BY A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE,B.AC_REF_NAME,B.AC_CITY,B.AC_KHATA_NO ORDER BY B.AC_NAME"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 9
+ },
+ "calc": [
+  "CurFormula = (CurFormula + \"AND {LEDR_AC_DATA.DR_AMT} >= \" + Conversions.ToString(Conversion.Val(nAmount.Text))) ?? \"\";",
+  "CurFormula = (CurFormula + \"AND {LEDR_AC_DATA.DR_AMT} <= \" + Conversions.ToString(Conversion.Val(nBigAmt.Text))) ?? \"\";",
+  "Cr[(short)3] = (\"AcPayInt =\" + Conversions.ToString(Conversion.Val(nPayIntPrc.Text))) ?? \"\";",
+  "Cr[(short)4] = (\"AcRecInt =\" + Conversions.ToString(Conversion.Val(nRecIntPrc.Text))) ?? \"\";",
+  "Cr[(short)5] = (\"DIVIDER = \" + Conversions.ToString(Conversion.Val(nIntDays.Text))) ?? \"\";"
+ ],
+ "validations": [
+  {
+   "message": "Party Selection Not Done...",
+   "when": "Operators.CompareString(ScelectAc, \"\", false) == 0"
+  },
+  {
+   "message": "Party Selection is Ok...",
+   "when": ""
+  },
+  {
+   "message": "Group Selection Not Done...",
+   "when": "Operators.CompareString(SelectGr, \"\", false) == 0"
+  },
+  {
+   "message": "Group Selection is Ok...",
+   "when": ""
+  },
+  {
+   "message": "City Selection Not Done...",
+   "when": "Operators.CompareString(SelectCity, \"\", false) == 0"
+  },
+  {
+   "message": "City Selection is Ok...",
+   "when": ""
+  },
+  {
+   "message": "Please Insert Intrest Prc Then Try...",
+   "when": "(Conversion.Val(nRecIntPrc.Text) == 0.0) & (Conversion.Val(nPayIntPrc.Text) == 0.0)"
+  }
+ ]
+}

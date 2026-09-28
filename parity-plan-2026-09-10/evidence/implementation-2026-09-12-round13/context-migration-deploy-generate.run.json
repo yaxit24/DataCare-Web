@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "scripts/parity-test-env.mjs",
+    "--",
+    "pnpm",
+    "--filter",
+    "@datacare/db",
+    "exec",
+    "prisma",
+    "generate",
+    "--schema",
+    "prisma/schema.prisma"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T19:21:46.797058+00:00",
+  "finishedAtUtc": "2026-09-11T19:21:53.284335+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-migration-deploy-generate.txt",
+  "logSha256": "bdfae34afba4e7944356acb1fe7605513f8420aa4375ee1cb221b557eed9a5b6",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-migration-deploy-generate.inputs.json",
+  "inputManifestSha256": "d30e9deb333eca5fc4611c60675dfe0cc2419bbcc7d9b01d8c30556bf0ee77e9",
+  "inputCount": 1754,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

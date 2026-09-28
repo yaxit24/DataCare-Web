@@ -1,0 +1,118 @@
+{
+  "kind": "independent-source-read-inputs",
+  "execution": "No implementation, tests, compiler, DB, browser or active edits. Hash and source-text inspection only.",
+  "files": [
+    {
+      "path": "/tmp/datacare-return-save-map-staged/ready-manifest.json",
+      "sha256": "77e0de75edb44f45c2c56250c2558e8aa056f019a01ff36b8699ea73ede691fd"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/implementation-contract.md",
+      "sha256": "bfc72c2f37878033fa3627498705cf342f4d5672f1395e678c16d12d4e80f34f"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/README.md",
+      "sha256": "23f467b3a1684f1ccac66a91644a2b0b3a082037001c78b31e2ae849a819a89a"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/source-inputs.json",
+      "sha256": "91e474f963660210cea252a32e90dde3e4945f64b03119a777640e8cd17928a6"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/fixture-freeze.json",
+      "sha256": "0ba5041ac27b261832861a292e20f9c1eab579ee07b6e08306fcfb197cc3adea"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/fixture-authorship.json",
+      "sha256": "c279534b390d8fb6cd7da323ca0e5756e9342fe41ae907cb167dc810751491ae"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/author-fixture.py",
+      "sha256": "615309a22a7aaa60a5730a01df578eafce259e2ccd9992d27cdc64d4ee1f25fc"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/src/saleReturnIncomingSaveProjection.ts",
+      "sha256": "96d8f57b32ccdbfb4fa53e68b4d3435059df8b74fa1cb98f7744ff4b57e32ea4"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/test/saleReturnIncomingSaveProjection.test.ts",
+      "sha256": "6b49316b2a6ae3a7c4e613f6dfa9977b3441a83d0fd0ce1511d111809c22dc2f"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "sha256": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/focused-final.run.json",
+      "sha256": "885038037140f734d10e637ddcf183a739b908209304c49bae60353a8b89064f"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/focused-final.inputs.json",
+      "sha256": "7a4f53c7eff0a55c53f6c64552b87c3fc80cd108ba314b19414b5d3eadb01ef6"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/focused-final.txt",
+      "sha256": "87eaba6a5ffb618359a1f8da9d65c8460cd55265fc687a5de6f0f056e5d5bf69"
+    },
+    {
+      "path": "/tmp/datacare-return-save-map-staged/types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnHeaderFloat.ts",
+      "sha256": "f7d0db544f76a165ed112bd9d87557db59a482f5e57b755b0c3d8d10c47c1327"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/saleReturnHeaderFloat.test.ts",
+      "sha256": "3ccc251a80f347252a1a6cd2acd55d5512cb14f3c48d2408bb78bce58a0b987c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/test/fixtures/saleReturnHeaderFloat.independent.json",
+      "sha256": "a56f54ebec8c89fb47133f4cc43bcb868a8c267b78dc35115f9d7ae9c9696ae7"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/header-float-profile/implementation-contract.md",
+      "sha256": "8ea2ab7e41fdb9ea0b095eb80e521ea38969095679e30abaa5be7d2d703c1f2b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/header-float-profile/fixture-freeze.json",
+      "sha256": "3f331c4344aee10e5a4916b2a98f330c0d17db3340027ff87a8694cca1b3f086"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+      "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/ready-manifest.json",
+      "sha256": "93dfd6b82a9ce811db6ec9665c126d337f0537b101d3ecc92da433aafcf6ba84"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/effects-contract.md",
+      "sha256": "00c0d6551a0b08445835869c93bb19cafa42e879b841c315596581ec4f7b28c2"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/source-effect-index.json",
+      "sha256": "886f5a32611e412128e9c5b749a9da188c8fbbde5e9f266f09c7d20bc800c1fd"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/remaining-blockers.json",
+      "sha256": "86aa52414f3f41f12e05a8141f7d15247cfb985096bf9d5fe73eb16a47eeea43"
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract-review/assignment-comparison.json",
+      "sha256": "956921467dd4c3a814f7e7e95d47379f185c66ed4202295612baf3bbcfb01ad9"
+    },
+    {
+      "path": "/tmp/datacare-return-next-write-contract-review/mandatory-stock-identity-erratum.json",
+      "sha256": "1425b1331e0708f5c3bc83f50b0acfdd9dfe61aef9e2352afb75bf190608c4a7"
+    }
+  ]
+}

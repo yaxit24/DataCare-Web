@@ -1,0 +1,69 @@
+{
+  "status": "read-only source observation; no execution",
+  "refs": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "f309a2e2c5c58e080c91ba5b634dbc1c9d940b46361ea06a25d97497572ecd84"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/routes/txn.ts",
+      "sha256": "a4169b9a5bfd4b8d86b7f2e70ba3a60e03a1292488d6752c88f3d312be54d91d"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextSelection.ts",
+      "sha256": "9440e509fa5f0938edf9b0031c2bff9f5a4e2091cbe8770be2c0c8d403a53aa5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextRefresh.ts",
+      "sha256": "4d43d2639c5345913a11283b8f626e7106662d4c451db3c54c4354c50fe696d9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/passwordAccount.ts",
+      "sha256": "f566af63d2048bd64f69c7e04aaede8102a5a789a11750a8450d7016cda5ce56"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/vouchers/numbering.ts",
+      "sha256": "ccf924ae90087c682e8ea915dcaa018cc59e250e9c1825b68600dc20fb2f09db"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/vouchers/lifecycle.ts",
+      "sha256": "346f7d64fb293666a6b430414844c5fba5ca635a71946244df46b383136a0c8b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/shared/rojmel.ts",
+      "sha256": "ff63789408f8d23b8908f9ed2070100724187ce42c2b9f8f5ea16abd21131a1e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/shared/lastDayLock.ts",
+      "sha256": "639e4e531ac7b0856b7c139b9e359f2805df699fc9baeb4ce1d6cbdb56c17add"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/tourOrder.db.test.ts",
+      "sha256": "63a652b175f402e2d2bced2ec12df8f253f7175f5889bee12de8e2929e236d38"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/salesOrderRound4.db.test.ts",
+      "sha256": "500f26578dbcb36434fd84415e11815008cc5de159285f2d46c0a7ee4138e0e6"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/salesOrderLifecycle.routes.db.test.ts",
+      "sha256": "3031006e1e6e54c69848b50d25564b2cfbff97cfab65592a1d4e57e719a54e63"
+    }
+  ]
+}

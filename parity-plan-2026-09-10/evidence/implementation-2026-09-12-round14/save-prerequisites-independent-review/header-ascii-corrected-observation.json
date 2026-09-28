@@ -1,0 +1,7 @@
+{
+  "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnHeaderFloat.ts",
+  "sha256": "f7d0db544f76a165ed112bd9d87557db59a482f5e57b755b0c3d8d10c47c1327",
+  "c0OnlyPrecheck": false,
+  "sourceReadOnly": true,
+  "qualification": "First persisted source observation follows root ASCII guard strengthening. The reviewer withdrew the original bypass claim: JavaScript non-multiline $ requires end-of-input, so no earlier functional failure was established. No earlier source-file hash or execution claim."
+}

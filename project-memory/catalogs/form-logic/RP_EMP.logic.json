@@ -1,0 +1,54 @@
+{
+ "form": "RP_EMP",
+ "tables": [
+  "BOOK_DATA",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "REPORT_DATA": [
+    "COL_1",
+    "COL_10",
+    "COL_11",
+    "COL_12",
+    "COL_13",
+    "COL_14",
+    "COL_15",
+    "COL_2",
+    "COL_3",
+    "COL_4",
+    "COL_5",
+    "COL_6",
+    "COL_7",
+    "COL_8",
+    "COL_9",
+    "CO_CODE",
+    "LC_CODE",
+    "SR_NO"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "REPORT_DATA"
+  ]
+ },
+ "selectTables": [
+  "BOOK_DATA",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "ITEM_MAST",
+  "REPORT_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 4,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 4124
+}

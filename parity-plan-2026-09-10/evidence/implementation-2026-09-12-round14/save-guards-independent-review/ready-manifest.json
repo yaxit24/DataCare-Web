@@ -1,0 +1,19 @@
+{
+  "kind": "round14-save-guard-review-v1",
+  "status": "source-review-complete",
+  "files": [
+    {
+      "path": "review.md",
+      "sha256": "4828b68eb99d3bb019e41b0f361f147f01e820cda21322e44d6ece8a29db4e39"
+    },
+    {
+      "path": "inputs.json",
+      "sha256": "f65d6a75ec9b28074d3f93d6b0c2693257c2100b332e92e387d1055fe8ec624c"
+    }
+  ],
+  "inputCount": 12,
+  "sourceInputsUnchanged": true,
+  "activeEdits": false,
+  "runtimeTests": false,
+  "finding": "No omitted guard category; exact all-year LedrCash scope is an implementation qualification within the existing unresolved cash guard."
+}

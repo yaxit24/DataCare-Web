@@ -1,0 +1,30 @@
+
+> datacare-web-saas@0.0.0 depth:parity /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/check-depth.mjs
+
+operator-depth parity
+  surface 3653/5107 = 71.5%   grid cols 2159/3508 = 61.5%
+  settings honoured 46/130 (inert 81)   unreachable API fields 101   contained ops 6
+
+improvements since baseline:
+  + web operator field surface: 2677 -> 3653 (+976)
+  + web visible grid columns: 1653 -> 2159 (+506)
+  + web input controls: 1024 -> 1494 (+470)
+  + pages with grid keyboard: 50 -> 62 (+12)
+  + txn pages with grid keyboard: 50 -> 61 (+11)
+  + txn pages presenting a line grid: 59 -> 73 (+14)
+  + txn grid pages honouring the keyboard contract: 50 -> 61 (+11)
+  + txn pages with an operator-authored grid: 50 -> 63 (+13)
+  + authored grids honouring the keyboard contract: 50 -> 61 (+11)
+  + pages rendering a sub-detail grid: 12 -> 16 (+4)
+  + enforced validation messages: 598 -> 751 (+153)
+  + runnable report workflows: 46 -> 78 (+32)
+  + operator surface % of desktop: 52.4 -> 71.5 (+19.1)
+  + grid column % of desktop: 47.1 -> 61.5 (+14.4)
+  + settings honoured in business logic: 45 -> 46 (+1)
+  + API fields reachable from a screen: 2042 -> 2269 (+227)
+  + inert settings: 82 -> 81 (-1)
+
+DEPTH GATE FAILED
+  - CEILING BREACHED  API fields no screen can supply: 96 -> 101 (regression)
+ ELIFECYCLE  Command failed with exit code 1.

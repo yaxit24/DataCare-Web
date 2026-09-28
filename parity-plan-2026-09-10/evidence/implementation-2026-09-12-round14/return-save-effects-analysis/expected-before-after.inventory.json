@@ -1,0 +1,1784 @@
+{
+  "kind": "independent-source-bound-before-after-inventory",
+  "status": "symbolic metadata bindings retained; NOT an executable complete SQL fixture or implementation acceptance",
+  "profile": {
+    "id": "P1-T-split-zero-tax-other-one-prospective",
+    "event": {
+      "kind": "moneyLeave",
+      "fieldId": "x13.primary-incoming.c27",
+      "editorText": "1"
+    },
+    "requiredCompleteRowBranch": "One saved P/I N incoming row, SR_NO/ordinal1, OLD_SRNO1, stable nonzero instance, PCS1/NWT10, retained metal100/labour10, MRP0/discount0/rowtax0, authoritative configuration keeping every unowned persisted field unchanged. Full core hydration fixture must be independently supplied.",
+    "header": "RTN_NET/RTN_TOT/RTN_BILL_OS110; all received monetary fields/tenders/kasar/header tax/hallmark tax zero; account !=00045; source clocks/header metadata already exact.",
+    "book": "One canonical BOOK_DATA MAIN_BOOK SALES RETURNE / INOUT I / BOOK_TYPE T / BOOK_TBL_NAME SL_DATA, and exactly one qualifying BOOK_DETL SR_NO1 with coherent type/name/data type; date>=qualified MOp_dt.",
+    "tax": "Non-UAE company; exact account GST type N; exactly one matching TAX_MAST row SR1 and SR2, no other matching alias/duplicate/interstate or hallmark effect; both TAX_PRC0.",
+    "remainingAuthority": "Current preview restrictions, BAR N branch and USER_UPDATE N policy must be resolved by an explicitly reviewed next profile; no existing capability is upgraded by this fixture."
+  },
+  "principalChanges": [
+    {
+      "table": "SL_DETL_RTN",
+      "cardinality": 1,
+      "identity": {
+        "SR_NO": "1",
+        "OLD_SRNO": "1",
+        "TAG_NO": "N",
+        "VCH_SRNO": "trusted unchanged nonzero raw",
+        "TAG_SRNO": "trusted unchanged raw",
+        "IT_CODE": "trusted unchanged exact item"
+      },
+      "typedDelta": {
+        "OTH_AMT": {
+          "before": "0.00",
+          "after": "1.00"
+        },
+        "TOT_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        },
+        "NET_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "source": "TR_SALE_RTN14307\u201314584; exact candidates must come from source mapper plus complete event replay",
+      "allOtherColumns": "unchanged raw, including NULL description and all hidden scalars"
+    },
+    {
+      "table": "SL_DATA",
+      "cardinality": 1,
+      "typedDelta": {
+        "RTN_NET_AMT": {
+          "before": "110",
+          "after": "111"
+        },
+        "RTN_TOT_AMT": {
+          "before": "110",
+          "after": "111"
+        },
+        "RTN_BILL_OS": {
+          "before": "110",
+          "after": "111"
+        }
+      },
+      "source": "TR_SALE_RTN12707,12789,12809",
+      "allOtherColumns": "unchanged raw under proposed limited web edit; source full Save resets are not silently adopted"
+    }
+  ],
+  "financialEffects": [
+    {
+      "role": "incoming-customer-ledger",
+      "table": "AC_DATA",
+      "cardinality": 1,
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+        "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+        "line": 1324
+      },
+      "beforeSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'+STR(A.SR_NO)",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BILL_NO": "",
+        "BILL_DATE": null,
+        "CHQ_NO": "",
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "D.SALE_AC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": "110.00",
+        "DR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "FINE_WT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": "",
+        "ENTRY_TIME": {
+          "unchangedSourceBinding": "A.VCH_TIME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "HD_VCH_NO": {
+          "unchangedSourceBinding": "A.HD_VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CLR_DATE": null,
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DATA_TRFR": "N",
+        "MAIN_USER": {
+          "unchangedSourceBinding": "A.MAIN_USER",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "FINE_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "PARTY_AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LDR_NAME": ""
+      },
+      "afterSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'+STR(A.SR_NO)",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BILL_NO": "",
+        "BILL_DATE": null,
+        "CHQ_NO": "",
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "D.SALE_AC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": "111.00",
+        "DR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "FINE_WT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": "",
+        "ENTRY_TIME": {
+          "unchangedSourceBinding": "A.VCH_TIME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "HD_VCH_NO": {
+          "unchangedSourceBinding": "A.HD_VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CLR_DATE": null,
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DATA_TRFR": "N",
+        "MAIN_USER": {
+          "unchangedSourceBinding": "A.MAIN_USER",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "FINE_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "PARTY_AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LDR_NAME": ""
+      },
+      "typedDelta": {
+        "CR_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "allOtherStoredColumns": "preserve exact observed strings/NULL, row identity, locator and revision unless this row has a nonempty typedDelta; do not insert defaults for unmentioned schema columns"
+    },
+    {
+      "role": "incoming-sale-account-ledger",
+      "table": "AC_DATA",
+      "cardinality": 1,
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+        "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+        "line": 1326
+      },
+      "beforeSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO)",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BILL_NO": "",
+        "BILL_DATE": null,
+        "CHQ_NO": "",
+        "AC_CODE": {
+          "unchangedSourceBinding": "D.SALE_AC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "DR_AMT": "110.00",
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "FINE_WT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": "",
+        "ENTRY_TIME": {
+          "unchangedSourceBinding": "A.VCH_TIME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "HD_VCH_NO": {
+          "unchangedSourceBinding": "A.HD_VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CLR_DATE": null,
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DATA_TRFR": "N",
+        "MAIN_USER": {
+          "unchangedSourceBinding": "A.MAIN_USER",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "FINE_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "PARTY_AC_CODE": "",
+        "LDR_NAME": ""
+      },
+      "afterSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'+STR(A.SR_NO)",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BILL_NO": "",
+        "BILL_DATE": null,
+        "CHQ_NO": "",
+        "AC_CODE": {
+          "unchangedSourceBinding": "D.SALE_AC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "DR_AMT": "111.00",
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "FINE_WT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": "",
+        "ENTRY_TIME": {
+          "unchangedSourceBinding": "A.VCH_TIME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "HD_VCH_NO": {
+          "unchangedSourceBinding": "A.HD_VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CLR_DATE": null,
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DATA_TRFR": "N",
+        "MAIN_USER": {
+          "unchangedSourceBinding": "A.MAIN_USER",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "FINE_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "PARTY_AC_CODE": "",
+        "LDR_NAME": ""
+      },
+      "typedDelta": {
+        "DR_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "allOtherStoredColumns": "preserve exact observed strings/NULL, row identity, locator and revision unless this row has a nonempty typedDelta; do not insert defaults for unmentioned schema columns"
+    },
+    {
+      "role": "incoming-stock",
+      "table": "MAIN_STOCK",
+      "cardinality": 1,
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Stock.cs",
+        "sha256": "946f9ba4f7e85835f0baf5cdbd2ef71a46c59517bae3e18fd45d29eb8504ef1c",
+        "line": 247
+      },
+      "beforeSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "SR_NO": {
+          "sourceNumericLiteral": "2",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ISR_NO": {
+          "unchangedSourceBinding": "A.SR_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "STK_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_CODE": {
+          "unchangedSourceBinding": "A.IT_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAG_NO": {
+          "unchangedSourceBinding": "A.TAG_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_SRNO": {
+          "unchangedSourceBinding": "A.VCH_SRNO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TBL_CODE": {
+          "unchangedSourceBinding": "A.TBL_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TR_TYPE": "I",
+        "ITM_SIGN": "+",
+        "ITM_QTY": {
+          "sourceNumericLiteral": "1",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_PCS": {
+          "unchangedSourceBinding": "A.ITM_PCS",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_GWT": {
+          "unchangedSourceBinding": "A.ITM_GWT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_NWT": {
+          "unchangedSourceBinding": "A.ITM_NWT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_TOUCH": {
+          "unchangedSourceBinding": "A.ITM_TOUCH",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_WEST": {
+          "unchangedSourceBinding": "A.ITM_WEST_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_FINE": {
+          "unchangedSourceBinding": "A.ITM_FINE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_RATE": {
+          "unchangedSourceBinding": "A.ITM_RATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_AMT": {
+          "unchangedSourceBinding": "A.ITM_AMT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LBR_RATE": {
+          "unchangedSourceBinding": "A.LBR_RATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LBR_AMT": {
+          "unchangedSourceBinding": "A.LBR_AMT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "OTH_AMT": "0.00",
+        "ITM_MRP": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "NET_AMT": "110.00",
+        "KR_NWT": {
+          "unchangedSourceBinding": "A.ITM_NWT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_TOUCH": {
+          "unchangedSourceBinding": "A.ITM_TOUCH",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_WEST": {
+          "unchangedSourceBinding": "A.ITM_WEST_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_FINE": {
+          "unchangedSourceBinding": "A.ITM_FINE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_LBR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "KR_OTH_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "KR_COST": {
+          "unchangedSourceBinding": "A.TAG_COST",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "EMP_CODE": {
+          "unchangedSourceBinding": "A.EMP_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ENTRY_TIME": {
+          "unchangedSourceBinding": "A.VCH_TIME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "MAIN_USER": {
+          "unchangedSourceBinding": "A.MAIN_USER",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "A.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DESIGN_NO": {
+          "unchangedSourceBinding": "A.DESIGN_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_SIZE": {
+          "unchangedSourceBinding": "A.ITM_SIZE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_DESC": "",
+        "GHT_PRC": {
+          "unchangedSourceBinding": "A.ITM_GHT_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_LOT": "",
+        "ITM_DISC": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        }
+      },
+      "afterSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "SR_NO": {
+          "sourceNumericLiteral": "2",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ISR_NO": {
+          "unchangedSourceBinding": "A.SR_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "STK_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_CODE": {
+          "unchangedSourceBinding": "A.IT_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAG_NO": {
+          "unchangedSourceBinding": "A.TAG_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_SRNO": {
+          "unchangedSourceBinding": "A.VCH_SRNO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TBL_CODE": {
+          "unchangedSourceBinding": "A.TBL_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TR_TYPE": "I",
+        "ITM_SIGN": "+",
+        "ITM_QTY": {
+          "sourceNumericLiteral": "1",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_PCS": {
+          "unchangedSourceBinding": "A.ITM_PCS",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_GWT": {
+          "unchangedSourceBinding": "A.ITM_GWT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_NWT": {
+          "unchangedSourceBinding": "A.ITM_NWT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_TOUCH": {
+          "unchangedSourceBinding": "A.ITM_TOUCH",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_WEST": {
+          "unchangedSourceBinding": "A.ITM_WEST_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_FINE": {
+          "unchangedSourceBinding": "A.ITM_FINE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_RATE": {
+          "unchangedSourceBinding": "A.ITM_RATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_AMT": {
+          "unchangedSourceBinding": "A.ITM_AMT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LBR_RATE": {
+          "unchangedSourceBinding": "A.LBR_RATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LBR_AMT": {
+          "unchangedSourceBinding": "A.LBR_AMT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "OTH_AMT": "1.00",
+        "ITM_MRP": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "NET_AMT": "111.00",
+        "KR_NWT": {
+          "unchangedSourceBinding": "A.ITM_NWT",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_TOUCH": {
+          "unchangedSourceBinding": "A.ITM_TOUCH",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_WEST": {
+          "unchangedSourceBinding": "A.ITM_WEST_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_FINE": {
+          "unchangedSourceBinding": "A.ITM_FINE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "KR_LBR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "KR_OTH_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "KR_COST": {
+          "unchangedSourceBinding": "A.TAG_COST",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "EMP_CODE": {
+          "unchangedSourceBinding": "A.EMP_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ENTRY_TIME": {
+          "unchangedSourceBinding": "A.VCH_TIME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "MAIN_USER": {
+          "unchangedSourceBinding": "A.MAIN_USER",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "A.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DESIGN_NO": {
+          "unchangedSourceBinding": "A.DESIGN_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_SIZE": {
+          "unchangedSourceBinding": "A.ITM_SIZE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_DESC": "",
+        "GHT_PRC": {
+          "unchangedSourceBinding": "A.ITM_GHT_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "ITM_LOT": "",
+        "ITM_DISC": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        }
+      },
+      "typedDelta": {
+        "OTH_AMT": {
+          "before": "0.00",
+          "after": "1.00"
+        },
+        "NET_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "allOtherStoredColumns": "preserve exact observed strings/NULL, row identity, locator and revision unless this row has a nonempty typedDelta; do not insert defaults for unmentioned schema columns"
+    },
+    {
+      "role": "return-outstanding-rojmel",
+      "table": "ROJ_MEL_DATA",
+      "cardinality": 1,
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+        "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+        "line": 586
+      },
+      "beforeSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "B.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": "110.00",
+        "DR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "AC_NAME": "",
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "ITM_PCS": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_GWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_NWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_TOUCH": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_WEST": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_FINE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "OTH_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "NET_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": {
+          "unchangedSourceBinding": "A.VCH_DESC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_CODE": "",
+        "MEMB_CODE": "",
+        "SCHM_CODE": "",
+        "REF_NO": "",
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        }
+      },
+      "afterSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'01'",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "B.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": "111.00",
+        "DR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "AC_NAME": "",
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "ITM_PCS": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_GWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_NWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_TOUCH": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_WEST": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_FINE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "OTH_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "NET_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": {
+          "unchangedSourceBinding": "A.VCH_DESC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_CODE": "",
+        "MEMB_CODE": "",
+        "SCHM_CODE": "",
+        "REF_NO": "",
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        }
+      },
+      "typedDelta": {
+        "CR_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "allOtherStoredColumns": "preserve exact observed strings/NULL, row identity, locator and revision unless this row has a nonempty typedDelta; do not insert defaults for unmentioned schema columns"
+    },
+    {
+      "role": "return-taxbook-summary-rojmel",
+      "table": "ROJ_MEL_DATA",
+      "cardinality": 1,
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+        "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+        "line": 588
+      },
+      "beforeSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "B.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "DR_AMT": "110.00",
+        "AC_NAME": {
+          "unchangedSourceBinding": "'RTN' + ' - ' + A.AC_NAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "ITM_PCS": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_GWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_NWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_TOUCH": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_WEST": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_FINE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "OTH_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "NET_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": {
+          "unchangedSourceBinding": "A.VCH_DESC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_CODE": "",
+        "MEMB_CODE": "",
+        "SCHM_CODE": "",
+        "REF_NO": "",
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        }
+      },
+      "afterSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "A.VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LEDR_KEY": {
+          "unchangedSourceBinding": "A.CO_CODE+A.LC_CODE+A.CO_YEAR+A.CO_BOOK+A.VCH_NO+'02'",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_TYPE": {
+          "unchangedSourceBinding": "B.BOOK_SNAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LD_CODE": {
+          "unchangedSourceBinding": "B.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "DR_AMT": "111.00",
+        "AC_NAME": {
+          "unchangedSourceBinding": "'RTN' + ' - ' + A.AC_NAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_TYPE": "A",
+        "SIGN": "",
+        "ITM_PCS": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_GWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_NWT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_TOUCH": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_WEST": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_FINE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ITM_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_RATE": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "LBR_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "OTH_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "NET_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "IT_DESC": {
+          "unchangedSourceBinding": "A.VCH_DESC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "IT_CODE": "",
+        "MEMB_CODE": "",
+        "SCHM_CODE": "",
+        "REF_NO": "",
+        "DATA_TYPE": {
+          "unchangedSourceBinding": "B.DATA_TYPE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        }
+      },
+      "typedDelta": {
+        "DR_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "allOtherStoredColumns": "preserve exact observed strings/NULL, row identity, locator and revision unless this row has a nonempty typedDelta; do not insert defaults for unmentioned schema columns"
+    },
+    {
+      "role": "return-tax-sr1",
+      "table": "TAX_DATA",
+      "cardinality": 1,
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+        "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+        "line": 191
+      },
+      "beforeSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "SR_NO": {
+          "sourceNumericLiteral": "1",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TRAN_TYPE": "S",
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_CODE": {
+          "unchangedSourceBinding": "A.TAX_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_TYPE": {
+          "unchangedSourceBinding": "C.TAX_GROUP",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_PRC": {
+          "unchangedSourceBinding": "C.TAX_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "NET_AMT": "110.00",
+        "TAX_AMT": {
+          "unchangedSourceBinding": "A.TAX_AMT/2",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DISC_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TOT_AMT": "110.00",
+        "TAX_SIGN": "-",
+        "PARTY_NAME": {
+          "unchangedSourceBinding": "A.AC_NAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "R_CHARG": "N",
+        "ISR_NO": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TAX_FREE_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ZERO_RATED_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        }
+      },
+      "afterSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "SR_NO": {
+          "sourceNumericLiteral": "1",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TRAN_TYPE": "S",
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_CODE": {
+          "unchangedSourceBinding": "A.TAX_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_TYPE": {
+          "unchangedSourceBinding": "C.TAX_GROUP",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_PRC": {
+          "unchangedSourceBinding": "C.TAX_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "NET_AMT": "111.00",
+        "TAX_AMT": {
+          "unchangedSourceBinding": "A.TAX_AMT/2",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DISC_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TOT_AMT": "111.00",
+        "TAX_SIGN": "-",
+        "PARTY_NAME": {
+          "unchangedSourceBinding": "A.AC_NAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "R_CHARG": "N",
+        "ISR_NO": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TAX_FREE_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ZERO_RATED_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        }
+      },
+      "typedDelta": {
+        "NET_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        },
+        "TOT_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "allOtherStoredColumns": "preserve exact observed strings/NULL, row identity, locator and revision unless this row has a nonempty typedDelta; do not insert defaults for unmentioned schema columns"
+    },
+    {
+      "role": "return-tax-sr2",
+      "table": "TAX_DATA",
+      "cardinality": 1,
+      "source": {
+        "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+        "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+        "line": 193
+      },
+      "beforeSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "SR_NO": {
+          "sourceNumericLiteral": "2",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TRAN_TYPE": "S",
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_CODE": {
+          "unchangedSourceBinding": "A.TAX_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_TYPE": {
+          "unchangedSourceBinding": "C.TAX_GROUP",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_PRC": {
+          "unchangedSourceBinding": "C.TAX_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "NET_AMT": "110.00",
+        "TAX_AMT": {
+          "unchangedSourceBinding": "A.TAX_AMT/2",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DISC_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TOT_AMT": "110.00",
+        "TAX_SIGN": "-",
+        "PARTY_NAME": {
+          "unchangedSourceBinding": "A.AC_NAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "R_CHARG": "N",
+        "ISR_NO": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TAX_FREE_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ZERO_RATED_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        }
+      },
+      "afterSourceOwnedColumns": {
+        "CO_CODE": {
+          "unchangedSourceBinding": "A.CO_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "LC_CODE": {
+          "unchangedSourceBinding": "A.LC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_YEAR": {
+          "unchangedSourceBinding": "A.CO_YEAR",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "CO_BOOK": {
+          "unchangedSourceBinding": "A.CO_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "VCH_NO": {
+          "unchangedSourceBinding": "VCH_NO",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "SR_NO": {
+          "sourceNumericLiteral": "2",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "BOOK_NAME": {
+          "unchangedSourceBinding": "B.MAIN_BOOK",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TRAN_TYPE": "S",
+        "VCH_DATE": {
+          "unchangedSourceBinding": "A.VCH_DATE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "AC_CODE": {
+          "unchangedSourceBinding": "A.AC_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_CODE": {
+          "unchangedSourceBinding": "A.TAX_CODE",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_TYPE": {
+          "unchangedSourceBinding": "C.TAX_GROUP",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "TAX_PRC": {
+          "unchangedSourceBinding": "C.TAX_PRC",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "NET_AMT": "111.00",
+        "TAX_AMT": {
+          "unchangedSourceBinding": "A.TAX_AMT/2",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "DISC_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TOT_AMT": "111.00",
+        "TAX_SIGN": "-",
+        "PARTY_NAME": {
+          "unchangedSourceBinding": "A.AC_NAME",
+          "resolution": "exact trusted raw/master/config plus separately qualified source expression; unresolved is not empty/zero"
+        },
+        "R_CHARG": "N",
+        "ISR_NO": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "TAX_FREE_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        },
+        "ZERO_RATED_AMT": {
+          "sourceNumericLiteral": "0",
+          "storedText": "must bind target type/scale; no JS Number"
+        }
+      },
+      "typedDelta": {
+        "NET_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        },
+        "TOT_AMT": {
+          "before": "110.00",
+          "after": "111.00"
+        }
+      },
+      "allOtherStoredColumns": "preserve exact observed strings/NULL, row identity, locator and revision unless this row has a nonempty typedDelta; do not insert defaults for unmentioned schema columns"
+    }
+  ],
+  "preservedOrAbsent": [
+    {
+      "table": "BAR_DATA",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "source": "TR_SALE_RTN13072\u201313140",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Source condition MRP!=0 OR PCS+NWT+OTHER!=0 holds before11 and after12. Twelve source assignments plus Vch_Remark scoped AC_CODE blank maintenance qualify source-shaped header; absence is a separate unsupported/source-difference decision."
+    },
+    {
+      "table": "BAR_DETL",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "source": "TR_SALE_RTN10369,13901\u201314229",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Literal N is nonblank; source condition PCS+NWT+NET!=0 holds before121 and after122. All74 ordered source assignments indexed. None directly reads c27/36/38 as a stored valuation; code29/30/31/32/33/34/35 owns tag valuation. Require every mapped BAR value unchanged. Current preview rejects this parent; not admitted by this inventory."
+    },
+    {
+      "table": "TEMP_BOOK_DATA",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "source": "TR_SALE_RTN12515\u201312570",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Identity is company/location/book/HD_VCH_NO without year. BOOK_NAME comes from FormName/current configured book display name. Must observe all competing year/header references to that hidden number."
+    },
+    {
+      "table": "REMARK_DATA",
+      "beforeCount": "0 if exact saved VCH_DESC empty or SQL NULL; otherwise1",
+      "afterCount": "0 if exact saved VCH_DESC empty or SQL NULL; otherwise1",
+      "source": "Ac_Tax563\u2013824, especially751",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "MsSrNo0 + BOOK_TBL_NAME SL_DATA selects SR_NO0, header AC_CODE/date/VCH_DESC and master AC_NAME. Canonical master cardinality and existing remark must agree. No numeric delta."
+    },
+    {
+      "table": "SL_DETL",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "source": "TR_SALE_RTN12499; Ac_Stock245; Ac_Ledr1345/1347",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "No outgoing exchange."
+    },
+    {
+      "table": "SL_IDTL",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "source": "TR_SALE_RTN12503; Ac_Stock806",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "No outgoing components."
+    },
+    {
+      "table": "BAR_IDTL",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "source": "TR_SALE_RTN13164\u201313185; Ac_Stock808",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "No source incoming component rows; prove absence independently of BAR parent N."
+    },
+    {
+      "table": "DM_DATA",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "source": "TR_SALE_RTN13451\u201313459; Ac_Stock804\u2013810",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Both component joins have no rows; unknown existing DM means refusal, not delete."
+    },
+    {
+      "table": "BILL_OS_DATA",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "source": "TR_SALE_RTN13194\u201313225",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Received total remains0; payment RTN_BILL_OS111 does not create an outstanding row."
+    },
+    {
+      "table": "USER_DATA",
+      "beforeCount": "conditional unresolved",
+      "afterCount": "conditional unresolved",
+      "source": "TR_SALE_RTN13465\u201313564",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Edition E saved edit creates per-changed-header field audit rows with current clock, users and caption metadata. This is not proved inert by incoming-only/tax0. Qualify edition or a deliberate web audit compatibility policy before release."
+    },
+    {
+      "table": "all source/settlement/allocation/transfer references",
+      "beforeCount": "unchanged membership",
+      "afterCount": "unchanged membership",
+      "source": "First write admission requirement",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Do not infer absence from empty effect tables. Enumerate reference owners and lock/version protocol before DML; unknown rows block."
+    },
+    {
+      "table": "all unrelated tenant/company/location/year/book/voucher rows",
+      "beforeCount": "unchanged",
+      "afterCount": "unchanged",
+      "source": "Bounded web ownership policy",
+      "action": "preserve exact raw/physical snapshot when admitted",
+      "qualification": "Do not execute desktop global BAR_DATA AC_CODE NULL or SL_DATA RATE_UNFIX NULL maintenance."
+    }
+  ],
+  "rowCountQualification": "When the exact T/noninterstate/master predicates and source-shaped BAR/temp metadata qualify, nine existing rows have numeric deltas: one saved line, one header, two account, one stock, two Rojmel, two tax. BAR header/parent/temp and optional remark have no value delta. Physical preservation for unchanged rows is the intended web policy, not desktop delete/reinsert parity. USER_DATA remains a release blocker until edition/audit policy is qualified.",
+  "bodyAndAuthority": "Only server-replayed c27 history and retained exact scope/context/document/dependency tokens; no client rows/mode/table/policy/effect values. All save capabilities remain false in this analysis."
+}

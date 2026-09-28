@@ -1,0 +1,42 @@
+{
+  "kind": "session-context-batch1-staged-extraction-v1",
+  "status": "staged-not-integrated-not-executed",
+  "declaredTestCases": 72,
+  "compiler": "not-run",
+  "tests": "not-run",
+  "database": "not-run",
+  "browser": "not-run",
+  "formatter": "staged TypeScript files only",
+  "independentFixtureSha256": "5fb741ce33c4615e1c1f905aef9dabf86ef97a58ca1514a56fe44bb46827c8d7",
+  "independentReadReview": "No confirmed semantic mismatch reported; final reviewer note is being pinned separately.",
+  "artifacts": [
+    {
+      "path": "web/apps/api/src/modules/auth/businessScope.ts",
+      "sha256": "c864e5e3aaa7319537ef31fab2861d0a776b9347efa0eb958af2373b8764c3f3"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "ee079f09d0076f2339dd1307a3912c249624786566d216b1f17466af134b3acd"
+    },
+    {
+      "path": "web/apps/api/test/sessionContext.extraction.test.ts",
+      "sha256": "292deccae00b08541747782e9c5fd1722942e984185cd3c95d93a746d008c9ed"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionContext.extraction.independent.json",
+      "sha256": "5fb741ce33c4615e1c1f905aef9dabf86ef97a58ca1514a56fe44bb46827c8d7"
+    },
+    {
+      "path": "batch1-extraction.patch",
+      "sha256": "ea760ac9cad515a185bcc90ff98f8a336312c997c8b988b7c1b9b378f7e1fc6d"
+    },
+    {
+      "path": "static-preservation-check.json",
+      "sha256": "ea9e92d1aa5e5b957da502ec0539d79d97b55583683ebbf8cbb2c528470ef2b6"
+    },
+    {
+      "path": "README.md",
+      "sha256": "d947a41318e88d306a3af222607a3eb8d40d0dbfbbbe6418139dc540a3bba542"
+    }
+  ]
+}

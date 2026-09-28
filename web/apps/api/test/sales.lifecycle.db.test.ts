@@ -832,8 +832,19 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       expect(row.tot % 1).toBe(0);
     }
 
-    // Provenance stamping applied by postVoucherTx: DATA_TRFR defaults to 'N' and the renumbering trail
-    // exists as null so a later renumber updates rather than inserts.
+    /**
+     * Provenance stamping applied by postVoucherTx. Both expectations here were CORRECTED against the real
+     * database: this row is `SL_DETL`, and the desktop leaves BOTH `DATA_TRFR` and `ADD_USER` empty on it.
+     *
+     *   `DATA_TRFR` — populated on 18691 of 27214 rows across the 37 tables carrying it, but `SL_DETL` is
+     *   0 of 245. This test previously required 'N' here, which no real SL_DETL row has.
+     *
+     *   `ADD_USER` — populated on only 2 of the 19 tables carrying both it and `MAIN_USER`
+     *   (`BAR_DETL` 1169/1329, `SL_ORD_DETL` 25/63) and 0 of 245 on `SL_DETL`. The old blanket mirror
+     *   stamped it everywhere.
+     *
+     * The renumbering trail still exists as null so a later renumber updates rather than inserts.
+     */
     const provenance = (await owner.$queryRawUnsafe(
       `SELECT "DATA_TRFR","OLD_VCH_NO","NEW_VCH_NO","MAIN_USER","ADD_USER"
          FROM "SL_DETL" WHERE tenant_id=$1 AND "VCH_NO"='00008' LIMIT 1`,
@@ -841,11 +852,10 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     )) as Array<Record<string, unknown>>;
     expect(provenance).toHaveLength(1);
     const stamp = provenance[0]!;
-    expect(String(stamp.DATA_TRFR ?? '').trim()).toBe('N');
+    expect(String(stamp.DATA_TRFR ?? '').trim()).toBe('');
     expect(stamp.OLD_VCH_NO).toBeNull();
     expect(stamp.NEW_VCH_NO).toBeNull();
-    // ADD_USER mirrors the acting user on a fresh write.
-    if (stamp.MAIN_USER != null) expect(stamp.ADD_USER).toBe(stamp.MAIN_USER);
+    expect(String(stamp.ADD_USER ?? '').trim()).toBe('');
   }, 30_000);
 
   it('rejects an edit locked by the persisted date and leaves the voucher unchanged', async () => {

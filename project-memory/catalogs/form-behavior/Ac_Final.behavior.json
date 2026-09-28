@@ -1,0 +1,33 @@
+{
+ "form": "Ac_Final",
+ "loc": 219,
+ "gridColumns": {},
+ "inlineSql": [
+  "Delete from AC_DATA where CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '999'",
+  "SELECT * FROM AC_DATA WHERE CO_CODE = ' ? ' AND CO_BOOK = '888'",
+  "SELECT B.TRAD_TYPE AS Code ,C.TRAD_NAME AS Name,C.IT_TYPE As ItType,C.AVG_FINE As ClFine,C.AVG_TOUCH,C.AVG_AMT,C.CLG_AC,C.CLOSING_AC,C.TRAD_AMT, SUM(CASE WHEN A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.ITM_MRP <> 0 THEN(CASE WHEN ITM_SIGN = '+' THEN A.ITM_PCS ELSE -A.ITM_PCS END) ELSE 0 END) AS ClPcs, SUM(CASE WHEN A.VCH_DATE <= ' ? MM/dd/yyyy ? ' AND A.ITM_MRP = 0 THEN(CASE WHEN ITM_SIGN = '+' THEN A.ITM_NWT ELSE -A.ITM_NWT END) ELSE 0 END) AS ClNwt FROM (MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE) LEFT JOIN BAL_GR AS C ON B.CO_CODE = C.CO_CODE AND B.TRAD_TYPE = C.TRAD_TYPE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' AND B.TRAD_TYPE <> ''",
+  "INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE, CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE) VALUES (' ? ' , ? ' ? ' ? ' ? ' ? ,' ? ' ,'999','CLGBL','00001',' ? MM/dd/yyyy ? ',' ? Code ? ','FINAL BALANCE','',NULL,'', ' ? CLG_AC ? ',' ? CLOSING_AC ? ', ? 0, ? AVG_AMT ? , '','',0,'',' ? MM/dd/yyyy ? ','',NULL,'A','N',' ? ',0,'')",
+  "SELECT A.TRAD_TYPE AS Code,B.IT_TYPE As ItType,B.TRAD_NAME AS Name,B.AVG_RATE As ClRate,B.AVG_NWT AS ClNwt,B.TOT_PCS AS ClPcs,B.PCS_RATE,B.CLG_AC,B.CLOSING_AC,B.AVG_AMT,0 As ClFine,0 as TRAD_AMT FROM ITEM_MAST AS A LEFT JOIN BAL_GR AS B ON A.CO_CODE = B.CO_CODE AND A.TRAD_TYPE = B.TRAD_TYPE WHERE A.CO_CODE = ' ? ' AND A.TRAD_TYPE <> ''",
+  "SELECT A.TRAD_TYPE AS Code,A.IT_TYPE As ItType,B.TRAD_NAME AS Name,B.AVG_RATE As ClRate,B.AVG_NWT AS ClNwt,B.TOT_PCS AS ClPcs,B.PCS_RATE,B.CLG_AC,B.CLOSING_AC,B.AVG_AMT,0 As ClFine,B.TRAD_AMT FROM ITEM_MAST AS A LEFT JOIN BAL_GR AS B ON A.CO_CODE = B.CO_CODE AND A.TRAD_TYPE = B.TRAD_TYPE WHERE A.CO_CODE = ' ? ' AND A.TRAD_TYPE <> ''",
+  "DELETE FROM LEDR_AC_DATA",
+  "Select B.AC_GR,A.AC_CODE,ROUND(SUM(CR_AMT-DR_AMT),2) AS BalAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' ? T ? P ? AND B.AC_MAIN_GR >= '3' ? AND B.AC_MAIN_GR < '3' ? and VCH_DATE = ' ? MM/dd/yyyy ? ' GROUP BY B.AC_GR,A.AC_CODE HAVING ROUND(SUM(A.CR_AMT-A.DR_AMT),2) <> 0 ORDER BY A.AC_CODE",
+  "Select B.AC_GR,A.AC_CODE,A.DATA_TYPE,ROUND(SUM(CR_AMT-DR_AMT),2) AS BalAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' ? T ? P ? AND B.AC_MAIN_GR >= '3' ? AND B.AC_MAIN_GR < '3' ? and VCH_DATE = ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? GROUP BY B.AC_GR,A.AC_CODE,A.DATA_TYPE HAVING ROUND(SUM(A.CR_AMT-A.DR_AMT),2) <> 0 ORDER BY A.AC_CODE",
+  "Select B.AC_GR,A.AC_CODE,ROUND(SUM(A.CR_AMT-A.DR_AMT),2) AS BalAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' ? T ? P ? AND B.AC_MAIN_GR >= '3' ? AND B.AC_MAIN_GR < '3' ? and VCH_DATE < ' ? MM/dd/yyyy ? ' AND A.CO_BOOK <> '999' GROUP BY B.AC_GR,A.AC_CODE HAVING ROUND(SUM(A.CR_AMT-A.DR_AMT),2) <> 0 ORDER BY A.AC_CODE",
+  "Select B.AC_GR,A.AC_CODE,A.DATA_TYPE,ROUND(SUM(A.CR_AMT-A.DR_AMT),2) AS BalAmt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? AND A.CO_YEAR = ' ? ' ? T ? P ? AND B.AC_MAIN_GR >= '3' ? AND B.AC_MAIN_GR < '3' ? and VCH_DATE < ' ? MM/dd/yyyy ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.CO_BOOK <> '999' GROUP BY B.AC_GR,A.AC_CODE,A.DATA_TYPE HAVING ROUND(SUM(A.CR_AMT-A.DR_AMT),2) <> 0 ORDER BY A.AC_CODE",
+  "INSERT INTO LEDR_AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_DT,MAIN_USER,AC_CODE,CR_AMT,DR_AMT,CR_FINE_WT,DR_FINE_WT,CR_SL_FINE,DR_SL_FINE,DATA_TYPE,AC_GR) VALUES(' ? ', ? ' ? ' ? ' ? ' ? ,' ? ','', ? ' ? MM/dd/yyyy ? ' ? ' ? MM/dd/yyyy ? ' ? ,'',' ? AC_CODE ? ', ? BalAmt ? ,0,0,0,0,0,' ? ',' ? AC_GR ? ')",
+  "SELECT * FROM LEDR_AC_DATA"
+ ],
+ "keyboard": {},
+ "calc": [
+  "num2 = Conversion.Val(RuntimeHelpers.GetObjectValue(DtTradStock.Rows[DC_Main.M][\"ClFine\"])) * (GoldRate / 10.0);",
+  "num3 = Conversion.Val(RuntimeHelpers.GetObjectValue(DtTradStock.Rows[DC_Main.M][\"ClFine\"])) * (SilverRate / 10.0);",
+  "num9 = Conversion.Val(RuntimeHelpers.GetObjectValue(DtTradStock.Rows[DC_Main.M][\"ClNwt\"])) * Conversion.Val(RuntimeHelpers.GetObjectValue(DtTradStock.Rows[DC_Main.M][\"ClRate\"]));",
+  "num10 = Conversion.Val(RuntimeHelpers.GetObjectValue(DtTradStock.Rows[DC_Main.M][\"ClPcs\"])) * Conversion.Val(RuntimeHelpers.GetObjectValue(DtTradStock.Rows[DC_Main.M][\"PCS_RATE\"]));"
+ ],
+ "validations": [
+  {
+   "message": "Please Insert Gold And Silver Rate",
+   "when": ""
+  }
+ ]
+}

@@ -8,6 +8,8 @@ import { LookupPicker } from '../../../../components/LookupPicker';
 export default function ContraPage() {
   const [drAc, setDrAc] = useState('');
   const [crAc, setCrAc] = useState('');
+  // P3: the receiving account's NAME, denormalised onto the voucher as the desktop does.
+  const [toAcName, setToAcName] = useState('');
   const [drAmt, setDrAmt] = useState('');
   const [crAmt, setCrAmt] = useState('');
   const [itDesc, setItDesc] = useState('');
@@ -63,6 +65,10 @@ export default function ContraPage() {
       <form onSubmit={submit}>
         <div className="panel">
           <div className="row">
+            <div className="field">
+              <label>To A/c Name</label>
+              <input value={toAcName} onChange={(e) => setToAcName(e.target.value)} />
+            </div>
             <div className="field">
               <label>Date</label>
               <input type="date" value={vchDate} onChange={(e) => setVchDate(e.target.value)} />

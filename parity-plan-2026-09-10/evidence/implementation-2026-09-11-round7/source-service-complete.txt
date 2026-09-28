@@ -1,0 +1,51 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/saleReturnSource.db.test.ts (41 tests) 10341ms
+   ✓ original sale source observation without Return admission > reads exact original parent OLD ownership and numerically ordered children without any writes 1362ms
+   ✓ original sale source observation without Return admission > browses exact books/historical years with bounded string pagination and literal search 326ms
+   ✓ original sale source observation without Return admission > requires the selected target year and versions its configuration independently of the original year 528ms
+   ✓ original sale source observation without Return admission > uses exact persisted1 before00001 and preserves6–8 digit imported keys 1293ms
+   ✓ original sale source observation without Return admission > rejects malformed source query {"sourceVchNo":"123456789"} 531ms
+   ✓ original sale source observation without Return admission > invalidates observations for source/master/config/child/linked Return changes and ABA 1422ms
+
+ Test Files  1 passed (1)
+      Tests  41 passed (41)
+   Start at  09:03:58
+   Duration  12.21s (transform 298ms, setup 0ms, collect 462ms, tests 10.34s, environment 0ms, prepare 255ms)
+

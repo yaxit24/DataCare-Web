@@ -1,0 +1,198 @@
+{
+ "form": "TR_PHYSTK",
+ "loc": 4892,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cTagNo": 1,
+  "cItCode": 2,
+  "citName": 3,
+  "cDesign": 4,
+  "cColour": 5,
+  "cPolish": 6,
+  "cSize": 7,
+  "cCfNo": 8,
+  "cCounter": 9,
+  "cFromCntr": 10,
+  "cToCntrCode": 11,
+  "cToCntrName": 12,
+  "cPcs": 13,
+  "cGrWt": 14,
+  "cOthWt": 15,
+  "cNetWt": 16,
+  "cFine": 17,
+  "cLbrAmt": 18,
+  "cOthAmt": 19,
+  "cTagCost": 20,
+  "cMrp": 21,
+  "cMargin": 22,
+  "cNewMrp": 23,
+  "cRemark": 24,
+  "cKrName": 25,
+  "cVchSrno": 26,
+  "cEntryMod": 27,
+  "cDesignImgId": 28,
+  "cOldSrNo": 29,
+  "cTblPosting": 30,
+  "cOldMargin": 31
+ },
+ "inlineSql": [
+  "MRP UPDATE ? VK052NEVK",
+  "Select A.TAG_NO,A.VCH_SRNO,B.VCH_TIME FROM MAIN_STOCK AS A LEFT JOIN BAR_DETL AS B ON A.LC_CODE = B.LC_CODE AND A.TAG_NO = B.TAG_NO AND A.VCH_SRNO = B.VCH_SRNO WHERE ? Y ? A.CO_CODE = ' ? ' AND ? A.LC_CODE = ' ? ' AND A.TAG_NO = ' ? ' ? AND A.VCH_SRNO = ? AND B.EMP_ISU <> 'Y' GROUP BY A.TAG_NO,A.VCH_SRNO,B.VCH_TIME HAVING SUM(CASE WHEN A.ITM_SIGN ='+' THEN A.VCH_SRNO ELSE - A.VCH_SRNO END) > 0 ORDER BY B.VCH_TIME DESC",
+  "Select A.TAG_NO,A.VCH_SRNO,B.VCH_TIME FROM MAIN_STOCK AS A LEFT JOIN BAR_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.TAG_NO = B.TAG_NO AND A.VCH_SRNO = B.VCH_SRNO WHERE ? Y ? A.CO_CODE = ' ? ' AND ? A.LC_CODE = ' ? ' AND A.TAG_NO = ' ? ' ? AND A.VCH_SRNO = ? AND B.EMP_ISU <> 'Y' GROUP BY A.TAG_NO,A.VCH_SRNO,B.VCH_TIME HAVING SUM(CASE WHEN A.ITM_SIGN ='+' THEN A.VCH_SRNO ELSE - A.VCH_SRNO END) > 0 ORDER BY B.VCH_TIME DESC",
+  "Select A.TAG_NO AS TagNoL,B.IT_NAME As ItNameL,A.IT_CODE as ItCodeL,C.DESIGN_NO AS DesignNoL,C.ITM_GWT AS GrWtW,C.ITM_NWT AS NetWtW,C.ITM_MRP as MrpR,C.VCH_SRNO,C.VCH_TIME From (MAIN_STOCK AS A LEFT JOIN BAR_DETL AS C ON A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO)LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE ? Y ? A.CO_CODE = ' ? ' AND ? A.LC_CODE = ' ? ' AND C.EMP_ISU <> 'Y' GROUP BY A.TAG_NO,B.IT_NAME,A.IT_CODE,C.DESIGN_NO,C.ITM_GWT,C.ITM_NWT,C.ITM_MRP,C.VCH_SRNO,C.VCH_TIME HAVING SUM(CASE WHEN ITM_SIGN = '+' THEN A.VCH_SRNO ELSE -A.VCH_SRNO END) > 0 ORDER BY A.TAG_NO,C.VCH_TIME DESC",
+  "SELECT TAG_NO FROM BAR_CAN_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND BOOK_NAME = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT A.*,B.IT_NAME FROM BAR_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.TAG_NO = ' ? TAG_NO ? ' AND A.VCH_SRNO = ' ? '",
+  "SELECT TABLE_NAME FROM TABLE_MAST WHERE CO_CODE =' ? ' AND LC_CODE = ' ? ' AND TABLE_CODE = ' ? TBL_CODE ? '",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItemNameL,A.IT_CODE as ItCodeL, B.GR_NAME AS GroupL,A.PR_CODE As PrCodeL,A.IT_TYPE As ItTypeL,A.TAG_TYPE As TagTypeL FROM ITEM_MAST AS A LEFT JOIN GROUP_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_NAME",
+  "Select * From TABLE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TABLE_CODE = ' ? '",
+  "SELECT A.TABLE_NAME As CouneterNameL,A.TABLE_CODE as CtrCodeL FROM TABLE_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' ORDER BY A.TABLE_CODE",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM PRINT_MAST WHERE CO_CODE = ' ? ' AND PRINT_TYPE = 'QR' ORDER BY PRINT_FILE",
+  "SELECT * FROM PRINT_MAST WHERE CO_CODE = ' ? ' AND PRINT_TYPE = 'TAG' ORDER BY PRINT_FILE",
+  "Select MAX(VCH_NO) As VchNo From BAR_CAN_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT MAX(VCH_NO) AS VchNo From TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM BAR_CAN_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT EMP_NAME FROM EMP_MAST WHERE CO_CODE =' ? ' AND EMP_CODE = ' ? '",
+  "SELECT A.*,B.IT_NAME FROM BAR_CAN_DETL AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.IT_CODE = B.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' AND A.VCH_NO = ' ? ' ORDER BY A.SR_NO",
+  "SELECT TABLE_NAME FROM TABLE_MAST WHERE CO_CODE =' ? ' AND LC_CODE = ' ? ' AND TABLE_CODE = ' ? TO_TBL_CODE ? '",
+  "MRP UPDATE ? OLD_MRP ? 0.00",
+  "Please Select Employee Code and Try......",
+  "SELECT MAX(VCH_NO) AS VchNo From BAR_CAN_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = ' ? ' HAVING MAX(VCH_NO) > 0",
+  "SELECT * FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM BAR_IDTL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM BAR_CAN_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM BAR_CAN_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM TEMP_BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT * FROM BAR_CAN_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "INSERT INTO BAR_DETL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO,VCH_DATE,STK_DATE,VCH_TIME, VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,BOOK_NAME,AC_CODE,IT_CODE,TAG_NO,LOT_NO,DESIGN_NO,TBL_CODE,ITM_SIZE,ITM_PCS, BAG_WT,ITM_GWT,ITM_OTH_WT,ITM_NWT,ITM_GHT_PRC,ITM_GHT_WT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE,LBR_PRC,LBR_RATE, LBR_TYPE,LBR_AMT,OTH_AMT,ITM_RATE,ITM_AMT,TAG_COST,ITM_MARGIN,ITM_MRP,ITM_REMARK,SF_NO,KR_NAME,KR_OTH_WT, KR_NET_WT,KR_GHT_PRC,KR_GHT_WT,KR_TOUCH,KR_WEST_PRC,KR_FINE,KR_LBR_RATE,KR_LBR_AMT,KR_OTH_AMT,KR_COST, TAG_SRNO,VCH_SRNO,RATE_TYPE,IT_TYPE,TAG_TYPE,PR_CODE,APR_ISU,ORD_NO,ORD_SRNO,ORD_YRCD,ORD_DBCD,ORD_AC, MAIN_USER,ADD_USER,DATA_TRFR,HD_VCH_NO,OLD_VCH_NO,NEW_VCH_NO,HM_ID2,HM_ID3,HM_ID4,HM_ID_WT,HM_ID2_WT,HM_ID3_WT, HM_ID4_WT,HM_ID,DATA_TYPE,APP_TRFR,ITM_COLOR,MAIN_MARGIN_PRC,MAIN_MRP,JDT_JDT_WT,JDT_GHT_WT,JDT_KUN_WT,JDT_WAX_WT, KR_WAX_WT,JDT_KUN_TOUCH,JDT_KUN_NET,EMP_ISU,LBR_CODE,DESIGN_IMG_ID) SELECT TOP 1 CO_CODE,LC_CODE,' ? ',' ? ',' ? ', ? , ? ,' ? MM/dd/yyyy ? ',STK_DATE,' ? MM/dd/yyyy HH:mm:ss ? ', ' ? ',' ? ','T',' ? ',AC_CODE,IT_CODE,TAG_NO,LOT_NO,DESIGN_NO,' ? ',ITM_SIZE,ITM_PCS, BAG_WT,ITM_GWT,ITM_OTH_WT,ITM_NWT,ITM_GHT_PRC,ITM_GHT_WT,ITM_TOUCH,ITM_WEST_PRC,ITM_FINE,LBR_PRC,LBR_RATE, LBR_TYPE,LBR_AMT,OTH_AMT,ITM_RATE,ITM_AMT,TAG_COST,ITM_MARGIN,ITM_MRP,ITM_REMARK,SF_NO,KR_NAME,KR_OTH_WT, KR_NET_WT,KR_GHT_PRC,KR_GHT_WT,KR_TOUCH,KR_WEST_PRC,KR_FINE,KR_LBR_RATE,KR_LBR_AMT,KR_OTH_AMT,KR_COST, TAG_SRNO, ? ,RATE_TYPE,IT_TYPE,TAG_TYPE,PR_CODE,APR_ISU,ORD_NO,ORD_SRNO,ORD_YRCD,ORD_DBCD,ORD_AC, MAIN_USER,ADD_USER,DATA_TRFR,HD_VCH_NO,OLD_VCH_NO,NEW_VCH_NO,HM_ID2,HM_ID3,HM_ID4,HM_ID_WT,HM_ID2_WT,HM_ID3_WT, HM_ID4_WT,HM_ID,DATA_TYPE,APP_TRFR,ITM_COLOR,MAIN_MARGIN_PRC,MAIN_MRP,JDT_JDT_WT,JDT_GHT_WT,JDT_KUN_WT,JDT_WAX_WT, KR_WAX_WT,JDT_KUN_TOUCH,JDT_KUN_NET,EMP_ISU,LBR_CODE,DESIGN_IMG_ID FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ORDER BY VCH_TIME DESC",
+  "INSERT INTO BAR_IDTL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE,VCH_TYPE,INOUT_TYPE,ENTRY_TYPE, BOOK_NAME,AC_CODE,TAG_NO,VCH_SRNO,IT_CODE,IT_TYPE,DM_CODE,DM_SIZE,DM_SFNO,DM_LEB,IT_PCS,IT_PCS_WT,KR_WT, KR_LESS_PRC,IT_GWT,IT_CON_PRC,IT_CON_WT,IT_RATE_TYPE,IT_RATE,IT_AMT,IT_LBR_RATE,IT_LBR_AMT,IT_NET_AMT,KR_CON_PRC, KR_CON_WT,KR_RATE,KR_AMT,KR_LBR_RATE,KR_LBR_AMT,KR_NET_AMT,MAIN_USER,DM_NAME,OLD_VCH_NO,NEW_VCH_NO,DM_ORIGIN, DM_REMARK,DM_COLOR,KR_ACT_WT,KR_ACT_PRC) SELECT CO_CODE,LC_CODE,' ? ',' ? ',' ? ', ? ,ISR_NO,' ? MM/dd/yyyy ? ',' ? ',' ? ','T', ' ? ',AC_CODE,TAG_NO, ? ,IT_CODE,IT_TYPE,DM_CODE,DM_SIZE,DM_SFNO,DM_LEB,IT_PCS,IT_PCS_WT,KR_WT, KR_LESS_PRC,IT_GWT,IT_CON_PRC,IT_CON_WT,IT_RATE_TYPE,IT_RATE,IT_AMT,IT_LBR_RATE,IT_LBR_AMT,IT_NET_AMT,KR_CON_PRC, KR_CON_WT,KR_RATE,KR_AMT,KR_LBR_RATE,KR_LBR_AMT,KR_NET_AMT,MAIN_USER,DM_NAME,OLD_VCH_NO,NEW_VCH_NO,DM_ORIGIN, DM_REMARK,DM_COLOR,KR_ACT_WT,KR_ACT_PRC FROM BAR_IDTL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "DELETE FROM IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "SELECT * FROM IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "MRP UPDATE ? UPDATE BAR_DETL SET BAR_DETL.ITM_MARGIN = B.MRP_MARGIN,BAR_DETL.ITM_MRP = B.ITM_MRP FROM BAR_DETL,BAR_CAN_DETL AS B WHERE BAR_DETL.CO_CODE = B.CO_CODE AND BAR_DETL.TAG_NO = B.TAG_NO AND BAR_DETL.VCH_SRNO = B.VCH_SRNO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "UPDATE BAR_DETL SET BAR_DETL.ITM_MARGIN = B.MRP_MARGIN,BAR_DETL.ITM_MRP = B.ITM_MRP FROM BAR_DETL,BAR_CAN_DETL AS B WHERE BAR_DETL.CO_CODE = B.CO_CODE AND BAR_DETL.TAG_NO = B.TAG_NO AND BAR_DETL.VCH_SRNO = B.VCH_SRNO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "DELETE FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "DELETE FROM DM_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "UPDATE BAR_DETL SET BAR_DETL.TBL_CODE = B.TO_TBL_CODE FROM BAR_DETL,BAR_CAN_DETL AS B WHERE BAR_DETL.CO_CODE = B.CO_CODE AND BAR_DETL.TAG_NO = B.TAG_NO AND BAR_DETL.VCH_SRNO = B.VCH_SRNO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "UPDATE APR_DETL SET APR_DETL.TBL_CODE = B.TO_TBL_CODE FROM APR_DETL,BAR_CAN_DETL AS B WHERE APR_DETL.CO_CODE = B.CO_CODE AND APR_DETL.TAG_NO = B.TAG_NO AND APR_DETL.VCH_SRNO = B.VCH_SRNO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "UPDATE MAIN_STOCK SET MAIN_STOCK.TBL_CODE = B.TO_TBL_CODE FROM MAIN_STOCK,BAR_CAN_DETL AS B WHERE MAIN_STOCK.CO_CODE = B.CO_CODE AND MAIN_STOCK.TAG_NO = B.TAG_NO AND MAIN_STOCK.VCH_SRNO = B.VCH_SRNO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "UPDATE BAR_DETL SET BAR_DETL.TBL_CODE = B.TBL_CODE FROM BAR_DETL,BAR_CAN_DETL AS B WHERE BAR_DETL.CO_CODE = B.CO_CODE AND BAR_DETL.TAG_NO = B.TAG_NO AND BAR_DETL.VCH_SRNO = B.VCH_SRNO AND B.CO_CODE = ' ? ' AND B.LC_CODE = ' ? ' AND B.CO_YEAR = ' ? ' AND B.CO_BOOK = ' ? ' AND B.VCH_NO = ' ? '",
+  "DELETE FROM REMARK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "SELECT A.VCH_NO As VchNoL,replace(convert(NVARCHAR,A.VCH_DATE, 103), ' ', '/') AS VchDateL,C.IT_NAME As ItemNameL,A.MAIN_USER UserL FROM (BAR_CAN_DATA AS A LEFT JOIN BAR_CAN_DETL AS B ON A.CO_CODE = B.CO_CODE AND A.LC_CODE = B.LC_CODE AND A.CO_YEAR = B.CO_YEAR AND A.CO_BOOK = B.CO_BOOK AND A.VCH_NO = B.VCH_NO) LEFT JOIN ITEM_MAST AS C ON B.CO_CODE = C.CO_CODE AND B.IT_CODE = C.IT_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = ' ? ' GROUP BY A.VCH_NO,A.VCH_DATE,C.IT_NAME,A.MAIN_USER ORDER BY A.VCH_NO",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? ' AND IMAGE_TYPE = 'D'",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT VCH_NO FROM BAR_CAN_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? ' AND VCH_NO = ' ? '",
+  "Select * From EMP_MAST WHERE CO_CODE = ' ? ' AND EMP_CODE = ' ? '",
+  "SELECT EMP_NAME As EmpNameL,EMP_CODE As EmpL FROM EMP_MAST WHERE CO_CODE = ' ? ' ORDER BY EMP_NAME",
+  "UPDATE APR_DETL SET ISU_REC = 'N' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 2,
+  "Up": 2,
+  "Down": 2,
+  "Enter": 4,
+  "Right": 1,
+  "Left": 1
+ },
+ "calc": [
+  "mSG_TOT[0, 13] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 13]) + Conversion.Val(MSG[DC_Main.M, 13]))), \"0\");",
+  "mSG_TOT[0, 17] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 17]) + Conversion.Val(MSG[DC_Main.M, 17]))), \"0.000\");",
+  "mSG_TOT[0, 15] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 15]) + Conversion.Val(MSG[DC_Main.M, 15]))), \"0.000\");",
+  "mSG_TOT[0, 14] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 14]) + Conversion.Val(MSG[DC_Main.M, 14]))), \"0.000\");",
+  "mSG_TOT[0, 16] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 16]) + Conversion.Val(MSG[DC_Main.M, 16]))), \"0.000\");",
+  "NewValTot = Conversion.Val(MSG_TOT[0, 13]) + Conversion.Val(MSG_TOT[0, 14]);",
+  "mSG[mSG.Row, 29] = Conversions.ToString(Conversion.Val(mSG[mSG.Rows - 2, 29]) + 1.0);",
+  "val[val.Row, 22] = Strings.Format((object)Math.Round((Conversion.Val(val[val.Row, 23]) - Conversion.Val(val[val.Row, 20])) / Conversion.Val(val[val.Row, 20]) * 100.0, 2), \"0.00\");",
+  "val[val.Row, 23] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 21]) * (1.0 + Conversion.Val(val[val.Row, 22]) / 100.0)), \"0.00\");",
+  "val[val.Row, 22] = Strings.Format((object)Math.Round((Conversion.Val(val[val.Row, 23]) - Conversion.Val(val[val.Row, 21])) / Conversion.Val(val[val.Row, 21]) * 100.0, 2), \"0.00\");",
+  "val[val.Row, 23] = Strings.Format((object)Math.Round(Conversion.Val(val[val.Row, 20]) * (1.0 + Conversion.Val(val[val.Row, 22]) / 100.0)), \"0.00\");",
+  "tVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "tHdVchNo.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"VchNo\"])) + 1.0), \"00000\");",
+  "OldValTot = Conversion.Val(MSG_TOT[0, 13]) + Conversion.Val(MSG_TOT[0, 14]);",
+  "if (((Operators.CompareString(mSG[DC_Main.i, 2], \"\", false) != 0) & (Operators.CompareString(mSG[DC_Main.i, 1], \"\", false) != 0) & (Conversion.Val(mSG[DC_Main.i, 21]) != 0.0)) | (Conversion.Val(mSG[DC_Main.i, 14]) + Conversion.Val(mSG[DC_Main.i, 18]) + Conversion.Val(mSG[DC_Main.i, 19]) != 0.0))",
+  "MSG[MSG.Row, 29] = Conversions.ToString(Conversion.Val(MSG[MSG.Rows - 2, 29]) + 1.0);",
+  "string text = Strings.Format((object)(Conversion.Val(tVchNo.Text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) - 1.0), \"00000\");",
+  "text = Strings.Format((object)(Conversion.Val(text) + 1.0), \"00000\");"
+ ],
+ "validations": [
+  {
+   "message": "This Row Record will Removed permantley ?",
+   "when": "Operators.CompareString(FormMainBook, \"COUNTER TRFR\", false) == 0 && (int)Interaction.MsgBox((object)\"This Row Record will Removed permantley ?\", (MsgBoxStyle)3"
+  },
+  {
+   "message": "Please Save This Voucher Then Effect....",
+   "when": ""
+  },
+  {
+   "message": "Duplicate Tag No",
+   "when": "(Operators.CompareString(mSG[DC_Main.X, 1], TEXT_ENTRY.Text, false) == 0) & (mSG.Row != DC_Main.X)"
+  },
+  {
+   "message": "This Tag is Allrady Scane to Other Voucher Not Alloud Duplicate Tag No",
+   "when": "dataTable.Rows.Count > 0"
+  },
+  {
+   "message": "Please Select Employee Code and Try......",
+   "when": "Operators.CompareString(FormMainBook, \"COUNTER TRFR\", false) == 0 && ((Operators.CompareString(DC_Main.MsEmpCodeMendetry, \"Y\", false) == 0) & (Operators.Compare"
+  },
+  {
+   "message": "You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...",
+   "when": "(DateTime.Compare(Conversions.ToDate(DC_Main.MCo_OpDate), Conversions.ToDate(mVchDate.Text)) > 0) | (DateTime.Compare(Conversions.ToDate(DC_Main.MCo_ClDate), Co"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Please Insert VchNo and try",
+   "when": "Operators.CompareString(tVchNo.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Voucher Is Saved.....",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Voucher now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Voucher now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "Last Record...",
+   "when": "Conversion.Val(tVchNo.Text) >= Conversion.Val(LastVchNo)"
+  },
+  {
+   "message": "You Have No Open Report Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Physical Stock will Reset permantley ?",
+   "when": "(int)Interaction.MsgBox((object)\"Physical Stock will Reset permantley ?\", (MsgBoxStyle)20, (object)null) == 6 && (int)Interaction.MsgBox((object)\"Delete All Phy"
+  },
+  {
+   "message": "Physical Stock Is ReSet...",
+   "when": ""
+  },
+  {
+   "message": "Please Insert Design No and Try..",
+   "when": "Operators.CompareString(DC_Main.MsImageNo, \"\", false) == 0"
+  },
+  {
+   "message": "Please Check Len Connection...You Cant Save Image...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  }
+ ]
+}

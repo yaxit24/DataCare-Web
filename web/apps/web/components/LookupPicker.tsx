@@ -23,6 +23,7 @@ export function LookupPicker({
   placeholder,
   ariaLabel,
   style,
+  advanceOnPick = true,
 }: {
   entity: string;
   value: string;
@@ -33,6 +34,8 @@ export function LookupPicker({
   placeholder?: string;
   ariaLabel?: string;
   style?: React.CSSProperties;
+  /** Workflows with asynchronous validation move focus after their own successful commit. */
+  advanceOnPick?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LookupRow[]>([]);
@@ -70,7 +73,7 @@ export function LookupPicker({
     onChange(String(r.code));
     onPick?.(r);
     setOpen(false);
-    if (inputRef.current) focusNext(inputRef.current);
+    if (advanceOnPick && inputRef.current) focusNext(inputRef.current);
   };
 
   return (

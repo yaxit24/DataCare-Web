@@ -1,0 +1,38 @@
+{
+ "form": "UT_SETTING_MAIN",
+ "tables": [
+  "CO_SET",
+  "CO_SET_NEW",
+  "MENU_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "CO_SET",
+   "CO_SET_NEW",
+   "MENU_DATA"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "CO_SET",
+  "CO_SET_NEW",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 65,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 1,
+ "calcSample": [
+  "ITM_RATE_ROF = '\" + Strings.Mid(cboBilTotRof.Text, 1, 1) + \"' WHERE CO_CODE = '\" + DC_Main.MCo_code + \"'\"",
+  "LAmt = GhtWt + NetWt * LRate\"",
+  "LBR_WITH_GHT = '\" + Strings.Mid(cboLbrWitGht.Text, 1, 1) + \"' WHERE CO_CODE = '\" + DC_Main.MCo_code + \"'\"",
+  "TOT_AMT_ROF = '\" + Strings.Mid(cboBilTotRof.Text, 1, 1) + \"' WHERE CO_CODE = '\" + DC_Main.MCo_code + \"'\"",
+  "WAPP_IMG_GWT = '\" + Strings.Mid(cboImgWithWt.Text, 1, 1) + \"' WHERE CO_CODE = '\" + DC_Main.MCo_code + \"'\""
+ ],
+ "loc": 9496
+}

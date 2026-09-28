@@ -28,6 +28,33 @@ const OUT_DIR = String(process.env.PARITY_OUT_DIR ?? '').trim()
   ? resolve(process.cwd(), String(process.env.PARITY_OUT_DIR).trim())
   : resolve(REPO, '..', 'project-memory', 'parity', 'bundles');
 
+/**
+ * Tables that carry CO_BOOK and VCH_NO but whose (CO_BOOK, VCH_NO) does NOT identify a voucher in that book.
+ *
+ * Both extractors discover their table set from the schema on purpose, so a table the desktop writes and the
+ * web does not will surface. `OP_LDR` breaks the assumption behind that discovery rather than being a genuine
+ * missing write, and had to be excluded once the comparison scaled past a single voucher:
+ *
+ *   * 7011 rows across 35 books, all under ONE CO_YEAR;
+ *   * in book 035 it holds 77 distinct VCH_NO where PR_DATA holds 29, and 50 of those 77 do not exist in
+ *     PR_DATA at all;
+ *   * its VCH_DATE values fall in the PRIOR year (2023) while the year being compared is 2024-2025.
+ *
+ * It is the year-end/opening ledger snapshot written by the import utility and read by one report — not a
+ * posting target. Matching it on (book, vchNo) therefore pulled unrelated prior-year rows into every case and
+ * produced 55 "the web never wrote this table" findings plus 64 missing rows of pure noise, which is worse
+ * than useless: it made all 66 cases fail for a reason that is not a defect.
+ *
+ * Set PARITY_EXCLUDE_TABLES to override (comma separated). The SAME set must apply on both sides, or the
+ * differ reports a one-sided table.
+ */
+const NON_VOUCHER_TABLES = new Set(
+  (process.env.PARITY_EXCLUDE_TABLES ?? 'OP_LDR')
+    .split(',')
+    .map((s) => s.trim().toUpperCase())
+    .filter(Boolean),
+);
+
 const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const qpg = (v) => {
   if (!IDENT.test(v)) throw new Error(`unsafe SQL identifier: ${v}`);
@@ -90,7 +117,9 @@ async function main() {
        WHERE table_schema='public' AND upper(column_name) IN ('CO_BOOK','VCH_NO')
        GROUP BY table_name HAVING count(DISTINCT upper(column_name))=2
        ORDER BY table_name`);
-    const candidateTables = tableRows.map((r) => String(r.name));
+    const candidateTables = tableRows
+      .map((r) => String(r.name))
+      .filter((t) => !NON_VOUCHER_TABLES.has(t.toUpperCase()));
     if (!candidateTables.length) throw new Error('no voucher-shaped tables found');
 
     const metaRows = await prisma.$queryRawUnsafe(`

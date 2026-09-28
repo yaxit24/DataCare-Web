@@ -1,0 +1,14 @@
+{
+  "command": [
+    "pnpm",
+    "test:parity:api"
+  ],
+  "cwd": "/tmp/datacare-round12-verification/web",
+  "startedAtUtc": "2026-09-11T18:02:25.592856+00:00",
+  "finishedAtUtc": "2026-09-11T18:12:45.581667+00:00",
+  "exitCode": 1,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-api.txt",
+  "isolatedInputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-workspace-inputs.json",
+  "isolatedInputManifestSha256": "598de0a6f696babb3ecc147bf552c6f933682b64e379382fed943c5d6c7fc245"
+}

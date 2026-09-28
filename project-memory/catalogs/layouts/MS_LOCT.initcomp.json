@@ -1,0 +1,757 @@
+{
+ "form": "MS_LOCT",
+ "controlCount": 72,
+ "byKind": {
+  "tab": 7,
+  "textbox": 26,
+  "panel": 4,
+  "label": 27,
+  "grid": 1,
+  "combo": 1,
+  "button": 5,
+  "check": 1
+ },
+ "grids": [
+  "DGV"
+ ],
+ "tabs": [
+  "TabPanel1",
+  "TabPanel2",
+  "TabPanel3",
+  "TabMenu",
+  "Tab1",
+  "Tab2",
+  "Tab3"
+ ],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint"
+  ],
+  "TabMenu": [
+   "TabPanel1",
+   "TabPanel2",
+   "TabPanel3"
+  ],
+  "Pnl1": [
+   "chkItmDisc",
+   "Label16",
+   "tAcCode",
+   "tAcName",
+   "cboRptHader",
+   "Label15",
+   "lblReset",
+   "tJudrection",
+   "Label7",
+   "tMobile2",
+   "Label6",
+   "tPhone2",
+   "Label5",
+   "TState",
+   "Label4",
+   "tCountry",
+   "Label3",
+   "tEmail",
+   "tMobile",
+   "tPhone",
+   "tCity",
+   "tAddress3",
+   "tAddress2",
+   "tAddress1",
+   "tPinCode",
+   "lblEmail",
+   "lblMoNo",
+   "lblPhone",
+   "lblCity",
+   "lblAdd3",
+   "lblAdd2",
+   "lblAdd1",
+   "lblBookCo",
+   "tCoName",
+   "tCoCode",
+   "Label2",
+   "Label1"
+  ],
+  "Pnl2": [
+   "tPanNo",
+   "tDhiranNo",
+   "tCstNo",
+   "tGstNo",
+   "Label8",
+   "lblMoNo2",
+   "Label9",
+   "Label10"
+  ],
+  "Pnl3": [
+   "tRtgsNo",
+   "tBankAcNo",
+   "tBankArea",
+   "tBankName",
+   "Label11",
+   "Label12",
+   "Label13",
+   "Label14"
+  ],
+  "this": [
+   "Text1",
+   "TabMenu",
+   "DGV",
+   "lblBook",
+   "PnlBotam"
+  ]
+ },
+ "controls": [
+  {
+   "name": "TabPanel1",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "547,436",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "tCoCode",
+   "type": "TextBox",
+   "location": "127,17",
+   "size": "65,23",
+   "tabIndex": "0",
+   "text": "01",
+   "kind": "textbox"
+  },
+  {
+   "name": "TabPanel2",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "547,436",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "Pnl2",
+   "type": "Panel",
+   "location": "-13,-4",
+   "size": "578,441",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "TabPanel3",
+   "type": "SuperTabControlPanel",
+   "location": "0,0",
+   "size": "547,436",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "tCoName",
+   "type": "TextBox",
+   "location": "127,47",
+   "size": "391,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Pnl3",
+   "type": "Panel",
+   "location": "-12,-3",
+   "size": "578,440",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tAddress1",
+   "type": "TextBox",
+   "location": "127,77",
+   "size": "391,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAddress2",
+   "type": "TextBox",
+   "location": "127,107",
+   "size": "391,23",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAddress3",
+   "type": "TextBox",
+   "location": "127,137",
+   "size": "391,23",
+   "tabIndex": "4",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "tCountry",
+   "type": "TextBox",
+   "location": "127,167",
+   "size": "391,23",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Location Master",
+   "kind": "label"
+  },
+  {
+   "name": "TState",
+   "type": "TextBox",
+   "location": "127,197",
+   "size": "391,23",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "69,94",
+   "size": "395,391",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tCity",
+   "type": "TextBox",
+   "location": "127,227",
+   "size": "216,23",
+   "tabIndex": "7",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "TabMenu",
+   "type": "SuperTabControl",
+   "location": "563,49",
+   "size": "547,463",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "tab"
+  },
+  {
+   "name": "tPinCode",
+   "type": "TextBox",
+   "location": "416,228",
+   "size": "102,23",
+   "tabIndex": "8",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tPhone",
+   "type": "TextBox",
+   "location": "127,257",
+   "size": "148,23",
+   "tabIndex": "9",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Text1",
+   "type": "TextBox",
+   "location": "69,64",
+   "size": "395,18",
+   "tabIndex": "9",
+   "text": "SEARCH RECORD",
+   "kind": "textbox"
+  },
+  {
+   "name": "tPhone2",
+   "type": "TextBox",
+   "location": "370,259",
+   "size": "148,23",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tMobile",
+   "type": "TextBox",
+   "location": "127,287",
+   "size": "148,23",
+   "tabIndex": "11",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tMobile2",
+   "type": "TextBox",
+   "location": "370,288",
+   "size": "148,23",
+   "tabIndex": "12",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tEmail",
+   "type": "TextBox",
+   "location": "127,317",
+   "size": "391,23",
+   "tabIndex": "13",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tJudrection",
+   "type": "TextBox",
+   "location": "127,348",
+   "size": "391,23",
+   "tabIndex": "14",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "cboRptHader",
+   "type": "ComboBox",
+   "location": "127,407",
+   "size": "124,24",
+   "tabIndex": "15",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "tGstNo",
+   "type": "TextBox",
+   "location": "127,29",
+   "size": "391,23",
+   "tabIndex": "16",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tCstNo",
+   "type": "TextBox",
+   "location": "127,57",
+   "size": "391,23",
+   "tabIndex": "17",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tPanNo",
+   "type": "TextBox",
+   "location": "127,86",
+   "size": "391,23",
+   "tabIndex": "18",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tDhiranNo",
+   "type": "TextBox",
+   "location": "127,114",
+   "size": "391,23",
+   "tabIndex": "19",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tBankName",
+   "type": "TextBox",
+   "location": "127,28",
+   "size": "391,23",
+   "tabIndex": "20",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tBankArea",
+   "type": "TextBox",
+   "location": "127,56",
+   "size": "391,23",
+   "tabIndex": "21",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "908,3",
+   "size": "95,37",
+   "tabIndex": "22",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "tBankAcNo",
+   "type": "TextBox",
+   "location": "127,84",
+   "size": "391,23",
+   "tabIndex": "22",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1009,3",
+   "size": "95,37",
+   "tabIndex": "23",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "tRtgsNo",
+   "type": "TextBox",
+   "location": "127,112",
+   "size": "391,23",
+   "tabIndex": "23",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1110,3",
+   "size": "95,37",
+   "tabIndex": "24",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1211,3",
+   "size": "95,37",
+   "tabIndex": "25",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "807,3",
+   "size": "95,37",
+   "tabIndex": "26",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "24,115",
+   "size": "79,19",
+   "tabIndex": "85",
+   "text": "Dhiran No",
+   "kind": "label"
+  },
+  {
+   "name": "Label11",
+   "type": "Label",
+   "location": "17,112",
+   "size": "108,19",
+   "tabIndex": "85",
+   "text": "Rtgs No",
+   "kind": "label"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "24,86",
+   "size": "82,19",
+   "tabIndex": "86",
+   "text": "Pan No",
+   "kind": "label"
+  },
+  {
+   "name": "Label12",
+   "type": "Label",
+   "location": "17,84",
+   "size": "105,19",
+   "tabIndex": "86",
+   "text": "Bank AcNo",
+   "kind": "label"
+  },
+  {
+   "name": "Label8",
+   "type": "Label",
+   "location": "24,58",
+   "size": "85,19",
+   "tabIndex": "87",
+   "text": "Cst No",
+   "kind": "label"
+  },
+  {
+   "name": "Label13",
+   "type": "Label",
+   "location": "17,56",
+   "size": "105,19",
+   "tabIndex": "87",
+   "text": "Branch Name",
+   "kind": "label"
+  },
+  {
+   "name": "lblMoNo2",
+   "type": "Label",
+   "location": "24,30",
+   "size": "98,19",
+   "tabIndex": "88",
+   "text": "Gst / Tin No",
+   "kind": "label"
+  },
+  {
+   "name": "Label14",
+   "type": "Label",
+   "location": "17,28",
+   "size": "102,19",
+   "tabIndex": "88",
+   "text": "Bank Name",
+   "kind": "label"
+  },
+  {
+   "name": "Pnl1",
+   "type": "Panel",
+   "location": "-12,-2",
+   "size": "578,438",
+   "tabIndex": "109",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "24,17",
+   "size": "97,20",
+   "tabIndex": "110",
+   "text": "Co Code",
+   "kind": "label"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "24,48",
+   "size": "105,20",
+   "tabIndex": "111",
+   "text": "Co Name",
+   "kind": "label"
+  },
+  {
+   "name": "lblReset",
+   "type": "Label",
+   "location": "198,18",
+   "size": "66,20",
+   "tabIndex": "112",
+   "text": "-",
+   "kind": "label"
+  },
+  {
+   "name": "lblBookCo",
+   "type": "Label",
+   "location": "333,227",
+   "size": "81,19",
+   "tabIndex": "120",
+   "text": "Pin Code",
+   "kind": "label"
+  },
+  {
+   "name": "lblAdd1",
+   "type": "Label",
+   "location": "24,79",
+   "size": "116,19",
+   "tabIndex": "121",
+   "text": "Address1",
+   "kind": "label"
+  },
+  {
+   "name": "lblAdd2",
+   "type": "Label",
+   "location": "24,109",
+   "size": "119,19",
+   "tabIndex": "122",
+   "text": "Address2",
+   "kind": "label"
+  },
+  {
+   "name": "lblAdd3",
+   "type": "Label",
+   "location": "24,139",
+   "size": "119,19",
+   "tabIndex": "123",
+   "text": "Address3",
+   "kind": "label"
+  },
+  {
+   "name": "lblCity",
+   "type": "Label",
+   "location": "24,229",
+   "size": "101,19",
+   "tabIndex": "124",
+   "text": "City",
+   "kind": "label"
+  },
+  {
+   "name": "lblPhone",
+   "type": "Label",
+   "location": "24,259",
+   "size": "108,19",
+   "tabIndex": "125",
+   "text": "Phone No",
+   "kind": "label"
+  },
+  {
+   "name": "lblMoNo",
+   "type": "Label",
+   "location": "24,289",
+   "size": "108,19",
+   "tabIndex": "126",
+   "text": "Mobile No",
+   "kind": "label"
+  },
+  {
+   "name": "lblEmail",
+   "type": "Label",
+   "location": "24,319",
+   "size": "107,19",
+   "tabIndex": "127",
+   "text": "Email",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "24,169",
+   "size": "119,19",
+   "tabIndex": "129",
+   "text": "Country",
+   "kind": "label"
+  },
+  {
+   "name": "Label4",
+   "type": "Label",
+   "location": "24,199",
+   "size": "119,19",
+   "tabIndex": "131",
+   "text": "State",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "277,259",
+   "size": "86,19",
+   "tabIndex": "133",
+   "text": "Phone No2",
+   "kind": "label"
+  },
+  {
+   "name": "Label6",
+   "type": "Label",
+   "location": "277,290",
+   "size": "86,19",
+   "tabIndex": "135",
+   "text": "Mobile No2",
+   "kind": "label"
+  },
+  {
+   "name": "Label7",
+   "type": "Label",
+   "location": "24,349",
+   "size": "119,19",
+   "tabIndex": "137",
+   "text": "Jurisdiction",
+   "kind": "label"
+  },
+  {
+   "name": "Label15",
+   "type": "Label",
+   "location": "24,407",
+   "size": "124,20",
+   "tabIndex": "139",
+   "text": "Report Hader",
+   "kind": "label"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "127,377",
+   "size": "79,23",
+   "tabIndex": "1166",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "211,377",
+   "size": "307,23",
+   "tabIndex": "1167",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label16",
+   "type": "Label",
+   "location": "24,379",
+   "size": "92,19",
+   "tabIndex": "1168",
+   "text": "Branch Ac",
+   "kind": "label"
+  },
+  {
+   "name": "chkItmDisc",
+   "type": "CheckBox",
+   "location": "287,405",
+   "size": "127,27",
+   "tabIndex": "1169",
+   "text": "",
+   "kind": "check"
+  },
+  {
+   "name": "Tab1",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Company Detail",
+   "kind": "tab"
+  },
+  {
+   "name": "Tab2",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Tax Detail",
+   "kind": "tab"
+  },
+  {
+   "name": "Tab3",
+   "type": "SuperTabItem",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "Bank Detail",
+   "kind": "tab"
+  }
+ ]
+}

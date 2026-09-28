@@ -1,0 +1,14 @@
+{
+  "command": [
+    "env",
+    "API_ORIGIN=http://127.0.0.1:4410",
+    "pnpm",
+    "build"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T13:58:48.863375+00:00",
+  "finishedAtUtc": "2026-09-11T13:58:50.115972+00:00",
+  "exitCode": 2,
+  "status": "failed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round10/build.txt"
+}

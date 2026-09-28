@@ -1,0 +1,11 @@
+{
+  "status": "retained",
+  "baselineJourneys": 17,
+  "contextChecks": 14,
+  "contextTransportFaults": 5,
+  "labourChecks": 5,
+  "labourTransportFaults": 4,
+  "publicArtifacts": 63,
+  "qualification": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/retained-browser-artifacts-qualification.json",
+  "qualificationSha256": "9256708cca7d2b97451f9724fc05f029ed28d55eb7f079331a8d7207e13b6e8c"
+}

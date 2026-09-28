@@ -1,0 +1,436 @@
+{
+ "kind": "datacare.parity-diff/1.0",
+ "comparedAt": "2026-08-01T12:01:23.872Z",
+ "desktop": {
+  "capturedAt": "2026-08-01T11:59:50.560Z",
+  "database": "Live24",
+  "engine": "sqlserver",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU26) (KB5093420) - 16.0.4265.3 (X64) ",
+  "host": "127.0.0.1"
+ },
+ "web": {
+  "capturedAt": "2026-08-01T12:01:23.820Z",
+  "database": "datacare",
+  "engine": "postgres"
+ },
+ "matched": false,
+ "cases": [
+  {
+   "caseId": "scheme-074-00001",
+   "description": "",
+   "desktopVoucher": "074/00001",
+   "webVoucher": "074/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 50,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000858 DR_AMT=0.00 CR_AMT=2000.00",
+       "column": "LEDR_KEY",
+       "desktop": "01002024-20250740000101         1",
+       "web": "01002024-20250740000152",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000858 DR_AMT=0.00 CR_AMT=2000.00",
+       "column": "LD_CODE",
+       "desktop": "00001",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000858 DR_AMT=0.00 CR_AMT=2000.00",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "C",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000858 DR_AMT=0.00 CR_AMT=2000.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000858 DR_AMT=0.00 CR_AMT=2000.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000858 DR_AMT=0.00 CR_AMT=2000.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-01",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000858 DR_AMT=0.00 CR_AMT=2000.00",
+       "column": "LDR_NAME",
+       "desktop": "03 - ALAUDIN MAKASUDBHAI KADARI",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "LEDR_KEY",
+       "desktop": "01002024-20250740000102         1",
+       "web": "01002024-20250740000151",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "AC_CODE",
+       "desktop": "00001",
+       "web": "CASH",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "LD_CODE",
+       "desktop": "000858",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SIGN",
+       "desktop": "",
+       "web": "D",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-01",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "PARTY_AC_CODE",
+       "desktop": "",
+       "web": "CASH",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "single unmatched row",
+       "column": "LDR_NAME",
+       "desktop": "03 - ALAUDIN MAKASUDBHAI KADARI",
+       "web": "",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "AD_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 26,
+     "fieldsExcluded": 6,
+     "differences": [
+      {
+       "table": "AD_DATA",
+       "rowKey": "single unmatched row",
+       "column": "IT_DESC",
+       "desktop": "APR",
+       "web": "Scheme 03 installment",
+       "scale": 6
+      },
+      {
+       "table": "AD_DATA",
+       "rowKey": "single unmatched row",
+       "column": "EMP_CODE",
+       "desktop": "002",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AD_DATA",
+       "rowKey": "single unmatched row",
+       "column": "REC_AC",
+       "desktop": "00001",
+       "web": "CASH",
+       "scale": 6
+      },
+      {
+       "table": "AD_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ITM_GWT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AD_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ITM_RATE",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "AD_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BANK_NAME",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AD_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CHQ_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "AD_OS",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 23,
+     "fieldsExcluded": 3,
+     "differences": [
+      {
+       "table": "AD_OS",
+       "rowKey": "single unmatched row",
+       "column": "ENTRY_TYPE",
+       "desktop": "E",
+       "web": "I",
+       "scale": 6
+      },
+      {
+       "table": "AD_OS",
+       "rowKey": "single unmatched row",
+       "column": "LD_CODE",
+       "desktop": "00001",
+       "web": "CASH",
+       "scale": 6
+      },
+      {
+       "table": "AD_OS",
+       "rowKey": "single unmatched row",
+       "column": "EMP_CODE",
+       "desktop": "002",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AD_OS",
+       "rowKey": "single unmatched row",
+       "column": "DATA_TRFR",
+       "desktop": "(null)",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "AD_OS",
+       "rowKey": "single unmatched row",
+       "column": "ITM_RATE",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      }
+     ]
+    },
+    {
+     "table": "OP_LDR",
+     "presentOn": "desktop-only",
+     "desktopRows": 2,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:",
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "CR_AMT",
+      "CR_GL_FINE",
+      "CR_SL_FINE",
+      "DATA_TYPE",
+      "DR_AMT",
+      "DR_GL_FINE",
+      "DR_SL_FINE",
+      "ENTRY_TYPE",
+      "INOUT_TYPE",
+      "LC_CODE",
+      "VCH_DATE",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 33,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250740000101         1",
+       "column": "AC_NAME",
+       "desktop": "ALAUDIN MAKASUDBHAI KADARI",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250740000101         1",
+       "column": "LD_CODE",
+       "desktop": "00001",
+       "web": "CASH",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250740000101         1",
+       "column": "IT_DESC",
+       "desktop": "APR",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250740000101         1",
+       "column": "MEMB_CODE",
+       "desktop": "0029",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250740000101         1",
+       "column": "SCHM_CODE",
+       "desktop": "03",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250740000101         1",
+       "column": "REF_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 4,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "TEMP_BOOK_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BOOK_NAME",
+       "desktop": "Member Monthly Entry",
+       "web": "MEMB ENTRY",
+       "scale": 6
+      }
+     ]
+    }
+   ],
+   "totals": {
+    "tablesCompared": 5,
+    "tablesDesktopOnly": 1,
+    "tablesWebOnly": 0,
+    "rowsMissing": 2,
+    "rowsExtra": 0,
+    "fieldsCompared": 136,
+    "fieldsExcluded": 16,
+    "fieldDifferences": 35
+   }
+  }
+ ],
+ "desktopOnlyCases": [],
+ "webOnlyCases": [],
+ "totals": {
+  "cases": 1,
+  "casesMatched": 0,
+  "tablesCompared": 5,
+  "tablesDesktopOnly": 1,
+  "tablesWebOnly": 0,
+  "rowsMissing": 2,
+  "rowsExtra": 0,
+  "fieldsCompared": 136,
+  "fieldsExcluded": 16,
+  "fieldDifferences": 35
+ }
+}

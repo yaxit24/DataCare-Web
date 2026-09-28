@@ -1,0 +1,122 @@
+{
+  "kind": "independent-read-review-inputs-v1",
+  "recordedAtUtc": "2026-09-12T00:01:15.049025+00:00",
+  "root": "/Users/yakshitsavaliya/Desktop/imodule-extracted",
+  "files": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/gap-manifest-current.json",
+      "sha256": "d303296da9043c198d4a6bdc8dc307d7d342e971166835226288c8f0c0e65471",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-input-labour-current.json",
+      "sha256": "9a352dfbfc2245cd5eb6abdcf00be115633cd311cfd39af7114b998e6a6432bb",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-input-delta-qualification.json",
+      "sha256": "fb065a2f9a538cc703847885a6bc2a1bc198a6b8886cec31c86c18683913d434",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-current.inputs.json",
+      "sha256": "66843be5960efb0532637ccf9c2b08b47e992da474140b19ea742443b622a083",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-current.run.json",
+      "sha256": "cc79eb768eb5f90fec935ffa4af8180f5a3d961f4ef5f8a5012f52022c5ece74",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-current.txt",
+      "sha256": "0f1f81017b4ef35400509ac530e7f56bf9aab3635dafb69d6e9090036f93506d",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-labour-current.inputs.json",
+      "sha256": "08c5b9f8110912edc9afb4d8514194d11c94618ab7ab2bcbb600e539d4378189",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-labour-current.run.json",
+      "sha256": "a50b8340b990a8ccab138071722f8085324233fc9e6370686f0fb6a30c30a2e4",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/depth-gate-labour-current.txt",
+      "sha256": "2db3f6c011072faefbfaa70445c7ac5de50821abef869cae927ec4cfaa97ff5d",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "project-memory/parity/gap_manifest.py",
+      "sha256": "0404f2b930215b1c90dbdce0e3f4ab1fc0b0328dd28554aeeb8dbcb5150c5a35",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "web/scripts/check-depth.mjs",
+      "sha256": "02887291c8e230250ac0b27d04e0fe2c9273bb6ee66cae08566de4ea24df6be1",
+      "earlierRecordedInputSha256": "02887291c8e230250ac0b27d04e0fe2c9273bb6ee66cae08566de4ea24df6be1",
+      "laterRecordedInputSha256": "02887291c8e230250ac0b27d04e0fe2c9273bb6ee66cae08566de4ea24df6be1"
+    },
+    {
+      "path": "web/parity/depth-parity-baseline.json",
+      "sha256": "f1715408a150d2382fad4ef48df67c91d453e239b4462c04e42043ecd7efd032",
+      "earlierRecordedInputSha256": "f1715408a150d2382fad4ef48df67c91d453e239b4462c04e42043ecd7efd032",
+      "laterRecordedInputSha256": "f1715408a150d2382fad4ef48df67c91d453e239b4462c04e42043ecd7efd032"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/measurement-script-manifest.json",
+      "sha256": "48273ae0eec645093a3e20104fc32239aa3729115466cba082ec20614382e3d8",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": null
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "sha256": "caeca09dcbdff4990ce5ffbe00505605d498f92a63beaec640496398fb236626",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": "caeca09dcbdff4990ce5ffbe00505605d498f92a63beaec640496398fb236626"
+    },
+    {
+      "path": "web/apps/api/src/modules/rbac/authorization.ts",
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe",
+      "earlierRecordedInputSha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe",
+      "laterRecordedInputSha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe"
+    },
+    {
+      "path": "web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "sha256": "c2d34d7a4270fe35a9af9455ecf402376e450377b95d392382c79268b99658ba",
+      "earlierRecordedInputSha256": "c2d34d7a4270fe35a9af9455ecf402376e450377b95d392382c79268b99658ba",
+      "laterRecordedInputSha256": "c2d34d7a4270fe35a9af9455ecf402376e450377b95d392382c79268b99658ba"
+    },
+    {
+      "path": "web/apps/web/lib/salesReturnLabourReplay.ts",
+      "sha256": "c9775c999e07f5827a9196f975aea7315da0ae275ab492f64c411f1c510a4905",
+      "earlierRecordedInputSha256": null,
+      "laterRecordedInputSha256": "a5c5b4c21bf630d9fc99c86294660a2465c0d1392ee45f09f9b65cbd57139ae8"
+    }
+  ],
+  "measurementScriptQualification": {
+    "gapScannerAbsentFromBothRunInputManifests": true,
+    "currentGapScannerMatchesEarlierDeltaQualification": true,
+    "captureTimeSourceIsNotNewExecutionEvidence": true
+  },
+  "activeLaterFrontendDrift": [
+    {
+      "path": "web/apps/web/lib/salesReturnLabourReplay.ts",
+      "recordedSha256": "a5c5b4c21bf630d9fc99c86294660a2465c0d1392ee45f09f9b65cbd57139ae8",
+      "currentSha256": "c9775c999e07f5827a9196f975aea7315da0ae275ab492f64c411f1c510a4905"
+    }
+  ],
+  "comparisonSha256": "b6bcb45477c1af7cea6f250c8e92370c4d1a914e9940ec2ef0ca611d85c5a7f1"
+}

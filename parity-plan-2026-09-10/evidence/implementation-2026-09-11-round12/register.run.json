@@ -1,0 +1,12 @@
+{
+  "command": [
+    "pnpm",
+    "register:check"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T16:23:49.943138+00:00",
+  "finishedAtUtc": "2026-09-11T16:24:02.779749+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/register.txt"
+}

@@ -1,0 +1,11 @@
+{
+  "status": "failed",
+  "verifiedAtUtc": "2026-09-11T17:41:58.410132+00:00",
+  "changedInputs": [
+    "web/apps/api/src/modules/ops/releaseCertification.ts",
+    "web/apps/api/test/releaseCandidateIdentity.test.mjs",
+    "web/apps/api/test/releaseCertification.test.ts"
+  ],
+  "inputSnapshotSha256": "4f46d961b8919d6929d0568ac160743f0cd57fb0385edc5a07eeb2f6063899e7",
+  "inputs": 589
+}

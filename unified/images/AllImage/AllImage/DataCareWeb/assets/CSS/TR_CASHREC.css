@@ -1,0 +1,329 @@
+﻿html {
+    height: 100%;
+}
+
+body {
+    background: #ff6a00;
+    font-family: Assistant, sans-serif;
+    display: flex;
+    margin: auto;
+    min-height: 90vh;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    height: 100%;
+    width: 100%;
+}
+
+.card {
+    background-color: red;
+    height: 100%;
+    width: 10%;
+    text-align: center;
+}
+
+.top {
+    background-color: #ff6a00;
+    height: 4.5rem;
+    width: 100%;
+    position: absolute;
+    padding-top: 20px;
+}
+
+.toplbl {
+    padding: 2%;
+    font: 35px/68px 'Muli', sans-serif;
+    font-weight: 600;
+}
+
+.mid {
+    background-color: white;
+    width: 100%;
+    position: fixed;
+    height: 93%;
+    overflow: scroll;
+}
+
+.iconline {
+    width: 100%;
+    height: 300px;
+    background-color: white;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(35, 5rem);
+    grid-row-gap: 2rem;
+}
+
+.icon {
+    background-color: white;
+    width: 100%;
+    cursor: pointer;
+    align-content: center;
+}
+
+    .icon:nth-child(1) {
+        grid-column: 1;
+        text-align: center;
+        color: white;
+        font: 30px/60px 'Muli', sans-serif;
+        font-weight: 700;
+    }
+
+    .icon:nth-child(2) {
+        grid-column: 1;
+        grid-row: 2;
+        text-align: left;
+    }
+
+    .icon:nth-child(3) {
+        grid-column: 1;
+        grid-row: 3;
+        text-align: left;
+    }
+
+    .icon:nth-child(4) {
+        grid-column: 1;
+        grid-row: 4;
+        text-align: left;
+    }
+
+    .icon:nth-child(5) {
+        grid-column: 1;
+        grid-row: 5;
+        text-align: left;
+    }
+
+    .icon:nth-child(6) {
+        grid-column: 1;
+        grid-row: 6;
+        text-align: left;
+    }
+
+    .icon:nth-child(7) {
+        grid-column: 1;
+        grid-row: 7;
+        text-align: left;
+    }
+
+    .icon:nth-child(8) {
+        grid-column: 1;
+        grid-row: 8;
+        text-align: left;
+    }
+
+    .icon:nth-child(9) {
+        grid-column: 1;
+        grid-row: 9;
+        text-align: left;
+    }
+
+    .icon:nth-child(10) {
+        grid-column: 1;
+        grid-row: 10;
+        text-align: left;
+    }
+
+    .icon:nth-child(11) {
+        grid-column: 1;
+        grid-row: 11;
+        text-align: left;
+    }
+
+.acclbl {
+    font-size: 35px;
+    position: absolute;
+    top: 18%;
+    left: 3%;
+    color: #5b5a5a;
+    font-weight: 600;
+}
+
+.Midacclbl {
+    font-size: 35px;
+    position: absolute;
+    top: 18%;
+    right: 0;
+    margin-right: 36%;
+    color: #5b5a5a;
+    font-weight: 600;
+}
+
+.mainline {
+    height: 5rem;
+    width: 100%;
+    position: absolute;
+}
+
+.textbox {
+    border: 2px solid;
+    position: relative;
+    left: 23%;
+    font: 40px/72px 'Muli', sans-serif;
+    color: #005B75;
+    width: 73%;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+    padding-left: 3%;
+    text-transform: uppercase;
+}
+
+.Midtextbox {
+    border: 2px solid;
+    position: relative;
+    float: right;
+    margin-right: 4%;
+    font: 40px/72px 'Muli', sans-serif;
+    color: #005B75;
+    width: 73%;
+    box-sizing: border-box;
+    letter-spacing: 1px;
+    padding-left: 3%;
+    text-transform: uppercase;
+}
+
+
+/*=============Help - Greed ===========*/
+.serch-input {
+    font: 30px/50px Arial, Helvetica, sans-serif;
+    color: black;
+    text-decoration: none;
+    border: none;
+    text-transform: uppercase;
+    border: none;
+    font-weight: 600;
+}
+
+.hlp-main {
+    margin: 3%;
+    height: 650px;
+    width: 92%;
+    background-color: #faf0e6;
+    overflow: auto;
+    position: sticky;
+    border: 1px solid;
+}
+
+.hlp-gv {
+    height: 100px;
+}
+/*help Greed mate design*/
+.hlpgrid {
+    display: grid;
+    border: none;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    background-color: whitesmoke;
+    width: auto;
+}
+    /*greed header*/
+    .hlpgrid th {
+        background-image: linear-gradient(#ffffff, #d5ddea);
+        padding: 10px;
+        font: 10px/20px Arial, Helvetica, sans-serif;
+    }
+
+    .hlpgrid td {
+        font-weight: 500;
+        cursor: pointer;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+        /*greed box hover*/
+        .hlpgrid td:hover {
+            font-weight: 500;
+            cursor: pointer;
+            background-color: #ffe2b3;
+        }
+    /*greed row*/
+    .hlpgrid td, .hlpgrid th {
+        border: 1px solid #005B75;
+        font-family: Arial;
+        font-size: 23pt;
+        font-weight: 600;
+        margin: auto;
+        /*padding: 5px;*/
+        overflow: hidden;
+    }
+/*greed line back color*/
+tr:nth-child(even) {
+    background-color: #ffefd5;
+}
+/*greed line back color hover*/
+tr:hover {
+    background-color: #ffc0c0;
+    font-weight: 500;
+}
+
+.hlpgrid table table td {
+    border-style: none;
+}
+/* greed header and footer ne fix karva mate*/
+table th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 0;
+    border: none;
+}
+
+.ft {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;
+    z-index: 0;
+    background-image: linear-gradient(#ffffff, #d5ddea);
+    font-weight: 800;
+    border-bottom: solid;
+    text-align: right;
+}
+
+.gr-text {
+    font: 20px/40px Arial, Helvetica, sans-serif;
+    color: black;
+    padding-left: 1%;
+    text-transform: uppercase;
+    font-weight: 600;
+    background: none;
+    border: none;
+}
+
+    .gr-text:focus {
+        outline: none;
+    }
+
+
+
+
+.bottom {
+    background-color: #dbedf7;
+    height: 130px;
+    width: 100%;
+    border-radius: 10px;
+    position: fixed;
+    bottom: 0;
+}
+
+.left-buttom {
+    margin-top: 3%;
+    margin-left: -7%;
+    height: 80px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.right-buttom {
+    margin-right: 16%;
+    margin-top: 3%;
+    float: right;
+    height: 80px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.mid-buttom {
+    margin-left: 20%;
+    cursor: pointer;
+    height: 80px;
+    width: 80px;
+}

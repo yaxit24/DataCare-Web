@@ -1,0 +1,80 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+26 migrations found in prisma/migrations
+
+Applying migration `20260911050000_sale_header_ledger`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260911050000_sale_header_ledger/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 173 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/mfgLotRead.db.test.ts (6 tests) 371ms
+ ❯ test/mfgLotRoutes.db.test.ts (4 tests | 1 failed) 847ms
+   × lot Setting read HTTP integration > rejects wrong families, missing books, foreign scope and malformed pagination; missing exact voucher is404 44ms
+     → expected 409 to be 400 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/mfgLotRoutes.db.test.ts > lot Setting read HTTP integration > rejects wrong families, missing books, foreign scope and malformed pagination; missing exact voucher is404
+AssertionError: expected 409 to be 400 // Object.is equality
+
+- Expected
++ Received
+
+- 400
++ 409
+
+ ❯ test/mfgLotRoutes.db.test.ts:169:9
+    167|       expect(
+    168|         (await request('setting-issue', `/mfg/lot/issue/${suffix}?coBo…
+    169|       ).toBe(400);
+       |         ^
+    170|       expect(
+    171|         (await request('setting-issue', `/mfg/lot/issue/${suffix}?coBo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   Start at  03:23:20
+   Duration  4.80s (transform 1.39s, setup 0ms, collect 2.12s, tests 1.22s, environment 0ms, prepare 93ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/mfgLotRead.db.test.ts test/mfgLotRoutes.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1

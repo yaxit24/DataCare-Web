@@ -1,0 +1,324 @@
+﻿html {
+    height: 100%;
+}
+
+body {
+    background: #ff6a00;
+    font-family: Assistant, sans-serif;
+    display: flex;
+    margin: auto;
+    min-height: 90vh;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    height: 100%;
+    width: 100%;
+}
+
+.card {
+    background-color: red;
+    height: 100%;
+    width: 10%;
+    text-align: center;
+}
+
+.top {
+    background-color: #ff6a00;
+    height: 4.5rem;
+    width: 100%;
+    position: absolute;
+    padding-top: 20px;
+}
+
+.toplbl {
+    padding: 2%;
+    font: 35px/68px 'Muli', sans-serif;
+    font-weight: 600;
+}
+
+.mid {
+    background-color: white;
+    width: 100%;
+    position: fixed;
+    height: 93%;
+    overflow: scroll;
+}
+
+.iconline {
+    width: 100%;
+    height: 300px;
+    background-color: white;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(2, 5rem);
+    grid-row-gap: 2rem;
+}
+
+.icon {
+    background-color: white;
+    width: 100%;
+    cursor: pointer;
+    align-content: center;
+}
+
+    .icon:nth-child(1) {
+        grid-column: 1;
+        text-align: center;
+        color: white;
+        font: 30px/60px 'Muli', sans-serif;
+        font-weight: 700;
+    }
+
+
+
+.cIsuSrNo {
+    margin-top: 100px;
+    box-shadow: 0px 8px 30px lightgray;
+    border-end-end-radius: 20px;
+    border-end-start-radius: 20px;
+    /*border-start-start-radius: 100px;
+    border-start-end-radius: 100px;*/
+    row-gap: 100px;
+    padding: 60px;
+    margin-top: 100px;
+}
+
+
+
+/*============text - Greed Entry===========*/
+.oth-main {
+    margin: 3%;
+    height: 650px;
+    width: 92%;
+    overflow: auto;
+    position: sticky;
+}
+
+
+/*Greed mate design*/
+.grid {
+    display: grid;
+    justify-content: center;
+    border: none;
+}
+
+
+    .grid td {
+        font-weight: 500;
+        cursor: pointer;
+        vertical-align: top;
+        padding-bottom: 100px;
+    }
+
+    /*greed row*/
+    .grid td, .grid th {
+        font-family: Arial;
+        font-size: 34pt;
+        font-weight: 600;
+        border: none;
+        /*padding: 5px;*/
+        overflow: hidden;
+        color: black;
+    }
+
+    .grid table table td {
+        border-style: none;
+        grid-row-gap: 1rem;
+        border: none;
+    }
+
+
+.ft {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;
+    z-index: 0;
+    background-image: linear-gradient(#ffffff, #d5ddea);
+    font-weight: 800;
+    border-bottom: solid;
+    text-align: right;
+}
+
+.sectiondtl {
+    font-family: Bahnschrift;
+    color: #808080;
+    text-align: left;
+    font-size: 30px;
+    font-weight: 600;
+    margin-top: 2%;
+    padding-left: 2%;
+    position: sticky;
+}
+
+
+
+
+.ynbtn {
+    font-size: 34px;
+    font-family: Bahnschrift;
+    font-weight: 700;
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+    border: 3px solid;
+    border-color: #66abd9;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-top-right-radius: 40px;
+    border-top-left-radius: 40px;
+    background-color: white;
+    color: #a52323cc;
+    margin-top: 50px;
+    margin-left: 10%;
+    cursor: pointer;
+}
+
+.acspace {
+    margin-top: 30px;
+}
+
+.ACNAME {
+    color: #045fa3d9;
+    border-bottom: 3px solid;
+    padding-bottom: 10px;
+    border-bottom-color: lightgray;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.VCHNO {
+    color: #a52323;
+    letter-spacing: 2px;
+}
+
+.VCHDATE {
+    color: #a52323;
+    letter-spacing: 2px;
+}
+
+.UserName {
+    color: #a52323;
+    letter-spacing: 2px;
+}
+
+.EditUser {
+    color: #07692f;
+    letter-spacing: 2px;
+}
+
+.EditRem {
+    color: #07692f;
+    letter-spacing: 2px;
+}
+
+.Rtype {
+    color: #045fa3d9;
+    letter-spacing: 2px;
+}
+
+
+/*==============  LDR MAte*/
+
+.serchinput {
+    font: 27px/50px Arial, Helvetica, sans-serif;
+    color: #808080;
+    background-color: white;
+    text-decoration: none;
+    border: none;
+    text-transform: uppercase;
+    border: none;
+    font-weight: 600;
+    padding-left: 30px;
+    padding-right: 30px;
+    float: left;
+    margin-left: 25px;
+    box-shadow: 0px 8px 30px lightgray;
+    border-end-end-radius: 20px;
+    border-end-start-radius: 20px;
+    border-start-start-radius: 10px;
+    border-start-end-radius: 10px;
+    max-width: 35%;
+    min-width: 35%;
+}
+
+.Searchlbl {
+    font: 27px/50px Arial, Helvetica, sans-serif;
+    color: #808080;
+    background-color: white;
+    text-decoration: none;
+    border: none;
+    text-transform: uppercase;
+    border: none;
+    font-weight: 600;
+    padding-left: 30px;
+    padding-right: 30px;
+    float: left;
+    margin-left: 25px;
+    margin-top: 25px;
+    box-shadow: 0px 8px 30px lightgray;
+    border-end-end-radius: 20px;
+    border-end-start-radius: 20px;
+    border-start-start-radius: 10px;
+    border-start-end-radius: 10px;
+    max-width: 20%;
+    min-width: 20%;
+}
+
+.serchtab {
+    background-color: whitesmoke;
+    height: 9rem;
+    width: 100%;
+    position: absolute;
+    padding-top: 20px;
+}
+
+.drop {
+    font: 32px/72px Arial, Helvetica, sans-serif;
+    color: #808080;
+    text-decoration: none;
+    background-color: white;
+    border: none;
+    text-transform: uppercase;
+    border: none;
+    font-weight: 600;
+    padding-left: 30px;
+    padding-right: 30px;
+    float: left;
+    margin-left: 25px;
+    box-shadow: 0px 8px 30px lightgray;
+    border-end-end-radius: 20px;
+    border-end-start-radius: 20px;
+    border-start-start-radius: 10px;
+    border-start-end-radius: 10px;
+    max-width: 25%;
+    min-width: 25%;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    /*position: relative;
+    left: 22%;
+    text-transform: uppercase;
+    font: 40px/72px 'Muli', sans-serif;
+    border: 2px solid;
+    background: #ffffff;
+    color: #005B75;
+    width: 73%;
+    height: 5rem;
+    box-sizing: border-box;
+    letter-spacing: 1px;*/
+}
+
+.Chekbox input {
+    height: 40px;
+    width: 40px;
+    margin-left: 25px;
+    margin-top: 30px;
+    border: none;
+    border-end-end-radius: 20px;
+    border-end-start-radius: 20px;
+    border-start-start-radius: 10px;
+    border-start-end-radius: 10px;
+    float: left;
+    box-shadow: 0px 8px 30px lightgray;
+}

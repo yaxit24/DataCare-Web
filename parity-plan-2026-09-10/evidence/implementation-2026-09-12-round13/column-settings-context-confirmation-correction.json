@@ -1,0 +1,6 @@
+{
+  "path": "web/apps/web/test/column-settings.journey.mjs",
+  "beforeSha256": "27ed4223771c9806d9da1e921eaecdc6c1330f6035dbca19cdd4d3002eaf1e04",
+  "afterSha256": "c820d22dadac2910cdd666b19774ca4125cd23446318ef834aed279fca7c7010",
+  "reason": "Existing year-switch journey must accept the new explicit unsaved-work confirmation; Playwright otherwise automatically dismisses it. All original draft clearing, year and unchanged stored value assertions retained. No interception or synthetic response."
+}

@@ -1,0 +1,48 @@
+{
+ "form": "UT_USER_REQUEST",
+ "tables": [
+  "AC_DATA",
+  "MAIN_STOCK",
+  "USER_REQUEST"
+ ],
+ "writes": {
+  "INSERT": {
+   "USER_REQUEST": [
+    "AC_CODE",
+    "AC_NAME",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "EDIT_RMARK",
+    "EDIT_USER",
+    "EMP_CODE",
+    "ITM_TYPE",
+    "LC_CODE",
+    "PARMATION_TYPE",
+    "REQ_TIME",
+    "REQ_TYPE",
+    "TOT_AMT",
+    "TOT_FINE",
+    "USER_NAME",
+    "VCH_DATE",
+    "VCH_NO"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "USER_REQUEST"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "MAIN_STOCK",
+  "USER_REQUEST"
+ ],
+ "fKeys": [],
+ "messageBoxes": 2,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 1,
+ "calcSample": [],
+ "loc": 460
+}

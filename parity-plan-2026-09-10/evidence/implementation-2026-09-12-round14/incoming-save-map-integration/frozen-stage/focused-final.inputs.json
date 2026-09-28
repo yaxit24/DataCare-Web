@@ -1,0 +1,7 @@
+{
+  "web/packages/core/src/saleReturnIncomingSaveProjection.ts": "96d8f57b32ccdbfb4fa53e68b4d3435059df8b74fa1cb98f7744ff4b57e32ea4",
+  "web/packages/core/test/saleReturnIncomingSaveProjection.test.ts": "6b49316b2a6ae3a7c4e613f6dfa9977b3441a83d0fd0ce1511d111809c22dc2f",
+  "web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50",
+  "web/packages/core/vitest.config.ts": "a28b987604c0ded000ccdbe483b023bea051839173ea3f390defb2d1ec0428f5",
+  "web/packages/core/package.json": "75310bff016b194c22167683f733bcd0991ba7d1d2a288c77763698eafecf4e8"
+}

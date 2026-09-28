@@ -1,0 +1,232 @@
+ M web/.github/workflows/ci.yml
+ M web/DEPLOY.md
+ M web/apps/api/integration/cutover.mjs
+ M web/apps/api/integration/parity-extract-mssql.mjs
+ M web/apps/api/integration/parity-extract-pg.mjs
+ M web/apps/api/integration/parity-replay-cash.mjs
+ M web/apps/api/integration/parity-replay-purchase.mjs
+ M web/apps/api/integration/parity-replay-sale.mjs
+ M web/apps/api/src/app.ts
+ M web/apps/api/src/modules/einvoice/einvoice.ts
+ M web/apps/api/src/modules/finance/batchReceipt.ts
+ M web/apps/api/src/modules/finance/billToBill.ts
+ M web/apps/api/src/modules/finance/finance.ts
+ M web/apps/api/src/modules/finance/tender.ts
+ M web/apps/api/src/modules/inout/fineInout.ts
+ M web/apps/api/src/modules/manufacturing/karigar.ts
+ M web/apps/api/src/modules/manufacturing/melting.ts
+ M web/apps/api/src/modules/manufacturing/mfg.ts
+ M web/apps/api/src/modules/masters/lookup.ts
+ M web/apps/api/src/modules/membership/scheme.ts
+ M web/apps/api/src/modules/ops/backup.ts
+ M web/apps/api/src/modules/ops/migrationManifest.ts
+ M web/apps/api/src/modules/ops/restoreVerification.ts
+ M web/apps/api/src/modules/posting/posting.ts
+ M web/apps/api/src/modules/purchase/purchase.ts
+ M web/apps/api/src/modules/purchase/purchaseReturn.ts
+ M web/apps/api/src/modules/rbac/formCatalog.ts
+ M web/apps/api/src/modules/rbac/routePolicy.ts
+ M web/apps/api/src/modules/sales/labourInvoice.ts
+ M web/apps/api/src/modules/sales/rateCut.ts
+ M web/apps/api/src/modules/sales/sales.ts
+ M web/apps/api/src/modules/sales/salesReturn.ts
+ M web/apps/api/src/modules/shared/finePolicy.ts
+ M web/apps/api/src/modules/shared/rojmel.ts
+ M web/apps/api/src/modules/shared/settingsBehavior.ts
+ M web/apps/api/src/modules/shared/stoneSubDetail.ts
+ M web/apps/api/src/modules/shared/taxPolicy.ts
+ M web/apps/api/src/modules/stock/stock.ts
+ M web/apps/api/src/modules/stock/stockVoucherLifecycle.ts
+ M web/apps/api/src/modules/stock/tagOps.ts
+ M web/apps/api/src/modules/stock/tagSplit.ts
+ M web/apps/api/src/modules/tour/tour.ts
+ M web/apps/api/src/modules/utilities/dataRepair.ts
+ M web/apps/api/src/routes/txn.ts
+ M web/apps/api/test/cutover.test.ts
+ M web/apps/api/test/dataRepair.db.test.ts
+ M web/apps/api/test/dhrnReceipt.db.test.ts
+ M web/apps/api/test/einvoice_gsp.test.ts
+ M web/apps/api/test/finance.test.ts
+ M web/apps/api/test/mfgLifecycle.db.test.ts
+ M web/apps/api/test/provenance.test.ts
+ M web/apps/api/test/purchase.lifecycle.db.test.ts
+ M web/apps/api/test/rateCut.test.ts
+ M web/apps/api/test/rateCutSettlement.db.test.ts
+ M web/apps/api/test/reportFilterGuard.test.ts
+ M web/apps/api/test/rojmel.test.ts
+ M web/apps/api/test/routePolicy.test.ts
+ M web/apps/api/test/sales.lifecycle.db.test.ts
+ M web/apps/api/test/salesFamilyLifecycle.db.test.ts
+ M web/apps/api/test/settingsBehavior.db.test.ts
+ M web/apps/api/test/settingsBehavior.test.ts
+ M web/apps/api/test/transaction.integrity.db.test.ts
+ M web/apps/api/vitest.config.ts
+ M web/apps/web/app/(app)/backup/page.tsx
+ M web/apps/web/app/(app)/reports/[report]/page.tsx
+ M web/apps/web/app/(app)/txn/ac-opbl/page.tsx
+ M web/apps/web/app/(app)/txn/batch-receipt/page.tsx
+ M web/apps/web/app/(app)/txn/bill-to-bill/page.tsx
+ M web/apps/web/app/(app)/txn/bullion/page.tsx
+ M web/apps/web/app/(app)/txn/contra/page.tsx
+ M web/apps/web/app/(app)/txn/counter-transfer/page.tsx
+ M web/apps/web/app/(app)/txn/dhrn-interest/page.tsx
+ M web/apps/web/app/(app)/txn/dhrn-issue/page.tsx
+ M web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx
+ M web/apps/web/app/(app)/txn/estimate/page.tsx
+ M web/apps/web/app/(app)/txn/fine-inout/page.tsx
+ M web/apps/web/app/(app)/txn/fine-jv/page.tsx
+ M web/apps/web/app/(app)/txn/fine-sale/page.tsx
+ M web/apps/web/app/(app)/txn/hallmark-sale/page.tsx
+ M web/apps/web/app/(app)/txn/item-lot/page.tsx
+ M web/apps/web/app/(app)/txn/item-opening/page.tsx
+ M web/apps/web/app/(app)/txn/jobwork-issue/page.tsx
+ M web/apps/web/app/(app)/txn/jobwork-receive/page.tsx
+ M web/apps/web/app/(app)/txn/journal/page.tsx
+ M web/apps/web/app/(app)/txn/labour-sale/page.tsx
+ M web/apps/web/app/(app)/txn/melting/page.tsx
+ M web/apps/web/app/(app)/txn/mfg-issue/page.tsx
+ M web/apps/web/app/(app)/txn/mfg-order-issue/page.tsx
+ M web/apps/web/app/(app)/txn/mfg-receive/page.tsx
+ M web/apps/web/app/(app)/txn/other-purchase/page.tsx
+ M web/apps/web/app/(app)/txn/purchase-hm/page.tsx
+ M web/apps/web/app/(app)/txn/purchase-return/page.tsx
+ M web/apps/web/app/(app)/txn/purchase/page.tsx
+ M web/apps/web/app/(app)/txn/rate-cut/page.tsx
+ M web/apps/web/app/(app)/txn/sale-return/page.tsx
+ M web/apps/web/app/(app)/txn/sales-order/page.tsx
+ M web/apps/web/app/(app)/txn/sales/page.tsx
+ M web/apps/web/app/(app)/txn/scheme/page.tsx
+ M web/apps/web/app/(app)/txn/stock-adjust/page.tsx
+ M web/apps/web/app/(app)/txn/tag-cancel/page.tsx
+ M web/apps/web/app/(app)/txn/tag-opening/page.tsx
+ M web/apps/web/app/(app)/txn/tag-split/page.tsx
+ M web/apps/web/app/(app)/txn/tag-transfer/page.tsx
+ M web/apps/web/app/(app)/txn/tag-weight-diff/page.tsx
+ M web/apps/web/app/(app)/txn/tour-return/page.tsx
+ M web/apps/web/app/(app)/txn/tour/page.tsx
+ M web/apps/web/app/(app)/txn/vp-parcel/page.tsx
+ M web/apps/web/app/(app)/txn/wholesale-sale-return/page.tsx
+ M web/apps/web/app/(app)/txn/wholesale-sale/page.tsx
+ M web/apps/web/app/(app)/utilities/data-repair/page.tsx
+ M web/apps/web/components/BookSelect.tsx
+ M web/apps/web/components/ExtendedGrid.tsx
+ M web/apps/web/components/FormKeys.tsx
+ M web/apps/web/components/GridKeyboard.tsx
+ M web/apps/web/components/KarigarForm.tsx
+ M web/apps/web/components/PaymentForm.tsx
+ M web/apps/web/components/RepairImagePanel.tsx
+ M web/apps/web/package.json
+ M web/apps/web/test/formKeys.test.ts
+ M web/deploy/.env.example
+ M web/deploy/docker-compose.prod.yml
+ M web/docker-compose.yml
+ M web/docs/COMPLETION-REGISTER.json
+ M web/docs/TECHNICAL-REFERENCE.md
+ M web/package.json
+ M web/packages/core/package.json
+ M web/packages/core/src/calc.ts
+ M web/packages/core/src/index.ts
+ M web/packages/db/prisma/rls.sql
+ M web/packages/db/setup_roles.sql
+ M web/packages/db/src/tenant.ts
+ M web/pnpm-lock.yaml
+ M web/scripts/check-completion-register.mjs
+ M web/scripts/restore-drill.mjs
+?? DESKTOP-PARITY-EXECUTION-PLAN-2026-08-30.md
+?? DESKTOP-PARITY-IMPLEMENTATION-PLAN-2026-09-01.md
+?? DESKTOP-VS-WEB-RICHNESS-GAP-REPORT-2026-09-01.md
+?? EXACT-END-TO-END-PARITY-PLAN-2026-08-29.md
+?? FIXES-AND-SCALED-COMPARISON-2026-08-02.md
+?? FUNCTIONAL-PARITY-PLAN-2026-08-02.md
+?? PARITY-AND-GAP-REPORT-2026-08-02.md
+?? PARITY-GAP-ANALYSIS-2026-08-30.md
+?? REMAINING-WORK-AND-WEB-VERIFICATION-2026-08-31.md
+?? parity-plan-2026-09-10/
+?? reflection.md
+?? web/.github/workflows/release-certification.yml
+?? web/apps/api/integration/daybook-family-audit.mjs
+?? web/apps/api/integration/derive-column-defaults.mjs
+?? web/apps/api/integration/desktop-footprint-census.mjs
+?? web/apps/api/integration/functional-parity-matrix.mjs
+?? web/apps/api/integration/parity-bundle-merge.mjs
+?? web/apps/api/integration/parity-import-masters.mjs
+?? web/apps/api/integration/parity-replay-generic.mjs
+?? web/apps/api/integration/parity-replay-wsale.mjs
+?? web/apps/api/integration/parity-seed-derive.mjs
+?? web/apps/api/src/modules/ops/backupManifest.ts
+?? web/apps/api/src/modules/ops/contractIntegrity.ts
+?? web/apps/api/src/modules/ops/kernelConformance.ts
+?? web/apps/api/src/modules/ops/parityRatchet.ts
+?? web/apps/api/src/modules/ops/releaseCertification.ts
+?? web/apps/api/src/modules/posting/desktopColumnDefaults.ts
+?? web/apps/api/src/modules/reports/billProfitReport.ts
+?? web/apps/api/src/modules/reports/huid.ts
+?? web/apps/api/src/modules/reports/movement.ts
+?? web/apps/api/src/modules/reports/physicalStock.ts
+?? web/apps/api/src/modules/reports/reportAuthorization.ts
+?? web/apps/api/src/modules/reports/stockLevel.ts
+?? web/apps/api/src/modules/shared/postingAccounts.ts
+?? web/apps/api/src/modules/stock/tagInvariants.ts
+?? web/apps/api/test/backupRestore.db.test.ts
+?? web/apps/api/test/billToBillDelete.db.test.ts
+?? web/apps/api/test/clearanceDateBooks.test.ts
+?? web/apps/api/test/completionRegister.test.ts
+?? web/apps/api/test/contraDelete.db.test.ts
+?? web/apps/api/test/contractIntegrity.test.ts
+?? web/apps/api/test/correctionWorkflow.db.test.ts
+?? web/apps/api/test/dataRepairAuthority.test.ts
+?? web/apps/api/test/einvoiceProductionGuard.test.ts
+?? web/apps/api/test/fineInoutGrid.db.test.ts
+?? web/apps/api/test/globalSetup.ts
+?? web/apps/api/test/karigarDayBook.db.test.ts
+?? web/apps/api/test/kernelConformance.test.ts
+?? web/apps/api/test/operatorDepth.roundtrip.db.test.ts
+?? web/apps/api/test/p9Reports.db.test.ts
+?? web/apps/api/test/pageEndpointFamily.test.ts
+?? web/apps/api/test/parityContainmentRoutes.test.ts
+?? web/apps/api/test/parityRatchet.test.ts
+?? web/apps/api/test/postingAccountFailClosed.db.test.ts
+?? web/apps/api/test/postingAccountLiterals.test.ts
+?? web/apps/api/test/purchaseRojmel.test.ts
+?? web/apps/api/test/releaseCertification.test.ts
+?? web/apps/api/test/reopenVoucher.db.test.ts
+?? web/apps/api/test/reportAuthorization.test.ts
+?? web/apps/api/test/settingsEffect.db.test.ts
+?? web/apps/api/test/settingsRealValues.test.ts
+?? web/apps/api/test/tagCancelIdentity.db.test.ts
+?? web/apps/api/test/tagInvariants.db.test.ts
+?? web/apps/api/test/tagOpeningRoundTrip.db.test.ts
+?? web/apps/web/components/ParityContainmentNotice.tsx
+?? web/apps/web/components/SubDetailGrid.tsx
+?? web/apps/web/lib/companySettings.ts
+?? web/apps/web/lib/lineRecalc.ts
+?? web/apps/web/test/derivedValueSources.test.ts
+?? web/apps/web/test/lineRecalc.test.ts
+?? web/apps/web/test/parityContainment.test.ts
+?? web/apps/web/test/route-coverage.mjs
+?? web/apps/web/test/subDetailGrid.test.ts
+?? web/apps/web/test/textIdentifiers.test.ts
+?? web/docs/HANDOFF.md
+?? web/docs/comparisons/family-04-purchase.md
+?? web/eslint.config.mjs
+?? web/packages/core/containment.d.mts
+?? web/packages/core/containment.mjs
+?? web/packages/core/src/finePolicy.ts
+?? web/packages/core/test/containment.test.ts
+?? web/packages/db/prisma/migrations/20260829010000_company_restore_sequence_guard/
+?? web/packages/db/prisma/migrations/20260830000000_data_repair_authority/
+?? web/parity/depth-budget.json
+?? web/parity/depth-parity-baseline.json
+?? web/parity/unreachable-triage.json
+?? web/scripts/adopt-sub-detail.py
+?? web/scripts/check-contracts.mjs
+?? web/scripts/check-dead-cells.mjs
+?? web/scripts/check-depth.mjs
+?? web/scripts/check-kernel-conformance.mjs
+?? web/scripts/mount-grid-keyboard.py
+?? web/scripts/parity-measure.mjs
+?? web/scripts/release-certify.mjs
+?? web/scripts/wire-mfg-line-fields.py
+?? web/scripts/wire-p3-remaining.py
+?? web/scripts/wire_extended_columns.py
+?? web/scripts/writer_verified_fields.py

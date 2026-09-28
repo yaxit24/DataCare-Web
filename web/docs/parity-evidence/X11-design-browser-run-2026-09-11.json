@@ -1,0 +1,28 @@
+{
+  "id": "X11-real-browser-lifecycle-2026-09-11",
+  "parentRun": "apps/web/test/parity.real-stack.mjs",
+  "sourceResult": "test-results/parity-real-stack/result.json",
+  "sourceResultSha256": "b930e5f0ce6514c20aa82ea9b7e78a7cf95b8e69126660afb98f5b79677d147e",
+  "startedAt": "2026-09-10T21:37:37.666Z",
+  "finishedAt": "2026-09-10T21:37:47.925Z",
+  "status": "passed",
+  "database": "disposable localhost:55433 / app_user",
+  "mockedRequests": 0,
+  "checks": [
+    "browser create/reload",
+    "two components",
+    "style and text page number",
+    "unchanged edit",
+    "saved image upload/read/delete",
+    "changed component",
+    "stale edit409 retains form",
+    "browser deletion"
+  ],
+  "classification": "synthetic fixture through real production Next build, Fastify and disposable PostgreSQL; not desktop comparison",
+  "log": "/tmp/datacare-parity-browser.log",
+  "screenshot": {
+    "path": "test-results/parity-real-stack/design-book-components.png",
+    "sha256": "3e4b6d18a3fa3388232c70d4283aab8250fb6c108fcc583ea7634023b4641776",
+    "visualReview": "not asserted by this manifest"
+  }
+}

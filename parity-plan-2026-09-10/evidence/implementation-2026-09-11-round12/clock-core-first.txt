@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/savedSaleReturnClock.test.ts (159 tests) 51ms
+
+ Test Files  1 passed (1)
+      Tests  159 passed (159)
+   Start at  23:22:32
+   Duration  536ms (transform 104ms, setup 0ms, collect 99ms, tests 51ms, environment 0ms, prepare 90ms)
+

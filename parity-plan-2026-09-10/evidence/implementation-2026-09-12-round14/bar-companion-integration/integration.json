@@ -1,0 +1,24 @@
+{
+  "stageManifestSha256": "5d4938df90240195ca8693b94409335de350177eb733f6fb423f5a290ce387c1",
+  "files": [
+    {
+      "path": "web/packages/core/src/saleReturnNBarCompanions.ts",
+      "stagedSha256": "0d63cb36e8b225055efd9c50cbdd005504ad802f589a14b1503f009f2e131d39",
+      "copiedSha256": "0d63cb36e8b225055efd9c50cbdd005504ad802f589a14b1503f009f2e131d39",
+      "afterRepositoryFormattingSha256": "1ec25c5579ec58bd06db0f2ec5cd0161bd29bfe532af2e2e64e7f6e0940ff826"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnNBarCompanions.test.ts",
+      "stagedSha256": "9f40da10bc5455d4d3ea612af6cddac3e3b9cd313f68310086abcaa473535eaf",
+      "copiedSha256": "9f40da10bc5455d4d3ea612af6cddac3e3b9cd313f68310086abcaa473535eaf",
+      "afterRepositoryFormattingSha256": "f2c78357a27b456b20b7fa58031f51e5c27ee6ffb29c3cd1e8e722120377f393"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnNBarCompanions.independent.json",
+      "stagedSha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a",
+      "copiedSha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a",
+      "afterRepositoryFormattingSha256": "30a5f3ff30c3a217bf35cf76afd763f4abde898aae3ef58311dfbce451bc382a"
+    }
+  ],
+  "qualification": "Only three manifest implementation files copied, with separate index export; repository Prettier may change formatting. Stage originals preserved. Active checks recorded separately."
+}

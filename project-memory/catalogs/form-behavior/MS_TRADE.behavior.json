@@ -1,0 +1,57 @@
+{
+ "form": "MS_TRADE",
+ "loc": 1435,
+ "gridColumns": {
+  "cSr": 0,
+  "cTrdName": 1,
+  "cTrdType": 2,
+  "cItType": 3,
+  "cSalAc": 4,
+  "cPurAc": 5,
+  "cCloAc": 6,
+  "cOpnAc": 7,
+  "cClgAc": 8
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM BAL_GR WHERE CO_CODE = ' ? '",
+  "DELETE FROM BAL_GR WHERE CO_CODE = ' ? '",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '25' AND AC_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT A.AC_NAME As TradingNameL,A.AC_CODE as TradeCodeL, A.AC_GR AS TradeGroupL, B.AC_GR_NAME As TradeGroupName FROM AC_MAST As A LEFT JOIN AC_GROUP As B On A.CO_CODE = B.CO_CODE AND A.AC_GR=B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.AC_GR = '25' ORDER BY AC_NAME",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '30' AND AC_CODE = ' ? ' ORDER BY AC_NAME",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '27' AND AC_CODE = ' ? ' ORDER BY AC_NAME",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '28' AND AC_CODE = ' ? ' ORDER BY AC_NAME",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_GR = '18' AND AC_CODE = ' ? ' ORDER BY AC_NAME"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Right": 1,
+  "Left": 1,
+  "Up": 1,
+  "Down": 1,
+  "Enter": 2
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Insert Trading Name...",
+   "when": "Operators.CompareString(TEXT_ENTRY.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Trade Type...",
+   "when": "Operators.CompareString(TEXT_ENTRY.Text, \"\", false) == 0"
+  }
+ ]
+}

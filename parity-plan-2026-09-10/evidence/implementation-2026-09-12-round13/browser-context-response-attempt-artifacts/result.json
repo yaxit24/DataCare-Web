@@ -1,0 +1,45 @@
+{
+  "status": "failed",
+  "startedAt": "2026-09-11T21:24:12.263Z",
+  "requiredChecks": [
+    "real login bootstraps an exact string epoch and immutable login company",
+    "same-scope Open persists one original selection ID and expected epoch before dispatch and bumps once",
+    "cancelled Shell company confirmation preserves the mounted draft and performs no selection",
+    "confirmed Shell company change uses one exact operation and deliberately navigates",
+    "a second tab shares the same session and changes its context through the actual selection UI",
+    "old-page business action receives context-stale without automatic retry or draft DOM replacement",
+    "A to B to A advances epoch while retaining the original page scope values",
+    "an actual late component-default response cannot overwrite the stale page draft",
+    "an uncertain committed Shell selection retains the exact recovery request and draft",
+    "deliberate recovery navigation loads fresh me before retrying the original operation",
+    "exact current receipt retry preserves the epoch and database session row without another open",
+    "business configuration and design rows remain byte-observation unchanged throughout",
+    "late successful selection after client-side Back pauses the document without navigation, draft replacement or recovery erasure",
+    "late dropped selection after client-side Back pauses the document and preserves the draft and exact receipt recovery"
+  ],
+  "provenance": "Real Chromium -> production Next -> Fastify -> PostgreSQL app_user/RLS; explicitly injected upstream response transport faults",
+  "releaseSha": null,
+  "database": "disposable localhost:55433 / app_user",
+  "sessionContext": {
+    "status": "failed",
+    "checks": [
+      "real login bootstraps an exact string epoch and immutable login company"
+    ],
+    "transitions": [],
+    "transportFaultInjections": [
+      {
+        "name": "same-scope-open",
+        "kind": "real-upstream-response-hold",
+        "method": "POST",
+        "path": "/api/context/select",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "9b88681faa8d8d002c6d130eb6787a2057af8e9302013cf71f9ccb416717734c",
+        "resolution": "deliver-unchanged"
+      }
+    ],
+    "syntheticBusinessResponses": 0,
+    "cleanupErrors": []
+  },
+  "error": "Could not acquire the actual response from /api/context/select at its response event: response.body: Protocol error (Network.getResponseBody): No resource with given identifier found",
+  "finishedAt": "2026-09-11T21:24:14.435Z"
+}

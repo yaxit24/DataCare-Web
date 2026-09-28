@@ -1,0 +1,19 @@
+{
+  "atUtc": "2026-09-11T21:46:25.799467+00:00",
+  "baselineVerified": true,
+  "files": [
+    {
+      "path": "web/apps/web/test/session-context-lifecycle.journey.mjs",
+      "sha256": "3037c004c16d3634507bdb1c5553c3c320bf441215693ad38e11df57fa40b708"
+    },
+    {
+      "path": "web/apps/web/test/session-context-response-observation.mjs",
+      "sha256": "c0282d1be8d7e8f107c9dca7d222e9580d7fea5e144e5dd01c80168600cbaf29"
+    },
+    {
+      "path": "web/apps/web/test/session-context.journey.mjs",
+      "sha256": "113c5841f9390c3a826b5c6d4c63e96bc0fd232197b3101cfddc8378a0bf1798"
+    }
+  ],
+  "status": "Actual lookup barrier + privacy-safe diagnostic counts; all14 checks and5 faults retained; runtime pending"
+}

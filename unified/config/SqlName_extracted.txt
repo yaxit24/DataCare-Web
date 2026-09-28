@@ -1,0 +1,10 @@
+.\SQLEXPRESS
+Next_Dev
+Next_Dev
+Next
+00
+W
+C:\DcLink\Images\
+C:\Program Files\Microsoft SQL Server\MSSQL15.SQLEXPRESS\MSSQL\DATA\
+Next_Dev_log
+Next_Dev

@@ -1,0 +1,35 @@
+{
+  "status": "frozen-independent-read-only-review",
+  "confirmedIssues": 0,
+  "executionCredit": false,
+  "references": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-reader-independent-review.md",
+      "sha256": "2b97f211bd04ab231de1a00119d2719dfabb0544adc720b84e72b66f2f739d04"
+    },
+    {
+      "path": "web/apps/api/src/modules/shared/desktopAccountBalance.ts",
+      "sha256": "375629060abeb7454079996c19f61dcc3f8dbdff095616358257e1fa9ce4a2bd"
+    },
+    {
+      "path": "web/apps/api/test/desktopAccountBalance.db.test.ts",
+      "sha256": "da57beda30df821c8178f423a2b2f6142381348e1033ca386a56617322ca017c"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "158aa2c66db0ff7b5b07931d853d73cb2aad0973880a0d7385eee6695c973754"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-observation-contract.md",
+      "sha256": "faa7e216765256d0d67cced66cdabb2dac1cedd72accb85370586f3f0d0c3c21"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/x13-account-balance-observation-contract.run.json",
+      "sha256": "60686d0dce326d04e93e72ea62a3755cb0c3203593b39b563d5d77d757aecc08"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+# TR_SL_PR_ITEM
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_SL_PR_ITEM.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** DELETE_DATA
+- **UPDATE:** PRINT_MAST
+
+## Tables deleted / reversed
+- **DELETE:** AC_DATA, CARD_DATA, DM_DATA, E_DATA, MAIN_STOCK, ROJ_MEL_DATA, SL_ORD_ADJ, SL_PR_DETL, TAX_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- AC_MAST, TAX_MAST, TEMP_BOOK_DATA, MAIN_STOCK, E_DATA, AC_DATA, ITEM_MAST, EMP_MAST, ROJ_MEL_DATA, TAG_IMAGE_DATA, DM_MAST, RATE_MAST, TABLE_MAST, PRINT_MAST, TAX_DATA, DM_DATA, CARD_DATA, BAR_DETL, BAR_IDTL, USER_SET, E_MAST, SL_IDTL, SL_ORD_ADJ, SL_PR_DETL
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L6472: DELETE TEMP_BOOK_DATA
+- L6766: DELETE AC_DATA
+- L6768: DELETE ROJ_MEL_DATA
+- L6770: DELETE MAIN_STOCK
+- L6772: DELETE TAX_DATA
+- L6774: DELETE DM_DATA
+- L6894: INSERT DELETE_DATA
+- L6900: DELETE AC_DATA
+- L6901: DELETE ROJ_MEL_DATA
+- L6902: DELETE TEMP_BOOK_DATA
+- L6903: DELETE CARD_DATA
+- L6905: DELETE TEMP_BOOK_DATA
+- L6906: DELETE MAIN_STOCK
+- L6907: DELETE AC_DATA
+- L6908: DELETE ROJ_MEL_DATA
+- L6909: DELETE SL_ORD_ADJ
+- L6910: DELETE TAX_DATA
+- L6911: DELETE DM_DATA
+- L6916: DELETE SL_PR_DETL
+- L6995: DELETE E_DATA
+- L8003: UPDATE PRINT_MAST
+- L8635: DELETE E_DATA
+- L8636: DELETE AC_DATA
+
+## Validation guards (heuristic, user-facing messages)
+- Error: \r\n
+- Request failed:
+- Internet Connection Failed

@@ -1,0 +1,173 @@
+{
+ "form": "UT_WINDOW",
+ "controlCount": 17,
+ "byKind": {
+  "other": 16,
+  "button": 1
+ },
+ "grids": [],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "this": [
+   "TileControl1",
+   "btnClose",
+   "TileControl"
+  ]
+ },
+ "controls": [
+  {
+   "name": "TileControl",
+   "type": "TileControl",
+   "location": "6,9",
+   "size": "554,296",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "btnClose",
+   "type": "Button",
+   "location": "501,578",
+   "size": "34,25",
+   "tabIndex": "1147",
+   "text": "",
+   "kind": "button"
+  },
+  {
+   "name": "TileControl1",
+   "type": "TileControl",
+   "location": "5,283",
+   "size": "554,293",
+   "tabIndex": "1148",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "val",
+   "type": "GraphicsPath",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F1",
+   "kind": "other"
+  },
+  {
+   "name": "val3",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F4",
+   "kind": "other"
+  },
+  {
+   "name": "val4",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F5",
+   "kind": "other"
+  },
+  {
+   "name": "val5",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F2",
+   "kind": "other"
+  },
+  {
+   "name": "val6",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F3",
+   "kind": "other"
+  },
+  {
+   "name": "val10",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F3",
+   "kind": "other"
+  },
+  {
+   "name": "val11",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F6",
+   "kind": "other"
+  },
+  {
+   "name": "val13",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F7",
+   "kind": "other"
+  },
+  {
+   "name": "val15",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "X",
+   "kind": "other"
+  },
+  {
+   "name": "val19",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "X",
+   "kind": "other"
+  },
+  {
+   "name": "val20",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F11",
+   "kind": "other"
+  },
+  {
+   "name": "val21",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F8",
+   "kind": "other"
+  },
+  {
+   "name": "val22",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F9",
+   "kind": "other"
+  },
+  {
+   "name": "val23",
+   "type": "TileItemElement",
+   "location": "",
+   "size": "",
+   "tabIndex": "",
+   "text": "F12",
+   "kind": "other"
+  }
+ ]
+}

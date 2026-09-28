@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: datacare
+      POSTGRES_DB: datacare
+      POSTGRES_PASSWORD: ${PARITY_OWNER_PASSWORD:?Run scripts/parity-test-env.mjs}
+    ports:
+      - '127.0.0.1:55433:5432'
+    volumes:
+      - parity-test-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U datacare -d datacare']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  parity-test-data:

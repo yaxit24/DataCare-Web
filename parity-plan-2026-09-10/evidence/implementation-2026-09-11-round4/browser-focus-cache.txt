@@ -1,0 +1,419 @@
+
+> datacare-web-saas@0.0.0 test:parity:browser /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
+
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: unchanged UI replacement must retain complete input-shaped snapshot/version
++ actual - expected
+... Skipped lines
+
+  {
+    acCode: 'TOURAC',
+    acName: 'Real browser tour customer',
+    address1: '',
+    address2: '',
+...
+    vchTime: '15:42:31.123456',
++   version: 'cd737b3a53cbe980df27d96c1231678003bc5bd6228701c7adb44a666c88385f',
+-   version: 'ad4734d55a9e9b8acd90ac80ac2f796b26eb55a0edab9e20d527dbf5c51a29a5',
+    voucherNo: '00002'
+  }
+
+    at exerciseSalesOrder (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-order.journey.mjs:153:12)
+    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs:354:23 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: {
+    voucherNo: '00002',
+    hiddenVoucherNo: '00002',
+    mainUser: 'browser',
+    vchTime: '15:42:31.123456',
+    version: 'cd737b3a53cbe980df27d96c1231678003bc5bd6228701c7adb44a666c88385f',
+    labourIncludesGhat: true,
+    labourRateDecimals: 2,
+    coCode: '01',
+    lcCode: '01',
+    coYear: '2024-2025',
+    coBook: 'S41',
+    vchDate: '2024-07-10',
+    billNo: 'WEB-SALES/41',
+    vchDesc: '',
+    acCode: 'TOURAC',
+    acName: 'Real browser tour customer',
+    netAmount: 20781,
+    taxRatePct: 0,
+    total: 20781,
+    advanceAmount: 12.34,
+    cashAc: 'CASH',
+    empCode: '',
+    taxCode: '',
+    upiAmount: 0,
+    bankAc: '',
+    chequeNo: '',
+    bankName: '',
+    cardAc: '',
+    cardAdj: '',
+    oldGoldFine: 0,
+    oldGoldAmount: 0,
+    oldSilverFine: 0,
+    oldSilverAmount: 0,
+    schemeAmount: 0,
+    rateCutRate: 0,
+    rateCutFine: 0,
+    rateCutAmount: 0,
+    adjustGold: 0,
+    adjustSilver: 0,
+    orderAdjustAmount: 0,
+    deliveryDate: '2024-07-20',
+    functionDate: null,
+    address1: '',
+    address2: '',
+    address3: 'Sales third road',
+    city: '',
+    mobile: '',
+    lines: [
+      {
+        srNo: 1,
+        tagNo: '',
+        itCode: 'GOLD',
+        designNo: 'WEB-SALES',
+        pcs: 2,
+        grossWt: 3.5,
+        netWt: 3.123,
+        touch: 91.6,
+        rate: 7000,
+        making: 36.301582376667696,
+        remark: 'Keep both Sales components',
+        tblCode: '',
+        itmColor: '',
+        itmSize: '',
+        bagWt: 0,
+        lessWt: 0,
+        ghtPct: 0,
+        ghtWt: 0.1,
+        westPct: 0,
+        rateFix: '',
+        labourPct: 0,
+        labourType: '',
+        labourRate: 36.3,
+        labourAmount: 117,
+        fineWeight: 2.952,
+        itemAmount: 20664,
+        lineNetAmount: 20781,
+        lineTotalAmount: 20781,
+        otherAmount: 0,
+        mrp: 0,
+        orderDeliveryDate: null,
+        karigarNetWt: 0,
+        karigarTouch: 0,
+        karigarWestPct: 0,
+        karigarFine: 0,
+        karigarName: '',
+        tagCost: 0,
+        vchSrno: 0,
+        oldSrNo: 1,
+        rateType: '',
+        itType: '',
+        prCode: '',
+        oldTblCode: '',
+        tagStockLess: '',
+        designImageId: 'N',
+        huid: 'SA0123',
+        hallmarkId2: '',
+        hallmarkId3: '',
+        hallmarkId4: '',
+        hallmarkIdWt: 0,
+        hallmarkId2Wt: 0,
+        hallmarkId3Wt: 0,
+        hallmarkId4Wt: 0,
+        consumed: false,
+        components: [
+          {
+            isrNo: 1,
+            itCode: 'STONE',
+            itType: '',
+            dmCode: '',
+            dmName: 'Sales Ruby',
+            dmSize: '',
+            dmSfNo: '',
+            dmColor: null,
+            dmOrigin: null,
+            dmRemark: null,
+            dmLeb: null,
+            pcs: 0,
+            grossWt: 0.123,
+            pcsWt: 0,
+            conPct: 0,
+            conWt: 0,
+            rateType: '',
+            rate: 0,
+            amount: 0,
+            lbrRate: 0,
+            lbrAmount: 0,
+            netAmount: 0,
+            karigarWt: 0,
+            karigarLessPct: 0,
+            karigarConPct: 0,
+            karigarConWt: 0,
+            karigarRate: 0,
+            karigarAmount: 0,
+            karigarLabourRate: 0,
+            karigarLabourAmount: 0,
+            karigarNetAmount: 0
+          },
+          {
+            isrNo: 2,
+            itCode: 'STONE',
+            itType: '',
+            dmCode: '',
+            dmName: 'Sales Diamond',
+            dmSize: '',
+            dmSfNo: '',
+            dmColor: null,
+            dmOrigin: null,
+            dmRemark: null,
+            dmLeb: null,
+            pcs: 0,
+            grossWt: 0.234,
+            pcsWt: 0,
+            conPct: 0,
+            conWt: 0,
+            rateType: '',
+            rate: 0,
+            amount: 0,
+            lbrRate: 0,
+            lbrAmount: 0,
+            netAmount: 0,
+            karigarWt: 0,
+            karigarLessPct: 0,
+            karigarConPct: 0,
+            karigarConWt: 0,
+            karigarRate: 0,
+            karigarAmount: 0,
+            karigarLabourRate: 0,
+            karigarLabourAmount: 0,
+            karigarNetAmount: 0
+          }
+        ]
+      }
+    ]
+  },
+  expected: {
+    voucherNo: '00002',
+    hiddenVoucherNo: '00002',
+    mainUser: 'browser',
+    vchTime: '15:42:31.123456',
+    version: 'ad4734d55a9e9b8acd90ac80ac2f796b26eb55a0edab9e20d527dbf5c51a29a5',
+    labourIncludesGhat: true,
+    labourRateDecimals: 2,
+    coCode: '01',
+    lcCode: '01',
+    coYear: '2024-2025',
+    coBook: 'S41',
+    vchDate: '2024-07-10',
+    billNo: 'WEB-SALES/41',
+    vchDesc: '',
+    acCode: 'TOURAC',
+    acName: 'Real browser tour customer',
+    netAmount: 20781,
+    taxRatePct: 0,
+    total: 20781,
+    advanceAmount: 12.34,
+    cashAc: 'CASH',
+    empCode: '',
+    taxCode: '',
+    upiAmount: 0,
+    bankAc: '',
+    chequeNo: '',
+    bankName: '',
+    cardAc: '',
+    cardAdj: '',
+    oldGoldFine: 0,
+    oldGoldAmount: 0,
+    oldSilverFine: 0,
+    oldSilverAmount: 0,
+    schemeAmount: 0,
+    rateCutRate: 0,
+    rateCutFine: 0,
+    rateCutAmount: 0,
+    adjustGold: 0,
+    adjustSilver: 0,
+    orderAdjustAmount: 0,
+    deliveryDate: '2024-07-20',
+    functionDate: null,
+    address1: '',
+    address2: '',
+    address3: 'Sales third road',
+    city: '',
+    mobile: '',
+    lines: [
+      {
+        srNo: 1,
+        tagNo: '',
+        itCode: 'GOLD',
+        designNo: 'WEB-SALES',
+        pcs: 2,
+        grossWt: 3.5,
+        netWt: 3.123,
+        touch: 91.6,
+        rate: 7000,
+        making: 36.301582376667696,
+        remark: 'Keep both Sales components',
+        tblCode: '',
+        itmColor: '',
+        itmSize: '',
+        bagWt: 0,
+        lessWt: 0,
+        ghtPct: 0,
+        ghtWt: 0.1,
+        westPct: 0,
+        rateFix: '',
+        labourPct: 0,
+        labourType: '',
+        labourRate: 36.3,
+        labourAmount: 117,
+        fineWeight: 2.952,
+        itemAmount: 20664,
+        lineNetAmount: 20781,
+        lineTotalAmount: 20781,
+        otherAmount: 0,
+        mrp: 0,
+        orderDeliveryDate: null,
+        karigarNetWt: 0,
+        karigarTouch: 0,
+        karigarWestPct: 0,
+        karigarFine: 0,
+        karigarName: '',
+        tagCost: 0,
+        vchSrno: 0,
+        oldSrNo: 1,
+        rateType: '',
+        itType: '',
+        prCode: '',
+        oldTblCode: '',
+        tagStockLess: '',
+        designImageId: 'N',
+        huid: 'SA0123',
+        hallmarkId2: '',
+        hallmarkId3: '',
+        hallmarkId4: '',
+        hallmarkIdWt: 0,
+        hallmarkId2Wt: 0,
+        hallmarkId3Wt: 0,
+        hallmarkId4Wt: 0,
+        consumed: false,
+        components: [
+          {
+            isrNo: 1,
+            itCode: 'STONE',
+            itType: '',
+            dmCode: '',
+            dmName: 'Sales Ruby',
+            dmSize: '',
+            dmSfNo: '',
+            dmColor: null,
+            dmOrigin: null,
+            dmRemark: null,
+            dmLeb: null,
+            pcs: 0,
+            grossWt: 0.123,
+            pcsWt: 0,
+            conPct: 0,
+            conWt: 0,
+            rateType: '',
+            rate: 0,
+            amount: 0,
+            lbrRate: 0,
+            lbrAmount: 0,
+            netAmount: 0,
+            karigarWt: 0,
+            karigarLessPct: 0,
+            karigarConPct: 0,
+            karigarConWt: 0,
+            karigarRate: 0,
+            karigarAmount: 0,
+            karigarLabourRate: 0,
+            karigarLabourAmount: 0,
+            karigarNetAmount: 0
+          },
+          {
+            isrNo: 2,
+            itCode: 'STONE',
+            itType: '',
+            dmCode: '',
+            dmName: 'Sales Diamond',
+            dmSize: '',
+            dmSfNo: '',
+            dmColor: null,
+            dmOrigin: null,
+            dmRemark: null,
+            dmLeb: null,
+            pcs: 0,
+            grossWt: 0.234,
+            pcsWt: 0,
+            conPct: 0,
+            conWt: 0,
+            rateType: '',
+            rate: 0,
+            amount: 0,
+            lbrRate: 0,
+            lbrAmount: 0,
+            netAmount: 0,
+            karigarWt: 0,
+            karigarLessPct: 0,
+            karigarConPct: 0,
+            karigarConWt: 0,
+            karigarRate: 0,
+            karigarAmount: 0,
+            karigarLabourRate: 0,
+            karigarLabourAmount: 0,
+            karigarNetAmount: 0
+          }
+        ]
+      }
+    ]
+  },
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.8.0
+PARITY_TEST_FAILED node exited 1
+ ELIFECYCLE  Command failed with exit code 1.

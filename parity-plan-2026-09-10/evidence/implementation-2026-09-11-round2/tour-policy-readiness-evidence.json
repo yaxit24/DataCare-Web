@@ -1,0 +1,126 @@
+{
+  "kind": "bounded-tour-policy-readiness-regression",
+  "browserResult": "passed engineering regression against the real production web/API/database stack",
+  "desktopAcceptance": "not established; open source and desktop workflow acceptance gaps remain",
+  "verification": {
+    "coreTests": {
+      "files": 1,
+      "tests": 23,
+      "status": "passed"
+    },
+    "focusedWebTests": {
+      "files": 2,
+      "tests": 12,
+      "status": "passed"
+    },
+    "webTypecheck": "passed",
+    "finalBuild": {
+      "successfulTasks": 7,
+      "totalTasks": 7,
+      "cachedTasks": 6,
+      "status": "passed"
+    },
+    "finalWebTests": {
+      "files": 18,
+      "tests": 83,
+      "status": "passed"
+    },
+    "finalBrowser": {
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-09-10T23:39:01.888Z",
+      "finishedAt": "2026-09-10T23:39:10.249Z",
+      "database": "disposable localhost:55433 / app_user",
+      "mockedRequests": 0,
+      "tourChecks": [
+        "configured book",
+        "real offline configuration failure blocks editing and save",
+        "real delayed configuration retry blocks editing and save until ready",
+        "POST preserves rate-before-ghat journal and amount117",
+        "browser create/reopen",
+        "two component rows",
+        "legacy flattened update400 preserves children",
+        "unchanged edit",
+        "changed child",
+        "whole-rupee pieces and percentage labour",
+        "manual paise unchanged edit",
+        "rate-before-ghat ordered commits",
+        "voucher time preservation",
+        "stale edit409 retains form",
+        "scoped print",
+        "browser deletion"
+      ]
+    },
+    "priorFailure": "retained: earlier complete run observed saved labour 120 instead of 117"
+  },
+  "files": [
+    {
+      "path": "web/apps/web/app/(app)/txn/tour-order/page.tsx",
+      "sha256": "673f600619bf082138863f6a08942fe297d40173e791550d727cf7d67ac04706"
+    },
+    {
+      "path": "web/apps/web/test/tour-order.journey.mjs",
+      "sha256": "67587a68b5139c039bcccebe0499140093496e04b5b2813350cc27e129cbc904"
+    },
+    {
+      "path": "web/apps/web/lib/tourOrderForm.ts",
+      "sha256": "27ab5b536e698f981be47b4e8c87d396773e47ad9c0170f6b868e951fc1d3af4"
+    },
+    {
+      "path": "web/apps/web/test/tourOrderForm.test.ts",
+      "sha256": "6a90b682615ceaabeb91d65b49a21d56d45ee72e118f76efb7117a73d6784ddd"
+    },
+    {
+      "path": "web/apps/web/test/derivedValueSources.test.ts",
+      "sha256": "48b9375d8b776350eedce1469dcd50806dfeb2915044a105c7d43b9b84bee9cd"
+    },
+    {
+      "path": "web/packages/core/src/orderLabour.ts",
+      "sha256": "5981b6198035c845b447caf0d92fe84e3c25d1412e6b61b0eee0483f0224230d"
+    },
+    {
+      "path": "web/packages/core/test/orderLabour.test.ts",
+      "sha256": "d19586b4f16c1a5027b2f8a0f447e4642193756677a41ef86c241078ad1e1a25"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round2-tested/result.json",
+      "sha256": "dd8b0fe34eaddb0e0ca07926a95ea1b1f554cab73d03fa015a3fa78af2d6178f"
+    },
+    {
+      "path": "web/test-results/parity-real-stack-round2-complete/result.json",
+      "sha256": "3d7da7fcf40c40c862d0afa6ddac92a6a500f48b4db7e09d52b76655a92bff41"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/tour-policy-readiness-regression.md",
+      "sha256": "ff184357705c6558cea8097e52ec81c6c52a64c33d8748cf9d6f98826b2de6af"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/tour-policy-core-tests.txt",
+      "sha256": "8047880107dd5eade86e36867118df3b2072bca7d3d5c94a487fc8994f7db5d7"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/tour-policy-web-tests.txt",
+      "sha256": "7b72911aa2f9bc25505c775fad33cc8d7678bf82813a3c2830dff76656e21aa6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/tour-policy-web-types.txt",
+      "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/build-tested.txt",
+      "sha256": "d06d8011482e3a0260c94a6586c37ef2e9bbf054269d852ae5259a03157ba4c0"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/web-tests-tested.txt",
+      "sha256": "ed76ab953ab6060cb3891591e9cbf69c83a1825d6195f80e13ca988676ccb3e8"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/browser-real-stack-tested.txt",
+      "sha256": "46c9c13253ce64badd1a66e583135434450d7cabade703c4e1e0873e07936a83"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/browser-real-stack-complete.txt",
+      "sha256": "9d360727005981b2ac40967e7ae221ac3b3f193e292f1f94b755d5a5e298f50c"
+    }
+  ]
+}

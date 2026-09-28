@@ -1,0 +1,4020 @@
+{
+  "tables": [
+    {
+      "table": "AC_DATA",
+      "desktopWrittenColumns": 29,
+      "webWrittenColumns": 28,
+      "coveragePct": 96.6,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "CLR_DATE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AC_GROUP",
+      "desktopWrittenColumns": 7,
+      "webWrittenColumns": 7,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AC_MAST",
+      "desktopWrittenColumns": 47,
+      "webWrittenColumns": 46,
+      "coveragePct": 97.9,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AC_MAST_SRNO",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 5,
+      "coveragePct": 83.3,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "ADD_MAST",
+      "desktopWrittenColumns": 25,
+      "webWrittenColumns": 23,
+      "coveragePct": 92.0,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "DATA_TRFR",
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AD_ADJ",
+      "desktopWrittenColumns": 37,
+      "webWrittenColumns": 28,
+      "coveragePct": 75.7,
+      "missingColumnCount": 9,
+      "missingColumns": [
+        "EMP_CODE",
+        "SBILL_AMT",
+        "SBILL_DBCD",
+        "SBILL_HD_VCH_NO",
+        "SBILL_LC_CODE",
+        "SBILL_NO",
+        "SBILL_YRCD",
+        "USER_DELETE",
+        "USER_UPDATE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AD_DATA",
+      "desktopWrittenColumns": 32,
+      "webWrittenColumns": 26,
+      "coveragePct": 81.2,
+      "missingColumnCount": 6,
+      "missingColumns": [
+        "BANK_NAME",
+        "EMP_CODE",
+        "MONTH_CODE",
+        "USER_DELETE",
+        "USER_UPDATE",
+        "WITH_UPI"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AD_MAST",
+      "desktopWrittenColumns": 12,
+      "webWrittenColumns": 10,
+      "coveragePct": 83.3,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "DATA_TRFR",
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AD_MEMB",
+      "desktopWrittenColumns": 36,
+      "webWrittenColumns": 36,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "AD_OS",
+      "desktopWrittenColumns": 26,
+      "webWrittenColumns": 23,
+      "coveragePct": 88.5,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "EMP_CODE",
+        "GOLD_WT",
+        "LD_CODE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "APP_CHATMESSAGES",
+      "desktopWrittenColumns": 0,
+      "webWrittenColumns": 0,
+      "coveragePct": null,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "APR_DATA",
+      "desktopWrittenColumns": 16,
+      "webWrittenColumns": 13,
+      "coveragePct": 81.2,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "ISU_DBCD",
+        "ISU_LC_CODE",
+        "ISU_YRCD"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "APR_DETL",
+      "desktopWrittenColumns": 76,
+      "webWrittenColumns": 62,
+      "coveragePct": 81.6,
+      "missingColumnCount": 14,
+      "missingColumns": [
+        "ADJ_GWT",
+        "ADJ_NWT",
+        "HM_ID2",
+        "HM_ID2_WT",
+        "HM_ID3",
+        "HM_ID3_WT",
+        "HM_ID4",
+        "HM_ID4_WT",
+        "HM_ID_WT",
+        "ITM_COLOR",
+        "ITM_LESS_TCH",
+        "ITM_LOSS_WT",
+        "LOT_NO",
+        "TAG_COST"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "APR_IDTL",
+      "desktopWrittenColumns": 46,
+      "webWrittenColumns": 33,
+      "coveragePct": 71.7,
+      "missingColumnCount": 13,
+      "missingColumns": [
+        "DM_COLOR",
+        "DM_LEB",
+        "DM_ORIGIN",
+        "DM_REMARK",
+        "IT_PCS_WT",
+        "KR_AMT",
+        "KR_CON_PRC",
+        "KR_CON_WT",
+        "KR_LBR_AMT",
+        "KR_LBR_RATE",
+        "KR_LESS_PRC",
+        "KR_NET_AMT",
+        "KR_RATE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BAL_GR",
+      "desktopWrittenColumns": 10,
+      "webWrittenColumns": 10,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BANK_RECONCILE",
+      "desktopWrittenColumns": 4,
+      "webWrittenColumns": 4,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BAR_CAN_DATA",
+      "desktopWrittenColumns": 13,
+      "webWrittenColumns": 13,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BAR_CAN_DETL",
+      "desktopWrittenColumns": 55,
+      "webWrittenColumns": 51,
+      "coveragePct": 92.7,
+      "missingColumnCount": 4,
+      "missingColumns": [
+        "ADD_USER",
+        "BAG_WT",
+        "LOT_NO",
+        "TRFR_IT_CODE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BAR_CAN_IDTL",
+      "desktopWrittenColumns": 43,
+      "webWrittenColumns": 41,
+      "coveragePct": 95.3,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "AC_CODE",
+        "HD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BAR_DATA",
+      "desktopWrittenColumns": 16,
+      "webWrittenColumns": 15,
+      "coveragePct": 93.8,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "CUST_AC"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BAR_DETL",
+      "desktopWrittenColumns": 107,
+      "webWrittenColumns": 103,
+      "coveragePct": 96.3,
+      "missingColumnCount": 4,
+      "missingColumns": [
+        "ADD_USER",
+        "APP_TRFR",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BAR_IDTL",
+      "desktopWrittenColumns": 53,
+      "webWrittenColumns": 41,
+      "coveragePct": 77.4,
+      "missingColumnCount": 12,
+      "missingColumns": [
+        "DM_LEB",
+        "IT_DISC_AMT",
+        "IT_DISC_PRC",
+        "KR_ACT_PRC",
+        "KR_ACT_WT",
+        "KR_CON_PRC",
+        "KR_LBR_AMT",
+        "KR_LBR_RATE",
+        "KR_NET_AMT",
+        "KR_RATE_TYPE",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BILL_OS_DATA",
+      "desktopWrittenColumns": 38,
+      "webWrittenColumns": 38,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BOOK_DATA",
+      "desktopWrittenColumns": 22,
+      "webWrittenColumns": 22,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BOOK_DETL",
+      "desktopWrittenColumns": 14,
+      "webWrittenColumns": 14,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "BOOK_IDTL",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 6,
+      "missingColumns": [
+        "AC_CODE",
+        "AC_NAME",
+        "INOUT_TYPE",
+        "MAIN_BOOK",
+        "SR_NO",
+        "SVR_PWD"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "CASH_DATA",
+      "desktopWrittenColumns": 33,
+      "webWrittenColumns": 25,
+      "coveragePct": 75.8,
+      "missingColumnCount": 8,
+      "missingColumns": [
+        "ADD_USER",
+        "BANK_CHARGES",
+        "CHQ_PRINT_NAME",
+        "CLR_DATE",
+        "IT_DESC",
+        "MOB_ENTRY_SAVE",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "COL_MAST",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 6,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "CONTRA_DATA",
+      "desktopWrittenColumns": 30,
+      "webWrittenColumns": 27,
+      "coveragePct": 90.0,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "ADD_USER",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "CONV_MAST",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 15,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "CO_MAST",
+      "desktopWrittenColumns": 37,
+      "webWrittenColumns": 36,
+      "coveragePct": 97.3,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "CO_SET",
+      "desktopWrittenColumns": 58,
+      "webWrittenColumns": 58,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "CO_SET_NEW",
+      "desktopWrittenColumns": 69,
+      "webWrittenColumns": 69,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": true
+    },
+    {
+      "table": "DELETE_DATA",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DESIGN_DETL",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 34,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DESIGN_MAST",
+      "desktopWrittenColumns": 3,
+      "webWrittenColumns": 2,
+      "coveragePct": 66.7,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DG_GOLD_DATA",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 31,
+      "coveragePct": 91.2,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "APP_TRFR",
+        "ITM_SIGN",
+        "ITM_TYPE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DG_GOLD_MAST",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 13,
+      "coveragePct": 86.7,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "BANK_AC_CODE",
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DHRN_DATA",
+      "desktopWrittenColumns": 35,
+      "webWrittenColumns": 30,
+      "coveragePct": 85.7,
+      "missingColumnCount": 5,
+      "missingColumns": [
+        "ADJ_DHRN",
+        "DHRN_LIC_NO",
+        "REC_DATE",
+        "REMARKS",
+        "UNCHAK_DHRN_REC"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DHRN_ISU_DATA",
+      "desktopWrittenColumns": 46,
+      "webWrittenColumns": 35,
+      "coveragePct": 76.1,
+      "missingColumnCount": 11,
+      "missingColumns": [
+        "DHRN_BILL",
+        "DHRN_LIC_NO",
+        "DHRN_MONTH",
+        "INT_DAYS",
+        "OLD_ISU_DBCD",
+        "OLD_ISU_LC",
+        "OLD_ISU_NO",
+        "OLD_ISU_YRCD",
+        "OLD_ITEM_ADJ",
+        "SILVER_NWT",
+        "UNCHAK_DHRN_REC"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DHRN_ISU_DETL",
+      "desktopWrittenColumns": 40,
+      "webWrittenColumns": 31,
+      "coveragePct": 77.5,
+      "missingColumnCount": 9,
+      "missingColumns": [
+        "CUST_NAME",
+        "DHRN_DBCD",
+        "DHRN_NO",
+        "DHRN_YRCD",
+        "HM_ID",
+        "IT_TYPE",
+        "OLD_SRNO",
+        "RATE_TYPE",
+        "REC_NWT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DHRN_REC_DATA",
+      "desktopWrittenColumns": 56,
+      "webWrittenColumns": 53,
+      "coveragePct": 94.6,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "DHRN_DAY",
+        "MONTH_INT_AMT",
+        "ORNA_AMT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DHRN_REC_DETL",
+      "desktopWrittenColumns": 40,
+      "webWrittenColumns": 38,
+      "coveragePct": 95.0,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "REC_NWT",
+        "REC_QTY"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DM_DATA",
+      "desktopWrittenColumns": 29,
+      "webWrittenColumns": 29,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "DM_KR_DATA",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "EMP_MAST",
+      "desktopWrittenColumns": 13,
+      "webWrittenColumns": 13,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "FAN_AC_MAST",
+      "desktopWrittenColumns": 4,
+      "webWrittenColumns": 4,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "FINE_DATA",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 34,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "GROUP_MAST",
+      "desktopWrittenColumns": 26,
+      "webWrittenColumns": 26,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "HDD_MAST",
+      "desktopWrittenColumns": 1,
+      "webWrittenColumns": 1,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "ITEM_MAST",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 34,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "ITM_CITY",
+      "desktopWrittenColumns": 3,
+      "webWrittenColumns": 3,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "ITM_OPBL",
+      "desktopWrittenColumns": 27,
+      "webWrittenColumns": 24,
+      "coveragePct": 88.9,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "DM_AMT",
+        "DM_RATE",
+        "DM_WT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "KR_DATA",
+      "desktopWrittenColumns": 57,
+      "webWrittenColumns": 50,
+      "coveragePct": 87.7,
+      "missingColumnCount": 7,
+      "missingColumns": [
+        "CGST_TAX",
+        "ENTRY_TIME",
+        "IGST_TAX",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO",
+        "OS_ADJ_AMT",
+        "SGST_TAX"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "KR_DETL",
+      "desktopWrittenColumns": 61,
+      "webWrittenColumns": 58,
+      "coveragePct": 95.1,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "ADD_USER",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "KR_IDTL",
+      "desktopWrittenColumns": 45,
+      "webWrittenColumns": 42,
+      "coveragePct": 93.3,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "HD_VCH_NO",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "LEDR_AC_DATA",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 15,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "LOCT_MAST",
+      "desktopWrittenColumns": 10,
+      "webWrittenColumns": 10,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "LOGIN_MAST",
+      "desktopWrittenColumns": 5,
+      "webWrittenColumns": 4,
+      "coveragePct": 80.0,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "LOT_DETL",
+      "desktopWrittenColumns": 30,
+      "webWrittenColumns": 29,
+      "coveragePct": 96.7,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "ITM_LOT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MAIN_STOCK",
+      "desktopWrittenColumns": 48,
+      "webWrittenColumns": 48,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MENU_DATA",
+      "desktopWrittenColumns": 9,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 9,
+      "missingColumns": [
+        "BTN_NAME",
+        "MAIN_SRNO",
+        "SM_CODE",
+        "SM_MAIN_CODE",
+        "SM_MAIN_NAME",
+        "SM_NAME",
+        "SM_TYPE",
+        "SM_VIEW",
+        "TILE_ITEM"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MFG_DATA",
+      "desktopWrittenColumns": 46,
+      "webWrittenColumns": 40,
+      "coveragePct": 87.0,
+      "missingColumnCount": 6,
+      "missingColumns": [
+        "BANK_AC",
+        "CARD_AC",
+        "CHQ_NO",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO",
+        "TAX_CODE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MFG_DETL",
+      "desktopWrittenColumns": 74,
+      "webWrittenColumns": 74,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MFG_IDTL",
+      "desktopWrittenColumns": 31,
+      "webWrittenColumns": 30,
+      "coveragePct": 96.8,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "VCH_SRNO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MFG_ISU_REC",
+      "desktopWrittenColumns": 57,
+      "webWrittenColumns": 52,
+      "coveragePct": 91.2,
+      "missingColumnCount": 5,
+      "missingColumns": [
+        "ADD_WT",
+        "KDM_WT",
+        "LESS_WT",
+        "MINO_WT",
+        "RTN_KDM"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MFG_MAST",
+      "desktopWrittenColumns": 14,
+      "webWrittenColumns": 14,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MODEL_MAST",
+      "desktopWrittenColumns": 3,
+      "webWrittenColumns": 2,
+      "coveragePct": 66.7,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "MSG_MAST",
+      "desktopWrittenColumns": 4,
+      "webWrittenColumns": 4,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "OP_DATA",
+      "desktopWrittenColumns": 17,
+      "webWrittenColumns": 17,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "OP_LDR",
+      "desktopWrittenColumns": 18,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 18,
+      "missingColumns": [
+        "AC_CODE",
+        "BOOK_NAME",
+        "CO_BOOK",
+        "CO_CODE",
+        "CO_YEAR",
+        "CR_AMT",
+        "CR_GL_FINE",
+        "CR_SL_FINE",
+        "DATA_TYPE",
+        "DR_AMT",
+        "DR_GL_FINE",
+        "DR_SL_FINE",
+        "ENTRY_TYPE",
+        "INOUT_TYPE",
+        "LC_CODE",
+        "VCH_DATE",
+        "VCH_NO",
+        "VCH_TYPE"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "POINT_DATA",
+      "desktopWrittenColumns": 19,
+      "webWrittenColumns": 12,
+      "coveragePct": 63.2,
+      "missingColumnCount": 7,
+      "missingColumns": [
+        "BOOK_NAME",
+        "ITM_SIGN",
+        "MAIN_USER",
+        "POINT_TYPE",
+        "POINT_VAL",
+        "REF_NAME",
+        "VCH_TIME"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": true
+    },
+    {
+      "table": "POINT_MAST",
+      "desktopWrittenColumns": 13,
+      "webWrittenColumns": 11,
+      "coveragePct": 84.6,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "DATA_TRFR",
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "POINT_MEMB",
+      "desktopWrittenColumns": 10,
+      "webWrittenColumns": 8,
+      "coveragePct": 80.0,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "DATA_TRFR",
+        "LAST_BILL_DATE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "PRINT_MAST",
+      "desktopWrittenColumns": 5,
+      "webWrittenColumns": 5,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "PRODUCT_MAST",
+      "desktopWrittenColumns": 5,
+      "webWrittenColumns": 4,
+      "coveragePct": 80.0,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "DATA_TRFR"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "PR_DATA",
+      "desktopWrittenColumns": 57,
+      "webWrittenColumns": 53,
+      "coveragePct": 93.0,
+      "missingColumnCount": 4,
+      "missingColumns": [
+        "ENTRY_TIME",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO",
+        "OS_ADJ_AMT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "PR_DETL",
+      "desktopWrittenColumns": 60,
+      "webWrittenColumns": 57,
+      "coveragePct": 95.0,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "ADD_USER",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "PR_IDTL",
+      "desktopWrittenColumns": 45,
+      "webWrittenColumns": 32,
+      "coveragePct": 71.1,
+      "missingColumnCount": 13,
+      "missingColumns": [
+        "DM_LEB",
+        "IT_PCS_WT",
+        "KR_AMT",
+        "KR_CON_PRC",
+        "KR_CON_WT",
+        "KR_LBR_AMT",
+        "KR_LBR_RATE",
+        "KR_LESS_PRC",
+        "KR_NET_AMT",
+        "KR_RATE",
+        "KR_WT",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "RATE_CUT_DATA",
+      "desktopWrittenColumns": 65,
+      "webWrittenColumns": 56,
+      "coveragePct": 86.2,
+      "missingColumnCount": 9,
+      "missingColumns": [
+        "ADD1",
+        "ADD2",
+        "ADD3",
+        "BANK_NAME",
+        "CITY",
+        "ENTRY_TIME",
+        "MOBILE",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "RATE_CUT_ISU",
+      "desktopWrittenColumns": 76,
+      "webWrittenColumns": 57,
+      "coveragePct": 75.0,
+      "missingColumnCount": 19,
+      "missingColumns": [
+        "ADD_USER",
+        "ADJ_WT",
+        "CONV_PRC",
+        "CONV_RATE",
+        "HM_FINE",
+        "ISU_LC_CODE",
+        "ITM_LOT",
+        "ITM_OTH_FINE",
+        "ITM_OTH_RATE",
+        "LESS_TOUCH",
+        "LESS_WT",
+        "LOT_NO",
+        "MCX_RATE",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO",
+        "SILVER_FINE",
+        "TAG_COST",
+        "TAG_GWT",
+        "TAG_NWT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "RATE_CUT_ISU_REC",
+      "desktopWrittenColumns": 52,
+      "webWrittenColumns": 52,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "RATE_CUT_REC",
+      "desktopWrittenColumns": 59,
+      "webWrittenColumns": 46,
+      "coveragePct": 78.0,
+      "missingColumnCount": 13,
+      "missingColumns": [
+        "ADD_USER",
+        "CONV_PRC",
+        "CONV_RATE",
+        "ITM_OTH_FINE",
+        "ITM_OTH_RATE",
+        "LBR_PRC",
+        "LESS_TOUCH",
+        "LESS_WT",
+        "LOT_NO",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO",
+        "SILVER_FINE",
+        "TAG_COST"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "RATE_MAST",
+      "desktopWrittenColumns": 26,
+      "webWrittenColumns": 25,
+      "coveragePct": 96.2,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "REMARK_DATA",
+      "desktopWrittenColumns": 11,
+      "webWrittenColumns": 11,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "REPORT_DATA",
+      "desktopWrittenColumns": 36,
+      "webWrittenColumns": 36,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": true
+    },
+    {
+      "table": "REP_DATA",
+      "desktopWrittenColumns": 47,
+      "webWrittenColumns": 45,
+      "coveragePct": 95.7,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "NEW_VCH_NO",
+        "OLD_VCH_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "REP_DETL",
+      "desktopWrittenColumns": 74,
+      "webWrittenColumns": 62,
+      "coveragePct": 83.8,
+      "missingColumnCount": 12,
+      "missingColumns": [
+        "DATA_TRFR",
+        "DESIGN_IMG_ID",
+        "HM_ID",
+        "HM_ID2",
+        "HM_ID2_WT",
+        "HM_ID3",
+        "HM_ID3_WT",
+        "HM_ID4",
+        "HM_ID4_WT",
+        "HM_ID_WT",
+        "ITM_COLOR",
+        "ITM_LOT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "ROJMEL_BAL",
+      "desktopWrittenColumns": 5,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 5,
+      "missingColumns": [
+        "CLOSING_CASH",
+        "CO_CODE",
+        "LC_CODE",
+        "MAIN_USER",
+        "VCH_DATE"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "ROJ_MEL_DATA",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 34,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_DATA",
+      "desktopWrittenColumns": 97,
+      "webWrittenColumns": 97,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_DETL",
+      "desktopWrittenColumns": 103,
+      "webWrittenColumns": 103,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_DETL_RTN",
+      "desktopWrittenColumns": 54,
+      "webWrittenColumns": 54,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_IDTL",
+      "desktopWrittenColumns": 43,
+      "webWrittenColumns": 38,
+      "coveragePct": 88.4,
+      "missingColumnCount": 5,
+      "missingColumns": [
+        "DM_LEB",
+        "KR_CON_PRC",
+        "KR_LBR_AMT",
+        "KR_LBR_RATE",
+        "KR_NET_AMT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_ORD_ADJ",
+      "desktopWrittenColumns": 36,
+      "webWrittenColumns": 27,
+      "coveragePct": 75.0,
+      "missingColumnCount": 9,
+      "missingColumns": [
+        "ADD_USER",
+        "DATA_TRFR",
+        "EMP_CODE",
+        "ORD_DBCD",
+        "ORD_GOLD",
+        "ORD_HD_VCH_NO",
+        "ORD_LC",
+        "ORD_SILVER",
+        "ORD_YRCD"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_ORD_DATA",
+      "desktopWrittenColumns": 55,
+      "webWrittenColumns": 51,
+      "coveragePct": 92.7,
+      "missingColumnCount": 4,
+      "missingColumns": [
+        "MOB_ENTRY_SAVE",
+        "NEW_VCH_NO",
+        "OLD_VCH_NO",
+        "SL_BILL_TYPE"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_ORD_DETL",
+      "desktopWrittenColumns": 77,
+      "webWrittenColumns": 74,
+      "coveragePct": 96.1,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "ADD_USER",
+        "DATA_TRFR",
+        "LOT_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_ORD_IDTL",
+      "desktopWrittenColumns": 49,
+      "webWrittenColumns": 49,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SL_PR_DETL",
+      "desktopWrittenColumns": 37,
+      "webWrittenColumns": 37,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "SRNO_MAST",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 4,
+      "coveragePct": 66.7,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "IT_CODE",
+        "TAG_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "STATE_MAST",
+      "desktopWrittenColumns": 3,
+      "webWrittenColumns": 3,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TABLE_MAST",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 4,
+      "coveragePct": 66.7,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "DATA_TRFR",
+        "MAIN_USER"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TAG_DATA",
+      "desktopWrittenColumns": 3,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 3,
+      "missingColumns": [
+        "CO_CODE",
+        "SR_NO",
+        "TAG_NO"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TAG_PRINT_DATA",
+      "desktopWrittenColumns": 60,
+      "webWrittenColumns": 60,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": true
+    },
+    {
+      "table": "TAG_SET",
+      "desktopWrittenColumns": 8,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 8,
+      "missingColumns": [
+        "CO_BOOK",
+        "CO_CODE",
+        "LC_CODE",
+        "PR_CODE",
+        "TAG_NO",
+        "TAG_TYPE",
+        "VCH_NO",
+        "VCH_SRNO"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TAG_STOCK",
+      "desktopWrittenColumns": 25,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 25,
+      "missingColumns": [
+        "CO_CODE",
+        "DESIGN_IMG_ID",
+        "DESIGN_NO",
+        "GR_CODE",
+        "GR_NAME",
+        "GR_RATE",
+        "ITM_GWT",
+        "ITM_MRP",
+        "ITM_NWT",
+        "ITM_PCS",
+        "ITM_SIZE",
+        "IT_TYPE",
+        "LBR_AMT",
+        "LBR_PRC",
+        "LBR_RATE",
+        "LBR_TYPE",
+        "LC_CODE",
+        "MAIN_USER",
+        "OTH_AMT",
+        "PR_CODE",
+        "PR_NAME",
+        "SR_NO",
+        "STK_TYPE",
+        "TAG_NO",
+        "VCH_SRNO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": true
+    },
+    {
+      "table": "TAG_STOCK_PRINT",
+      "desktopWrittenColumns": 45,
+      "webWrittenColumns": 31,
+      "coveragePct": 68.9,
+      "missingColumnCount": 14,
+      "missingColumns": [
+        "AC_CODE",
+        "CR_AMT",
+        "CR_GOLD",
+        "CR_SILVER",
+        "DR_AMT",
+        "DR_GOLD",
+        "DR_SILVER",
+        "GHT_PRC",
+        "IT_DESC",
+        "MAIN_USER",
+        "MM_WT",
+        "OTH_AMT",
+        "SN_WT",
+        "WX_WT"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": true
+    },
+    {
+      "table": "TAG_SUM_DATA",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 23,
+      "missingColumns": [
+        "CO_BOOK",
+        "CO_CODE",
+        "CO_YEAR",
+        "DATA_TYPE",
+        "DESIGN_NO",
+        "ISR_NO",
+        "ITM_FINE",
+        "ITM_GWT",
+        "ITM_NWT",
+        "ITM_PCS",
+        "ITM_QTY",
+        "ITM_SIGN",
+        "ITM_SIZE",
+        "IT_CODE",
+        "IT_TYPE",
+        "LC_CODE",
+        "SR_NO",
+        "TAG_NO",
+        "TBL_CODE",
+        "TR_TYPE",
+        "VCH_DATE",
+        "VCH_NO",
+        "VCH_SRNO"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TAX_DATA",
+      "desktopWrittenColumns": 22,
+      "webWrittenColumns": 22,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TAX_MAST",
+      "desktopWrittenColumns": 9,
+      "webWrittenColumns": 9,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TEMP_ADD",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 15,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TEMP_AD_DATA",
+      "desktopWrittenColumns": 17,
+      "webWrittenColumns": 16,
+      "coveragePct": 94.1,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "GOLD_BAL"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TEMP_BOOK_DATA",
+      "desktopWrittenColumns": 5,
+      "webWrittenColumns": 5,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TILE_DATA",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 6,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "TOUCH_MAST",
+      "desktopWrittenColumns": 12,
+      "webWrittenColumns": 12,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "UPI_DATA",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 14,
+      "coveragePct": 93.3,
+      "missingColumnCount": 1,
+      "missingColumns": [
+        "ISR_NO"
+      ],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "USER_DATA",
+      "desktopWrittenColumns": 16,
+      "webWrittenColumns": 16,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "USER_MAST",
+      "desktopWrittenColumns": 2,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 2,
+      "missingColumns": [
+        "COL_NAME",
+        "TBL_COL_NAME"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "USER_REQUEST",
+      "desktopWrittenColumns": 18,
+      "webWrittenColumns": 18,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "USER_SET",
+      "desktopWrittenColumns": 11,
+      "webWrittenColumns": 11,
+      "coveragePct": 100.0,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": true,
+      "columnListDynamic": false
+    },
+    {
+      "table": "WEBHOOKINBOX",
+      "desktopWrittenColumns": 0,
+      "webWrittenColumns": 0,
+      "coveragePct": null,
+      "missingColumnCount": 0,
+      "missingColumns": [],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    },
+    {
+      "table": "WEIGHT_MAST",
+      "desktopWrittenColumns": 4,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "missingColumnCount": 4,
+      "missingColumns": [
+        "COL_NAME",
+        "HIGH_WT",
+        "LOW_WT",
+        "SR_NO"
+      ],
+      "webWritesTableAtAll": false,
+      "columnListDynamic": false
+    }
+  ],
+  "forms": [
+    {
+      "form": "Ac_Final",
+      "desktopWrittenColumns": 43,
+      "webWrittenColumns": 42,
+      "coveragePct": 97.7,
+      "perTable": {
+        "AC_DATA": {
+          "desktop": 28,
+          "web": 27
+        },
+        "LEDR_AC_DATA": {
+          "desktop": 15,
+          "web": 15
+        }
+      }
+    },
+    {
+      "form": "Ac_Image",
+      "desktopWrittenColumns": 64,
+      "webWrittenColumns": 63,
+      "coveragePct": 98.4,
+      "perTable": {
+        "PRODUCT_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "GROUP_MAST": {
+          "desktop": 23,
+          "web": 23
+        },
+        "ITEM_MAST": {
+          "desktop": 28,
+          "web": 28
+        },
+        "CO_SET_NEW": {
+          "desktop": 2,
+          "web": 2
+        },
+        "COL_MAST": {
+          "desktop": 6,
+          "web": 6
+        }
+      }
+    },
+    {
+      "form": "Ac_Ledr",
+      "desktopWrittenColumns": 29,
+      "webWrittenColumns": 28,
+      "coveragePct": 96.6,
+      "perTable": {
+        "AC_DATA": {
+          "desktop": 29,
+          "web": 28
+        }
+      }
+    },
+    {
+      "form": "Ac_Rojmel",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 34,
+      "coveragePct": 100.0,
+      "perTable": {
+        "ROJ_MEL_DATA": {
+          "desktop": 34,
+          "web": 34
+        }
+      }
+    },
+    {
+      "form": "Ac_Stock",
+      "desktopWrittenColumns": 154,
+      "webWrittenColumns": 129,
+      "coveragePct": 83.8,
+      "perTable": {
+        "MAIN_STOCK": {
+          "desktop": 48,
+          "web": 48
+        },
+        "LOT_DETL": {
+          "desktop": 29,
+          "web": 29
+        },
+        "TAG_SUM_DATA": {
+          "desktop": 23,
+          "web": 0
+        },
+        "DM_DATA": {
+          "desktop": 29,
+          "web": 29
+        },
+        "DM_KR_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "Ac_Tax",
+      "desktopWrittenColumns": 187,
+      "webWrittenColumns": 161,
+      "coveragePct": 86.1,
+      "perTable": {
+        "AD_OS": {
+          "desktop": 22,
+          "web": 19
+        },
+        "DHRN_DATA": {
+          "desktop": 35,
+          "web": 30
+        },
+        "SL_ORD_ADJ": {
+          "desktop": 36,
+          "web": 27
+        },
+        "TAX_DATA": {
+          "desktop": 22,
+          "web": 22
+        },
+        "MFG_ISU_REC": {
+          "desktop": 57,
+          "web": 52
+        },
+        "REMARK_DATA": {
+          "desktop": 11,
+          "web": 11
+        }
+      }
+    },
+    {
+      "form": "BtmSchm",
+      "desktopWrittenColumns": 896,
+      "webWrittenColumns": 785,
+      "coveragePct": 87.6,
+      "perTable": {
+        "PRODUCT_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "GROUP_MAST": {
+          "desktop": 18,
+          "web": 18
+        },
+        "TABLE_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "ITEM_MAST": {
+          "desktop": 24,
+          "web": 24
+        },
+        "BAR_DETL": {
+          "desktop": 107,
+          "web": 103
+        },
+        "BAR_IDTL": {
+          "desktop": 51,
+          "web": 41
+        },
+        "BAR_DATA": {
+          "desktop": 10,
+          "web": 9
+        },
+        "OP_DATA": {
+          "desktop": 17,
+          "web": 17
+        },
+        "AC_MAST": {
+          "desktop": 42,
+          "web": 41
+        },
+        "ITM_OPBL": {
+          "desktop": 24,
+          "web": 21
+        },
+        "SL_ORD_DATA": {
+          "desktop": 53,
+          "web": 49
+        },
+        "SL_ORD_DETL": {
+          "desktop": 77,
+          "web": 74
+        },
+        "AD_MAST": {
+          "desktop": 11,
+          "web": 9
+        },
+        "AD_MEMB": {
+          "desktop": 36,
+          "web": 36
+        },
+        "AD_DATA": {
+          "desktop": 29,
+          "web": 26
+        },
+        "AD_ADJ": {
+          "desktop": 37,
+          "web": 28
+        },
+        "DHRN_ISU_DATA": {
+          "desktop": 46,
+          "web": 35
+        },
+        "DHRN_ISU_DETL": {
+          "desktop": 40,
+          "web": 31
+        },
+        "DHRN_REC_DATA": {
+          "desktop": 56,
+          "web": 53
+        },
+        "APR_DETL": {
+          "desktop": 76,
+          "web": 62
+        },
+        "APR_IDTL": {
+          "desktop": 46,
+          "web": 33
+        },
+        "BILL_OS_DATA": {
+          "desktop": 38,
+          "web": 38
+        },
+        "OP_LDR": {
+          "desktop": 18,
+          "web": 0
+        },
+        "LOT_DETL": {
+          "desktop": 30,
+          "web": 29
+        }
+      }
+    },
+    {
+      "form": "MS_ACCT",
+      "desktopWrittenColumns": 47,
+      "webWrittenColumns": 46,
+      "coveragePct": 97.9,
+      "perTable": {
+        "AC_MAST": {
+          "desktop": 47,
+          "web": 46
+        }
+      }
+    },
+    {
+      "form": "MS_AC_GROUP",
+      "desktopWrittenColumns": 13,
+      "webWrittenColumns": 7,
+      "coveragePct": 53.8,
+      "perTable": {
+        "AC_GROUP": {
+          "desktop": 7,
+          "web": 7
+        },
+        "BOOK_IDTL": {
+          "desktop": 6,
+          "web": 0
+        }
+      }
+    },
+    {
+      "form": "MS_ADD_MAST",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 6,
+      "coveragePct": 100.0,
+      "perTable": {
+        "ADD_MAST": {
+          "desktop": 6,
+          "web": 6
+        }
+      }
+    },
+    {
+      "form": "MS_COMPANY",
+      "desktopWrittenColumns": 97,
+      "webWrittenColumns": 95,
+      "coveragePct": 97.9,
+      "perTable": {
+        "FAN_AC_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "CO_MAST": {
+          "desktop": 37,
+          "web": 36
+        },
+        "PRODUCT_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "GROUP_MAST": {
+          "desktop": 18,
+          "web": 18
+        },
+        "ITEM_MAST": {
+          "desktop": 24,
+          "web": 24
+        },
+        "COL_MAST": {
+          "desktop": 6,
+          "web": 6
+        },
+        "CONV_MAST": {
+          "desktop": 3,
+          "web": 3
+        }
+      }
+    },
+    {
+      "form": "MS_DESIGN_BOOK",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 34,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DESIGN_DETL": {
+          "desktop": 34,
+          "web": 34
+        }
+      }
+    },
+    {
+      "form": "MS_GOLD_MAST",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 13,
+      "coveragePct": 86.7,
+      "perTable": {
+        "DG_GOLD_MAST": {
+          "desktop": 15,
+          "web": 13
+        }
+      }
+    },
+    {
+      "form": "MS_ITEM",
+      "desktopWrittenColumns": 31,
+      "webWrittenColumns": 30,
+      "coveragePct": 96.8,
+      "perTable": {
+        "PRODUCT_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "GROUP_MAST": {
+          "desktop": 26,
+          "web": 26
+        }
+      }
+    },
+    {
+      "form": "MS_LOCT",
+      "desktopWrittenColumns": 35,
+      "webWrittenColumns": 35,
+      "coveragePct": 100.0,
+      "perTable": {
+        "BOOK_DATA": {
+          "desktop": 17,
+          "web": 17
+        },
+        "BOOK_DETL": {
+          "desktop": 14,
+          "web": 14
+        },
+        "TABLE_MAST": {
+          "desktop": 4,
+          "web": 4
+        }
+      }
+    },
+    {
+      "form": "MS_LOGIN",
+      "desktopWrittenColumns": 6,
+      "webWrittenColumns": 5,
+      "coveragePct": 83.3,
+      "perTable": {
+        "AC_MAST_SRNO": {
+          "desktop": 6,
+          "web": 5
+        }
+      }
+    },
+    {
+      "form": "MS_MFG_MAST",
+      "desktopWrittenColumns": 11,
+      "webWrittenColumns": 11,
+      "coveragePct": 100.0,
+      "perTable": {
+        "USER_SET": {
+          "desktop": 11,
+          "web": 11
+        }
+      }
+    },
+    {
+      "form": "MS_OPNCOMP",
+      "desktopWrittenColumns": 5,
+      "webWrittenColumns": 5,
+      "coveragePct": 100.0,
+      "perTable": {
+        "AC_MAST_SRNO": {
+          "desktop": 5,
+          "web": 5
+        }
+      }
+    },
+    {
+      "form": "MS_PRODUCT",
+      "desktopWrittenColumns": 110,
+      "webWrittenColumns": 67,
+      "coveragePct": 60.9,
+      "perTable": {
+        "TABLE_MAST": {
+          "desktop": 6,
+          "web": 4
+        },
+        "AD_MAST": {
+          "desktop": 12,
+          "web": 10
+        },
+        "PRODUCT_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "CO_MAST": {
+          "desktop": 37,
+          "web": 36
+        },
+        "BOOK_IDTL": {
+          "desktop": 6,
+          "web": 0
+        },
+        "TAG_STOCK": {
+          "desktop": 25,
+          "web": 0
+        },
+        "ITEM_MAST": {
+          "desktop": 13,
+          "web": 13
+        }
+      }
+    },
+    {
+      "form": "MS_RATE",
+      "desktopWrittenColumns": 27,
+      "webWrittenColumns": 25,
+      "coveragePct": 92.6,
+      "perTable": {
+        "RATE_MAST": {
+          "desktop": 26,
+          "web": 25
+        }
+      }
+    },
+    {
+      "form": "MS_STYLE",
+      "desktopWrittenColumns": 9,
+      "webWrittenColumns": 7,
+      "coveragePct": 77.8,
+      "perTable": {
+        "DESIGN_MAST": {
+          "desktop": 3,
+          "web": 2
+        },
+        "MODEL_MAST": {
+          "desktop": 3,
+          "web": 2
+        },
+        "ITM_CITY": {
+          "desktop": 3,
+          "web": 3
+        }
+      }
+    },
+    {
+      "form": "MS_UPDATE",
+      "desktopWrittenColumns": 183,
+      "webWrittenColumns": 159,
+      "coveragePct": 86.9,
+      "perTable": {
+        "BANK_RECONCILE": {
+          "desktop": 4,
+          "web": 4
+        },
+        "COL_MAST": {
+          "desktop": 6,
+          "web": 6
+        },
+        "MENU_DATA": {
+          "desktop": 9,
+          "web": 0
+        },
+        "USER_MAST": {
+          "desktop": 2,
+          "web": 0
+        },
+        "BOOK_DATA": {
+          "desktop": 19,
+          "web": 19
+        },
+        "BOOK_IDTL": {
+          "desktop": 5,
+          "web": 0
+        },
+        "AC_MAST": {
+          "desktop": 21,
+          "web": 21
+        },
+        "PRINT_MAST": {
+          "desktop": 5,
+          "web": 5
+        },
+        "DG_GOLD_MAST": {
+          "desktop": 14,
+          "web": 13
+        },
+        "USER_SET": {
+          "desktop": 11,
+          "web": 11
+        },
+        "BOOK_DETL": {
+          "desktop": 14,
+          "web": 14
+        },
+        "PRODUCT_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "ITEM_MAST": {
+          "desktop": 26,
+          "web": 26
+        },
+        "WEIGHT_MAST": {
+          "desktop": 4,
+          "web": 0
+        },
+        "TAX_MAST": {
+          "desktop": 9,
+          "web": 9
+        },
+        "TILE_DATA": {
+          "desktop": 6,
+          "web": 6
+        },
+        "SRNO_MAST": {
+          "desktop": 6,
+          "web": 4
+        },
+        "OP_DATA": {
+          "desktop": 17,
+          "web": 17
+        }
+      }
+    },
+    {
+      "form": "MS_USER",
+      "desktopWrittenColumns": 51,
+      "webWrittenColumns": 36,
+      "coveragePct": 70.6,
+      "perTable": {
+        "LOGIN_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "USER_SET": {
+          "desktop": 11,
+          "web": 11
+        },
+        "MENU_DATA": {
+          "desktop": 9,
+          "web": 0
+        },
+        "BOOK_IDTL": {
+          "desktop": 5,
+          "web": 0
+        },
+        "BOOK_DATA": {
+          "desktop": 15,
+          "web": 15
+        },
+        "TILE_DATA": {
+          "desktop": 6,
+          "web": 6
+        }
+      }
+    },
+    {
+      "form": "MS_YEAR",
+      "desktopWrittenColumns": 329,
+      "webWrittenColumns": 329,
+      "coveragePct": 100.0,
+      "perTable": {
+        "AC_GROUP": {
+          "desktop": 6,
+          "web": 6
+        },
+        "AC_MAST": {
+          "desktop": 27,
+          "web": 27
+        },
+        "BAL_GR": {
+          "desktop": 10,
+          "web": 10
+        },
+        "BOOK_DATA": {
+          "desktop": 22,
+          "web": 22
+        },
+        "BOOK_DETL": {
+          "desktop": 14,
+          "web": 14
+        },
+        "CO_SET": {
+          "desktop": 58,
+          "web": 58
+        },
+        "CO_SET_NEW": {
+          "desktop": 69,
+          "web": 69
+        },
+        "COL_MAST": {
+          "desktop": 6,
+          "web": 6
+        },
+        "CONV_MAST": {
+          "desktop": 15,
+          "web": 15
+        },
+        "EMP_MAST": {
+          "desktop": 13,
+          "web": 13
+        },
+        "GROUP_MAST": {
+          "desktop": 24,
+          "web": 24
+        },
+        "ITEM_MAST": {
+          "desktop": 33,
+          "web": 33
+        },
+        "LOCT_MAST": {
+          "desktop": 10,
+          "web": 10
+        },
+        "PRINT_MAST": {
+          "desktop": 5,
+          "web": 5
+        },
+        "PRODUCT_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "TABLE_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "TAX_MAST": {
+          "desktop": 9,
+          "web": 9
+        }
+      }
+    },
+    {
+      "form": "Mfg_Module",
+      "desktopWrittenColumns": 98,
+      "webWrittenColumns": 83,
+      "coveragePct": 84.7,
+      "perTable": {
+        "MENU_DATA": {
+          "desktop": 9,
+          "web": 0
+        },
+        "MFG_MAST": {
+          "desktop": 14,
+          "web": 14
+        },
+        "BOOK_IDTL": {
+          "desktop": 5,
+          "web": 0
+        },
+        "BOOK_DATA": {
+          "desktop": 15,
+          "web": 15
+        },
+        "STATE_MAST": {
+          "desktop": 3,
+          "web": 3
+        },
+        "AC_MAST": {
+          "desktop": 21,
+          "web": 21
+        },
+        "ITEM_MAST": {
+          "desktop": 26,
+          "web": 26
+        },
+        "PRODUCT_MAST": {
+          "desktop": 5,
+          "web": 4
+        }
+      }
+    },
+    {
+      "form": "Module_Schm",
+      "desktopWrittenColumns": 204,
+      "webWrittenColumns": 191,
+      "coveragePct": 93.6,
+      "perTable": {
+        "MAIN_STOCK": {
+          "desktop": 48,
+          "web": 48
+        },
+        "AD_MEMB": {
+          "desktop": 36,
+          "web": 36
+        },
+        "AD_DATA": {
+          "desktop": 32,
+          "web": 26
+        },
+        "AC_MAST": {
+          "desktop": 46,
+          "web": 45
+        },
+        "AC_MAST_SRNO": {
+          "desktop": 6,
+          "web": 5
+        },
+        "DG_GOLD_DATA": {
+          "desktop": 34,
+          "web": 31
+        }
+      }
+    },
+    {
+      "form": "RP_ADDRESS",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 15,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TEMP_ADD": {
+          "desktop": 15,
+          "web": 15
+        }
+      }
+    },
+    {
+      "form": "RP_ALL",
+      "desktopWrittenColumns": 38,
+      "webWrittenColumns": 38,
+      "coveragePct": 100.0,
+      "perTable": {
+        "RATE_CUT_ISU_REC": {
+          "desktop": 38,
+          "web": 38
+        }
+      }
+    },
+    {
+      "form": "RP_BALANCE",
+      "desktopWrittenColumns": 28,
+      "webWrittenColumns": 27,
+      "coveragePct": 96.4,
+      "perTable": {
+        "AC_DATA": {
+          "desktop": 28,
+          "web": 27
+        }
+      }
+    },
+    {
+      "form": "RP_BAL_ZOOM",
+      "desktopWrittenColumns": 22,
+      "webWrittenColumns": 22,
+      "coveragePct": 100.0,
+      "perTable": {
+        "REPORT_DATA": {
+          "desktop": 10,
+          "web": 10
+        },
+        "LEDR_AC_DATA": {
+          "desktop": 12,
+          "web": 12
+        }
+      }
+    },
+    {
+      "form": "RP_CASH_BANK",
+      "desktopWrittenColumns": 17,
+      "webWrittenColumns": 16,
+      "coveragePct": 94.1,
+      "perTable": {
+        "TEMP_AD_DATA": {
+          "desktop": 17,
+          "web": 16
+        }
+      }
+    },
+    {
+      "form": "RP_DHRN_LOAN",
+      "desktopWrittenColumns": 14,
+      "webWrittenColumns": 13,
+      "coveragePct": 92.9,
+      "perTable": {
+        "DHRN_DATA": {
+          "desktop": 14,
+          "web": 13
+        }
+      }
+    },
+    {
+      "form": "RP_DHRN_OS",
+      "desktopWrittenColumns": 26,
+      "webWrittenColumns": 26,
+      "coveragePct": 100.0,
+      "perTable": {
+        "REPORT_DATA": {
+          "desktop": 26,
+          "web": 26
+        }
+      }
+    },
+    {
+      "form": "RP_EMP",
+      "desktopWrittenColumns": 18,
+      "webWrittenColumns": 18,
+      "coveragePct": 100.0,
+      "perTable": {
+        "REPORT_DATA": {
+          "desktop": 18,
+          "web": 18
+        }
+      }
+    },
+    {
+      "form": "RP_HUID",
+      "desktopWrittenColumns": 27,
+      "webWrittenColumns": 27,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TAG_STOCK_PRINT": {
+          "desktop": 27,
+          "web": 27
+        }
+      }
+    },
+    {
+      "form": "RP_INOUT",
+      "desktopWrittenColumns": 15,
+      "webWrittenColumns": 15,
+      "coveragePct": 100.0,
+      "perTable": {
+        "REPORT_DATA": {
+          "desktop": 15,
+          "web": 15
+        }
+      }
+    },
+    {
+      "form": "RP_LEDR",
+      "desktopWrittenColumns": 48,
+      "webWrittenColumns": 48,
+      "coveragePct": 100.0,
+      "perTable": {
+        "LEDR_AC_DATA": {
+          "desktop": 14,
+          "web": 14
+        },
+        "FINE_DATA": {
+          "desktop": 34,
+          "web": 34
+        }
+      }
+    },
+    {
+      "form": "RP_OS",
+      "desktopWrittenColumns": 14,
+      "webWrittenColumns": 14,
+      "coveragePct": 100.0,
+      "perTable": {
+        "LEDR_AC_DATA": {
+          "desktop": 14,
+          "web": 14
+        }
+      }
+    },
+    {
+      "form": "RP_PHY_STOCK",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TAG_STOCK_PRINT": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "RP_REMINDER",
+      "desktopWrittenColumns": 16,
+      "webWrittenColumns": 16,
+      "coveragePct": 100.0,
+      "perTable": {
+        "REPORT_DATA": {
+          "desktop": 16,
+          "web": 16
+        }
+      }
+    },
+    {
+      "form": "RP_ROJMEL",
+      "desktopWrittenColumns": 46,
+      "webWrittenColumns": 33,
+      "coveragePct": 71.7,
+      "perTable": {
+        "LEDR_AC_DATA": {
+          "desktop": 14,
+          "web": 14
+        },
+        "TAG_STOCK_PRINT": {
+          "desktop": 27,
+          "web": 19
+        },
+        "ROJMEL_BAL": {
+          "desktop": 5,
+          "web": 0
+        }
+      }
+    },
+    {
+      "form": "RP_STOCK",
+      "desktopWrittenColumns": 24,
+      "webWrittenColumns": 24,
+      "coveragePct": 100.0,
+      "perTable": {
+        "REPORT_DATA": {
+          "desktop": 24,
+          "web": 24
+        }
+      }
+    },
+    {
+      "form": "RP_TAG",
+      "desktopWrittenColumns": 46,
+      "webWrittenColumns": 23,
+      "coveragePct": 50.0,
+      "perTable": {
+        "TAG_SUM_DATA": {
+          "desktop": 18,
+          "web": 0
+        },
+        "TAG_STOCK_PRINT": {
+          "desktop": 28,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "RP_TAG_ESTMATE",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TAG_STOCK_PRINT": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "RP_USER",
+      "desktopWrittenColumns": 47,
+      "webWrittenColumns": 44,
+      "coveragePct": 93.6,
+      "perTable": {
+        "TAG_STOCK_PRINT": {
+          "desktop": 11,
+          "web": 8
+        },
+        "REPORT_DATA": {
+          "desktop": 36,
+          "web": 36
+        }
+      }
+    },
+    {
+      "form": "TR_AC_OPBL",
+      "desktopWrittenColumns": 82,
+      "webWrittenColumns": 82,
+      "coveragePct": 100.0,
+      "perTable": {
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "CONTRA_DATA": {
+          "desktop": 26,
+          "web": 26
+        },
+        "OP_DATA": {
+          "desktop": 17,
+          "web": 17
+        }
+      }
+    },
+    {
+      "form": "TR_APR_ISU",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_BILL_TO",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_BUL_BOOKING",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_BUL_SALE",
+      "desktopWrittenColumns": 68,
+      "webWrittenColumns": 68,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TOUCH_MAST": {
+          "desktop": 8,
+          "web": 8
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 37,
+          "web": 37
+        }
+      }
+    },
+    {
+      "form": "TR_CARD_REC",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_CASH",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_CONTRA",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_DHRN_INTREC",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_DHRN_ISU",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_DHRN_REC",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_FN_INOUT",
+      "desktopWrittenColumns": 70,
+      "webWrittenColumns": 70,
+      "coveragePct": 100.0,
+      "perTable": {
+        "ITEM_MAST": {
+          "desktop": 25,
+          "web": 25
+        },
+        "PRODUCT_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "GROUP_MAST": {
+          "desktop": 18,
+          "web": 18
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_GOLD_BOOK",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_INOUT",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_ITM_LOT",
+      "desktopWrittenColumns": 59,
+      "webWrittenColumns": 59,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TAG_PRINT_DATA": {
+          "desktop": 59,
+          "web": 59
+        }
+      }
+    },
+    {
+      "form": "TR_JDT_REC",
+      "desktopWrittenColumns": 81,
+      "webWrittenColumns": 81,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 58,
+          "web": 58
+        }
+      }
+    },
+    {
+      "form": "TR_KR_ISU",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_LOCT_AMT",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_MEMB_ADJ",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_MEMB_ENT",
+      "desktopWrittenColumns": 55,
+      "webWrittenColumns": 55,
+      "coveragePct": 100.0,
+      "perTable": {
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TEMP_AD_DATA": {
+          "desktop": 16,
+          "web": 16
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_GHAT_REC",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ISU_REC",
+      "desktopWrittenColumns": 81,
+      "webWrittenColumns": 81,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 58,
+          "web": 58
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ITEM",
+      "desktopWrittenColumns": 81,
+      "webWrittenColumns": 81,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 58,
+          "web": 58
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_KR_ISU_REC",
+      "desktopWrittenColumns": 81,
+      "webWrittenColumns": 81,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 58,
+          "web": 58
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ORD_ISU",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_ORD_REC",
+      "desktopWrittenColumns": 81,
+      "webWrittenColumns": 81,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 58,
+          "web": 58
+        }
+      }
+    },
+    {
+      "form": "TR_MFG_WITH_LOT",
+      "desktopWrittenColumns": 81,
+      "webWrittenColumns": 81,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 58,
+          "web": 58
+        }
+      }
+    },
+    {
+      "form": "TR_MLT_PRO",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_OTH_COMM",
+      "desktopWrittenColumns": 22,
+      "webWrittenColumns": 22,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 22,
+          "web": 22
+        }
+      }
+    },
+    {
+      "form": "TR_OTH_PURC",
+      "desktopWrittenColumns": 22,
+      "webWrittenColumns": 22,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 22,
+          "web": 22
+        }
+      }
+    },
+    {
+      "form": "TR_PHYSTK",
+      "desktopWrittenColumns": 206,
+      "webWrittenColumns": 193,
+      "coveragePct": 93.7,
+      "perTable": {
+        "BAR_DETL": {
+          "desktop": 96,
+          "web": 92
+        },
+        "BAR_IDTL": {
+          "desktop": 50,
+          "web": 41
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 60,
+          "web": 60
+        }
+      }
+    },
+    {
+      "form": "TR_PR_SL_UAE",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_PURC",
+      "desktopWrittenColumns": 60,
+      "webWrittenColumns": 50,
+      "coveragePct": 83.3,
+      "perTable": {
+        "TOUCH_MAST": {
+          "desktop": 7,
+          "web": 7
+        },
+        "TAG_SET": {
+          "desktop": 8,
+          "web": 0
+        },
+        "SRNO_MAST": {
+          "desktop": 6,
+          "web": 4
+        },
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_PURC_HM",
+      "desktopWrittenColumns": 29,
+      "webWrittenColumns": 27,
+      "coveragePct": 93.1,
+      "perTable": {
+        "SRNO_MAST": {
+          "desktop": 6,
+          "web": 4
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_SALE",
+      "desktopWrittenColumns": 52,
+      "webWrittenColumns": 52,
+      "coveragePct": 100.0,
+      "perTable": {
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "PRINT_MAST": {
+          "desktop": 5,
+          "web": 5
+        },
+        "POINT_MEMB": {
+          "desktop": 8,
+          "web": 8
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_HM",
+      "desktopWrittenColumns": 28,
+      "webWrittenColumns": 28,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "PRINT_MAST": {
+          "desktop": 5,
+          "web": 5
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_LBR",
+      "desktopWrittenColumns": 88,
+      "webWrittenColumns": 88,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TOUCH_MAST": {
+          "desktop": 7,
+          "web": 7
+        },
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 42,
+          "web": 42
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_ORD",
+      "desktopWrittenColumns": 39,
+      "webWrittenColumns": 39,
+      "coveragePct": 100.0,
+      "perTable": {
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_RTN",
+      "desktopWrittenColumns": 79,
+      "webWrittenColumns": 71,
+      "coveragePct": 89.9,
+      "perTable": {
+        "TAG_SET": {
+          "desktop": 8,
+          "web": 0
+        },
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 32,
+          "web": 32
+        }
+      }
+    },
+    {
+      "form": "TR_SALE_RTN_UAE",
+      "desktopWrittenColumns": 34,
+      "webWrittenColumns": 32,
+      "coveragePct": 94.1,
+      "perTable": {
+        "SRNO_MAST": {
+          "desktop": 6,
+          "web": 4
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "PRINT_MAST": {
+          "desktop": 5,
+          "web": 5
+        }
+      }
+    },
+    {
+      "form": "TR_SL_EBILL",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_SL_ORD_ADJ",
+      "desktopWrittenColumns": 146,
+      "webWrittenColumns": 133,
+      "coveragePct": 91.1,
+      "perTable": {
+        "BAR_DETL": {
+          "desktop": 96,
+          "web": 92
+        },
+        "BAR_IDTL": {
+          "desktop": 50,
+          "web": 41
+        }
+      }
+    },
+    {
+      "form": "TR_SL_PR_ITEM",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_CAN",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_OPBL",
+      "desktopWrittenColumns": 246,
+      "webWrittenColumns": 225,
+      "coveragePct": 91.5,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TAG_SET": {
+          "desktop": 8,
+          "web": 0
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 60,
+          "web": 60
+        },
+        "SRNO_MAST": {
+          "desktop": 6,
+          "web": 4
+        },
+        "BAR_IDTL": {
+          "desktop": 48,
+          "web": 41
+        },
+        "BAR_DETL": {
+          "desktop": 101,
+          "web": 97
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_SPLIT",
+      "desktopWrittenColumns": 117,
+      "webWrittenColumns": 109,
+      "coveragePct": 93.2,
+      "perTable": {
+        "TAG_SET": {
+          "desktop": 8,
+          "web": 0
+        },
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "TAG_PRINT_DATA": {
+          "desktop": 60,
+          "web": 60
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 33,
+          "web": 33
+        }
+      }
+    },
+    {
+      "form": "TR_TAG_WT_DIFF",
+      "desktopWrittenColumns": 93,
+      "webWrittenColumns": 93,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TAG_PRINT_DATA": {
+          "desktop": 60,
+          "web": 60
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 33,
+          "web": 33
+        }
+      }
+    },
+    {
+      "form": "TR_TOUR",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_TOUR_ORD",
+      "desktopWrittenColumns": 39,
+      "webWrittenColumns": 39,
+      "coveragePct": 100.0,
+      "perTable": {
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_TOUR_SALE",
+      "desktopWrittenColumns": 93,
+      "webWrittenColumns": 93,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TOUCH_MAST": {
+          "desktop": 8,
+          "web": 8
+        },
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 46,
+          "web": 46
+        }
+      }
+    },
+    {
+      "form": "TR_VP",
+      "desktopWrittenColumns": 60,
+      "webWrittenColumns": 60,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 37,
+          "web": 37
+        }
+      }
+    },
+    {
+      "form": "TR_VP_ADJ",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 23,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        }
+      }
+    },
+    {
+      "form": "TR_WH_SALE",
+      "desktopWrittenColumns": 102,
+      "webWrittenColumns": 101,
+      "coveragePct": 99.0,
+      "perTable": {
+        "TOUCH_MAST": {
+          "desktop": 8,
+          "web": 8
+        },
+        "USER_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 49,
+          "web": 49
+        },
+        "PRINT_MAST": {
+          "desktop": 5,
+          "web": 5
+        }
+      }
+    },
+    {
+      "form": "TR_WH_SALE_RTN",
+      "desktopWrittenColumns": 71,
+      "webWrittenColumns": 71,
+      "coveragePct": 100.0,
+      "perTable": {
+        "DELETE_DATA": {
+          "desktop": 23,
+          "web": 23
+        },
+        "RATE_CUT_ISU_REC": {
+          "desktop": 48,
+          "web": 48
+        }
+      }
+    },
+    {
+      "form": "UT_AI_TRFR",
+      "desktopWrittenColumns": 18,
+      "webWrittenColumns": 0,
+      "coveragePct": 0.0,
+      "perTable": {
+        "TAG_DATA": {
+          "desktop": 3,
+          "web": 0
+        },
+        "BOOK_IDTL": {
+          "desktop": 6,
+          "web": 0
+        }
+      }
+    },
+    {
+      "form": "UT_EXPORT",
+      "desktopWrittenColumns": 1836,
+      "webWrittenColumns": 1674,
+      "coveragePct": 91.2,
+      "perTable": {
+        "REP_DATA": {
+          "desktop": 47,
+          "web": 45
+        },
+        "REP_DETL": {
+          "desktop": 74,
+          "web": 62
+        },
+        "AD_MAST": {
+          "desktop": 11,
+          "web": 9
+        },
+        "AD_MEMB": {
+          "desktop": 36,
+          "web": 36
+        },
+        "AD_DATA": {
+          "desktop": 30,
+          "web": 26
+        },
+        "UPI_DATA": {
+          "desktop": 15,
+          "web": 14
+        },
+        "AD_ADJ": {
+          "desktop": 37,
+          "web": 28
+        },
+        "SL_ORD_DATA": {
+          "desktop": 55,
+          "web": 51
+        },
+        "SL_ORD_DETL": {
+          "desktop": 69,
+          "web": 66
+        },
+        "SL_ORD_IDTL": {
+          "desktop": 49,
+          "web": 49
+        },
+        "SL_PR_DETL": {
+          "desktop": 37,
+          "web": 37
+        },
+        "SL_ORD_ADJ": {
+          "desktop": 36,
+          "web": 27
+        },
+        "ITM_OPBL": {
+          "desktop": 26,
+          "web": 23
+        },
+        "OP_DATA": {
+          "desktop": 17,
+          "web": 17
+        },
+        "CONTRA_DATA": {
+          "desktop": 30,
+          "web": 27
+        },
+        "BAR_CAN_DATA": {
+          "desktop": 13,
+          "web": 13
+        },
+        "BAR_CAN_DETL": {
+          "desktop": 55,
+          "web": 51
+        },
+        "BAR_CAN_IDTL": {
+          "desktop": 43,
+          "web": 41
+        },
+        "BAR_DATA": {
+          "desktop": 16,
+          "web": 15
+        },
+        "BAR_DETL": {
+          "desktop": 94,
+          "web": 90
+        },
+        "BAR_IDTL": {
+          "desktop": 46,
+          "web": 41
+        },
+        "TEMP_BOOK_DATA": {
+          "desktop": 5,
+          "web": 5
+        },
+        "BOOK_DATA": {
+          "desktop": 15,
+          "web": 15
+        },
+        "BOOK_DETL": {
+          "desktop": 14,
+          "web": 14
+        },
+        "KR_DATA": {
+          "desktop": 57,
+          "web": 50
+        },
+        "KR_DETL": {
+          "desktop": 61,
+          "web": 58
+        },
+        "KR_IDTL": {
+          "desktop": 45,
+          "web": 42
+        },
+        "PR_DATA": {
+          "desktop": 57,
+          "web": 53
+        },
+        "PR_DETL": {
+          "desktop": 60,
+          "web": 57
+        },
+        "PR_IDTL": {
+          "desktop": 45,
+          "web": 32
+        },
+        "RATE_CUT_DATA": {
+          "desktop": 65,
+          "web": 56
+        },
+        "RATE_CUT_ISU": {
+          "desktop": 76,
+          "web": 57
+        },
+        "SL_IDTL": {
+          "desktop": 43,
+          "web": 38
+        },
+        "RATE_CUT_REC": {
+          "desktop": 59,
+          "web": 46
+        },
+        "CASH_DATA": {
+          "desktop": 33,
+          "web": 25
+        },
+        "SL_DATA": {
+          "desktop": 97,
+          "web": 97
+        },
+        "SL_DETL": {
+          "desktop": 103,
+          "web": 103
+        },
+        "SL_DETL_RTN": {
+          "desktop": 54,
+          "web": 54
+        },
+        "AC_MAST": {
+          "desktop": 46,
+          "web": 45
+        },
+        "PRODUCT_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "GROUP_MAST": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TABLE_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "ITEM_MAST": {
+          "desktop": 28,
+          "web": 28
+        }
+      }
+    },
+    {
+      "form": "UT_HDD",
+      "desktopWrittenColumns": 1,
+      "webWrittenColumns": 1,
+      "coveragePct": 100.0,
+      "perTable": {
+        "HDD_MAST": {
+          "desktop": 1,
+          "web": 1
+        }
+      }
+    },
+    {
+      "form": "UT_IMPORT",
+      "desktopWrittenColumns": 1469,
+      "webWrittenColumns": 1342,
+      "coveragePct": 91.4,
+      "perTable": {
+        "OP_LDR": {
+          "desktop": 18,
+          "web": 0
+        },
+        "TOUCH_MAST": {
+          "desktop": 12,
+          "web": 12
+        },
+        "SL_ORD_DATA": {
+          "desktop": 42,
+          "web": 39
+        },
+        "SL_ORD_DETL": {
+          "desktop": 63,
+          "web": 60
+        },
+        "ITM_OPBL": {
+          "desktop": 22,
+          "web": 19
+        },
+        "BAR_DETL": {
+          "desktop": 93,
+          "web": 91
+        },
+        "BAR_IDTL": {
+          "desktop": 42,
+          "web": 37
+        },
+        "BAR_DATA": {
+          "desktop": 16,
+          "web": 15
+        },
+        "PRODUCT_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "GROUP_MAST": {
+          "desktop": 23,
+          "web": 23
+        },
+        "TABLE_MAST": {
+          "desktop": 5,
+          "web": 4
+        },
+        "ITEM_MAST": {
+          "desktop": 28,
+          "web": 28
+        },
+        "OP_DATA": {
+          "desktop": 16,
+          "web": 16
+        },
+        "AC_MAST": {
+          "desktop": 45,
+          "web": 44
+        },
+        "AC_MAST_SRNO": {
+          "desktop": 5,
+          "web": 5
+        },
+        "ADD_MAST": {
+          "desktop": 25,
+          "web": 23
+        },
+        "BAR_CAN_DATA": {
+          "desktop": 8,
+          "web": 8
+        },
+        "TEMP_BOOK_DATA": {
+          "desktop": 5,
+          "web": 5
+        },
+        "BAR_CAN_DETL": {
+          "desktop": 34,
+          "web": 33
+        },
+        "DHRN_ISU_DATA": {
+          "desktop": 45,
+          "web": 35
+        },
+        "DHRN_ISU_DETL": {
+          "desktop": 39,
+          "web": 31
+        },
+        "DHRN_REC_DATA": {
+          "desktop": 49,
+          "web": 46
+        },
+        "DHRN_REC_DETL": {
+          "desktop": 40,
+          "web": 38
+        },
+        "DHRN_DATA": {
+          "desktop": 34,
+          "web": 30
+        },
+        "AD_MAST": {
+          "desktop": 11,
+          "web": 9
+        },
+        "AD_MEMB": {
+          "desktop": 36,
+          "web": 36
+        },
+        "AD_DATA": {
+          "desktop": 29,
+          "web": 26
+        },
+        "AD_ADJ": {
+          "desktop": 32,
+          "web": 25
+        },
+        "AD_OS": {
+          "desktop": 25,
+          "web": 22
+        },
+        "APR_DATA": {
+          "desktop": 16,
+          "web": 13
+        },
+        "APR_DETL": {
+          "desktop": 56,
+          "web": 54
+        },
+        "SRNO_MAST": {
+          "desktop": 6,
+          "web": 4
+        },
+        "EMP_MAST": {
+          "desktop": 13,
+          "web": 13
+        },
+        "AC_GROUP": {
+          "desktop": 7,
+          "web": 7
+        },
+        "APR_IDTL": {
+          "desktop": 42,
+          "web": 32
+        },
+        "POINT_MAST": {
+          "desktop": 12,
+          "web": 11
+        },
+        "POINT_MEMB": {
+          "desktop": 10,
+          "web": 8
+        },
+        "POINT_DATA": {
+          "desktop": 19,
+          "web": 12
+        },
+        "REP_DETL": {
+          "desktop": 71,
+          "web": 61
+        },
+        "MFG_DATA": {
+          "desktop": 46,
+          "web": 40
+        },
+        "MFG_DETL": {
+          "desktop": 74,
+          "web": 74
+        },
+        "MFG_IDTL": {
+          "desktop": 31,
+          "web": 30
+        },
+        "BILL_OS_DATA": {
+          "desktop": 38,
+          "web": 38
+        },
+        "SL_DATA": {
+          "desktop": 86,
+          "web": 86
+        },
+        "SL_DETL": {
+          "desktop": 95,
+          "web": 95
+        }
+      }
+    },
+    {
+      "form": "UT_SMS",
+      "desktopWrittenColumns": 17,
+      "webWrittenColumns": 17,
+      "coveragePct": 100.0,
+      "perTable": {
+        "MSG_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "LEDR_AC_DATA": {
+          "desktop": 13,
+          "web": 13
+        }
+      }
+    },
+    {
+      "form": "UT_TAG_PRINT",
+      "desktopWrittenColumns": 60,
+      "webWrittenColumns": 60,
+      "coveragePct": 100.0,
+      "perTable": {
+        "TAG_PRINT_DATA": {
+          "desktop": 60,
+          "web": 60
+        }
+      }
+    },
+    {
+      "form": "UT_USER_REQUEST",
+      "desktopWrittenColumns": 18,
+      "webWrittenColumns": 18,
+      "coveragePct": 100.0,
+      "perTable": {
+        "USER_REQUEST": {
+          "desktop": 18,
+          "web": 18
+        }
+      }
+    },
+    {
+      "form": "UT_WAPP_WITH_API",
+      "desktopWrittenColumns": 19,
+      "webWrittenColumns": 18,
+      "coveragePct": 94.7,
+      "perTable": {
+        "WEBHOOKINBOX": {
+          "desktop": 0,
+          "web": 0
+        },
+        "APP_CHATMESSAGES": {
+          "desktop": 0,
+          "web": 0
+        },
+        "LEDR_AC_DATA": {
+          "desktop": 13,
+          "web": 13
+        },
+        "POINT_MAST": {
+          "desktop": 6,
+          "web": 5
+        }
+      }
+    },
+    {
+      "form": "UT_WHATSAPP",
+      "desktopWrittenColumns": 23,
+      "webWrittenColumns": 22,
+      "coveragePct": 95.7,
+      "perTable": {
+        "MSG_MAST": {
+          "desktop": 4,
+          "web": 4
+        },
+        "LEDR_AC_DATA": {
+          "desktop": 13,
+          "web": 13
+        },
+        "POINT_MAST": {
+          "desktop": 6,
+          "web": 5
+        }
+      }
+    }
+  ]
+}

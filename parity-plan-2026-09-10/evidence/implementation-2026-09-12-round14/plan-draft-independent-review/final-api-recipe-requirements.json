@@ -1,0 +1,41 @@
+{
+  "kind": "mandatory-final-api-input-coverage-qualification",
+  "scope": "Final capture recipe must retain existing normal API/core/db/types/config/schema dependencies and add/check the actual external read closure. List below is a required minimum, not a claim that all external reads have already been enumerated.",
+  "requiredDomains": [
+    {
+      "path": "web/apps/web/test/",
+      "reason": "Includes parity.real-stack.mjs and all journey/fixture producers; test releaseCertification693\u2013702 reads the producer directly."
+    },
+    {
+      "path": ".github/workflows/",
+      "reason": "Active root ci/release-certification workflows read at1088\u20131118."
+    },
+    {
+      "path": "web/.github/workflows/",
+      "reason": "Nested copies are compared byte-for-byte at1091\u20131118."
+    },
+    {
+      "path": "web/scripts/",
+      "reason": "release-certify.mjs read at1183/1205, plus imported script dependencies and other API test fs reads."
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/report-register.json",
+      "reason": "Optional exists/read comparison at327\u2013330; observe presence/absence as well as bytes."
+    },
+    {
+      "path": "project-memory/parity/PARITY-RATCHET.json",
+      "reason": "Optional read at510\u2013513; changed membership invalidates tested expectations."
+    },
+    {
+      "path": "RELEASE_GATES evidence paths actually read by API tests, including retained G5/report/restore observations",
+      "reason": "readJson at1258+ resolves outside API sources; required missing artefacts are meaningful absence inputs."
+    }
+  ],
+  "rules": [
+    "Capture and compare the same domains against the current tested source; merely listing a file in a broad manifest does not prove current equality if the required comparison omits it.",
+    "Record missing external paths when test behavior depends on absence; a later creation is a dependency change.",
+    "Preserve the failed Round14 run and frozen39; do not retroactively credit old3050 API pass to later browser source.",
+    "Run the corrected full suite after final source/fixture freeze; new17-journey requirement must reject previous16-only all-pass records.",
+    "Root owns concrete final capture recipe and any expanded read-closure inventory; no gate/denominator is waived."
+  ]
+}

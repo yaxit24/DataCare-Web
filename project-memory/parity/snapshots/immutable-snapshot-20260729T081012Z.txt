@@ -1,0 +1,5 @@
+snapshot_utc=20260729T081012Z
+snapshot_path=/tmp/imodule-parity-snapshot-20260729T081012Z
+live_before=f9f80c1462be2df52aa454c9d71709f46f37cd3d226e2e3988a300eb04ced7be files=5277
+live_after=f9f80c1462be2df52aa454c9d71709f46f37cd3d226e2e3988a300eb04ced7be files=5277
+snapshot=f9f80c1462be2df52aa454c9d71709f46f37cd3d226e2e3988a300eb04ced7be files=5277

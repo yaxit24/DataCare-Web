@@ -1,0 +1,71 @@
+{
+ "form": "UT_VCH_RE_NUMBR",
+ "loc": 4446,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ? AND CO_BOOK = ' ? ' ? AND MAIN_BOOK = 'SALES' ORDER BY CO_BOOK",
+  "SELECT VCH_NO,VCH_DATE,CO_BOOK,OLD_VCH_NO FROM SL_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' ORDER BY VCH_DATE,VCH_NO",
+  "UPDATE SL_DATA SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_DETL SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_IDTL SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_PR_DETL SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_ORD_ADJ SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BILL_OS_DATA SET VCH_NO = NEW_VCH_NO,BILL_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE UPI_DATA SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_DATA SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_DATA SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_DETL SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_DETL SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_IDTL SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_IDTL SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_PR_DETL SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_PR_DETL SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_ORD_ADJ SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE SL_ORD_ADJ SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BILL_OS_DATA SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BILL_OS_DATA SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE UPI_DATA SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE UPI_DATA SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE AD_ADJ SET SBILL_NO = ' ? ',SBILL_HD_VCH_NO = ' ? ' WHERE CO_CODE = ' ? ' AND SBILL_LC_CODE = ' ? ' AND SBILL_YRCD = ' ? ' AND SBILL_DBCD = ' ? CO_BOOK ? ' AND SBILL_NO <> ' ? VCH_NO ? '",
+  "UPDATE BILL_OS_DATA SET BILL_NO = ' ? ',BILL_HD_VCH_NO = ' ? ' WHERE CO_CODE = ' ? ' AND BILL_LC = ' ? ' AND BILL_YRCD = ' ? ' AND BILL_DBCD = ' ? CO_BOOK ? ' AND BILL_NO <> ' ? VCH_NO ? '",
+  "UPDATE PR_DATA SET SL_BILL_NO = ' ? ' WHERE CO_CODE = ' ? ' AND SL_BILL_LC = ' ? ' AND SL_BILL_YRCD = ' ? ' AND SL_BILL_DBCD = ' ? CO_BOOK ? ' AND SL_BILL_NO <> ' ? VCH_NO ? '",
+  "UPDATE PR_DETL SET SL_BILL_NO = ' ? ' WHERE CO_CODE = ' ? ' AND SL_BILL_LC = ' ? ' AND SL_BILL_YRCD = ' ? ' AND SL_BILL_DBCD = ' ? CO_BOOK ? ' AND SL_BILL_NO <> ' ? VCH_NO ? '",
+  "SELECT * FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ? AND CO_BOOK = ' ? ' ? AND MAIN_BOOK = 'PURCHASE' ORDER BY CO_BOOK",
+  "SELECT VCH_NO,VCH_DATE,CO_BOOK,OLD_VCH_NO FROM PR_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' ORDER BY VCH_DATE,VCH_NO",
+  "UPDATE PR_DATA SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_DETL SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_IDTL SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_DATA SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_DETL SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_IDTL SET VCH_NO = NEW_VCH_NO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_DATA SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_DATA SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_DETL SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_DETL SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_IDTL SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE PR_IDTL SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_DATA SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_DATA SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_DETL SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_DETL SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_IDTL SET OLD_VCH_NO = ' ? VCH_NO ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "UPDATE BAR_IDTL SET NEW_VCH_NO = ' ? ',VCH_NO = 'A ? ' WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "SELECT * FROM BOOK_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ? AND CO_BOOK = ' ? ' ? AND MAIN_BOOK = 'CASH REC' ORDER BY CO_BOOK",
+  "SELECT VCH_NO,VCH_DATE,CO_BOOK,OLD_VCH_NO FROM CASH_DATA WHERE CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' ORDER BY VCH_DATE,VCH_NO"
+ ],
+ "keyboard": {
+  "Esc": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Are you sure to Voucher Re Numbering Data?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are you sure to Voucher Re Numbering Data?\", (MsgBoxStyle)4, (object)null)) != 6"
+  },
+  {
+   "message": "Voucher are sucessfully Re Numbering.. Please Data Refresh After Vch No Is Re Numbring.....",
+   "when": ""
+  }
+ ]
+}

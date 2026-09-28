@@ -1,0 +1,1008 @@
+{
+  "baseManifestSha256": "598de0a6f696babb3ecc147bf552c6f933682b64e379382fed943c5d6c7fc245",
+  "qualifiedManifestSha256": "52177ad18ac7717c709ccb4b74cdbc325158c5984c9cbc466c7e31c927e9857d",
+  "addedInputs": [
+    {
+      "path": "project-memory/parity/PARITY-RATCHET.json",
+      "sha256": "0656b24e6183a34731947d096c43b8f2209f5bd6a30742f932a0c019592ab0a3"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Ac_Final.cs",
+      "sha256": "4e433fc643c8e0190be2181609653686963cc96d0fa6d9d7078bbb5e0eac9e6c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/AuthClass.cs",
+      "sha256": "cc3d0e1e39d739f7551e2c8d79b6f644ece56fe81eaa91f906feb25bf85fa516"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/AuthError.cs",
+      "sha256": "e273206d67e12bb5f189748de939c9be9d7b597e718f95da76d06e5ab72aac20"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/BtmSchm.cs",
+      "sha256": "6acfdbeacd856dc3b72c9088ad5794eeb872c554cbe09cc386ef62ee70faf994"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClassTagList.cs",
+      "sha256": "b4a2f47ad878346e02c424a18f07d627e5ab69f39d6ebdb8b2989d2454b714f6"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsAddlDocDtls.cs",
+      "sha256": "59d7faac8d10926b491a0b6c9e5ab56459c10eb66c4e491db71bb56f1b935a72"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsAttribDtls.cs",
+      "sha256": "cfb408df44abb6b502582fefd3427a9f9fb555434a91ae0b62c8fc95ca0365dc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsBchDtls.cs",
+      "sha256": "f9eaf2d337c04694370280e5a3d3c7c28c966f944554c7ad9a992ade499ad46e"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsBuyerDtls.cs",
+      "sha256": "a9b1b193bb1fd63aa7f4aa2b3365438491f58bb1895cc2349dda2930d1351fbc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsContrDtls.cs",
+      "sha256": "275cc8d085b07cf7d7098777ac989e3fd484ef263ac8414d77c28743cad689d0"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsDispDtls.cs",
+      "sha256": "a5bd0940f8bdb2e9c1bb8f31f81adffbf6b59f245cbf473cbff1feb3f0fa8030"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsDocDtls.cs",
+      "sha256": "3058b4a8aba98ee0e9f1e3399ab3c3b2748936505db1b3574c54e8459fed2321"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsDocPerdDtls.cs",
+      "sha256": "2030ee1d7639fd2a1a788312433e46999ef95aa5405909cdf07a2fbfb768e7c4"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsExpDtls.cs",
+      "sha256": "4456e4fe5e442bf0a978857df58285e561f425d1988968f4a55942e72ce88c2f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsItemList.cs",
+      "sha256": "e85c337e80a7cc6da35835a400b933856b393f3c4af9b4d9d130b2e082596d72"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsPayDtls.cs",
+      "sha256": "73fa1330cfdd3ecdec9004e25bcd032ceac79f3b67ca496346546f6b891f22e0"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsPrecDocDtls.cs",
+      "sha256": "8addbb9ccb55b48f97f8653eb9d65d06c7c137cb505ac07a843b08c27f841a19"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsRefDtls.cs",
+      "sha256": "04c9a24ddc006ff067d231439a5d1a24714db549d2d10eb0be8a453c23452921"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsSellerDtls.cs",
+      "sha256": "cd16abe02ca650ca596f896f46803b2cc60905bf06a25b96e66d9d766f51dc29"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsShipDtls.cs",
+      "sha256": "96fc615531ab21236a10a3016d16a9dcf1544f85b1677337075ee28e45a5c2a7"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsTranDtls.cs",
+      "sha256": "52498b396bfaacc5751ee421c67b941e29e812338a421884f35828b72c19bd4f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ClsValDtls.cs",
+      "sha256": "d3fc68ae41fa3096c5d8c137a3526a1f962dc6ea6509e1231882050883b13e09"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Data.cs",
+      "sha256": "a170823f4822d2c7671bb52393533a467cf4a186a08a51e79d240014267e8890"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DcClass.cs",
+      "sha256": "ff3823273dfbff37d84fe135d9d6077753a17e514b52e1bd5e09b553ddc5b1b7"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/DcPrintClass.cs",
+      "sha256": "12a21eae531d76cc7dfaba010fd0ce9d53aa19dc2e0b9968677c1a6888f04658"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/ErrorResp.cs",
+      "sha256": "7c5542ef23857657fb66766b9d6b021d2989a8fe90df97ba2247d72c9c721d9a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/IRNClass.cs",
+      "sha256": "73f4fcf9a5987e5cf635d12d5deb320f025358b30f3a203b6b3021b6f825c21c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/IRNData.cs",
+      "sha256": "51345caf912c025f6175af8f3d49519e8b9326e76e5d6a7ae4c4672b0bc329c1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_ACCT.cs",
+      "sha256": "1e469807eb724e60c30eb4247eafe24d0c7d5bc5f374fdfd1c268bd3b0f626e3"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_AC_GROUP.cs",
+      "sha256": "e08ef7c96d6f3c79e98fb2ac3630a6b93e1da171facf95cb67f35eff82901fd8"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_ADD_MAST.cs",
+      "sha256": "59fc7cce2405fee26b512de52559e19c86d4bc0f199ff826746afb167ea4e911"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs",
+      "sha256": "b82f18292f76b736e73051b971340226512363db55a1954c4a2b2cadc843066d"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_BOOK.cs",
+      "sha256": "83600c77f272796619b63eb41b52fe2a1a95c0bd122787c2b6fd13c16c32f571"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_BOOKLIST.cs",
+      "sha256": "3bb4522fff1a0fdd074e4d64e3f46ed62a12470df6e924001818dee44ca401f1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_COMPANY.cs",
+      "sha256": "9ac96b102ff4f005c869d30562724561d1015ef04f757c1ae7e761198c0d664a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_DM.cs",
+      "sha256": "824dd54c20067b5298516d9d1c392f74f203d69b140d28f13ee7862bfd0c4dd8"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_EMP.cs",
+      "sha256": "e42f900981c94c5bfffc2ce33abecfbc43ed88c60292cce0d9c0d4b8b84bacc7"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_GOLD_MAST.cs",
+      "sha256": "4bc5f1b3500e9b61f5201c5566d78795ee3944e0b4d45ad2d6230af5882a982b"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_GROUP.cs",
+      "sha256": "b79a61382497db0323151974eaad24543d3674383cc302fe27baaac8b290103c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_ITEM.cs",
+      "sha256": "eff38e440fc8137534d4afbf8c355ad0d67f4fabbaf6b9c54c130affaa3f47cc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_LBR_TYPE.cs",
+      "sha256": "2af55b3852a561ac2da511750256a18652349d22ea3a6eb0ff55579a212a2df7"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_LOCT.cs",
+      "sha256": "bef0250e43c825ebe9ac6dd2d0ef32cb6c6edff96822cc4d3d83824552ec3805"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_LOGIN.cs",
+      "sha256": "37789ae10c9d4f55f42bb14505ac6ddb923d2cb67661430a810fa7efb3a7a6ae"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_MEMB.cs",
+      "sha256": "ade737da6c187a69b915004fbaffca305efbb05e57f1dca18eac0628c00d7d71"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_MFG_MAST.cs",
+      "sha256": "955c6da42b67706b5a6fff19f3aac248fbab87df5d9e18e7a72937d576e5d734"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_POINT.cs",
+      "sha256": "7935a394938caa1b5d3a444718598c1acf0d5f7c4defbe7fffebc580b3d4940a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_PRINT.cs",
+      "sha256": "f455d5b50f92250c0d2507baec46eab49509211fd5b9e1a91c744b1c256c41e8"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_PRODUCT.cs",
+      "sha256": "65e81fd7871b539ab3287e67cdb530c83ad1862c18b0565ebc4f8369649a71fa"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_RATE.cs",
+      "sha256": "0994c843fa423383012bbf354718fa96a24f8264d51c9b7eb2a648022760c23f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_STK_LIMIT.cs",
+      "sha256": "c2aaf2d4757b7d8ddcb2e2ee8f76f5b8d1d362cbbcdc1cba3042a9c90ba8be4b"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_STYLE.cs",
+      "sha256": "3c276bd6ee16242fd0234987adaa9c0801bba021984eb9673fb9dc1ff48c24b2"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_TASTING.cs",
+      "sha256": "3fac5fadcb407ddfc9fbcaa3be3da190413ab1c7414b4f846d895c88b617b500"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_TAX.cs",
+      "sha256": "dae827083d1f09200a33045eef82bb2bcdf7f2186baf470487250a4302e6ad82"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_TRADE.cs",
+      "sha256": "e45156f1833d5a87aa2facb469f0084514e6030eb923bcb35a5f8af438e2b83b"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_USER.cs",
+      "sha256": "1ef06af072135a302967c68c95a5af022a2344f0dc3177b0e6ac1fb016fe9247"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_WINDOW_SET.cs",
+      "sha256": "997260f8ec6878a2696a1285426b929fd0a7488f762609f04ca37bed6739dcd1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/MS_YEAR.cs",
+      "sha256": "d0d8aec029eb187841091f5c1c1d6f67a3cf77edeff00b79f68f4ed5a9177808"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Mfg_Module.cs",
+      "sha256": "a9dbf0ef98f5e051b4d7959ec5d57912c083b32b7bb93e21e29d51cacae1f0de"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Module_Save.cs",
+      "sha256": "1775f578aa82706efd385cc873db5a4683216e6daccf32d81c05ddb318cc2c75"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Module_Schm.cs",
+      "sha256": "2c6fe25a5a614239d73beae1fba9db3669cb521f11608c5976d4d025364c0c10"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Module_WhatsApp.cs",
+      "sha256": "8ef0e8a0aff718fa45aca6e3311f0be5cf0a223ea8a6c73fcdb86f38e3e73343"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/OlockerService.cs",
+      "sha256": "cab4ee8f3b95fb2c028505d83c398321f6765b18748d7cb8f8117d04c6f1846c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/PolicyModels.cs",
+      "sha256": "ec957a99ad260b0217f954000fe5fbb7c71d38f0a706d2338924a43bd5b4bbfc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_ADDRESS.cs",
+      "sha256": "9d7ca0cc41531a97ba28883c50e6db65baa15c57c9c47582b097f8ecdb91a90f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_ALL.cs",
+      "sha256": "49a03bcc88b4babd67a17fe97ec4c045c6d3649838f6c8440db20fbaca892b0a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_BALANCE.cs",
+      "sha256": "b41369c0e569dacdf5879c9bd1c4d2ae6d92a8d13243237f4a4a9e6d810f3db0"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_BAL_ZOOM.cs",
+      "sha256": "60ef0579a71a7eb987b0ff0cfa11fb1bcf94809f86a80d6740da16e6ee239a71"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_BILL_PROFIT.cs",
+      "sha256": "b0933c99d3b6d17398b7326cd973fd35a45f3042c7d15e6a1f8447433207d9e1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_CASH_BANK.cs",
+      "sha256": "80006db00a348f937fba1c00ebf486b3565fafa5e41a1a7316b0303a55797a83"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_CONSI_APR.cs",
+      "sha256": "75a8f9380124b0bd647feba20d1b2089c4a47195408ebdba82cacd79da2285ce"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_CUST.cs",
+      "sha256": "6418e1baa7c4be70ce0452695f27c49c258cb392b18c7ffe160a14438c7a5d3f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_CUST_CRM.cs",
+      "sha256": "7e19f1983a11bced059fca88c0f95d6009929a3aa52476080a2422ffad944523"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_DAY_WORK.cs",
+      "sha256": "d1f8c3fce5e5ab6a172c56d0845aa84169b3ceff74ff6e4b40b1130ad2ecd8db"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_DHRN_LOAN.cs",
+      "sha256": "4e8ed86ecc38394e1a897903bdd5d6298219f2308c94e6ac28896bb7f541447f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_DHRN_OS.cs",
+      "sha256": "1c1803b93fbef1ef1856c19af8b8b4831cb1825df7467c69ca925ffb6272c907"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_EMP.cs",
+      "sha256": "e9f5c451cd49315ba002458b757d4434192fc698eb2098c8dca50ab7cfe11409"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_GRAPH.cs",
+      "sha256": "fcf4c596c2daa8ce42adc7a1d629d57464b0426ecfd952a2c502328ab65a1efa"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_GST.cs",
+      "sha256": "a3b8788913da6fb2631b029363f3b78c6883609021941246aaf97c6ff9ce005a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_HUID.cs",
+      "sha256": "00d0dda05691e716d22b39dd0a5cf0bb0e36767eeb4badfbe414ec298fc8bfd1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_INOUT.cs",
+      "sha256": "72845e2386a84f48f21baf86e5daaffff8efb765ada8f73e77828bed47864d4e"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_JDTR_ZOOM.cs",
+      "sha256": "dcdc810ea9fed6afef066b981579dde4b5737af96993966c334ad568863dc161"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_LC_INOUT.cs",
+      "sha256": "cba7dd36ae51342a561cc61aa909c6270f04724fddf78dea7396df2ec2c37d14"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_LC_SALE.cs",
+      "sha256": "4ac7189c47157d9f1609e893db26a60c1625db5e22e97ae71b9ed29d867f9a30"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_LEDR.cs",
+      "sha256": "7fc5a8351a6bbd01ef58c715faa35d5eb49a5bcc757b5e77a980b19e3825c017"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_MFG.cs",
+      "sha256": "b69dcab8f607e2ed65ec4ff938d56bd04ddb5e52471f2ff39604fdd81df2c9ab"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_MFG_LEDR.cs",
+      "sha256": "9a4b4a079b31c48b17124a3f55342d92ec5661961322c0180b5f2ec9b68c7df3"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_MFG_ZOOM.cs",
+      "sha256": "0775743be625324017ba3cfe77edb19b83a060d8e69267762c13985aaa6d46cb"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_MOVEMENT.cs",
+      "sha256": "20e7907a3e0d962770ed7911b64f9ebf33754d60d5d9a0a86bd251745b393994"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_ORDER.cs",
+      "sha256": "0bb45881a92c61f56c61695df22f279800893695f60d0deb47a8ab882eb94d9e"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_ORD_TRACK.cs",
+      "sha256": "2c0e8ca2e3606b107d40e26a1f60a39d4b5533913e6a50497bfac7a7acea2c6b"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_OS.cs",
+      "sha256": "f4f0e07c0d4e461abe028f913e5e88afcbb860aecd1d3343172e6f1706c674dc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_OTH_DETL.cs",
+      "sha256": "1a1bdbb1def88d0f296abb756de26b26ef7e9be31da3f63a81eeefec57b1a87f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_PHY_STOCK.cs",
+      "sha256": "8d69ecd5707615de365aab50638bf4fb7f7f62efc8aa07dca2c0ed64bb5f45c2"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_REMINDER.cs",
+      "sha256": "9bf06bb41d24236d3d9c5d7de4b4f6b6e2ef74f170976d53014905ecee530038"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_ROJMEL.cs",
+      "sha256": "62a77f251f74858924f095c430918345d8d3b0b43ecad9cf54e0d1c200c20ca9"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_SLPR_ZOOM.cs",
+      "sha256": "992a44bfb69f8fee1187c50f3753f4d5b14ea38546f3f72faf2a7567f4e3e13f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_STK_LEVEL.cs",
+      "sha256": "d54346a97eb8b4be293d08c405cb4e8cf1bd529b477926d60fd5acbe05f9b20f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_STK_MOVE.cs",
+      "sha256": "69facb99b321d6d9d6556867f7038e6b31456026a04d42b9b83391e844c4bf4e"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_STOCK.cs",
+      "sha256": "e87068f6f6c010cb6cfba5a6d1808f7a07328d6827aa96d0b06c7433b44e8c0b"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_STOCK_FINE.cs",
+      "sha256": "6fb232af9289c3a4973cf57f8a3e4fb0fb3478b0b851ddec99dd7618c2a8836d"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_STOCK_VALUE.cs",
+      "sha256": "aba1a5e946d45d1324964726a82f3bd6d6e92e52d1e7f0bfd3ce1a5327ba4926"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_TAG.cs",
+      "sha256": "4d41f78f9aa2ee62ab9ff0b2f84851691e8bd929cff0039e87494578e6c3971a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_TAG_ESTMATE.cs",
+      "sha256": "67ff5d96f3a31c4d06f8d8004eafe656b89d23a1ac810fe3aa598fe095c77957"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_TAG_IMAGE.cs",
+      "sha256": "cc03a71930281ad50aebce3c62dfa6c59d4edd61683e0965fdd7aa23c8fa3249"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_TAX.cs",
+      "sha256": "5a50164de35b3bbc19bfda2f5c302b2f5c52553cbe600fdcfa9f24fe62a02942"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_TOUR_ZOOM.cs",
+      "sha256": "dccddac2d40eb00c665a0ffd5ddfb81a33b5ee4762c68b30e57de15345daa230"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_TRADING.cs",
+      "sha256": "1d10e9244e680f452b578f86df6e0e1f60e330df92174ac57314bcfccc9363a3"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/RP_USER.cs",
+      "sha256": "db9c6e6a01cfdf98444775bc84ff09d51fb87f6cd0637fc1ee1c8e906e8e8239"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_AC_OPBL.cs",
+      "sha256": "6cda5f35c766e9c1e19b5de9813e37ad4768a4a92bbda48f5bb5175540a3051c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_APR_ISU.cs",
+      "sha256": "32c4de989bfdb2e07f38d14905626c4c04182dbd6eb112ceb1f4817f519d0ca6"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_BILL_TO.cs",
+      "sha256": "8af59f2d1889855f0e131e4260fbad06d4d6e8443b5016d3e6d3a3bfc2d56ca7"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_BUL_BOOKING.cs",
+      "sha256": "7b6e6503715287cb117f3809af73e25c406bcfe46c30a1f766ffbbe17814dc6c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_BUL_SALE.cs",
+      "sha256": "ca0942cc78c4081d021069fe5759fd46f2f897ef90b4804d61703a14ea09259a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_CARD_REC.cs",
+      "sha256": "463395f1524f83db1b62f70f8ed6e7817908af20a9b02fe0816e3be54f59f876"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_CASH.cs",
+      "sha256": "1f70eeb3afdd24369743353ec5d33ca35d58e92ec15f61db790e6fa3076d13b6"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_CONTRA.cs",
+      "sha256": "3b2cd7b5568cca62bca9a49f98ccbe7011dddae3a3f8916dcf2e374226f8e997"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs",
+      "sha256": "a25d1eddb92ac8d73309313e00df96032c787afdb0632c9b0b28dc2f57355907"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_DHRN_ISU.cs",
+      "sha256": "6d87c15ca0129a0f32f8b96d5d828856c5af9037d856ca6c9466a098f0906e17"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_DHRN_REC.cs",
+      "sha256": "2c947743fa1397d02cd16e7ce2a764a4dee3d8490f70bb5e233703a50ba16e10"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_EMP_JV.cs",
+      "sha256": "bd0438aeae278ab078761a1a8275cb11228c8dd3ff8ff953abf6cf3b7de6d782"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_FINE_SL_PR.cs",
+      "sha256": "371610b50ddf1d04d1caae59b187eb04b2c39d2315841c29d5654e9fd718637c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_FN_INOUT.cs",
+      "sha256": "ac03ffa138cd01f1bb79b915b7ca22ecb523870748e6736f8d4f93c6fed147ab"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_GOLD_BOOK.cs",
+      "sha256": "71753e1934287d31e2b8998edea2589820ef20c44c73dc50b0b1048b2211735d"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_INOUT.cs",
+      "sha256": "9b1b60d0dc00f56a8d11da35737bc751ee3f71f728798e1a99577b02e50a4f78"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_ITM_LOT.cs",
+      "sha256": "0fbfb7d946ac1ebeb1f46621576488bbaf6d0beeb533724049e25c764a5ba281"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs",
+      "sha256": "89352a4a40ba0be314bfcfb70a13f54e7368f50e6be37dce4d6960896db12055"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_JDT_REC.cs",
+      "sha256": "89fa2f75dff6fbd8c5fb448e38607079524b45df787b6d7094ee062a50b5b879"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_KR_ISU.cs",
+      "sha256": "468180a6985da6c7f086f14a7d6a82c0e4161d02b0af68e6c16635a3e796e332"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_LEDR_ADJ.cs",
+      "sha256": "a9d3b96de4b0bb7ed586f3d13880f2da725d183e1cb0653b161e1bac64ab7449"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_LOCT_AMT.cs",
+      "sha256": "706325ee8aa59f2991b6c38a459f9040d966a9af8cb55794a653e0ff6a6c8095"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MEMB_ADJ.cs",
+      "sha256": "44583388ec2039af24e34b52f92f1ab133350bbe2a1b31259966e56c4ff01429"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MEMB_ENT.cs",
+      "sha256": "7dda5aa8715629cd980b082e2fc1666479cfdd8c7771225743d5dd1181e7d47a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MFG_GHAT_REC.cs",
+      "sha256": "1e9844b18b0b5e9c316d1f91223e69ce9be6aa313c34572f943cc55fc2384acf"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs",
+      "sha256": "f35dbfbc5448b2fe903c8dc2cf59e375a162669ff875ed099ee14fd8fa3488df"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MFG_ITEM.cs",
+      "sha256": "de0a4e39e3698f51b5fce8fe97529f67c74719aacda91ce183c6167373969330"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MFG_KR_ISU_REC.cs",
+      "sha256": "28939f359585de337b87db810d18ba11c53d11f77b6cd4d9f33becf6f993b8a1"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MFG_ORD_ISU.cs",
+      "sha256": "5c4cb8b92ae33ad34e15b2c05686fe0e1684785663078ec84af90d6e590cc7cb"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MFG_ORD_REC.cs",
+      "sha256": "9e439e81c74796ebc0f71df2dd37fbd4da516e1b2929071056e8c90554ce0855"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_MLT_PRO.cs",
+      "sha256": "2da36ca434bd6daffa000483b02c37668c892f3109368d470087356e2b4ccec5"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_OTH_COMM.cs",
+      "sha256": "8210ea7080fc5dc0ebb5adb542e07bbf331ab31f62f5fdb9dd86e75df5cc1af6"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_OTH_PURC.cs",
+      "sha256": "60089817a26620587278ac1632fe6461561df7894023ddfdace0743330792fb8"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_PHYSTK.cs",
+      "sha256": "564c89fc4244ae3db04b5e2a4da85b821dc5eb3c12510561601425f437bff2fe"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_PR_SL_HEDG.cs",
+      "sha256": "ed6cd5eb5c8ff7e036ab59df773a2ba77cb4dc336233927fc66ef002fce91544"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_PR_SL_UAE.cs",
+      "sha256": "5b511b3dec78c16ab9a6e6c4e9faa7c2894b72b75a5e0000cb4b715be2d625da"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_PURC.cs",
+      "sha256": "ad25a6e1976dd0776dbdc1c723908da8b394cbd2de686079061018174d3ee58c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_PURC_HM.cs",
+      "sha256": "560a3504c54d6fb44779051c5ae54ef51d31a41874131d4354d5cc31ed7d3cec"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_REP_REC.cs",
+      "sha256": "9cb668f9096474c3e5dda024e45be08c5f6c5a19771c2faf97f2a13288fc1f29"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_HM.cs",
+      "sha256": "9792919406890fc558a91cb38afb2cd0a44d074bcc182973c13c9949af21dae2"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SALE_LBR.cs",
+      "sha256": "a7e79667d8bff92b705e9a00c71fdc2f3329a656a347807aa13202e511be17fa"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs",
+      "sha256": "450fb8a06d12db4ae4e4fca255a946710751b94fad2c9fab1f7e2993ab71c515"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_SL_PR_ITEM.cs",
+      "sha256": "1e68c7d377480aaaed1c6771504c0e76debc34285ff6ccd3355567257fc773c2"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TAG_CAN.cs",
+      "sha256": "04e7ae5842f6311684a2890ffccbdef23570827f7e91e3a0bab676f4c255b436"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs",
+      "sha256": "219e7e1b69928d5270e98a222d2a0fff9bee4d38de3dd399bd38394050132866"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TAG_SPLIT.cs",
+      "sha256": "d43ab71230437abd50b612c963a36c1c81fd0a9f2d7b08455f241a9044afb690"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TAG_WT_DIFF.cs",
+      "sha256": "12a246f20604c233fb34509ed81c69b18fd238997ae486c79e75644b07202290"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TOUR.cs",
+      "sha256": "c6293d5072ce451c4f300ad18c5ee3035431f63069dff1807863c9cf0868e8bc"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TOUR_ORD.cs",
+      "sha256": "b27ad23a324b837bed8ef7a4d672a7ce82006c51485fb68fa4dced3e6bf49ced"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs",
+      "sha256": "64059f77fa351e292ef4c54d88e77e99d25d9fda717b2f6ca13e7dcc3718dcbb"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_UPI_REC.cs",
+      "sha256": "6e882ea4f47c1187473aee25e42288780fbbf041fa027de50731bd08a144727c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_VP.cs",
+      "sha256": "a8d3479fc88a452a0a00698d3f584f0d81c7c0cdf7c334494cdbcb1ab8a75be3"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_VP_ADJ.cs",
+      "sha256": "3ba7240d3f029252bb2cb28b7bcd2e6c6b0fe52f5a7bcdf389b1237cb9fd7d4c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_WH_SALE.cs",
+      "sha256": "bac1e3578f9c0284790e7b1b46d7897dbb569a07f1848d99d9e1c581fb1ecf97"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TR_WH_SALE_RTN.cs",
+      "sha256": "53e42397cbb42492803aeeccb8af67b400153a3264ac6e8f0806a8244fbb39b4"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/TagOthDetail.cs",
+      "sha256": "4efe0ea893b8cd703fcd9c33fc3482595da840d3114ad97a2b718b159f050a5c"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/Translator.cs",
+      "sha256": "428303bd03e0a58fe563144865a636f97452fcda59205f7dbc71928bb90e0abf"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_AI_TRFR.cs",
+      "sha256": "56d8f3cc7e6c10a07a11f525999b57f933be983f9d6806c0f277cf1392e93b61"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_BANK.cs",
+      "sha256": "bd5ac39e6706ee541b1d150c97a95686e4c83b40886004faec2181d16fd8a20a"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_BKP.cs",
+      "sha256": "bde21595f4136183329fad12eb0832e730f272e6021b4182f9a8bfeb302a2325"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs",
+      "sha256": "e11f30ffbe97f4f390b806714297638c08674b470fcb2e5afee34016c8e4a8c2"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_EXPORT.cs",
+      "sha256": "c10a665e658cada014aed50ee886fe9d163259e40d02a0def63f3694e97b53ad"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_E_INVOICE.cs",
+      "sha256": "8f7bb649510af1c5f19d7dd5ba6a41d4fd27b3f81e733c4c85b9b83e3a8f1367"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_HDD.cs",
+      "sha256": "665d340e3cb878611f33a076c3acea4ea4e77f61b616695cc1b9057250302fc5"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_IMPORT.cs",
+      "sha256": "b23f53c7794ae5a98cc75583194d577b47caba6a06d0676c908d418023f38440"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_PWD_UPDATE.cs",
+      "sha256": "22f06bd299960e93f3699b2a6678470fc22ac384eaf95c4aedba3dfa458e1f1f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_REMINDER.cs",
+      "sha256": "fa7b1d7a726189d81bf91df53724d1813770a9bd85370df97464c28c969d8875"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_REPORT.cs",
+      "sha256": "de079c7945dcd8e78d7aded1532a8440d71225b0a226883082909becf89cf60f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_SETTING_MAIN.cs",
+      "sha256": "76116b14149afc1c6a5b93562c9aa9877979c43bdf6372e1d8fe1e6296aec4c5"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_SET_ADMIN.cs",
+      "sha256": "f8cc0a4b8757826f0e295a3a49ab3767a7876785517e5afcc911b19e6c48c359"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_SMS.cs",
+      "sha256": "5b12dc6a5edb955949ea5b380d746342b1dd2af5045fd3eb4ed2119b667bf20d"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs",
+      "sha256": "2a639c0cd04ec0e73e9a63d65ce14e736017f2feb68b1d48a8b05b43a0cac7b2"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_USER_REQUEST.cs",
+      "sha256": "8e4d0284b0ddf97ef030a5fa4c42a6b83c1545cdbd06edf035151c796a924762"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_VCH_RE_NUMBR.cs",
+      "sha256": "6d10e669326bd7ab4a4f5f2ea220a6473ffc23a736471f75904dbd1957e9870f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_WAPP_WITH_API.cs",
+      "sha256": "d97cda8b16fbba990eba1460ed103f3e5a5738add982398fccbe42cc39e2c530"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_WEB_CAM.cs",
+      "sha256": "de46d8768e44c35c8554531aab077eeaf379c0e1d723752fea1dcbab80315ab0"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_WHATSAPP.cs",
+      "sha256": "ac56158c2655ab37158703351efdaad5838d20426484cd0f025c1d3e8d1b5d0f"
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_WINDOW.cs",
+      "sha256": "e2821d58971f3a809b47ed64b1b6467ae718fe69c73f69707bb5f46488bacbf0"
+    },
+    {
+      "path": "web/deploy/.env.example",
+      "sha256": "7b8a91748bb0975c9d16ff232334e1a8bf9137f12c95998c406953e033c17971"
+    }
+  ],
+  "changedBaseInputs": [],
+  "reason": "Three initial isolated API failures exposed omitted desktop citation sources, the current deployment example and the retained parity-ratchet register. Restore exact active reference inputs without changing application code or assertions.",
+  "auditReferences": [
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-api.run.json",
+      "sha256": "a03543ef93cc0b3594d014d5c1ed6117e928b1b103f416444a2c6e842a6eb189"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-input-audit/recommended-reference-additions.json",
+      "sha256": "6c982a86008b80f34ea6f4099395265c89835caf7eeafce1cb175799a8a75f84"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-input-audit/audit.json",
+      "sha256": "2309e537ccc40db5174d50fa789c08ec5e7e6b704031180ae2a6fe7ce872a18c"
+    }
+  ],
+  "sourceDirectoryMembership": {
+    "unified/src/csharp/DataCareNext": {
+      "pattern": "*.cs",
+      "members": [
+        "Ac_Final.cs",
+        "Ac_Image.cs",
+        "Ac_Ledr.cs",
+        "Ac_Rojmel.cs",
+        "Ac_Stock.cs",
+        "Ac_Tax.cs",
+        "AuthClass.cs",
+        "AuthError.cs",
+        "BtmSchm.cs",
+        "ClassTagList.cs",
+        "ClsAddlDocDtls.cs",
+        "ClsAttribDtls.cs",
+        "ClsBchDtls.cs",
+        "ClsBuyerDtls.cs",
+        "ClsContrDtls.cs",
+        "ClsDispDtls.cs",
+        "ClsDocDtls.cs",
+        "ClsDocPerdDtls.cs",
+        "ClsExpDtls.cs",
+        "ClsItemList.cs",
+        "ClsPayDtls.cs",
+        "ClsPrecDocDtls.cs",
+        "ClsRefDtls.cs",
+        "ClsSellerDtls.cs",
+        "ClsShipDtls.cs",
+        "ClsTranDtls.cs",
+        "ClsValDtls.cs",
+        "DC_Main.cs",
+        "Data.cs",
+        "DcClass.cs",
+        "DcPrintClass.cs",
+        "ErrorResp.cs",
+        "IRNClass.cs",
+        "IRNData.cs",
+        "MDI_FORM.cs",
+        "MS_ACCT.cs",
+        "MS_AC_GROUP.cs",
+        "MS_ADD_MAST.cs",
+        "MS_AUTO_ITEM.cs",
+        "MS_BOOK.cs",
+        "MS_BOOKLIST.cs",
+        "MS_COMPANY.cs",
+        "MS_DESIGN_BOOK.cs",
+        "MS_DM.cs",
+        "MS_EMP.cs",
+        "MS_GOLD_MAST.cs",
+        "MS_GROUP.cs",
+        "MS_HELP.cs",
+        "MS_ITEM.cs",
+        "MS_LBR_TYPE.cs",
+        "MS_LOCT.cs",
+        "MS_LOGIN.cs",
+        "MS_MEMB.cs",
+        "MS_MFG_MAST.cs",
+        "MS_OPNCOMP.cs",
+        "MS_POINT.cs",
+        "MS_PRINT.cs",
+        "MS_PRODUCT.cs",
+        "MS_RATE.cs",
+        "MS_STK_LIMIT.cs",
+        "MS_STYLE.cs",
+        "MS_TASTING.cs",
+        "MS_TAX.cs",
+        "MS_TRADE.cs",
+        "MS_UPDATE.cs",
+        "MS_USER.cs",
+        "MS_WINDOW_SET.cs",
+        "MS_YEAR.cs",
+        "Mfg_Module.cs",
+        "Module_Save.cs",
+        "Module_Schm.cs",
+        "Module_WhatsApp.cs",
+        "OlockerService.cs",
+        "PolicyModels.cs",
+        "RP_ADDRESS.cs",
+        "RP_ALL.cs",
+        "RP_BALANCE.cs",
+        "RP_BAL_ZOOM.cs",
+        "RP_BILL_PROFIT.cs",
+        "RP_CASH_BANK.cs",
+        "RP_CONSI_APR.cs",
+        "RP_CUST.cs",
+        "RP_CUST_CRM.cs",
+        "RP_DAY_WORK.cs",
+        "RP_DHRN_LOAN.cs",
+        "RP_DHRN_OS.cs",
+        "RP_EMP.cs",
+        "RP_GRAPH.cs",
+        "RP_GST.cs",
+        "RP_HUID.cs",
+        "RP_INOUT.cs",
+        "RP_JDTR_ZOOM.cs",
+        "RP_LC_INOUT.cs",
+        "RP_LC_SALE.cs",
+        "RP_LEDR.cs",
+        "RP_MFG.cs",
+        "RP_MFG_LEDR.cs",
+        "RP_MFG_ZOOM.cs",
+        "RP_MOVEMENT.cs",
+        "RP_ORDER.cs",
+        "RP_ORD_TRACK.cs",
+        "RP_OS.cs",
+        "RP_OTH_DETL.cs",
+        "RP_PHY_STOCK.cs",
+        "RP_REMINDER.cs",
+        "RP_ROJMEL.cs",
+        "RP_SLPR_ZOOM.cs",
+        "RP_STK_LEVEL.cs",
+        "RP_STK_MOVE.cs",
+        "RP_STOCK.cs",
+        "RP_STOCK_FINE.cs",
+        "RP_STOCK_VALUE.cs",
+        "RP_TAG.cs",
+        "RP_TAG_ESTMATE.cs",
+        "RP_TAG_IMAGE.cs",
+        "RP_TAX.cs",
+        "RP_TOUR_ZOOM.cs",
+        "RP_TRADING.cs",
+        "RP_USER.cs",
+        "TR_AC_OPBL.cs",
+        "TR_APR_ISU.cs",
+        "TR_BILL_TO.cs",
+        "TR_BUL_BOOKING.cs",
+        "TR_BUL_SALE.cs",
+        "TR_CARD_REC.cs",
+        "TR_CASH.cs",
+        "TR_CONTRA.cs",
+        "TR_DHRN_INTREC.cs",
+        "TR_DHRN_ISU.cs",
+        "TR_DHRN_REC.cs",
+        "TR_EMP_JV.cs",
+        "TR_FINE_SL_PR.cs",
+        "TR_FN_INOUT.cs",
+        "TR_GOLD_BOOK.cs",
+        "TR_INOUT.cs",
+        "TR_ITM_LOT.cs",
+        "TR_ITM_OPBL.cs",
+        "TR_JDT_REC.cs",
+        "TR_KR_ISU.cs",
+        "TR_LEDR_ADJ.cs",
+        "TR_LOCT_AMT.cs",
+        "TR_MEMB_ADJ.cs",
+        "TR_MEMB_ENT.cs",
+        "TR_MFG_GHAT_REC.cs",
+        "TR_MFG_ISU_REC.cs",
+        "TR_MFG_ITEM.cs",
+        "TR_MFG_KR_ISU_REC.cs",
+        "TR_MFG_ORD_ISU.cs",
+        "TR_MFG_ORD_REC.cs",
+        "TR_MFG_WITH_LOT.cs",
+        "TR_MLT_PRO.cs",
+        "TR_OTH_COMM.cs",
+        "TR_OTH_PURC.cs",
+        "TR_PHYSTK.cs",
+        "TR_PR_SL_HEDG.cs",
+        "TR_PR_SL_UAE.cs",
+        "TR_PURC.cs",
+        "TR_PURC_HM.cs",
+        "TR_REP_REC.cs",
+        "TR_SALE.cs",
+        "TR_SALE_HM.cs",
+        "TR_SALE_LBR.cs",
+        "TR_SALE_ORD.cs",
+        "TR_SALE_RTN.cs",
+        "TR_SALE_RTN_UAE.cs",
+        "TR_SL_EBILL.cs",
+        "TR_SL_ORD_ADJ.cs",
+        "TR_SL_PR_ITEM.cs",
+        "TR_TAG_CAN.cs",
+        "TR_TAG_OPBL.cs",
+        "TR_TAG_SPLIT.cs",
+        "TR_TAG_WT_DIFF.cs",
+        "TR_TOUR.cs",
+        "TR_TOUR_ORD.cs",
+        "TR_TOUR_SALE.cs",
+        "TR_UPI_REC.cs",
+        "TR_VP.cs",
+        "TR_VP_ADJ.cs",
+        "TR_WH_SALE.cs",
+        "TR_WH_SALE_RTN.cs",
+        "TagOthDetail.cs",
+        "Translator.cs",
+        "UT_AI_TRFR.cs",
+        "UT_BANK.cs",
+        "UT_BKP.cs",
+        "UT_CUST_ENTRY.cs",
+        "UT_EXPORT.cs",
+        "UT_E_INVOICE.cs",
+        "UT_HDD.cs",
+        "UT_IMPORT.cs",
+        "UT_PWD_UPDATE.cs",
+        "UT_REMINDER.cs",
+        "UT_REPORT.cs",
+        "UT_SETTING.cs",
+        "UT_SETTING_MAIN.cs",
+        "UT_SET_ADMIN.cs",
+        "UT_SMS.cs",
+        "UT_TAG_PRINT.cs",
+        "UT_USER_REQUEST.cs",
+        "UT_VCH_RE_NUMBR.cs",
+        "UT_WAPP_WITH_API.cs",
+        "UT_WEB_CAM.cs",
+        "UT_WHATSAPP.cs",
+        "UT_WINDOW.cs"
+      ]
+    },
+    "project-memory/contracts": {
+      "pattern": "*.contract.md",
+      "members": [
+        "TR_DHRN_REC.contract.md",
+        "TR_KR_ISU.contract.md",
+        "TR_MEMB_ENT.contract.md",
+        "TR_MLT_PRO.contract.md",
+        "TR_PURC.contract.md",
+        "TR_SALE.contract.md",
+        "TR_SALE_ORD.contract.md",
+        "TR_SALE_RTN.contract.md",
+        "TR_TAG_OPBL.contract.md",
+        "TR_TOUR_SALE.contract.md",
+        "TR_WH_SALE.contract.md"
+      ]
+    }
+  },
+  "replacedUncapturedGitBaselineFiles": [
+    {
+      "path": "web/deploy/.env.example",
+      "priorUncapturedSha256": "3e553b28c19f9fa0e70ec7225a33132e6ba0682b6fcdd678051182115905da62",
+      "qualifiedSha256": "7b8a91748bb0975c9d16ff232334e1a8bf9137f12c95998c406953e033c17971"
+    }
+  ]
+}

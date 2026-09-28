@@ -1,0 +1,1002 @@
+{
+ "kind": "datacare.parity-diff/1.0",
+ "comparedAt": "2026-08-02T04:02:39.691Z",
+ "desktop": {
+  "capturedAt": "2026-08-02T03:01:24.599Z",
+  "database": "Live24",
+  "engine": "sqlserver",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU26) (KB5093420) - 16.0.4265.3 (X64) ",
+  "host": "127.0.0.1"
+ },
+ "web": {
+  "capturedAt": "2026-08-02T04:02:39.650Z",
+  "database": "datacare",
+  "engine": "postgres"
+ },
+ "matched": false,
+ "cases": [
+  {
+   "caseId": "purc-035-00001",
+   "description": "",
+   "desktopVoucher": "035/00001",
+   "webVoucher": "035/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 4,
+     "webRows": 4,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 100,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000903 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000903 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000903 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-01",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000903 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "LDR_NAME",
+       "desktop": "RUPALBEN DODIYA",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00008 DR_AMT=6780.00 CR_AMT=0.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00008 DR_AMT=6780.00 CR_AMT=0.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00008 DR_AMT=6780.00 CR_AMT=0.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-01",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00008 DR_AMT=6780.00 CR_AMT=0.00",
+       "column": "PARTY_AC_CODE",
+       "desktop": "",
+       "web": "00008",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000903 DR_AMT=6780.00 CR_AMT=0.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000903 DR_AMT=6780.00 CR_AMT=0.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000903 DR_AMT=6780.00 CR_AMT=0.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-01",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "FINE_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "IT_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "CLR_DATE",
+       "desktop": "(null)",
+       "web": "2024-04-01",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "PARTY_AC_CODE",
+       "desktop": "",
+       "web": "00001",
+       "scale": 6
+      },
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00001 DR_AMT=0.00 CR_AMT=6780.00",
+       "column": "LDR_NAME",
+       "desktop": "RUPALBEN DODIYA",
+       "web": "",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "BILL_OS_DATA",
+     "presentOn": "web-only",
+     "desktopRows": 0,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [
+      "content:"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 0,
+     "differences": []
+    },
+    {
+     "table": "LOT_DETL",
+     "presentOn": "web-only",
+     "desktopRows": 0,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [
+      "content:"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 0,
+     "differences": []
+    },
+    {
+     "table": "MAIN_STOCK",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 47,
+     "fieldsExcluded": 3,
+     "differences": [
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "ISR_NO",
+       "desktop": "1",
+       "web": "(null)",
+       "scale": 0
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "TBL_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "ITM_WEST",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "LBR_RATE",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "OTH_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "ITM_MRP",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "KR_NWT",
+       "desktop": "1.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "KR_TOUCH",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "KR_WEST",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "KR_FINE",
+       "desktop": "1.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "KR_LBR_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "KR_OTH_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "KR_COST",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "EMP_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "STK_DATE",
+       "desktop": "2024-04-01",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "OTH_FINE",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "DESIGN_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "ITM_SIZE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "ITM_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "GHT_PRC",
+       "desktop": "0.0000",
+       "web": "(null)",
+       "scale": 4
+      }
+     ]
+    },
+    {
+     "table": "OP_LDR",
+     "presentOn": "desktop-only",
+     "desktopRows": 1,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "CR_AMT",
+      "CR_GL_FINE",
+      "CR_SL_FINE",
+      "DATA_TYPE",
+      "DR_AMT",
+      "DR_GL_FINE",
+      "DR_SL_FINE",
+      "ENTRY_TYPE",
+      "INOUT_TYPE",
+      "LC_CODE",
+      "VCH_DATE",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "PR_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 65,
+     "fieldsExcluded": 8,
+     "differences": [
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BILL_NO",
+       "desktop": "",
+       "web": "00001",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "AC_NAME",
+       "desktop": "RUPALBEN DODIYA",
+       "web": "GOLD SUPPLIER",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OS_ADJ_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CARD_AC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BANK_AC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CHQ_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BANK_NAME",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "EMP_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "VCH_DESC",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ADD1",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ADD2",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "ADD3",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CITY",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "MOBILE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_BILL_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_BILL_LC",
+       "desktop": "00",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_BILL_YRCD",
+       "desktop": "2024-2025",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_BILL_DBCD",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "PARTY_FINE",
+       "desktop": "0.000",
+       "web": "1.000",
+       "scale": 3
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "TCS_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "TDS_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "HM_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "HM_TAX_PRC",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "HM_TAX_AMT",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "USER_DELETE",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "TOT_TAX_FREE_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      }
+     ]
+    },
+    {
+     "table": "PR_DETL",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 105,
+     "fieldsExcluded": 6,
+     "differences": [
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "OLD_SRNO",
+       "desktop": "1",
+       "web": "(null)",
+       "scale": 0
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_NO",
+       "desktop": "",
+       "web": "N",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "LOT_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "DESIGN_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TBL_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "RATE_TYPE",
+       "desktop": "G",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "WITH_STOCK",
+       "desktop": "Y",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ADD_USER",
+       "desktop": "(null)",
+       "web": "parity-replay",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "SL_BILL_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "SL_BILL_DBCD",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "IT_DESC",
+       "desktop": "FINE GOLD",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "CONSI_SRNO",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "HM_ID_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "HM_ID2_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "HM_ID3_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "HM_ID4_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "URD_RATE_TYPE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_NWT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_OTH_WT",
+       "desktop": "0.000",
+       "web": "(null)",
+       "scale": 3
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_TYPE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "LBR_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "PR_CODE",
+       "desktop": "FN",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_SRNO",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "DESIGN_IMG_ID",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "HM_ID_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "APR_ISU",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "EMP_ISU",
+       "desktop": "N",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_IT_RATE",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_IT_AMT",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_TOT_COST",
+       "desktop": "0.00",
+       "web": "(null)",
+       "scale": 2
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TAG_MARGIN_PRC",
+       "desktop": "0.0000",
+       "web": "(null)",
+       "scale": 4
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "ITM_LOT",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 2,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [
+      "LEDR_KEY=01002024-20250350000102"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 33,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250350000101         1",
+       "column": "AC_NAME",
+       "desktop": "RUPALBEN DODIYA",
+       "web": "GOLD SUPPLIER",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250350000101         1",
+       "column": "IT_DESC",
+       "desktop": "FINE GOLD",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250350000101         1",
+       "column": "IT_CODE",
+       "desktop": "999",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250350000101         1",
+       "column": "MEMB_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250350000101         1",
+       "column": "SCHM_CODE",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002024-20250350000101         1",
+       "column": "REF_NO",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 4,
+     "fieldsExcluded": 1,
+     "differences": []
+    }
+   ],
+   "totals": {
+    "tablesCompared": 6,
+    "tablesDesktopOnly": 1,
+    "tablesWebOnly": 2,
+    "rowsMissing": 1,
+    "rowsExtra": 3,
+    "fieldsCompared": 354,
+    "fieldsExcluded": 24,
+    "fieldDifferences": 100
+   }
+  }
+ ],
+ "desktopOnlyCases": [
+  "purc-035-00004"
+ ],
+ "webOnlyCases": [],
+ "totals": {
+  "cases": 1,
+  "casesMatched": 0,
+  "tablesCompared": 6,
+  "tablesDesktopOnly": 1,
+  "tablesWebOnly": 2,
+  "rowsMissing": 1,
+  "rowsExtra": 3,
+  "fieldsCompared": 354,
+  "fieldsExcluded": 24,
+  "fieldDifferences": 100
+ }
+}

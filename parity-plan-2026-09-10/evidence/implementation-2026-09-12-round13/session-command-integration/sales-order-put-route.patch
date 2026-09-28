@@ -1,0 +1,61 @@
+--- a/web/apps/api/src/routes/txn.ts
++++ b/web/apps/api/src/routes/txn.ts
+@@ -1,3 +1,4 @@
++import { SessionCommandError } from '../modules/auth/sessionContextCommand.js';
+ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+ import { withTenant } from '@datacare/db';
+ import { loadPrincipal, authorizeForm, FormForbiddenError } from '../modules/rbac/authorization.js';
+@@ -70,7 +71,7 @@
+   cancelTourOrder,
+   getTourOrderConfiguration,
+   getSalesOrderConfiguration,
+-  editSalesOrder,
++  editSalesOrderInSession,
+   createSalesOrder,
+   createTourOrder,
+   editTourOrder,
+@@ -617,6 +618,10 @@
+     lcCode: string;
+     coYear?: string;
+     loginCoCode: string;
++    // Optional in this shared dependency for unrelated legacy route harnesses; the guarded PUT
++    // validates both as required authority and refuses missing values without a fallback.
++    sid?: string;
++    contextEpoch?: string;
+     rights: any;
+   };
+   scopeOfRequest: (req: FastifyRequest) => {
+@@ -677,6 +682,9 @@
+       return reply.code(okCode).send(out as any);
+     } catch (e: any) {
+       const n: string = e?.name ?? '';
++      if (e instanceof SessionCommandError)
++        return reply.code(e.statusCode).send({ error: e.code, message: e.message,
++          ...(e.form === undefined ? {} : { form: e.form, action: e.action }) });
+       if (e instanceof SavedSaleReturnError)
+         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
+       if (e instanceof SaleReturnSourceError)
+@@ -1425,14 +1433,18 @@
+   app.put('/sales-orders/:vchNo', auth, async (req, reply) => {
+     if (!guard(req, reply, 'update')) return;
+     return run(reply, 200, () =>
+-      editSalesOrder(
+-        prisma,
+-        {
++      editSalesOrderInSession(prisma, {
++        identity: {
++          tenantId: sess(req).tenantId, sessionId: sess(req).sid, loginName: sess(req).sub,
++          loginCoCode: sess(req).loginCoCode, coCode: sess(req).coCode, lcCode: sess(req).lcCode,
++          coYear: sess(req).coYear, contextEpoch: sess(req).contextEpoch,
++        },
++        input: {
+           ...completeSalesOrderInput(req),
+           expectedVersion: requireOrderVersion(body(req).expectedVersion),
+         },
+-        (req.params as any).vchNo,
+-      ),
++        voucherNo: (req.params as any).vchNo,
++      }),
+     );
+   });
+   app.delete('/sales-orders/:vchNo', auth, async (req, reply) => {

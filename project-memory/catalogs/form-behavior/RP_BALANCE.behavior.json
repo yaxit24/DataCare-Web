@@ -1,0 +1,64 @@
+{
+ "form": "RP_BALANCE",
+ "loc": 2711,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cTradCode": 1,
+  "cTradName": 2,
+  "cClPcs": 3,
+  "cPcsVal": 4,
+  "cClWt": 5,
+  "cClFine": 6,
+  "cAcFine": 7,
+  "cFineVal": 8,
+  "cTotVal": 9,
+  "cClosingVal": 10,
+  "cAcCode": 11,
+  "cLdCode": 12
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM AC_DATA WHERE CO_CODE = ' ? ' ? AND LC_CODE = ' ? ' ? AND CO_BOOK = '888'",
+  "Select A.AC_CODE ,SUM(CASE WHEN A.IT_TYPE = 'G' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END) ELSE 0 END) as GoldWt,sum(CASE WHEN A.IT_TYPE = 'S' THEN (CASE WHEN A.SIGN = '+' THEN A.FINE_WT ELSE -A.FINE_WT END) ELSE 0 END) as SilverWt FROM AC_DATA AS A WHERE A.CO_CODE = ' ? ' ? AND A.LC_CODE = ' ? ' ? and VCH_DATE <= ' ? MM/dd/yyyy ? ' and AC_CODE NOT IN ('00045','00050','00098') ? C ? AND A.DATA_TYPE = ' ? ' ? GROUP BY A.AC_CODE",
+  "SELECT VCH_DATE,FINE_GL_RATE,FINE_SL_RATE FROM RATE_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' GROUP BY VCH_DATE,FINE_GL_RATE,FINE_SL_RATE ORDER BY VCH_DATE DESC",
+  "Delete from AC_DATA where CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '999' ? AND LC_CODE = ' ? ' ? ",
+  "SELECT SUM(CR_AMT ) AS Gr1Tot, SUM(DR_AMT ) AS Gr2Tot FROM (LEDR_AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE) LEFT JOIN AC_GROUP AS C ON B.CO_CODE = C.CO_CODE AND B.AC_GR = C.AC_GR WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? AND A.LC_CODE = ' ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? And C.AC_MAIN_GR < '3'",
+  "SELECT SUM(CR_AMT ) AS Gr3Tot, SUM(DR_AMT ) AS Gr4Tot FROM (LEDR_AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE) LEFT JOIN AC_GROUP AS C ON B.CO_CODE = C.CO_CODE AND B.AC_GR = C.AC_GR WHERE A.CO_CODE = ' ? ' AND A.CO_YEAR = ' ? ' ? AND A.LC_CODE = ' ? ' ? C ? AND A.DATA_TYPE = ' ? ' ? And C.AC_MAIN_GR >= '3'",
+  "Select * From LOCT_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "Select LC_CODE As CodeL,LC_NAME As NameL,LC_ADD1 As AddressL,LC_CITY As CityL FROM LOCT_MAST WHERE CO_CODE = ' ? ' ORDER BY LC_CODE",
+  "Delete from AC_DATA where CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '999'",
+  "Delete from AC_DATA where CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '888'",
+  "INSERT INTO AC_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_TYPE,VCH_NO,VCH_DATE,LEDR_KEY,BOOK_NAME,BILL_NO,BILL_DATE,CHQ_NO,AC_CODE,LD_CODE, CR_AMT,DR_AMT,IT_TYPE,SIGN,FINE_WT,IT_DESC,ENTRY_TIME,HD_VCH_NO,CLR_DATE,DATA_TYPE,DATA_TRFR,MAIN_USER,FINE_RATE,PARTY_AC_CODE) VALUES (' ? ' ,' ? ',' ? ' ,'888','CLGBL','00001',' ? MM/dd/yyyy ? ',' ? ','FINAL BALANCE','',NULL,'', ' ? ',' ? ', ? ",
+  "UPDATE BAL_GR SET TRAD_AMT =",
+  "Delete from LEDR_AC_DATA where CO_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '888'",
+  "UPDATE BAL_GR SET TRAD_AMT = 0 WHERE CO_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 7
+ },
+ "calc": [
+  "((DataGridView)dGV)[4, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(Ac_Final.DtTradStock.Rows[DC_Main.M][\"ClPcs\"])) * Conversion.Val(RuntimeHelpers.GetObjectValue(Ac_Final.DtTradStock.Rows[DC_Main.M][\"PCS_RATE\"]))), \"0.00\");",
+  "((DataGridView)dGV)[8, DC_Main.R].Value = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(Ac_Final.DtTradStock.Rows[DC_Main.M][\"ClNwt\"])) * Conversion.Val(RuntimeHelpers.GetObjectValue(Ac_Final.DtTradStock.Rows[DC_Main.M][\"ClRate\"]))), \"0.00\");",
+  "((DataGridView)dGV)[8, DC_Main.R].Value = num2 * (Conversion.Val(nGoldAmt.Text) / 10.0);",
+  "((DataGridView)dGV)[8, DC_Main.R].Value = Conversion.Val(RuntimeHelpers.GetObjectValue(Ac_Final.DtTradStock.Rows[DC_Main.M][\"ClFine\"])) * (Conversion.Val(nGoldAmt.Text) / 10.0);",
+  "((DataGridView)dGV)[8, DC_Main.R].Value = num3 * (Conversion.Val(nSilverAmt.Text) / 10.0);",
+  "((DataGridView)dGV)[8, DC_Main.R].Value = Conversion.Val(RuntimeHelpers.GetObjectValue(Ac_Final.DtTradStock.Rows[DC_Main.M][\"ClFine\"])) * (Conversion.Val(nSilverAmt.Text) / 10.0);",
+  "((DataGridView)dGV)[9, DC_Main.R].Value = Conversion.Val(Operators.ConcatenateObject(((DataGridView)dGV)[8, DC_Main.R].Value, (object)\"\")) + Conversion.Val(Operators.ConcatenateObject(((DataGridView)dGV)[4, DC_Main.R].Value, (object)\"\"));",
+  "nSilverAmt.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"FINE_SL_RATE\"])) / 100.0), \"0.00\");"
+ ],
+ "validations": [
+  {
+   "message": "Closing Stock is Save....",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Account now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Account now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Closing Stock is Delete...",
+   "when": ""
+  }
+ ]
+}

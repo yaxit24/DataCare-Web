@@ -1,0 +1,15 @@
+{
+  "reason": "Earlier inherited input universe omitted measurement Python programs even though depth invokes them. Future runs and current archive now explicitly include all21 project-memory/parity Python scripts; old recorded inputs are not reconstructed or relabeled. Freshdepth run required.",
+  "files": [
+    {
+      "path": "run_check_round13.py",
+      "beforeSha256": "a16809d2a40f9e2929246460d0ca5f4f2a3e08ac63e80fac7353f6afe0c0c4fe",
+      "afterSha256": "e5e772e578a3ac4b349915c4009ad6f28322effb0f43a2b7a8d97e483ec00111"
+    },
+    {
+      "path": "capture_implementation_checkpoint_round13.py",
+      "beforeSha256": "b7750ca8f9fd9c5e0c34795f19adaaacbacd46bd58b613725c99642ad3544685",
+      "afterSha256": "63984bee889afe6ddbd866e4a64edeaa109de246725f785bc8599eb93c1a8272"
+    }
+  ]
+}

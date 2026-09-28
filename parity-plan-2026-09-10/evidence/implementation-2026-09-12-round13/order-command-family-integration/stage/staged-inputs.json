@@ -1,0 +1,72 @@
+{
+  "status": "staged-unexecuted; root owns integration/runtime acceptance",
+  "declaredUnitCases": 24,
+  "declaredDbCases": 34,
+  "frozenProspectiveSchedules": 26,
+  "refs": [
+    {
+      "path": "contract-inputs.json",
+      "sha256": "551a4b0415fe62f2418710bdb0bfde4bcde4a14d05d235a30f176231411a77bc"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "e3dd7ad89afa3934337ce3652729a7fefc31e7224b186cd50ae318aaab55e502"
+    },
+    {
+      "path": "order-command-independent.v1.json",
+      "sha256": "c6f86ef10f4f948c570e417f4f1a0336df196fb1085b2028c1f79a1e432c979e"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "0a20f7956b5ee8b18100a9df4f83faf955ba6d83f9eb0c6dd3bbf31c4ea7a887"
+    },
+    {
+      "path": "baseline/salesOrder.ts",
+      "sha256": "f309a2e2c5c58e080c91ba5b634dbc1c9d940b46361ea06a25d97497572ecd84"
+    },
+    {
+      "path": "baseline/txn.ts",
+      "sha256": "a4169b9a5bfd4b8d86b7f2e70ba3a60e03a1292488d6752c88f3d312be54d91d"
+    },
+    {
+      "path": "staged/README.md",
+      "sha256": "443a4975741c8571b8bc1fd41742a1daca57cd792972d3a71e49304770cf60a9"
+    },
+    {
+      "path": "staged/extraction-comparison.json",
+      "sha256": "17c7d61a6d080c5f36d25ad98862de2350a93157c7c3973837c1c9a35d480eb2"
+    },
+    {
+      "path": "staged/order-routes.patch",
+      "sha256": "b9153c92b939fafbb48dde10dad7eb64f8c88a9fafafd4c9a051229d0f39c64c"
+    },
+    {
+      "path": "staged/order-service.patch",
+      "sha256": "a1d91b2a890a401305ca6d629aebfa4c7840fee2685f7c9feb8ee341401073c6"
+    },
+    {
+      "path": "staged/txn.ts.preview",
+      "sha256": "ee608103ab3933bb588d76d48c8166ba2401f67fa29bb8fbd7757ba770bf1149"
+    },
+    {
+      "path": "staged/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "a3c91053e27cbae2c1fbea06c93ad8cfba9846bcae5562b1a1e37323dc15ddd1"
+    },
+    {
+      "path": "staged/web/apps/api/test/fixtures/orderCommand.independent.json",
+      "sha256": "c6f86ef10f4f948c570e417f4f1a0336df196fb1085b2028c1f79a1e432c979e"
+    },
+    {
+      "path": "staged/web/apps/api/test/orderSessionCommands.db.test.ts",
+      "sha256": "dd2e9d984e2cbf2f73e439da116908db7b5b809a2ab3dac061901d6e91868d5e"
+    },
+    {
+      "path": "staged/web/apps/api/test/orderSessionCommands.test.ts",
+      "sha256": "36884796c08a915ab3e3e31be7ba4fcb2864b47dcf6b2f8166f0cf4b7c123669"
+    },
+    {
+      "path": "independent-read-review.md",
+      "sha256": "faf3855d2cee986463f7874e48aae9552c99b287c1dfdce84902d291d4b668f8"
+    }
+  ]
+}

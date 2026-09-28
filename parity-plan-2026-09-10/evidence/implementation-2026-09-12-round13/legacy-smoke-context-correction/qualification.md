@@ -1,0 +1,11 @@
+# Legacy smoke session-response fixture correction
+
+Status: staged test-only correction; no active workspace edits and no browser, server, database, build or compiler execution by this reviewer. `node --check` passed as a JavaScript syntax-only check.
+
+The retained first failure is `legacy-browser-after-session-command.txt`: the scope select stayed blank at the unchanged assertion. Its actual `page.html` shows the context-stale alert and disabled empty selects. The prior `/me` fixture omitted `context`. Current `api.ts`68–72/152/159–171 observes that descriptor; `pageContext.ts` validates the exact five fields, and SelectPage39–52 establishes it before loading choices. Thus an old mock shape is rejected before choice hydration. There is no browser timing or product workaround in this patch.
+
+The corrected mock keeps the original user BROWSER, company/location01, year2024-2025, rights, business rows and every existing action/assertion byte-identical. It adds a literal UUID and canonical string epoch, plus an explicit unknown ledger envelope. Auth login, `/me` and refresh use the actual response shapes from app.ts452–504/554–575; their mocked responses are no-store. The one existing same-scope Open now receives the actual scoped/replayed response contract from app.ts631–647 and contextSelection.ts129–155. The mock asserts the existing five-key request, original epoch, generated UUID and exact context header pair, then advances epoch1 to2 and returns replayed=false. This models only the smoke's successful Open; it is not a receipt, concurrency, credential, cookie, PostgreSQL or authority proof. Refresh has a contract-shaped compatibility stub but no new exercised refresh claim.
+
+No Shell company/year switch occurs in this smoke; it only checks their selected values. Therefore no new confirmation handler or navigation expectation is needed. Existing Open→dashboard and logout assertions remain untouched, as do all business assertions and fixtures. The separately passed real session-context journey owns real lifecycle evidence.
+
+The initial failed log/HTML remain immutable and are pinned below. Root owns integration and the next actual compatibility run. A passing syntax check does not claim the browser regression has passed.

@@ -1,0 +1,18 @@
+{
+  "capturedAtUtc": "2026-09-11T23:53:03.909905+00:00",
+  "files": [
+    {
+      "path": "web/apps/web/test/labour-preview-lifecycle.journey.mjs",
+      "sha256": "1744ece8ab2ce1e9114a32b5ebd22d12be56fedcab92f93e607bd306e41db828"
+    },
+    {
+      "path": "web/apps/web/test/labour-preview-lifecycle.real-stack.mjs",
+      "sha256": "4b52fdec40647f4615c03fc3d880953f58eef15c1f3df93038565c60b37415b4"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/labour-preview-lifecycle.required.json",
+      "sha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795"
+    }
+  ],
+  "validation": "16 stage/dependency references verified, rootsource review; runtimepending5requiredcases4actualresponsefaults"
+}

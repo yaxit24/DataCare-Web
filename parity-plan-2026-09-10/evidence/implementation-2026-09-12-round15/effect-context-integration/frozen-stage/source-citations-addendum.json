@@ -1,0 +1,15 @@
+{
+  "purpose": "Additional exact lines; original pre-code source manifest and fixture freeze remain unchanged.",
+  "references": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+      "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+      "criticalLines": [
+        191,
+        193
+      ],
+      "finding": "Finite non-interstate Return tax legs end ISR_NO0,TAX_FREE_AMT0,ZERO_RATED_AMT0; text storage witness0 explicitly qualified separately."
+    }
+  ],
+  "databaseExecution": "Not performed; exact typed query/readback remains a post-integration prerequisite."
+}

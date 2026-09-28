@@ -1,0 +1,83 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+27 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "salesOrderRound4.db.test.ts" "tourOrderHydration.db.test.ts" "salesOrderLifecycle.routes.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/tourOrderHydration.db.test.ts (14 tests) 4540ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions 1283ms
+   ✓ Tour Order configured-book and complete editor round trip > hydrates all persisted input fields and multiple independent children; unchanged edit keeps business rows 302ms
+   ✓ Tour Order configured-book and complete editor round trip > persists whole-rupee P/G/K/net labour with exact derived-rate and manual edit transitions 520ms
+   ✓ Tour Order configured-book and complete editor round trip > blocks the allocated source order while allowing the same number in another book, branch or year 650ms
+ ❯ test/salesOrderRound4.db.test.ts (10 tests | 2 failed) 3214ms
+   ✓ Sales ordinary saved state and ordered design source replay > preserves complete imported business rows, six-digit clock, nullable values and exact large decimals on unchanged edit 516ms
+   ✓ Sales ordinary saved state and ordered design source replay > keeps F1-only cached totals and applies copied labour/fine only at the later actual trigger 998ms
+   ✓ Sales ordinary saved state and ordered design source replay > rejects stale Design sources and forged journal values without any order writes 312ms
+   × Sales ordinary saved state and ordered design source replay > copies source text null as explicit blank on new/existing F1 and keeps no-event null distinct 164ms
+     → order amount (or line weights/rate) is required
+   × Sales ordinary saved state and ordered design source replay > copies source text "" as explicit blank on new/existing F1 and keeps no-event null distinct 75ms
+     → order amount (or line weights/rate) is required
+ ✓ test/salesOrderLifecycle.routes.db.test.ts (13 tests) 2519ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/salesOrderRound4.db.test.ts > Sales ordinary saved state and ordered design source replay > copies source text null as explicit blank on new/existing F1 and keeps no-event null distinct
+ FAIL  test/salesOrderRound4.db.test.ts > Sales ordinary saved state and ordered design source replay > copies source text "" as explicit blank on new/existing F1 and keeps no-event null distinct
+SaleValidationError: order amount (or line weights/rate) is required
+ ❯ run src/modules/sales/salesOrder.ts:866:13
+    864|     const baseNet = linesNet > 0 ? linesNet : Number(input.netAmount |…
+    865|     if (!(baseNet > 0))
+    866|       throw new SaleValidationError('order amount (or line weights/rat…
+       |             ^
+    867|     let totals = billTotals({
+    868|       lineNetTotal: baseNet,
+ ❯ Proxy._transactionWithCallback ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:722:18
+ ❯ test/salesOrderRound4.db.test.ts:390:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 35 passed (37)
+   Start at  05:38:06
+   Duration  19.08s (transform 3.33s, setup 0ms, collect 5.94s, tests 10.27s, environment 1ms, prepare 456ms)
+
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 test: `vitest run "salesOrderRound4.db.test.ts" "tourOrderHydration.db.test.ts" "salesOrderLifecycle.routes.db.test.ts"`
+Exit status 1
+PARITY_TEST_FAILED pnpm exited 1

@@ -1,0 +1,67 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+28 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/saleReturnIncomingReplay.test.ts" "test/saleReturnIncomingReplay.db.test.ts" "test/saleReturnIncomingReplay.routes.db.test.ts" "test/routePolicy.test.ts" "test/saleReturnIncomingConfiguration.db.test.ts" "test/savedSaleReturn.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 34ms
+ ✓ test/savedSaleReturn.db.test.ts (26 tests) 11799ms
+   ✓ saved incoming Sales Return metadata preservation > hydrates complete exact decimals, nulls, timestamps, source refs and stable saved identities 1257ms
+   ✓ saved incoming Sales Return metadata preservation > lists and reads only the configured complete tenant/book scope 1936ms
+   ✓ saved incoming Sales Return metadata preservation > updates only explicitly selected metadata and preserves every other row including physical IDs 2059ms
+   ✓ saved incoming Sales Return metadata preservation > no-op commits do not rewrite rows or turn a display fallback into a stored description 2063ms
+   ✓ saved incoming Sales Return metadata preservation > uses CAS so exactly one concurrent editor succeeds and stale retry cannot lose the winner 415ms
+   ✓ saved incoming Sales Return metadata preservation > rolls back the first actual write when the next update fails 311ms
+   ✓ saved incoming Sales Return metadata preservation > keeps saved date null readable and blocks metadata even without a lock date 613ms
+ ✓ test/saleReturnIncomingReplay.db.test.ts (43 tests) 8781ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > hydrates exact raw identities, rawNULL/blank/decimals/microseconds, eight caches and an empty journal without recalculation or business writes 469ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > admits only a trusted configured LeaveCell for column19 without persisting it 360ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > replays independent source prefixes: manual-labour-then-rate 1775ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > replays independent source prefixes: equal-manual-total-then-same-valued-other 302ms
+   ✓ saved incoming Return trusted replay in a real read-only observation > contains hidden, known unsupported and malformed events without widening the twelve-field profile 792ms
+ ✓ test/saleReturnIncomingReplay.routes.db.test.ts (12 tests) 7424ms
+   ✓ saved Incoming Return journal HTTP authority > does not admit source, hidden, labour-code or unimplemented commits through the preview route 327ms
+ ✓ test/saleReturnIncomingConfiguration.db.test.ts (26 tests) 930ms
+ ✓ test/saleReturnIncomingReplay.test.ts (31 tests) 7ms
+
+ Test Files  6 passed (6)
+      Tests  192 passed (192)
+   Start at  12:24:30
+   Duration  38.51s (transform 4.11s, setup 0ms, collect 6.58s, tests 28.97s, environment 1ms, prepare 781ms)
+

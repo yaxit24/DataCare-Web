@@ -1,0 +1,47 @@
+{
+  "capturedAtUtc": "2026-09-11T05:30:13.033377+00:00",
+  "round": 4,
+  "overallBrowserPassed": false,
+  "boundedSalesDesignPassed": true,
+  "boundedCheckCount": 10,
+  "checks": [
+    "F1 lists exact item-product/company sources with duplicate labels and full desktop display columns",
+    "Native modal contains keyboard focus; Escape cancels without changing the draft and restores Design focus",
+    "Search distinguishes duplicate design numbers by album and cancellation remains lossless",
+    "Selection preserves invalid unrelated draft and components while copying only source-defined new-row cells",
+    "Validated Design photo previews both inside picker and immediately on the unsaved order row",
+    "Zero source defaults retain manual numerics; source percentage zero permits its nonzero rate copy",
+    "Actual POST replays selected saved sources and later manual edit; reopening preserves parent/components and linked image",
+    "Actual PUT treats loaded parent as E: numeric caches, parent/child identities and component snapshots stay unchanged",
+    "Explicit clear resets only Design and image N while retaining size, karigar and numerics",
+    "Complete picker/create/edit/clear workflow has no unhandled browser errors"
+  ],
+  "desktopCancellationEquivalent": false,
+  "cancellationQualification": "Web Escape preservation is a deliberate loss-prevention difference; shared desktop helper source indicates an empty-selection clear branch and runtime/business acceptance remains open.",
+  "result": {
+    "path": "test-results/parity-real-stack-round4-focus-cache/result.json",
+    "sha256": "df709697eb588b7f820ed42b06365396647f93f53156d60bb8507941f5e2fd86"
+  },
+  "log": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/browser-focus-cache.txt",
+    "sha256": "fb97967d72f2f64b12e9c11d144e5a0ea2180ad1ae6bfe15a8383b2b1e61b271"
+  },
+  "screens": [
+    {
+      "path": "test-results/parity-real-stack-round4-focus-cache/sales-design-picker-round4.png",
+      "sha256": "8f0179b0820f4da12ce96ff7898f832c6286f56ff179dcc8aac68a28865e3613",
+      "review": "Pass: modal and all eleven columns/actions fit the viewport; both duplicate-name sources remain distinguishable by album; portrait is complete and uncropped."
+    },
+    {
+      "path": "test-results/parity-real-stack-round4-focus-cache/sales-design-loaded-round4.png",
+      "sha256": "82448758e78ff0234633cdcda406af593160bb02592af1f5a350339c3b08a601",
+      "review": "Pass: saved parent source-clear state retains size14/karigarK02/numerics and focuses Design input; fields/read context are legible."
+    }
+  ],
+  "laterFailure": "unchanged UI replacement must retain complete input-shaped snapshot/version\n+ actual - expected\n... Skipped lines\n\n  {\n    acCode: 'TOURAC',\n    acName: 'Real browser tour customer',\n    address1: '',\n    address2: '',\n...\n    vchTime: '15:42:31.123456',\n+   version: 'cd737b3a53cbe980df27d96c1231678003bc5bd6228701c7adb44a666c88385f',\n-   version: 'ad4734d55a9e9b8acd90ac80ac2f796b26eb55a0edab9e20d527dbf5c51a29a5',\n    voucherNo: '00002'\n  }\n",
+  "laterFailureAssessment": "The later Sales lifecycle journey required a stable replacement version. orderVersion explicitly hashes replacement row IDs; its owner corrected the test to compare every business field and require a new nonempty token. No picker or selector source change was needed. Final whole-run success is still pending.",
+  "source": {
+    "path": "apps/api/src/modules/sales/salesOrder.ts",
+    "sha256": "d51732854faa0e110b6960a1b9e3e08ec08a087b457c7ee1c4eb85c99d15b1af"
+  }
+}

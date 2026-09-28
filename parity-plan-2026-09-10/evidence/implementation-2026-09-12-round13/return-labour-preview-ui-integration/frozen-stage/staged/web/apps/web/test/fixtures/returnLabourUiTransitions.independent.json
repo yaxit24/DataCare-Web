@@ -1,0 +1,161 @@
+{
+  "status": "prospective literals frozen before UI implementation; no execution",
+  "cases": [
+    {
+      "id": "L01",
+      "before": "unbound page",
+      "intent": "open",
+      "expected": "no request"
+    },
+    {
+      "id": "L02",
+      "before": "ready page",
+      "intent": "claim rejected",
+      "expected": "no request"
+    },
+    {
+      "id": "L03",
+      "before": "ready owner",
+      "intent": "start GET",
+      "expected": "busy, one request"
+    },
+    {
+      "id": "L04",
+      "before": "GET pending",
+      "intent": "close",
+      "expected": "late response ignored"
+    },
+    {
+      "id": "L05",
+      "before": "GET pending",
+      "intent": "document changes",
+      "expected": "late response ignored"
+    },
+    {
+      "id": "L06",
+      "before": "GET pending",
+      "intent": "same scope newer epoch",
+      "expected": "late response ignored, draft retained"
+    },
+    {
+      "id": "L07",
+      "before": "code draft BB",
+      "intent": "check",
+      "expected": "candidate only, zero events"
+    },
+    {
+      "id": "L08",
+      "before": "lookup pending BB",
+      "intent": "draft changes AA",
+      "expected": "BB response ignored"
+    },
+    {
+      "id": "L09",
+      "before": "checked BB",
+      "intent": "field changes",
+      "expected": "candidate cleared"
+    },
+    {
+      "id": "L10",
+      "before": "checked BB",
+      "intent": "append",
+      "expected": "old prefix plus one labour event"
+    },
+    {
+      "id": "L11",
+      "before": "code draft BB",
+      "intent": "Enter",
+      "expected": "one lookup then one append"
+    },
+    {
+      "id": "L12",
+      "before": "Enter pending",
+      "intent": "second Enter",
+      "expected": "no duplicate request"
+    },
+    {
+      "id": "L13",
+      "before": "accepted BB",
+      "intent": "same code Enter",
+      "expected": "one additional event"
+    },
+    {
+      "id": "L14",
+      "before": "accepted BB",
+      "intent": "AA response for wrong old prefix",
+      "expected": "refuse, keep BB"
+    },
+    {
+      "id": "L15",
+      "before": "accepted BB",
+      "intent": "money blank",
+      "expected": "explicit empty event preserved"
+    },
+    {
+      "id": "L16",
+      "before": "accepted BB",
+      "intent": "Tab or blur",
+      "expected": "no request"
+    },
+    {
+      "id": "L17",
+      "before": "lookup or append pending",
+      "intent": "selection pause",
+      "expected": "late callbacks ignored"
+    },
+    {
+      "id": "L18",
+      "before": "accepted BB, AA draft",
+      "intent": "422",
+      "expected": "retain BB and AA"
+    },
+    {
+      "id": "L19",
+      "before": "accepted BB, AA draft",
+      "intent": "409",
+      "expected": "retain BB/AA and block until reload"
+    },
+    {
+      "id": "L20",
+      "before": "accepted BB, AA draft",
+      "intent": "network failure",
+      "expected": "retain prefix/draft; explicit identical retry allowed"
+    },
+    {
+      "id": "L21",
+      "before": "accepted prefix",
+      "intent": "response appends twice",
+      "expected": "refuse unchanged"
+    },
+    {
+      "id": "L22",
+      "before": "accepted prefix",
+      "intent": "matching422 recovery",
+      "expected": "validate equality, do not replace prefix"
+    },
+    {
+      "id": "L23",
+      "before": "accepted prefix",
+      "intent": "shortened422 recovery",
+      "expected": "refuse unchanged"
+    },
+    {
+      "id": "L24",
+      "before": "closed A then reopened A",
+      "intent": "first A response",
+      "expected": "ignore ABA by generation"
+    },
+    {
+      "id": "L25",
+      "before": "labour owns preview",
+      "intent": "row or bill claim",
+      "expected": "refuse"
+    },
+    {
+      "id": "L26",
+      "before": "old owner callback",
+      "intent": "new document owner",
+      "expected": "cannot release newer owner"
+    }
+  ]
+}

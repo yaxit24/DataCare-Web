@@ -1,0 +1,50 @@
+{
+ "form": "RP_OS",
+ "tables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "LEDR_AC_DATA",
+  "LOCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "LEDR_AC_DATA": [
+    "AC_CODE",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "CR_AMT",
+    "CR_FINE_WT",
+    "CR_SL_FINE",
+    "DATA_TYPE",
+    "DR_AMT",
+    "DR_FINE_WT",
+    "DR_SL_FINE",
+    "LC_CODE",
+    "MAIN_USER",
+    "VCH_DT"
+   ]
+  },
+  "UPDATE": [],
+  "DELETE": [
+   "LEDR_AC_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_DATA",
+  "AC_GROUP",
+  "AC_MAST",
+  "LEDR_AC_DATA",
+  "LOCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 7,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 5680
+}

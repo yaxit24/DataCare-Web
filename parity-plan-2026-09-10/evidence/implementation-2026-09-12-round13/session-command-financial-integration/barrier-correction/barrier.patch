@@ -1,0 +1,57 @@
+--- a/apps/api/test/sessionContextCommand.db.test.ts
++++ b/apps/api/test/sessionContextCommand.db.test.ts
+@@ -51,6 +51,18 @@
+     (value) => ({ value, error: undefined }),
+     (error: unknown) => ({ value: undefined, error }),
+   );
++
++/** Do not wait forever if the operation fails before reaching its test barrier. */
++const waitForGate = <T>(
++  gate: Promise<void>,
++  operation: Promise<{ value: T | undefined; error: unknown }>,
++): Promise<void> =>
++  Promise.race([
++    gate,
++    operation.then((outcome) => {
++      throw outcome.error ?? new Error('Operation completed before the expected test barrier');
++    }),
++  ]);
+ 
+ /** Real row locks and rollback on a small master sentinel. Financial/HTTP coverage is in the companion file. */
+ db('session command lock schedules on isolated PostgreSQL', () => {
+@@ -303,7 +315,7 @@
+     let command: ReturnType<typeof settled<string>> | undefined;
+     const work = vi.fn(mark);
+     try {
+-      await entered.promise;
++      await waitForGate(entered.promise, holder);
+       command = settled(withSessionContextCommand(runtime, identity, policy, work));
+       await waitForLock(commandName);
+       const deadline = Date.now() + 2500;
+@@ -345,7 +357,7 @@
+     );
+     let selection: ReturnType<typeof settled<Awaited<ReturnType<typeof select>>>> | undefined;
+     try {
+-      await entered.promise;
++      await waitForGate(entered.promise, command);
+       selection = settled(select());
+       await waitForLock(actorName);
+       expect(await marker()).toBe('before-command');
+@@ -372,7 +384,7 @@
+     let command: ReturnType<typeof settled<string>> | undefined;
+     const work = vi.fn(mark);
+     try {
+-      await signing.promise;
++      await waitForGate(signing.promise, selection);
+       command = settled(withSessionContextCommand(runtime, identity, policy, work));
+       await waitForLock(commandName);
+       release.release();
+@@ -401,7 +413,7 @@
+       );
+       let operationPromise: Promise<{ value: unknown; error: unknown }> | undefined;
+       try {
+-        await entered.promise;
++        await waitForGate(entered.promise, command);
+         const actorOperation: Promise<unknown> =
+           kind === 'refresh'
+             ? refresh()

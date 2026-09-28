@@ -1,0 +1,136 @@
+{
+  "kind": "datacare.documentation-status-review/1.0",
+  "observedAtUtc": "2026-09-12T03:07:45.759711+00:00",
+  "scope": "Read-only status observations and documentation updates; no new product implementation, product test execution or checkpoint seal.",
+  "functionalImplementationPercentage": null,
+  "functionalPercentageReason": "Full semantic requirement/transition denominator and current per-leaf implementation/acceptance evidence are not closed. Menu, field and test counts cannot substitute.",
+  "menuMapping": {
+    "mapped": 198,
+    "total": 198,
+    "percent": 100,
+    "qualification": "Declared surfaces include partial and contained workflows."
+  },
+  "wholeMenuAcceptance": {
+    "accepted": 0,
+    "total": 198,
+    "percent": 0,
+    "qualification": "Certificate count, not implemented-code percentage."
+  },
+  "registerStateCounts": {
+    "implemented-unverified": 198
+  },
+  "packageStatusCounts": {
+    "open": 83
+  },
+  "executionCardStatusCounts": {
+    "open": 34
+  },
+  "latestRetainedSurfaceAudit": {
+    "round": 14,
+    "representedControls": 3681,
+    "legacyDesktopControlDenominator": 5107,
+    "reportedPercent": 72.1,
+    "representedGridColumns": 2149,
+    "legacyDesktopGridDenominator": 3508,
+    "reportedGridPercent": 61.3,
+    "source": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/depth-final.txt",
+    "sha256": "2db3f6c011072faefbfaa70445c7ac5de50821abef869cae927ec4cfaa97ff5d",
+    "qualification": "Historical scanner/proxy with incomplete semantic denominator. Not a new Round15 audit, true functional parity, or an estimate of remaining work. The older completion-review ratio was73%."
+  },
+  "actualRound15CoreVerification": {
+    "testFiles": 26,
+    "testsPassed": 1613,
+    "strictNewTestFiles": 5,
+    "runs": [
+      {
+        "label": "core-final-test-types",
+        "status": "passed",
+        "exitCode": 0,
+        "inputCount": 1930,
+        "changedInputs": [],
+        "changedPrivateInputs": [],
+        "changedRuntimeInputs": [],
+        "record": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round15/core-final-test-types.run.json",
+        "recordSha256": "f38335256e0202f16c4be0728358f72aca201c934a4d079fff46224332169d40",
+        "logHashMatches": true,
+        "inputManifestHashMatches": true
+      },
+      {
+        "label": "core-final",
+        "status": "passed",
+        "exitCode": 0,
+        "inputCount": 1930,
+        "changedInputs": [],
+        "changedPrivateInputs": [],
+        "changedRuntimeInputs": [],
+        "record": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round15/core-final.run.json",
+        "recordSha256": "1553b325317e0d663b8f9c2c919ede0c373b851e1f9e26241bd82ad4b3e5e32f",
+        "logHashMatches": true,
+        "inputManifestHashMatches": true
+      }
+    ],
+    "productInputFilesReadBack": 1508,
+    "changedProductInputsSinceCoreRun": [],
+    "qualification": "Bounded core/type assertions only; no API/UI adoption or complete desktop acceptance."
+  },
+  "round15RequiredCheckCount": 18,
+  "round15RequiredRunCount": 2,
+  "round15PendingRequiredChecks": [
+    "api-qualified",
+    "api-final-test-types",
+    "workspace-final-build",
+    "workspace-final-lint",
+    "web-final",
+    "browser-labour-bound",
+    "browser-context-bound",
+    "browser-bound",
+    "kernel-final",
+    "dead-cells-final",
+    "depth-final",
+    "scanner-final",
+    "completion-final",
+    "docs-refs-qualified",
+    "checkpoint-chain-recorded",
+    "recipe-controls-recorded"
+  ],
+  "latestSealedCheckpoint": {
+    "path": "41-implementation-checkpoint-round14.json",
+    "sha256": "643bf89ad0ac50729c7feff06c28dfa6bf8cca7d6318e498397cd5c57bf9ebea",
+    "scope": "Round14 archived input snapshot only"
+  },
+  "round15CheckpointExists": false,
+  "explicitlyContainedOperations": [
+    "logical-restore",
+    "production-cutover-load",
+    "tag-transfer",
+    "tag-cancel",
+    "tag-weight-difference",
+    "tag-split"
+  ],
+  "containmentSourceSha256": "79108272df09bcaa6070ff7a3aebf0b2b7e754323a6943d73ef0bad589306b66",
+  "latestRetainedBlockingScannerResults": {
+    "round": 14,
+    "roundingBypasses": 127,
+    "roundingCeiling": 108,
+    "saleReturnUnresolvedExtendedColumns": 33,
+    "saleReturnMappedExtendedColumns": 48,
+    "unreachableApiFields": 106,
+    "unreachableCeiling": 96,
+    "qualification": "Retained failing diagnostic gates, not freshly confirmed count of missing business requirements; unsupported scanner syntax requires triage."
+  },
+  "currentReportComparisonArtifactExists": false,
+  "mainRemainingImplementation": [
+    "Trusted numeric Sales Return observation, admission, complete companion ownership, atomic writer and UI; remaining Return modes and known closing.",
+    "Full create/edit/delete credit-note workflow beyond saved review/IRN.",
+    "Complete tag transfer, cancellation, split and weight-difference lifecycles.",
+    "Manufacturing Setting issue/partial receipt and other domain variants, conservation and reversals.",
+    "Remaining source-selection, child-detail, settlement, finance, custody, loan and scheme workflows across business configurations.",
+    "Complete reports/printing, settings consumers, devices/providers, migration, restoration and operational workflows."
+  ],
+  "mainRemainingVerification": [
+    "Semantic source/mode inventory and per-leaf implementation measurement.",
+    "Current complete desktop/web field, calculation, posting, lifecycle and report comparisons.",
+    "Full runtime/DB/browser/concurrency/recovery tests for current source; remaining Round15 checks.",
+    "Role-specific business UAT, all83package/34card/198menu acceptances, migration/cutover and production certification."
+  ]
+}

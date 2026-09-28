@@ -1,0 +1,92 @@
+{
+  "kind": "round14-save-guard-read-inputs-v1",
+  "files": [
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "reviewedReferences": [
+        "10614",
+        "12110-12407",
+        "13467-13567",
+        "5162-5202",
+        "16381-16458"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/DC_Main.cs",
+      "sha256": "7ff3543a78440db0f6f18eaf442aade59a105fcb398c0ba7fd9f9c53c195a688",
+      "reviewedReferences": [
+        "2149-2163",
+        "2258-2271"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_OPNCOMP.cs",
+      "sha256": "180f295f9595dfc7c28ee34629563889c943eea0a0afc7c7a9baa519a11c4561",
+      "reviewedReferences": [
+        "601-604",
+        "666",
+        "690",
+        "710-713",
+        "952"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+      "reviewedReferences": [
+        "1323-1395"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Rojmel.cs",
+      "sha256": "d1097c87b8109a31c6b0baed687a6338422dd5272abb90f4ba0da085ca8a1f85",
+      "reviewedReferences": [
+        "586-616"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Tax.cs",
+      "sha256": "683d1508b6724a820807eb2806494b093386e8be8bfa8cd9c15a985d3d69fba2",
+      "reviewedReferences": [
+        "191-195"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/doc-update-stage/40-implementation-progress-round14.md",
+      "sha256": "32a1682dc46f10195f40bd04bc9fff6690b62b31b0b8453f4f8dd155e749a01c",
+      "reviewedReferences": [
+        "Required next sequence"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract/implementation-contract.md",
+      "sha256": "ffb358067fff21f5921fd7edd66e2e1638fe28cc2fc48735211805a198274f24",
+      "reviewedReferences": [
+        "3",
+        "6",
+        "7"
+      ]
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/return-next-write-contract-review/review.md",
+      "sha256": "6127a1e87981ab2e61eb31a9b58f6bedc3e9210180d028df01b8080aa423b0c8",
+      "reviewedReferences": [
+        "Effect and save-guard findings"
+      ]
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/effects-contract.md",
+      "sha256": "00c0d6551a0b08445835869c93bb19cafa42e879b841c315596581ec4f7b28c2"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/remaining-blockers.json",
+      "sha256": "86aa52414f3f41f12e05a8141f7d15247cfb985096bf9d5fe73eb16a47eeea43"
+    },
+    {
+      "path": "/tmp/datacare-return-save-effects-analysis/source-effect-index.json",
+      "sha256": "886f5a32611e412128e9c5b749a9da188c8fbbde5e9f266f09c7d20bc800c1fd"
+    }
+  ],
+  "scope": "Bounded source excerpts and prospective contract comparison; no independent execution or full new effect inventory."
+}

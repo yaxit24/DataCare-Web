@@ -1,0 +1,44 @@
+{
+  "baseline": {
+    "path": "web/test-results/parity-real-stack-round13-labour-complete/result.json",
+    "sha256": "0c5f21ed14942d36c6ea29a738ef81999be0eaa1981f01e7aac589067ad10cd4",
+    "journeys": 17,
+    "labourRequiredChecks": 12,
+    "auditRows": 21,
+    "acceptedAppends": 10,
+    "sqlSnapshots": [
+      {
+        "label": "state and lookup do not change saved data",
+        "tables": 29,
+        "beforeSha256": "75fb943a5c086348cd2c5db2f30da57b1057b3467e46eb845d4524b697c349d3",
+        "afterSha256": "75fb943a5c086348cd2c5db2f30da57b1057b3467e46eb845d4524b697c349d3"
+      },
+      {
+        "label": "all successful and refused previews leave complete business/session/config/master rows unchanged",
+        "tables": 29,
+        "beforeSha256": "75fb943a5c086348cd2c5db2f30da57b1057b3467e46eb845d4524b697c349d3",
+        "afterSha256": "75fb943a5c086348cd2c5db2f30da57b1057b3467e46eb845d4524b697c349d3"
+      },
+      {
+        "label": "historical master conflict cannot edit or rebase any stored state",
+        "tables": 29,
+        "beforeSha256": "96f9fdc50b1194b684a628f66d45ebad450c1300b7756bb400d496042723f93f",
+        "afterSha256": "96f9fdc50b1194b684a628f66d45ebad450c1300b7756bb400d496042723f93f"
+      },
+      {
+        "label": "View-only and original panels leave stored rows unchanged after their own login",
+        "tables": 29,
+        "beforeSha256": "1b80e9f7101f2e24b42459ff7ec1d5c8bb7ea037c063feec49ab6c8656d66597",
+        "afterSha256": "1b80e9f7101f2e24b42459ff7ec1d5c8bb7ea037c063feec49ab6c8656d66597"
+      }
+    ]
+  },
+  "faults": {
+    "path": "web/test-results/return-labour-preview-lifecycle-round13/result.json",
+    "sha256": "acfad1b1a11e6c3d292e31df3d76f1f56593d0d29329e1c56e82494e6078f044",
+    "requiredCases": 5,
+    "actualInterceptionRegistrations": 4,
+    "syntheticBusinessResponses": 0
+  },
+  "qualification": "All mandatory actual-run checks passed at their recorded inputs. Baseline has zero mocked requests/responses; fault run explicitly intercepts four real responses. No full-menu or production acceptance."
+}

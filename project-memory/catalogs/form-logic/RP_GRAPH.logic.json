@@ -1,0 +1,25 @@
+{
+ "form": "RP_GRAPH",
+ "tables": [
+  "AC_DATA",
+  "GROUP_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "AC_DATA",
+  "GROUP_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2558
+}

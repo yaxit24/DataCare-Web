@@ -1,0 +1,436 @@
+{
+  "version": "session-serializable-return-update-v1",
+  "authoredBeforeNewImplementation": true,
+  "identity": {
+    "tenantId": "serial-command-unit",
+    "sessionId": "11111111-1111-4111-8111-111111111111",
+    "loginName": "operator",
+    "loginCoCode": "01",
+    "coCode": "01",
+    "lcCode": "01",
+    "coYear": "2024-2025",
+    "contextEpoch": "7"
+  },
+  "policy": {
+    "scope": {
+      "tenantId": "serial-command-unit",
+      "coCode": "01",
+      "lcCode": "01",
+      "coYear": "2024-2025",
+      "coBook": "R14"
+    }
+  },
+  "unitCases": [
+    {
+      "id": "S01",
+      "scenario": "ready",
+      "given": "Serializable; canonical subject; View Y/Edit Y",
+      "expected": {
+        "code": "success",
+        "statusCode": 200
+      }
+    },
+    {
+      "id": "S02",
+      "scenario": "numeric-epoch",
+      "given": "epoch is numeric 7",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S03",
+      "scenario": "leading-zero-epoch",
+      "given": "epoch is text 07",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S04",
+      "scenario": "overflow-epoch",
+      "given": "epoch exceeds positive PostgreSQL BIGINT",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S05",
+      "scenario": "authority-extra",
+      "given": "identity includes isAdmin",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S06",
+      "scenario": "missing-year",
+      "given": "identity has own coYear undefined",
+      "expected": {
+        "code": "scope-incomplete",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S07",
+      "scenario": "scope-mismatch",
+      "given": "policy company02; retained company01",
+      "expected": {
+        "code": "scope-mismatch",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S08",
+      "scenario": "mutable-action",
+      "given": "policy includes action read",
+      "expected": {
+        "code": "invalid-serializable-command-policy",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S09",
+      "scenario": "mutable-form",
+      "given": "policy includes another form",
+      "expected": {
+        "code": "invalid-serializable-command-policy",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S10",
+      "scenario": "admin-override",
+      "given": "policy includes adminOnly true",
+      "expected": {
+        "code": "invalid-serializable-command-policy",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S11",
+      "scenario": "wrong-tenant",
+      "given": "transaction tenant differs",
+      "expected": {
+        "code": "invalid-transaction-context",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S12",
+      "scenario": "wrong-isolation",
+      "given": "transaction reports read committed",
+      "expected": {
+        "code": "invalid-transaction-context",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S13",
+      "scenario": "repeatable-isolation",
+      "given": "transaction reports repeatable read",
+      "expected": {
+        "code": "invalid-transaction-context",
+        "statusCode": 500
+      }
+    },
+    {
+      "id": "S14",
+      "scenario": "missing-session",
+      "given": "no exact scoped session",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S15",
+      "scenario": "foreign-subject",
+      "given": "immutable credential login company differs",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S16",
+      "scenario": "stale-epoch",
+      "given": "database8 versus bearer7",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S17",
+      "scenario": "scope-aba",
+      "given": "same company but database9 versus bearer7",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S18",
+      "scenario": "malformed-ledger",
+      "given": "caller cannot activate known mode A",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S19",
+      "scenario": "revoked",
+      "given": "post-lock SQL revoked true",
+      "expected": {
+        "code": "session-revoked",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S20",
+      "scenario": "expired",
+      "given": "post-lock SQL unexpired false",
+      "expected": {
+        "code": "session-expired",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S21",
+      "scenario": "principal-missing",
+      "given": "current principal absent",
+      "expected": {
+        "code": "session-invalid",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S22",
+      "scenario": "forced-reset",
+      "given": "fresh selected principal requires password reset",
+      "expected": {
+        "code": "password-reset-required",
+        "statusCode": 403
+      }
+    },
+    {
+      "id": "S23",
+      "scenario": "view-denied",
+      "given": "View N/Edit Y",
+      "expected": {
+        "code": "forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "id": "S24",
+      "scenario": "update-denied",
+      "given": "View Y/Edit N",
+      "expected": {
+        "code": "forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "id": "S25",
+      "scenario": "year-unavailable",
+      "given": "stored configured year absent; never default",
+      "expected": {
+        "code": "year-unavailable",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S26",
+      "scenario": "company-forbidden",
+      "given": "stored company exists but company rights false",
+      "expected": {
+        "code": "company-forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "id": "S27",
+      "scenario": "final-expiry",
+      "given": "callback returns after SQL expiry",
+      "expected": {
+        "code": "session-expired",
+        "statusCode": 401
+      }
+    },
+    {
+      "id": "S28",
+      "scenario": "final-epoch",
+      "given": "callback changes epoch in same transaction",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S29",
+      "scenario": "final-ledger",
+      "given": "callback changes unknown ledger reason",
+      "expected": {
+        "code": "context-stale",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S30",
+      "scenario": "raw-serialization",
+      "given": "raw40001 during row lock",
+      "expected": {
+        "code": "session-command-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S31",
+      "scenario": "prisma-conflict",
+      "given": "P2034 at commit",
+      "expected": {
+        "code": "session-command-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S32",
+      "scenario": "wrapped-serialization",
+      "given": "P2010/meta40001",
+      "expected": {
+        "code": "session-command-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S33",
+      "scenario": "raw-deadlock",
+      "given": "raw40P01",
+      "expected": {
+        "code": "session-command-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S34",
+      "scenario": "wrapped-deadlock",
+      "given": "P2010/meta40P01",
+      "expected": {
+        "code": "session-command-conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "id": "S35",
+      "scenario": "connection-failure",
+      "given": "08006 unknown connection outcome",
+      "expected": {
+        "code": "propagate-original",
+        "statusCode": null
+      }
+    },
+    {
+      "id": "S36",
+      "scenario": "unknown-commit",
+      "given": "unclassified commit acknowledgment failure",
+      "expected": {
+        "code": "propagate-original",
+        "statusCode": null
+      }
+    }
+  ],
+  "databaseSchedules": [
+    {
+      "id": "D01",
+      "schedule": "No-op admitted callback; SERIALIZABLE, fixed Return update; all scoped raw/xmin/ctid unchanged",
+      "expected": "success; one callback; no auth writes"
+    },
+    {
+      "id": "D02",
+      "schedule": "Command SHARE first; callback marker write; selection UPDATE waits until commit",
+      "expected": "command marker committed then selection epoch8; no command auth write"
+    },
+    {
+      "id": "D03",
+      "schedule": "Selection UPDATE uncommitted before command snapshot; command SHARE waits; selection commits",
+      "expected": "command409 known serialization before callback; selection remains8; no marker change"
+    },
+    {
+      "id": "D04",
+      "schedule": "Actor holds session UPDATE lock without changing tuple; expiry passes during command wait",
+      "expected": "401 session-expired after lock; no callback; exact raw unchanged"
+    },
+    {
+      "id": "D05",
+      "schedule": "Actor updates marker after command first read; command rereads same row in same snapshot",
+      "expected": "both reads before; actor change committed; no latest-at-response claim"
+    },
+    {
+      "id": "D06",
+      "schedule": "Command SHARE held; actual refresh waits",
+      "expected": "command succeeds then actual refresh rotates JTI; command did not rotate"
+    },
+    {
+      "id": "D07",
+      "schedule": "Command SHARE held; actual logout waits",
+      "expected": "command succeeds then revoked logout"
+    },
+    {
+      "id": "D08",
+      "schedule": "Command SHARE held; reset holds LOGIN then waits session",
+      "expected": "command completes without later LOGIN lock; actual reset succeeds"
+    },
+    {
+      "id": "D09",
+      "schedule": "Callback writes marker then natural expiry before final SQL",
+      "expected": "401 final expiry; marker and all raw/xmin/ctid rollback"
+    },
+    {
+      "id": "D10",
+      "schedule": "selected company02; immutable login company01",
+      "expected": "admitted selected principal company02; session unchanged"
+    },
+    {
+      "id": "D11",
+      "schedule": "Committed FRM_EDIT=N before snapshot while FRM_VIEW=Y",
+      "expected": "403 update denied before callback; unchanged raw"
+    },
+    {
+      "id": "D12",
+      "schedule": "USER_SET edit revocation commits after snapshot",
+      "expected": "first snapshot retains EditY; subsequent command403; no universal current-rights guarantee"
+    },
+    {
+      "id": "D13",
+      "schedule": "Callback marker DML then explicit throw",
+      "expected": "original error; exact full rollback"
+    },
+    {
+      "id": "D14",
+      "schedule": "Prohibited callback mutates same session epoch then returns",
+      "expected": "409 context-stale; session and marker rollback"
+    },
+    {
+      "id": "D15",
+      "schedule": "Two Serializable commands share session; both read PARTY+PEER then independently update one different marker",
+      "expected": "exactly one success and one409 SSI; each callback once; one marker changes; auth unchanged"
+    },
+    {
+      "id": "D16",
+      "schedule": "Callback reads PARTY, independent actor commits PARTY update, callback attempts same row update",
+      "expected": "409 serialization; actor value preserved; no retry; auth/foreign rows unchanged"
+    },
+    {
+      "id": "D17",
+      "schedule": "Prohibited callback changes only unknown ledger reason plus marker",
+      "expected": "409 context-stale; entire candidate transaction rollback"
+    }
+  ]
+}

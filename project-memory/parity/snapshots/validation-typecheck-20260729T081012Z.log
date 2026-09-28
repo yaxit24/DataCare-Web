@@ -1,0 +1,65 @@
+
+> datacare-web-saas@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web
+> turbo run typecheck
+
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running typecheck in 7 packages
+   • Remote caching disabled
+
+@datacare/web:typecheck: cache miss, executing ee8ee57a1773f156
+@datacare/types:typecheck: cache miss, executing 8e87dda90f06c208
+@datacare/types:build: cache miss, executing 2f339ad5308aa62d
+@datacare/core:typecheck: cache miss, executing 214b2e7bc3bed2dd
+@datacare/core:build: cache miss, executing 39c861034c57d064
+@datacare/reports:typecheck: cache miss, executing 33b6a472396565d4
+@datacare/parity:typecheck: cache miss, executing 682a57e683eaa463
+@datacare/db:typecheck: cache miss, executing 5a8a84ae1b394c59
+@datacare/db:build: cache miss, executing 64f5e78c5158ded0
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/parity:typecheck: 
+@datacare/parity:typecheck: > @datacare/parity@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/parity
+@datacare/parity:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/parity:typecheck: 
+@datacare/types:typecheck: 
+@datacare/types:typecheck: > @datacare/types@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/types
+@datacare/types:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/types:typecheck: 
+@datacare/reports:typecheck: 
+@datacare/reports:typecheck: > @datacare/reports@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/reports
+@datacare/reports:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/reports:typecheck: 
+@datacare/web:typecheck: 
+@datacare/web:typecheck: > @datacare/web@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/apps/web
+@datacare/web:typecheck: > tsc --noEmit
+@datacare/web:typecheck: 
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/core:typecheck: 
+@datacare/core:typecheck: > @datacare/core@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/core
+@datacare/core:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/core:typecheck: 
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/core
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/db:typecheck: 
+@datacare/db:typecheck: > @datacare/db@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/packages/db
+@datacare/db:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/db:typecheck: 
+@datacare/api:typecheck: cache miss, executing d3bfab9e4e0e3f12
+@datacare/api:typecheck: 
+@datacare/api:typecheck: > @datacare/api@0.0.0 typecheck /private/tmp/imodule-parity-snapshot-20260729T081012Z/web/apps/api
+@datacare/api:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/api:typecheck: 
+
+ Tasks:    10 successful, 10 total
+Cached:    0 cached, 10 total
+  Time:    18.141s 
+

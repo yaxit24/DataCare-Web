@@ -1,0 +1,51 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/routePolicy.test.ts (54 tests) 13ms
+ ✓ test/saleReturnBillReplay.db.test.ts (34 tests) 2296ms
+ ✓ test/saleReturnBillReplay.routes.db.test.ts (10 tests) 1659ms
+   ✓ authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text 356ms
+ ✓ test/saleReturnLabourReplay.routes.db.test.ts (10 tests) 1786ms
+ ✓ test/saleReturnLabourReplay.db.test.ts (17 tests) 1873ms
+ ✓ test/saleReturnLabourReplay.test.ts (30 tests) 13ms
+
+ Test Files  6 passed (6)
+      Tests  155 passed (155)
+   Start at  23:29:12
+   Duration  10.29s (transform 893ms, setup 0ms, collect 1.70s, tests 7.64s, environment 0ms, prepare 146ms)
+

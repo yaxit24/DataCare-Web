@@ -1,4 +1,15 @@
 import { withTenant } from '@datacare/db';
+import {
+  lockImageRevisionTx,
+  readImageRevisionTx,
+  advanceImageRevisionTx,
+} from '../images/imageRevision.js';
+import {
+  compareImageVersion,
+  imageStateVersion,
+  imagePreview,
+  validateImagePixels,
+} from '../images/imageState.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
   RepairWorkflowValidationError,
@@ -147,7 +158,7 @@ async function assertRepairLineExistsTx(
     `SELECT 1 FROM "REP_DETL"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
         AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"::numeric=$7::numeric
-      LIMIT 1`,
+      LIMIT 1 FOR SHARE`,
     scope.tenantId,
     scope.coCode,
     scope.lcCode,
@@ -163,6 +174,87 @@ async function assertRepairLineExistsTx(
   }
 }
 
+function repairRevisionKey(scope: VoucherScope, key: RepairImageKey) {
+  return {
+    tenantId: scope.tenantId,
+    coCode: scope.coCode,
+    lcCode: scope.lcCode,
+    entityType: 'REPAIR',
+    entityKey: JSON.stringify([key.coYear, key.coBook, key.voucherNo, key.srNo]),
+    instance: 0,
+  };
+}
+
+async function repairImageSnapshotTx(tx: any, scope: VoucherScope, key: RepairImageKey) {
+  await assertRepairLineExistsTx(tx, scope, key);
+  const values = [
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    key.coYear,
+    key.coBook,
+    key.voucherNo,
+    key.srNo,
+  ];
+  const where =
+    'tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"::numeric=$7::numeric';
+  const parents = await tx.$queryRawUnsafe(
+    `SELECT xmin::text AS "generation",ctid::text AS "tuple" FROM "REP_DETL" WHERE ${where}`,
+    ...values,
+  );
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT "IMAGE_NO","IMAGE_TYPE","MIME_TYPE","IMAGE_SIZE","REP_IMAGE","MAIN_USER","ENTRY_TIME"::text AS "entryTime" FROM "REP_IMAGE" WHERE ${where}`,
+    ...values,
+  );
+  const revision = await readImageRevisionTx(tx, repairRevisionKey(scope, key));
+  return {
+    rows,
+    version: imageStateVersion([
+      values,
+      revision,
+      parents,
+      rows.map(({ REP_IMAGE, ...row }) => ({
+        ...row,
+        data: Buffer.from(REP_IMAGE ?? []).toString('base64'),
+      })),
+    ]),
+  };
+}
+
+export async function getRepairImageState(
+  prisma: any,
+  scope: VoucherScope,
+  input: RepairImageKeyInput,
+) {
+  assertCompleteRepairScope(scope);
+  const key = resolveRepairImageKey(scope, input);
+  return withTenant(
+    prisma,
+    scope.tenantId,
+    async (tx: any) => {
+      const snapshot = await repairImageSnapshotTx(tx, scope, key);
+      const row = snapshot.rows[0];
+      return {
+        version: snapshot.version,
+        image: await imagePreview(
+          row
+            ? {
+                bytes: Buffer.from(row.REP_IMAGE ?? []),
+                mimeType: String(row.MIME_TYPE ?? ''),
+                size: Number(row.IMAGE_SIZE),
+                validType:
+                  snapshot.rows.length === 1 &&
+                  row.IMAGE_TYPE === REPAIR_IMAGE_TYPE &&
+                  row.IMAGE_NO === key.imageNo,
+              }
+            : null,
+        ),
+      };
+    },
+    { isolationLevel: 'RepeatableRead' },
+  );
+}
+
 /** Replace-on-save, exactly like the desktop button which deletes the old JPEG first. */
 export async function saveRepairImage(
   prisma: any,
@@ -172,14 +264,20 @@ export async function saveRepairImage(
     data?: string;
     mimeType?: string;
     mainUser?: string;
+    version?: string;
   },
 ): Promise<RepairImageKey & { size: number; mimeType: string; replaced: boolean }> {
   assertCompleteRepairScope(input.scope);
   const scope = input.scope;
   const key = resolveRepairImageKey(scope, input.key);
   const image = decodeRepairImage(input);
+  if (input.version !== undefined) await validateImagePixels(image.data, image.mimeType);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
     await assertRepairLineExistsTx(tx, scope, key);
+    const revisionKey = repairRevisionKey(scope, key);
+    await lockImageRevisionTx(tx, revisionKey);
+    if (input.version !== undefined)
+      compareImageVersion(input.version, (await repairImageSnapshotTx(tx, scope, key)).version);
     const removed = await tx.$executeRawUnsafe(
       `DELETE FROM "REP_IMAGE"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -211,6 +309,7 @@ export async function saveRepairImage(
       image.data,
       String(input.mainUser ?? '').trim() || null,
     );
+    await advanceImageRevisionTx(tx, revisionKey);
     return {
       ...key,
       size: image.data.length,
@@ -259,12 +358,17 @@ export async function getRepairImage(
 
 export async function deleteRepairImage(
   prisma: any,
-  input: { scope: VoucherScope; key: RepairImageKeyInput },
+  input: { scope: VoucherScope; key: RepairImageKeyInput; version?: string },
 ): Promise<{ deleted: boolean }> {
   assertCompleteRepairScope(input.scope);
   const scope = input.scope;
   const key = resolveRepairImageKey(scope, input.key);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    if (input.version !== undefined) await assertRepairLineExistsTx(tx, scope, key);
+    const revisionKey = repairRevisionKey(scope, key);
+    await lockImageRevisionTx(tx, revisionKey);
+    if (input.version !== undefined)
+      compareImageVersion(input.version, (await repairImageSnapshotTx(tx, scope, key)).version);
     const removed = await tx.$executeRawUnsafe(
       `DELETE FROM "REP_IMAGE"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -277,6 +381,7 @@ export async function deleteRepairImage(
       key.voucherNo,
       key.srNo,
     );
+    await advanceImageRevisionTx(tx, revisionKey);
     return { deleted: Number(removed) > 0 };
   });
 }

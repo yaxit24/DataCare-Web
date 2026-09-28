@@ -1,0 +1,697 @@
+{
+  "kind": "session-context-canonical-dto-independent-v1",
+  "profileDecisions": {
+    "epoch": "Canonical ASCII positive decimal text1..9223372036854775807; exact successors with overflow refusal.",
+    "ledgerContext": "Exactly version/status/mode/reason: server-session-ledger-context-v1 / unknown / NULL / one of the three declared reasons. No known mode or extra keys.",
+    "selectionId": "Canonical lowercase UUIDv4 only; hyphenated8-4-4-4-12 hex, version4, RFC4122 variant8/9/a/b. This is the chosen initial web transport profile matching crypto.randomUUID, not a desktop rule or a grant of idempotency/session authority."
+  },
+  "expectedValues": "Independent literal values; no proposed parser, BigInt arithmetic implementation, compiler or DB generated expected outcomes. Operation labels are semantic adapter labels, not prescribed export names. Accepted epoch/successor expected.value is canonical text regardless internal parser representation.",
+  "cases": [
+    {
+      "id": "E01",
+      "operation": "epoch",
+      "reason": "Canonical positive PostgreSQL BIGINT text retained exactly",
+      "input": "1",
+      "expected": {
+        "accepted": true,
+        "value": "1"
+      }
+    },
+    {
+      "id": "E02",
+      "operation": "epoch",
+      "reason": "Canonical positive PostgreSQL BIGINT text retained exactly",
+      "input": "10",
+      "expected": {
+        "accepted": true,
+        "value": "10"
+      }
+    },
+    {
+      "id": "E03",
+      "operation": "epoch",
+      "reason": "Canonical positive PostgreSQL BIGINT text retained exactly",
+      "input": "9007199254740993",
+      "expected": {
+        "accepted": true,
+        "value": "9007199254740993"
+      }
+    },
+    {
+      "id": "E04",
+      "operation": "epoch",
+      "reason": "Canonical positive PostgreSQL BIGINT text retained exactly",
+      "input": "9223372036854775806",
+      "expected": {
+        "accepted": true,
+        "value": "9223372036854775806"
+      }
+    },
+    {
+      "id": "E05",
+      "operation": "epoch",
+      "reason": "Canonical positive PostgreSQL BIGINT text retained exactly",
+      "input": "9223372036854775807",
+      "expected": {
+        "accepted": true,
+        "value": "9223372036854775807"
+      }
+    },
+    {
+      "id": "E06",
+      "operation": "epoch",
+      "reason": "No zero generation",
+      "input": "0",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E07",
+      "operation": "epoch",
+      "reason": "No negative generation",
+      "input": "-1",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E08",
+      "operation": "epoch",
+      "reason": "No plus prefix",
+      "input": "+1",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E09",
+      "operation": "epoch",
+      "reason": "No leading zero",
+      "input": "01",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E10",
+      "operation": "epoch",
+      "reason": "No decimal coercion",
+      "input": "1.0",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E11",
+      "operation": "epoch",
+      "reason": "No exponent coercion",
+      "input": "1e3",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E12",
+      "operation": "epoch",
+      "reason": "No leading trim",
+      "input": " 1",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E13",
+      "operation": "epoch",
+      "reason": "No trailing trim",
+      "input": "1 ",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E14",
+      "operation": "epoch",
+      "reason": "No terminal newline",
+      "input": "1\n",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E15",
+      "operation": "epoch",
+      "reason": "No Unicode line terminator",
+      "input": "1\u2028",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E16",
+      "operation": "epoch",
+      "reason": "No Unicode digits",
+      "input": "\uff11",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E17",
+      "operation": "epoch",
+      "reason": "One above PostgreSQL BIGINT max",
+      "input": "9223372036854775808",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E18",
+      "operation": "epoch",
+      "reason": "Oversized integer text",
+      "input": "999999999999999999999999999999999999",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E19",
+      "operation": "epoch",
+      "reason": "No empty value",
+      "input": "",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E20",
+      "operation": "epoch",
+      "reason": "NULL not epoch1",
+      "input": null,
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E21",
+      "operation": "epoch",
+      "reason": "Number not canonical text",
+      "input": 1,
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E22",
+      "operation": "epoch",
+      "reason": "Boolean not numeric generation",
+      "input": true,
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "E23",
+      "operation": "epoch",
+      "reason": "Object not numeric generation",
+      "input": {},
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "N01",
+      "operation": "successor",
+      "reason": "First successor",
+      "input": "1",
+      "expected": {
+        "accepted": true,
+        "value": "2"
+      }
+    },
+    {
+      "id": "N02",
+      "operation": "successor",
+      "reason": "Successor beyond JS safe integer remains exact",
+      "input": "9007199254740993",
+      "expected": {
+        "accepted": true,
+        "value": "9007199254740994"
+      }
+    },
+    {
+      "id": "N03",
+      "operation": "successor",
+      "reason": "Last valid successor",
+      "input": "9223372036854775806",
+      "expected": {
+        "accepted": true,
+        "value": "9223372036854775807"
+      }
+    },
+    {
+      "id": "N04",
+      "operation": "successor",
+      "reason": "Overflow refuses, never wraps/resets",
+      "input": "9223372036854775807",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "N05",
+      "operation": "successor",
+      "reason": "Successor validates input before incrementing",
+      "input": "0",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L01",
+      "operation": "ledgerContext",
+      "reason": "Explicit unknown observation reason retained",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": true,
+        "value": {
+          "version": "server-session-ledger-context-v1",
+          "status": "unknown",
+          "mode": null,
+          "reason": "vendor-authority-unresolved"
+        }
+      }
+    },
+    {
+      "id": "L02",
+      "operation": "ledgerContext",
+      "reason": "Explicit unknown observation reason retained",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": "legacy-session-uninitialized"
+      },
+      "expected": {
+        "accepted": true,
+        "value": {
+          "version": "server-session-ledger-context-v1",
+          "status": "unknown",
+          "mode": null,
+          "reason": "legacy-session-uninitialized"
+        }
+      }
+    },
+    {
+      "id": "L03",
+      "operation": "ledgerContext",
+      "reason": "Explicit unknown observation reason retained",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": "scope-incomplete"
+      },
+      "expected": {
+        "accepted": true,
+        "value": {
+          "version": "server-session-ledger-context-v1",
+          "status": "unknown",
+          "mode": null,
+          "reason": "scope-incomplete"
+        }
+      }
+    },
+    {
+      "id": "L04",
+      "operation": "ledgerContext",
+      "reason": "Missing version",
+      "input": {
+        "status": "unknown",
+        "mode": null,
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L05",
+      "operation": "ledgerContext",
+      "reason": "Missing status",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "mode": null,
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L06",
+      "operation": "ledgerContext",
+      "reason": "Missing mode differs from requiredNULL",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L07",
+      "operation": "ledgerContext",
+      "reason": "Missing reason",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L08",
+      "operation": "ledgerContext",
+      "reason": "Unknown semantic version",
+      "input": {
+        "version": "server-session-ledger-context-v2",
+        "status": "unknown",
+        "mode": null,
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L09",
+      "operation": "ledgerContext",
+      "reason": "Known mode is outside initial schema/profile",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "resolved",
+        "mode": "A",
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L10",
+      "operation": "ledgerContext",
+      "reason": "Unknown status cannot carry known mode",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": "A",
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L11",
+      "operation": "ledgerContext",
+      "reason": "Blank mode is notNULL",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": "",
+        "reason": "vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L12",
+      "operation": "ledgerContext",
+      "reason": "Reason is not trimmed",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": " vendor-authority-unresolved"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L13",
+      "operation": "ledgerContext",
+      "reason": "Reason terminal newline refused",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": "vendor-authority-unresolved\n"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L14",
+      "operation": "ledgerContext",
+      "reason": "NULL reason unsupported",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": null
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L15",
+      "operation": "ledgerContext",
+      "reason": "Unrecognized reason",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": "other"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L16",
+      "operation": "ledgerContext",
+      "reason": "No extra client scope/generation inside stored observation",
+      "input": {
+        "version": "server-session-ledger-context-v1",
+        "status": "unknown",
+        "mode": null,
+        "reason": "vendor-authority-unresolved",
+        "contextEpoch": "1"
+      },
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L17",
+      "operation": "ledgerContext",
+      "reason": "NULL envelope",
+      "input": null,
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "L18",
+      "operation": "ledgerContext",
+      "reason": "Array envelope",
+      "input": [],
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U01",
+      "operation": "selectionId",
+      "reason": "Canonical lowercase UUIDv4 with RFC4122 variant retained",
+      "input": "12345678-1234-4234-8234-123456789abc",
+      "expected": {
+        "accepted": true,
+        "value": "12345678-1234-4234-8234-123456789abc"
+      }
+    },
+    {
+      "id": "U02",
+      "operation": "selectionId",
+      "reason": "Canonical lowercase UUIDv4 with RFC4122 variant retained",
+      "input": "12345678-1234-4234-9234-123456789abc",
+      "expected": {
+        "accepted": true,
+        "value": "12345678-1234-4234-9234-123456789abc"
+      }
+    },
+    {
+      "id": "U03",
+      "operation": "selectionId",
+      "reason": "Canonical lowercase UUIDv4 with RFC4122 variant retained",
+      "input": "12345678-1234-4234-a234-123456789abc",
+      "expected": {
+        "accepted": true,
+        "value": "12345678-1234-4234-a234-123456789abc"
+      }
+    },
+    {
+      "id": "U04",
+      "operation": "selectionId",
+      "reason": "Canonical lowercase UUIDv4 with RFC4122 variant retained",
+      "input": "12345678-1234-4234-b234-123456789abc",
+      "expected": {
+        "accepted": true,
+        "value": "12345678-1234-4234-b234-123456789abc"
+      }
+    },
+    {
+      "id": "U05",
+      "operation": "selectionId",
+      "reason": "Uppercase hex refused rather than normalized",
+      "input": "12345678-1234-4234-8234-123456789ABC",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U06",
+      "operation": "selectionId",
+      "reason": "UUIDv1 outside selected initial transport profile",
+      "input": "12345678-1234-1234-8234-123456789abc",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U07",
+      "operation": "selectionId",
+      "reason": "UUIDv5 outside selected initial transport profile",
+      "input": "12345678-1234-5234-8234-123456789abc",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U08",
+      "operation": "selectionId",
+      "reason": "UUIDv8 outside selected initial transport profile",
+      "input": "12345678-1234-8234-8234-123456789abc",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U09",
+      "operation": "selectionId",
+      "reason": "Nil UUID lacks required version/variant",
+      "input": "00000000-0000-0000-0000-000000000000",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U10",
+      "operation": "selectionId",
+      "reason": "Variant below8 refused",
+      "input": "12345678-1234-4234-7234-123456789abc",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U11",
+      "operation": "selectionId",
+      "reason": "Variant aboveb refused",
+      "input": "12345678-1234-4234-c234-123456789abc",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U12",
+      "operation": "selectionId",
+      "reason": "No omitted hyphen normalization",
+      "input": "12345678123442348234123456789abc",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U13",
+      "operation": "selectionId",
+      "reason": "No brace stripping",
+      "input": "{12345678-1234-4234-8234-123456789abc}",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U14",
+      "operation": "selectionId",
+      "reason": "No leading trim",
+      "input": " 12345678-1234-4234-8234-123456789abc",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U15",
+      "operation": "selectionId",
+      "reason": "Terminal newline refused",
+      "input": "12345678-1234-4234-8234-123456789abc\n",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U16",
+      "operation": "selectionId",
+      "reason": "NULL not generated automatically",
+      "input": null,
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "id": "U17",
+      "operation": "selectionId",
+      "reason": "Number not operation identity",
+      "input": 123,
+      "expected": {
+        "accepted": false
+      }
+    }
+  ],
+  "requiredEnvelopeChecksNotRepresentableInJson": [
+    "Own property getters must not be invoked.",
+    "Inherited/custom-prototype fields, symbol keys, nonenumerable extra keys and cycles refuse without throwing or coercing.",
+    "Accepted ledger output should be detached/frozen; caller object must remain unmutated and unfrozen.",
+    "Missing/undefined input is refusal, never generation1 or default unknown mode."
+  ],
+  "scopeLimits": [
+    "Pure parsing and immutable observations only.",
+    "No schema/JWT/session/permission/ledger mode authority or closing integration is implemented by these cases.",
+    "No UUID version broadening or silent ID generation in a parser.",
+    "No Number conversions for epoch comparison or successor arithmetic."
+  ]
+}

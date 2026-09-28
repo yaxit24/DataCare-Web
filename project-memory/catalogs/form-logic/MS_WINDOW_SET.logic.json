@@ -1,0 +1,30 @@
+{
+ "form": "MS_WINDOW_SET",
+ "tables": [
+  "CO_SET_NEW",
+  "MENU_DATA",
+  "TILE_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [
+   "CO_SET_NEW",
+   "TILE_DATA"
+  ],
+  "DELETE": []
+ },
+ "selectTables": [
+  "CO_SET_NEW",
+  "MENU_DATA",
+  "TILE_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 5,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 1301
+}

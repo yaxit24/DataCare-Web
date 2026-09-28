@@ -1,0 +1,248 @@
+{
+ "form": "RP_DAY_WORK",
+ "controlCount": 22,
+ "byKind": {
+  "masked": 2,
+  "textbox": 3,
+  "button": 7,
+  "combo": 1,
+  "panel": 1,
+  "label": 5,
+  "other": 1,
+  "grid": 2
+ },
+ "grids": [
+  "DGV_DETL",
+  "DGV"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "btnExel"
+  ],
+  "this": [
+   "DGV",
+   "tBookCode",
+   "Label5",
+   "cboUser",
+   "Label3",
+   "Label1",
+   "mFromDt",
+   "BtnList",
+   "Label2",
+   "Cr",
+   "tAcCode",
+   "tAcName",
+   "lblBook",
+   "PnlBotam",
+   "DGV_DETL",
+   "mToDt"
+  ]
+ },
+ "controls": [
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "60,45",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "144,45",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "tBookCode",
+   "type": "TextBox",
+   "location": "288,47",
+   "size": "60,23",
+   "tabIndex": "2",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "tAcCode",
+   "type": "TextBox",
+   "location": "430,47",
+   "size": "66,22",
+   "tabIndex": "3",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnList",
+   "type": "QButton",
+   "location": "751,41",
+   "size": "70,33",
+   "tabIndex": "4",
+   "text": "Ok",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "cboUser",
+   "type": "ComboBox",
+   "location": "1037,45",
+   "size": "135,22",
+   "tabIndex": "5",
+   "text": "",
+   "kind": "combo"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Day Work Report",
+   "kind": "label"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "btnExel",
+   "type": "SimpleButton",
+   "location": "730,3",
+   "size": "91,37",
+   "tabIndex": "8",
+   "text": "&Excel",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "tAcName",
+   "type": "TextBox",
+   "location": "502,47",
+   "size": "198,23",
+   "tabIndex": "1129",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label2",
+   "type": "Label",
+   "location": "359,49",
+   "size": "64,20",
+   "tabIndex": "1132",
+   "text": "Ac Code",
+   "kind": "label"
+  },
+  {
+   "name": "DGV_DETL",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,82",
+   "size": "1159,473",
+   "tabIndex": "1133",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "10,44",
+   "size": "44,20",
+   "tabIndex": "1167",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "Label3",
+   "type": "Label",
+   "location": "980,44",
+   "size": "51,20",
+   "tabIndex": "1169",
+   "text": "User",
+   "kind": "label"
+  },
+  {
+   "name": "Label5",
+   "type": "Label",
+   "location": "234,48",
+   "size": "47,20",
+   "tabIndex": "1171",
+   "text": "Book",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "13,83",
+   "size": "1160,471",
+   "tabIndex": "1172",
+   "text": "",
+   "kind": "grid"
+  }
+ ]
+}

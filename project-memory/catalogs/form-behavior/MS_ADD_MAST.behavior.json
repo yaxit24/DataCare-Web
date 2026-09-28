@@ -1,0 +1,83 @@
+{
+ "form": "MS_ADD_MAST",
+ "loc": 4668,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM ADD_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY AC_CODE",
+  "SELECT AC_CODE As CoCode From ADD_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 5 ORDER BY AC_CODE DESC",
+  "SELECT AC_CODE As CoCode From ADD_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 6 ORDER BY AC_CODE DESC",
+  "SELECT * from ADD_MAST where CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR AS GroupL,AC_ADD1 As AddressL,AC_PHONE As PhoneL,AC_MOBILE As MobileL FROM ADD_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT * FROM ADD_MAST WHERE CO_CODE = ' ? ' AND AC_MOBILE = ' ? '",
+  "SELECT AC_GR FROM ADD_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_GR ORDER BY AC_GR",
+  "SELECT AC_COUNTRY FROM ADD_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_COUNTRY ORDER BY AC_COUNTRY",
+  "SELECT AC_STATE FROM ADD_MAST WHERE CO_CODE = ' ? ' AND AC_STATE <> '' GROUP BY AC_STATE UNION ALL SELECT STATE_NAME as AC_STATE FROM STATE_MAST GROUP BY STATE_NAME ORDER BY AC_STATE",
+  "SELECT AC_DISTRICT FROM ADD_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_DISTRICT ORDER BY AC_DISTRICT",
+  "SELECT AC_CITY FROM ADD_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_CITY ORDER BY AC_CITY",
+  "SELECT AC_AREA FROM ADD_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_AREA ORDER BY AC_AREA",
+  "Select * From ADD_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT TOP 99 AC_CODE,AC_NAME FROM ADD_MAST WHERE CO_CODE = ' ? ' AND AC_NAME LIKE ' ? %'",
+  "Please Select Customer name and try....",
+  "DELETE FROM ADD_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT * FROM ADD_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "Please Select AcCode For Delete.",
+  "DELETE FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? '",
+  "SELECT * FROM [{RuntimeHelpers.GetObjectValue(objectValue)}]",
+  "INSERT INTO ADD_MAST(CO_CODE,AC_CODE,LC_CODE,AC_NAME,AC_MOBILE,AC_GR) VALUES (' ? ',' ? ',' ? ',' ? ',' ? ','ALL')"
+ ],
+ "keyboard": {
+  "F1": 2,
+  "Enter": 32,
+  "Backspace": 1,
+  "Ctrl+E": 1,
+  "Esc": 1
+ },
+ "calc": [
+  "tAcCode.Text = Strings.Mid(DC_Main.MLc_code, 2, 1) + Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"0000\");",
+  "tAcCode.Text = DC_Main.MLc_code + Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00000\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Please Insert Party Name ...",
+   "when": "Operators.CompareString(tAcName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Please Select Customer name and try....",
+   "when": "(Operators.CompareString(tAcCode.Text, \"\", false) == 0) | (Operators.CompareString(tAcName.Text, \"\", false) == 0)"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select AcCode For Delete.",
+   "when": "Operators.CompareString(tAcCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Account now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Account now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Import Old Software Data In Next Software ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Old Software Data In Next Software ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Data is Import Ok....",
+   "when": ""
+  }
+ ]
+}

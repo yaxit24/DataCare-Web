@@ -1,0 +1,163 @@
+{
+ "form": "TR_AC_OPBL",
+ "loc": 3419,
+ "gridColumns": {
+  "cSr": 0,
+  "cVchNo": 1,
+  "cVchDate": 2,
+  "cBillNo": 3,
+  "cDays": 4,
+  "cItName": 5,
+  "cItType": 6,
+  "cGrWt": 7,
+  "cNetWt": 8,
+  "cGhatWt": 9,
+  "cTouch": 10,
+  "cWestPrc": 11,
+  "cFineGl": 12,
+  "cFineSl": 13,
+  "cDmPcs": 14,
+  "cDmWt": 15,
+  "cDmAmt": 16,
+  "cNetAmt": 17,
+  "cCrDr": 18
+ },
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT A.AC_CODE,CASE WHEN OP_SIGN = 'C' THEN OP_AMT ELSE 0 END AS CrAmt,CASE WHEN OP_SIGN = 'D' THEN OP_AMT ELSE 0 END AS DrAmt, B.AC_GR,B.AC_NAME FROM OP_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE And A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_BOOK = '000' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.OP_AMT <> 0 ORDER BY B.AC_GR,B.AC_NAME",
+  "SELECT A.AC_CODE,CASE WHEN FINE_SIGN = 'C' THEN FINE_BAL ELSE 0 END AS CrAmt,CASE WHEN FINE_SIGN = 'D' THEN FINE_BAL ELSE 0 END AS DrAmt, B.AC_GR,B.AC_NAME FROM OP_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE And A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_BOOK = '000' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.FINE_BAL <> 0 ORDER BY B.AC_GR,B.AC_NAME",
+  "SELECT A.AC_CODE,CASE WHEN SL_FINE_SIGN = 'C' THEN SL_FINE_BAL ELSE 0 END AS CrAmt,CASE WHEN SL_FINE_SIGN = 'D' THEN SL_FINE_BAL ELSE 0 END AS DrAmt, B.AC_GR,B.AC_NAME FROM OP_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE And A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_BOOK = '000' ? C ? AND A.DATA_TYPE = ' ? ' ? AND A.DATA_TYPE = ' ? ' AND A.SL_FINE_BAL <> 0 ORDER BY B.AC_GR,B.AC_NAME",
+  "Plese Select Data Type A or B then Try...",
+  "SELECT * FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? ' AND DATA_TYPE = ' ? '",
+  "SELECT * FROM OP_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? '",
+  "Please Select Data Type = A or Data Type = B and try You Cant Change in Data Type = C ....",
+  "DELETE FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? ' AND DATA_TYPE = ' ? '",
+  "DELETE FROM OP_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? '",
+  "SELECT * FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? ' AND DATA_TYPE = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? ' AND DATA_TYPE = ' ? '",
+  "INSERT INTO USER_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,AC_CODE,VCH_DATE,EDIT_DATE,ENTRY_TIME,USER_NAME,NEW_USER,BOOK_NAME,COL_TYPE,OLD_VAL,NEW_VAL,ENTRY_CHECK) VALUES (' ? ',' ? ',' ? ','000','00000',' ? ',' ? MM/dd/yyyy ? ',' ? MM/dd/yyyy ? ',' ? MM/dd/yyyy hh:mm ? ',' ? ',' ? ','OPSTK',' ? ',' ? ',' ? ','N')",
+  "Please Select Account Details.",
+  "INSERT INTO DELETE_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,DELETE_DATE,VCH_TYPE,VCH_TIME,DELETE_TIME, BOOK_NAME,AC_CODE,AC_NAME,VCH_VAL_DR,VCH_VAL_CR,FINE_TYPE,VCH_FINE_DR,VCH_FINE_CR,HD_VCH_NO,MAIN_USER,DELETE_USER,VCH_DESC) SELECT A.CO_CODE,A.LC_CODE,A.CO_YEAR,A.CO_BOOK,VCH_NO,0,' ? MM/dd/yyyy ? ',' ? MM/dd/yyyy ? ','OPBAL',' ? MM/dd/yyyy ? ',' ? MM/dd/yyyy HH:mm:ss ? ', 'Ac OpBal',A.AC_CODE,C.AC_NAME,CASE WHEN OP_SIGN = 'D' THEN OP_AMT ELSE 0 END,CASE WHEN OP_SIGN = 'C' THEN OP_AMT ELSE 0 END,CASE WHEN FINE_BAL <> 0 THEN 'G' ELSE 'A' END,CASE WHEN FINE_SIGN = 'D' THEN FINE_BAL ELSE 0 END,CASE WHEN FINE_SIGN = 'C' THEN FINE_BAL ELSE 0 END,VCH_NO,A.MAIN_USER,' ? ','' FROM OP_DATA AS A LEFT JOIN AC_MAST AS C ON A.CO_CODE = C.CO_CODE And A.AC_CODE = C.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.CO_YEAR = ' ? ' AND A.CO_BOOK = '000' AND A.AC_CODE = ' ? ' AND OP_AMT + FINE_BAL <> 0",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE As AcCodeL,B.AC_GR_NAME AS GroupL,A.AC_AREA As AreaL,A.AC_ADD1 As AddressL,A.AC_CITY As CityL,A.AC_MOBILE As MobileL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' ORDER BY A.LC_CODE,A.AC_NAME",
+  "SELECT C.AC_NAME As AcNameL,C.AC_CODE As AcCodeL,D.AC_GR_NAME AS GroupL,C.AC_AREA As AreaL,C.AC_ADD1 As AddressL,C.AC_CITY As CityL,C.AC_MOBILE As MobileL FROM AC_MAST AS C LEFT JOIN AC_GROUP AS D ON C.CO_CODE = D.CO_CODE AND C.AC_GR = D.AC_GR WHERE C.CO_CODE = ' ? ' AND CAST(C.AC_CODE AS INT) < 100 UNION ALL SELECT A.AC_NAME,A.AC_CODE,B.AC_GR_NAME,A.AC_AREA,A.AC_ADD1,A.AC_CITY,A.AC_MOBILE FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CAST(A.AC_CODE AS INT) >=200 ORDER BY C.AC_NAME",
+  "SELECT LC_CODE FROM LOCT_MAST WHERE CO_CODE = ' ? '",
+  "SELECT MAX((VCH_NO)) AS CoCode From CONTRA_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' and CO_BOOK = '017' HAVING MAX((VCH_NO)) > 0",
+  "SELECT * FROM BAL_GR WHERE CO_CODE = ' ? ' ORDER BY CLG_AC",
+  "SELECT * FROM OP_DATA WHERE CO_CODE = ' ? ' AND DATA_TYPE = 'A' AND AC_CODE = ' ? CLG_AC ? '",
+  "SELECT * FROM CONTRA_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '017' AND AC_CODE = ' ? CLG_AC ? ' AND CRDR_TYPE = 'Cr' AND VCH_DATE = ' ? MM/dd/yyyy ? '",
+  "UPDATE CONTRA_DATA SET CR_AMT = ? OP_AMT ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' And CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' AND AC_CODE = ' ? CLG_AC ? ' AND CRDR_TYPE = 'Cr'",
+  "UPDATE CONTRA_DATA SET DR_AMT = ? OP_AMT ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? ' AND AC_CODE = ' ? OP_AC ? ' AND CRDR_TYPE = 'Dr'",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = ' ? CO_BOOK ? ' AND VCH_NO = ' ? VCH_NO ? '",
+  "INSERT INTO CONTRA_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,VCH_DATE,VCH_TYPE,INOUT_TYPE,ENTRY_TYPE,VCH_TIME,BOOK_NAME, AC_CODE,AC_NAME,LD_CODE,DR_AMT,CR_AMT,CRDR_TYPE,IT_DESC,LDR_TYPE,EMP_CODE,DATA_TRFR,HD_VCH_NO,CR_FINE,DR_FINE,IT_TYPE) VALUES(' ? ',' ? ',' ? ','017',' ? ',1,' ? MM/dd/yyyy ? ','JV','O','J',' ? MM/dd/yyyy ? ','CONTRA', ' ? CLG_AC ? ','',' ? OP_AC ? ',0, ? OP_AMT ? ,'Cr','',0,'001','N',' ? ',0,0,'A')",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '017' AND VCH_NO = ' ? '",
+  "Select A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE,'A' As DataType,format(Sum(A.CR_AMT-A.DR_AMT),'0.00') as Amount,format(SUM(iif(A.IT_TYPE = 'G',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0)),'0.000') as GoldWt,format(sum(iif(A.IT_TYPE = 'S',iif(A.SIGN = '+',A.FINE_WT,-A.FINE_WT),0)),'0.000') as SilverWt FROM AC_DATA AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.AC_CODE = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CO_BOOK = '000' GROUP BY A.AC_CODE,B.AC_NAME,B.AC_ADD1,B.AC_MOBILE ORDER BY A.AC_CODE",
+  "DELETE FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "INSERT INTO OP_DATA(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,AC_CODE, OP_AMT,OP_SIGN,FINE_BAL,FINE_SIGN,SL_FINE_BAL,SL_FINE_SIGN, DATA_TYPE,MAIN_USER,ADD_USER,ADD_DATE,DATA_TRFR) VALUES (' ? ',' ? ',' ? ','000','00000',' ? AC_CODE ? ', ? Amount ? , ? Amount ? 'C' ? 'D' ? , ? GoldWt ? , ? GoldWt ? 'C' ? 'D' ? , ? SilverWt ? , ? SilverWt ? 'C' ? 'D' ? , ? ' ? DataType ? ',' ? ','',NULL,'Y')"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 9,
+  "Right": 1,
+  "Left": 1,
+  "Up": 1,
+  "Down": 1
+ },
+ "calc": [
+  "mSG[mSG.Row, 12] = Strings.Format((object)(Conversion.Val(mSG[mSG.Row, 8]) * (Conversion.Val(mSG[mSG.Row, 10]) + Conversion.Val(mSG[mSG.Row, 11])) / 100.0), \"0.000\");",
+  "mSG[mSG.Row, 13] = Strings.Format((object)(Conversion.Val(mSG[mSG.Row, 8]) * (Conversion.Val(mSG[mSG.Row, 10]) + Conversion.Val(mSG[mSG.Row, 11])) / 100.0), \"0.000\");",
+  "mSG_TOT[0, 7] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 7]) - Conversion.Val(MSG[DC_Main.M, 7]))), \"0.000\");",
+  "mSG_TOT[0, 8] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 8]) - Conversion.Val(MSG[DC_Main.M, 8]))), \"0.000\");",
+  "mSG_TOT[0, 9] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 9]) - Conversion.Val(MSG[DC_Main.M, 9]))), \"0.000\");",
+  "mSG_TOT[0, 12] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 12]) - Conversion.Val(MSG[DC_Main.M, 12]))), \"0.000\");",
+  "mSG_TOT[0, 13] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 13]) - Conversion.Val(MSG[DC_Main.M, 13]))), \"0.000\");",
+  "mSG_TOT[0, 10] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 10]) - Conversion.Val(MSG[DC_Main.M, 10]))), \"0.00\");",
+  "mSG_TOT[0, 11] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 11]) - Conversion.Val(MSG[DC_Main.M, 11]))), \"0.00\");",
+  "mSG_TOT[0, 15] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 15]) - Conversion.Val(MSG[DC_Main.M, 15]))), \"0.00\");",
+  "mSG_TOT[0, 16] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 16]) - Conversion.Val(MSG[DC_Main.M, 16]))), \"0.00\");",
+  "mSG_TOT[0, 14] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 14]) - Conversion.Val(MSG[DC_Main.M, 14]))), \"0\");",
+  "mSG_TOT[0, 17] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 17]) - Conversion.Val(MSG[DC_Main.M, 17]))), \"0.00\");",
+  "mSG_TOT[0, 7] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 7]) + Conversion.Val(MSG[DC_Main.M, 7]))), \"0.000\");",
+  "mSG_TOT[0, 8] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 8]) + Conversion.Val(MSG[DC_Main.M, 8]))), \"0.000\");",
+  "mSG_TOT[0, 9] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 9]) + Conversion.Val(MSG[DC_Main.M, 9]))), \"0.000\");",
+  "mSG_TOT[0, 12] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 12]) + Conversion.Val(MSG[DC_Main.M, 12]))), \"0.000\");",
+  "mSG_TOT[0, 13] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 13]) + Conversion.Val(MSG[DC_Main.M, 13]))), \"0.000\");",
+  "mSG_TOT[0, 10] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 10]) + Conversion.Val(MSG[DC_Main.M, 10]))), \"0.00\");",
+  "mSG_TOT[0, 11] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 11]) + Conversion.Val(MSG[DC_Main.M, 11]))), \"0.00\");",
+  "mSG_TOT[0, 15] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 15]) + Conversion.Val(MSG[DC_Main.M, 15]))), \"0.00\");",
+  "mSG_TOT[0, 16] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 16]) + Conversion.Val(MSG[DC_Main.M, 16]))), \"0.00\");",
+  "mSG_TOT[0, 14] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 14]) + Conversion.Val(MSG[DC_Main.M, 14]))), \"0\");",
+  "mSG_TOT[0, 17] = Strings.Format((object)Conversion.Val((object)(Conversion.Val(mSG_TOT[0, 17]) + Conversion.Val(MSG[DC_Main.M, 17]))), \"0.00\");",
+  "NewValTot = Conversion.Val(nOpAmt.Text) + Conversion.Val(nOpGoldFine.Text) + Conversion.Val(nOpSilverFine.Text);",
+  "OldValTot = Conversion.Val(nOpAmt.Text) + Conversion.Val(nOpGoldFine.Text) + Conversion.Val(nOpSilverFine.Text);",
+  "if ((Operators.CompareString(MSG[DC_Main.i, 1], \"\", false) != 0) & (Conversion.Val(MSG[DC_Main.i, 7]) + Conversion.Val(MSG[DC_Main.i, 12]) + Conversion.Val(MSG[DC_Main.i, 13]) + Conversion.Val(MSG[DC_Main.i, 17]) + Conversion.Val(MSG[DC_Main.i, 15]) != 0.0))",
+  "string text = ((DC_Main.Rshlp.Rows.Count != 0) ? Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00000\") : \"00001\");",
+  "text = Strings.Format((object)(Conversion.Val(text) + 1.0), \"00000\");"
+ ],
+ "validations": [
+  {
+   "message": "Plese Select Data Type A or B then Try...",
+   "when": "Operators.CompareString(DC_Main.MsDataType, \"\", false) == 0"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Please Select Data Type = A or Data Type = B and try You Cant Change in Data Type = C ....",
+   "when": "Operators.CompareString(tDataType.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Vch No and Try...",
+   "when": "Operators.CompareString(MSG[DC_Main.M, 1], \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Gold fine or Silver fine or Net Amount and try...",
+   "when": "Conversion.Val(MSG[DC_Main.M, 12]) + Conversion.Val(MSG[DC_Main.M, 13]) + Conversion.Val(MSG[DC_Main.M, 17]) == 0.0"
+  },
+  {
+   "message": "Please Enter Party First...",
+   "when": "Operators.CompareString(tAcCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Account Details.",
+   "when": "Operators.CompareString(tAcCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Record now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "Please insert ItmType  G = Gold S = Silver Or A = Amount and try",
+   "when": "Operators.CompareString(TEXT_ENTRY.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Enter C or D and Try Again...",
+   "when": "(Operators.CompareString(TEXT_ENTRY.Text, \"C\", false) != 0) & (Operators.CompareString(TEXT_ENTRY.Text, \"D\", false) != 0)"
+  },
+  {
+   "message": "Are You Sure To insert Opning blance Entry In Contra Data  Location Wise...?",
+   "when": "DC_Main.Rshlp.Rows.Count > 1 && (int)Interaction.MsgBox((object)\"Are You Sure To insert Opning blance Entry In Contra Data  Location Wise...?\", (MsgBoxStyle)4, "
+  },
+  {
+   "message": "A And B Data Merge Transfer...",
+   "when": "(int)Interaction.MsgBox((object)\"A And B Data Merge Transfer...\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Data is Merge Pleas Refresh Data and Check....",
+   "when": ""
+  }
+ ]
+}

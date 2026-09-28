@@ -13,9 +13,9 @@ const d = RUN ? describe : describe.skip;
 /**
  * Report filters applied against real rows.
  *
- * The unit tests pin the SQL the matrix generates; these pin that the generated SQL actually narrows the
- * result, which is the part a wrong alias would break silently. Every bound report is exercised, so a binding
- * cannot be registered without being proven to work.
+ * The unit tests pin the SQL the matrix generates; these checks pin the registry and exercise representative
+ * builders where alias mistakes would silently bypass a filter. Report-family bindings are covered by
+ * reportFamilyReports.db.test.ts because their data lives in RP_ALL-specific source tables.
  */
 d('report filters end to end', () => {
   const prisma = new PrismaClient();
@@ -143,15 +143,32 @@ d('report filters end to end', () => {
       }
     });
 
-  it('every registered binding is exercised by this file', () => {
-    // Guards against registering a binding without proving it works, which would let the capability endpoint
-    // advertise a dimension the builder ignores.
+  it('pins the registered report filter binding list', () => {
+    // Guards the exact capability surface; data-level assertions for newer RP_ALL-family bindings live in
+    // reportFamilyReports.db.test.ts.
     expect(Object.keys(REPORT_FILTER_BINDINGS).sort()).toEqual([
+      'address-print',
+      'approval-report',
+      'branch-inout',
+      'bullion-report',
+      'design-move',
+      'dhiran-report',
+      'entry-check',
       'item-group-stock',
+      'karigar-report',
+      'last-visit',
+      'loan-report',
+      'old-stock',
+      'other-item-report',
       'purchase-by-party',
+      'repair-report',
       'sales-return-register',
       'stock-valuation',
       'tag-estimate',
+      'tour-report',
+      'tour-tag',
+      'user-report',
+      'vp-report',
     ]);
   });
 
@@ -220,5 +237,10 @@ d('report filters end to end', () => {
       ['acCode', 'bookCode', 'empCode', 'lcCode'].sort(),
     );
     expect(supportedFilters(REPORT_FILTER_BINDINGS['sales-return-register']!)).toContain('state');
+    expect(supportedFilters(REPORT_FILTER_BINDINGS['other-item-report']!)).toContain('city');
+    expect(supportedFilters(REPORT_FILTER_BINDINGS['other-item-report']!)).not.toContain('state');
+    expect(supportedFilters(REPORT_FILTER_BINDINGS['old-stock']!).sort()).toEqual(
+      ['itType', 'lcCode'].sort(),
+    );
   });
 });

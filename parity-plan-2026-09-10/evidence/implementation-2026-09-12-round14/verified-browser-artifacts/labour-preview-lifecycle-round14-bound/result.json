@@ -1,0 +1,101 @@
+{
+  "status": "passed",
+  "startedAt": "2026-09-12T01:56:15.732Z",
+  "requiredChecks": [
+    "pending BB lookup cannot replace edited AA draft or its newer checked candidate",
+    "close and reopen with a new accepted prefix rejects the prior lookup and preserves current focus",
+    "late lookup after actual client route departure cannot replace destination draft, focus or navigation",
+    "lost successful append response retains the old prefix and exact retry appends once locally",
+    "same-session scope ABA is detected by a later real request without replacing accepted preview or draft"
+  ],
+  "provenance": "Real Chromium -> production Next4411 -> Fastify4410 -> disposable PostgreSQL55433 app_user/RLS. Four explicit actual-response transport faults; no synthetic business response.",
+  "fixtureSha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+  "tenantId": "browser-labour-faults",
+  "releaseSha": null,
+  "cleanupErrors": [],
+  "labourPreviewLifecycle": {
+    "status": "passed",
+    "checks": [
+      "pending BB lookup cannot replace edited AA draft or its newer checked candidate",
+      "close and reopen with a new accepted prefix rejects the prior lookup and preserves current focus",
+      "late lookup after actual client route departure cannot replace destination draft, focus or navigation",
+      "lost successful append response retains the old prefix and exact retry appends once locally",
+      "same-session scope ABA is detected by a later real request without replacing accepted preview or draft"
+    ],
+    "transportFaultInjections": [
+      {
+        "name": "U04-lookup-draft-replaced",
+        "kind": "actual-upstream-response-hold",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "ee085eb3e5b59f7dac17bf2d56a0f0d6e77b1ae57569c8ef6d78c360bf946b16",
+        "requestBodySha256": "8b34da583688b09564fa2621c19cd2c007ac99a4340d02efdd4d5517bc30402e",
+        "resolution": "deliver-unchanged"
+      },
+      {
+        "name": "U05-lookup-close-reopen",
+        "kind": "actual-upstream-response-hold",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "ee085eb3e5b59f7dac17bf2d56a0f0d6e77b1ae57569c8ef6d78c360bf946b16",
+        "requestBodySha256": "8b34da583688b09564fa2621c19cd2c007ac99a4340d02efdd4d5517bc30402e",
+        "resolution": "deliver-unchanged"
+      },
+      {
+        "name": "U06-lookup-route-departure",
+        "kind": "actual-upstream-response-hold",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "ee085eb3e5b59f7dac17bf2d56a0f0d6e77b1ae57569c8ef6d78c360bf946b16",
+        "requestBodySha256": "8b34da583688b09564fa2621c19cd2c007ac99a4340d02efdd4d5517bc30402e",
+        "resolution": "deliver-unchanged"
+      },
+      {
+        "name": "U12-append-reply-lost",
+        "kind": "actual-upstream-response-hold",
+        "upstreamStatus": 200,
+        "upstreamBodySha256": "8349e5478cf31a97639a6c5378adbfe3cbbedcc2754cd250bfe7cb844936c6ff",
+        "requestBodySha256": "70237abd048a2d330094e8b4f70bee1f36430667b14fe69e25465eeb7bb08547",
+        "resolution": "abort-after-successful-upstream-read"
+      }
+    ],
+    "syntheticBusinessResponses": 0,
+    "observations": [
+      {
+        "case": "U12",
+        "originalRequestSha256": "70237abd048a2d330094e8b4f70bee1f36430667b14fe69e25465eeb7bb08547",
+        "retriedRequestSha256": "70237abd048a2d330094e8b4f70bee1f36430667b14fe69e25465eeb7bb08547",
+        "prefixSha256": "7f12dce95320376c154e4aec478b56cbb945d8406e3bdc92804d955e9edea8c1",
+        "automaticRetries": 0
+      },
+      {
+        "case": "U_CONTEXT",
+        "oldContext": {
+          "sessionId": "92f6dd2a-74ba-437c-81f1-b0cce2760c7d",
+          "contextEpoch": "2",
+          "coCode": "01",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        },
+        "finalContext": {
+          "sessionId": "92f6dd2a-74ba-437c-81f1-b0cce2760c7d",
+          "contextEpoch": "5",
+          "coCode": "01"
+        },
+        "automaticRetries": 0,
+        "detection": "subsequent actual request with retained headers"
+      }
+    ],
+    "cleanupErrors": [],
+    "previewPosts": 11,
+    "previewAuditRows": 10,
+    "observedPreSessionContextRefusals": 1,
+    "businessSnapshotTables": 35,
+    "limitations": [
+      "Existing16 plus basic17th harness untouched. This is a separate optional runner and mandatory five-case suite when invoked.",
+      "Callback final-state snapshots compare all seeded business/config/master data; auth_session compared before context-selection actors then their changes asserted separately. Intentional POST audit is separately counted.",
+      "UI/editor modifications use normal locator fill/select/click/keyboard only; no forced DOM values or local arithmetic.",
+      "Actual client-side departure covers unmount in retained document, not an unexecuted cross-process full-navigation branch.",
+      "Fixtures and every case are required; missing owner/config/controls fail rather than skip."
+    ]
+  },
+  "actualInterceptionRegistrations": 4,
+  "finishedAt": "2026-09-12T01:56:19.351Z"
+}

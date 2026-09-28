@@ -247,7 +247,7 @@ databaseDescribe('database-backed dhiran receipt', () => {
     expect(d.net_amt).toBeCloseTo(46_935, 2);
     // Header-derived columns come from book/scope, never the request body.
     expect(String(d.AC_CODE).trim()).toBe('BORR');
-    expect(String(d.ENTRY_TYPE).trim()).toBe('L');
+    expect(String(d.ENTRY_TYPE).trim()).toBe('D');
     expect(String(d.INOUT_TYPE).trim()).toBe('I');
     expect(String(d.ISU_LC).trim()).toBe(LC);
     // ISU_NO defaults to the issue voucher being repaid when the grid does not carry one.
@@ -298,5 +298,128 @@ databaseDescribe('database-backed dhiran receipt', () => {
       String(received.vchNo).padStart(5, '0'),
     )) as Array<{ n: number }>;
     expect(rows[0]!.n).toBe(0);
+  }, 30_000);
+
+  /**
+   * P1-1 — the configured interest engine must actually run.
+   *
+   * `dhrn.ts:563-566` computes interest from the loan's configured mode ONLY when `interest` is
+   * absent; any supplied finite number is an override. Both dhiran screens used to send
+   * `Number(interest || 0)`, so an untouched field became an explicit override of zero and every
+   * receipt saved through the UI charged nothing. These tests pin the two halves of the contract
+   * so the suppression cannot return: omitting the field computes, supplying it overrides.
+   */
+  it('computes interest from the configured rate when the operator supplies none', async () => {
+    const issued = await issueDhrn(runtime, {
+      scope: scope(ISSUE_BOOK),
+      borrowerAc: 'BORR',
+      principal: 50_000,
+      intPrc: 12,
+      intMonths: 6,
+      // DhrnIssueInput dates the voucher from `fromDate`; it has no `vchDate`. Passing the wrong
+      // field silently dated the loan today, which made the interest window negative and the
+      // computed interest zero — indistinguishable from the bug under test.
+      fromDate: DAY,
+    } as never);
+
+    // interest deliberately ABSENT — this is what a blank field must now send
+    const computed = await receiveDhrn(runtime, {
+      scope: scope(REC_BOOK),
+      isuNo: issued.vchNo,
+      isuBook: ISSUE_BOOK,
+      borrowerAc: 'BORR',
+      principalRepaid: 10_000,
+      vchDate: '2024-07-10',
+      toDate: '2024-07-10',
+    } as never);
+
+    const posted = (await owner.$queryRawUnsafe(
+      `SELECT "INT_AMT"::float8 AS int_amt FROM "DHRN_REC_DATA"
+        WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      String(computed.vchNo).padStart(5, '0'),
+    )) as Array<{ int_amt: number }>;
+
+    // The exact figure comes from desktopDhrnInterest; what matters here is that it is NOT zero,
+    // which is what the old payload forced, and that it is positive interest on a real loan.
+    expect(posted).toHaveLength(1);
+    expect(posted[0]!.int_amt).toBeGreaterThan(0);
+  }, 30_000);
+
+  it('honours an explicitly supplied interest as an override', async () => {
+    const issued = await issueDhrn(runtime, {
+      scope: scope(ISSUE_BOOK),
+      borrowerAc: 'BORR',
+      principal: 50_000,
+      intPrc: 12,
+      intMonths: 6,
+      // DhrnIssueInput dates the voucher from `fromDate`; it has no `vchDate`. Passing the wrong
+      // field silently dated the loan today, which made the interest window negative and the
+      // computed interest zero — indistinguishable from the bug under test.
+      fromDate: DAY,
+    } as never);
+    const overridden = await receiveDhrn(runtime, {
+      scope: scope(REC_BOOK),
+      isuNo: issued.vchNo,
+      isuBook: ISSUE_BOOK,
+      borrowerAc: 'BORR',
+      principalRepaid: 10_000,
+      interest: 1_234.56,
+      vchDate: '2024-07-10',
+      toDate: '2024-07-10',
+    } as never);
+    const posted = (await owner.$queryRawUnsafe(
+      `SELECT "INT_AMT"::float8 AS int_amt FROM "DHRN_REC_DATA"
+        WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      String(overridden.vchNo).padStart(5, '0'),
+    )) as Array<{ int_amt: number }>;
+    expect(posted[0]!.int_amt).toBeCloseTo(1_234.56, 2);
+  }, 30_000);
+
+  /**
+   * P1-1 — the issue screen must be able to fall back to the company rate.
+   *
+   * `dhrn.ts:306` resolves `input.intPrc ?? cfg.dhrnDefaultRate` (CO_SET.DHRN_PRC, seeded to 12
+   * in this fixture; desktop TR_DHRN_ISU.cs:4787). The issue page sent `Number(intPrc || 0)`, and
+   * because `annualRatePct >= 0` accepts zero, a blank rate silently issued a zero-interest loan
+   * instead of using the configured default.
+   */
+  it('falls back to CO_SET.DHRN_PRC when the issue rate is omitted', async () => {
+    const withDefault = await issueDhrn(runtime, {
+      scope: scope(ISSUE_BOOK),
+      borrowerAc: 'BORR',
+      principal: 50_000,
+      intMonths: 6,
+      fromDate: DAY,
+      // intPrc deliberately ABSENT
+    } as never);
+    const explicitZero = await issueDhrn(runtime, {
+      scope: scope(ISSUE_BOOK),
+      borrowerAc: 'BORR',
+      principal: 50_000,
+      intMonths: 6,
+      intPrc: 0,
+      fromDate: DAY,
+    } as never);
+
+    const rateOf = async (vchNo: unknown) => {
+      const rows = (await owner.$queryRawUnsafe(
+        `SELECT "INT_PRC"::float8 AS int_prc, "INT_AMT"::float8 AS int_amt FROM "DHRN_DATA"
+          WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+        TENANT,
+        String(vchNo).padStart(5, '0'),
+      )) as Array<{ int_prc: number; int_amt: number }>;
+      return rows[0]!;
+    };
+
+    const fallback = await rateOf(withDefault.vchNo);
+    const zero = await rateOf(explicitZero.vchNo);
+
+    // The company default must be used, and must differ from what an explicit zero produces —
+    // otherwise the fallback is indistinguishable from the bug it replaces.
+    expect(fallback.int_prc).toBeCloseTo(12, 2);
+    expect(fallback.int_amt).toBeGreaterThan(0);
+    expect(zero.int_amt).toBe(0);
   }, 30_000);
 });

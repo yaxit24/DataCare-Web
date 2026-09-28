@@ -1,0 +1,70 @@
+{
+ "form": "MS_TAX",
+ "loc": 2115,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cTaxGroup": 1,
+  "cTaxTypeName": 2,
+  "cTaxAc": 3,
+  "cTaxPrc": 4
+ },
+ "inlineSql": [
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE as AcCodeL, B.AC_GR_NAME AS GrNameL FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE = ' ? ' ORDER BY A.AC_NAME",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "UPDATE AC_MAST SET AC_NAME = 'VAT INPUT A/C' WHERE CO_CODE = ' ? ' AND AC_CODE = '00085'",
+  "UPDATE AC_MAST SET AC_NAME = 'VAT OUTPUT A/C' WHERE CO_CODE = ' ? ' AND AC_CODE = '00014'",
+  "SELECT * FROM TAX_MAST WHERE CO_CODE = ' ? ' AND SR_NO = 0 ORDER BY TAX_CODE",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE =' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.*,B.AC_NAME FROM TAX_MAST AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.TAX_AC = B.AC_CODE WHERE A.CO_CODE = ' ? ' AND A.TAX_CODE = ' ? ' AND A.SR_NO <> 0 ORDER BY A.SR_NO",
+  "DELETE FROM TAX_MAST WHERE CO_CODE = ' ? ' AND TAX_CODE = ' ? '",
+  "SELECT * FROM TAX_MAST WHERE CO_CODE = ' ? ' AND TAX_CODE = ' ? '",
+  "Please Select Tax Code For Delete.",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR AS GroupL FROM AC_MAST WHERE CO_CODE = ' ? ' AND (AC_GR = '12' OR AC_CODE = '00013') ORDER BY AC_NAME"
+ ],
+ "keyboard": {
+  "F1": 2,
+  "Enter": 5,
+  "Esc": 1,
+  "Backspace": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Please Insert Tax Name ...",
+   "when": "Operators.CompareString(tTaxName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Enter Tax Code.",
+   "when": "Operators.CompareString(tTaxCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Enter Tax Name.",
+   "when": "Operators.CompareString(tTaxName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Tax Code For Delete.",
+   "when": "Operators.CompareString(tTaxCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Record now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  }
+ ]
+}

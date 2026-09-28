@@ -1,0 +1,8 @@
+
+> @datacare/api@0.0.0 typecheck /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> tsc -p tsconfig.json --noEmit
+
+src/modules/sales/orderLifecyclePolicy.ts(3,25): error TS2307: Cannot find module 'decimal.js' or its corresponding type declarations.
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/api@0.0.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2

@@ -1,0 +1,29 @@
+{
+ "form": "RP_TOUR_ZOOM",
+ "tables": [
+  "APR_DETL",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": []
+ },
+ "selectTables": [
+  "APR_DETL",
+  "EMP_MAST",
+  "GROUP_MAST",
+  "PRODUCT_MAST",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 3,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 5862
+}

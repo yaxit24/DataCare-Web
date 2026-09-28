@@ -2,6 +2,8 @@ import { type StoneSubDetailInput, stoneSubDetailColumns } from '../shared/stone
 import { withTenant } from '@datacare/db';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/posting.js';
+import { issueTagTx, restoreTagTx, resolveLiveTagIdentityTx } from './stock.js';
+import { fineFor } from '@datacare/core';
 
 /**
  * Phase 4 tag operations — Tag Cancel (TR_TAG_CAN) and Tag Weight Change (TR_TAG_WT_DIFF).
@@ -68,11 +70,62 @@ export interface TagCancelLine {
   transferItCode?: string;
   tagNo: string;
   itCode: string;
+  /**
+   * The live tag INSTANCE to cancel, when a tag number has more than one.
+   *
+   * A tag number is not unique on its own: `BAR_DETL` keys an instance by `TAG_NO + VCH_SRNO`, and the
+   * resolver treats an ambiguous number as an error rather than picking one. Supplying this selects the
+   * intended instance; omitting it is fine when only one is live.
+   */
+  vchSrno?: number;
   pcs?: number;
   netWt?: number;
   grossWt?: number;
+  /** ITM_GHT_WT — part of the fine base under the shared tag policy. */
+  ghtWt?: number;
   touch?: number;
+  /** ITM_WEST_PRC — added to touch in the fine base, as every other voucher family does. */
+  westPct?: number;
   fineWt?: number;
+  /**
+   * P6: the rest of the desktop `TR_TAG_CAN` MSG grid (45 named columns). The writer populated 17 of
+   * `BAR_CAN_DETL`'s 76 columns, so the cancel register recorded far less than the tag it cancels —
+   * the "omits required source and sub-detail lineage" half of the containment rule.
+   *
+   * Every field maps to a real BAR_CAN_DETL column, verified against information_schema.
+   */
+  tagLot?: string; // ITM_LOT      "TagLot"
+  designNo?: string; // DESIGN_NO    "Design"
+  tblCode?: string; // TBL_CODE     "Counter"
+  itmSize?: string; // ITM_SIZE     "Size"
+  itmStyle?: string; // ITM_STYLE
+  itmColor?: string; // ITM_COLOR
+  itmPolish?: string; // ITM_POLISH
+  itDesc?: string; // IT_DESC
+  remark?: string; // ITM_REMARK
+  /** HM_ID — alphanumeric HUID, so a string. Never coerce it to a number. */
+  hallmarkId?: string;
+  lessWt?: number; // ITM_OTH_WT   "LsWt"
+  itemType?: string; // IT_TYPE      "Type"
+  labourPct?: number; // LBR_PRC      "Lbr%"
+  labourType?: string; // LBR_TYPE     "LType"
+  labourRate?: number; // LBR_RATE     "LbrRate"
+  labourAmount?: number; // LBR_AMT      "LbrAmt"
+  otherAmount?: number; // OTH_AMT      "OthAmt"
+  mrp?: number; // ITM_MRP      "Mrp"
+  rate?: number; // ITM_RATE     "ItRate"
+  amount?: number; // ITM_AMT      "ItAmt"
+  tagCost?: number; // TAG_COST     "TagCost"
+  tagNetWt?: number; // TAG_NWT
+  rateType?: string; // RATE_TYPE
+  prCode?: string; // PR_CODE      "PrCost"
+  karigarName?: string; // KR_NAME      "KrCode"
+  karigarNetWt?: number; // KR_NET_WT    "KrNwt"
+  karigarTouch?: number; // KR_TOUCH     "KrTouch"
+  karigarWestPct?: number; // KR_WEST_PRC  "KrWst%"
+  karigarFine?: number; // KR_FINE      "KrFine"
+  designImageId?: string; // DESIGN_IMG_ID "Image"
+  toTblCode?: string; // TO_TBL_CODE
   /**
    * Stone/diamond sub-detail rows for this cancelled tag → BAR_CAN_IDTL
    * (TR_TAG_CAN.cs:5194-5243, `DtIdtl` grid). Empty sub-grid writes no rows.
@@ -120,25 +173,48 @@ export async function tagCancel(
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const fineOf = (l: TagCancelLine): number =>
-    l.fineWt != null ? Number(l.fineWt) : r3((N(l.netWt) * N(l.touch)) / 100);
+    l.fineWt != null
+      ? Number(l.fineWt)
+      : fineFor('tagOpening', {
+          netWt: N(l.netWt),
+          ghtWt: N(l.ghtWt),
+          touch: N(l.touch),
+          westPct: N(l.westPct),
+        });
   return withTenant(prisma, tenantId, async (tx: any) => {
-    // In-stock guard: only an in-stock tag can be cancelled (exists in BAR_DETL AND not already
-    // sold/removed via a MAIN_STOCK '-' out-movement). Prevents cancelling a phantom or sold tag.
+    /**
+     * P6/WP-09 — resolve ONE LIVE SERIAL IDENTITY per line, under the shared resolver.
+     *
+     * What this replaces was the first defect named in the containment rule. It ran two count queries:
+     *   SELECT count(*) FROM BAR_DETL  WHERE CO_CODE=$1 AND TAG_NO=$2
+     *   SELECT count(*) FROM MAIN_STOCK WHERE CO_CODE=$1 AND TAG_NO=$2 AND ITM_SIGN='-'
+     * Both were wrong in ways that matter:
+     *   • no LC_CODE, so a tag belonging to ANOTHER LOCATION satisfied the guard;
+     *   • no VCH_SRNO, so it counted any historical row for that tag number rather than the one live
+     *     instance — "historical availability instead of one live serial identity", verbatim;
+     *   • the sign test asked whether a '-' movement EVER existed, so a tag sold and later returned
+     *     (the return posts '+') could not be cancelled even though it is in stock, while a tag with
+     *     several instances could be cancelled on the strength of a different instance's movement.
+     *
+     * `issueTagTx` is the same path a sale uses. It nets the MAIN_STOCK signs per instance and requires
+     * a positive balance, excludes employee-issued tags, holds an advisory lock on the identity, and
+     * throws TagNotAvailableError / TagIdentityAmbiguousValidationError rather than guessing. Reusing it
+     * means a cancel cannot disagree with a sale about what "in stock" means.
+     */
+    const identities = [] as Array<{ TAG_NO: string; VCH_SRNO: number; IT_CODE: string }>;
     for (const l of input.lines) {
-      const ex: Array<{ n: number }> = await tx.$queryRawUnsafe(
-        `SELECT count(*)::int AS n FROM "BAR_DETL" WHERE "CO_CODE"::text=$1 AND "TAG_NO"::text=$2`,
-        input.scope.coCode,
-        String(l.tagNo),
-      );
-      if (!ex[0] || ex[0].n === 0)
-        throw new TagOpsError(`tagCancel: tag ${l.tagNo} not found in stock (BAR_DETL)`);
-      const gone: Array<{ n: number }> = await tx.$queryRawUnsafe(
-        `SELECT count(*)::int AS n FROM "MAIN_STOCK" WHERE "CO_CODE"::text=$1 AND "TAG_NO"::text=$2 AND "ITM_SIGN"::text='-'`,
-        input.scope.coCode,
-        String(l.tagNo),
-      );
-      if (gone[0] && gone[0].n > 0)
-        throw new TagOpsError(`tagCancel: tag ${l.tagNo} already sold/removed — cannot cancel`);
+      const identity = await issueTagTx(tx, {
+        CO_CODE: input.scope.coCode,
+        LC_CODE: input.scope.lcCode,
+        TAG_NO: String(l.tagNo),
+        IT_CODE: l.itCode ? String(l.itCode) : undefined,
+        VCH_SRNO: l.vchSrno != null ? Number(l.vchSrno) : undefined,
+      } as never);
+      identities.push({
+        TAG_NO: identity.TAG_NO,
+        VCH_SRNO: Number(identity.VCH_SRNO ?? 0),
+        IT_CODE: String(identity.IT_CODE ?? l.itCode ?? ''),
+      });
     }
     const no = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, no, input.book ?? CANCEL_BOOK);
@@ -149,16 +225,21 @@ export async function tagCancel(
       VCH_DATE: vchDate,
       VCH_TYPE: 'TGCAN',
       BOOK_NAME: 'TAG CANCEL',
-      IT_CODE: l.itCode,
-      TAG_NO: l.tagNo,
+      IT_CODE: identities[i]!.IT_CODE || l.itCode,
+      TAG_NO: identities[i]!.TAG_NO,
+      // The resolved instance, so the out-movement nets against the SAME row the resolver matched.
+      // Without it a multi-instance tag could be cancelled while its stock stayed positive.
+      VCH_SRNO: identities[i]!.VCH_SRNO,
       TR_TYPE: 'O',
       ITM_SIGN: '-',
-      ITM_QTY: N(l.netWt) || N(l.pcs) || 1,
+      ITM_QTY: 1,
       ITM_PCS: N(l.pcs) || 1,
       ITM_GWT: N(l.grossWt),
       ITM_NWT: N(l.netWt),
       ITM_TOUCH: N(l.touch),
-      ITM_WEST: 0,
+      // Wastage now travels rather than being hard-coded to 0: it is part of the fine base for every
+      // other voucher family, so zeroing it here made a cancel disagree with the tag it reverses.
+      ITM_WEST: N(l.westPct),
       ITM_FINE: fineOf(l),
       KR_TOUCH: N(l.touch),
       KR_FINE: fineOf(l),
@@ -197,6 +278,47 @@ export async function tagCancel(
       BAG_WT: N(l.bagWt),
       LOT_NO: txt(l.lotNo, 15),
       TRFR_IT_CODE: txt(l.transferItCode, 255),
+      // P6: the rest of the desktop MSG grid. This register is the audit trail for a cancelled tag, so
+      // recording 17 of 76 columns meant the evidence of WHAT was cancelled was thinner than the tag
+      // itself — the "omits required source and sub-detail lineage" clause of the containment rule.
+      //
+      // The resolved serial identity is stamped here too: without VCH_SRNO the register cannot say which
+      // instance of a repeated tag number was cancelled.
+      VCH_SRNO: identities[i]!.VCH_SRNO,
+      ITM_LOT: txt(l.tagLot, 15),
+      DESIGN_NO: txt(l.designNo, 255),
+      TBL_CODE: txt(l.tblCode, 3),
+      ITM_SIZE: txt(l.itmSize, 20),
+      ITM_STYLE: txt(l.itmStyle, 255),
+      ITM_COLOR: txt(l.itmColor, 255),
+      ITM_POLISH: txt(l.itmPolish, 255),
+      IT_DESC: txt(l.itDesc, 50),
+      ITM_REMARK: txt(l.remark, 255),
+      // HM_ID is the alphanumeric HUID; a Number() coercion here would destroy any id with a letter.
+      HM_ID: txt(l.hallmarkId, 15),
+      ITM_OTH_WT: N(l.lessWt),
+      ITM_GHT_WT: N(l.ghtWt),
+      ITM_WEST_PRC: N(l.westPct),
+      IT_TYPE: txt(l.itemType, 1),
+      LBR_PRC: N(l.labourPct),
+      LBR_TYPE: txt(l.labourType, 1),
+      LBR_RATE: N(l.labourRate),
+      LBR_AMT: N(l.labourAmount),
+      OTH_AMT: N(l.otherAmount),
+      ITM_MRP: N(l.mrp),
+      ITM_RATE: N(l.rate),
+      ITM_AMT: N(l.amount),
+      TAG_COST: N(l.tagCost),
+      TAG_NWT: N(l.tagNetWt),
+      RATE_TYPE: txt(l.rateType, 1),
+      PR_CODE: txt(l.prCode, 2),
+      KR_NAME: txt(l.karigarName, 255),
+      KR_NET_WT: N(l.karigarNetWt),
+      KR_TOUCH: N(l.karigarTouch),
+      KR_WEST_PRC: N(l.karigarWestPct),
+      KR_FINE: N(l.karigarFine),
+      DESIGN_IMG_ID: txt(l.designImageId, 255),
+      TO_TBL_CODE: txt(l.toTblCode, 3),
     }));
     // BAR_CAN_IDTL stone/diamond sub-detail (TR_TAG_CAN.cs:5194-5243). Header-derived columns come
     // from the book and scope; the desktop writes nothing when the sub-grid is empty.
@@ -283,10 +405,69 @@ export async function deleteTagCancel(
 ): Promise<{ reversed: true }> {
   const key = keyOf(scope, Number(vchNo), book);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    /**
+     * P6/WP-09 — restore the tags this cancel consumed, or deleting a cancel LOSES them.
+     *
+     * `tagCancel` resolves each line through `issueTagTx`, which DELETES the `TAG_STOCK` row when the
+     * tag lives there. Reversing only `MAIN_STOCK` and the register therefore restored availability for
+     * a tag backed by `BAR_DETL` (because `availableBarTags` nets the signs, and removing the '-' makes
+     * the net positive again) but left a TAG_STOCK-only tag permanently gone: not in TAG_STOCK, not in
+     * BAR_DETL, so invisible to every availability query.
+     *
+     * This mirrors the sale reversal (`sales.ts:2017-2042`): read what was consumed, and restore only
+     * the tags that BAR_DETL cannot vouch for. Restoring a BAR_DETL-backed tag as well would duplicate
+     * it into TAG_STOCK and make the same tag issuable twice.
+     *
+     * The read must happen BEFORE `reverseVoucherTx`, which deletes the register rows it reads from.
+     */
+    const consumed: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT"
+         FROM "BAR_CAN_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+          AND NULLIF(btrim(coalesce("TAG_NO"::text,'')),'') IS NOT NULL
+          AND "TAG_NO"::text <> 'N'`,
+      scope.tenantId,
+      key.CO_CODE,
+      key.LC_CODE,
+      key.CO_YEAR,
+      key.CO_BOOK,
+      key.VCH_NO,
+    );
+
+    const restores: Array<Record<string, unknown>> = [];
+    for (const tag of consumed) {
+      const inBar: Array<{ n: unknown }> = await tx.$queryRawUnsafe(
+        `SELECT count(*)::int AS n FROM "BAR_DETL"
+          WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"::text=$4
+            AND coalesce("VCH_SRNO",0)=coalesce($5::numeric,0)`,
+        scope.tenantId,
+        key.CO_CODE,
+        key.LC_CODE,
+        String(tag.TAG_NO ?? ''),
+        Number(tag.VCH_SRNO ?? 0),
+      );
+      if (Number(inBar[0]?.n ?? 0) === 0) {
+        restores.push({
+          CO_CODE: key.CO_CODE,
+          LC_CODE: key.LC_CODE,
+          TAG_NO: String(tag.TAG_NO ?? ''),
+          VCH_SRNO: Number(tag.VCH_SRNO ?? 0),
+          // TAG_STOCK has IT_TYPE, not IT_CODE — insertTagTx rejects unknown columns by design, so a
+          // stray key aborts the whole reversal rather than being ignored.
+          ITM_PCS: tag.ITM_PCS,
+          ITM_GWT: tag.ITM_GWT,
+          ITM_NWT: tag.ITM_NWT,
+          STK_TYPE: 'R',
+        });
+      }
+    }
+
     await reverseVoucherTx(tx, scope.tenantId, {
       tables: ['MAIN_STOCK', 'BAR_CAN_DATA', 'BAR_CAN_DETL', 'BAR_CAN_IDTL'],
       key,
     });
+    for (const tag of restores) await restoreTagTx(tx, scope.tenantId, tag as never);
     return { reversed: true };
   });
 }
@@ -301,6 +482,15 @@ export interface TagWeightDiffLine {
   newNetWt?: number;
   touch?: number;
   rate?: number; // fine rate used to value the weight difference
+  /**
+   * The live tag INSTANCE whose weight is changing, when a tag number has more than one.
+   *
+   * `BAR_DETL` keys an instance by TAG_NO + VCH_SRNO and the resolver treats an ambiguous number as an
+   * error rather than picking one, so this selects the intended instance.
+   */
+  vchSrno?: number;
+  /** ITM_WEST_PRC — part of the fine base, as in every other voucher family. */
+  westPct?: number;
 }
 
 export interface TagWeightDiffInput {
@@ -345,6 +535,36 @@ export async function tagWeightDiff(
     const key = keyOf(input.scope, no, input.book ?? WTDIFF_BOOK);
     const useParty = !!input.partyAc;
 
+    /**
+     * P6/WP-09 — resolve the LIVE tag instance before adjusting its weight.
+     *
+     * This path previously never looked the tag up at all: it wrote a MAIN_STOCK movement keyed on
+     * TAG_NO alone, so it would happily adjust a tag that does not exist, one belonging to another
+     * location, or one already sold. It also stamped no VCH_SRNO, so the movement did not net against
+     * any particular instance of a repeated tag number.
+     *
+     * `resolveLiveTagIdentityTx` is the resolver a sale uses — LC_CODE-scoped, per-instance, netting the
+     * MAIN_STOCK signs. Note it RESOLVES without consuming: a weight change does not remove the tag from
+     * stock, so `issueTagTx` (which deletes the TAG_STOCK row) would be wrong here. That distinction is
+     * why this calls the resolver directly rather than reusing the cancel path.
+     */
+    const identities = new Map<number, { VCH_SRNO: number; IT_CODE: string }>();
+    for (let i = 0; i < input.lines.length; i += 1) {
+      const l = input.lines[i]!;
+      if (r3(N(l.newNetWt) - N(l.oldNetWt)) === 0) continue; // unchanged tag: nothing to resolve
+      const identity = await resolveLiveTagIdentityTx(tx, {
+        CO_CODE: input.scope.coCode,
+        LC_CODE: input.scope.lcCode,
+        TAG_NO: String(l.tagNo),
+        IT_CODE: l.itCode ? String(l.itCode) : undefined,
+        VCH_SRNO: l.vchSrno != null ? Number(l.vchSrno) : undefined,
+      } as never);
+      identities.set(i, {
+        VCH_SRNO: Number(identity.VCH_SRNO ?? 0),
+        IT_CODE: String(identity.IT_CODE ?? l.itCode ?? ''),
+      });
+    }
+
     const mainStock: Record<string, unknown>[] = [];
     const ledger: LedgerLine[] = [];
     let totDiffFine = 0;
@@ -355,7 +575,13 @@ export async function tagWeightDiff(
       if (diff === 0) return; // no movement for an unchanged tag
       const absDiff = Math.abs(diff);
       const up = diff > 0;
-      const diffFine = r3((absDiff * N(l.touch)) / 100);
+      // Fine goes through the shared desktop policy so a weight change agrees with the tag it adjusts,
+      // rather than using a local netWt x touch / 100 that ignores wastage.
+      const diffFine = fineFor('tagOpening', {
+        netWt: absDiff,
+        touch: N(l.touch),
+        westPct: N(l.westPct),
+      });
       const value = r2(diffFine * N(l.rate));
       totDiffFine += up ? diffFine : -diffFine;
       totValue += up ? value : -value;
@@ -367,8 +593,10 @@ export async function tagWeightDiff(
         VCH_DATE: vchDate,
         VCH_TYPE: 'TGWD',
         BOOK_NAME: 'TAG WT CHANGE',
-        IT_CODE: l.itCode,
+        IT_CODE: identities.get(i)?.IT_CODE || l.itCode,
         TAG_NO: l.tagNo,
+        // The resolved instance: without it the movement nets against no particular tag row.
+        VCH_SRNO: identities.get(i)?.VCH_SRNO ?? 0,
         TR_TYPE: up ? 'I' : 'O',
         ITM_SIGN: up ? '+' : '-',
         ITM_QTY: absDiff,
@@ -376,7 +604,8 @@ export async function tagWeightDiff(
         ITM_GWT: absDiff,
         ITM_NWT: absDiff,
         ITM_TOUCH: N(l.touch),
-        ITM_WEST: 0,
+        // Wastage travels rather than being hard-coded to 0, matching every other voucher family.
+        ITM_WEST: N(l.westPct),
         ITM_FINE: diffFine,
         ITM_RATE: N(l.rate),
         KR_TOUCH: N(l.touch),

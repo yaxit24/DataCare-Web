@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { withTenant } from '@datacare/db';
+import { verifyWithMigration } from '../auth/password.js';
 
 /**
  * Data-repair framework — the safety protocol shared by every operation in the desktop's `MS_UPDATE`
@@ -25,6 +26,21 @@ import { withTenant } from '@datacare/db';
  * Applying only the diff is what makes these operations safe to re-run: a healthy row is not rewritten, so
  * a second apply reports zero changes and leaves `updated_at`-style columns untouched. That property is
  * asserted for every operation rather than assumed.
+ *
+ * AUTHORITY FOR A DESTRUCTIVE APPLY
+ * --------------------------------
+ * A preview-hash check answers "is this the change set that was reviewed". It does not answer "is this
+ * person allowed to rewrite a shop's ledger right now". Route policy answers the first half by making the
+ * console admin-only; this module answers the rest, because a requirement that lives in a route handler is
+ * one refactor away from being forgotten:
+ *
+ *   * a written REASON, so the run ledger says why history was rewritten;
+ *   * RE-AUTHENTICATION with the operator's own password, so an unattended session cannot be used;
+ *   * a verified BACKUP REFERENCE naming a real, recent `company_backup_run` row for the same company, so
+ *     the operation is recoverable rather than merely recorded.
+ *
+ * These attach to `high` and `danger` operations — the same threshold that already demands a typed
+ * confirmation — and are derived from the operation's own risk, never from the caller's request.
  */
 
 export type RepairRisk = 'low' | 'medium' | 'high' | 'danger';
@@ -55,6 +71,20 @@ export interface RepairPreview {
   clean: boolean;
   risk: RepairRisk;
   requiresConfirmation: string | null;
+  /** Everything the apply will demand, so the console can ask for it up front rather than by trial. */
+  authority: RepairAuthority;
+}
+
+/** What a given operation's apply will require, derived from its risk rather than from the request. */
+export interface RepairAuthority {
+  /** Typed confirmation string, or null when the operation is not destructive. */
+  confirmation: string | null;
+  /** A written reason of at least `REPAIR_REASON_MIN_LENGTH` characters. */
+  reason: boolean;
+  /** The operator's own password, re-entered. */
+  reauthentication: boolean;
+  /** A `company_backup_run` checksum for this company, no older than `REPAIR_BACKUP_MAX_AGE_MS`. */
+  backupReference: boolean;
 }
 
 export interface RepairApplied {
@@ -120,6 +150,38 @@ export function confirmationFor(op: RepairOperation, scope: RepairScope): string
 }
 
 /**
+ * A destructive operation is one that rewrites or removes historical business rows rather than correcting a
+ * derived value in place. `high` and `danger` are exactly those, which is why they already carry a typed
+ * confirmation; the remaining authority requirements attach to the same set so there is one threshold to
+ * reason about instead of two.
+ */
+export function isDestructive(op: RepairOperation): boolean {
+  return op.risk === 'high' || op.risk === 'danger';
+}
+
+/** Minimum length of the written reason a destructive apply must carry. */
+export const REPAIR_REASON_MIN_LENGTH = 12;
+
+/**
+ * How recent a company backup must be to cover a destructive repair.
+ *
+ * A backup older than this may predate the very rows the operation is about to rewrite, so naming it would
+ * prove recoverability that does not exist.
+ */
+export const REPAIR_BACKUP_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+/** Everything the apply will demand for this operation, in the shape the console needs. */
+export function authorityFor(op: RepairOperation, scope: RepairScope): RepairAuthority {
+  const destructive = isDestructive(op);
+  return {
+    confirmation: confirmationFor(op, scope),
+    reason: destructive,
+    reauthentication: destructive,
+    backupReference: destructive,
+  };
+}
+
+/**
  * Hash the reviewed candidate set. Deliberately includes the scope and the exact counts, so moving the
  * company, adding a row, or repairing one record by hand between preview and apply all invalidate it.
  */
@@ -180,31 +242,137 @@ export async function previewRepair(
       clean,
       risk: op.risk,
       requiresConfirmation: confirmationFor(op, scope),
+      authority: authorityFor(op, scope),
     };
   });
+}
+
+/** Input for an apply. The destructive fields are required only for `high`/`danger` operations. */
+export interface RepairApplyInput {
+  previewHash: string;
+  confirmation?: string;
+  operator: string;
+  /** Company the operator's `LOGIN_MAST` row belongs to; defaults to the repaired company. */
+  loginCoCode?: string;
+  reason?: string;
+  /** The operator's own password, re-entered for a destructive apply. */
+  operatorPassword?: string;
+  /** `company_backup_run.checksum` proving a recent restorable backup of this company exists. */
+  backupReference?: string;
+}
+
+/**
+ * Re-prove the operator's identity from `LOGIN_MAST`.
+ *
+ * Session possession is not enough for an operation that rewrites history: the desktop console sat on a shop
+ * counter and the web session can be left open on one. Legacy plaintext passwords are accepted through the
+ * same migration path login uses, so a shop that has not yet rotated credentials is not locked out of a
+ * repair it is entitled to run.
+ */
+async function requireReauthentication(
+  tx: any,
+  scope: RepairScope,
+  input: RepairApplyInput,
+): Promise<void> {
+  const candidate = input.operatorPassword ?? '';
+  if (!candidate) {
+    throw new RepairError(
+      'reauthentication-required',
+      're-enter your password to apply a destructive repair',
+    );
+  }
+  const rows: Array<{ LOGIN_PWD?: string | null }> = await tx.$queryRawUnsafe(
+    `SELECT "LOGIN_PWD" FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1`,
+    input.loginCoCode ?? scope.coCode,
+    input.operator,
+  );
+  const stored = rows[0]?.LOGIN_PWD;
+  // A missing login row fails exactly like a wrong password: the caller learns nothing about which it was.
+  const ok = stored ? (await verifyWithMigration(String(stored), candidate)).ok : false;
+  if (!ok) {
+    throw new RepairError(
+      'reauthentication-failed',
+      'password does not match the applying operator',
+    );
+  }
+}
+
+/**
+ * Require a real, recent backup of the company being repaired.
+ *
+ * The reference is checked against `company_backup_run`, which `backupCompany` writes append-only. An
+ * operator therefore cannot satisfy this by typing a plausible string, and an old backup cannot be reused to
+ * cover rows created after it.
+ */
+async function requireBackupReference(
+  tx: any,
+  scope: RepairScope,
+  input: RepairApplyInput,
+): Promise<void> {
+  const reference = (input.backupReference ?? '').trim();
+  if (!reference) {
+    throw new RepairError(
+      'backup-reference-required',
+      'take a company backup and supply its checksum before applying a destructive repair',
+    );
+  }
+  const rows: Array<{ generated_at: Date | string }> = await tx.$queryRawUnsafe(
+    `SELECT "generated_at" FROM "company_backup_run"
+      WHERE tenant_id=$1 AND co_code=$2 AND checksum=$3
+      ORDER BY "generated_at" DESC LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+    reference,
+  );
+  if (!rows.length) {
+    throw new RepairError(
+      'backup-reference-unknown',
+      'no backup of this company matches that checksum',
+    );
+  }
+  const generatedAt = new Date(rows[0]!.generated_at as string).getTime();
+  if (!Number.isFinite(generatedAt) || Date.now() - generatedAt > REPAIR_BACKUP_MAX_AGE_MS) {
+    throw new RepairError(
+      'backup-reference-stale',
+      'that backup is too old to cover this repair; take a fresh one',
+    );
+  }
 }
 
 /**
  * Apply a previously reviewed repair.
  *
  * Refuses unless the recomputed hash still matches, so an operator can never commit a change set that
- * differs from the one they were shown.
+ * differs from the one they were shown. A destructive operation must additionally satisfy every requirement
+ * in `authorityFor`, all of which are checked before the first write.
  */
 export async function applyRepair(
   prisma: any,
   operationId: string,
   scope: RepairScope,
-  input: { previewHash: string; confirmation?: string; operator: string; reason?: string },
+  input: RepairApplyInput,
 ): Promise<RepairApplied> {
   const op = getRepair(operationId);
-  const required = confirmationFor(op, scope);
-  if (required && input.confirmation !== required) {
+  const authority = authorityFor(op, scope);
+  if (authority.confirmation && input.confirmation !== authority.confirmation) {
     throw new RepairError(
       'confirmation-required',
-      `this operation is ${op.risk} risk; type "${required}" to confirm`,
+      `this operation is ${op.risk} risk; type "${authority.confirmation}" to confirm`,
+    );
+  }
+  const reason = (input.reason ?? '').trim();
+  if (authority.reason && reason.length < REPAIR_REASON_MIN_LENGTH) {
+    throw new RepairError(
+      'reason-required',
+      `record why this repair is being applied (at least ${REPAIR_REASON_MIN_LENGTH} characters)`,
     );
   }
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    // Authority first: an unauthorised caller must not even hold the operation lock.
+    if (authority.reauthentication) await requireReauthentication(tx, scope, input);
+    if (authority.backupReference) await requireBackupReference(tx, scope, input);
+    const reauthenticatedAt = authority.reauthentication ? new Date() : null;
+
     // Serialise per tenant+operation so two operators cannot repair the same data concurrently.
     // executeRaw, not queryRaw: pg_advisory_xact_lock returns void and the driver cannot deserialise it.
     await tx.$executeRawUnsafe(
@@ -243,8 +411,8 @@ export async function applyRepair(
     await tx.$executeRawUnsafe(
       `INSERT INTO "data_repair_run"
          (tenant_id,operation_id,co_code,lc_code,co_year,state,preview_hash,counts,applied_counts,
-          samples,operator,reason,applied_at)
-       VALUES ($1,$2,$3,$4,$5,'applied',$6,$7::jsonb,$8::jsonb,$9::jsonb,$10,$11,now())`,
+          samples,operator,reason,backup_reference,reauthenticated_at,applied_at)
+       VALUES ($1,$2,$3,$4,$5,'applied',$6,$7::jsonb,$8::jsonb,$9::jsonb,$10,$11,$12,$13,now())`,
       scope.tenantId,
       op.id,
       scope.coCode,
@@ -255,7 +423,9 @@ export async function applyRepair(
       JSON.stringify(applied),
       JSON.stringify(samples.slice(0, 50)),
       input.operator.slice(0, 64),
-      input.reason ?? null,
+      reason || null,
+      (input.backupReference ?? '').trim() || null,
+      reauthenticatedAt,
     );
     return { operationId: op.id, previewHash: input.previewHash, applied, deduplicated: false };
   });
@@ -273,7 +443,7 @@ export async function repairHistory(
     if (scope.coCode) params.push(scope.coCode);
     return tx.$queryRawUnsafe(
       `SELECT operation_id, co_code, state, preview_hash, counts, applied_counts, operator, reason,
-              error, created_at, applied_at
+              backup_reference, reauthenticated_at, error, created_at, applied_at
          FROM "data_repair_run" WHERE tenant_id=$1${co}
         ORDER BY created_at DESC LIMIT ${Math.min(Math.max(1, limit), 200)}`,
       ...params,

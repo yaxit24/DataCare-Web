@@ -1,0 +1,60 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+26 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 173 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "tourOrderHydration.db.test.ts" "orderImageWrite.db.test.ts" "tourOrderPrint.routes.db.test.ts" "orderImageReport.db.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/tourOrderHydration.db.test.ts (14 tests) 3544ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions 505ms
+   ✓ Tour Order configured-book and complete editor round trip > refuses flattened legacy edits of multiple persisted components without changing any business row 330ms
+   ✓ Tour Order configured-book and complete editor round trip > persists whole-rupee P/G/K/net labour with exact derived-rate and manual edit transitions 304ms
+   ✓ Tour Order configured-book and complete editor round trip > preserves imported manual metal/labour/net values and voucher time on unchanged and child-only edits 394ms
+   ✓ Tour Order configured-book and complete editor round trip > blocks the allocated source order while allowing the same number in another book, branch or year 680ms
+   ✓ Tour Order configured-book and complete editor round trip > treats missing legacy allocation dimensions conservatively but respects an explicit different source dimension 308ms
+ ✓ test/tourOrderPrint.routes.db.test.ts (5 tests) 1428ms
+ ✓ test/orderImageReport.db.test.ts (5 tests) 1253ms
+   ✓ image report binding from saved scoped order identities > binds 'OrdVchImg' images by actual saved scope and source precedence without fanout 308ms
+   ✓ image report binding from saved scoped order identities > keeps custom images separate across complete saved year/book/branch/company/tenant identities 370ms
+ ✓ test/orderImageWrite.db.test.ts (7 tests) 322ms
+
+ Test Files  4 passed (4)
+      Tests  31 passed (31)
+   Start at  03:52:28
+   Duration  16.55s (transform 2.85s, setup 0ms, collect 8.24s, tests 6.55s, environment 1ms, prepare 335ms)
+

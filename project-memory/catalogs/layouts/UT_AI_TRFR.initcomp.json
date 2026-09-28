@@ -1,0 +1,359 @@
+{
+ "form": "UT_AI_TRFR",
+ "controlCount": 33,
+ "byKind": {
+  "masked": 2,
+  "button": 12,
+  "panel": 2,
+  "label": 8,
+  "other": 2,
+  "grid": 2,
+  "textbox": 5
+ },
+ "grids": [
+  "DGV",
+  "GridControl1"
+ ],
+ "tabs": [],
+ "gridColumns": 0,
+ "containers": {
+  "PnlBotam": [
+   "BtnExit",
+   "BtnDelete",
+   "BtnCancel",
+   "BtnSave",
+   "BtnPrint",
+   "btnExel",
+   "lblStatus"
+  ],
+  "pnlAppFtpPath": [
+   "BtnExitUae",
+   "btnSaveUae",
+   "tftpPwd",
+   "Label32",
+   "tFtpId",
+   "Label33",
+   "tFtpPath",
+   "Label34"
+  ],
+  "this": [
+   "pnlAppFtpPath",
+   "GridControl1",
+   "ProgressBar1",
+   "Label10",
+   "tGrCode",
+   "Label9",
+   "tPrCode",
+   "DGV",
+   "Label1",
+   "mFromDt",
+   "Cr",
+   "lblBook",
+   "PnlBotam",
+   "mToDt",
+   "BtnList",
+   "btnTagTrfr",
+   "btnBrouser",
+   "btnServerData"
+  ]
+ },
+ "controls": [
+  {
+   "name": "mFromDt",
+   "type": "MaskedTextBox",
+   "location": "60,45",
+   "size": "76,23",
+   "tabIndex": "0",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "mToDt",
+   "type": "MaskedTextBox",
+   "location": "144,45",
+   "size": "76,23",
+   "tabIndex": "1",
+   "text": "",
+   "kind": "masked"
+  },
+  {
+   "name": "BtnPrint",
+   "type": "SimpleButton",
+   "location": "827,3",
+   "size": "91,37",
+   "tabIndex": "3",
+   "text": "&Print",
+   "kind": "button"
+  },
+  {
+   "name": "BtnSave",
+   "type": "SimpleButton",
+   "location": "924,3",
+   "size": "91,37",
+   "tabIndex": "4",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "BtnCancel",
+   "type": "SimpleButton",
+   "location": "1021,3",
+   "size": "91,37",
+   "tabIndex": "5",
+   "text": "&Cancel",
+   "kind": "button"
+  },
+  {
+   "name": "BtnList",
+   "type": "QButton",
+   "location": "530,46",
+   "size": "140,42",
+   "tabIndex": "5",
+   "text": "Ok",
+   "kind": "button"
+  },
+  {
+   "name": "PnlBotam",
+   "type": "FlowLayoutPanel",
+   "location": "0,566",
+   "size": "1309,41",
+   "tabIndex": "6",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "BtnDelete",
+   "type": "SimpleButton",
+   "location": "1118,3",
+   "size": "91,37",
+   "tabIndex": "6",
+   "text": "&Delete",
+   "kind": "button"
+  },
+  {
+   "name": "lblBook",
+   "type": "Label",
+   "location": "0,0",
+   "size": "1309,32",
+   "tabIndex": "6",
+   "text": "Ai Image Trfr",
+   "kind": "label"
+  },
+  {
+   "name": "BtnExit",
+   "type": "SimpleButton",
+   "location": "1215,3",
+   "size": "91,37",
+   "tabIndex": "7",
+   "text": "E&xit",
+   "kind": "button"
+  },
+  {
+   "name": "btnExel",
+   "type": "SimpleButton",
+   "location": "661,3",
+   "size": "160,37",
+   "tabIndex": "8",
+   "text": "Image Import",
+   "kind": "button"
+  },
+  {
+   "name": "Cr",
+   "type": "AxCrystalReport",
+   "location": "1247,476",
+   "size": "28,28",
+   "tabIndex": "10",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "Label1",
+   "type": "Label",
+   "location": "10,44",
+   "size": "44,20",
+   "tabIndex": "1167",
+   "text": "Date",
+   "kind": "label"
+  },
+  {
+   "name": "DGV",
+   "type": "DevComponents.DotNetBar.Controls.DataGridViewX",
+   "location": "14,83",
+   "size": "1160,443",
+   "tabIndex": "1172",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tPrCode",
+   "type": "TextBox",
+   "location": "430,48",
+   "size": "53,22",
+   "tabIndex": "1173",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label9",
+   "type": "Label",
+   "location": "364,48",
+   "size": "60,20",
+   "tabIndex": "1174",
+   "text": "Pr Code",
+   "kind": "label"
+  },
+  {
+   "name": "Label34",
+   "type": "Label",
+   "location": "10,19",
+   "size": "58,16",
+   "tabIndex": "1174",
+   "text": "Ftp Path",
+   "kind": "label"
+  },
+  {
+   "name": "lblStatus",
+   "type": "Label",
+   "location": "513,0",
+   "size": "142,44",
+   "tabIndex": "1175",
+   "text": "Pr Code",
+   "kind": "label"
+  },
+  {
+   "name": "tGrCode",
+   "type": "TextBox",
+   "location": "305,48",
+   "size": "53,22",
+   "tabIndex": "1175",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "tFtpPath",
+   "type": "TextBox",
+   "location": "79,16",
+   "size": "372,22",
+   "tabIndex": "1175",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "Label10",
+   "type": "Label",
+   "location": "235,48",
+   "size": "64,20",
+   "tabIndex": "1176",
+   "text": "Gr Code",
+   "kind": "label"
+  },
+  {
+   "name": "pnlAppFtpPath",
+   "type": "Panel",
+   "location": "60,393",
+   "size": "470,168",
+   "tabIndex": "1176",
+   "text": "",
+   "kind": "panel"
+  },
+  {
+   "name": "Label33",
+   "type": "Label",
+   "location": "10,55",
+   "size": "41,16",
+   "tabIndex": "1176",
+   "text": "Ftp Id",
+   "kind": "label"
+  },
+  {
+   "name": "ProgressBar1",
+   "type": "ProgressBar",
+   "location": "14,535",
+   "size": "1161,23",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "other"
+  },
+  {
+   "name": "tFtpId",
+   "type": "TextBox",
+   "location": "79,52",
+   "size": "372,22",
+   "tabIndex": "1177",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnTagTrfr",
+   "type": "QButton",
+   "location": "690,46",
+   "size": "140,42",
+   "tabIndex": "1178",
+   "text": "Export Tag",
+   "kind": "button"
+  },
+  {
+   "name": "Label32",
+   "type": "Label",
+   "location": "10,92",
+   "size": "56,16",
+   "tabIndex": "1178",
+   "text": "Ftp Pwd",
+   "kind": "label"
+  },
+  {
+   "name": "GridControl1",
+   "type": "GridControl",
+   "location": "14,83",
+   "size": "1161,443",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "grid"
+  },
+  {
+   "name": "tftpPwd",
+   "type": "TextBox",
+   "location": "79,89",
+   "size": "372,22",
+   "tabIndex": "1179",
+   "text": "",
+   "kind": "textbox"
+  },
+  {
+   "name": "btnServerData",
+   "type": "QButton",
+   "location": "1008,46",
+   "size": "140,42",
+   "tabIndex": "1180",
+   "text": "Server Image",
+   "kind": "button"
+  },
+  {
+   "name": "btnSaveUae",
+   "type": "SimpleButton",
+   "location": "122,121",
+   "size": "91,37",
+   "tabIndex": "1180",
+   "text": "&Save",
+   "kind": "button"
+  },
+  {
+   "name": "btnBrouser",
+   "type": "QButton",
+   "location": "849,46",
+   "size": "140,42",
+   "tabIndex": "1181",
+   "text": "Next Ai Open",
+   "kind": "button"
+  },
+  {
+   "name": "BtnExitUae",
+   "type": "SimpleButton",
+   "location": "226,121",
+   "size": "91,37",
+   "tabIndex": "1181",
+   "text": "E&xit",
+   "kind": "button"
+  }
+ ]
+}

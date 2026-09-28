@@ -1,0 +1,51 @@
+{
+  "runs": [
+    {
+      "label": "focused-formatted",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.config.ts"
+      ],
+      "cwd": "/tmp/datacare-round15-financial-effects/web/packages/core",
+      "startedAtUtc": "2026-09-12T02:45:02.160219+00:00",
+      "finishedAtUtc": "2026-09-12T02:45:02.950544+00:00",
+      "exitCode": 0,
+      "log": "focused-formatted.txt",
+      "logSha256": "2a7af3f498f459b85035245fa6317256e1a139ae278d091b7afd3b0282e80853"
+    },
+    {
+      "label": "types-formatted",
+      "argv": [
+        "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/node_modules/.bin/tsc",
+        "--noEmit",
+        "--strict",
+        "--noUncheckedIndexedAccess",
+        "--isolatedModules",
+        "--skipLibCheck",
+        "--target",
+        "ES2022",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--types",
+        "node",
+        "src/saleReturnFinancialEffects.ts",
+        "test/saleReturnFinancialEffects.test.ts"
+      ],
+      "cwd": "/tmp/datacare-round15-financial-effects/web/packages/core",
+      "startedAtUtc": "2026-09-12T02:45:02.950790+00:00",
+      "finishedAtUtc": "2026-09-12T02:45:03.486253+00:00",
+      "exitCode": 0,
+      "log": "types-formatted.txt",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "inputManifest": "focused-formatted.inputs.json",
+  "inputManifestSha256": "ea8b37a9e66f9500d916d1f4ec3dce77f1ca4e2ebc9c8eff50371e56bb6e006d",
+  "inputCount": 6,
+  "changedInputs": [],
+  "limits": "Only this new staged pure planner and tests; no shared DB/API/browser/build/broad suite or active source mutation."
+}

@@ -1,0 +1,117 @@
+{
+ "form": "MS_ITEM",
+ "loc": 4029,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? ' ORDER BY IT_NAME",
+  "SELECT PR_NAME FROM PRODUCT_MAST WHERE CO_CODE =' ? ' AND PR_CODE = ' ? '",
+  "SELECT GR_NAME FROM GROUP_MAST WHERE CO_CODE =' ? ' AND GR_CODE = ' ? '",
+  "Select * From PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "SELECT PR_NAME As PrNameL,PR_CODE as PrCodeL FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_NAME",
+  "SELECT IT_CODE FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? ' AND TAG_IDTL_COL = 'Y' ORDER BY IT_CODE",
+  "SELECT IT_CODE FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND TAG_IDTL_COL = 'Y' ORDER BY IT_CODE",
+  "DELETE FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT * FROM ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT * FROM MAIN_STOCK WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "Please Select Item For Delete.",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME",
+  "SELECT UNIT_NAME FROM ITEM_MAST WHERE CO_CODE = ' ? ' GROUP BY UNIT_NAME ORDER BY UNIT_NAME",
+  "SELECT SAFE_NAME FROM ITEM_MAST WHERE CO_CODE = ' ? ' GROUP BY SAFE_NAME ORDER BY SAFE_NAME",
+  "Select * From ITEM_MAST WHERE CO_CODE = ' ? ' AND IT_CODE = ' ? '",
+  "SELECT A.IT_NAME As ItNameL,A.IT_CODE As ItCodeL FROM ITEM_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.IT_CODE",
+  "SELECT * FROM [{RuntimeHelpers.GetObjectValue(objectValue)}]",
+  "SELECT PR_NAME FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_NAME = ' ? '",
+  "INSERT INTO PRODUCT_MAST(CO_CODE,PR_CODE,PR_NAME,MAIN_USER,DATA_TRFR) VALUES (' ? ',' ? 00 ? ',' ? ','ABC','N')",
+  "SELECT GR_CODE FROM GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "INSERT INTO GROUP_MAST(CO_CODE,GR_CODE,GR_NAME,GR_TYPE,TRAD_TYPE,GR_TOUCH,GR_PURC_TOUCH,MELTING_PRC, GR_RATE,WEST_PRC,SALE_AC,PURC_AC,HSN_CODE,MAIN_USER,TAX_PRC,AVG_TOUCH,AVG_FINE,AVG_NWT, DAY_OP_PCS,DAY_OP_WT,DAY_CL_PCS,DAY_CL_WT,RATE_DISPLAY,DATA_TRFR,OP_TOUCH,OP_FINE) VALUES (' ? ',' ? ',' ? Silver Item','S','SL',0,0,0, 0,0,'00004','00009','7113','ABC',0,0,0,0, 0,0,0,0,'N','N',0,0)",
+  "Are You Sure To Update This Item Tag With New Value... ? ",
+  "UPDATE BAR_DETL SET LBR_PRC = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND IT_CODE = ' ? ' AND LBR_PRC = 0 AND TAG_NO NOT IN (SELECT A.TAG_NO FROM MAIN_STOCK AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.ITM_SIGN = '-' AND A.TAG_NO <> 'N' AND A.IT_CODE = ' ? ' GROUP BY A.TAG_NO HAVING SUM(IIF(ITM_SIGN = '+',VCH_SRNO,-VCH_SRNO)) > 0)",
+  "UPDATE BAR_DETL SET KR_TOUCH = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND IT_CODE = ' ? ' AND KR_TOUCH = 0 AND TAG_NO NOT IN (SELECT A.TAG_NO FROM MAIN_STOCK AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.ITM_SIGN = '-' AND A.TAG_NO <> 'N' AND A.IT_CODE = ' ? ' GROUP BY A.TAG_NO HAVING SUM(IIF(ITM_SIGN = '+',VCH_SRNO,-VCH_SRNO)) > 0)",
+  "UPDATE BAR_DETL SET KR_WEST_PRC = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND IT_CODE = ' ? ' AND KR_WEST_PRC = 0 AND KR_TOUCH <> 0 AND TAG_NO NOT IN (SELECT A.TAG_NO FROM MAIN_STOCK AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND A.ITM_SIGN = '-' AND A.TAG_NO <> 'N' AND A.IT_CODE = ' ? ' GROUP BY A.TAG_NO HAVING SUM(IIF(ITM_SIGN = '+',VCH_SRNO,-VCH_SRNO)) > 0)",
+  "SELECT TAG_NO,ITM_NWT,KR_NET_WT,KR_TOUCH,KR_WEST_PRC,VCH_SRNO,IT_CODE FROM BAR_DETL WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND (KR_TOUCH + KR_WEST_PRC) <> 0 AND KR_NET_WT <> 0 AND IT_CODE = ' ? ' ORDER BY TAG_NO",
+  "UPDATE BAR_DETL SET KR_FINE = ? WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND TAG_NO = ' ? TAG_NO ? ' AND VCH_SRNO = ? VCH_SRNO ? ",
+  "Item Tag Value Is Update....."
+ ],
+ "keyboard": {
+  "Ctrl+Esc": 1,
+  "Ctrl+O": 1,
+  "F1": 1,
+  "Enter": 21,
+  "Backspace": 1
+ },
+ "calc": [
+  "num = Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[DC_Main.M][\"KR_NET_WT\"])) * (Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[DC_Main.M][\"KR_TOUCH\"])) + Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Tbl.Rows[DC_Main.M][\"KR_WEST_PRC\"]))) / 100.0;"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "You Cant Add Other Detail Column More Then 4... Please Remove Old Item Then Try...",
+   "when": "DC_Main.Rshlp.Rows.Count > 3"
+  },
+  {
+   "message": "Product Code Is Null Please Create Item Again..",
+   "when": "Operators.CompareString(tPrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Group Code Is Null Please Create Item Again..",
+   "when": "Operators.CompareString(tGrCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Item Code Is Null Please Create Item Again..",
+   "when": "Operators.CompareString(tItCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "You Can't Delete Record This Item Use in Transaction....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "You Cant Delete Record This Item Code Is Default Code....",
+   "when": ""
+  },
+  {
+   "message": "Please Select Item For Delete.",
+   "when": "Operators.CompareString(tItCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Are You Sure To Delete This Record now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Record now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Please Insert Item Name",
+   "when": "Operators.CompareString(tItName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Are You Sure Import Item Master....?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure Import Item Master....?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Data is Import Ok....",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Update This Item Tag With New Value... ?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Update This Item Tag With New Value... ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Item Tag Value Is Update.....",
+   "when": ""
+  }
+ ]
+}

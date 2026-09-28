@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { BookSelect } from '../../../../components/BookSelect';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /** Fine Sale / Fine Purchase (TR_FINE_SL_PR) — pure-metal trade priced on fine weight. SALE sells
  *  fine out, PURC buys fine in; a purchase may "cut" (rate-fix) open fine on existing purchase lines.
@@ -37,6 +38,19 @@ export default function FineSalePurchasePage() {
     interState: false,
   });
   const [rows, setRows] = useState<Row[]>([blank()]);
+  // P1-5: desktop grids are keyboard-first — arrows move, Enter advances and appends at the end,
+  // Ctrl/Cmd+D removes a row (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: rows.length,
+    onAppendRow: () => setRows((current) => [...current, blank()]),
+    onRemoveRow: (row) => {
+      setRows((current) =>
+        current.length === 1 ? [blank()] : current.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [cuts, setCuts] = useState<Cut[]>([]);
   const [res, setRes] = useState<any>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -171,7 +185,7 @@ export default function FineSalePurchasePage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Fine lines</h2>
-          <table className="grid">
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>

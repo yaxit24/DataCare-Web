@@ -1,0 +1,51 @@
+{
+  "kind": "independent-binary64-storage-bit-vectors-v1",
+  "authorship": "Explicit IEEE754 sign/exponent/fraction bit strings authored before the DB test; no DB/qualifier execution generated expectations.",
+  "accepted": [
+    {
+      "decimal": "0",
+      "hex": "0000000000000000"
+    },
+    {
+      "decimal": "111",
+      "hex": "405bc00000000000"
+    },
+    {
+      "decimal": "0.5",
+      "hex": "3fe0000000000000"
+    },
+    {
+      "decimal": "1.25",
+      "hex": "3ff4000000000000"
+    },
+    {
+      "decimal": "-0.125",
+      "hex": "bfc0000000000000"
+    },
+    {
+      "decimal": "9007199254740991",
+      "hex": "433fffffffffffff"
+    },
+    {
+      "decimal": "9007199254740992",
+      "hex": "4340000000000000"
+    },
+    {
+      "decimal": "9007199254740994",
+      "hex": "4340000000000001"
+    },
+    {
+      "decimal": "18446744073709551616",
+      "hex": "43f0000000000000"
+    },
+    {
+      "decimal": "0.000003814697265625",
+      "hex": "3ed0000000000000"
+    }
+  ],
+  "rejectedExample": {
+    "decimal": "0.1",
+    "postgresNearestBits": "3fb999999999999a",
+    "qualifierDiagnostic": "inexact-binary64"
+  }
+}

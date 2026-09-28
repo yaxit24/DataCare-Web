@@ -1,0 +1,60 @@
+{
+  "kind": "source-review-additive-cases-not-executed",
+  "frozenHeaderFixtureSha256": "a56f54ebec8c89fb47133f4cc43bcb868a8c267b78dc35115f9d7ae9c9696ae7",
+  "cases": [
+    {
+      "id": "H-R01",
+      "input": {
+        "RTN_NET_AMT": "111\u2028",
+        "RTN_TOT_AMT": "111",
+        "RTN_BILL_OS": "111"
+      },
+      "expected": {
+        "status": "unsupported",
+        "values": null,
+        "canCommit": false,
+        "diagnostic": {
+          "code": "invalid-decimal",
+          "field": "RTN_NET_AMT",
+          "recoverable": true
+        }
+      },
+      "basis": "Terminal line separator is outside printable ASCII; no suffix may be discarded by regex end assertion."
+    },
+    {
+      "id": "H-R02",
+      "input": {
+        "RTN_NET_AMT": "111",
+        "RTN_TOT_AMT": "111\u2029",
+        "RTN_BILL_OS": "111"
+      },
+      "expected": {
+        "status": "unsupported",
+        "values": null,
+        "canCommit": false,
+        "diagnostic": {
+          "code": "invalid-decimal",
+          "field": "RTN_TOT_AMT",
+          "recoverable": true
+        }
+      },
+      "basis": "Terminal paragraph separator is outside printable ASCII; whole candidate values remain withheld."
+    }
+  ],
+  "prospectiveEvidenceQualifications": [
+    {
+      "id": "M-R01",
+      "sourceTest": "saleReturnIncomingSaveProjection.test.ts:195-203",
+      "qualification": "9007199254740993 proves a supplied string can be preserved without coercion. It cannot be an exact mathematical binary64 integer stored by current VCH_SRNO Float. Any future real DB case must use an actually representable stored value and exact SQL observation."
+    },
+    {
+      "id": "M-R02",
+      "qualification": "A ready0.49 row map is not a source Save admission. Recheck whole-unit bill zero and all source-dependent header/BAR/credit membership after real replay."
+    },
+    {
+      "id": "H-R03",
+      "qualification": "2^64 can pass header-only exactness while exceeding numeric(18,2) effect/row storage. Composing qualifiers must intersect all field limits, not widen them."
+    }
+  ],
+  "findingQualification": "The reviewer withdrew the original JavaScript end-anchor bypass claim. These are profile-boundary cases, not proved regressions against the earlier implementation."
+}

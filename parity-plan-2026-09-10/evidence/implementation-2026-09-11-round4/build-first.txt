@@ -1,0 +1,202 @@
+
+> datacare-web-saas@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web
+> turbo run build
+
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running build in 7 packages
+   • Remote caching disabled
+
+@datacare/db:build: cache miss, executing 0218a43b57d04560
+@datacare/core:build: cache miss, executing 862cc56e3ff97b4c
+@datacare/reports:build: cache hit, replaying logs e39286397a8c7315
+@datacare/reports:build: 
+@datacare/reports:build: > @datacare/reports@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/reports
+@datacare/reports:build: > tsc -p tsconfig.json
+@datacare/reports:build: 
+@datacare/parity:build: cache hit, replaying logs 771d602a9ad80574
+@datacare/parity:build: 
+@datacare/parity:build: > @datacare/parity@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/parity
+@datacare/parity:build: > tsc -p tsconfig.json
+@datacare/parity:build: 
+@datacare/types:build: cache hit, replaying logs f58a874d80d74b33
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/web:build: cache miss, executing 1baf1a0749bfc18d
+@datacare/web:build: 
+@datacare/web:build: > @datacare/web@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web
+@datacare/web:build: > next build
+@datacare/web:build: 
+@datacare/web:build:    ▲ Next.js 15.1.6
+@datacare/web:build: 
+@datacare/web:build:    Creating an optimized production build ...
+@datacare/api:build: cache miss, executing a02292a8fe25cdc8
+@datacare/api:build: 
+@datacare/api:build: > @datacare/api@0.0.0 build /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+@datacare/api:build: > tsc -p tsconfig.json
+@datacare/api:build: 
+@datacare/web:build:  ✓ Compiled successfully
+@datacare/web:build:    Linting and checking validity of types ...
+@datacare/web:build: 
+@datacare/web:build:  ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+@datacare/web:build:    Collecting page data ...
+@datacare/web:build:    Generating static pages (0/126) ...
+@datacare/web:build:    Generating static pages (31/126) 
+@datacare/web:build:    Generating static pages (62/126) 
+@datacare/web:build:    Generating static pages (94/126) 
+@datacare/web:build:  ✓ Generating static pages (126/126)
+@datacare/web:build:    Finalizing page optimization ...
+@datacare/web:build:    Collecting build traces ...
+@datacare/web:build: 
+@datacare/web:build: Route (app)                              Size     First Load JS
+@datacare/web:build: ┌ ○ /                                    144 B           106 kB
+@datacare/web:build: ├ ○ /_not-found                          144 B           106 kB
+@datacare/web:build: ├ ○ /admin/provision                     2.06 kB         107 kB
+@datacare/web:build: ├ ○ /admin/users                         3.93 kB         109 kB
+@datacare/web:build: ├ ○ /audit                               1.59 kB         107 kB
+@datacare/web:build: ├ ○ /backup                              2.35 kB         108 kB
+@datacare/web:build: ├ ○ /company/balance-transfer            3.52 kB         113 kB
+@datacare/web:build: ├ ○ /dashboard                           1.87 kB         111 kB
+@datacare/web:build: ├ ○ /forms/form-layouts                  1.75 kB         107 kB
+@datacare/web:build: ├ ○ /integrations                        2.92 kB         108 kB
+@datacare/web:build: ├ ○ /login                               1.77 kB         107 kB
+@datacare/web:build: ├ ƒ /masters/[name]                      7.26 kB         113 kB
+@datacare/web:build: ├ ○ /masters/auto-item                   3.66 kB         109 kB
+@datacare/web:build: ├ ○ /masters/design-book                 12.1 kB         135 kB
+@datacare/web:build: ├ ○ /masters/diamond-sizes               3.98 kB         109 kB
+@datacare/web:build: ├ ○ /masters/item-stock-limits           4.3 kB          110 kB
+@datacare/web:build: ├ ○ /masters/labour-update               4.28 kB         110 kB
+@datacare/web:build: ├ ○ /masters/opening-balance             3.79 kB         109 kB
+@datacare/web:build: ├ ○ /masters/party                       4.44 kB         110 kB
+@datacare/web:build: ├ ○ /masters/year-create                 2.33 kB         108 kB
+@datacare/web:build: ├ ○ /password-change                     1.85 kB         107 kB
+@datacare/web:build: ├ ƒ /reports/[report]                    11.1 kB         117 kB
+@datacare/web:build: ├ ○ /reports/karigar-ledger              3.34 kB         109 kB
+@datacare/web:build: ├ ○ /reports/report-layouts              1.71 kB         107 kB
+@datacare/web:build: ├ ○ /reports/tag-stock                   5.45 kB         111 kB
+@datacare/web:build: ├ ○ /reports/voucher-register            2.18 kB         108 kB
+@datacare/web:build: ├ ○ /select                              2.09 kB         107 kB
+@datacare/web:build: ├ ○ /settings                            2.47 kB         108 kB
+@datacare/web:build: ├ ○ /soon                                691 B           106 kB
+@datacare/web:build: ├ ○ /txn/ac-opbl                         5.5 kB          111 kB
+@datacare/web:build: ├ ○ /txn/bank-recon                      3.77 kB         109 kB
+@datacare/web:build: ├ ○ /txn/batch-receipt                   2.88 kB         112 kB
+@datacare/web:build: ├ ○ /txn/bill-to-bill                    5.72 kB         111 kB
+@datacare/web:build: ├ ○ /txn/bullion                         4.05 kB         109 kB
+@datacare/web:build: ├ ○ /txn/bullion-sale                    5.64 kB         115 kB
+@datacare/web:build: ├ ○ /txn/cheque-print                    1.7 kB          107 kB
+@datacare/web:build: ├ ○ /txn/consi-purchase                  11.2 kB         141 kB
+@datacare/web:build: ├ ○ /txn/contra                          3.52 kB         109 kB
+@datacare/web:build: ├ ○ /txn/counter-transfer                4.86 kB         110 kB
+@datacare/web:build: ├ ○ /txn/daily-rate                      4.13 kB         110 kB
+@datacare/web:build: ├ ○ /txn/dhrn-interest                   4.21 kB         110 kB
+@datacare/web:build: ├ ○ /txn/dhrn-issue                      8.36 kB         131 kB
+@datacare/web:build: ├ ○ /txn/dhrn-receipt                    4.91 kB         110 kB
+@datacare/web:build: ├ ○ /txn/e-crnt-note                     4.77 kB         110 kB
+@datacare/web:build: ├ ○ /txn/employee-jv                     3.6 kB          109 kB
+@datacare/web:build: ├ ○ /txn/estimate                        3.46 kB         130 kB
+@datacare/web:build: ├ ○ /txn/fine-inout                      3.36 kB         130 kB
+@datacare/web:build: ├ ○ /txn/fine-jv                         4.14 kB         110 kB
+@datacare/web:build: ├ ○ /txn/fine-sale                       6.08 kB         111 kB
+@datacare/web:build: ├ ○ /txn/gold-book                       5.54 kB         111 kB
+@datacare/web:build: ├ ○ /txn/hallmark-sale                   4.46 kB         131 kB
+@datacare/web:build: ├ ○ /txn/item-lot                        6.68 kB         116 kB
+@datacare/web:build: ├ ○ /txn/item-opening                    6.18 kB         112 kB
+@datacare/web:build: ├ ○ /txn/jobwork-issue                   290 B           116 kB
+@datacare/web:build: ├ ○ /txn/jobwork-receive                 293 B           116 kB
+@datacare/web:build: ├ ○ /txn/journal                         5.52 kB         111 kB
+@datacare/web:build: ├ ○ /txn/karigar-issue                   265 B           116 kB
+@datacare/web:build: ├ ○ /txn/karigar-receive                 266 B           116 kB
+@datacare/web:build: ├ ○ /txn/labour-sale                     4.16 kB         113 kB
+@datacare/web:build: ├ ○ /txn/ledger-adjust                   3.36 kB         109 kB
+@datacare/web:build: ├ ○ /txn/loan-issue                      4.91 kB         110 kB
+@datacare/web:build: ├ ○ /txn/loan-received                   8.37 kB         131 kB
+@datacare/web:build: ├ ○ /txn/location-amount                 5.7 kB          111 kB
+@datacare/web:build: ├ ○ /txn/melting                         8.09 kB         113 kB
+@datacare/web:build: ├ ○ /txn/membership                      5.86 kB         111 kB
+@datacare/web:build: ├ ○ /txn/mfg-issue                       6.86 kB         133 kB
+@datacare/web:build: ├ ○ /txn/mfg-lot-issue                   137 B           113 kB
+@datacare/web:build: ├ ○ /txn/mfg-lot-receive                 137 B           113 kB
+@datacare/web:build: ├ ○ /txn/mfg-order-issue                 4.87 kB         114 kB
+@datacare/web:build: ├ ○ /txn/mfg-receive                     7.48 kB         134 kB
+@datacare/web:build: ├ ○ /txn/old-item-sales                  173 B           116 kB
+@datacare/web:build: ├ ○ /txn/order-cancel                    5.84 kB         111 kB
+@datacare/web:build: ├ ○ /txn/other-commission                6.05 kB         111 kB
+@datacare/web:build: ├ ○ /txn/other-income                    7.28 kB         113 kB
+@datacare/web:build: ├ ○ /txn/other-purchase                  6.64 kB         112 kB
+@datacare/web:build: ├ ○ /txn/payment                         270 B           115 kB
+@datacare/web:build: ├ ○ /txn/physical-stock                  9.54 kB         115 kB
+@datacare/web:build: ├ ○ /txn/purchase                        9.82 kB         140 kB
+@datacare/web:build: ├ ○ /txn/purchase-hm                     4.84 kB         131 kB
+@datacare/web:build: ├ ○ /txn/purchase-quotation              9.84 kB         140 kB
+@datacare/web:build: ├ ○ /txn/purchase-return                 7.02 kB         133 kB
+@datacare/web:build: ├ ○ /txn/rate-cut                        5.63 kB         115 kB
+@datacare/web:build: ├ ○ /txn/receipt                         269 B           115 kB
+@datacare/web:build: ├ ○ /txn/reminders                       2.61 kB         108 kB
+@datacare/web:build: ├ ○ /txn/repair-customer-issue           9.42 kB         115 kB
+@datacare/web:build: ├ ○ /txn/repair-karigar-issue            3.72 kB         116 kB
+@datacare/web:build: ├ ○ /txn/repair-karigar-receipt          9.14 kB         115 kB
+@datacare/web:build: ├ ○ /txn/repair-receipt                  3.69 kB         116 kB
+@datacare/web:build: ├ ○ /txn/sale-return                     5.61 kB         132 kB
+@datacare/web:build: ├ ○ /txn/sales                           9.65 kB         140 kB
+@datacare/web:build: ├ ○ /txn/sales-order                     10 kB           143 kB
+@datacare/web:build: ├ ○ /txn/sales-quotation                 9.65 kB         140 kB
+@datacare/web:build: ├ ○ /txn/scheme                          5.69 kB         111 kB
+@datacare/web:build: ├ ○ /txn/scheme-gold-adjust              6.57 kB         112 kB
+@datacare/web:build: ├ ○ /txn/stock                           2.12 kB         108 kB
+@datacare/web:build: ├ ○ /txn/stock-adjust                    5.29 kB         111 kB
+@datacare/web:build: ├ ○ /txn/stock-in                        148 B           131 kB
+@datacare/web:build: ├ ○ /txn/stock-out                       148 B           131 kB
+@datacare/web:build: ├ ○ /txn/stone-dm-cf                     9.44 kB         115 kB
+@datacare/web:build: ├ ○ /txn/tag-adjust                      3.49 kB         109 kB
+@datacare/web:build: ├ ○ /txn/tag-cancel                      5.97 kB         115 kB
+@datacare/web:build: ├ ○ /txn/tag-opening                     8.93 kB         135 kB
+@datacare/web:build: ├ ○ /txn/tag-print                       3.56 kB         109 kB
+@datacare/web:build: ├ ○ /txn/tag-split                       7.55 kB         113 kB
+@datacare/web:build: ├ ○ /txn/tag-transfer                    6.73 kB         112 kB
+@datacare/web:build: ├ ○ /txn/tag-weight-diff                 7.49 kB         113 kB
+@datacare/web:build: ├ ○ /txn/tour                            7.18 kB         134 kB
+@datacare/web:build: ├ ○ /txn/tour-order                      4.32 kB         138 kB
+@datacare/web:build: ├ ○ /txn/tour-return                     4.95 kB         114 kB
+@datacare/web:build: ├ ○ /txn/vp-adjustment                   5.61 kB         111 kB
+@datacare/web:build: ├ ○ /txn/vp-parcel                       9 kB            114 kB
+@datacare/web:build: ├ ○ /txn/wholesale-sale                  4.15 kB         113 kB
+@datacare/web:build: ├ ○ /txn/wholesale-sale-return           6.08 kB         115 kB
+@datacare/web:build: ├ ○ /utilities                           1.84 kB         111 kB
+@datacare/web:build: ├ ○ /utilities/data-export               2.66 kB         108 kB
+@datacare/web:build: ├ ○ /utilities/data-refresh              1.1 kB          106 kB
+@datacare/web:build: ├ ○ /utilities/data-repair               3.32 kB         109 kB
+@datacare/web:build: ├ ○ /utilities/e-invoice                 4.25 kB         110 kB
+@datacare/web:build: ├ ○ /utilities/estimate-reset            2.87 kB         108 kB
+@datacare/web:build: ├ ○ /utilities/hdd-registry              1.87 kB         107 kB
+@datacare/web:build: ├ ○ /utilities/reminder-entry            3.46 kB         109 kB
+@datacare/web:build: ├ ○ /utilities/reminders                 3.69 kB         109 kB
+@datacare/web:build: ├ ○ /utilities/user-request              2.35 kB         108 kB
+@datacare/web:build: ├ ○ /utilities/voucher-renumber          2.82 kB         108 kB
+@datacare/web:build: ├ ○ /utilities/window-tiles              1.83 kB         107 kB
+@datacare/web:build: └ ○ /utilities/year-end                  2.85 kB         108 kB
+@datacare/web:build: + First Load JS shared by all            105 kB
+@datacare/web:build:   ├ chunks/2427-7819bcda6676e84d.js      50.6 kB
+@datacare/web:build:   ├ chunks/3f956f18-ad4336f1ffaf64a7.js  53 kB
+@datacare/web:build:   └ other shared chunks (total)          1.86 kB
+@datacare/web:build: 
+@datacare/web:build: 
+@datacare/web:build: ○  (Static)   prerendered as static content
+@datacare/web:build: ƒ  (Dynamic)  server-rendered on demand
+@datacare/web:build: 
+
+ Tasks:    7 successful, 7 total
+Cached:    3 cached, 7 total
+  Time:    51.823s 
+

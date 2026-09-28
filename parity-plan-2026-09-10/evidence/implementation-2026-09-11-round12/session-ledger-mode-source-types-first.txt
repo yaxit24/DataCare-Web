@@ -1,0 +1,21 @@
+packages/core/src/sessionLedgerMode.ts(235,19): error TS2345: Argument of type '{} | undefined' is not assignable to parameter of type 'object'.
+  Type 'undefined' is not assignable to type 'object'.
+packages/core/src/sessionLedgerMode.ts(245,11): error TS18048: 'length' is possibly 'undefined'.
+packages/core/src/sessionLedgerMode.ts(245,54): error TS18048: 'length' is possibly 'undefined'.
+packages/core/src/sessionLedgerMode.ts(247,35): error TS18048: 'length' is possibly 'undefined'.
+packages/core/src/sessionLedgerMode.ts(250,27): error TS18048: 'property' is possibly 'undefined'.
+packages/core/src/sessionLedgerMode.ts(266,22): error TS2345: Argument of type '{} | undefined' is not assignable to parameter of type 'object'.
+  Type 'undefined' is not assignable to type 'object'.
+packages/core/src/sessionLedgerMode.ts(572,18): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(573,16): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(574,22): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(581,16): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(635,17): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(636,16): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(637,16): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(643,7): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(644,7): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(645,7): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(661,23): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(662,16): error TS18046: 'data' is of type 'unknown'.
+packages/core/src/sessionLedgerMode.ts(663,16): error TS18046: 'data' is of type 'unknown'.

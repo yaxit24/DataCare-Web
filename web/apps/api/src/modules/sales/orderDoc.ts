@@ -1,5 +1,6 @@
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTenant } from '@datacare/db';
+import { resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import {
   docShell,
   esc,
@@ -17,44 +18,94 @@ import {
 export interface OrderScope {
   tenantId: string;
   coCode: string;
-  coYear?: string;
+  lcCode: string;
+  coYear: string;
   coBook: string;
   vchNo: string | number;
+  /** Required by the form-specific print routes; prevents one order form reading another family. */
+  family?: 'SALES ORDER' | 'TOUR ORDER';
 }
 
 export async function orderData(
   prisma: any,
   s: OrderScope,
-): Promise<{ header: any; lines: any[]; company: any; party: any } | null> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
-    const params = s.coYear
-      ? [s.coCode, s.coBook, formatVoucherNo(s.vchNo), s.coYear]
-      : [s.coCode, s.coBook, formatVoucherNo(s.vchNo)];
-    const h: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "SL_ORD_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3${s.coYear ? ' AND "CO_YEAR"=$4' : ''} LIMIT 1`,
-      ...params,
-    );
-    if (!h.length) return null;
-    const header = h[0];
-    const lines: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "SL_ORD_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
-      s.coCode,
-      s.coBook,
-      formatVoucherNo(s.vchNo),
-    );
-    const co: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "CO_MAST" WHERE "CO_CODE"=$1 LIMIT 1`,
-      s.coCode,
-    );
-    const party: any[] = header.AC_CODE
-      ? await tx.$queryRawUnsafe(
-          `SELECT * FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 LIMIT 1`,
-          s.coCode,
-          header.AC_CODE,
-        )
-      : [];
-    return { header, lines, company: co[0] ?? null, party: party[0] ?? null };
-  });
+): Promise<{ header: any; lines: any[]; company: any; party: any; imagePrint: boolean } | null> {
+  // TR_SALE_ORD.cs:9918 selects all five desktop voucher identity fields for printing.
+  // A missing year/location must not broaden a document query to another order.
+  for (const field of ['tenantId', 'coCode', 'lcCode', 'coYear', 'coBook', 'vchNo'] as const) {
+    if (!String(s[field] ?? '').trim()) {
+      const error = new Error(`Order confirmation requires ${field}`);
+      error.name = 'OrderDocumentValidationError';
+      throw error;
+    }
+  }
+  return withTenant(
+    prisma,
+    s.tenantId,
+    async (tx: any) => {
+      if (s.family) {
+        await resolveBookPolicyTx(tx, s, s.family, {
+          requireExplicitMainBook: true,
+          expectedTable: 'SL_ORD_DATA',
+        });
+      }
+      const params = [s.tenantId, s.coCode, s.lcCode, s.coYear, s.coBook, formatVoucherNo(s.vchNo)];
+      const where =
+        'tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6';
+      const h: any[] = await tx.$queryRawUnsafe(
+        `SELECT * FROM "SL_ORD_DATA" WHERE ${where} LIMIT 1`,
+        ...params,
+      );
+      if (!h.length) return null;
+      const header = h[0];
+      const lines: any[] = await tx.$queryRawUnsafe(
+        `SELECT * FROM "SL_ORD_DETL" WHERE ${where} ORDER BY "SR_NO"`,
+        ...params,
+      );
+      const co: any[] = await tx.$queryRawUnsafe(
+        `SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
+        s.tenantId,
+        s.coCode,
+      );
+      const party: any[] = header.AC_CODE
+        ? await tx.$queryRawUnsafe(
+            `SELECT * FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "AC_CODE"=$4 LIMIT 1`,
+            s.tenantId,
+            s.coCode,
+            s.lcCode,
+            header.AC_CODE,
+          )
+        : [];
+      const settings: any[] = lines.length
+        ? await tx.$queryRawUnsafe(
+            'SELECT "ORD_IMG_PRINT" FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$2',
+            s.tenantId,
+            s.coCode,
+          )
+        : [];
+      const imageFlags = new Set(
+        settings.map(
+          (row) =>
+            String(row.ORD_IMG_PRINT ?? '')
+              .trim()
+              .toUpperCase() || 'N',
+        ),
+      );
+      if (imageFlags.size > 1) {
+        const error = new Error('The company has conflicting order image print settings.');
+        error.name = 'OrderDocumentValidationError';
+        throw error;
+      }
+      return {
+        header,
+        lines,
+        company: co[0] ?? null,
+        party: party[0] ?? null,
+        imagePrint: imageFlags.has('Y'),
+      };
+    },
+    { isolationLevel: 'RepeatableRead' },
+  );
 }
 
 export interface OrderCtx {
@@ -64,7 +115,8 @@ export interface OrderCtx {
   fallbackName?: string;
   title?: string;
 }
-const dt = (v: any): string => (v ? String(v).slice(0, 10) : '');
+const dt = (v: any): string =>
+  v ? (v instanceof Date ? v.toISOString().slice(0, 10) : String(v).slice(0, 10)) : '';
 
 export function orderHtml(header: any, lines: any[], ctx: OrderCtx = {}): string {
   const h = header;

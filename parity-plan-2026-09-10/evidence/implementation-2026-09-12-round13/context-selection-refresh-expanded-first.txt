@@ -1,0 +1,85 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/sessionContextRefresh.db.test.ts (34 tests | 2 failed) 5037ms
+   × internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during signer; no rotation or revocation survives 2080ms
+     → expected PrismaClientKnownRequestError{ …(7) } to match object { code: 'session-expired' }
+(5 matching properties omitted from actual)
+   × internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during after-final-sample; no rotation or revocation survives 2111ms
+     → expected PrismaClientKnownRequestError{ …(7) } to match object { code: 'session-expired' }
+(5 matching properties omitted from actual)
+ ✓ test/sessionContextSelection.test.ts (74 tests) 12ms
+ ✓ test/sessionContextSelection.db.test.ts (15 tests) 4747ms
+   ✓ atomic session company selection on real PostgreSQL > rolls back tentative last-lock changes when signing crosses absolute expiry 2207ms
+   ✓ atomic session company selection on real PostgreSQL > checks fresh expiry after a real session-row lock wait 2223ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/sessionContextRefresh.db.test.ts > internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during signer; no rotation or revocation survives
+ FAIL  test/sessionContextRefresh.db.test.ts > internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during after-final-sample; no rotation or revocation survives
+AssertionError: expected PrismaClientKnownRequestError{ …(7) } to match object { code: 'session-expired' }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- Object {
+-   "code": "session-expired",
++ PrismaClientKnownRequestError {
++   "code": "P2010",
+  }
+
+ ❯ test/sessionContextRefresh.db.test.ts:743:9
+    741|           },
+    742|         });
+    743|         await expect(
+       |         ^
+    744|           refreshSessionContext(
+    745|             client,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 121 passed (123)
+   Start at  20:18:41
+   Duration  10.55s (transform 104ms, setup 0ms, collect 181ms, tests 9.79s, environment 0ms, prepare 87ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/sessionContextSelection.test.ts test/sessionContextSelection.db.test.ts test/sessionContextRefresh.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1

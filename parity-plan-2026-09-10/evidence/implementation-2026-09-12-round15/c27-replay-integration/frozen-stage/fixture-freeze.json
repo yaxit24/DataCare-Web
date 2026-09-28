@@ -1,0 +1,19 @@
+{
+  "fixtureSha256": "30169f426d943e0ebfde4f82bbde957603421a4163b4fa0ffafcec9e5a24da10",
+  "cases": 16,
+  "implementationAbsent": true,
+  "sourceInputs": [
+    {
+      "path": "extracted_code/DataCareNext/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnIncomingSave.independent.json",
+      "sha256": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50"
+    }
+  ]
+}

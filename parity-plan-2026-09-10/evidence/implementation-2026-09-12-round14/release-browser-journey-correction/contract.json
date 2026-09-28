@@ -1,0 +1,6 @@
+{
+  "problem": "Actual mandatory browser runner grew to17 in Round13, but release certification still freezes16. Full Round14 API run rejects the mismatch.",
+  "requiredBehavior": "Require all17 including sales-return-labour-replay exactly once; reject previous16-only all-pass evidence. Existing evidence provenance, failure, duplicate, synthetic and requirement-fingerprint gates remain strict.",
+  "historicalQualification": "Round13 API3050 pass precedes the browser runner addition. Its input manifest captured that dependency, but checkpoint-required API current-prefix domains omitted web/apps/web/test/parity.real-stack.mjs. Preserve39 and original actual pass; do not credit it as full final-source API proof. New required recipe must cover browser/test source and other external files the API tests read.",
+  "scope": "Certification requirement grows; no original acceptance denominator is relaxed and no production release is certified."
+}

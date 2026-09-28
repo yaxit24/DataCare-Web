@@ -1,0 +1,27 @@
+{
+ "form": "MS_TRADE",
+ "tables": [
+  "AC_MAST",
+  "BAL_GR",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "BAL_GR"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BAL_GR",
+  "USER_SET"
+ ],
+ "fKeys": [],
+ "messageBoxes": 7,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 1435
+}

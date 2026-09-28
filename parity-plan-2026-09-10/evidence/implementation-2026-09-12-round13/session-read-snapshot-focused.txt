@@ -1,0 +1,48 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/sessionContextReadSnapshot.db.test.ts (14 tests) 1712ms
+   ✓ session read snapshot schedules on isolated PostgreSQL > D04 clock is sampled after a real lock wait even when the MVCC row itself never changed 534ms
+   ✓ session read snapshot schedules on isolated PostgreSQL > D09 final SQL clock refuses a naturally expired session after callback reads 543ms
+ ✓ test/sessionContextReadSnapshot.test.ts (57 tests) 13ms
+
+ Test Files  2 passed (2)
+      Tests  71 passed (71)
+   Start at  22:57:36
+   Duration  2.25s (transform 75ms, setup 0ms, collect 114ms, tests 1.72s, environment 0ms, prepare 53ms)
+

@@ -1,0 +1,129 @@
+{
+  "desktopTablesWritten": 122,
+  "webWritesAtAll": 118,
+  "tablesNeverWrittenByWeb": 4,
+  "totalDesktopWrittenColumns": 3669,
+  "totalWebWrittenColumns": 3627,
+  "overallColumnCoveragePct": 98.9,
+  "avgCoverageOfWrittenTablesPct": 99.2,
+  "worstCoveredWrittenTables": [
+    {
+      "table": "TAG_STOCK",
+      "pct": 0.0,
+      "missing": 25
+    },
+    {
+      "table": "AC_DATA",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "AC_MAST",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "ADD_MAST",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "AD_ADJ",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "AD_DATA",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "AD_MAST",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "AD_MEMB",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "AD_OS",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "APR_DATA",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "APR_DETL",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "APR_IDTL",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BAL_GR",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BAR_CAN_DATA",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BAR_CAN_DETL",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BAR_CAN_IDTL",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BAR_DATA",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BAR_DETL",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BAR_IDTL",
+      "pct": 100.0,
+      "missing": 0
+    },
+    {
+      "table": "BILL_OS_DATA",
+      "pct": 100.0,
+      "missing": 0
+    }
+  ],
+  "largestUnwrittenTables": [
+    {
+      "table": "MENU_DATA",
+      "desktopColumns": 9
+    },
+    {
+      "table": "TAG_SET",
+      "desktopColumns": 8
+    },
+    {
+      "table": "APP_CHATMESSAGES",
+      "desktopColumns": 0
+    },
+    {
+      "table": "WEBHOOKINBOX",
+      "desktopColumns": 0
+    }
+  ]
+}

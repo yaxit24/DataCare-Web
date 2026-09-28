@@ -1,0 +1,5 @@
+# From the active web root, only after root integrates the four listed files:
+pnpm --filter @datacare/core exec vitest run test/saleReturnFinancialEffects.test.ts
+pnpm --filter @datacare/core exec tsc --noEmit --strict --noUncheckedIndexedAccess --isolatedModules --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext --types node src/saleReturnFinancialEffects.ts test/saleReturnFinancialEffects.test.ts
+# Root separately composes J01.replayInput -> trusted c27 replay -> context/guard/BAR/effect checks.
+# No command above grants write permission; no DB/API/browser/broad check was run by this owner.

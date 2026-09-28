@@ -1,0 +1,17 @@
+{
+  "stage": "Captured immediately after first runtime/type execution, before correcting import and key typing; not a before-run snapshot.",
+  "inputs": [
+    {
+      "path": "packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "d3a46a33cd01c8ab09c40734e2c7dd0ea8b7bc44f64048d2fb83bb9c2c20f3ec"
+    },
+    {
+      "path": "packages/core/test/saleReturnBillProjection.test.ts",
+      "sha256": "6ca93947345a2380aae1e432654b509bf3796e6431f1a6cb96995437a63d7310"
+    },
+    {
+      "path": "packages/core/test/fixtures/sale-return-bill-projection.v1.json",
+      "sha256": "3a13171acfc68e79a8b2f12e1b3169d97c85c23851bda7fed81bce49707eea8c"
+    }
+  ]
+}

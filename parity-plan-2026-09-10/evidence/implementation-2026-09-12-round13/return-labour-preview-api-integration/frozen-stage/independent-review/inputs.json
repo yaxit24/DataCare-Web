@@ -1,0 +1,64 @@
+{
+  "kind": "independent-staged-labour-api-source-review",
+  "capturedAtUtc": "2026-09-11T23:02:31.665318+00:00",
+  "disposition": "no-confirmed-blocker-with-documented-boundaries",
+  "executionCredit": null,
+  "files": [
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/src/modules/sales/saleReturnLabourReplay.ts",
+      "sha256": "caeca09dcbdff4990ce5ffbe00505605d498f92a63beaec640496398fb236626"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "bffe67a9bcec0d3686cd4b447efddab51a9932d66f7d1ec5a09f471635c4e232"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "5daa0b7eb2b9dede9933ba2e654647bc3c4bc6c3052ee2c1b5cc3ccbbf75bebd"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/src/routes/txn.ts",
+      "sha256": "e8bfb98b1263cc2c7559a540b035aa10efa26f623dc68f7358004de5b15bc691"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/baseline/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "b78bbed89d97a401227fa1399448b3b56081c07676986621b89e697ef968d953"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/baseline/apps/api/src/modules/rbac/routePolicy.ts",
+      "sha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/baseline/apps/api/src/routes/txn.ts",
+      "sha256": "ee608103ab3933bb588d76d48c8166ba2401f67fa29bb8fbd7757ba770bf1149"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "sha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/implementation-contract.md",
+      "sha256": "2bbfd5a65f6806f50daf3099a9204743be40024d89359861c52e558eee206ccc"
+    },
+    {
+      "path": "/tmp/datacare-session-read-snapshot-staged/web/apps/api/src/modules/auth/sessionContextReadSnapshot.ts",
+      "sha256": "9ec76ffb83786d7be4c0e258f8242f861315227463d68dbe1f7bb3249345a53b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "sha256": "c2d34d7a4270fe35a9af9455ecf402376e450377b95d392382c79268b99658ba"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingLabourCompose.ts",
+      "sha256": "62405dc4662d23978581f8a8b91708f659af681c014f75848d539c0386fd9865"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-api/independent-review/service-read-review.md",
+      "sha256": "4df8917c51d68e69d9b038e505f497217ddef1014f6466d1f82b4e7e34e1300f"
+    }
+  ]
+}

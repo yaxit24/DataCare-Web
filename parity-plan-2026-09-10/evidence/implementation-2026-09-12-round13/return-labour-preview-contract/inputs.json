@@ -1,0 +1,306 @@
+{
+  "kind": "prospective-saved-return-labour-preview-contract",
+  "status": "frozen-for-parent-review; implementation-not-started",
+  "validation": "36 unique literal candidate IDs; original24/23 fixture SHA equality; all references exist and hashed. No execution acceptance.",
+  "counts": {
+    "httpCandidates": 24,
+    "uiCandidates": 12,
+    "references": 49
+  },
+  "references": [
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/implementation-contract.md",
+      "kind": "authored-contract",
+      "bytes": 34045,
+      "sha256": "2bbfd5a65f6806f50daf3099a9204743be40024d89359861c52e558eee206ccc"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/http-ui-independent-candidates.json",
+      "kind": "authored-contract",
+      "bytes": 23768,
+      "sha256": "1b3ca92179d7ad9bc1bea938a6c1e7b68ee7b066ae9bb4af57a1d60bda198ee0"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/author-candidates.py",
+      "kind": "authored-contract",
+      "bytes": 16124,
+      "sha256": "47e27b84a2e444ecb6f8b47cee39f40fd444ccd7230a40cb13455409aa0a20db"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-preview-next/README.md",
+      "kind": "authored-contract",
+      "bytes": 1690,
+      "sha256": "8f976daa74c11c0ba02b4a7b47046f6b3e5706542a3799883f4318a99867e32e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "kind": "current-read-source",
+      "bytes": 21546,
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "kind": "current-read-source",
+      "bytes": 22044,
+      "sha256": "b78bbed89d97a401227fa1399448b3b56081c07676986621b89e697ef968d953"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "kind": "current-read-source",
+      "bytes": 6551,
+      "sha256": "c2d34d7a4270fe35a9af9455ecf402376e450377b95d392382c79268b99658ba"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/savedSaleReturn.ts",
+      "kind": "current-read-source",
+      "bytes": 25202,
+      "sha256": "f23c529ea4ea7003e5d6f553e03d4f596beb3914be24076d6a16ea26eeafffec"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingConfiguration.ts",
+      "kind": "current-read-source",
+      "bytes": 21346,
+      "sha256": "2352433c0fb065d5ef17c227a594ba887875c7d024817848da3056c852466505"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnSource.ts",
+      "kind": "current-read-source",
+      "bytes": 24686,
+      "sha256": "07f5116677cf88e8c0f879e40f29f811ada866af13f2462cce11f5762fcc7395"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextAccess.ts",
+      "kind": "current-read-source",
+      "bytes": 2910,
+      "sha256": "4caa701a9c7fb82a43ddaf1c5da01ce04be6a7f1028add2049ef64231ab6ea28"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextCommand.ts",
+      "kind": "current-read-source",
+      "bytes": 14128,
+      "sha256": "732fb9030ee94a8a246e05aa7a8a7f82284a9e0403523257764966afd03f5ad8"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/sessionContextValue.ts",
+      "kind": "current-read-source",
+      "bytes": 4706,
+      "sha256": "3a359d6b8a441a13c027752e172d9b5ddbe7ea794237f59518bc9661b6ec7b8c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/auth/businessScope.ts",
+      "kind": "current-read-source",
+      "bytes": 10678,
+      "sha256": "bd11c2f6fe392c622f73ef871b6d97eb7735836c3a56a6f79dd1c72fa5ba401c"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/authorization.ts",
+      "kind": "current-read-source",
+      "bytes": 5876,
+      "sha256": "d9931723006cb48a5f97cee93be7f5c6f38c240cf09744df7821233780a18ebe"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/rbac/routePolicy.ts",
+      "kind": "current-read-source",
+      "bytes": 34961,
+      "sha256": "2e51f3879c8728c8a526a0b4db2f82435e935b0ce690ab3dc52dcb4826053c2e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/routes/txn.ts",
+      "kind": "current-read-source",
+      "bytes": 285900,
+      "sha256": "ee608103ab3933bb588d76d48c8166ba2401f67fa29bb8fbd7757ba770bf1149"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/app.ts",
+      "kind": "current-read-source",
+      "bytes": 33029,
+      "sha256": "168d491e208c3695a4253e83b677b3f8eae80f916bca30af9651f4088047e41a"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/src/tenant.ts",
+      "kind": "current-read-source",
+      "bytes": 1381,
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "kind": "current-read-source",
+      "bytes": 262459,
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingLabour.ts",
+      "kind": "current-read-source",
+      "bytes": 16275,
+      "sha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingLabourCompose.ts",
+      "kind": "current-read-source",
+      "bytes": 17505,
+      "sha256": "62405dc4662d23978581f8a8b91708f659af681c014f75848d539c0386fd9865"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "kind": "current-read-source",
+      "bytes": 18267,
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "kind": "current-read-source",
+      "bytes": 24770,
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingProjection.ts",
+      "kind": "current-read-source",
+      "bytes": 11556,
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnBillProjection.ts",
+      "kind": "current-read-source",
+      "bytes": 7479,
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnBillTaxPolicy.ts",
+      "kind": "current-read-source",
+      "bytes": 7961,
+      "sha256": "4e12c8b129cbdc168bafb01cb40a7a723e1db2bfb57af57a3c73f9099b809622"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/money.ts",
+      "kind": "current-read-source",
+      "bytes": 3246,
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnBillReplay.ts",
+      "kind": "current-read-source",
+      "bytes": 14764,
+      "sha256": "9c7621a1ddce3e81fee8f15991398e5210035a5cd04b404124b0e69b14b8933b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnReplay.ts",
+      "kind": "current-read-source",
+      "bytes": 13631,
+      "sha256": "60093c4f2a0ded2a675c68496c958b5c62dfd24b526dc346c4183e3d9dc6a1ef"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnForm.ts",
+      "kind": "current-read-source",
+      "bytes": 14258,
+      "sha256": "45e1f06c642a3fee536972baf6dfaa3592bd0176f6b6018fabb6e7da151c0e1f"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/api.ts",
+      "kind": "current-read-source",
+      "bytes": 9026,
+      "sha256": "752786074a6de23482dc33560ed677751c59fc8d686c2d25d893ad82598cc015"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/pageContext.ts",
+      "kind": "current-read-source",
+      "bytes": 7511,
+      "sha256": "1f157fc8f55cee17e914bebbf77d5b709f42640f902f10228e41b4478dc20426"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/useOperationLease.ts",
+      "kind": "current-read-source",
+      "bytes": 1054,
+      "sha256": "584e1e1b609aa1a5d1fb10f0801ec5d4e4c3d28269b810a6d54b4ecfae87912b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnSavedPanel.tsx",
+      "kind": "current-read-source",
+      "bytes": 27145,
+      "sha256": "79b0af1731dfc0e15b1ecc57070413750c639d8964807f331f09fa10b75ae65b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnReplayPanel.tsx",
+      "kind": "current-read-source",
+      "bytes": 16874,
+      "sha256": "3c9a58eed10d73f53a6024b7e37542a5a271a09b71e60034ba2fcc32ed944b57"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/components/SaleReturnBillReplayPanel.tsx",
+      "kind": "current-read-source",
+      "bytes": 24021,
+      "sha256": "11478a6b1bb4f59009491606bfcd1ff3ccadd709b08ffce49e021925aee0e54b"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/saleReturnBillReplay.db.test.ts",
+      "kind": "current-read-source",
+      "bytes": 23516,
+      "sha256": "75a8535c45d1be37d466fa88d7bd406c6962bdc8071ed5b2f78d185832ce48db"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/fixtures/saleReturnBillReplay.fixture.ts",
+      "kind": "current-read-source",
+      "bytes": 6877,
+      "sha256": "15b7d9d591052c38be2efbd6aef083b376fb848bd8c03e751f8eb963f1471eb5"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/test/fixtures/saleReturnBillReplay.independent.json",
+      "kind": "current-read-source",
+      "bytes": 10054,
+      "sha256": "1d0cecba70ed751c64a14b506f18468a49778987dda285b0a0abbb37b7b48410"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 579807,
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_UPDATE.cs",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 1126527,
+      "sha256": "943525d918df85170ee3a4733bdf81cdc1d5b7e61b5efed27add7bc2883d8cb7"
+    },
+    {
+      "path": "/tmp/datacare-return-next-admission/next-admission-contract.md",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 5252,
+      "sha256": "40c4f718173465275a0396db861c98acf5eee686c48e745d7ff8afa9d45b17ac"
+    },
+    {
+      "path": "/tmp/datacare-return-next-admission/labour-code-independent-candidates.json",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 17175,
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/implementation-contract.md",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 9158,
+      "sha256": "5f47c2adcb05b54b923274c7566e1dd23c5f4d4e933cdd03d0d12c313ff165fd"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/labour-compose-independent.v1.json",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 530087,
+      "sha256": "fd55edb9173dbc40475d7dd04a63877226600d36c983f20b1421ab013ee73dd6"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-contract/inputs.json",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 2810,
+      "sha256": "20a8ffcfba0bad984377a15f66ac87c5728e2379da8d0cdf34bb42b4e8f66dbb"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-staged/inputs.json",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 3409,
+      "sha256": "ffce266143cb53f8bcba4cad3ade6fee7f51283f552340170fe991ea01fa6aca"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-compose-review/independent-source-review.md",
+      "kind": "source-or-frozen-prerequisite",
+      "bytes": 6732,
+      "sha256": "2b86ef5c7f4a27610be7960b2eaa827c5a43412f4faf9dd751dae4e38a45efae"
+    }
+  ]
+}

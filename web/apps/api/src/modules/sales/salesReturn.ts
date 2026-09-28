@@ -513,7 +513,7 @@ export async function createSaleReturn(
       ITM_SIZE: line.in.itmSize ?? null,
       TR_TYPE: 'I',
       ITM_SIGN: '+',
-      ITM_QTY: num(line.in.netWt) || num(line.in.pcs) || 1,
+      ITM_QTY: 1,
       ITM_PCS: num(line.in.pcs) || 1,
       ITM_GWT: num(line.in.grossWt),
       ITM_NWT: num(line.in.netWt),

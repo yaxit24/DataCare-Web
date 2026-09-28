@@ -1,0 +1,257 @@
+--- a/web/apps/api/src/modules/rbac/authorization.ts
++++ b/web/apps/api/src/modules/rbac/authorization.ts
+@@ -93,16 +93,33 @@
+  * Creating a new record requires View, while modifying an existing record requires Edit; this
+  * preserves the desktop behavior demonstrated by a user who can create a sale but cannot edit it.
+  */
++export interface FormAuthorizationInput {
++  tenantId: string;
++  lcCode: string;
++  principal: Principal;
++  form: string;
++  action: RouteAction;
++  adminOnly?: boolean;
++}
++
+ export async function authorizeForm(
+   prisma: any,
+-  input: {
+-    tenantId: string;
+-    lcCode: string;
+-    principal: Principal;
+-    form: string;
+-    action: RouteAction;
+-    adminOnly?: boolean;
+-  },
++  input: FormAuthorizationInput,
++): Promise<FormAuthorization> {
++  // Preserve the existing public wrapper's pre-transaction administrator shortcut.
++  if (input.adminOnly && !input.principal.isAdmin) {
++    throw new FormForbiddenError(input.form, input.action);
++  }
++  if (input.principal.isAdmin) {
++    return { form: input.form, action: input.action, principal: input.principal };
++  }
++  return withTenant(prisma, input.tenantId, (tx) => authorizeFormTx(tx, input));
++}
++
++/** The caller owns the tenant-bound transaction; keep the existing authorization decisions. */
++export async function authorizeFormTx(
++  tx: Tx,
++  input: FormAuthorizationInput,
+ ): Promise<FormAuthorization> {
+   if (input.adminOnly && !input.principal.isAdmin) {
+     throw new FormForbiddenError(input.form, input.action);
+@@ -123,16 +140,14 @@
+     FRM_EDIT?: string | null;
+     FRM_DELETE?: string | null;
+     FRM_PRINT?: string | null;
+-  }> = await withTenant(prisma, input.tenantId, (tx: any) =>
+-    tx.$queryRawUnsafe(
+-      `SELECT "FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT"
++  }> = await tx.$queryRawUnsafe(
++    `SELECT "FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT"
+          FROM "USER_SET"
+         WHERE "LC_CODE"=$1 AND "USER_NAME"=$2
+           AND UPPER(TRIM(COALESCE("SUB_MENU",''))) IN (${placeholders})
+         ORDER BY "row_id"
+         LIMIT 1`,
+-      ...params,
+-    ),
++    ...params,
+   );
+   const row = rows[0];
+   const view = Y(row?.FRM_VIEW);
+--- a/web/apps/api/src/modules/sales/salesOrder.ts
++++ b/web/apps/api/src/modules/sales/salesOrder.ts
+@@ -1,4 +1,5 @@
+-import { withTenant } from '@datacare/db';
++import { withTenant, type Tx } from '@datacare/db';
++import { withSessionContextCommand } from '../auth/sessionContextCommand.js';
+ import { createHash } from 'node:crypto';
+ import {
+   readStoneSubDetail,
+@@ -1593,11 +1594,7 @@
+     );
+ }
+ 
+-export async function editSalesOrder(
+-  prisma: any,
+-  input: SalesOrderInput,
+-  requestedVoucherNo: number | string,
+-): Promise<{ vchNo: number; total: number; advance: number }> {
++function prepareSalesOrderEdit(input: SalesOrderInput, requestedVoucherNo: number | string) {
+   completeOrderScope(input.scope);
+   const scope = input.scope;
+   const voucherNo = formatVoucherNo(requestedVoucherNo);
+@@ -1606,59 +1603,119 @@
+   orderDate(input.functionDate, 'functionDate');
+   if (input.vchTime != null) orderClock(input.vchTime);
+   for (const line of input.lines ?? []) orderDate(line.orderDeliveryDate, 'orderDeliveryDate');
+-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+-    await resolveOrderBookTx(tx, scope, requestedMode(input.orderMainBook));
+-    await lockOrderMutationTx(tx, scope, voucherNo);
+-    const persisted = await persistedVoucherHeaderTx(tx, {
+-      table: 'SL_ORD_DATA',
+-      scope,
+-      voucherNo,
+-      extraColumns: [],
++  return { scope, voucherNo, requestedDate };
++}
++
++/** Existing internal compatibility entry; it does not establish HTTP session-context admission. */
++export async function editSalesOrder(
++  prisma: any,
++  input: SalesOrderInput,
++  requestedVoucherNo: number | string,
++): Promise<{ vchNo: number; total: number; advance: number }> {
++  const prepared = prepareSalesOrderEdit(input, requestedVoucherNo);
++  return withTenant(prisma, prepared.scope.tenantId, (tx) =>
++    runSalesOrderEditTx(tx, input, prepared),
++  );
++}
++
++/** Existing edit/replacement write set, entirely within the caller's transaction. */
++export async function editSalesOrderTx(
++  tx: Tx,
++  input: SalesOrderInput,
++  requestedVoucherNo: number | string,
++): Promise<{ vchNo: number; total: number; advance: number }> {
++  return runSalesOrderEditTx(tx, input, prepareSalesOrderEdit(input, requestedVoucherNo));
++}
++
++async function runSalesOrderEditTx(
++  tx: Tx,
++  input: SalesOrderInput,
++  prepared: ReturnType<typeof prepareSalesOrderEdit>,
++): Promise<{ vchNo: number; total: number; advance: number }> {
++  const { scope, voucherNo, requestedDate } = prepared;
++  await resolveOrderBookTx(tx, scope, requestedMode(input.orderMainBook));
++  await lockOrderMutationTx(tx, scope, voucherNo);
++  const persisted = await persistedVoucherHeaderTx(tx, {
++    table: 'SL_ORD_DATA',
++    scope,
++    voucherNo,
++    extraColumns: [],
++  });
++  const state = await assertOrderVersionTx(tx, scope, voucherNo, input.expectedVersion);
++  const editBlockedReason = unsupportedOrderEdit(state);
++  if (editBlockedReason) throw new SaleValidationError(editBlockedReason);
++  const childCounts = new Map<number, number>();
++  for (const child of state.SL_ORD_IDTL)
++    childCounts.set(n(child.SR_NO), (childCounts.get(n(child.SR_NO)) ?? 0) + 1);
++  // Older clients flatten one component into each parent line. Such a request cannot represent
++  // an existing multi-component order, including imported noncontiguous parent serials. Require
++  // explicit component collections before replacing any rows; never infer deletion from omission.
++  if (
++    [...childCounts.values()].some((count) => count > 1) &&
++    (!input.lines || input.lines.some((line) => line.components === undefined))
++  )
++    throw new SaleValidationError(
++      'This order has multiple components. Reload it and submit complete component lists before editing.',
++    );
++  const writeDate = requestedDate ?? orderDate(persisted.VCH_DATE, 'saved vchDate', true)!;
++  if (input.orderMainBook !== 'TOUR ORDER') await assertSalesOrderDateTx(tx, scope, writeDate);
++  for (const date of [persisted.VCH_DATE, writeDate])
++    await assertPeriodOpen(tx, scope.tenantId, {
++      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: date }] },
+     });
+-    const state = await assertOrderVersionTx(tx, scope, voucherNo, input.expectedVersion);
+-    const editBlockedReason = unsupportedOrderEdit(state);
+-    if (editBlockedReason) throw new SaleValidationError(editBlockedReason);
+-    const childCounts = new Map<number, number>();
+-    for (const child of state.SL_ORD_IDTL)
+-      childCounts.set(n(child.SR_NO), (childCounts.get(n(child.SR_NO)) ?? 0) + 1);
+-    // Older clients flatten one component into each parent line. Such a request cannot represent
+-    // an existing multi-component order, including imported noncontiguous parent serials. Require
+-    // explicit component collections before replacing any rows; never infer deletion from omission.
+-    if (
+-      [...childCounts.values()].some((count) => count > 1) &&
+-      (!input.lines || input.lines.some((line) => line.components === undefined))
+-    )
+-      throw new SaleValidationError(
+-        'This order has multiple components. Reload it and submit complete component lists before editing.',
+-      );
+-    const writeDate = requestedDate ?? orderDate(persisted.VCH_DATE, 'saved vchDate', true)!;
+-    if (input.orderMainBook !== 'TOUR ORDER') await assertSalesOrderDateTx(tx, scope, writeDate);
+-    for (const date of [persisted.VCH_DATE, writeDate])
+-      await assertPeriodOpen(tx, scope.tenantId, {
+-        ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: date }] },
+-      });
+-    await assertOrderUnconsumedTx(tx, scope, voucherNo);
+-    const hd = formatVoucherNo(text(persisted.HD_VCH_NO));
+-    await deleteVoucherWriteSetTx(tx, {
+-      tables: ORDER_WRITE_TABLES,
+-      key: { scope, voucherNo },
+-      tempBook: { voucherNo: hd },
+-    });
+-    return createSalesOrder(
+-      prisma,
+-      { ...input, vchDate: writeDate },
+-      {
+-        tx,
+-        vchNo: Number(voucherNo),
+-        hdVchNo: hd,
+-        mainUser: text(persisted.MAIN_USER),
+-        persistedClock: state.SL_ORD_DATA[0].VCH_CLOCK,
+-        previousLines: state.SL_ORD_DETL,
+-        previousComponents: state.SL_ORD_IDTL,
+-        previousHeader: state.SL_ORD_DATA[0],
+-      },
+-    );
++  await assertOrderUnconsumedTx(tx, scope, voucherNo);
++  const hd = formatVoucherNo(text(persisted.HD_VCH_NO));
++  await deleteVoucherWriteSetTx(tx, {
++    tables: ORDER_WRITE_TABLES,
++    key: { scope, voucherNo },
++    tempBook: { voucherNo: hd },
+   });
++  return createSalesOrder(
++    undefined,
++    { ...input, vchDate: writeDate },
++    {
++      tx,
++      vchNo: Number(voucherNo),
++      hdVchNo: hd,
++      mainUser: text(persisted.MAIN_USER),
++      persistedClock: state.SL_ORD_DATA[0].VCH_CLOCK,
++      previousLines: state.SL_ORD_DETL,
++      previousComponents: state.SL_ORD_IDTL,
++      previousHeader: state.SL_ORD_DATA[0],
++    },
++  );
++}
++
++/** Required-authority entry for the single participating Sales Order HTTP edit route. */
++export async function editSalesOrderInSession(
++  prisma: Parameters<typeof withTenant>[0],
++  request: { identity: unknown; input: SalesOrderInput; voucherNo: number | string },
++): Promise<{ vchNo: number; total: number; advance: number }> {
++  // This HTTP entry requires a saved version even though internal/Tour compatibility allows omission.
++  if (
++    typeof request.input.expectedVersion !== 'string' ||
++    request.input.expectedVersion.length !== 64 ||
++    /[^0-9a-f]/.test(request.input.expectedVersion)
++  ) {
++    throw new SaleValidationError('A valid saved Sales Order expectedVersion is required.');
++  }
++  if (request.input.orderMainBook !== undefined && request.input.orderMainBook !== 'SALES ORDER') {
++    throw new SaleValidationError('This session command edits Sales Orders only.');
++  }
++  // Detach the complete request (including Date objects) before any wait. Admission and work share this scope.
++  const input = structuredClone(request.input);
++  input.scope = Object.freeze({ ...input.scope });
++  const prepared = prepareSalesOrderEdit(input, request.voucherNo);
++  return withSessionContextCommand(
++    prisma,
++    request.identity,
++    {
++      form: 'Sales/Sales Order',
++      action: 'update',
++      scope: prepared.scope,
++    },
++    (tx) => runSalesOrderEditTx(tx, input, prepared),
++  );
+ }
+ 
+ export async function listSalesOrders(

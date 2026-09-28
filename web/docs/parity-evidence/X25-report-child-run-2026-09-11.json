@@ -1,0 +1,104 @@
+{
+  "card": "X25",
+  "parents": [
+    "P10-01",
+    "P10-05",
+    "P10-06"
+  ],
+  "slice": "scoped-report-parent-component-binding",
+  "implementationState": "partial",
+  "engineeringState": "focused-checks-passed",
+  "desktopAcceptance": null,
+  "realBrowserAcceptance": null,
+  "businessAcceptance": null,
+  "productionAcceptance": null,
+  "capturedAtUtc": "2026-09-10T21:22:44.515391+00:00",
+  "sourceState": "shared-dirty-development-tree; this bundle identifies only the listed inputs, not a clean release candidate",
+  "repositoryHead": "41a7ba4e2bd529be25f80144c97bb647b6795781",
+  "inputFiles": [
+    {
+      "path": "apps/api/src/modules/reports/reportBind.ts",
+      "sha256": "17614d960028b8955470700ed209458cc9e30e4167e65321907f620a0da5d7fe"
+    },
+    {
+      "path": "apps/api/src/modules/reports/reportBindingContract.ts",
+      "sha256": "054199003b3f774dc762c86584013967200df6d3c6f94a7ef9647799ca84d1da"
+    },
+    {
+      "path": "apps/api/src/modules/reports/reportEngine.ts",
+      "sha256": "3f732d3e2839f080b354711ab4162ba2c8e74410484aa60249c99343df312f25"
+    },
+    {
+      "path": "apps/api/test/reportBind.test.ts",
+      "sha256": "38440274a7087cb11db5e659da37260794b6e27ba4be1e377a388bd2906f7944"
+    },
+    {
+      "path": "apps/api/test/reportChildren.db.test.ts",
+      "sha256": "3fa3d7e1b49d1ba2df9538d522939836c680b1e931aa9d1d7a8abd212f871207"
+    },
+    {
+      "path": "apps/api/test/reportRender.db.test.ts",
+      "sha256": "7e0391399d3ebf284779a7aca7f6f3f2ecda112417e4903c3641ff7388ef359c"
+    },
+    {
+      "path": "apps/api/test/reportEngine.test.ts",
+      "sha256": "644c22b21308f27c65c120325c2eee848ab3109159da507110cdcdeae8a638ab"
+    },
+    {
+      "path": "packages/db/prisma/schema.prisma",
+      "sha256": "c6124e738f5a982896a42253eb414c3b7e7b25cf41b9e40fff1f7931c3aded90"
+    },
+    {
+      "path": "packages/db/src/tenant.ts",
+      "sha256": "1f158835529c4b5c1692c05e377b00c6b14a9bba3b72b2e43a12ff3687fc0a32"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "879301e14ee6f08fab429b1e54952ab118dabc371c5ce2dc7677bfde20337c1b"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_SALE.cs",
+      "sha256": "b122837a890d99c370ec60e309b59a5207b65556493ce29f62ca6584e428d690"
+    },
+    {
+      "path": "../unified/src/csharp/DataCareNext/TR_PURC.cs",
+      "sha256": "ad25a6e1976dd0776dbdc1c723908da8b394cbd2de686079061018174d3ee58c"
+    }
+  ],
+  "inputBundleSha256": "c917cdf4b7e9d23ba2e54cbae6bb1b5058d2c465bf002f82fda4ba63ee4980d4",
+  "evidenceMode": "synthetic deterministic fixtures; real PostgreSQL non-owner restricted-role reads; HTML engine assertions; concurrency scheduling instrumented",
+  "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- reportBind.test.ts reportEngine.test.ts reportRender.db.test.ts reportChildren.db.test.ts",
+  "database": "positively identified disposable localhost:55433; isolated Compose project; migrations; forced RLS",
+  "result": {
+    "filesPassed": 4,
+    "filesFailed": 0,
+    "testsPassed": 50,
+    "testsFailed": 0,
+    "testsSkipped": 0,
+    "exitCode": 0
+  },
+  "log": "docs/parity-evidence/X25-report-child-test-2026-09-11.txt",
+  "logSha256": "97123d31b9eee5ac5469e64e849fed7d4ff0669990b2b717e823d2238b24008a",
+  "otherChecks": [
+    {
+      "command": "pnpm --filter @datacare/api typecheck",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check -- <owned report files>",
+      "result": "passed"
+    }
+  ],
+  "resolvedDuringDevelopment": [
+    "Initial fixture used sales-only ITM_REMARK for PR/KR; corrected fixture to common ITM_SIZE without weakening amount/scope assertions.",
+    "A direct unit-test invocation without the isolated environment failed default database reachability before collecting tests; final run used the required isolated wrapper, without skips."
+  ],
+  "contractAndCaseMatrix": "docs/parity-evidence/X25-report-child-binding-2026-09-11.md",
+  "templateInventory": "docs/parity-evidence/X25-report-binding-scope-2026-09-11.json",
+  "remaining": [
+    "79 previously inferred template names are explicitly contained pending correct contracts.",
+    "Registered templates still require complete Crystal formula/format/grouping semantics and desktop comparisons.",
+    "Browser/PDF/device/copy/physical-print and business acceptance are outstanding.",
+    "X25 and its parent requirements remain open."
+  ]
+}

@@ -1,0 +1,18 @@
+
+> @datacare/api@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+> vitest run "test/creditNoteIrnAmounts.test.ts" "test/einvoice.test.ts" "test/einvoice_gsp.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database unreachable (Invalid `prisma.$queryRawUnsafe()` invocation:) — database-backed tests SKIPPED because ALLOW_SKIP_DB_TESTS=1.
+         This run does NOT establish posting or RLS behaviour.
+ ✓ test/einvoice_gsp.test.ts (5 tests) 6ms
+ ✓ test/creditNoteIrnAmounts.test.ts (8 tests) 46ms
+ ✓ test/einvoice.test.ts (6 tests) 3ms
+
+ Test Files  3 passed (3)
+      Tests  19 passed (19)
+   Start at  04:47:02
+   Duration  2.25s (transform 211ms, setup 0ms, collect 158ms, tests 55ms, environment 1ms, prepare 261ms)
+

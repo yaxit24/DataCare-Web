@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnIncomingLabour.test.ts (73 tests) 32ms
+
+ Test Files  1 passed (1)
+      Tests  73 passed (73)
+   Start at  03:11:10
+   Duration  367ms (transform 104ms, setup 0ms, collect 108ms, tests 32ms, environment 0ms, prepare 46ms)
+

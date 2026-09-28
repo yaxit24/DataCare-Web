@@ -708,7 +708,7 @@ async function writeTagOpeningTx(
     VCH_SRNO: identities[index]!.vchSrno,
     TR_TYPE: 'P',
     ITM_SIGN: '+',
-    ITM_QTY: n(line.netWt) || n(line.pcs) || 1,
+    ITM_QTY: n(line.pcs) || 1,
     ITM_PCS: n(line.pcs) || 1,
     ITM_GWT: n(line.grossWt),
     ITM_NWT: n(line.netWt),
@@ -733,7 +733,7 @@ async function writeTagOpeningTx(
         VCH_SRNO: 0,
         TR_TYPE: 'O',
         ITM_SIGN: '-',
-        ITM_QTY: n(line.netWt) || n(line.pcs) || 1,
+        ITM_QTY: n(line.pcs) || 1,
         ITM_PCS: n(line.pcs) || 1,
         ITM_GWT: n(line.grossWt),
         ITM_NWT: n(line.netWt),
@@ -809,7 +809,7 @@ async function writeItemOpeningTx(
     TAG_NO: 'N',
     TR_TYPE: 'P',
     ITM_SIGN: '+',
-    ITM_QTY: n(line.netWt) || n(line.pcs) || 1,
+    ITM_QTY: n(line.pcs) || 1,
     ITM_PCS: n(line.pcs) || 1,
     ITM_GWT: n(line.grossWt),
     ITM_NWT: n(line.netWt),
@@ -1051,7 +1051,26 @@ export async function getTagOpening(
     requestedVoucherNo,
     'tag-opening',
     'BAR_DETL',
-    '"SR_NO","TAG_NO","VCH_SRNO","IT_CODE","TBL_CODE","DESIGN_NO","ITM_SIZE","ITM_PCS","ITM_GWT","ITM_OTH_WT","ITM_NWT","ITM_GHT_WT","ITM_TOUCH","ITM_WEST_PRC","ITM_FINE","ITM_RATE","ITM_MRP","LBR_PRC","LBR_TYPE","LBR_RATE","LBR_AMT","OTH_AMT","TAG_COST"',
+    // P0-06: this list must stay SYMMETRICAL with the fields `writeTagOpeningTx` accepts.
+    //
+    // It previously selected 22 of the 65 line fields the create path writes. Because `editTagOpening`
+    // deletes the whole write set and rebuilds it from its input, reopening a tag and saving it unchanged
+    // silently WIPED the other 43 — every hallmark id and weight, the whole karigar cost block, the JDT
+    // weights, and the order and manufacturing links. Nothing failed; the columns simply came back empty.
+    //
+    // The round-trip is asserted in `tagOpeningRoundTrip.db.test.ts`, which fails if this list and the
+    // writer ever drift apart again.
+    '"SR_NO","TAG_NO","VCH_SRNO","IT_CODE","TBL_CODE","DESIGN_NO","ITM_SIZE","ITM_PCS","ITM_GWT",' +
+      '"ITM_OTH_WT","ITM_NWT","ITM_GHT_WT","ITM_TOUCH","ITM_WEST_PRC","ITM_FINE","ITM_RATE","ITM_MRP",' +
+      '"LBR_PRC","LBR_TYPE","LBR_RATE","LBR_AMT","OTH_AMT","TAG_COST",' +
+      '"ITM_STYLE","ITM_COLOR","ITM_MARGIN","LBR_CODE","SL_TYPE","EMP_ISU","DESIGN_IMG_ID",' +
+      '"MAIN_MARGIN_PRC","MAIN_MRP",' +
+      '"HM_ID2","HM_ID3","HM_ID4","HM_ID_WT","HM_ID2_WT","HM_ID3_WT","HM_ID4_WT",' +
+      '"KR_LBR_RATE","KR_LBR_AMT","KR_OTH_AMT","KR_OTH_RATE","KR_OTH_FINE","KR_TOT_FINE",' +
+      '"KR_GWT_TOUCH","KR_COST","KR_NAME","KR_WAX_WT",' +
+      '"JDT_JDT_WT","JDT_GHT_WT","JDT_KUN_WT","JDT_KUN_TOUCH","JDT_KUN_NET","JDT_WAX_WT",' +
+      '"ORD_NO","ORD_SRNO","ORD_YRCD","ORD_DBCD","ORD_AC","ORD_LC_CODE","SF_NO",' +
+      '"MFG_NO","MFG_YRCD","MFG_DBCD","MFG_SRNO"',
   );
   return {
     voucherNo,
@@ -1083,6 +1102,52 @@ export async function getTagOpening(
       lbrAmt: n(row.LBR_AMT),
       othAmt: n(row.OTH_AMT),
       tagCost: n(row.TAG_COST),
+      // The rich desktop grid, restored. Order follows the writer so the two can be read side by side.
+      itmStyle: text(row.ITM_STYLE),
+      itmColor: text(row.ITM_COLOR),
+      itmMargin: n(row.ITM_MARGIN),
+      lbrCode: text(row.LBR_CODE),
+      slType: text(row.SL_TYPE),
+      empIsu: text(row.EMP_ISU),
+      designImageId: text(row.DESIGN_IMG_ID),
+      mainMarginPct: n(row.MAIN_MARGIN_PRC),
+      mainMrp: n(row.MAIN_MRP),
+      // Hallmark ids are TEXT on both sides. The desktop's HUID is alphanumeric, so reading them as numbers
+      // would corrupt every id containing a letter — P0-06 records the page doing exactly that.
+      hallmarkId2: text(row.HM_ID2),
+      hallmarkId3: text(row.HM_ID3),
+      hallmarkId4: text(row.HM_ID4),
+      hallmarkIdWt: n(row.HM_ID_WT),
+      hallmarkId2Wt: n(row.HM_ID2_WT),
+      hallmarkId3Wt: n(row.HM_ID3_WT),
+      hallmarkId4Wt: n(row.HM_ID4_WT),
+      karigarLbrRate: n(row.KR_LBR_RATE),
+      karigarLbrAmt: n(row.KR_LBR_AMT),
+      karigarOthAmt: n(row.KR_OTH_AMT),
+      karigarOthRate: n(row.KR_OTH_RATE),
+      karigarOthFine: n(row.KR_OTH_FINE),
+      karigarTotFine: n(row.KR_TOT_FINE),
+      karigarGwtTouch: n(row.KR_GWT_TOUCH),
+      karigarCost: n(row.KR_COST),
+      karigarName: text(row.KR_NAME),
+      karigarWaxWt: n(row.KR_WAX_WT),
+      jdtJdtWt: n(row.JDT_JDT_WT),
+      jdtGhtWt: n(row.JDT_GHT_WT),
+      jdtKunWt: n(row.JDT_KUN_WT),
+      jdtKunTouch: n(row.JDT_KUN_TOUCH),
+      jdtKunNet: n(row.JDT_KUN_NET),
+      jdtWaxWt: n(row.JDT_WAX_WT),
+      ordNo: text(row.ORD_NO),
+      ordSrno: n(row.ORD_SRNO),
+      ordYrcd: text(row.ORD_YRCD),
+      ordDbcd: text(row.ORD_DBCD),
+      ordAc: text(row.ORD_AC),
+      ordLcCode: text(row.ORD_LC_CODE),
+      sfNo: text(row.SF_NO),
+      mfgNo: text(row.MFG_NO),
+      mfgYrcd: text(row.MFG_YRCD),
+      mfgDbcd: text(row.MFG_DBCD),
+      mfgSrno: n(row.MFG_SRNO),
     })),
   };
 }

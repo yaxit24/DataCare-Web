@@ -1,0 +1,15 @@
+{
+ "binary": "NextEmp.exe",
+ "size": 320000,
+ "purpose": "bulk WhatsApp/SMS messaging companion (feature-scan)",
+ "features": [
+  "2NextEmp.UT_WHATSAPP_OLD+VB$StateMachine_302_DgvSms",
+  "5NextEmp.UT_WHATSAPP_OLD+VB$StateMachine_299_SingelMsg",
+  "6NextEmp.UT_WHATSAPP_OLD+VB$StateMachine_300_PartyOsSms",
+  "7NextEmp.UT_WHATSAPP_OLD+VB$StateMachine_301_BirthdaySms",
+  "8NextEmp.UT_WHATSAPP_OLD+VB$StateMachine___Lambda$__300-0",
+  "8NextEmp.UT_WHATSAPP_OLD+VB$StateMachine___Lambda$__300-1",
+  "8NextEmp.UT_WHATSAPP_OLD+VB$StateMachine___Lambda$__301-0",
+  "8NextEmp.UT_WHATSAPP_OLD+VB$StateMachine___Lambda$__301-1"
+ ]
+}

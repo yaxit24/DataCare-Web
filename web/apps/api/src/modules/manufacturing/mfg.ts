@@ -768,7 +768,7 @@ function stockRows(
     TAG_NO: l.tagNo ?? null,
     TR_TYPE: trType,
     ITM_SIGN: sign,
-    ITM_QTY: num(l.netWt),
+    ITM_QTY: 1,
     ITM_PCS: num(l.pcs),
     ITM_GWT: num(l.grossWt),
     ITM_NWT: num(l.netWt),
@@ -1149,16 +1149,72 @@ export async function getMfg(prisma: any, scopeInput: VoucherScope, vchNoInput: 
       ordYrcd: d.ORD_YRCD,
       ordDbcd: d.ORD_DBCD,
       ordSrno: Number(d.ORD_SRNO ?? 0),
+      /**
+       * P3-1: the reconciliation, karigar-side, old-metal, material and provenance fields.
+       *
+       * The writer persists every one of these (`:607-643`, `:726-735`) and `MFG_DETL` carries the
+       * columns, but the reader omitted them — so they were accepted, stored, and lost on the next
+       * save, and no screen could sensibly offer them because a reopen showed nothing. This is the
+       * third time in this module family that the WRITE side was complete and the READ side was not.
+       *
+       * `itmGhat` is receive-only at the writer (`:735` gates it on `ctx.isReceipt`), matching the
+       * desktop: filings and polishing dust come back when the ornament is received, not when metal
+       * is issued. Reading it unconditionally is still correct — an issue voucher simply returns 0.
+       */
+      totalGrossWt: Number(d.TOT_GWT ?? 0),
+      totalLessWt: Number(d.TOT_LWT ?? 0),
+      karigarJobworkWt: Number(d.KR_JDT_WT ?? 0),
+      karigarMinorityWt: Number(d.KR_MINO_WT ?? 0),
+      karigarMinorityAmount: Number(d.KR_MINO_AMT ?? 0),
+      oldGrossWt: Number(d.OLD_GWT ?? 0),
+      oldFine: Number(d.OLD_FINE ?? 0),
+      oldLabourAmount: Number(d.OLD_LBR_AMT ?? 0),
+      oldOther: Number(d.OLD_OTH ?? 0),
+      addOtherWt: Number(d.ADD_OTH_WT ?? 0),
+      lessOtherWt: Number(d.LESS_OTH_WT ?? 0),
+      itmGhat: Number(d.ITM_GHAT ?? 0),
+      dmPcs: Number(d.DM_PCS ?? 0),
+      dmWt: Number(d.DM_WT ?? 0),
+      fittingItCode: d.FTNG_IT_CODE,
+      adjustDate: d.ADJ_DATE,
+      repYrcd: d.REP_YRCD,
+      repDbcd: d.REP_DBCD,
+      repNo: d.REP_NO,
+      repSrno: Number(d.REP_SRNO ?? 0),
+      repAcCode: d.REP_AC_CODE,
+      /**
+       * Every field `MfgComponent` accepts, not a subset.
+       *
+       * This mapping used to return 7 of 22, which made the module LOOK safe in a reader audit — it
+       * does select MFG_IDTL — while an unchanged save still dropped the labour columns and the whole
+       * return/breakage block. `MFG_IDTL` is in the write set, so edit deletes and rebuilds it from
+       * the request, and a request built from a 7-field read carries only 7 fields. Selecting a table
+       * is half the job; the mapping is the other half. Pinned by the manufacturing case in
+       * `test/operatorDepth.roundtrip.db.test.ts`.
+       */
       components: components
         .filter((c) => Number(c.SR_NO) === Number(d.SR_NO))
         .map((c) => ({
+          vchSrno: Number(c.VCH_SRNO ?? 0) || undefined,
           itCode: c.IT_CODE,
+          itType: c.IT_TYPE,
+          tagNo: c.TAG_NO,
           pcs: Number(c.IT_PCS ?? 0),
+          pcsWt: Number(c.IT_PCS_WT ?? 0),
           grossWt: Number(c.IT_GWT ?? 0),
           conPct: Number(c.IT_CON_PRC ?? 0),
           conWt: Number(c.IT_CON_WT ?? 0),
+          rateType: c.IT_RATE_TYPE,
           rate: Number(c.IT_RATE ?? 0),
           amount: Number(c.IT_AMT ?? 0),
+          lbrRate: Number(c.IT_LBR_RATE ?? 0),
+          lbrAmt: Number(c.IT_LBR_AMT ?? 0),
+          netAmt: Number(c.IT_NET_AMT ?? 0),
+          oldItmIsu: c.OLD_ITM_ISU,
+          rtnPcs: Number(c.RTN_PCS ?? 0),
+          rtnWt: Number(c.RTN_GWT ?? 0),
+          brokPcs: Number(c.BROK_PCS ?? 0),
+          brokWt: Number(c.BROK_WT ?? 0),
         })),
     }));
     // DISPLAY_DATA preserves VCH_TIME/HD_VCH_NO/MAIN_USER in every scoped desktop form; examples:

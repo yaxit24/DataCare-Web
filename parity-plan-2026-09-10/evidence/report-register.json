@@ -1,0 +1,4952 @@
+[
+  {
+    "id": "AcCrList",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcCrList.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcCrList.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcDrList",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcDrList.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcDrList.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcFineGold",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcFineGold.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcFineGold.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcFineSilver",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcFineSilver.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcFineSilver.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcGroupRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcGroupRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcGroupRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcLastVisit",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcLastVisit.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcLastVisit.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcLedger",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcLedger.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcLedger.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcLedgerSelected",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcLedgerSelected.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcLedgerSelected.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcOsArea",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcOsArea.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcOsArea.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcOsWithAdd",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcOsWithAdd.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcOsWithAdd.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcPurcRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcPurcRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcPurcRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcPurcSummRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcPurcSummRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcPurcSummRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcPurcWhRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcPurcWhRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcPurcWhRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcSaleWhRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcSaleWhRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcSaleWhRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcSummLdr",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcSummLdr.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcSummLdr.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcWithWt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcWithWt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcWithWt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcWithWtGold",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcWithWtGold.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcWithWtGold.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AcWithWtSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AcWithWtSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AcWithWtSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AngdiyaIsuRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AngdiyaIsuRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AngdiyaIsuRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AprBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AprBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AprBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AprInOut",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AprInOut.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AprInOut.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AprPan",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AprPan.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AprPan.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "AprPartyWise",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/AprPartyWise.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/AprPartyWise.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "B2BPurcBillA4Tax",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/B2BPurcBillA4Tax.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/B2BPurcBillA4Tax.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "B2BPurcImgVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/B2BPurcImgVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/B2BPurcImgVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "B2BSaleBillA4Tax",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/B2BSaleBillA4Tax.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/B2BSaleBillA4Tax.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "B2BSaleImgVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/B2BSaleImgVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/B2BSaleImgVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BalanceHz",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BalanceHz.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BalanceHz.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BarPrint10",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BarPrint10.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BarPrint10.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BarPrint13",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BarPrint13.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BarPrint13.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BillRecVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BillRecVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BillRecVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BillWiseOrderAdjust",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BillWiseOrderAdjust.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BillWiseOrderAdjust.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BulCustAdjust",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BulCustAdjust.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BulCustAdjust.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BulCustBooking",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BulCustBooking.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BulCustBooking.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "BullBookBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/BullBookBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/BullBookBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CashBankBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CashBankBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CashBankBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CashBankBillAc",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CashBankBillAc.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CashBankBillAc.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ChqPrint010",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ChqPrint010.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ChqPrint010.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ChqPrint011",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ChqPrint011.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ChqPrint011.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ChqPrint012",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ChqPrint012.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ChqPrint012.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ChqPrint013",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ChqPrint013.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ChqPrint013.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ChqPrint014",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ChqPrint014.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ChqPrint014.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ChqPrint135",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ChqPrint135.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ChqPrint135.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CntrTagStkRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CntrTagStkRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CntrTagStkRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CntrTagSumRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CntrTagSumRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CntrTagSumRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "Company",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/Company.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/Company.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ConsiBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ConsiBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ConsiBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ContraBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ContraBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ContraBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CounterSale",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CounterSale.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CounterSale.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CounterTrfr",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CounterTrfr.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CounterTrfr.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CustRepIsu",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CustRepIsu.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CustRepIsu.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CustRepRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CustRepRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CustRepRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "CustRepRecBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/CustRepRecBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/CustRepRecBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DharnDue",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DharnDue.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DharnDue.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhiranIssuRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhiranIssuRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhiranIssuRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhiranitemRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhiranitemRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhiranitemRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhiranReg",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhiranReg.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhiranReg.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhiranStock",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhiranStock.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhiranStock.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhrnIntRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhrnIntRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhrnIntRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhrnIssue",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhrnIssue.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhrnIssue.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhrnIssueImg",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhrnIssueImg.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhrnIssueImg.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhrnKhataVahi",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhrnKhataVahi.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhrnKhataVahi.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhrnKhataVahiSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhrnKhataVahiSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhrnKhataVahiSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhrnOsLetter",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhrnOsLetter.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhrnOsLetter.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DhrnReceivedSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DhrnReceivedSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DhrnReceivedSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "DiamondSf",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/DiamondSf.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/DiamondSf.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "EInvoice",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/EInvoice.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/EInvoice.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "EInvOthIncom",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/EInvOthIncom.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/EInvOthIncom.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "EmpIsuRecVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/EmpIsuRecVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/EmpIsuRecVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "EmpSaleReport",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/EmpSaleReport.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/EmpSaleReport.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "FineJvBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/FineJvBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/FineJvBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "FineSalesGstBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/FineSalesGstBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/FineSalesGstBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "Form12",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/Form12.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/Form12.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "Form8",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/Form8.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/Form8.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "GhatDesignIsu",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/GhatDesignIsu.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/GhatDesignIsu.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "GhatTagPrnt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/GhatTagPrnt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/GhatTagPrnt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "GoldInterest",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/GoldInterest.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/GoldInterest.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "GroupStkRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/GroupStkRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/GroupStkRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "Gstr_1",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/Gstr_1.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/Gstr_1.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "Gstr_2",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/Gstr_2.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/Gstr_2.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "Gstr_3",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/Gstr_3.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/Gstr_3.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "HedgingFixVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/HedgingFixVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/HedgingFixVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "InTax_PurcRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/InTax_PurcRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/InTax_PurcRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemInOut",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemInOut.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemInOut.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemInOutSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemInOutSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemInOutSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemInword",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemInword.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemInword.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemLedger",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemLedger.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemLedger.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemOutword",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemOutword.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemOutword.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemPurcVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemPurcVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemPurcVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemSalesVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemSalesVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemSalesVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemSalesVchWithQr",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemSalesVchWithQr.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemSalesVchWithQr.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItemStkRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItemStkRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItemStkRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItmLotPrint",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItmLotPrint.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItmLotPrint.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItmStkBalance",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItmStkBalance.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItmStkBalance.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItmStkWithGrid",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItmStkWithGrid.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItmStkWithGrid.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ItmStkWithOthWt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ItmStkWithOthWt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ItmStkWithOthWt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JadtarInOut",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JadtarInOut.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JadtarInOut.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JadtarIssue",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JadtarIssue.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JadtarIssue.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JadtarRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JadtarRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JadtarRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JdtProcessRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JdtProcessRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JdtProcessRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdAmt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdAmt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdAmt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdFine",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdFine.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdFine.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdFineHz",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdFineHz.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdFineHz.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdFineHzSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdFineHzSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdFineHzSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdFineHzSummVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdFineHzSummVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdFineHzSummVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdFineSl",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdFineSl.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdFineSl.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdFineSlHz",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdFineSlHz.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdFineSlHz.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "JmUdFineSlSum",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/JmUdFineSlSum.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/JmUdFineSlSum.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrDesignIsuImg",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrDesignIsuImg.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrDesignIsuImg.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrDesignIsuVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrDesignIsuVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrDesignIsuVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrDmIsuRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrDmIsuRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrDmIsuRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrDmWtInOut",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrDmWtInOut.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrDmWtInOut.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrIsuBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrIsuBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrIsuBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrIsuBillGst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrIsuBillGst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrIsuBillGst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrRecVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrRecVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrRecVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrRecVchGst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrRecVchGst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrRecVchGst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "KrRepRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/KrRepRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/KrRepRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LabourBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LabourBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LabourBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LabourBillGst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LabourBillGst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LabourBillGst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LabourWorkVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LabourWorkVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LabourWorkVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LbrWorkRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LbrWorkRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LbrWorkRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LedrAdjVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LedrAdjVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LedrAdjVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LedrInOut",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LedrInOut.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LedrInOut.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LedrInOutWh",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LedrInOutWh.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LedrInOutWh.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LoanStock",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LoanStock.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LoanStock.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "LoanWisePacket",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/LoanWisePacket.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/LoanWisePacket.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembBonus",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembBonus.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembBonus.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembCommRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembCommRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembCommRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembDailyRecRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembDailyRecRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembDailyRecRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembGoldRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembGoldRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembGoldRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembOpenNew",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembOpenNew.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembOpenNew.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembQr",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembQr.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembQr.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembRptAdd",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembRptAdd.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembRptAdd.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MembVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MembVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MembVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MfgGhatIsu",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MfgGhatIsu.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MfgGhatIsu.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MfgGhatRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MfgGhatRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MfgGhatRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MfgLedger",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MfgLedger.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MfgLedger.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MfgMinoIsuRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MfgMinoIsuRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MfgMinoIsuRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MfgVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MfgVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MfgVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "MtlIsu",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/MtlIsu.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/MtlIsu.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OldItmSaleVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OldItmSaleVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OldItmSaleVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "KR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrdAdjBillWise",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrdAdjBillWise.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrdAdjBillWise.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrdAdvAdj",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrdAdvAdj.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrdAdvAdj.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrdAdvRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrdAdvRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrdAdvRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrdDesignSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrdDesignSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrdDesignSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrdDetlPanding",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrdDetlPanding.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrdDetlPanding.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrdDetlRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrdDetlRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrdDetlRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrderBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrderBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrderBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrderCancelVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrderCancelVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrderCancelVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrderVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrderVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrderVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OrdVchImg",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OrdVchImg.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OrdVchImg.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OthCommVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OthCommVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OthCommVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OthExpUae",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OthExpUae.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OthExpUae.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OthItmLoose",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OthItmLoose.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OthItmLoose.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OthItmStud",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OthItmStud.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OthItmStud.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "OutTax_SaleRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/OutTax_SaleRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/OutTax_SaleRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PartyInterest",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PartyInterest.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PartyInterest.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PartyIntSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PartyIntSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PartyIntSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PaymentVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PaymentVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PaymentVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ProdStkRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ProdStkRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ProdStkRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ProfitLossHz",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ProfitLossHz.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ProfitLossHz.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PrRtnBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PrRtnBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PrRtnBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PrRtnBillGst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PrRtnBillGst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PrRtnBillGst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PrTaxRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PrTaxRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PrTaxRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcBillA4",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcBillA4.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcBillA4.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcBillA4Gst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcBillA4Gst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcBillA4Gst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcBillHalfGst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcBillHalfGst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcBillHalfGst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcGroupWise",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcGroupWise.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcGroupWise.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcItem",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcItem.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcItem.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcReport",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcReport.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcReport.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "PurcToSalesFixingVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/PurcToSalesFixingVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/PurcToSalesFixingVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "PR_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "QrPrint10",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/QrPrint10.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/QrPrint10.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RateCutBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RateCutBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RateCutBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RateCutItmBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RateCutItmBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RateCutItmBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RateRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RateRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RateRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ReminderAll",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ReminderAll.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ReminderAll.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ReparingCustIsu",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ReparingCustIsu.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ReparingCustIsu.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ReparingKrRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ReparingKrRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ReparingKrRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "ReparingRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/ReparingRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/ReparingRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RojMel",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RojMel.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RojMel.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RojMelCash",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RojMelCash.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RojMelCash.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RojMelCrDr",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RojMelCrDr.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RojMelCrDr.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RojMelEstmat",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RojMelEstmat.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RojMelEstmat.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RojMelGr",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RojMelGr.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RojMelGr.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RojMelItem",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RojMelItem.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RojMelItem.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RojMelJmaUdhar",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RojMelJmaUdhar.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RojMelJmaUdhar.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "RtlHuidPrint",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/RtlHuidPrint.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/RtlHuidPrint.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SafeStkSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SafeStkSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SafeStkSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalarySlip",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalarySlip.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalarySlip.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SaleOrnaIsu",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SaleOrnaIsu.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SaleOrnaIsu.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SaleReport",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SaleReport.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SaleReport.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SaleRtnReport",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SaleRtnReport.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SaleRtnReport.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillA4",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillA4.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillA4.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillA4_WithImage",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillA4_WithImage.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillA4_WithImage.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillA4Gst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillA4Gst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillA4Gst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillHz",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillHz.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillHz.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillHzGst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillHzGst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillHzGst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillOrgDup",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillOrgDup.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillOrgDup.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillOs",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillOs.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillOs.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesBillVr",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesBillVr.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesBillVr.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesGroupWise",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesGroupWise.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesGroupWise.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesItem",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesItem.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesItem.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesQuotation",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesQuotation.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesQuotation.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesRtnA4",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesRtnA4.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesRtnA4.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesRtnA4Gst",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesRtnA4Gst.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesRtnA4Gst.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesRtnBillUae",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesRtnBillUae.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesRtnBillUae.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesRtnItem",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesRtnItem.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesRtnItem.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesRtnSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesRtnSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesRtnSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesToPurcFixingVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesToPurcFixingVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesToPurcFixingVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SalesWithOrder",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SalesWithOrder.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SalesWithOrder.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SchmAdj",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SchmAdj.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SchmAdj.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SchmMonthRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SchmMonthRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SchmMonthRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SchmPassBook",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SchmPassBook.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SchmPassBook.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SchmRecVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SchmRecVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SchmRecVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SlBillWapp",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SlBillWapp.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SlBillWapp.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "SlTaxRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/SlTaxRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/SlTaxRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "StkInOutVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/StkInOutVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/StkInOutVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "StngIsuRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/StngIsuRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/StngIsuRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TableStkGwtRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TableStkGwtRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TableStkGwtRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagCanBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagCanBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagCanBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagHuIdRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagHuIdRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagHuIdRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagItmSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagItmSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagItmSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagReNumberVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagReNumberVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagReNumberVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagSplitVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagSplitVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagSplitVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagStkIdtlRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagStkIdtlRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagStkItemSumRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagStkItemSumRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagStkItemSumRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagStkRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagStkRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagStkRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagStkRptDmSum",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagStkRptDmSum.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagStkRptDmSum.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagStkSummRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagStkSummRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagStkSummRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagWtChangeVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagWtChangeVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagWtChangeVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TagWtChangSplit",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TagWtChangSplit.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TagWtChangSplit.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TaxInOutRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TaxInOutRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TaxInOutRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TaxSummUae",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TaxSummUae.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TaxSummUae.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TempAdd2",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TempAdd2.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TempAdd2.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TempAdd3",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TempAdd3.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TempAdd3.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TempPhone",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TempPhone.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TempPhone.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TourOrdImg",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TourOrdImg.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TourOrdImg.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TourOrdVch",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TourOrdVch.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TourOrdVch.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "TRialBalHz",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/TRialBalHz.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/TRialBalHz.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "UserDtlRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/UserDtlRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/UserDtlRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "VpAdjustBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/VpAdjustBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/VpAdjustBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "VpIsuRpt",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/VpIsuRpt.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/VpIsuRpt.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhHuidPrint",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhHuidPrint.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhHuidPrint.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhSalesBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhSalesBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhSalesBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhSalesBillSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhSalesBillSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhSalesBillSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhSalesEmp",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhSalesEmp.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhSalesEmp.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhSalesImage",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhSalesImage.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhSalesImage.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhSalesIsuRec",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhSalesIsuRec.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhSalesIsuRec.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhSalesRtnBill",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhSalesRtnBill.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhSalesRtnBill.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "WhSalesSumm",
+    "kind": "supplied-crystal",
+    "binary": "unified/reports/WhSalesSumm.rpt",
+    "binaryPresent": true,
+    "webSpec": "web/apps/api/report-specs/WhSalesSumm.spec.json",
+    "webSpecPresent": true,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "aprbillimg",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "balzoom",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "bankadj",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "billwiseos",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "empdaysumm",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "empsumm",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "franchisebill",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "jdterskt",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "jdtvch",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "krisureport",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "krrecreport",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "loctamtvch",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "mainacsumm",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "mltingisu",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "purcquot",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "reminderschm",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "remindervch",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "salesrtna4print",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "vpparcelbill",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  },
+  {
+    "id": "whquotation",
+    "kind": "absent-referenced",
+    "binary": null,
+    "binaryPresent": false,
+    "webSpec": null,
+    "webSpecPresent": false,
+    "retainedBinder": "SL_DATA_DEFAULT_UNSAFE",
+    "status": "unverified",
+    "requiredEvidence": [
+      "parameter-map",
+      "explicit-dataset-binding",
+      "filters-and-scope",
+      "desktop-data-diff",
+      "visual-and-physical-output",
+      "print-rights"
+    ]
+  }
+]

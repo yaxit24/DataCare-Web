@@ -1,0 +1,197 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/salesOrderSessionCommand.db.test.ts (15 tests | 4 failed) 1687ms
+   × Sales Order financial edit joins the admitted HTTP session transaction > the real session entry changes only advance100→125 and preserves children, raw precision, clock and accounting ownership 246ms
+     → expected [ …(2) ] to deeply equal [ …(2) ]
+   × Sales Order financial edit joins the admitted HTTP session transaction > mounted authenticated PUT uses the retained context and one balanced125 posting; an old document retry conflicts without another write 105ms
+     → expected [ …(2) ] to deeply equal [ …(2) ]
+   × Sales Order financial edit joins the admitted HTTP session transaction > an actual row-lock wait cannot rebase captured input scope, amount, parent or child values 77ms
+     → expected [ …(2) ] to deeply equal [ …(2) ]
+   × Sales Order financial edit joins the admitted HTTP session transaction > two real same-session edits with one document version commit one125 advance and one domain conflict 63ms
+     → expected [ …(2) ] to deeply equal [ …(2) ]
+ ✓ test/sessionContextCommand.db.test.ts (13 tests) 1034ms
+   ✓ session command lock schedules on isolated PostgreSQL > samples expiry after an actual session-row lock wait, before invoking work 529ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/salesOrderSessionCommand.db.test.ts > Sales Order financial edit joins the admitted HTTP session transaction > the real session entry changes only advance100→125 and preserves children, raw precision, clock and accounting ownership
+AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "ac": "CASH",
+      "cr": "0",
+      "dr": "100",
+-     "sign": "D",
++     "sign": "",
+    },
+    Object {
+      "ac": "PARTY",
+      "cr": "100",
+      "dr": "0",
+-     "sign": "C",
++     "sign": "",
+    },
+  ]
+
+ ❯ footprint test/salesOrderSessionCommand.db.test.ts:395:9
+    393|           }))
+    394|           .sort((a, b) => String(a.ac).localeCompare(String(b.ac))),
+    395|       ).toEqual([
+       |         ^
+    396|         { ac: "CASH", dr: advance, cr: "0", sign: "D" },
+    397|         { ac: "PARTY", dr: "0", cr: advance, sign: "C" },
+ ❯ test/salesOrderSessionCommand.db.test.ts:596:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/salesOrderSessionCommand.db.test.ts > Sales Order financial edit joins the admitted HTTP session transaction > mounted authenticated PUT uses the retained context and one balanced125 posting; an old document retry conflicts without another write
+AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "ac": "CASH",
+      "cr": "0",
+      "dr": "100",
+-     "sign": "D",
++     "sign": "",
+    },
+    Object {
+      "ac": "PARTY",
+      "cr": "100",
+      "dr": "0",
+-     "sign": "C",
++     "sign": "",
+    },
+  ]
+
+ ❯ footprint test/salesOrderSessionCommand.db.test.ts:395:9
+    393|           }))
+    394|           .sort((a, b) => String(a.ac).localeCompare(String(b.ac))),
+    395|       ).toEqual([
+       |         ^
+    396|         { ac: "CASH", dr: advance, cr: "0", sign: "D" },
+    397|         { ac: "PARTY", dr: "0", cr: advance, sign: "C" },
+ ❯ test/salesOrderSessionCommand.db.test.ts:626:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  test/salesOrderSessionCommand.db.test.ts > Sales Order financial edit joins the admitted HTTP session transaction > an actual row-lock wait cannot rebase captured input scope, amount, parent or child values
+AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "ac": "CASH",
+      "cr": "0",
+      "dr": "100",
+-     "sign": "D",
++     "sign": "",
+    },
+    Object {
+      "ac": "PARTY",
+      "cr": "100",
+      "dr": "0",
+-     "sign": "C",
++     "sign": "",
+    },
+  ]
+
+ ❯ footprint test/salesOrderSessionCommand.db.test.ts:395:9
+    393|           }))
+    394|           .sort((a, b) => String(a.ac).localeCompare(String(b.ac))),
+    395|       ).toEqual([
+       |         ^
+    396|         { ac: "CASH", dr: advance, cr: "0", sign: "D" },
+    397|         { ac: "PARTY", dr: "0", cr: advance, sign: "C" },
+ ❯ test/salesOrderSessionCommand.db.test.ts:704:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  test/salesOrderSessionCommand.db.test.ts > Sales Order financial edit joins the admitted HTTP session transaction > two real same-session edits with one document version commit one125 advance and one domain conflict
+AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "ac": "CASH",
+      "cr": "0",
+      "dr": "100",
+-     "sign": "D",
++     "sign": "",
+    },
+    Object {
+      "ac": "PARTY",
+      "cr": "100",
+      "dr": "0",
+-     "sign": "C",
++     "sign": "",
+    },
+  ]
+
+ ❯ footprint test/salesOrderSessionCommand.db.test.ts:395:9
+    393|           }))
+    394|           .sort((a, b) => String(a.ac).localeCompare(String(b.ac))),
+    395|       ).toEqual([
+       |         ^
+    396|         { ac: "CASH", dr: advance, cr: "0", sign: "D" },
+    397|         { ac: "PARTY", dr: "0", cr: advance, sign: "C" },
+ ❯ test/salesOrderSessionCommand.db.test.ts:1037:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 24 passed (28)
+   Start at  21:54:21
+   Duration  4.36s (transform 791ms, setup 0ms, collect 1.22s, tests 2.72s, environment 0ms, prepare 53ms)
+
+undefined
+/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/salesOrderSessionCommand.db.test.ts test/sessionContextCommand.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1

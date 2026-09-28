@@ -1,0 +1,55 @@
+{
+  "capturedAt": "2026-09-10T23:19:07.755Z",
+  "runtimeFiles": [
+    {
+      "path": "apps/api/dist/modules/reports/reportEngine.js",
+      "sha256": "db39534c6c3f1090079870224c80ae151b33526efe86c45582b79106b50e76ca"
+    },
+    {
+      "path": "apps/api/dist/modules/reports/reportBindingContract.js",
+      "sha256": "2d1814e1c36fb7badd753fb0180face005649706539edf583e1f95067c3d4341"
+    },
+    {
+      "path": "apps/api/dist/modules/reports/orderReportValues.js",
+      "sha256": "c0773bdc88caa46c0d52452446fa0d5ed0836fd1cb77ec8bc7048c21e98e13cf"
+    },
+    {
+      "path": "apps/api/dist/modules/reports/orderReportLayout.js",
+      "sha256": "e5fe327a5c6932eca8598f769e23c45b0293a3ed5a3c633b1cb3cc4f59547a46"
+    }
+  ],
+  "results": [
+    {
+      "report": "OrderVch",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "pageErrors": []
+    },
+    {
+      "report": "OrderBill",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdVch",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 1,
+      "outside": [],
+      "overlaps": [],
+      "pageErrors": []
+    },
+    {
+      "report": "TourOrdVch-long",
+      "fixture": "synthetic; not a desktop golden",
+      "pages": 4,
+      "outside": [],
+      "overlaps": [],
+      "pageErrors": []
+    }
+  ]
+}

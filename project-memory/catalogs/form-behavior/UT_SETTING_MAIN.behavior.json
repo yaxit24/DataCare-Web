@@ -1,0 +1,320 @@
+{
+ "form": "UT_SETTING_MAIN",
+ "loc": 9496,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * From CO_SET WHERE CO_CODE = ' ? '",
+  "SELECT * From CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT LEDR_BILL_COL FROM CO_SET WHERE CO_CODE = ' ? '",
+  "SELECT ALL_ROF_REMOVE FROM CO_SET WHERE CO_CODE = ' ? '",
+  "SELECT KR_DESIGN_IMG_PRINT FROM CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT SALES_WITH_HMTAX FROM CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT PURC_WITH_HMTAX FROM CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT SL_TDS_TAX FROM CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT PR_TDS_TAX FROM CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT DESIGN_HELP FROM CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "SELECT ITM_FINE_LOCK FROM CO_SET_NEW WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET LEDR_BILL_COL = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET ALL_ROF_REMOVE = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET KR_DESIGN_IMG_PRINT = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET SALES_WITH_HMTAX = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET PURC_WITH_HMTAX = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET SL_TDS_TAX = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET PR_TDS_TAX = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET DESIGN_HELP = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET ITM_FINE_LOCK = ? 'Y' ? 'N' ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET QR_CODE_GEN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET OS_BILL_SMS = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET LOAN_INT_TYPE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET SL_BILL_IMG = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET TOT_FINE_STK_TYPE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET PR_RATE_ROF = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET ADMIN_SMS = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET CUST_SMS = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET COUNTRY_ID = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET WAPP_SL_PRINT = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET TAG_ENTRY_DESIGN_GEN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET ORD_IMG_PRINT = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET OS_BILL_ORNA_ISU = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET MOBILE_HELP = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET PRINT_FORM_BTN = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET EMP_CODE_MANDATORY = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET FONT_CHANGE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET FONT_SIZE = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET FONT_NAME = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET FONT_STYLE_TYPE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET GRID_ROW_HIGHT = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET LAST_DAY_LOCK = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET LOCK_DATE = ' ? MM/dd/yyyy ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET CASH_LIMIT = ? WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET TOT_AMT_ROF = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET ITM_RATE_ROF = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET GRID_SCROLL = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET SET STOCK_RPT_TYPE = ' ? ' WHERE CO_CODE = ' ? '",
+  "UPDATE CO_SET_NEW SET SL_TAG_WT_DIFF = ' ? ' WHERE CO_CODE = ' ? '"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 1
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Ledger Report Zoom Then Bill Column Show Set...",
+   "when": ""
+  },
+  {
+   "message": "All Form LbrRate - LbrAmt - Oth Amt - Itmrate - itm Amt Rof Set Plese ReOpen Software ...",
+   "when": ""
+  },
+  {
+   "message": "Karigar Design Isu Image Print Set...",
+   "when": ""
+  },
+  {
+   "message": "Sales Bill With Hm Tax Set ....",
+   "when": ""
+  },
+  {
+   "message": "Purchase Bill With Hm Tax Set ....",
+   "when": ""
+  },
+  {
+   "message": "Sales Bill With Tds Tax Set ....",
+   "when": ""
+  },
+  {
+   "message": "Purchase Bill With Tds Tax Set ....",
+   "when": ""
+  },
+  {
+   "message": "Design Wise Tag Help Set ....",
+   "when": ""
+  },
+  {
+   "message": "WhSale and Purchase Item Fine Columan Lock ....",
+   "when": ""
+  },
+  {
+   "message": "Tag Qr Code Generate....Set",
+   "when": ""
+  },
+  {
+   "message": "Sales bill Sms And Whatsapp With Os Amount is...Set",
+   "when": ""
+  },
+  {
+   "message": "Loan Intrest Type Is Set....",
+   "when": ""
+  },
+  {
+   "message": "Sales Bill Image Print is Set Please Image Set In Bill....",
+   "when": ""
+  },
+  {
+   "message": "Total Fine Report Stock Type is Set ....",
+   "when": ""
+  },
+  {
+   "message": "Purchase Item Rate Roundof Set....",
+   "when": ""
+  },
+  {
+   "message": "Admin Sms And Whatsapp Send is Set....",
+   "when": ""
+  },
+  {
+   "message": "Customer Sms And Whatsapp Send is Set....",
+   "when": ""
+  },
+  {
+   "message": "Whatsapp Country Id is Set....",
+   "when": ""
+  },
+  {
+   "message": "Whatsapp Sales bill Print is Set....",
+   "when": ""
+  },
+  {
+   "message": "Tag Entry Design Generat is Set....",
+   "when": ""
+  },
+  {
+   "message": "Order Image Print is Set Please Image Set In Sales Order Voucher....",
+   "when": ""
+  },
+  {
+   "message": "Sales bill Os Then Ornament isu Panding set...",
+   "when": ""
+  },
+  {
+   "message": "Party Help Serarch With Mobile No Set...",
+   "when": ""
+  },
+  {
+   "message": "Print Form Default Butten Set....",
+   "when": ""
+  },
+  {
+   "message": "In Sales Bill Employee Code Is Mandatory Set....",
+   "when": ""
+  },
+  {
+   "message": "Report Font Change Set....",
+   "when": ""
+  },
+  {
+   "message": "Font Size Change Set....",
+   "when": ""
+  },
+  {
+   "message": "Font Name Change Set....",
+   "when": ""
+  },
+  {
+   "message": "Font Style Change Set....",
+   "when": ""
+  },
+  {
+   "message": "Report Grid Row Height set....",
+   "when": ""
+  },
+  {
+   "message": "Previous Day Entry Auto Lock is Set....",
+   "when": "Operators.CompareString(DC_Main.MsLastDayLock, \"Y\", false) == 0"
+  },
+  {
+   "message": "Party Cash Amount Receved Limit Set....",
+   "when": ""
+  },
+  {
+   "message": "Now Open Member Setting Tab No 3...",
+   "when": "Operators.CompareString(Strings.UCase(tDcPwd.Text), \"GJ11DC\", false) == 0"
+  },
+  {
+   "message": "Passward Is Rong...",
+   "when": ""
+  },
+  {
+   "message": "Voucher Net And Total Amount Round of Set",
+   "when": ""
+  },
+  {
+   "message": "Sales Item Rate Roundof is Set....",
+   "when": ""
+  },
+  {
+   "message": "All Voucher Grid Total Scollbar Set....",
+   "when": ""
+  },
+  {
+   "message": "Stock Report Type F3 and F12 is Same Set....",
+   "when": ""
+  },
+  {
+   "message": "Sales Whight Chang Then Tag and Sl Wt Diff Posting Set....",
+   "when": ""
+  },
+  {
+   "message": "Sales Estmate With Tax Set....",
+   "when": ""
+  },
+  {
+   "message": "Tag Entry Last Row Auto Save is Set....",
+   "when": ""
+  },
+  {
+   "message": "Tag Entry Last Row Auto Print is Set....",
+   "when": ""
+  },
+  {
+   "message": "Dhrn Whatsapp Send is Set....",
+   "when": ""
+  },
+  {
+   "message": "Scheme Whatsapp Send is Set....",
+   "when": ""
+  },
+  {
+   "message": "Ledger Or Stock Grid Report Total (Footer Last Row) Show Set ....",
+   "when": ""
+  },
+  {
+   "message": "Home Page Default Reminder Menu Set ....",
+   "when": ""
+  },
+  {
+   "message": "All Entry Voucher VchDesc Help Lenth Set..",
+   "when": ""
+  },
+  {
+   "message": "Order Tag Then Stock less..Set...",
+   "when": ""
+  },
+  {
+   "message": "All Branch Party Ac Show In Other Branch Set...",
+   "when": ""
+  },
+  {
+   "message": "All Transection Default Employee Code As Par User Set ...",
+   "when": ""
+  },
+  {
+   "message": "Whatsapp Image Send With Tag Weight Set...",
+   "when": ""
+  },
+  {
+   "message": "Dhran Isu Item Print With Images...",
+   "when": ""
+  },
+  {
+   "message": "Approval Isu Item Print With Images...",
+   "when": ""
+  },
+  {
+   "message": "Other Item Weight Remove In WhSales bill With Tag Item...",
+   "when": ""
+  },
+  {
+   "message": "Ledger Or All Transection Silver Formate 3 Digit set...",
+   "when": ""
+  },
+  {
+   "message": "Wh Sales Bill Print With Images...",
+   "when": ""
+  },
+  {
+   "message": "Item With Lot Stock Is Set...In Item Master...Please Re Open Software...",
+   "when": ""
+  },
+  {
+   "message": "Balance Sheet Type Is Set ....",
+   "when": ""
+  },
+  {
+   "message": "Balance Sheet Report Type Set....",
+   "when": ""
+  },
+  {
+   "message": "Only Curent Day Stock Posting Is Set...",
+   "when": ""
+  },
+  {
+   "message": "Main Entry Grid Font Change Set...",
+   "when": ""
+  },
+  {
+   "message": "Sales Rate Calc With Net or gross or fine Set...",
+   "when": ""
+  },
+  {
+   "message": "Purchase Rate Calc With Net or gross or fine Set...",
+   "when": ""
+  },
+  {
+   "message": "Crystal Report View Type Set...",
+   "when": ""
+  }
+ ]
+}

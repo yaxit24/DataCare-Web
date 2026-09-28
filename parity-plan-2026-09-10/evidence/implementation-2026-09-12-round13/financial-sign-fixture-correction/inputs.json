@@ -1,0 +1,56 @@
+{
+  "status": "test-only-correction-staged-unexecuted",
+  "observedAt": "2026-09-11T21:57:58.189049+00:00",
+  "originalFixturePreserved": true,
+  "changedExpectationLines": 2,
+  "declaredCases": 15,
+  "productionChanges": false,
+  "executedByAuthor": false,
+  "references": [
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/web/apps/api/test/salesOrderSessionCommand.db.test.ts",
+      "sha256": "dfe798fe215184a0962460b528fb0679efb8354334f8c6e58ce2777d4d16ae80",
+      "bytes": 37040
+    },
+    {
+      "path": "/tmp/admission-financial-sign-correction/web/apps/api/test/salesOrderSessionCommand.db.test.ts",
+      "sha256": "5bb87840b3ce10ac1b659ca12f5c9b990279ef6430fefdef9a23d63597ffe96a",
+      "bytes": 37038
+    },
+    {
+      "path": "/tmp/admission-financial-sign-correction/correction.patch",
+      "sha256": "431abf523f68dd5e1b4d63acd39515977c8ba33002edf298e8f69af79329596a",
+      "bytes": 590
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/posting/posting.ts",
+      "sha256": "31cb38b11b25cdfdaaf796ae2d4305888b6f61f71704fde9e97424bacb6df44e",
+      "bytes": 32830
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_ORD.cs",
+      "sha256": "1432e5f95387c87c44fc8a6fb9b2ad64b6e0760886748478fc83f03ce28235d3",
+      "bytes": 466095
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/Ac_Ledr.cs",
+      "sha256": "b58ba77dbd2c960f5928db75993229ad2c7d8c2a2a45adadcf84da27d9fa264a",
+      "bytes": 1431083
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/session-command-financial-first.txt",
+      "sha256": "5cf9a1b8fe45cba2e2944d97b0cc0f4ff8c1000020f702b7d35f28f3afa8c8a7",
+      "bytes": 6901
+    },
+    {
+      "path": "/tmp/datacare-session-context-next/admission-staged/baseline/web/apps/api/src/modules/sales/salesOrder.ts",
+      "sha256": "556d87d9eb73974f4a06eec64a0f6a6fe0096b90e59b14522176021ea10fc8d9",
+      "bytes": 84550
+    },
+    {
+      "path": "/tmp/admission-financial-sign-correction/qualification.md",
+      "sha256": "3818d76a9e17814e3ba5ef603464d71ca864241efe4d03370beb8e6fb4ea9487",
+      "bytes": 2137
+    }
+  ]
+}

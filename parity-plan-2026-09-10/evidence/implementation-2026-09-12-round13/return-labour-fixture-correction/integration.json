@@ -1,0 +1,32 @@
+{
+  "integratedAtUtc": "2026-09-11T23:29:09.336944+00:00",
+  "verifiedReferences": 19,
+  "files": [
+    {
+      "path": "web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+      "beforeSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+      "afterSha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b"
+    },
+    {
+      "path": "web/apps/api/test/saleReturnLabourReplay.routes.db.test.ts",
+      "beforeSha256": "c1e60e77868af1ca9ad8e77316fb95333e7f25e89204171676b9be0affb40537",
+      "afterSha256": "7f1d08dbeb3930dc938a1e63fae0f97ceaae36727279ec0929a2078d794f0209"
+    },
+    {
+      "path": "web/apps/api/test/saleReturnLabourReplay.test.ts",
+      "beforeSha256": "a5da84e7f4b88edc3db8b7dbedff0b629e7b0d746519cb40f27d10549437d711",
+      "afterSha256": "57d9c622fa47ee1778247a3527fcd15af7aced492b6d612cd55c52f39efed455"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+      "beforeSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+      "afterSha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b"
+    },
+    {
+      "path": "web/apps/web/test/salesReturnLabourReplay.test.ts",
+      "beforeSha256": "c73bb2dbb07ba41946508d03720564069d64679398f1b47e598ab9d9b679d5e1",
+      "afterSha256": "ec4998269e5731f94e1ae3b071987493df56cde93e34d513d1885925c679d20f"
+    }
+  ],
+  "unchangedRestVerified": true
+}

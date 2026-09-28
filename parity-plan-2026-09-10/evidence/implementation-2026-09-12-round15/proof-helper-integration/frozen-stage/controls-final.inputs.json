@@ -1,0 +1,8 @@
+{
+  "staged/parity-plan-2026-09-10/capture_implementation_checkpoint_round12_isolated.py": "df513d5538f6ca0594b9c6f352fa7008ac7985dcebb0be8f89b482aa51b1207a",
+  "staged/parity-plan-2026-09-10/capture_implementation_checkpoint_round15.py": "394994e2f4aab6cc49adca5a684f07486402616e02b5a31fb63657e786e1c0a9",
+  "staged/parity-plan-2026-09-10/checkpoint_recipe_round15.py": "49582d251d83dd9efbcc61184da247a109ae61edb4b92cbaff8b571cc83f1b47",
+  "staged/parity-plan-2026-09-10/round14_runtime_inputs.py": "3ca576335fe99e1987b2ccca97227856a1b92a0f8a36f86ab15924a6704f4243",
+  "staged/parity-plan-2026-09-10/test_checkpoint_recipe_round15.py": "88ba9ea8328ce583fc07465446c28cf61b9c98a7cd7f3359b43ac89b9b9110f7",
+  "staged/parity-plan-2026-09-10/validate_current_review.py": "854ff62cf531a832e719acae98d5e2e1b23392c1dabaf98a411b4f3bf5b59862"
+}

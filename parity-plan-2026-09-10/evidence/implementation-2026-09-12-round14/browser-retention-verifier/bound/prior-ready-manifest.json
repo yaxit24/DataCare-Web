@@ -1,0 +1,32 @@
+{
+  "kind": "staged-browser-retention-helper/v1",
+  "status": "staged-not-executed",
+  "createdAtUtc": "2026-09-12T01:42:49.320779+00:00",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "2e614f5189d55c905e86179ad8ab3149a9cb6edc9c9f8fe2e363fd03fbeb51d6",
+      "bytes": 2059
+    },
+    {
+      "path": "contract.json",
+      "sha256": "3fc625b7dc3b78fc9b230b06b4478b082881af106c1a527d05c4af10e66043b0",
+      "bytes": 6292
+    },
+    {
+      "path": "prepare-contract.py",
+      "sha256": "09ef86322cfde40f9cbd5d4726789a632a2667df759c5d4a1ac693a93bb5ebc0",
+      "bytes": 2512
+    },
+    {
+      "path": "verify_retain_browsers.py",
+      "sha256": "31c4daedccb7fa4696cf0a09e4c3fbea6f790452b177d1601789952104c51fcc",
+      "bytes": 13987
+    }
+  ],
+  "priorQualification": {
+    "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/retained-browser-artifacts-qualification.json",
+    "sha256": "31ef1c72c8e7dcff5e0d4a795eb1b09da54d48ac83fa687454e4dc5f931fef2e"
+  },
+  "syntax": "ast.parse passed only; no verifier execution, no result reads from future folders, no active-tree edits"
+}

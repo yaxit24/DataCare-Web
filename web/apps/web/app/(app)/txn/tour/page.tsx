@@ -5,25 +5,205 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import SubDetailGrid, { useSubDetail } from '../../../../components/SubDetailGrid';
+import { fineFor } from '@datacare/core';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 interface Line {
+  adjustGrossWt: string;
+  adjustNetWt: string;
+  metalColor: string;
+  isuAcCode: string;
+  isuAcName: string;
+  isuLcCode: string;
   itCode: string;
   tagNo: string;
   pcs: string;
   grossWt: string;
   netWt: string;
   touch: string;
+  lotNo: string;
+  itmColor: string;
+  tagCost: string;
+  hallmarkId2: string;
+  hallmarkId3: string;
+  hallmarkId4: string;
+  hallmarkIdWt: string;
+  hallmarkId2Wt: string;
+  hallmarkId3Wt: string;
+  hallmarkId4Wt: string;
+  lessTouch: string;
+  lossWt: string;
+  fineWt: string;
+  remark: string;
+  tblCode: string;
+  designNo: string;
+  itmSize: string;
+  huid: string;
+  bagWt: string;
+  lessWt: string;
+  ghtWt: string;
+  westPct: string;
+  labourPct: string;
+  labourType: string;
+  labourRate: string;
+  labourAmount: string;
+  otherAmount: string;
+  mrp: string;
+  karigarNetWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
+  karigarName: string;
+  prCode: string;
+  isuYrcd: string;
+  isuDbcd: string;
+  designImageId: string;
 }
+/**
+ * P7 extended grid columns: desktop columns this form has and the web did not.
+ *
+ * Every entry was verified against the WRITER, not the API interface — a field present on the
+ * interface is not necessarily persisted (purchase hard-codes ITM_SIZE to blank, and five
+ * SaleLineInput fields have no SL_DETL column at all), and such a cell would silently discard
+ * what the operator types.
+ */
+const extendedLineFields: Array<[keyof Line, string]> = [
+  ['lotNo', 'LotNo'],
+  ['itmColor', 'Color'],
+  ['tagCost', 'TagCost'],
+  ['hallmarkId2', 'HmId2'],
+  ['hallmarkId3', 'HmId3'],
+  ['hallmarkId4', 'HmId4'],
+  ['hallmarkIdWt', 'HmIdWt'],
+  ['hallmarkId2Wt', 'HmId2Wt'],
+  ['hallmarkId3Wt', 'HmId3Wt'],
+  ['hallmarkId4Wt', 'HmId4Wt'],
+  ['lessTouch', 'LTouch'],
+  ['lossWt', 'LossWt'],
+  ['fineWt', 'Fine'],
+  ['remark', 'Remark'],
+  ['tblCode', 'Counter'],
+  ['designNo', 'Design'],
+  ['itmSize', 'Size'],
+  ['huid', 'HuId'],
+  ['bagWt', 'BagWt'],
+  ['lessWt', 'LsWt'],
+  ['ghtWt', 'GhtWt'],
+  ['westPct', 'West%'],
+  ['labourPct', 'Lbr%'],
+  ['labourType', 'LType'],
+  ['labourRate', 'LbrRate'],
+  ['labourAmount', 'LbrAmt'],
+  ['otherAmount', 'OthAmt'],
+  ['mrp', 'Mrp'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
+  ['karigarName', 'KrCode'],
+  ['prCode', 'PrCost'],
+  ['isuYrcd', 'IsuYr'],
+  ['isuDbcd', 'IsuBk'],
+  ['designImageId', 'Image'],
+];
+
+/** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
+const NUMERIC_EXTENDED = new Set<string>([
+  'tagCost',
+  'hallmarkIdWt',
+  'hallmarkId2Wt',
+  'hallmarkId3Wt',
+  'hallmarkId4Wt',
+  'lessTouch',
+  'lossWt',
+  'fineWt',
+  'bagWt',
+  'lessWt',
+  'ghtWt',
+  'westPct',
+  'labourPct',
+  'labourRate',
+  'labourAmount',
+  'otherAmount',
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+]);
+
 const blank = (): Line => ({
+  adjustGrossWt: '',
+  adjustNetWt: '',
+  metalColor: '',
+  isuAcCode: '',
+  isuAcName: '',
+  isuLcCode: '',
   itCode: 'GOLD',
   tagNo: '',
   pcs: '1',
   grossWt: '',
   netWt: '',
   touch: '',
+  lotNo: '',
+  itmColor: '',
+  tagCost: '',
+  hallmarkId2: '',
+  hallmarkId3: '',
+  hallmarkId4: '',
+  hallmarkIdWt: '',
+  hallmarkId2Wt: '',
+  hallmarkId3Wt: '',
+  hallmarkId4Wt: '',
+  lessTouch: '',
+  lossWt: '',
+  fineWt: '',
+  remark: '',
+  tblCode: '',
+  designNo: '',
+  itmSize: '',
+  huid: '',
+  bagWt: '',
+  lessWt: '',
+  ghtWt: '',
+  westPct: '',
+  labourPct: '',
+  labourType: '',
+  labourRate: '',
+  labourAmount: '',
+  otherAmount: '',
+  mrp: '',
+  karigarNetWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
+  karigarName: '',
+  prCode: '',
+  isuYrcd: '',
+  isuDbcd: '',
+  designImageId: '',
 });
 const n = (v: string) => Number(v || 0);
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
+
+/**
+ * P3: Line fields the server accepted that no screen could send.
+ *
+ * TR_APR_ISU carries the approval line's adjusted weights and the SOURCE voucher the consignment came from (issue account, its location and name) plus the metal colour; the screen posted six numeric fields and nothing else.
+ */
+const extendedP3Fields: Array<[keyof Line, string]> = [
+  ['adjustGrossWt', 'AdjGwt'],
+  ['adjustNetWt', 'AdjNwt'],
+  ['metalColor', 'Color'],
+  ['isuAcCode', 'IsuAc'],
+  ['isuAcName', 'IsuAcName'],
+  ['isuLcCode', 'IsuLc'],
+];
 
 export default function TourIssuePage() {
   const { lcCode, coYear } = useBusinessScope();
@@ -32,6 +212,27 @@ export default function TourIssuePage() {
   const [salesmanName, setSalesmanName] = useState('');
   const [vchDesc, setVchDesc] = useState('');
   const [lines, setLines] = useState<Line[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop TR_APR_ISU hangs a sub-detail row set under each item line; the server
+  // already persists it and this page sent nothing.
+  const sub = useSubDetail(lines.length);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => {
+      setLines((rows) => [...rows, blank()]);
+      sub.appendLine();
+    },
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      sub.removeLine(row);
+      return true;
+    },
+    onEscape: () => {},
+  });
   // The desktop's image buttons act on the CURRENT grid row, so the row that last held focus
   // owns the photograph. It persists after blur so clicking the panel does not clear it.
   const [imageRow, setImageRow] = useState(0);
@@ -43,7 +244,7 @@ export default function TourIssuePage() {
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
 
   // live line fine = net × touch / 100 (goods OUT on approval — no money)
-  const fineOf = (l: Line) => r3((n(l.netWt) * n(l.touch)) / 100);
+  const fineOf = (l: Line) => fineFor('sale', { netWt: n(l.netWt), touch: n(l.touch) });
   const totalFine = r3(lines.reduce((s, l) => s + fineOf(l), 0));
   const totalNet = r3(lines.reduce((s, l) => s + n(l.netWt), 0));
   const totalPcs = lines.reduce((s, l) => s + n(l.pcs), 0);
@@ -62,8 +263,34 @@ export default function TourIssuePage() {
         salesmanName: salesmanName || undefined,
         vchDesc: vchDesc || undefined,
         lines: lines
-          .filter((l) => l.itCode && (l.netWt || l.grossWt || l.pcs))
-          .map((l) => ({
+
+          // Original index carried through the filter: empty lines are dropped, so a
+
+          // filtered position would attach a sub-detail block to a different item.
+
+          .map((l, sourceIndex) => ({ l, sourceIndex }))
+
+          .filter(({ l }) => l.itCode && (l.netWt || l.grossWt || l.pcs))
+
+          .map(({ l, sourceIndex }) => ({
+            // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+            // explicit zero is an override at the writer and defeats the server's derivation.
+            ...Object.fromEntries(
+              extendedLineFields
+                .map(([key]) => [
+                  key,
+                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                ])
+                .filter(([, v]) => v !== '')
+                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+            ),
+            adjustGrossWt: n(l.adjustGrossWt),
+            adjustNetWt: n(l.adjustNetWt),
+            metalColor: l.metalColor || undefined,
+            isuAcCode: l.isuAcCode || undefined,
+            isuAcName: l.isuAcName || undefined,
+            isuLcCode: l.isuLcCode || undefined,
+            stones: sub.inputsFor(sourceIndex),
             itCode: l.itCode,
             tagNo: l.tagNo || undefined,
             pcs: n(l.pcs),
@@ -120,7 +347,19 @@ export default function TourIssuePage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Items issued on approval</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedP3Fields.length}
+            testId="tour-p3-mode"
+          />
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="tour-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -130,6 +369,8 @@ export default function TourIssuePage() {
                 <th className="num">Net Wt</th>
                 <th className="num">Touch%</th>
                 <th className="num">Fine</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedP3Fields} />
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -197,6 +438,14 @@ export default function TourIssuePage() {
                     />
                   </td>
                   <td className="num">{fineOf(l).toLocaleString('en-IN')}</td>
+                  <ExtendedBodyCells
+                    full={fullGrid}
+                    fields={extendedLineFields}
+                    line={l}
+                    row={i}
+                    baseColumns={12}
+                    setValue={(row, key, value) => setLine(row, key, value)}
+                  />
                   <td>
                     <button
                       type="button"
@@ -210,6 +459,31 @@ export default function TourIssuePage() {
               ))}
             </tbody>
           </table>
+          <div className="row" style={{ marginTop: 8, alignItems: 'flex-end' }}>
+            <div className="field">
+              <label>Stones for line</label>
+              <select
+                value={sub.activeLine}
+                onChange={(e) => sub.setActiveLine(Number(e.target.value))}
+              >
+                {lines.map((l, i) => (
+                  <option key={i} value={i}>
+                    {i + 1}
+                    {l.itCode ? ` — ${l.itCode}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <span className="muted">{sub.totalRows} row(s) on this voucher</span>
+            </div>
+          </div>
+          <SubDetailGrid
+            rows={sub.rowsFor(sub.activeLine)}
+            onRowsChange={(r) => sub.setRowsFor(sub.activeLine, r)}
+            parentLabel={`line ${sub.activeLine + 1}`}
+            desktopSource="TR_APR_ISU / MSG_IDTL (21 cols)"
+          />
           <div className="toolbar" style={{ marginTop: 10 }}>
             <button
               type="button"

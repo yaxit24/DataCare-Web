@@ -1,0 +1,46 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+29 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-labour-replay.journey.mjs:320
+        throw new Error('Actual labour state was refused by the UI: ' + await el('error', target).textContent());
+              ^
+
+Error: Actual labour state was refused by the UI: The labour preview response does not match this saved return and accepted history. Reload the saved return. Copy the retained entry and reload before continuing.
+    at file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-labour-replay.journey.mjs:320:15
+    at async open (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-labour-replay.journey.mjs:315:5)
+    at async exerciseSalesReturnLabourReplay (file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/sales-return-labour-replay.journey.mjs:398:5)
+    at async file:///Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/test/parity.real-stack.mjs:543:38
+
+Node.js v25.8.0
+PARITY_TEST_FAILED node exited 1

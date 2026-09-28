@@ -1,0 +1,21 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/containment.test.ts (4 tests) 5ms
+ ✓ test/salesOrderDesign.test.ts (8 tests) 5ms
+ ✓ test/calc.test.ts (10 tests) 3ms
+ ✓ test/designRepeat.test.ts (11 tests) 5ms
+ ✓ test/designCalc.test.ts (36 tests) 7ms
+ ✓ test/orderLabour.test.ts (23 tests) 9ms
+ ✓ test/orderLabourWithCache.test.ts (11 tests) 7ms
+ ✓ test/money.test.ts (3 tests) 2ms
+
+ Test Files  8 passed (8)
+      Tests  106 passed (106)
+   Start at  13:34:52
+   Duration  707ms (transform 664ms, setup 0ms, collect 910ms, tests 41ms, environment 1ms, prepare 582ms)
+

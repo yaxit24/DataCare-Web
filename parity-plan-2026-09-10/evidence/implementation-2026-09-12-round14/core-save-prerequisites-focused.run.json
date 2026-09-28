@@ -1,0 +1,25 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/core",
+    "exec",
+    "vitest",
+    "run",
+    "test/saleReturnIncomingSaveProjection.test.ts",
+    "test/saleReturnHeaderFloat.test.ts"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-12T00:32:07.442356+00:00",
+  "finishedAtUtc": "2026-09-12T00:32:08.921086+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-save-prerequisites-focused.txt",
+  "logSha256": "5bf30512d7ffca0a9add6865e01196947dca18635bd9ebfcbbfd6a11fad5049f",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round14/core-save-prerequisites-focused.inputs.json",
+  "inputManifestSha256": "f3ed4a40ecf861c9018b7d0a1cdde3242ca7ba01765fb64247a8227f78bcc5f5",
+  "inputCount": 1866,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

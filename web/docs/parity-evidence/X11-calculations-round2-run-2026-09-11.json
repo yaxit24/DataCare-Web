@@ -1,0 +1,249 @@
+{
+  "id": "X11-calculations-round2-2026-09-11",
+  "generatedAt": "2026-09-10T23:40:56.235888Z",
+  "status": "implemented-source-vectors-database-browser-and-integration-passed",
+  "x11Verified": false,
+  "observedDesktopExecution": false,
+  "source": {
+    "path": "../unified/src/csharp/DataCareNext/MS_DESIGN_BOOK.cs",
+    "sha256": "abde981d2825b4fc621a21c92305d36aea99aa3248d8f02f6d5e8644486cf9e3",
+    "executable": {
+      "path": "../DataCareNext.exe",
+      "sha256": "c85f93fd336853a2a639c6452b47748290a1dddb214e2fdf3fc78f47bc0ca6c8"
+    },
+    "alternate": {
+      "path": "../unified/src/csharp_nextdm/DataCareNext/MS_DESIGN_BOOK.cs",
+      "sha256": "bbc05e84afec56728d43cc84d1638e2e2653e63943d6ec82b0f1b491b51bf288"
+    }
+  },
+  "evidenceBasis": [
+    "decompiled source",
+    "alternate decompilation cross-check",
+    "original executable IL for component P rate condition",
+    "synthetic source-derived numerical vectors",
+    "real PostgreSQL app_user/forced-RLS tests",
+    "real production-build browser lifecycle and calculations; zero mocked requests"
+  ],
+  "files": [
+    {
+      "path": "packages/core/src/designCalc.ts",
+      "sha256": "d57501918abdaf82da048d88899a8d9bc956581dcf44539b8a69795aa9f3bfc7"
+    },
+    {
+      "path": "packages/core/test/designCalc.test.ts",
+      "sha256": "c41dad4c30d28f52e51146dd34104d49a6ec9e7ec498968d08ed91fba7f4ed0f"
+    },
+    {
+      "path": "apps/api/src/modules/masters/designBook.ts",
+      "sha256": "93aa5524ca8904af8f3a2f5adc2e268497ffa88ecc66086991493e2adc1c79a6"
+    },
+    {
+      "path": "apps/api/test/designCalculations.db.test.ts",
+      "sha256": "d7c6eb392c782b17047bd673d1baf0e56cb516ddec4511893bc58462e11cfbf0"
+    },
+    {
+      "path": "apps/web/lib/designBookDraft.ts",
+      "sha256": "e157b7fb6f8937afd78f240a911100b9b31f68e7510fe1e418c6830d599ab4cf"
+    },
+    {
+      "path": "apps/web/app/(app)/masters/design-book/page.tsx",
+      "sha256": "d450a8f9f79b26d8ad5ea3354c5cce1efbbebd3c93303ef5a763450acfb5f404"
+    },
+    {
+      "path": "apps/web/test/designBookCalculation.test.ts",
+      "sha256": "e7fb11b41744acffd39eafc8852c2af9aa070dd85f08d6acbbf1c5610a2ce5fb"
+    },
+    {
+      "path": "apps/web/test/design-calculation.journey.mjs",
+      "sha256": "53078285d97ed72e825d1570600e4b8a5efdad83e93419ef19fd6d9203f75656"
+    },
+    {
+      "path": "docs/parity-evidence/X11-calculations-round2-contract-2026-09-11.md",
+      "sha256": "e810686132067283de3c8dcde3724434d1393938c84c99d7b43ebe7378d06260"
+    },
+    {
+      "path": "docs/parity-evidence/X11-component-rate-round2.il.txt",
+      "sha256": "d2f98e658e4baf90b535b6ef03c5bf3e5bc817b7187932b1561ac5b51cbb531b"
+    }
+  ],
+  "verification": [
+    {
+      "command": "pnpm --filter @datacare/core build",
+      "result": "pass"
+    },
+    {
+      "command": "pnpm --filter @datacare/core test -- test/designCalc.test.ts",
+      "result": "pass",
+      "files": 1,
+      "tests": 36
+    },
+    {
+      "command": "pnpm --filter @datacare/api typecheck",
+      "result": "pass"
+    },
+    {
+      "command": "pnpm --filter @datacare/web typecheck",
+      "result": "pass"
+    },
+    {
+      "command": "pnpm --filter @datacare/web test -- test/designBookCalculation.test.ts test/designBookPage.test.ts",
+      "result": "pass",
+      "files": 2,
+      "tests": 10
+    },
+    {
+      "command": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test -- test/designCalculations.db.test.ts test/designComponents.db.test.ts test/designBook.routes.db.test.ts",
+      "result": "pass",
+      "files": 3,
+      "tests": 21,
+      "newCalculationTests": 7,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/design-focused-db.txt",
+      "logSha256": "3402b97f4ddcf0c29fd208dd2ddc1996d85205197f58d04cce75f6da13414e92"
+    },
+    {
+      "command": "pnpm typecheck:tests",
+      "result": "pass",
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/test-types-verified.txt",
+      "logSha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9"
+    },
+    {
+      "command": "pnpm --filter @datacare/api test through scripts/parity-test-env.mjs",
+      "result": "pass",
+      "files": 210,
+      "tests": 1630,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/api-full-verified.txt",
+      "logSha256": "07ae4d2463610380db3eea7ed57c2b7962c84df7f8e52a2d965b0cca21c7f770"
+    },
+    {
+      "command": "pnpm --filter @datacare/web test",
+      "result": "pass",
+      "files": 18,
+      "tests": 83,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/web-tests-tested.txt",
+      "logSha256": "ed76ab953ab6060cb3891591e9cbf69c83a1825d6195f80e13ca988676ccb3e8"
+    },
+    {
+      "command": "pnpm build",
+      "result": "pass",
+      "tasks": 7,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/build-tested.txt",
+      "logSha256": "d06d8011482e3a0260c94a6586c37ef2e9bbf054269d852ae5259a03157ba4c0"
+    },
+    {
+      "command": "pnpm test:parity:browser",
+      "result": "pass",
+      "mockedRequests": 0,
+      "log": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/browser-real-stack-tested.txt",
+      "logSha256": "46c9c13253ce64badd1a66e583135434450d7cabade703c4e1e0873e07936a83"
+    }
+  ],
+  "browser": {
+    "runner": "apps/web/test/parity.real-stack.mjs",
+    "runnerSha256": "46962207e10865b89edb269be1abea44f19dd9f31d63df1554eead3c5b66814a",
+    "journey": "apps/web/test/design-calculation.journey.mjs",
+    "journeySha256": "53078285d97ed72e825d1570600e4b8a5efdad83e93419ef19fd6d9203f75656",
+    "result": "passed",
+    "startedAt": "2026-09-10T23:39:01.888Z",
+    "finishedAt": "2026-09-10T23:39:10.249Z",
+    "database": "disposable localhost:55433 / app_user",
+    "mockedRequests": 0,
+    "designBookChecks": [
+      "browser create/reload",
+      "two components",
+      "style and text page number",
+      "unchanged edit",
+      "saved image upload/read/delete",
+      "changed component",
+      "stale edit409 retains form",
+      "browser deletion"
+    ],
+    "calculationChecks": [
+      "new-book configured item defaults",
+      "ordered cell leaves",
+      "invalid numeric refresh retains draft with field validation and no page error",
+      "customer/karigar conversion and labour",
+      "component-only aggregate trigger",
+      "explicit parent refresh",
+      "whole-amount bankers rounding",
+      "transient margin and saved MRP",
+      "server replay save/reopen",
+      "unchanged snapshot without replay",
+      "zero-rate manual amount retention",
+      "IL P-basis 0.50/0.51 boundary",
+      "wide grids scroll inside their panels while heading and book controls stay visible",
+      "delete calculated design"
+    ],
+    "artifacts": [
+      {
+        "path": "test-results/parity-real-stack-round2-tested/result.json",
+        "sha256": "dd8b0fe34eaddb0e0ca07926a95ea1b1f554cab73d03fa015a3fa78af2d6178f"
+      },
+      {
+        "path": "test-results/parity-real-stack-round2-tested/design-book-calculations-round2.png",
+        "sha256": "b7678d5d95665259a589ec64dc95f76a7fe88438814d520889e2ac049c0be62d"
+      },
+      {
+        "path": "test-results/parity-real-stack-round2-tested/design-book-components.png",
+        "sha256": "356286f9f252ad485481cf68d33e77fc5e71297cf9869e6eced4c5d92545aadb"
+      },
+      {
+        "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/browser-real-stack-tested.txt",
+        "sha256": "46c9c13253ce64badd1a66e583135434450d7cabade703c4e1e0873e07936a83"
+      }
+    ],
+    "visualReview": "Final screenshot inspected: heading, book/product/date and action controls remain visible; horizontal scrolling is confined to grid panels.",
+    "priorAttempts": [
+      {
+        "result": "failed",
+        "artifact": {
+          "path": "test-results/parity-real-stack-round2/result.json",
+          "sha256": "ac9bb60881a6de6b76f241ab9e1afe362f0711a28b138956ab9eadffc859036c"
+        },
+        "error": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('combobox').first()\u001b[22m\n\u001b[2m    - locator resolved to <select aria-label=\"Company\" title=\"Switch company\">\u2026</select>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - did not find some options\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - did not find some options\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 \u00d7 waiting for element to be visible and enabled\u001b[22m\n\u001b[2m       - did not find some options\u001b[22m\n\u001b[2m     - retrying select option action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+        "note": "Retained prior attempt; final combined verdict is the tested run above."
+      },
+      {
+        "result": "passed",
+        "artifact": {
+          "path": "test-results/parity-real-stack-round2-final/result.json",
+          "sha256": "7a187a50423c932632dcfcf928935067999bcacbdbdaa3749b3e81bbffde088c"
+        },
+        "error": null,
+        "note": "Retained prior attempt; final combined verdict is the tested run above."
+      },
+      {
+        "result": "failed",
+        "artifact": {
+          "path": "test-results/parity-real-stack-round2-verified/result.json",
+          "sha256": "a33e0c27e92cf53dec527b71fc11ed1758b80f40dc8a92db74126ee8480af07e"
+        },
+        "error": "Expected values to be strictly equal:\n\n1 !== 0\n",
+        "note": "Retained prior attempt; final combined verdict is the tested run above."
+      },
+      {
+        "result": "failed",
+        "artifact": {
+          "path": "test-results/parity-real-stack-round2-complete/result.json",
+          "sha256": "3d7da7fcf40c40c862d0afa6ddac92a6a500f48b4db7e09d52b76655a92bff41"
+        },
+        "error": "rate was entered before later ghat change\n\n120 !== 117\n",
+        "note": "Retained prior attempt; final combined verdict is the tested run above."
+      }
+    ]
+  },
+  "remaining": [
+    "paired operational desktop/web execution artifacts and binary-format rounding boundaries",
+    "preservation differences pending desktop comparison and business acceptance: row selection does not clear pcsWt or historical hidden values; loaded precision is retained until explicit commit",
+    "COL_RPT copy-previous-row defaults",
+    "keyboard-specific fixed amount/reset branch and diamond selection",
+    "karigar converted weight transient presentation",
+    "downstream order/manufacturing design and image transfer",
+    "legacy image migration reconciliation",
+    "business acceptance and full release gates"
+  ],
+  "frozen": true,
+  "nextContract": {
+    "path": "../parity-plan-2026-09-10/evidence/implementation-2026-09-11-round2/x23-lot-manufacturing-next-contract.md",
+    "sha256": "f74f5cf16a06e77c15c17a7564179f45eabf2ae52a9d52d0354edab131d18a9a"
+  }
+}

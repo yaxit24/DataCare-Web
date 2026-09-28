@@ -1,0 +1,28 @@
+{
+  "status": "prospective-not-executed",
+  "sourceFixtureSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+  "scope": {
+    "coCode": "01",
+    "lcCode": "01",
+    "coYear": "2024-2025",
+    "coBook": "RLP"
+  },
+  "voucherNo": "00017",
+  "checks": [
+    "saved-row-and-new-contract-identity",
+    "loaded-opened-exact-bill-and-unavailable-closing",
+    "exclusive-preview-ownership-and-no-numeric-save",
+    "resolved-lookup-does-not-append-or-change-totals",
+    "bb-then-aa-complete-prefix-bill-history",
+    "interleaved-money-and-labour-preserve-order",
+    "same-code-enter-appends-once-per-intent",
+    "tag-category04-keeps-callback-without-copy-destination",
+    "missing-code-retains-draft-and-prefix",
+    "historical-master-change-refuses-next-lookup-without-rebase",
+    "actual-database-rows-unchanged-apart-from-declared-master-test-change",
+    "view-only-preview-and-old-panels-retained"
+  ],
+  "browserProtocol": "Actual UI -> real API -> isolated55433 PostgreSQL, no fabricated responses/interception. One additional journey retains all16 existing journeys. Every required check must be recorded only after its assertions; exact fixture phases compared without running local arithmetic. Same-session/late actual-response fault cases remain separately required and must not be credited to this baseline run.",
+  "tableFootprint": "Explicit Return business tables, relevant master/config tables, auth_session raw/xmin/ctid snapshots; intentional POST audits counted separately. Master mutation case takes its post-mutation baseline explicitly.",
+  "uiIds": "sale-return-labour-replay-{open,close,row,field,entry,check,commit,status,error}; value-{column}, total-{column}-{opened|preview}, matrix-{loaded|opened|preview}-{row}-{column}; saved-{rawHeaderField}. Panel may propose a reviewed naming adaptation before integration."
+}

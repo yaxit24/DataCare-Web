@@ -1,0 +1,8 @@
+{
+  "phase": "preimplementation",
+  "files": {
+    "baseline-inputs.json": "5a8ebc8d939d7f6aecd87d31e16753844cef134aa5bee0cba8c11c996d431a7c",
+    "implementation-contract.md": "03e67f8a1f22f55c02adf8020ab7b9e0a108f9a5bee1cf60395916ecf8c8a390",
+    "tour-exact-values-independent.v1.json": "4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a"
+  }
+}

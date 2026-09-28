@@ -1,0 +1,1006 @@
+{
+  "kind": "static-source-and-literal-comparison",
+  "execution": "Text/JSON/hash inspection only; no mapper, qualifier, calculator, tests, DB or compiler executed.",
+  "sourceSha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+  "mapperSha256": "96d8f57b32ccdbfb4fa53e68b4d3435059df8b74fa1cb98f7744ff4b57e32ea4",
+  "distinctMappedFields": 58,
+  "comparisons": [
+    {
+      "field": "SR_NO",
+      "kind": "numeric",
+      "column": 0,
+      "sourceAssignments": [
+        {
+          "line": 14307,
+          "column": 0,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "OLD_SRNO",
+      "kind": "numeric",
+      "column": 51,
+      "sourceAssignments": [
+        {
+          "line": 14311,
+          "column": 51,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_PCS",
+      "kind": "numeric",
+      "column": 9,
+      "sourceAssignments": [
+        {
+          "line": 14358,
+          "column": 9,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_GWT",
+      "kind": "numeric",
+      "column": 10,
+      "sourceAssignments": [
+        {
+          "line": 14362,
+          "column": 10,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_OTH_WT",
+      "kind": "numeric",
+      "column": 11,
+      "sourceAssignments": [
+        {
+          "line": 14366,
+          "column": 11,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_NWT",
+      "kind": "numeric",
+      "column": 12,
+      "sourceAssignments": [
+        {
+          "line": 14370,
+          "column": 12,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_GHT_PRC",
+      "kind": "numeric",
+      "column": 14,
+      "sourceAssignments": [
+        {
+          "line": 14374,
+          "column": 14,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_GHT_WT",
+      "kind": "numeric",
+      "column": 15,
+      "sourceAssignments": [
+        {
+          "line": 14378,
+          "column": 15,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_TOUCH",
+      "kind": "numeric",
+      "column": 16,
+      "sourceAssignments": [
+        {
+          "line": 14382,
+          "column": 16,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_WEST_PRC",
+      "kind": "numeric",
+      "column": 17,
+      "sourceAssignments": [
+        {
+          "line": 14386,
+          "column": 17,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_FINE",
+      "kind": "numeric",
+      "column": 18,
+      "sourceAssignments": [
+        {
+          "line": 14390,
+          "column": 18,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_RATE",
+      "kind": "numeric",
+      "column": 19,
+      "sourceAssignments": [
+        {
+          "line": 14394,
+          "column": 19,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_AMT",
+      "kind": "numeric",
+      "column": 20,
+      "sourceAssignments": [
+        {
+          "line": 14398,
+          "column": 20,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "LBR_PRC",
+      "kind": "numeric",
+      "column": 21,
+      "sourceAssignments": [
+        {
+          "line": 14406,
+          "column": 21,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "LBR_RATE",
+      "kind": "numeric",
+      "column": 23,
+      "sourceAssignments": [
+        {
+          "line": 14414,
+          "column": 23,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "LBR_AMT",
+      "kind": "numeric",
+      "column": 24,
+      "sourceAssignments": [
+        {
+          "line": 14418,
+          "column": 24,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "DISC_PRC",
+      "kind": "numeric",
+      "column": 25,
+      "sourceAssignments": [
+        {
+          "line": 14422,
+          "column": 25,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "DISC_AMT",
+      "kind": "numeric",
+      "column": 26,
+      "sourceAssignments": [
+        {
+          "line": 14426,
+          "column": 26,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "OTH_AMT",
+      "kind": "numeric",
+      "column": 27,
+      "sourceAssignments": [
+        {
+          "line": 14430,
+          "column": 27,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_MRP",
+      "kind": "numeric",
+      "column": 28,
+      "sourceAssignments": [
+        {
+          "line": 14434,
+          "column": 28,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_LBR_PRC",
+      "kind": "numeric",
+      "column": 30,
+      "sourceAssignments": [
+        {
+          "line": 14442,
+          "column": 30,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_LBR_RATE",
+      "kind": "numeric",
+      "column": 31,
+      "sourceAssignments": [
+        {
+          "line": 14446,
+          "column": 31,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_LBR_AMT",
+      "kind": "numeric",
+      "column": 32,
+      "sourceAssignments": [
+        {
+          "line": 14450,
+          "column": 32,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_OTH_AMT",
+      "kind": "numeric",
+      "column": 33,
+      "sourceAssignments": [
+        {
+          "line": 14454,
+          "column": 33,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_COST",
+      "kind": "numeric",
+      "column": 34,
+      "sourceAssignments": [
+        {
+          "line": 14458,
+          "column": 34,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_MRP",
+      "kind": "numeric",
+      "column": 35,
+      "sourceAssignments": [
+        {
+          "line": 14462,
+          "column": 35,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TOT_AMT",
+      "kind": "numeric",
+      "column": 36,
+      "sourceAssignments": [
+        {
+          "line": 14466,
+          "column": 36,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAX_PRC",
+      "kind": "numeric",
+      "column": 37,
+      "sourceAssignments": [
+        {
+          "line": 14470,
+          "column": 37,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "NET_AMT",
+      "kind": "numeric",
+      "column": 38,
+      "sourceAssignments": [
+        {
+          "line": 14474,
+          "column": 38,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "VCH_SRNO",
+      "kind": "numeric",
+      "column": 40,
+      "sourceAssignments": [
+        {
+          "line": 14493,
+          "column": 40,
+          "kind": "numeric"
+        },
+        {
+          "line": 14497,
+          "column": 40,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_SRNO",
+      "kind": "numeric",
+      "column": 56,
+      "sourceAssignments": [
+        {
+          "line": 14513,
+          "column": 56,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID_WT",
+      "kind": "numeric",
+      "column": 62,
+      "sourceAssignments": [
+        {
+          "line": 14529,
+          "column": 62,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID2_WT",
+      "kind": "numeric",
+      "column": 63,
+      "sourceAssignments": [
+        {
+          "line": 14533,
+          "column": 63,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID3_WT",
+      "kind": "numeric",
+      "column": 64,
+      "sourceAssignments": [
+        {
+          "line": 14537,
+          "column": 64,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID4_WT",
+      "kind": "numeric",
+      "column": 65,
+      "sourceAssignments": [
+        {
+          "line": 14541,
+          "column": 65,
+          "kind": "numeric"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "IT_CODE",
+      "kind": "text",
+      "column": 1,
+      "sourceAssignments": [
+        {
+          "line": 14315,
+          "column": 1,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_REMARK",
+      "kind": "text",
+      "column": 3,
+      "sourceAssignments": [
+        {
+          "line": 14319,
+          "column": 3,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_NO",
+      "kind": "text",
+      "column": 2,
+      "sourceAssignments": [
+        {
+          "line": 14334,
+          "column": 2,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TBL_CODE",
+      "kind": "text",
+      "column": 4,
+      "sourceAssignments": [
+        {
+          "line": 14338,
+          "column": 4,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "DESIGN_NO",
+      "kind": "text",
+      "column": 5,
+      "sourceAssignments": [
+        {
+          "line": 14342,
+          "column": 5,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_STYLE",
+      "kind": "text",
+      "column": 6,
+      "sourceAssignments": [
+        {
+          "line": 14346,
+          "column": 6,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "ITM_SIZE",
+      "kind": "text",
+      "column": 7,
+      "sourceAssignments": [
+        {
+          "line": 14350,
+          "column": 7,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID",
+      "kind": "text",
+      "column": 8,
+      "sourceAssignments": [
+        {
+          "line": 14354,
+          "column": 8,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "LBR_CODE",
+      "kind": "text",
+      "column": 13,
+      "sourceAssignments": [
+        {
+          "line": 14402,
+          "column": 13,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "LBR_TYPE",
+      "kind": "text",
+      "column": 22,
+      "sourceAssignments": [
+        {
+          "line": 14410,
+          "column": 22,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_LBR_CODE",
+      "kind": "text",
+      "column": 29,
+      "sourceAssignments": [
+        {
+          "line": 14438,
+          "column": 29,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "KR_NAME",
+      "kind": "text",
+      "column": 39,
+      "sourceAssignments": [
+        {
+          "line": 14478,
+          "column": 39,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "RATE_TYPE",
+      "kind": "text",
+      "column": 44,
+      "sourceAssignments": [
+        {
+          "line": 14501,
+          "column": 44,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "PR_CODE",
+      "kind": "text",
+      "column": 52,
+      "sourceAssignments": [
+        {
+          "line": 14505,
+          "column": 52,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "TAG_TYPE",
+      "kind": "text",
+      "column": 54,
+      "sourceAssignments": [
+        {
+          "line": 14509,
+          "column": 54,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID2",
+      "kind": "text",
+      "column": 59,
+      "sourceAssignments": [
+        {
+          "line": 14517,
+          "column": 59,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID3",
+      "kind": "text",
+      "column": 60,
+      "sourceAssignments": [
+        {
+          "line": 14521,
+          "column": 60,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "HM_ID4",
+      "kind": "text",
+      "column": 61,
+      "sourceAssignments": [
+        {
+          "line": 14525,
+          "column": 61,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "APR_ISU",
+      "kind": "text",
+      "column": 50,
+      "sourceAssignments": [
+        {
+          "line": 14545,
+          "column": 50,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "EMP_ISU",
+      "kind": "text",
+      "column": 68,
+      "sourceAssignments": [
+        {
+          "line": 14549,
+          "column": 68,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "IT_TYPE",
+      "kind": "text",
+      "column": 43,
+      "sourceAssignments": [
+        {
+          "line": 14553,
+          "column": 43,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "DESIGN_IMG_ID",
+      "kind": "text",
+      "column": 69,
+      "sourceAssignments": [
+        {
+          "line": 14569,
+          "column": 69,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    },
+    {
+      "field": "DATA_TYPE",
+      "kind": "text",
+      "column": 70,
+      "sourceAssignments": [
+        {
+          "line": 14584,
+          "column": 70,
+          "kind": "text"
+        }
+      ],
+      "matchesAll": true
+    }
+  ],
+  "original64Reduction": "64 ordered assignments = 58 distinct grid fields + 3 duplicate branch assignments (TAG_NO, VCH_SRNO, DATA_TYPE) + 3 contextual fields (VCH_TIME, MAIN_USER, EMP_CODE).",
+  "fixtureSha256": "b6aae6e4add413b768f306703d16072999ac00a48ba779515b83346de4aeed50",
+  "fixtureCases": [
+    {
+      "id": "S01",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S02",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S03",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S04",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S05",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S06",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S07",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S08",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S09",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S10",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S11",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S12",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S13",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S14",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S15",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S16",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S17",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S18",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S19",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S20",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S21",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S22",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S23",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S24",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S25",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    },
+    {
+      "id": "S26",
+      "visibleFieldCount": 63,
+      "mappedFieldCount": 58,
+      "mappedKeysMatch": true,
+      "rawExpectedMatchesInput": true,
+      "rawHasAllCurrentSchemaColumns": true,
+      "canCommitIsFalse": true
+    }
+  ]
+}

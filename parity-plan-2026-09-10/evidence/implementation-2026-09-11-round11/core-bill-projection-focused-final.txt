@@ -1,0 +1,14 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+> vitest run "test/saleReturnBillProjection.test.ts"
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core
+
+ ✓ test/saleReturnBillProjection.test.ts (84 tests) 12ms
+
+ Test Files  1 passed (1)
+      Tests  84 passed (84)
+   Start at  19:57:16
+   Duration  350ms (transform 103ms, setup 0ms, collect 100ms, tests 12ms, environment 0ms, prepare 53ms)
+

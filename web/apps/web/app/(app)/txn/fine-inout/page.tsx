@@ -4,6 +4,13 @@ import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { fineFor } from '@datacare/core';
+import {
+  ExtendedBodyCells,
+  ExtendedHeaderCells,
+  GridModeToggle,
+} from '../../../../components/ExtendedGrid';
 
 // FINE IN/OUT (TR_FN_INOUT) — pure fine-metal movement to/from a refinery or inter-branch.
 // IN = metal received (+), OUT = metal sent (−). Posts to the /inout/fine backend (fineInout),
@@ -14,8 +21,172 @@ interface Line {
   grossWt: string;
   netWt: string;
   touch: string;
+  fineWt: string;
+  tagNo: string;
+  lotNo: string;
+  itemLot: string;
+  designNo: string;
+  tblCode: string;
+  itmSize: string;
+  itmStyle: string;
+  itmColor: string;
+  hallmarkId: string;
+  remark: string;
+  bagWt: string;
+  lessWt: string;
+  ghtWt: string;
+  westPct: string;
+  amount: string;
+  labourPct: string;
+  labourType: string;
+  labourRate: string;
+  labourAmount: string;
+  otherAmount: string;
+  tagCost: string;
+  mrp: string;
+  margin: string;
+  rateType: string;
+  karigarName: string;
+  karigarOtherWt: string;
+  karigarNetWt: string;
+  karigarGhtPct: string;
+  karigarGhtWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
+  karigarLbrRate: string;
+  karigarLbrAmt: string;
+  karigarOthAmt: string;
+  toLcCode: string;
+  prCode: string;
+  lbrCode: string;
+  designImageId: string;
+  empIsu: string;
 }
-const blank = (): Line => ({ itCode: '', pcs: '1', grossWt: '', netWt: '', touch: '' });
+/**
+ * P7 extended grid columns: desktop columns this form has and the web did not.
+ *
+ * Every entry was verified against the WRITER, not the API interface — a field present on the
+ * interface is not necessarily persisted (purchase hard-codes ITM_SIZE to blank, and five
+ * SaleLineInput fields have no SL_DETL column at all), and such a cell would silently discard
+ * what the operator types.
+ */
+const extendedLineFields: Array<[keyof Line, string]> = [
+  ['fineWt', 'Fine'],
+  ['tagNo', 'TagNo'],
+  ['lotNo', 'ItmLot'],
+  ['itemLot', 'ItmLot2'],
+  ['designNo', 'Design'],
+  ['tblCode', 'Counter'],
+  ['itmSize', 'Size'],
+  ['itmStyle', 'Style'],
+  ['itmColor', 'Color'],
+  ['hallmarkId', 'HmId'],
+  ['remark', 'Remark'],
+  ['bagWt', 'BagWt'],
+  ['lessWt', 'LsWt'],
+  ['ghtWt', 'GhtWt'],
+  ['westPct', 'West%'],
+  ['amount', 'ItAmt'],
+  ['labourPct', 'Lbr%'],
+  ['labourType', 'LType'],
+  ['labourRate', 'LbrRate'],
+  ['labourAmount', 'LbrAmt'],
+  ['otherAmount', 'OthAmt'],
+  ['tagCost', 'TagCost'],
+  ['mrp', 'Mrp'],
+  ['margin', 'Margin'],
+  ['rateType', 'RateType'],
+  ['karigarName', 'KrCode'],
+  ['karigarOtherWt', 'KrOthWt'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarGhtPct', 'KrGht%'],
+  ['karigarGhtWt', 'KrGht'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
+  ['karigarLbrRate', 'KrLRate'],
+  ['karigarLbrAmt', 'KrLAmt'],
+  ['karigarOthAmt', 'KrOthAmt'],
+  ['toLcCode', 'LCode'],
+  ['prCode', 'PrCost'],
+  ['lbrCode', 'LbrCode'],
+  ['designImageId', 'Image'],
+  ['empIsu', 'EmpIsu'],
+];
+
+/** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
+const NUMERIC_EXTENDED = new Set<string>([
+  'fineWt',
+  'bagWt',
+  'lessWt',
+  'ghtWt',
+  'westPct',
+  'labourPct',
+  'labourRate',
+  'labourAmount',
+  'otherAmount',
+  'tagCost',
+  'karigarOtherWt',
+  'karigarNetWt',
+  'karigarGhtPct',
+  'karigarGhtWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+  'karigarLbrRate',
+  'karigarLbrAmt',
+  'karigarOthAmt',
+]);
+
+const blank = (): Line => ({
+  itCode: '',
+  pcs: '1',
+  grossWt: '',
+  netWt: '',
+  touch: '',
+  fineWt: '',
+  tagNo: '',
+  lotNo: '',
+  itemLot: '',
+  designNo: '',
+  tblCode: '',
+  itmSize: '',
+  itmStyle: '',
+  itmColor: '',
+  hallmarkId: '',
+  remark: '',
+  bagWt: '',
+  lessWt: '',
+  ghtWt: '',
+  westPct: '',
+  amount: '',
+  labourPct: '',
+  labourType: '',
+  labourRate: '',
+  labourAmount: '',
+  otherAmount: '',
+  tagCost: '',
+  mrp: '',
+  margin: '',
+  rateType: '',
+  karigarName: '',
+  karigarOtherWt: '',
+  karigarNetWt: '',
+  karigarGhtPct: '',
+  karigarGhtWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
+  karigarLbrRate: '',
+  karigarLbrAmt: '',
+  karigarOthAmt: '',
+  toLcCode: '',
+  prCode: '',
+  lbrCode: '',
+  designImageId: '',
+  empIsu: '',
+});
 const n = (v: string) => Number(v || 0);
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
 
@@ -26,6 +197,20 @@ export default function FineInoutPage() {
   const [partyAc, setPartyAc] = useState('');
   const [partyName, setPartyName] = useState('');
   const [lines, setLines] = useState<Line[]>([blank()]);
+  const [fullGrid, setFullGrid] = useState(false);
+  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
+  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
+  const handleGridKey = useGridKeyboard({
+    rowCount: lines.length,
+    onAppendRow: () => setLines((rows) => [...rows, blank()]),
+    onRemoveRow: (row) => {
+      setLines((rows) =>
+        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
   const [result, setResult] = useState<{ vchNo: number; fine: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -34,7 +219,7 @@ export default function FineInoutPage() {
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
 
   // live preview: fine = net × touch / 100
-  const fineOf = (l: Line) => r3((n(l.netWt) * n(l.touch)) / 100);
+  const fineOf = (l: Line) => fineFor('sale', { netWt: n(l.netWt), touch: n(l.touch) });
   const netTotal = r3(lines.reduce((s, l) => s + n(l.netWt), 0));
   const fineTotal = r3(lines.reduce((s, l) => s + fineOf(l), 0));
 
@@ -53,6 +238,17 @@ export default function FineInoutPage() {
         lines: lines
           .filter((l) => l.itCode && l.netWt)
           .map((l) => ({
+            // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+            // explicit zero is an override at the writer and defeats the server's derivation.
+            ...Object.fromEntries(
+              extendedLineFields
+                .map(([key]) => [
+                  key,
+                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                ])
+                .filter(([, v]) => v !== '')
+                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+            ),
             itCode: l.itCode,
             pcs: n(l.pcs),
             grossWt: n(l.grossWt),
@@ -122,7 +318,13 @@ export default function FineInoutPage() {
 
         <div className="panel" style={{ overflow: 'auto' }}>
           <h2>Metal Lines</h2>
-          <table className="grid">
+          <GridModeToggle
+            full={fullGrid}
+            setFull={setFullGrid}
+            extendedCount={extendedLineFields.length}
+            testId="fine-inout-grid-mode"
+          />
+          <table className="grid" onKeyDown={handleGridKey}>
             <thead>
               <tr>
                 <th>Item</th>
@@ -131,6 +333,7 @@ export default function FineInoutPage() {
                 <th className="num">Net Wt</th>
                 <th className="num">Touch%</th>
                 <th className="num">Fine</th>
+                <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
                 <th></th>
               </tr>
             </thead>
@@ -174,6 +377,14 @@ export default function FineInoutPage() {
                     />
                   </td>
                   <td className="num">{fineOf(l).toLocaleString('en-IN')}</td>
+                  <ExtendedBodyCells
+                    full={fullGrid}
+                    fields={extendedLineFields}
+                    line={l}
+                    row={i}
+                    baseColumns={8}
+                    setValue={(row, key, value) => setLine(row, key, value)}
+                  />
                   <td>
                     <button
                       type="button"

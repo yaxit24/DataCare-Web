@@ -1,0 +1,15 @@
+{
+  "kind": "storage-shape-qualification-with-unchanged-lifecycle-cases",
+  "capturedAtUtc": "2026-09-11T23:49:28.509915+00:00",
+  "baseCaseManifestSha256": "4ff926ea9b74b5ba5e15204e24af25a9988d040a0f54e0e3db457abd8b0b9a5b",
+  "requiredCasesSha256": "ae546150a87578c3937995231e14d3e66f1c2dd0313feb126349f09cb8981795",
+  "requiredChecksUnchanged": true,
+  "originalFixtureSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc",
+  "qualifiedFixtureSha256": "8c2e2ba9a985a1e57e353bcbf742e8b350fac47cd34e6cf96f7cb283adbeb78b",
+  "qualifiedFixturePath": "/tmp/datacare-return-labour-preview-api-correction/web/apps/api/test/fixtures/saleReturnLabourReplay.independent.json",
+  "qualification": "Source saved-load c09 directly preserves stored numeric(12,3) text. Qualified fixture changes exactly nine expected visible c09 literals1 to1.000. No five-case semantics, raw seed or arithmetic expectations change. The original preimplementation manifest remains historical; current imported source dependencies are pinned separately by ready-manifest.json.",
+  "fixtureDiffProof": {
+    "path": "/tmp/datacare-return-labour-preview-api-correction/fixture-diff-proof.json",
+    "sha256": "8ed3216f911e6e2beecb5ce2202b610182acb924801e34e4f55356e7fef23900"
+  }
+}

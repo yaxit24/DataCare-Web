@@ -1,0 +1,69 @@
+{
+ "form": "MS_POINT",
+ "loc": 2372,
+ "gridColumns": {
+  "cSrNo": 0,
+  "cAcSrNo": 0,
+  "cPointType": 1,
+  "cAcCode": 1,
+  "cSlValue": 2,
+  "cAcName": 2,
+  "cPointCount": 3,
+  "cAcAdd": 3,
+  "cFixPoint": 4,
+  "cAcCity": 4,
+  "c1GmPoint": 5,
+  "cAcMobile": 5,
+  "cAcCardNo": 6,
+  "cAcSale": 7,
+  "cAcRef": 8,
+  "cAcMemb": 9
+ },
+ "inlineSql": [
+  "select ROW_NUMBER() OVER (ORDER BY A.CARD_NO,A.MEMB_NAME) AS SrNo,A.*,B.AC_ADD1,B.AC_CITY from POINT_MEMB AS A LEFT JOIN AC_MAST AS B ON A.CO_CODE = B.CO_CODE AND A.MEMB_CODE = B.AC_CODE where A.CO_CODE = ' ? ' AND A.POINT_CODE = ' ? ' ORDER BY A.CARD_NO,A.MEMB_NAME",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT A.POINT_CODE,A.POINT_NAME FROM POINT_MAST AS A WHERE A.CO_CODE = ' ? ' GROUP BY A.POINT_CODE,A.POINT_NAME ORDER BY A.POINT_CODE",
+  "SELECT POINT_CODE As CoCode From POINT_MAST WHERE CO_CODE = ' ? ' ORDER BY CAST(POINT_CODE AS INT) DESC",
+  "SELECT A.* FROM POINT_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.POINT_CODE = ' ? ' ORDER BY A.SR_NO",
+  "DELETE FROM POINT_MAST WHERE CO_CODE = ' ? ' AND POINT_CODE = ' ? '",
+  "SELECT * FROM POINT_MAST WHERE CO_CODE = ' ? ' AND POINT_CODE = ' ? '",
+  "DELETE FROM POINT_MEMB WHERE CO_CODE = ' ? ' AND POINT_CODE = ' ? '",
+  "SELECT * FROM POINT_MEMB WHERE CO_CODE = ' ? ' AND POINT_CODE = ' ? '",
+  "SELECT A.POINT_CODE,A.POINT_NAME FROM POINT_MAST AS A WHERE A.CO_CODE = ' ? ' ORDER BY A.POINT_CODE",
+  "Please Select Product For Delete.",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT A.AC_NAME As AcNameL,A.AC_CODE as AcCodeL,A.AC_ADD1 AS AddressL,A.AC_CITY As CityL,A.AC_MOBILE AS MobileL FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.AC_CODE > '00100' ORDER BY A.AC_NAME"
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "F1": 1,
+  "Enter": 6,
+  "Backspace": 1
+ },
+ "calc": [
+  "tPointCode.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00\");",
+  "if ((Operators.CompareString(tPointCode.Text, \"\", false) != 0) & (Conversion.Val(MSG[DC_Main.i, 5]) + Conversion.Val(MSG[DC_Main.i, 4]) + Conversion.Val(MSG[DC_Main.i, 2]) + Conversion.Val(MSG[DC_Main.i, 3]) != 0.0))"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Error Found : Please Enter code First...",
+   "when": "Operators.CompareString(tPointCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select Product For Delete.",
+   "when": "Operators.CompareString(tPointCode.Text, \"\", false) == 0"
+  }
+ ]
+}

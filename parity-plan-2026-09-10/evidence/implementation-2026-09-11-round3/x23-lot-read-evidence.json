@@ -1,0 +1,171 @@
+{
+  "kind": "x23-setting-lot-read-engineering-evidence",
+  "status": "final engineering checks and production browser passed; desktop acceptance not established",
+  "scope": "Configured saved/source read only; manufacturing mutations remain unavailable",
+  "verification": {
+    "previousFocusedDb": {
+      "files": 2,
+      "tests": 10,
+      "status": "passed before final exact-key/current-name changes; historical only"
+    },
+    "integratedApi": {
+      "files": 216,
+      "tests": 1674,
+      "status": "passed",
+      "lotFiles": 2,
+      "lotTests": 13
+    },
+    "integratedWeb": {
+      "files": 20,
+      "tests": 99,
+      "status": "passed",
+      "lotHelperTests": 4
+    },
+    "productionBuild": {
+      "tasks": 7,
+      "status": "passed"
+    },
+    "lintAndSourceTypes": {
+      "tasks": 10,
+      "status": "passed"
+    },
+    "strictApiTestTypes": "passed",
+    "productionBrowser": {
+      "status": "passed",
+      "startedAt": "2026-09-11T04:09:46.509Z",
+      "mockedRequests": 0,
+      "database": "disposable localhost:55433 / app_user",
+      "lotRequests": "GET only"
+    },
+    "visualReview": {
+      "screenshots": 2,
+      "viewport": "1600x1000",
+      "blockingDefectsObserved": false,
+      "limits": "Captured component/source regions only; no mobile or executable desktop comparison"
+    },
+    "sourceSchemaEvidence": "primary CoFieldAdd and original binary literals recovered",
+    "desktopAcceptance": "not established"
+  },
+  "files": [
+    {
+      "path": "web/apps/api/src/modules/manufacturing/mfgLot.ts",
+      "sha256": "52b0898404ffeae728f5fc8fa93bbd58bd9c8a99807f7ca5835b51e559875e66"
+    },
+    {
+      "path": "web/apps/api/test/mfgLotRead.db.test.ts",
+      "sha256": "3cfba39e1c0f40386ee386da448766ff79ae4c90ce7bd9d4cf5cc71b59cf4656"
+    },
+    {
+      "path": "web/apps/api/test/mfgLotRoutes.db.test.ts",
+      "sha256": "f94d50ab1f20733e2c1e265ff6a46f94287fa5814986de68c6f794d2268d5df5"
+    },
+    {
+      "path": "web/apps/web/components/MfgLotForm.tsx",
+      "sha256": "bfb5d381cf50ffb68a78aec97e4a898d36a128e87adcc370590af2467d4fca75"
+    },
+    {
+      "path": "web/apps/web/lib/mfgLotView.ts",
+      "sha256": "a1a3852ec794841f06269733e4526a4d6bf35b29a7763fd7995e773025687a9e"
+    },
+    {
+      "path": "web/apps/web/test/mfgLotView.test.ts",
+      "sha256": "80cb89b7ae588d5824599ffa4d499afbb5a4ff068433f0ff852521b40606fec5"
+    },
+    {
+      "path": "web/apps/web/test/mfg-lot.journey.mjs",
+      "sha256": "7288e7c0f1b32f68355f8fd0bd301c5e6b9230b72f8f016bf92e1fbeffca477a"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/mfg-lot-issue/page.tsx",
+      "sha256": "7bab94e8514afe88b40bed6af2c9c752d582a07a5c55c7eb95b505224e2634dc"
+    },
+    {
+      "path": "web/apps/web/app/(app)/txn/mfg-lot-receive/page.tsx",
+      "sha256": "08088bb37ee1cada1d85db185fb1875b6b7c30d29778f9a3a2a2dc8da6ac3b5a"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-focused-before-exact-key.txt",
+      "sha256": "5cf36cf68314e388423c13f0b73d38c76ad1834d36110614f0f40da00e6d113c"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-http-first-run.txt",
+      "sha256": "8efd198dceab915b875fdb058e0400e6dc261bdcbb7e5511482817a1f3589d71"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-api-types.txt",
+      "sha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-web-types.txt",
+      "sha256": "c04e30f07ee75678ce89d0a71be3ce6157ac20636152fb2c42a55c48c6209b1b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-view-tests.txt",
+      "sha256": "0f55d147dcefeb724eb865dee6f202b60693958887dc578a73bc5e65b54934aa"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-lint.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-format.txt",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-read-source-contract.md",
+      "sha256": "265f8ca294a35dc986dfa2f6181f8723fb1f8d41f7005d51c9ff092defd9106e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-component-lot-schema-source.json",
+      "sha256": "729e1cd8ff95df2fbf98dcca18436b78f8ac8d9d685072f16fc43626e13d963b"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/api-full.txt",
+      "sha256": "f9e0acea258cbfc1d91c0dc7cd73830e783e9f16f06638100844feb15fb18583"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/api-input-snapshot.json",
+      "sha256": "2a7694e6818fd07e7ef0d28b1d5839066d74ac9baa5c6d891aac3cacc00c4a9e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/web-tests-toolbar-fixed.txt",
+      "sha256": "b726eb4df15e137d4575f2e867c6e096ce6b42879e1b8da5728140c94ec6b869"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/build-toolbar-fixed.txt",
+      "sha256": "2fec727edea2c0845f35acec11deeab650e521dfa16585eb556d74e95046e4d2"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/lint-and-types-final.txt",
+      "sha256": "2a9eb7a5c2f191a74691cdf8799b84a2dca27c2daa3b9b79c3fb0cde5dc7c446"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/test-types.txt",
+      "sha256": "3e8c832c6a0be2cd5a9255843185dd9f0cd61fe559f98aed8124f45de05055c9"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/browser-verified.txt",
+      "sha256": "3b0ae394757b19f263230e447a3cf8272b9564eb6115130d5f628ad889fd3d0e"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-browser-verified-result.json",
+      "sha256": "e05791a3ee60cc45223fbb6175585b7eaf9e5e048ad528ec8bdf28aba7b37e93"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-issue-verified.png",
+      "sha256": "63903b83aa44db5c525de4190fc47d4ef61b37b91edc3cf041fd3556162faef6"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-receive-verified.png",
+      "sha256": "b532e979be85398f24bf23795c06985eaaaa7e49258ded9dd2a25f691d7fe8fb"
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round3/x23-lot-visual-review.md",
+      "sha256": "830ac890ad7eba12c83be020f14433324373027216d4bbe7e536ca4acd8ce649"
+    },
+    {
+      "path": "web/apps/web/test/parity.real-stack.mjs",
+      "sha256": "01c663491932fb0ca3ae1eb7e15506f3169d81cba529e66dc8a3514a6c90ffd0"
+    }
+  ]
+}

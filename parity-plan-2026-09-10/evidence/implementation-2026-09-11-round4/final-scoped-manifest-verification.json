@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "manifests": [
+    {
+      "path": "web/docs/parity-evidence/X11-X14-sales-order-run-round4-2026-09-11.json",
+      "sha256": "317414924cd1548ee554717fb4244ffc0c9aed34bba600d70e6e3ac062b118e0",
+      "verifiedReferences": 76
+    },
+    {
+      "path": "web/docs/parity-evidence/X11-sales-design-selection-round4-run-2026-09-11.json",
+      "sha256": "d9f12bb5b2344a3acc7f3b5e4fb0e1f697b0fa4c821ae4464cc85785b63858ec",
+      "verifiedReferences": 55
+    },
+    {
+      "path": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round4/sales-order-lifecycle-evidence.json",
+      "sha256": "115da5be17509901533ce433facb0bf18bbb4981c4749d6794eb25f2d1fdc147",
+      "verifiedReferences": 28
+    }
+  ],
+  "limits": "Only final scoped manifest references were compared with current files. Earlier source snapshots remain historical."
+}

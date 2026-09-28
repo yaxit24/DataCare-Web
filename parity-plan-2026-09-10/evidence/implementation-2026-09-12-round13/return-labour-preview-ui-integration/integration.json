@@ -1,0 +1,42 @@
+{
+  "integratedAtUtc": "2026-09-11T23:24:35.758811+00:00",
+  "verifiedReferences": 19,
+  "files": [
+    {
+      "path": "web/apps/web/test/salesReturnLabourReplay.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "c73bb2dbb07ba41946508d03720564069d64679398f1b47e598ab9d9b679d5e1"
+    },
+    {
+      "path": "web/apps/web/components/SaleReturnSavedPanel.tsx",
+      "beforeSha256": "79b0af1731dfc0e15b1ecc57070413750c639d8964807f331f09fa10b75ae65b",
+      "afterSha256": "b086e6d847bbdf45bee7e65e1c48ac1d590402463cbd483d11e234150bc90f25"
+    },
+    {
+      "path": "web/apps/web/components/SaleReturnLabourReplayPanel.tsx",
+      "beforeSha256": null,
+      "afterSha256": "e495e93df528bd6e2808f14b152faaa737ce145b65e1411cc359f7d374e0e2a9"
+    },
+    {
+      "path": "web/apps/web/lib/salesReturnLabourReplay.ts",
+      "beforeSha256": null,
+      "afterSha256": "33aa5e913b5eaa41cc948fa755e860fbfe64bc707379bde0e6e9f2f1f77a3752"
+    },
+    {
+      "path": "web/apps/web/lib/salesReturnBillReplay.ts",
+      "beforeSha256": "9c7621a1ddce3e81fee8f15991398e5210035a5cd04b404124b0e69b14b8933b",
+      "afterSha256": "9cc7de492facb40f02c05ae0537e9fc48dac19f1bd48222ffdf4395a98ee9924"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/returnLabourUiTransitions.independent.json",
+      "beforeSha256": null,
+      "afterSha256": "e11b9b1c9597bb72fa3c3a74e3ee1e541355f2b5defdf6b1644a2fe8d9d553d5"
+    },
+    {
+      "path": "web/apps/web/test/fixtures/saleReturnLabourReplay.independent.json",
+      "beforeSha256": null,
+      "afterSha256": "22cdfb8963c39dd50e3c41d1277d5d7549f3a65fb507598e1d8013deadc258bc"
+    }
+  ],
+  "validation": "focused checks pending; original independent fixture retained"
+}

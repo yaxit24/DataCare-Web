@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { withTenant } from '@datacare/db';
+import { checkTagInvariants } from '../src/modules/stock/tagInvariants.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 import {
   createPurchase,
@@ -59,6 +61,9 @@ const purchaseInput = (overrides: Record<string, unknown> = {}) => ({
   cashAmt: 10,
   cardAmt: 20,
   chequeAmt: 30,
+  // P0-04: a non-cash settlement must name the bank it lands in. This used to be omitted and the tender
+  // helper posted to the literal 'BANK', which is not an account in any real dataset.
+  bankAc: 'BANKAC',
   ...overrides,
 });
 
@@ -140,6 +145,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       'TAX_MAST',
       'AC_MAST',
       'CO_SET',
+      'CO_SET_NEW',
     ]) {
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
     }
@@ -148,6 +154,17 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
   const seed = async (): Promise<void> => {
     await owner.$executeRawUnsafe(
       `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
+      TENANT,
+      CO,
+    );
+    /**
+     * P4: purchase TDS is company-gated. The desktop exposes and writes TDS_CODE/TDS_PRC/TDS_AMT only
+     * when `MsPrTdsTax = 'Y'` and otherwise writes blank/zero (TR_PURC.cs:12160-12172, :12990-13003).
+     * This fixture asserts the columns DO persist, which is only true for a company that charges TDS,
+     * so the flag is seeded rather than the assertion weakened.
+     */
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","PR_TDS_TAX") VALUES ($1,$2,'Y')`,
       TENANT,
       CO,
     );
@@ -859,11 +876,27 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       expect(row.fine_rate).toBe(0);
       expect(String(row.HD_VCH_NO).trim()).toBe('00000');
       expect(row.bill_date).toBeNull();
-      // PARTY_AC_CODE defaults to the leg's own account, as the desktop statement does.
-      expect(String(row.PARTY_AC_CODE).trim()).toBe(String(row.AC_CODE).trim());
-      // ENTRY_TIME / CLR_DATE take the row date.
+      /**
+       * PARTY_AC_CODE names the VOUCHER'S party, and only on that party's own leg.
+       *
+       * This asserted the leg's own account on every row, and the code echoed `AC_CODE` to match — so a contra
+       * leg carried the settlement or expense account as though it were a party. Measured over the captured
+       * `AC_DATA` rows: a party leg carries the party on 120 of 120, and a contra leg is blank on 79 of 88. The
+       * 9 exceptions are multi-party vouchers, where each leg pair carries its own line's party.
+       */
+      const isPartyLeg = String(row.AC_CODE).trim() === 'SUPP';
+      expect(String(row.PARTY_AC_CODE ?? '').trim()).toBe(isPartyLeg ? 'SUPP' : '');
+      // ENTRY_TIME takes the row date on every family.
       expect(String(row.entry_time ?? '')).toContain('2024-04-10');
-      expect(String(row.clr_date ?? '')).toContain('2024-04-10');
+      /**
+       * CLR_DATE must be NULL on a PURCHASE ledger row.
+       *
+       * This previously asserted the row date, and the code stamped it on every family to match. Measured
+       * over all 5150 real AC_DATA rows in Live24, the desktop sets CLR_DATE on exactly 345 and only on
+       * three books — BANK PAY 130/130, BANK REC 98/98, OPSTK 117/117 — with PURCHASE at 0 of 143 and
+       * SALES at 0 of 1020. A clearance date belongs to a bank instrument, not to a purchase.
+       */
+      expect(row.clr_date).toBeNull();
       // Book name comes from the configured book, and the ledger key is stamped.
       expect(String(row.BOOK_NAME).trim()).toBe('PURCHASE');
       expect(String(row.LEDR_KEY).trim().length).toBeGreaterThan(10);
@@ -877,7 +910,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     // the day book and reverse the shop's metal position.
     await createPurchase(runtime, purchaseInput(), firstLines);
     const rows = (await owner.$queryRawUnsafe(
-      `SELECT "AC_CODE","IT_TYPE","SIGN","DR_AMT"::float dr,"CR_AMT"::float cr,"ITM_GWT"::float gwt
+      `SELECT "AC_CODE","IT_TYPE","SIGN","LEDR_KEY","DR_AMT"::float dr,"CR_AMT"::float cr,"ITM_GWT"::float gwt
          FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
       TENANT,
     )) as Array<Record<string, unknown>>;
@@ -886,8 +919,21 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     expect(metal.length).toBeGreaterThan(0);
     expect(metal.every((r) => r.SIGN === '+')).toBe(true); // metal IN
     expect(metal.every((r) => Number(r.gwt ?? 0) > 0)).toBe(true);
+    /**
+     * Split by ROW TYPE, because the two item rows book different things.
+     *
+     * This asserted a debit on every metal row. That holds for the money row (type `01`) but not for the
+     * unpriced-metal row (type `14`), which the desktop writes with no money at all — measured on all 51 captured
+     * purchases: `14` carries `ITM_FINE` on the party with `DR_AMT` and `CR_AMT` both zero.
+     */
+    const typeOf = (r: Record<string, unknown>) => String(r.LEDR_KEY ?? '').slice(21, 23);
+    const moneyRows = metal.filter((r) => typeOf(r) === '01');
+    const metalRows = metal.filter((r) => typeOf(r) === '14');
+    expect(moneyRows.length + metalRows.length).toBe(metal.length);
     // Expense debited on an inward voucher, the opposite of a sale's credited revenue.
-    expect(metal.every((r) => Number(r.dr ?? 0) > 0 && Number(r.cr ?? 0) === 0)).toBe(true);
+    expect(moneyRows.every((r) => Number(r.dr ?? 0) > 0 && Number(r.cr ?? 0) === 0)).toBe(true);
+    // Weight only: an unpriced line has no value to book yet.
+    expect(metalRows.every((r) => Number(r.dr ?? 0) === 0 && Number(r.cr ?? 0) === 0)).toBe(true);
   });
 
   it('writes exactly the declared set of tables, so a dropped write cannot pass unnoticed', async () => {
@@ -909,5 +955,221 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     const legs = await ledgerLegs(owner, TENANT, vch);
     expect(legs.dr, 'the ledger must actually be posted').toBeGreaterThan(0);
     expect(legs.dr, 'and it must balance').toBeCloseTo(legs.cr, 2);
+  });
+
+  // CALLER-LEVEL guard for the Rojmel party row. The shared builder's own condition was always correct; the
+  // DEFECT was in this module's argument - it passed `totals.total`, so `outstanding` was never zero and every
+  // purchase got a party row. A unit test on the builder passes either way, so the regression has to be caught
+  // here, through createPurchase.
+  //
+  // Real voucher 035/00001 pays 6780.00 cash against a 6780.00 bill and has exactly ONE Rojmel row.
+  it('writes no party Rojmel row when the purchase is paid in full', async () => {
+    const line = {
+      itCode: 'LOOSE',
+      pcs: 1,
+      grossWt: 1,
+      netWt: 1,
+      touch: 100,
+      /**
+       * A RATE, because the voucher this test cites has one.
+       *
+       * Real 035/00001 carries `ITM_RATE 6780`. The fixture omitted the rate, which now matters: a purchase line
+       * taken in at no rate gets the unpriced-metal day-book row (type `14`, on the party), measured on all 51
+       * captured purchases. Without a rate this fixture described unpriced metal while claiming to model a priced
+       * voucher, and the party row it asserts against would legitimately appear.
+       */
+      rate: 1000,
+      metalAmount: 1000,
+      metal: 'G' as const,
+    };
+    // Settle the bill exactly: no tax, cash equal to the metal amount, nothing else tendered.
+    const created = await createPurchase(
+      runtime,
+      purchaseInput({ taxRatePct: 3, cashAmt: 1030, cardAmt: 0, chequeAmt: 0 }),
+      [line],
+    );
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "AC_CODE","IT_CODE",coalesce("DR_AMT",0) dr,coalesce("CR_AMT",0) cr
+         FROM "ROJ_MEL_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=lpad($6::text,5,'0')
+        ORDER BY "LEDR_KEY"`,
+      TENANT,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      created.vchNo,
+    )) as Array<{ AC_CODE: string; IT_CODE: string; dr: number; cr: number }>;
+    // ONE row — the metal line row — not a line row plus a party row.
+    const hdr = (await owner.$queryRawUnsafe(
+      `SELECT coalesce("BILL_OS",0) os,coalesce("TOT_AMT",0) tot,coalesce("CASH_AMT",0) cash,
+              coalesce("KASAR_AMT",0) kasar
+         FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=lpad($3::text,5,'0')`,
+      TENANT,
+      scope.coBook,
+      created.vchNo,
+    )) as Array<Record<string, unknown>>;
+    // A FULLY SETTLED bill writes no PARTY row. That is the property under test, and it holds: measured on
+    // the real database, of 47 sales with BILL_OS = 0 none carries a party row, and of 42 with BILL_OS <> 0
+    // all 42 do (see shared/rojmel.ts:380-383).
+    expect(Number(hdr[0]!.os)).toBe(0);
+    expect(rows.filter((r) => String(r.AC_CODE).trim() === 'SUPP')).toHaveLength(0);
+
+    // This voucher is raised with taxRatePct 3, so a TAX row is expected alongside the metal line.
+    // Previously this asserted `toHaveLength(1)` and failed, which looked like an over-posting defect but
+    // was the assertion forgetting the tax the test itself configured.
+    //
+    // Desktop reference — Live24 purchase 035/00017, TAX_PRC 3, ROJ_MEL_DATA:
+    //     ac=00008  it=ORG  dr=22949     (metal line 1)
+    //     ac=00008  it=ORG  dr=16343     (metal line 2)
+    //     ac=00085  it=''   dr=1178.76   (TAX account, blank IT_CODE)
+    //     ac=000636 it=''   cr=40471     (party — that voucher is not fully settled)
+    // Aggregate: taxed purchases average 4.20 Rojmel rows (min 3, max 6); tax-free average 1.75 (min 1).
+    // So a tax row with a blank IT_CODE is the desktop's shape, not an extra row.
+    const metal = rows.filter((r) => String(r.IT_CODE).trim() === 'LOOSE');
+    const tax = rows.filter((r) => String(r.IT_CODE).trim() === '');
+    expect(rows).toHaveLength(2);
+    expect(metal).toHaveLength(1);
+    // The metal row carries its item: every real metal Rojmel row does (240 rows, 0 blank).
+    expect(metal[0]!.AC_CODE).not.toBe('SUPP');
+    expect(Number(metal[0]!.dr)).toBe(1000);
+    // The tax row carries the tax and no item, exactly as ac=00085 does on 035/00017.
+    expect(tax).toHaveLength(1);
+    expect(Number(tax[0]!.dr)).toBe(30);
+  });
+
+  /**
+   * WP-08 — reopening a tagged purchase and saving it unchanged must lose nothing.
+   *
+   * This is the same defect class that P0-06 records for tag opening: `editPurchase` deletes the write set and
+   * rebuilds it from its input, so any field the reader does not return is wiped by a save the operator
+   * believes changed nothing. `PurchaseLineInput` accepts 45 fields per line and `getPurchase` returns 24 of
+   * them, so the exposure is real — and unlike tag opening, `PUT /purchases/:vchNo` is NOT contained by WP-01,
+   * which means this path is reachable in production today.
+   *
+   * The assertion reads the FULL persisted rows rather than a list of field names, so a field added to the
+   * writer and forgotten in the reader fails here without anyone editing this test.
+   */
+  it('preserves every persisted purchase column across reopen and save unchanged', async () => {
+    // Values are deliberately non-zero and non-default: a field that defaults to 0 or '' would round-trip by
+    // accident and hide the loss this test exists to find.
+    const richLine = {
+      itCode: 'GOLD',
+      tagNo: 'TAGRT01',
+      pcs: 1,
+      grossWt: 12.345,
+      netWt: 11.111,
+      touch: 91.6,
+      ghtWt: 0.234,
+      westPct: 2.5,
+      rate: 6100,
+      metalAmount: 67777.7,
+      labourType: 'percentage' as const,
+      labourPct: 3.5,
+      labourRate: 55.25,
+      otherAmount: 41.5,
+      metal: 'G' as const,
+      huid: 'HUID9Z8Y',
+      designNo: 'D-4711',
+      tblCode: '007',
+      itDesc: 'ROUND-TRIP ORNAMENT',
+      mrp: 99999.5,
+      commissionPct: 1.25,
+      otherRate: 7.5,
+      bagWt: 0.321,
+      lessWt: 1.234,
+    };
+
+    const created = await createPurchase(runtime, purchaseInput(), [richLine]);
+
+    const snapshot = async (table: string): Promise<Array<Record<string, unknown>>> => {
+      const rows = (await owner.$queryRawUnsafe(
+        `SELECT * FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
+        TENANT,
+        BOOK,
+        String(created.vchNo).padStart(5, '0'),
+      )) as Array<Record<string, unknown>>;
+      // row_id is a surrogate; the edit path legitimately deletes and re-inserts each row.
+      return rows.map((row) => {
+        const copy = { ...row };
+        delete copy.row_id;
+        return copy;
+      });
+    };
+
+    const before = { PR_DETL: await snapshot('PR_DETL'), BAR_DETL: await snapshot('BAR_DETL') };
+    expect(before.PR_DETL).toHaveLength(1);
+    expect(before.BAR_DETL, 'the tagged line must have produced a barcode row').toHaveLength(1);
+
+    const reopened = (await getPurchase(runtime, scope, created.vchNo)) as Record<
+      string,
+      unknown
+    > & {
+      lines: Array<Record<string, unknown>>;
+    };
+
+    // Feed the reopened voucher straight back, which is what an operator pressing save does.
+    await editPurchase(
+      runtime,
+      { ...purchaseInput(), vchDate: String(reopened.vchDate) },
+      reopened.lines as never,
+      created.vchNo,
+    );
+
+    const after = { PR_DETL: await snapshot('PR_DETL'), BAR_DETL: await snapshot('BAR_DETL') };
+
+    for (const table of ['PR_DETL', 'BAR_DETL'] as const) {
+      const first = before[table][0] ?? {};
+      const second = after[table][0] ?? {};
+      const changed = Object.keys(first).filter(
+        (column) => String(first[column] ?? '') !== String(second[column] ?? ''),
+      );
+      /**
+       * Every column, including `VCH_SRNO`.
+       *
+       * The tag serial used to move (1 → 2) on an unchanged save, changing the tag IDENTITY and violating plan
+       * §7.1 invariants 1 and 2 on a route WP-01 does not contain. `assertPurchaseTagsUnconsumedTx` was already
+       * reading and locking the persisted `TAG_NO`/`VCH_SRNO` pairs and discarding them; it now returns them and
+       * the writer keeps each tag's serial, mirroring how tag opening threads `ctx.persistedTagSrnos`.
+       */
+      expect(
+        changed,
+        `an unchanged save altered ${table}: ${changed.map((c) => `${c} ${String(first[c])} -> ${String(second[c])}`).join('; ')}`,
+      ).toEqual([]);
+    }
+
+    /**
+     * The identity fix must not have traded one defect for a worse one.
+     *
+     * Reusing a persisted `VCH_SRNO` risks two lines sharing one serial, which would mint a DUPLICATE tag
+     * identity — worse than the field loss being fixed, because `BAR_DETL` carries no uniqueness constraint to
+     * catch it (WP-07 measured that). So WP-07's data invariants run over this tenant: INV-2 scans for a serial
+     * handed out twice, INV-3 for an ornament admitted twice.
+     */
+    const invariants = await withTenant(runtime, TENANT, (tx) => checkTagInvariants(tx));
+    expect(
+      invariants.results.flatMap((r) =>
+        r.violations.map((v) => `${r.invariant} ${v.identity} ${v.detail}`),
+      ),
+      'the round trip must leave every tag invariant intact',
+    ).toEqual([]);
+    expect(
+      invariants.results.find((r) => r.invariant.startsWith('INV-2'))!.examined,
+      'the invariant scan must have had rows to examine',
+    ).toBeGreaterThan(0);
+  });
+  it('rejects a missing taxRatePct with a named field instead of a DecimalError 500', async () => {
+    // FOUND BY RUNNING THE APP, NOT BY THE SUITE. Posting a real voucher through the live stack with
+    // no taxRatePct produced `[DecimalError] Invalid argument: undefined` as an unhandled HTTP 500,
+    // naming no field. Every fixture here supplies a complete header, so the suite never saw it.
+    // The contract declares taxRatePct a required number; omitting it is a caller error and must be
+    // reported as one. It is deliberately NOT defaulted to 0, which would silently post a tax-free
+    // bill for a company that charges tax and put a wrong figure on a GST return.
+    await expect(
+      createPurchase(runtime, { ...purchaseInput(), taxRatePct: undefined as unknown as number }, [
+        { itCode: 'GOLD', pcs: 1, grossWt: 10, netWt: 10, touch: 90, rate: 6000 },
+      ]),
+    ).rejects.toThrow(/numeric taxRatePct/);
   });
 });

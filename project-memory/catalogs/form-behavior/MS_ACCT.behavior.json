@@ -1,0 +1,174 @@
+{
+ "form": "MS_ACCT",
+ "loc": 9652,
+ "gridColumns": {},
+ "inlineSql": [
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = 'Party'",
+  "SELECT AC_CODE,AC_NAME,AC_MOBILE FROM AC_MAST WHERE CO_CODE = ' ? ' ORDER BY LC_CODE,AC_CODE",
+  "SELECT C.AC_CODE,C.AC_NAME,C.AC_MOBILE FROM AC_MAST AS C WHERE C.CO_CODE = ' ? ' AND CAST(C.AC_CODE AS INT) < 100 UNION ALL SELECT A.AC_CODE,A.AC_NAME,A.AC_MOBILE FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.LC_CODE = ' ? ' AND CAST(A.AC_CODE AS INT) >=200 ORDER BY C.AC_CODE",
+  "SELECT AC_CODE,AC_NAME,AC_MOBILE FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY SUBSTRING(AC_CODE,1,2), LEN(AC_CODE),AC_CODE",
+  "SELECT AC_CODE As CoCode From AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 5 ORDER BY AC_CODE DESC",
+  "SELECT AC_CODE As CoCode From AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 5 AND RIGHT(AC_CODE,5) > 80000 ORDER BY AC_CODE DESC",
+  "SELECT AC_CODE As CoCode From AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 6 ORDER BY AC_CODE DESC",
+  "SELECT AC_CODE As CoCode From AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 6 AND RIGHT(AC_CODE,5) > 80000 ORDER BY AC_CODE DESC",
+  "SELECT AC_CODE As CoCode From AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 6 AND SUBSTRING(AC_CODE,2,5) < 80000 ORDER BY SUBSTRING(AC_CODE,2,5) DESC",
+  "SELECT AC_CODE As CoCode From AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND LEN(AC_CODE) = 7 AND RIGHT(AC_CODE,5) > 80000 ORDER BY AC_CODE DESC",
+  "SELECT * from AC_MAST where CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT * from AC_MAST where CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT * FROM AC_GROUP WHERE CO_CODE = ' ? ' AND AC_GR = ' ? '",
+  "SELECT * FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT * FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE=' ? ' ? C ? AND DATA_TYPE = ' ? ' ? ORDER BY AC_CODE",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR AS GroupL,AC_ADD1 As AddressL,AC_PHONE As PhoneL,AC_MOBILE As MobileL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT AC_NAME,LC_CODE,AC_CODE FROM AC_MAST AS A WHERE A.CO_CODE = ' ? ' AND A.AC_MOBILE = ' ? ' AND AC_CODE <> ' ? '",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_MOBILE = ' ? ' AND AC_CODE <> ' ? '",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE <> ' ? ' AND (AC_MOBILE2 = ' ? ' or AC_MOBILE = ' ? ') AND (AC_MOBILE2 <> '' OR AC_MOBILE <> '')",
+  "SELECT * FROM STATE_MAST WHERE STATE_CODE = ' ? '",
+  "SELECT CO_STATE_CODE FROM CO_MAST WHERE CO_CODE = ' ? '",
+  "SELECT CO_STATE FROM CO_MAST WHERE CO_CODE = ' ? '",
+  "Select * From AC_GROUP WHERE CO_CODE = ' ? ' AND AC_GR = ' ? '",
+  "SELECT AC_GR as GrCode,AC_GR_NAME As AcGroupL,AC_SUB_GR AS MainGroupL,AC_MAIN_GR As GrL FROM AC_GROUP WHERE CO_CODE = ' ? ' ORDER BY AC_GR",
+  "SELECT AC_COUNTRY FROM AC_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_COUNTRY ORDER BY AC_COUNTRY",
+  "SELECT AC_STATE FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_STATE <> '' GROUP BY AC_STATE UNION ALL SELECT STATE_NAME as AC_STATE FROM STATE_MAST GROUP BY STATE_NAME ORDER BY AC_STATE",
+  "SELECT AC_DISTRICT FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_DISTRICT <> '' GROUP BY AC_DISTRICT ORDER BY AC_DISTRICT",
+  "SELECT AC_CITY FROM AC_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_CITY ORDER BY AC_CITY",
+  "SELECT AC_AREA FROM AC_MAST WHERE CO_CODE = ' ? ' GROUP BY AC_AREA ORDER BY AC_AREA",
+  "SELECT AC_SHORT As ShortL,AC_NAME As AcNameL,AC_ADD1 As AddressL,AC_MOBILE As MobileL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_SHORT <> '' ORDER BY AC_SHORT",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE <> ' ? ' AND AC_SHORT = ' ? ' AND AC_SHORT <> ''",
+  "Select * From AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "DELETE FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "DELETE FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? ' AND DATA_TYPE = ' ? '",
+  "SELECT * FROM OP_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? ' AND DATA_TYPE = ' ? '",
+  "DELETE FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND CO_YEAR = ' ? ' AND CO_BOOK = '000' AND AC_CODE = ' ? ' AND DATA_TYPE = ' ? '",
+  "DELETE FROM AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT * FROM AC_MAST_SRNO WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "Please Select AcCode For Delete.",
+  "SELECT * FROM AC_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND VCH_NO <> '00000' AND AC_CODE = ' ? '",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, ? A ? AC_SHORT ? '' ? As ShortL, AC_GR AS GroupL,AC_ADD1 As AddressL,AC_PHONE As PhoneL,AC_MOBILE As MobileL,MAIN_USER As UserL FROM AC_MAST WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY AC_NAME",
+  "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_AREA AS AreaL,AC_ADD1 AS AddressL,AC_CITY AS CityL FROM ADD_MAST WHERE CO_CODE = ' ? ' ORDER BY AC_NAME",
+  "select * from ADD_MAST where CO_CODE = ' ? ' AND AC_CODE = ' ? '",
+  "SELECT MEMB_NAME As AcNameL,MEMB_CODE as MembCodeL, SCHM_CODE AS SchmCodeL,AC_ADD1 AS AddressL,AC_CITY AS CityL FROM AD_MEMB WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' ORDER BY MEMB_NAME",
+  "select * from AD_MEMB where CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND MEMB_CODE = ' ? ' AND SCHM_CODE = ' ? '",
+  "SELECT * FROM [{RuntimeHelpers.GetObjectValue(objectValue)}]",
+  "SELECT AC_NAME FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_NAME = ' ? '",
+  "INSERT INTO AC_MAST(CO_CODE,AC_CODE,LC_CODE,AC_NAME,AC_SHORT,AC_MAIN_GR,AC_GR, AC_PERSON,AC_ADD1,AC_ADD2,AC_ADD3,AC_COUNTRY,AC_STATE,AC_DISTRICT,AC_CITY,AC_AREA, AC_PIN,AC_PHONE,AC_PHONE2,AC_MOBILE,AC_MOBILE2,AC_EMAIL,AC_GSTNO,AC_GST_TYPE, AC_PANNO,AC_REF_CODE,AC_KHATA_NO,BR_DATE,L_BR_DATE,AN_DATE,AC_CR_DAYS,AC_INT_PRC, DPC_PRC,BANK_NAME,BANK_AREA,BANK_AC_NO,BANK_RTGS_NO,BANK_DETL,AC_TYPE,LAST_DATE, DATA_TRFR,MAIN_USER,LAST_VISIT,VISIT_TRAN,APP_TRFR,AC_REF_NAME,AC_ADHAR_NO) VALUES (' ? ',' ? ',' ? ',' ? ','',' ? ',' ? ', ' ? ',' ? ',' ? ',' ? ','INDIA',' ? ',' ? ',' ? ','', ' ? ','','',' ? ',' ? ','',' ? ',' ? ', ' ? ','',' ? ',NULL,NULL,NULL,0,0, 0,'','','','','','',NULL, 'N',' ? ',NULL,'','N','','')",
+  "SELECT AC_CODE,AC_NAME,AC_GR FROM AC_MAST_SRNO WHERE CO_CODE = ' ? ' ORDER BY AC_CODE",
+  "SELECT AC_CODE,AC_NAME FROM AC_MAST WHERE CO_CODE = ' ? ' AND AC_CODE = ' ? AC_CODE ? '"
+ ],
+ "keyboard": {
+  "F1": 3,
+  "Enter": 47,
+  "Backspace": 1,
+  "Ctrl+E": 1,
+  "Ctrl+O": 1,
+  "Ctrl+Y": 1,
+  "Esc": 1
+ },
+ "calc": [
+  "tAcCode.Text = Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00000\");",
+  "tAcCode.Text = Strings.Mid(DC_Main.MLc_code, 2, 1) + Strings.Format((object)(Conversion.Val(Strings.Mid(Conversions.ToString(DC_Main.Rshlp.Rows[0][\"CoCode\"]), 2, 5)) + 1.0), \"00000\");",
+  "tAcCode.Text = Strings.Mid(DC_Main.MLc_code, 2, 1) + Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00000\");",
+  "tAcCode.Text = DC_Main.MLc_code + Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"000000\");",
+  "tAcCode.Text = DC_Main.MLc_code + Strings.Format((object)(Conversion.Val(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0][\"CoCode\"])) + 1.0), \"00000\");",
+  "text2 = Strings.Mid(DC_Main.MLc_code, 2, 1) + Strings.Format((object)(Conversion.Val(text2) + 1.0), \"00000\");",
+  "text2 = DC_Main.MLc_code + Strings.Format((object)(Conversion.Val(text2) + 1.0), \"000000\");",
+  "text2 = Strings.Format((object)(Conversion.Val(text2) + 1.0), \"00000\");"
+ ],
+ "validations": [
+  {
+   "message": "You Have No Print Rights.....",
+   "when": "Operators.CompareString(UserPrint, \"Y\", false) != 0"
+  },
+  {
+   "message": "Please Insert Party Name ...",
+   "when": "Operators.CompareString(tAcName.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Have No Rights.....",
+   "when": "(Operators.CompareString(UserEdit, \"Y\", false) != 0) & (Operators.CompareString(EntryMode, \"E\", false) == 0)"
+  },
+  {
+   "message": "Please Insert City Then Try....",
+   "when": "Operators.CompareString(DC_Main.SSRegSrNo, \"HM249NEHP\", false) == 0 && Operators.CompareString(cboCity.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert Mobile No Because This Ac With Multi Branch Acconut so Mobile No Is Mandatory....",
+   "when": "Operators.CompareString(DC_Main.MsAllBranchAcShow, \"Y\", false) == 0 && Operators.CompareString(tMobile.Text, \"\", false) == 0"
+  },
+  {
+   "message": "Please Insert City and Mobile no Then Try....",
+   "when": "((Operators.CompareString(DC_Main.SSRegSrNo, \"HM037NEKU\", false) == 0) | ((Operators.CompareString(DC_Main.SSRegSrNo, \"VK289NEPH\", false) == 0) & (Operators.Com"
+  },
+  {
+   "message": "You Change Software Default Account With Main Location....",
+   "when": "(Conversion.Val(tAcCode.Text) < 100.0) & !DletHoAc"
+  },
+  {
+   "message": "You Can't Change Software Default Account....",
+   "when": "Operators.CompareString(DC_Main.SSRegSrNo, \"KJ007NPKJ\", false) != 0 && ((Strings.Len(tAcCode.Text) == 5) & (((TextBoxBase)tAcCode).BackColor != Color.MistyRose)"
+  },
+  {
+   "message": "Enter Party Name and Account group Detail",
+   "when": "(Operators.CompareString(tAcCode.Text, \"\", false) == 0) | (Operators.CompareString(tAcName.Text, \"\", false) == 0) | (Operators.CompareString(tAcGrCode.Text, \"\","
+  },
+  {
+   "message": "Data Are Saved.",
+   "when": ""
+  },
+  {
+   "message": "Please Select AcCode For Delete.",
+   "when": "Operators.CompareString(tAcCode.Text, \"\", false) == 0"
+  },
+  {
+   "message": "You Can't Delete Record This Party Code Use in Transection....",
+   "when": "DC_Main.Rshlp.Rows.Count > 0"
+  },
+  {
+   "message": "You Cant Delete Default Account ....",
+   "when": "(Conversion.Val(tAcCode.Text) < 100.0) & !DletHoAc"
+  },
+  {
+   "message": "You Can't Delete Software Default Account....",
+   "when": "(Strings.Len(tAcCode.Text) == 5) & (((TextBoxBase)tAcCode).BackColor != Color.MistyRose)"
+  },
+  {
+   "message": "Are You Sure To Delete This Account now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Account now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Delete Success.",
+   "when": ""
+  },
+  {
+   "message": "Please Check Len Connection...You Cant Save Image...",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Delete This Image now?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Delete This Image now?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Are You Sure To Import Old Software Data In Next Software ?",
+   "when": "unchecked((int)Interaction.MsgBox((object)\"Are You Sure To Import Old Software Data In Next Software ?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle)) != 6"
+  },
+  {
+   "message": "Data is Import Ok....",
+   "when": ""
+  },
+  {
+   "message": "Are You Sure To Import Old year Party in Current Year....?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Import Old year Party in Current Year....?\", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) != 6"
+  },
+  {
+   "message": "Ac Mast is Import Ok....",
+   "when": ""
+  },
+  {
+   "message": "Please Select Group First And try...",
+   "when": ""
+  },
+  {
+   "message": "Data Are Update.",
+   "when": ""
+  }
+ ]
+}

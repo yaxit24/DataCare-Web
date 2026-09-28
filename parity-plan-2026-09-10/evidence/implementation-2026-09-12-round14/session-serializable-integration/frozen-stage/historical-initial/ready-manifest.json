@@ -1,0 +1,97 @@
+{
+  "status": "staged-unexecuted",
+  "version": "session-serializable-return-update-v1",
+  "sourceFiles": 1,
+  "unitCasesDeclared": 78,
+  "databaseCasesDeclared": 17,
+  "activeEdits": false,
+  "executed": {
+    "compiler": false,
+    "tests": false,
+    "database": false
+  },
+  "integrate": [
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextSerializableCommand.ts",
+      "sha256": "300447e6d3a8f11306620e12e6a5d13f0802dfc42544f73951231c13ba52bb37"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionSerializableCommand.independent.json",
+      "sha256": "719f298df0a0f1e18b0c10f7fabc57933b682f0916f6140cd26ac0724ff68486"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionSerializableCommand.qualifications.json",
+      "sha256": "1a84a5c10a5d7029af031b28a6f3707531305403b3fe76b6e721f5185d550795"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextSerializableCommand.db.test.ts",
+      "sha256": "68d8c6094d4183e9711017ad1fb4e44bde30dcd8a166274842b20bdc5bd85129"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextSerializableCommand.test.ts",
+      "sha256": "4d263e8d0016345beb1e303b8463328a0ea95ec0db7e96ddc932c49ed3bd9b07"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "README.md",
+      "sha256": "8d38466e6ee28fe8896aa8c5df00cc447de5c3edfcbbc4609c59e3072f14f356"
+    },
+    {
+      "path": "fixture-freeze.json",
+      "sha256": "ff07b5383f28cb7635578cb8ae34d9bd624e22d3fafa4614f5ea0b97af730157"
+    },
+    {
+      "path": "freeze-contract.py",
+      "sha256": "6c3661ba20464b09aaa511bd1d2b039fcbb11323bb0ea6398c13721db86c54c2"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "57fe4a02454b81264200fce82ef66a4637e41d69f3f9c71a81806ba5070097ec"
+    },
+    {
+      "path": "new-files.patch",
+      "sha256": "74bc07ee497b9b3cdead417ad91dc0260a1b28af8a1c13129faf9899a294aee1"
+    },
+    {
+      "path": "prepare-db-tests.py",
+      "sha256": "d45fcdef0aa1af2616286246b97c7b9f49e9017f2bc3df64ef5f289059ceb9a5"
+    },
+    {
+      "path": "prepare-source.py",
+      "sha256": "3f898b78de2a3702671af8ee9eb70a1e52d0260c0f8b106b4ea0037d73403792"
+    },
+    {
+      "path": "prepare-tests.py",
+      "sha256": "d8f977064feef13e86482414f5374836ab4ff085eab986944ee8c743d1161869"
+    },
+    {
+      "path": "preservation.json",
+      "sha256": "3abc3eaabff295592d60325da5b038917bfeb423832200f90fbc34de38fedf94"
+    },
+    {
+      "path": "scope-profile-addendum.md",
+      "sha256": "3d344250e04aec4b47c23cc69d149347c7bf6b37526f01a7f6c3c9969278fabc"
+    },
+    {
+      "path": "web/apps/api/src/modules/auth/sessionContextSerializableCommand.ts",
+      "sha256": "300447e6d3a8f11306620e12e6a5d13f0802dfc42544f73951231c13ba52bb37"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionSerializableCommand.independent.json",
+      "sha256": "719f298df0a0f1e18b0c10f7fabc57933b682f0916f6140cd26ac0724ff68486"
+    },
+    {
+      "path": "web/apps/api/test/fixtures/sessionSerializableCommand.qualifications.json",
+      "sha256": "1a84a5c10a5d7029af031b28a6f3707531305403b3fe76b6e721f5185d550795"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextSerializableCommand.db.test.ts",
+      "sha256": "68d8c6094d4183e9711017ad1fb4e44bde30dcd8a166274842b20bdc5bd85129"
+    },
+    {
+      "path": "web/apps/api/test/sessionContextSerializableCommand.test.ts",
+      "sha256": "4d263e8d0016345beb1e303b8463328a0ea95ec0db7e96ddc932c49ed3bd9b07"
+    }
+  ]
+}

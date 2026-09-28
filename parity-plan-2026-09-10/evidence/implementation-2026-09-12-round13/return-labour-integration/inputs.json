@@ -1,0 +1,130 @@
+{
+  "stage": "unexecuted-labour-prerequisite-v1",
+  "inputs": [
+    {
+      "path": "/tmp/datacare-return-labour-staged/README.md",
+      "sha256": "da8fad6982512f4c6ac4899b4702f44691007930eb3f34dba89658dc80af0d75",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-staged/required-core-export.txt",
+      "sha256": "eef00032af02f4c196d6f8054d369dcbf0614907fa3737b6b5928894af001921",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-staged/web/apps/api/src/modules/sales/saleReturnIncomingLabour.ts",
+      "sha256": "c2d34d7a4270fe35a9af9455ecf402376e450377b95d392382c79268b99658ba",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-staged/web/apps/api/test/saleReturnIncomingLabour.db.test.ts",
+      "sha256": "fd520c12cec05804f40df80172b60988432a45e80b3520ffad5148ac4475e65c",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-staged/web/apps/api/test/saleReturnIncomingLabour.test.ts",
+      "sha256": "8759a2d530870462b0fbe3e5345e28b81aed371a746b81d3da699c082e1ccc81",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-staged/web/packages/core/src/saleReturnIncomingLabour.ts",
+      "sha256": "d5e3260358a9596d6f735978f7be46379c5cb19bd7304f2e7db6763b44181b81",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-staged/web/packages/core/test/fixtures/saleReturnIncomingLabour.independent.json",
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-labour-staged/web/packages/core/test/saleReturnIncomingLabour.test.ts",
+      "sha256": "74da7d6d1b15d49fcf738533c4b7d6da90f173bd2db0f23b455f89f4c5cbd663",
+      "role": "new-staged-input"
+    },
+    {
+      "path": "/tmp/datacare-return-next-admission/labour-code-independent-candidates.json",
+      "sha256": "17ad183d4f9f143202fcdedac515aa58616a1d552dac06e01634212d44e941aa",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/tmp/datacare-return-next-admission/next-admission-contract.md",
+      "sha256": "40c4f718173465275a0396db861c98acf5eee686c48e745d7ff8afa9d45b17ac",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/tmp/datacare-return-next-admission/next-admission-inputs.json",
+      "sha256": "3e6a4ff68dff3a48eae212a52f55fb4829a8ba1c0ded419832824c3d4c94d006",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/TR_SALE_RTN.cs",
+      "sha256": "cdee9c37772522727d08c86baee71a46daa7b11cdfdf2eeb1ef656d80dfbb7a1",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/unified/src/csharp/DataCareNext/MS_UPDATE.cs",
+      "sha256": "943525d918df85170ee3a4733bdf81cdc1d5b7e61b5efed27add7bc2883d8cb7",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/db/prisma/schema.prisma",
+      "sha256": "a8b437b5ad32150d48360765832707888bb5b265126d329b0c92e6890e0496fd",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/index.ts",
+      "sha256": "9cf3e8c242ea0f28824f086f6dafb0f2ab803a60f285ef94cb448378e67dd415",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/money.ts",
+      "sha256": "d6fbf799c56f4ed70e7b83006e22adeef4a23ac12f36d91abbf4b8deb0f19131",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncoming.ts",
+      "sha256": "bbc5df6568da23a75804866ab31c789b9be9850e79681d8193a82e1e3430c805",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnIncomingReplay.ts",
+      "sha256": "0127c2a29c778823778253fa76af5c7bba1fd7bffcec6aafa0f74da28c0108ac",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/api/src/modules/sales/saleReturnBillReplay.ts",
+      "sha256": "b78bbed89d97a401227fa1399448b3b56081c07676986621b89e697ef968d953",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingProjection.ts",
+      "sha256": "3f3b9ac1e937f1adfbf535283cd66701438b791a24ed691d641c573f63e9d96e",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnBillProjection.ts",
+      "sha256": "881c903a3321923014eb776a2ddf583c3b2ea6232d6773f94a8d56ca7a4978b9",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnIncomingAggregate.ts",
+      "sha256": "c356eacb0a8f3a509997eb10a56a8bb269edf3791af3909fde1326c222f8d3ed",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/packages/core/src/saleReturnBillTaxPolicy.ts",
+      "sha256": "4e12c8b129cbdc168bafb01cb40a7a723e1db2bfb57af57a3c73f9099b809622",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnReplay.ts",
+      "sha256": "60093c4f2a0ded2a675c68496c958b5c62dfd24b526dc346c4183e3d9dc6a1ef",
+      "role": "read-only-reference"
+    },
+    {
+      "path": "/Users/yakshitsavaliya/Desktop/imodule-extracted/web/apps/web/lib/salesReturnBillReplay.ts",
+      "sha256": "9c7621a1ddce3e81fee8f15991398e5210035a5cd04b404124b0e69b14b8933b",
+      "role": "read-only-reference"
+    }
+  ]
+}

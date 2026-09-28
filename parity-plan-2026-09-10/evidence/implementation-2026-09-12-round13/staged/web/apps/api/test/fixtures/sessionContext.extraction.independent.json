@@ -1,0 +1,1627 @@
+{
+  "version": 1,
+  "kind": "batch1-tx-extraction-current-behavior-independent",
+  "authoredBeforeStagedImplementationInspection": true,
+  "sourceOfExpectedDecisions": "Current original web businessScope.ts/authorization.ts/rightsOf/isAdminRole; this is an extraction regression contract, not new desktop parity or auth-session integration evidence.",
+  "queryRowsMeaning": "Literal results are in the order produced by the existing SQL. A fake query queue must not emulate SQL sorting/membership. Separately compare SQL semantics and bindings to the original source.",
+  "undefinedEncoding": "expected.ownUndefinedKeys names own output properties whose values must be undefined; omitted JSON keys are not evidence that the JS result omits these properties.",
+  "cases": [
+    {
+      "id": "S01",
+      "reason": "Missing company refuses before location/year",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": []
+        }
+      ],
+      "expected": {
+        "errorCode": "company-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S02",
+      "reason": "Ordinary selected company requires exact login membership",
+      "operation": "selected",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "isAdmin": false
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": false
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "company-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S03",
+      "reason": "Ordinary selected company with membership resolves all three queries",
+      "operation": "selected",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "isAdmin": false
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S04",
+      "reason": "Admin bypass is an explicit company-query parameter",
+      "operation": "selected",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "isAdmin": true
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S05",
+      "reason": "Login resolver company query uses existing unconditional access path",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S06",
+      "reason": "Requested branch wins over company default",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "lcCode": "07"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "07",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "07"
+            },
+            {
+              "LC_CODE": "02"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "07",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S07",
+      "reason": "Missing requested branch refuses before querying year",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "lcCode": "99"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "99",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "location-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S08",
+      "reason": "Company default is supplied to SQL ordering; first returned row is used",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "07",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "07"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "07"
+            },
+            {
+              "LC_CODE": "02"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "07",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S09",
+      "reason": "Empty location master retains existing trimmed company-default fallback",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": " 07 ",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "07"
+          ],
+          "rows": []
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "07",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S10",
+      "reason": "Missing both location rows and company default refuses",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": null,
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            ""
+          ],
+          "rows": []
+        }
+      ],
+      "expected": {
+        "errorCode": "location-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S11",
+      "reason": "With no company default SQL-ordered first branch is selected",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": null,
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            ""
+          ],
+          "rows": [
+            {
+              "LC_CODE": "01"
+            },
+            {
+              "LC_CODE": "03"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "01",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S12",
+      "reason": "Requested historical year is exact and does not become latest",
+      "operation": "selected",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "isAdmin": false,
+        "coYear": "2020-2021"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            "2020-2021"
+          ],
+          "rows": [
+            {
+              "year": "2020-2021"
+            },
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02",
+          "coYear": "2020-2021"
+        }
+      }
+    },
+    {
+      "id": "S13",
+      "reason": "Explicit unavailable year refuses even at login",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "coYear": "1999-2000"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            "1999-2000"
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "year-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S14",
+      "reason": "Login with no year retains incomplete scope without invented year",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": []
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02"
+        },
+        "ownUndefinedKeys": [
+          "coYear"
+        ]
+      }
+    },
+    {
+      "id": "S15",
+      "reason": "Selection with no year remains unavailable",
+      "operation": "selected",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "isAdmin": false
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "operator",
+            false
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": []
+        }
+      ],
+      "expected": {
+        "errorCode": "year-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S16",
+      "reason": "Default year comes from first descending SQL observation",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2025-2026"
+            },
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02",
+          "coYear": "2025-2026"
+        }
+      }
+    },
+    {
+      "id": "S17",
+      "reason": "Requested branch is not silently trimmed",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "lcCode": " 02 "
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            " 02 ",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "location-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S18",
+      "reason": "Requested year is not silently trimmed",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "coYear": " 2024-2025 "
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            " 2024-2025 "
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorCode": "year-unavailable",
+        "errorName": "ScopeError"
+      }
+    },
+    {
+      "id": "S19",
+      "reason": "Empty-string requested branch/year follow current default path",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "lcCode": "",
+        "coYear": ""
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": "2024-2025"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02",
+          "coYear": "2024-2025"
+        }
+      }
+    },
+    {
+      "id": "S20",
+      "reason": "Year output is trimmed; OP_DATE-derived four-digit observation is retained",
+      "operation": "login",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02"
+      },
+      "queries": [
+        {
+          "table": "CO_MAST",
+          "params": [
+            "02",
+            "",
+            true
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "CO_NAME": "Fixture company",
+              "LC_CODE": "02",
+              "allowed": true
+            }
+          ]
+        },
+        {
+          "table": "LOCT_MAST",
+          "params": [
+            "02",
+            "",
+            "02"
+          ],
+          "rows": [
+            {
+              "LC_CODE": "02",
+              "LC_NAME": "Default branch"
+            }
+          ]
+        },
+        {
+          "table": "YEAR_MAST",
+          "params": [
+            "02",
+            ""
+          ],
+          "rows": [
+            {
+              "year": " 2024 "
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "tenantId": "tx-fixture",
+          "coCode": "02",
+          "lcCode": "02",
+          "coYear": "2024"
+        }
+      }
+    },
+    {
+      "id": "P01",
+      "reason": "Selected company credential owns effective rights even when login-company credential is admin",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "U",
+              "USER_UPDATE": "Y",
+              "USER_DELETE": "N",
+              "USER_PRINT": "1",
+              "PASSWORD_RESET_REQUIRED": "y"
+            },
+            {
+              "CO_CODE": "01",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "A",
+              "USER_UPDATE": "N",
+              "USER_DELETE": "N",
+              "USER_PRINT": "N",
+              "PASSWORD_RESET_REQUIRED": "N"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "02",
+          "role": "U",
+          "isAdmin": false,
+          "rights": {
+            "userUpdate": true,
+            "userDelete": false,
+            "userPrint": true
+          },
+          "passwordResetRequired": true
+        }
+      }
+    },
+    {
+      "id": "P02",
+      "reason": "Absent selected credential falls back to immutable-login-company lookup",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "01",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "A",
+              "USER_UPDATE": "N",
+              "USER_DELETE": "N",
+              "USER_PRINT": "N",
+              "PASSWORD_RESET_REQUIRED": "N"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "01",
+          "role": "A",
+          "isAdmin": true,
+          "rights": {
+            "userUpdate": true,
+            "userDelete": true,
+            "userPrint": true
+          },
+          "passwordResetRequired": false
+        }
+      }
+    },
+    {
+      "id": "P03",
+      "reason": "No principal rows refuses",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": []
+        }
+      ],
+      "expected": {
+        "errorName": "PrincipalUnavailableError",
+        "errorMessage": "principal-unavailable"
+      }
+    },
+    {
+      "id": "P04",
+      "reason": "Lowercase a-prefix is admin and grants all global rights",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "assistant",
+              "USER_UPDATE": null,
+              "USER_DELETE": null,
+              "USER_PRINT": null,
+              "PASSWORD_RESET_REQUIRED": "N"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "02",
+          "role": "assistant",
+          "isAdmin": true,
+          "rights": {
+            "userUpdate": true,
+            "userDelete": true,
+            "userPrint": true
+          },
+          "passwordResetRequired": false
+        }
+      }
+    },
+    {
+      "id": "P05",
+      "reason": "Leading-space admin role is not trimmed into admin",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": " Admin",
+              "USER_UPDATE": "N",
+              "USER_DELETE": "N",
+              "USER_PRINT": "N",
+              "PASSWORD_RESET_REQUIRED": "N"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "02",
+          "role": " Admin",
+          "isAdmin": false,
+          "rights": {
+            "userUpdate": false,
+            "userDelete": false,
+            "userPrint": false
+          },
+          "passwordResetRequired": false
+        }
+      }
+    },
+    {
+      "id": "P06",
+      "reason": "Global rights accept exactly Y/1/lowercase true",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "U",
+              "USER_UPDATE": "Y",
+              "USER_DELETE": "1",
+              "USER_PRINT": "true",
+              "PASSWORD_RESET_REQUIRED": "N"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "02",
+          "role": "U",
+          "isAdmin": false,
+          "rights": {
+            "userUpdate": true,
+            "userDelete": true,
+            "userPrint": true
+          },
+          "passwordResetRequired": false
+        }
+      }
+    },
+    {
+      "id": "P07",
+      "reason": "Global rights do not inherit forced-reset uppercase normalization",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "U",
+              "USER_UPDATE": "y",
+              "USER_DELETE": "TRUE",
+              "USER_PRINT": " Y ",
+              "PASSWORD_RESET_REQUIRED": "true"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "02",
+          "role": "U",
+          "isAdmin": false,
+          "rights": {
+            "userUpdate": false,
+            "userDelete": false,
+            "userPrint": false
+          },
+          "passwordResetRequired": true
+        }
+      }
+    },
+    {
+      "id": "P08",
+      "reason": "Forced-reset flag does not trim spaces",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "U",
+              "USER_UPDATE": "N",
+              "USER_DELETE": "N",
+              "USER_PRINT": "N",
+              "PASSWORD_RESET_REQUIRED": " TRUE "
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "02",
+          "role": "U",
+          "isAdmin": false,
+          "rights": {
+            "userUpdate": false,
+            "userDelete": false,
+            "userPrint": false
+          },
+          "passwordResetRequired": false
+        }
+      }
+    },
+    {
+      "id": "P09",
+      "reason": "NULL role remains empty and global NULL flags remain false",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": null,
+              "USER_UPDATE": null,
+              "USER_DELETE": null,
+              "USER_PRINT": null,
+              "PASSWORD_RESET_REQUIRED": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "value": {
+          "loginName": "operator",
+          "loginCoCode": "02",
+          "role": "",
+          "isAdmin": false,
+          "rights": {
+            "userUpdate": false,
+            "userDelete": false,
+            "userPrint": false
+          },
+          "passwordResetRequired": false
+        }
+      }
+    },
+    {
+      "id": "P10",
+      "reason": "Missing principal company is refused",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": null,
+              "LOGIN_NAME": "operator",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "U",
+              "USER_UPDATE": "N",
+              "USER_DELETE": "N",
+              "USER_PRINT": "N",
+              "PASSWORD_RESET_REQUIRED": "N"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorName": "PrincipalUnavailableError",
+        "errorMessage": "principal-unavailable"
+      }
+    },
+    {
+      "id": "P11",
+      "reason": "Missing principal name is refused",
+      "operation": "principal",
+      "input": {
+        "tenantId": "tx-fixture",
+        "coCode": "02",
+        "loginName": "operator",
+        "loginCoCode": "01"
+      },
+      "queries": [
+        {
+          "table": "LOGIN_MAST",
+          "params": [
+            "operator",
+            "02",
+            "01"
+          ],
+          "rows": [
+            {
+              "CO_CODE": "02",
+              "LOGIN_NAME": "",
+              "LOGIN_PWD": "fixture-not-authenticated",
+              "LOGIN_CATG": "U",
+              "USER_UPDATE": "N",
+              "USER_DELETE": "N",
+              "USER_PRINT": "N",
+              "PASSWORD_RESET_REQUIRED": "N"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "errorName": "PrincipalUnavailableError",
+        "errorMessage": "principal-unavailable"
+      }
+    }
+  ],
+  "transactionInvariants": [
+    {
+      "id": "TX01",
+      "expected": "Each public login/selected/principal wrapper opens exactly one withTenant callback with input.tenantId; all its domain queries use that callback tx."
+    },
+    {
+      "id": "TX02",
+      "expected": "Direct Tx helpers open zero transactions and do not call set_config, $transaction, withTenant or set isolation; caller must already bind tenant and choose transaction isolation."
+    },
+    {
+      "id": "TX03",
+      "expected": "An original query rejection propagates as the same error without reclassification, swallowing, fallback query or partial successful return."
+    },
+    {
+      "id": "TX04",
+      "expected": "Company refusal stops before location/year; location refusal stops before year; principal absence remains PrincipalUnavailableError."
+    },
+    {
+      "id": "TX05",
+      "expected": "No new row-lock clause, writes, LOGIN/USER_SET semantics, input coercion, last-day-lock invocation, token/session/epoch/ledger integration is added."
+    },
+    {
+      "id": "TX06",
+      "expected": "One default withTenant transaction is not a RepeatableRead guarantee and is not atomic with later separate auth/session/last-lock calls."
+    }
+  ]
+}

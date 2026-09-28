@@ -1,0 +1,7 @@
+{
+  "snapshotSha256": "b6dd02c720f1414e10c5c7f0cfc3a495e944c64772e3bda99c37ee658a6b46c9",
+  "checked": 11,
+  "mismatches": [],
+  "result": "passed",
+  "scope": "After owned focused runtime and strict test compilation, before root tax resolver index integration. Not a final workspace snapshot."
+}

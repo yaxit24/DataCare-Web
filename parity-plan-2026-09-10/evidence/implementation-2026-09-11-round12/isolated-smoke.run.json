@@ -1,0 +1,17 @@
+{
+  "command": [
+    "pnpm",
+    "test:browser"
+  ],
+  "cwd": "/tmp/datacare-round12-verification/web",
+  "startedAtUtc": "2026-09-11T18:54:29.752806+00:00",
+  "finishedAtUtc": "2026-09-11T18:54:39.291554+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-smoke.txt",
+  "isolatedInputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-workspace-inputs-qualified.json",
+  "isolatedInputManifestSha256": "52177ad18ac7717c709ccb4b74cdbc325158c5984c9cbc466c7e31c927e9857d",
+  "supplementalBrowserFixtureManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-11-round12/isolated-browser-fixtures.json",
+  "supplementalBrowserFixtureManifestSha256": "fefebf3b8f64e834537935b91530b621010a9285428f3a51656e62801d211bb5",
+  "changedFrozenInputs": []
+}

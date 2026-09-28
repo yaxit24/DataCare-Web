@@ -1,0 +1,89 @@
+{
+ "form": "TR_TAG_CAN",
+ "tables": [
+  "AC_MAST",
+  "BAR_CAN_DATA",
+  "BAR_CAN_DETL",
+  "BAR_CAN_IDTL",
+  "BAR_DETL",
+  "BAR_IDTL",
+  "DELETE_DATA",
+  "DM_DATA",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "LOT_DETL",
+  "MAIN_STOCK",
+  "TABLE_MAST",
+  "TAG_IMAGE_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {
+   "DELETE_DATA": [
+    "AC_CODE",
+    "AC_NAME",
+    "BOOK_NAME",
+    "CO_BOOK",
+    "CO_CODE",
+    "CO_YEAR",
+    "DELETE_DATE",
+    "DELETE_TIME",
+    "DELETE_USER",
+    "FINE_TYPE",
+    "HD_VCH_NO",
+    "LC_CODE",
+    "MAIN_USER",
+    "SR_NO",
+    "VCH_DATE",
+    "VCH_DESC",
+    "VCH_FINE_CR",
+    "VCH_FINE_DR",
+    "VCH_NO",
+    "VCH_TIME",
+    "VCH_TYPE",
+    "VCH_VAL_CR",
+    "VCH_VAL_DR"
+   ]
+  },
+  "UPDATE": [
+   "BAR_DETL",
+   "MAIN_STOCK"
+  ],
+  "DELETE": [
+   "BAR_CAN_DATA",
+   "BAR_CAN_DETL",
+   "BAR_CAN_IDTL",
+   "DM_DATA",
+   "LOT_DETL",
+   "MAIN_STOCK",
+   "TEMP_BOOK_DATA"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "BAR_CAN_DATA",
+  "BAR_CAN_DETL",
+  "BAR_CAN_IDTL",
+  "BAR_DETL",
+  "BAR_IDTL",
+  "DM_DATA",
+  "EMP_MAST",
+  "ITEM_MAST",
+  "LOT_DETL",
+  "MAIN_STOCK",
+  "TABLE_MAST",
+  "TAG_IMAGE_DATA",
+  "TEMP_BOOK_DATA",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 25,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 3,
+ "calcSample": [],
+ "loc": 5988
+}

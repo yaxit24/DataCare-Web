@@ -1,0 +1,21 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@datacare/api",
+    "typecheck"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T20:07:48.415506+00:00",
+  "finishedAtUtc": "2026-09-11T20:07:52.681156+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-coordinators-production-types-corrected.txt",
+  "logSha256": "9f7dbbb0bf1a156ed65e731ed92a2f558b2c36bb9d33e15bbf839295ace66889",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-coordinators-production-types-corrected.inputs.json",
+  "inputManifestSha256": "477faaaa4323920eff02b7869bb159a95833097b583b6b1e0e72781e978e3c87",
+  "inputCount": 1762,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

@@ -1,0 +1,43 @@
+# TR_REP_REC
+
+- **Module:** transaction
+- **Source:** `src/csharp/DataCareNext/TR_REP_REC.cs`
+- _Auto-extracted baseline (Task 4). Flagship transaction forms are enriched with curated narrative._
+
+## Tables written on save
+- **INSERT:** —
+- **UPDATE:** REP_DETL
+
+## Tables deleted / reversed
+- **DELETE:** AC_DATA, REMARK_DATA, REP_DATA, REP_DETL, ROJ_MEL_DATA, TAX_DATA, TEMP_BOOK_DATA
+
+## Tables read
+- REP_DETL, REP_DATA, AC_MAST, TEMP_BOOK_DATA, AC_DATA, ROJ_MEL_DATA, TAX_MAST, EMP_MAST, ITEM_MAST, MAIN_STOCK, BAR_DETL, USER_SET, REMARK_DATA, TAX_DATA
+
+## Save / operation sequence (ordered; consecutive dups collapsed)
+- L4657: DELETE REP_DATA
+- L4658: DELETE REP_DETL
+- L4661: DELETE TEMP_BOOK_DATA
+- L4747: DELETE REP_DETL
+- L4861: DELETE AC_DATA
+- L4864: DELETE ROJ_MEL_DATA
+- L4870: UPDATE REP_DETL
+- L4872: DELETE AC_DATA
+- L4875: DELETE ROJ_MEL_DATA
+- L4881: UPDATE REP_DETL
+- L4883: DELETE AC_DATA
+- L4886: DELETE ROJ_MEL_DATA
+- L4892: UPDATE REP_DETL
+- L4896: DELETE AC_DATA
+- L4899: DELETE ROJ_MEL_DATA
+- L4953: DELETE REMARK_DATA
+- L4954: DELETE TEMP_BOOK_DATA
+- L4955: DELETE AC_DATA
+- L4956: DELETE ROJ_MEL_DATA
+- L4957: DELETE TAX_DATA
+- L4960: UPDATE REP_DETL
+- L4975: DELETE REP_DATA
+- L4976: DELETE REP_DETL
+
+## Validation guards (heuristic, user-facing messages)
+- (none detected)

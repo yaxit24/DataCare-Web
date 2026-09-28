@@ -1,0 +1,33 @@
+{
+  "stage": "Historical first browser; product frozen, original 12-check journey loaded before final 15 test-only extension",
+  "reviewed": [
+    {
+      "path": "test-results/parity-real-stack-round8-first/result.json",
+      "sha256": "3dd6879b0ddb4d385e0f6922527918ef2682853e9f38148f409e5331466efde3"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-first/column-settings-conflict.png",
+      "sha256": "1c75844f6b2e085fd53d1427ccde568ebcf1bace869a9f67124d0a0d50e99038"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-first/column-settings-family-qualified.png",
+      "sha256": "7c11d1ee9bee0bb180a960dcd3e193bae97d9a60bfb13f87f6b52bad074a8d61"
+    },
+    {
+      "path": "test-results/parity-real-stack-round8-first/column-settings-read-only.png",
+      "sha256": "26ce625a83fc7ce97df06826c438430b70e7fbe8f820e6fed037600943a294ba"
+    }
+  ],
+  "observations": [
+    "Family-qualified original names and resulting captions are readable in the captured viewport.",
+    "Conflict draft stays visible with explicit reload and disabled mutation controls.",
+    "Restricted Styles user has disabled edit/delete actions and no unrelated image panel.",
+    "No clipping or overlap was observed in the three captured visible regions.",
+    "The global primary-button CSS stays blue inside a disabled fieldset; actual browser confirmed disabled behavior.",
+    "Read-only screenshot shows the scrollable list viewport; it is not a visual inspection of all rows below that viewport."
+  ],
+  "limits": [
+    "Final 15-check browser remains pending.",
+    "No actual desktop executable, arbitrary screen size or complete keyboard workflow acceptance is claimed."
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "command": [
+    "pnpm",
+    "exec",
+    "tsc",
+    "-p",
+    "../parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-coordinators-tsconfig.json",
+    "--noEmit"
+  ],
+  "cwd": "web",
+  "startedAtUtc": "2026-09-11T20:28:00.739161+00:00",
+  "finishedAtUtc": "2026-09-11T20:28:04.646844+00:00",
+  "exitCode": 0,
+  "status": "passed",
+  "log": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-coordinators-focused-strict.txt",
+  "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inputManifest": "parity-plan-2026-09-10/evidence/implementation-2026-09-12-round13/context-coordinators-focused-strict.inputs.json",
+  "inputManifestSha256": "ef08da26a0db0ecdea980b46be1c567de6595e843b48a0764bde9e86786b44db",
+  "inputCount": 1768,
+  "changedInputs": [],
+  "qualification": "unchanged-declared-inputs",
+  "limits": "Only the recorded command and its assertions; no original desktop, production, complete session lifecycle or whole-menu acceptance is inferred."
+}

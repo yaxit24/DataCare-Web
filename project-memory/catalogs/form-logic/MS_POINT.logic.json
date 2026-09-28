@@ -1,0 +1,32 @@
+{
+ "form": "MS_POINT",
+ "tables": [
+  "AC_MAST",
+  "POINT_MAST",
+  "POINT_MEMB",
+  "USER_SET"
+ ],
+ "writes": {
+  "INSERT": {},
+  "UPDATE": [],
+  "DELETE": [
+   "POINT_MAST",
+   "POINT_MEMB"
+  ]
+ },
+ "selectTables": [
+  "AC_MAST",
+  "POINT_MAST",
+  "POINT_MEMB",
+  "USER_SET"
+ ],
+ "fKeys": [
+  "F1"
+ ],
+ "messageBoxes": 6,
+ "timers": 0,
+ "serialPort": false,
+ "handlers": 2,
+ "calcSample": [],
+ "loc": 2372
+}

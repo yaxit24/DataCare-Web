@@ -1,0 +1,663 @@
+{
+ "report": "DhrnIssueImg",
+ "areas": [
+  {
+   "kind": "ReportHeader",
+   "name": "Area3",
+   "sections": [
+    {
+     "name": "Section3",
+     "kind": "ReportHeader",
+     "height": 336,
+     "objects": []
+    }
+   ]
+  },
+  {
+   "kind": "PageHeader",
+   "name": "Area1",
+   "sections": [
+    {
+     "name": "Section9",
+     "kind": "PageHeader",
+     "height": 4260,
+     "objects": [
+      {
+       "type": "FieldObject",
+       "name": "Field7",
+       "left": 285,
+       "top": 0,
+       "width": 10710,
+       "height": 278,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field15",
+       "left": 285,
+       "top": 270,
+       "width": 10635,
+       "height": 225,
+       "dataSource": "{@CoAdd}"
+      },
+      {
+       "type": "BoxObject",
+       "name": "Box1",
+       "left": 0,
+       "top": 608,
+       "width": 10965,
+       "height": 8520
+      },
+      {
+       "type": "TextObject",
+       "name": "Text24",
+       "left": 285,
+       "top": 645,
+       "width": 3435,
+       "height": 255,
+       "text": "FORM No. 11 (SEE RULE 14)"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text16",
+       "left": 4530,
+       "top": 645,
+       "width": 1707,
+       "height": 240,
+       "text": "REGISTRATION NO :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field10",
+       "left": 6315,
+       "top": 645,
+       "width": 1770,
+       "height": 225,
+       "dataSource": "{CO_MAST.DHIRAN_NO}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text28",
+       "left": 8385,
+       "top": 645,
+       "width": 480,
+       "height": 240,
+       "text": "Mo :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field17",
+       "left": 8797,
+       "top": 645,
+       "width": 1905,
+       "height": 225,
+       "dataSource": "{CO_MAST.CO_MOBILE}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text1",
+       "left": 1080,
+       "top": 885,
+       "width": 1095,
+       "height": 255,
+       "text": "SR NO :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field30",
+       "left": 2280,
+       "top": 900,
+       "width": 1132,
+       "height": 266,
+       "dataSource": "{DHRN_ISU_DATA.VCH_NO}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text20",
+       "left": 4530,
+       "top": 900,
+       "width": 4470,
+       "height": 225,
+       "text": "DATE OF REGISTRATION : 18-09-2012"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text41",
+       "left": 1080,
+       "top": 1155,
+       "width": 1095,
+       "height": 210,
+       "text": "Date :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field14",
+       "left": 2265,
+       "top": 1155,
+       "width": 1282,
+       "height": 228,
+       "dataSource": "{DHRN_ISU_DATA.VCH_DATE}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text7",
+       "left": 15,
+       "top": 1440,
+       "width": 2145,
+       "height": 255,
+       "text": "NAME OF DEBTER :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field24",
+       "left": 2265,
+       "top": 1440,
+       "width": 8535,
+       "height": 226,
+       "dataSource": "{DHRN_ISU_DATA.AC_NAME}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text35",
+       "left": 1080,
+       "top": 1725,
+       "width": 1095,
+       "height": 225,
+       "text": "ADDRESS :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field1",
+       "left": 2265,
+       "top": 1725,
+       "width": 3930,
+       "height": 225,
+       "dataSource": "{AC_MAST.AC_ADD1}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field4",
+       "left": 2265,
+       "top": 1995,
+       "width": 3420,
+       "height": 225,
+       "dataSource": "{AC_MAST.AC_ADD2}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field5",
+       "left": 5100,
+       "top": 1995,
+       "width": 2700,
+       "height": 225,
+       "dataSource": "{AC_MAST.AC_CITY}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line3",
+       "left": 15,
+       "top": 2257,
+       "width": 10980,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text8",
+       "left": 285,
+       "top": 2295,
+       "width": 3038,
+       "height": 255,
+       "text": "AMOUNT OF LOAN Rs :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field33",
+       "left": 3525,
+       "top": 2295,
+       "width": 1530,
+       "height": 221,
+       "dataSource": "{DHRN_ISU_DATA.DHRN_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field3",
+       "left": 5235,
+       "top": 2335,
+       "width": 5565,
+       "height": 238,
+       "dataSource": "{@RptTitle}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text6",
+       "left": 1320,
+       "top": 2520,
+       "width": 1988,
+       "height": 255,
+       "text": "In Words :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field34",
+       "left": 3525,
+       "top": 2520,
+       "width": 6735,
+       "height": 230,
+       "dataSource": "{@WordRuppes}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text10",
+       "left": 600,
+       "top": 2805,
+       "width": 2685,
+       "height": 225,
+       "text": "NATURE OF LOAN :"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text12",
+       "left": 3525,
+       "top": 2805,
+       "width": 7575,
+       "height": 225,
+       "text": "Agricultreal Loan, Industrial Loan, Trade Loan, Personal Loan and Miscellaneous Loan"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text14",
+       "left": 150,
+       "top": 3075,
+       "width": 3195,
+       "height": 225,
+       "text": "DATE OF MATURITY : (IF ANY) :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field12",
+       "left": 3525,
+       "top": 3075,
+       "width": 780,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DATA.DHRN_MONTH}"
+      },
+      {
+       "type": "BlobFieldObject",
+       "name": "Field11",
+       "left": 9180,
+       "top": 3075,
+       "width": 1380,
+       "height": 1005
+      },
+      {
+       "type": "TextObject",
+       "name": "Text15",
+       "left": 664,
+       "top": 3330,
+       "width": 2681,
+       "height": 216,
+       "text": "NATURE OF SECURITY :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field8",
+       "left": 3488,
+       "top": 3330,
+       "width": 5265,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.IT_NAME}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text4",
+       "left": 53,
+       "top": 3630,
+       "width": 3307,
+       "height": 255,
+       "text": "WEIGHT, ESTIMATED VALUE ETC :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field13",
+       "left": 3525,
+       "top": 3630,
+       "width": 780,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DATA.GOLD_WT}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text3",
+       "left": 1088,
+       "top": 3915,
+       "width": 4312,
+       "height": 255,
+       "text": "NAME AND ADDRESS OF MONEY LENDER :"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field2",
+       "left": 5625,
+       "top": 3915,
+       "width": 2790,
+       "height": 278,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "LineObject",
+       "name": "Line1",
+       "left": 15,
+       "top": 4200,
+       "width": 10980,
+       "height": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Detail",
+   "name": "Area5",
+   "sections": [
+    {
+     "name": "Section5",
+     "kind": "Detail",
+     "height": 1725,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line2",
+       "left": 15,
+       "top": 0,
+       "width": 10980,
+       "height": 0
+      },
+      {
+       "type": "BlobFieldObject",
+       "name": "Field16",
+       "left": 9188,
+       "top": 150,
+       "width": 1545,
+       "height": 1320
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field19",
+       "left": 132,
+       "top": 360,
+       "width": 780,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.SR_NO}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field20",
+       "left": 1080,
+       "top": 360,
+       "width": 4200,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.IT_NAME}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field21",
+       "left": 5625,
+       "top": 360,
+       "width": 795,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.ITM_PCS}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field22",
+       "left": 6615,
+       "top": 360,
+       "width": 900,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.ITM_GWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field23",
+       "left": 7710,
+       "top": 360,
+       "width": 915,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.ITM_NWT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field25",
+       "left": 4530,
+       "top": 720,
+       "width": 870,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.ITM_FINE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field26",
+       "left": 5460,
+       "top": 720,
+       "width": 960,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.ITM_RATE}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field27",
+       "left": 6600,
+       "top": 720,
+       "width": 915,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.ITM_AMT}"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field28",
+       "left": 7710,
+       "top": 720,
+       "width": 915,
+       "height": 225,
+       "dataSource": "{DHRN_ISU_DETL.NET_AMT}"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "ReportFooter",
+   "name": "Area4",
+   "sections": [
+    {
+     "name": "Section7",
+     "kind": "ReportFooter",
+     "height": 1095,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line5",
+       "left": 8,
+       "top": 0,
+       "width": 10965,
+       "height": 0
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field9",
+       "left": 7200,
+       "top": 120,
+       "width": 2640,
+       "height": 278,
+       "dataSource": "{CO_MAST.CO_NAME}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text11",
+       "left": 360,
+       "top": 720,
+       "width": 1440,
+       "height": 255,
+       "text": "SIGNATURE OF"
+      },
+      {
+       "type": "FieldObject",
+       "name": "Field6",
+       "left": 1920,
+       "top": 720,
+       "width": 3765,
+       "height": 225,
+       "dataSource": "{AC_MAST.AC_NAME}"
+      },
+      {
+       "type": "TextObject",
+       "name": "Text19",
+       "left": 7200,
+       "top": 720,
+       "width": 2985,
+       "height": 255,
+       "text": "SIGNATURE OF MONEY LENDER :"
+      }
+     ]
+    },
+    {
+     "name": "Section4",
+     "kind": "ReportFooter",
+     "height": 1875,
+     "objects": [
+      {
+       "type": "LineObject",
+       "name": "Line6",
+       "left": 15,
+       "top": 15,
+       "width": 10980,
+       "height": 0
+      },
+      {
+       "type": "TextObject",
+       "name": "Text2",
+       "left": 285,
+       "top": 120,
+       "width": 10597,
+       "height": 1560,
+       "text": "N.B. - A separate statement shall be furnished in respect of each loan transaction : In case of loan in kind there shall be reference to the commodity advanced along with marketvalue if the same at th"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "PageFooter",
+   "name": "Area2",
+   "sections": [
+    {
+     "name": "Section2",
+     "kind": "PageFooter",
+     "height": 1965,
+     "objects": []
+    },
+    {
+     "name": "Section6",
+     "kind": "PageFooter",
+     "height": 600,
+     "objects": []
+    }
+   ]
+  }
+ ],
+ "formulas": [
+  {
+   "name": "AcAdd1",
+   "ref": "{@AcAdd1}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD1} + ' , ' + {AC_MAST.AC_ADD2}"
+  },
+  {
+   "name": "AcAdd2",
+   "ref": "{@AcAdd2}",
+   "type": "StringField",
+   "text": "{AC_MAST.AC_ADD3} + ' , ' + {AC_MAST.AC_CITY}"
+  },
+  {
+   "name": "AcGstNo",
+   "ref": "{@AcGstNo}",
+   "type": "UnknownField",
+   "text": "'Gst No : ' + {AC_MAST.AC_LSTNO}"
+  },
+  {
+   "name": "AcMobile",
+   "ref": "{@AcMobile}",
+   "type": "StringField",
+   "text": "if {AC_MAST.AC_MOBILE} <> '' then 'Mo : ' + {AC_MAST.AC_MOBILE} else if {AC_MAST.AC_PHONE} <> '' then 'Ph : ' + {AC_MAST.AC_MOBILE} else 'Mo : ' + {AC_MAST.AC_MOBILE2}"
+  },
+  {
+   "name": "CoAdd",
+   "ref": "{@CoAdd}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD1} + ' - ' + {CO_MAST.CO_CITY}"
+  },
+  {
+   "name": "CoAdd2",
+   "ref": "{@CoAdd2}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_ADD2} + ' , ' + {CO_MAST.CO_ADD3}"
+  },
+  {
+   "name": "CoCity",
+   "ref": "{@CoCity}",
+   "type": "StringField",
+   "text": "{CO_MAST.CO_CITY}"
+  },
+  {
+   "name": "CurPag",
+   "ref": "{@CurPag}",
+   "type": "NumberField",
+   "text": "PageNumber"
+  },
+  {
+   "name": "for",
+   "ref": "{@for}",
+   "type": "StringField",
+   "text": "'For : ' + {CO_MAST.CO_NAME}"
+  },
+  {
+   "name": "InVoiceTipe",
+   "ref": "{@InVoiceTipe}",
+   "type": "StringField",
+   "text": "'ORIGINAL'"
+  },
+  {
+   "name": "RptTitle",
+   "ref": "{@RptTitle}",
+   "type": "StringField",
+   "text": "{BOOK_DATA.BOOK_NAME}"
+  },
+  {
+   "name": "Tax",
+   "ref": "{@Tax}",
+   "type": "StringField",
+   "text": ""
+  },
+  {
+   "name": "TotalRecAmt",
+   "ref": "{@TotalRecAmt}",
+   "type": "NumberField",
+   "text": "{DHRN_ISU_DATA.INT_REC_AMT}"
+  },
+  {
+   "name": "VchGroup",
+   "ref": "{@VchGroup}",
+   "type": "StringField",
+   "text": "{DHRN_ISU_DATA.CO_YEAR}+{DHRN_ISU_DATA.CO_BOOK}+{DHRN_ISU_DATA.VCH_NO}"
+  },
+  {
+   "name": "WordRuppes",
+   "ref": "{@WordRuppes}",
+   "type": "StringField",
+   "text": "if {DHRN_ISU_DATA.DHRN_AMT} <> 0 then ToWords ({DHRN_ISU_DATA.DHRN_AMT},0 )"
+  }
+ ],
+ "sectionCount": 7,
+ "objectCount": 55,
+ "formulaCount": 15
+}

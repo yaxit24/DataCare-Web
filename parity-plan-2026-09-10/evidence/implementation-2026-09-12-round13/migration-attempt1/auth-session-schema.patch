@@ -1,0 +1,15 @@
+--- a/web/packages/db/prisma/schema.prisma
++++ b/web/packages/db/prisma/schema.prisma
+@@ -3803,6 +3803,12 @@
+   revokedAt      DateTime? @map("revoked_at") @db.Timestamptz(6)
+   revokeReason   String?   @map("revoke_reason") @db.VarChar(40)
+ 
++  contextEpoch             BigInt  @default(1) @map("context_epoch") @db.BigInt
++  ledgerContext            Json    @default("{\"version\":\"server-session-ledger-context-v1\",\"status\":\"unknown\",\"mode\":null,\"reason\":\"vendor-authority-unresolved\"}") @map("ledger_context") @db.JsonB
++  lastContextSelectionId   String? @map("last_context_selection_id") @db.VarChar(36)
++  lastContextRequestSha256 String? @map("last_context_request_sha256") @db.Char(64)
++  lastContextFromEpoch     BigInt? @map("last_context_from_epoch") @db.BigInt
++
+   @@id([tenantId, sessionId])
+   @@index([tenantId, loginName, loginCoCode], map: "auth_session_login_idx")
+   @@index([tenantId, expiresAt], map: "auth_session_expiry_idx")

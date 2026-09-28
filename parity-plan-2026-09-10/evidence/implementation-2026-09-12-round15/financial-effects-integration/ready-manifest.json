@@ -1,0 +1,140 @@
+{
+  "kind": "round15-financial-effects-ready/v1",
+  "status": "staged-only-no-write-authority",
+  "frozenAtUtc": "2026-09-12T02:51:21.676152+00:00",
+  "focusedTests": 291,
+  "strictTypes": "passed",
+  "sourceAndTestFrozen": true,
+  "directRunEvidence": "focused-formatted.run.json",
+  "sourceReferenceHashesVerified": 12,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "6b14a2fa9d5698f649bb066960c2af09492be07e508efe435cb550fe788ae50e"
+    },
+    {
+      "path": "author-fixtures.py",
+      "sha256": "c8a672481ee1c5c97c54d2fe17fda7d43c0b5624068d9f36448b5f8e9663e9d9"
+    },
+    {
+      "path": "exports.txt",
+      "sha256": "2dd5557abc8410341e8e67cdcbd0f13c7fa52d5b31da853134be3804c3af00e6"
+    },
+    {
+      "path": "fixture-authorship.json",
+      "sha256": "8a1047c16fd85d04763caeb2d2feb7c3c623f42dac7032dfe81e62b7c0ed300c"
+    },
+    {
+      "path": "fixture-freeze.json",
+      "sha256": "3736e15dff3dfe0bcaceed7ede98f6e41b4222f5efaec29d940c65752d97dc6b"
+    },
+    {
+      "path": "focused-final.inputs.json",
+      "sha256": "d67a77f05cc4c90ebcca3ef51500cd4186b450eb29fb051abac84ba8f7177e1d"
+    },
+    {
+      "path": "focused-final.run.json",
+      "sha256": "9edb319ffcb5d6f15fd4c3d95d1f39107448fad539748f2dd30a2986ac0cb6ee"
+    },
+    {
+      "path": "focused-final.txt",
+      "sha256": "d5edefcfbfb7da5f4d55f1448988f20bbfb39b38a5b9045a5163d056b764363a"
+    },
+    {
+      "path": "focused-first.run.json",
+      "sha256": "e9601acfdd187f6308f1cd8c3e3e1b1e041b28c291b0ffa886a5b9561b027019"
+    },
+    {
+      "path": "focused-first.txt",
+      "sha256": "e2a76719a2a50e3b1877e1a79e429afff94b0c89be1b76ecca38ada6cef20086"
+    },
+    {
+      "path": "focused-formatted.inputs.json",
+      "sha256": "ea8b37a9e66f9500d916d1f4ec3dce77f1ca4e2ebc9c8eff50371e56bb6e006d"
+    },
+    {
+      "path": "focused-formatted.run.json",
+      "sha256": "38ea423dd2f3ed1bbe173c9d64a325471ba66f194a83e8d18d59594e01135332"
+    },
+    {
+      "path": "focused-formatted.txt",
+      "sha256": "2a7af3f498f459b85035245fa6317256e1a139ae278d091b7afd3b0282e80853"
+    },
+    {
+      "path": "focused-second.run.json",
+      "sha256": "1b81cc3df0df71d0d25ef4491f9ad4fefaad794bd06aaf3fa688a176af2d0a20"
+    },
+    {
+      "path": "focused-second.txt",
+      "sha256": "2078b6d5d6cbf8a63534f1b2949d1a9383508f6458c7d75a29234d0e51c24673"
+    },
+    {
+      "path": "implementation-contract.md",
+      "sha256": "6ee3a2b3d67da0959fe9c09b9ec7dd12cc0101f526198594a9a07502a32f224c"
+    },
+    {
+      "path": "integration-commands.txt",
+      "sha256": "92681ec264107fe4968ea38dd88121ddd6bd85762d34f7536cc6897f8891de17"
+    },
+    {
+      "path": "integration-files.json",
+      "sha256": "9b65bfacd6b15ebdb26f9dacd363b5d46c0801c308028f0e348ba4f2c1b513c6"
+    },
+    {
+      "path": "joint-fixture-freeze.json",
+      "sha256": "81ec1f92684ee5d8aff32df2c291a57fd0411acafc0918f327f5f3d048a0f2e8"
+    },
+    {
+      "path": "metadata-controls-before-fix.txt",
+      "sha256": "c2dbd6621c5ffcb915c7fb6761d73d863d36f43f47fcc8516c81fa1b2cf0751a"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "81bf33dd54f3a9fde36214e21429fd32c54c3d294d1e7d14c9300450d5ec2419"
+    },
+    {
+      "path": "target-storage-index.json",
+      "sha256": "7120a09451b96d88cc60470fcd83a058110089c53cee2b2cf224112baecb0a70"
+    },
+    {
+      "path": "types-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "types-first.run.json",
+      "sha256": "c0feccf23d17528a51dc4a01c4c8eab7db4a79d1ab363f2e4c95a193d42954d2"
+    },
+    {
+      "path": "types-first.txt",
+      "sha256": "e045b37bd464f538bdee9a215de28264282040387ce5f23703512d595348cc42"
+    },
+    {
+      "path": "types-formatted.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "web/packages/core/package.json",
+      "sha256": "c4520c9677194de7bc0127aa7dd006967970ceaada0928f3819fd4db0f5be608"
+    },
+    {
+      "path": "web/packages/core/src/saleReturnFinancialEffects.ts",
+      "sha256": "2e4d51469540b7618ceb84127fc609c0611cfbcf8e468205f10515766b84a5f6"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnFinancialEffects.independent.json",
+      "sha256": "635e1e251837c0c5acc6acd39f2b7e2932ad19850b976d3a1f2d59cf5229a09b"
+    },
+    {
+      "path": "web/packages/core/test/fixtures/saleReturnFinancialEffects.joint.independent.json",
+      "sha256": "d1d96417de35b406d8b50d47b8547dc0e788f323f953e3d26d71a9b77323390f"
+    },
+    {
+      "path": "web/packages/core/test/saleReturnFinancialEffects.test.ts",
+      "sha256": "e1fb1e72793c25cb93857aad1a7fdac248e6bb0ad6e599508a5244d61c2ebebe"
+    },
+    {
+      "path": "web/packages/core/vitest.config.ts",
+      "sha256": "60c6c52762ee1232696af0b62cbcdaec1e702a9b5e252e0bc1962833d424bdfb"
+    }
+  ]
+}

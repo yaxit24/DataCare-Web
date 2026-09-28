@@ -1,0 +1,5 @@
+{
+  "review": "Independent source-only review suggested terminal Unicode line separator acceptance; reviewer withdrew the defect claim after considering the regex end assertion without multiline. No runtime reproduction was claimed. Printable-ASCII precheck and three regression cases remain explicit contract guards, not a credited defect fix.",
+  "actualCompilerCorrection": "Initial strict NodeNext test compile required JSON import type attribute. Added explicit with {type:json}; failed run retained.",
+  "firstCoreBuild": "Six dist outputs were created/updated by the recorded compiler. Those expected outputs explain changedInputs; subsequent full tests capture the new bytes."
+}

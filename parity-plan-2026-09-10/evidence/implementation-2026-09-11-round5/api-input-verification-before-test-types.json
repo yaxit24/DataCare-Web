@@ -1,0 +1,12 @@
+{
+  "checkedAtUtc": "2026-09-11T07:05:01.550407+00:00",
+  "status": "passed",
+  "beforeRunSnapshotSha256": "b55128e1ac1546ddd64024fcf4dacc235763dcf72c2fd406956d0566575c8549",
+  "matchedInputs": 1001,
+  "fullRegression": {
+    "files": 221,
+    "tests": 1740,
+    "skipped": 0
+  },
+  "limits": "Final full regression captured before and unchanged after. Engineering evidence, not full desktop parity."
+}

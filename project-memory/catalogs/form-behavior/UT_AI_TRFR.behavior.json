@@ -1,0 +1,70 @@
+{
+ "form": "UT_AI_TRFR",
+ "loc": 2848,
+ "gridColumns": {
+  "cUSrNo": 0,
+  "cUBookName": 1,
+  "cUVchNo": 2,
+  "cUVchDate": 3,
+  "cUPrName": 4,
+  "cUTagNo": 5,
+  "cUGrwt": 6,
+  "cUNetWt": 7,
+  "cUVchSrNo": 8,
+  "cUImgId": 9,
+  "cUBook": 10
+ },
+ "inlineSql": [
+  "DELETE FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT * FROM TAG_IMAGE_DATA WHERE CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "SELECT ROW_NUMBER() OVER (ORDER BY C.VCH_DATE,C.CO_BOOK,C.VCH_NO,C.SR_NO) AS SrNo,E.BOOK_NAME,A.IT_CODE, A.TAG_NO, C.ITM_GWT, C.ITM_NWT, CONCAT(LTrim(RTrim(A.TAG_NO)), '_', CAST(A.VCH_SRNO AS BIGINT)) AS IMG_ID,B.PR_CODE,C.VCH_DATE,A.VCH_SRNO,D.PR_NAME,C.CO_BOOK,C.VCH_NO,C.SR_NO FROM(((MAIN_STOCK AS A LEFT JOIN BAR_DETL AS C ON A.CO_CODE = C.CO_CODE And A.LC_CODE = C.LC_CODE And A.TAG_NO = C.TAG_NO AND A.VCH_SRNO = C.VCH_SRNO ) LEFT JOIN ITEM_MAST As B On A.CO_CODE = B.CO_CODE And A.IT_CODE = B.IT_CODE) LEFT JOIN PRODUCT_MAST As D On B.CO_CODE = D.CO_CODE And B.PR_CODE = D.PR_CODE)LEFT JOIN BOOK_DATA AS E ON C.CO_CODE = E.CO_CODE AND C.LC_CODE = E.LC_CODE AND C.CO_BOOK = E.CO_BOOK WHERE A.CO_CODE =' ? ' AND A.LC_CODE = ' ? ' ? AND B.GR_CODE = ' ? ' ? AND B.PR_CODE = ' ? ' ? AND C.VCH_DATE >= ' ? MM/dd/yyyy ? ' AND C.VCH_DATE <= ' ? MM/dd/yyyy ? ' ? C ? AND C.DATA_TYPE = ' ? ' ? GROUP BY E.BOOK_NAME,A.IT_CODE, A.TAG_NO, C.ITM_GWT, C.ITM_NWT,B.PR_CODE,C.VCH_DATE,A.VCH_SRNO,D.PR_NAME,C.CO_BOOK,C.VCH_NO,C.SR_NO HAVING SUM(CASE WHEN A.ITM_SIGN='+' THEN A.VCH_SRNO ELSE -A.VCH_SRNO END) > 0",
+  "Select * From USER_SET WHERE LC_CODE = ' ? ' AND USER_NAME = ' ? ' AND SUB_MENU = ' ? '",
+  "SELECT * FROM BOOK_IDTL WHERE SR_NO = 78",
+  "Select * From GROUP_MAST WHERE CO_CODE = ' ? ' AND GR_CODE = ' ? '",
+  "SELECT GR_NAME As GrNameL,GR_CODE as GrCodeL,GR_TYPE as TypeL,TRAD_TYPE As TradTypeL FROM GROUP_MAST WHERE CO_CODE = ' ? ' ORDER BY GR_NAME",
+  "Select * From PRODUCT_MAST WHERE CO_CODE = ' ? ' AND PR_CODE = ' ? '",
+  "SELECT PR_NAME As PrNameL,PR_CODE as PrCodeL FROM PRODUCT_MAST WHERE CO_CODE = ' ? ' ORDER BY PR_NAME",
+  "DELETE FROM TAG_DATA WHERE CO_HDD = ' ? ' AND CO_CODE = ' ? ' AND LC_CODE = ' ? '",
+  "DELETE FROM TAG_DATA WHERE CO_HDD = ' ? ' AND CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND IMG_IMPORT = 'Y'",
+  "SELECT TAG_NO FROM TAG_DATA WHERE CO_HDD = ' ? ' AND CO_CODE = ' ? ' AND LC_CODE = ' ? ' AND TAG_NO = ' ? ' AND VCH_SRNO = ? ",
+  "INSERT INTO TAG_DATA(CO_HDD,CO_CODE,LC_CODE,TAG_NO,VCH_SRNO,LOGIN_NAME, SR_NO,VCH_DATE,PR_NAME,ITM_GWT,ITM_NWT,IMG_ID) VALUES(' ? ',' ? ',' ? ',' ? ', ? ,' ? ', ? ,' ? MM/dd/yyyy ? ',' ? ', ? , ? ,' ? ')",
+  "SELECT TAG_NO, PR_NAME, ITM_GWT, ITM_NWT, IMG_ID,VCH_SRNO FROM TAG_DATA WHERE CO_HDD = ' ? ' AND CO_CODE = ' ? ' AND LC_CODE = ' ? ' ? AND SUBSTRING(TAG_NO,1,2) = ' ? ' ? ",
+  "UPDATE TAG_DATA SET IMG_IMPORT = 'Y' WHERE CO_HDD=@HDD AND CO_CODE=@CO AND LC_CODE=@LC AND TAG_NO=@TAG AND VCH_SRNO=@SRNO",
+  "UPDATE BAR_DETL SET APP_TRFR = 'R' WHERE CO_CODE=@CO AND LC_CODE=@LC AND TAG_NO=@TAG AND VCH_SRNO=@SRNO",
+  "DELETE FROM BOOK_IDTL WHERE SR_NO = 78",
+  "Select * FROM BOOK_IDTL WHERE SR_NO = 78",
+  "INSERT INTO BOOK_IDTL(MAIN_BOOK,SR_NO,INOUT_TYPE,AC_CODE,AC_NAME,SVR_PWD)VALUES(' ? ',78,'O','',' ? ',' ? ')",
+  "Server Ip is Update....Ok.."
+ ],
+ "keyboard": {
+  "Esc": 1,
+  "Enter": 3
+ },
+ "calc": [],
+ "validations": [
+  {
+   "message": "Are You Sure To Image Server All Data Remove...Then New Data Export....?",
+   "when": "(int)Interaction.MsgBox((object)\"Are You Sure To Image Server All Data Remove...Then New Data Export....?\", (MsgBoxStyle)260, (object)DC_Main.MsgTitle) == 6"
+  },
+  {
+   "message": "Tag Is Transfer...ok...",
+   "when": ""
+  },
+  {
+   "message": "Data loaded OK",
+   "when": ""
+  },
+  {
+   "message": "No rows found!",
+   "when": "rowCount == 0"
+  },
+  {
+   "message": "Bulk Image Save Completed Successfully!",
+   "when": ""
+  },
+  {
+   "message": "Server Ip is Update....Ok..",
+   "when": ""
+  }
+ ]
+}
