@@ -164,7 +164,7 @@ run('Sales Order financial edit joins the admitted HTTP session transaction', ()
     owner.$queryRawUnsafe<Audit[]>(
       `SELECT id::text id,tenant_id AS "tenantId",login_name AS "loginName",co_code AS "coCode",
        action,path,status,to_jsonb(t)::text raw,xmin::text revision,ctid::text locator
-     FROM audit_log t WHERE tenant_id=ANY($1::text[]) ORDER BY id`,
+     FROM audit_log t WHERE tenant_id=ANY($1::text[]) ORDER BY t.id`,
       tenants,
     );
   const request = async (
