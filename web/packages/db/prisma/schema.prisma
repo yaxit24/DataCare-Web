@@ -1922,7 +1922,7 @@ model DG_GOLD_MAST {
   // Desktop: ALTER TABLE DG_GOLD_MAST ADD BANK_AC_CODE VARCHAR(10) NOT NULL DEFAULT '00075'
   // (MS_UPDATE scheme-data initialiser), bound to MS_GOLD_MAST's tBankCode control. Nullable here so the
   // migration does not reject rows created before it.
-  BANK_AC_CODE        String?  @db.VarChar(10)
+  BANK_AC_CODE        String?  @default("00075") @db.VarChar(10)
 
   @@id([tenantId, CO_CODE, COUNTRY_CODE])
   @@map("DG_GOLD_MAST")
@@ -3539,7 +3539,6 @@ model LBR_REC_DETL {
   AC_CODE       String?   @db.VarChar(8)
   IT_CODE       String?   @db.VarChar(6)
   LOT_NO        String?   @db.VarChar(15)
-  ITM_LOT       String?   @db.VarChar(15)
   DESIGN_NO     String?   @db.VarChar(20)
   TBL_CODE      String?   @db.VarChar(3)
   ITM_SIZE      String?   @db.VarChar(20)
@@ -7103,6 +7102,84 @@ model OP_DETL {
   @@index([tenantId], map: "OP_DETL_tenant_idx")
   @@index([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO], map: "OP_DETL_voucher_idx")
   @@map("OP_DETL")
+}
+
+/// Generalized image bytes introduced by raw SQL migrations. RLS, FORCE RLS, and policies remain migration-owned.
+model EntityImage {
+  rowId       BigInt   @id(map: "TAG_IMAGE_BLOB_pkey") @default(autoincrement()) @map("row_id")
+  tenantId    String   @map("tenant_id") @db.VarChar(24)
+  CO_CODE     String   @db.VarChar(12)
+  LC_CODE     String   @db.VarChar(12)
+  ENTITY_KEY  String   @db.VarChar(255)
+  INSTANCE    Float    @default(0)
+  IMAGE_TYPE  String   @default("TagImage") @db.VarChar(40)
+  MIME_TYPE   String   @db.VarChar(60)
+  IMAGE_SIZE  Int
+  IMAGE_BYTES Bytes
+  MAIN_USER   String?  @db.VarChar(64)
+  ENTRY_TIME  DateTime @default(now()) @db.Timestamp(6)
+  ENTITY_TYPE String   @default("TAG") @db.VarChar(8)
+
+  @@unique([tenantId, CO_CODE, LC_CODE, ENTITY_TYPE, ENTITY_KEY, INSTANCE], map: "entity_image_key_uq")
+  @@index([tenantId], map: "entity_image_tenant_idx")
+  @@map("ENTITY_IMAGE")
+}
+
+/// Durable image concurrency identity. The non-negative revision check remains migration-owned.
+model EntityImageRevision {
+  tenantId    String @map("tenant_id")
+  CO_CODE     String @db.VarChar(12)
+  LC_CODE     String @default("") @db.VarChar(12)
+  ENTITY_TYPE String @db.VarChar(8)
+  ENTITY_KEY  String @db.VarChar(255)
+  INSTANCE    Float
+  REVISION    BigInt @default(0)
+
+  @@id([tenantId, CO_CODE, LC_CODE, ENTITY_TYPE, ENTITY_KEY, INSTANCE])
+  @@map("ENTITY_IMAGE_REVISION")
+}
+
+/// Append-only company backup evidence. Immutability trigger and RLS remain migration-owned.
+model CompanyBackupRun {
+  rowId           BigInt   @id @default(autoincrement()) @map("row_id")
+  tenantId        String   @map("tenant_id") @db.VarChar(24)
+  coCode          String   @map("co_code") @db.VarChar(12)
+  checksum        String   @db.VarChar(64)
+  documentVersion Int      @map("document_version")
+  generatedAt     DateTime @map("generated_at") @db.Timestamptz(6)
+  tableCount      Int      @default(0) @map("table_count")
+  rowCount        BigInt   @default(0) @map("row_count")
+  operator        String?  @db.VarChar(64)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, coCode, checksum], map: "company_backup_run_checksum_uq")
+  @@index([tenantId, coCode, generatedAt(sort: Desc)], map: "company_backup_run_lookup_idx")
+  @@map("company_backup_run")
+}
+
+/// Append-only repair audit evidence. Partial uniqueness, immutability trigger, comments, and RLS remain migration-owned.
+model DataRepairRun {
+  rowId             BigInt    @id @default(autoincrement()) @map("row_id")
+  tenantId          String    @map("tenant_id") @db.VarChar(24)
+  operationId       String    @map("operation_id") @db.VarChar(64)
+  coCode            String    @map("co_code") @db.VarChar(12)
+  lcCode            String?   @map("lc_code") @db.VarChar(12)
+  coYear            String?   @map("co_year") @db.VarChar(16)
+  state             String    @db.VarChar(16)
+  previewHash       String    @map("preview_hash") @db.VarChar(64)
+  counts            Json      @default("{}")
+  appliedCounts     Json?     @map("applied_counts")
+  samples           Json      @default("[]")
+  operator          String    @db.VarChar(64)
+  reason            String?
+  error             String?
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  appliedAt         DateTime? @map("applied_at") @db.Timestamptz(6)
+  backupReference   String?   @map("backup_reference") @db.VarChar(64)
+  reauthenticatedAt DateTime? @map("reauthenticated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, operationId, createdAt(sort: Desc)], map: "data_repair_run_tenant_op_idx")
+  @@map("data_repair_run")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
