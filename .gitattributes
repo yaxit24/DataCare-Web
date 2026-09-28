@@ -69,3 +69,7 @@ DataCareSetup_extracted/DataCareNextS/selenium-manager/**/selenium-manager filte
 
 # Text files retain their working-tree line endings in this preservation baseline.
 # Repository contributors may format active web sources explicitly without rewriting raw provenance trees.
+
+# Active API image fixtures must be available to CI without hydrating the 1.1 GB desktop LFS archive.
+web/apps/api/test/fixtures/*.png -filter -diff -merge -text
+web/apps/api/test/fixtures/*.jpg -filter -diff -merge -text
