@@ -1,0 +1,892 @@
+{
+ "kind": "datacare.parity-diff/1.0",
+ "comparedAt": "2026-09-28T22:25:30.909Z",
+ "desktop": {
+  "capturedAt": "2026-09-28T22:25:30.116Z",
+  "database": "Next23",
+  "engine": "sqlserver",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU27) (KB5104824) - 16.0.4295.3 (X64) ",
+  "host": "127.0.0.1"
+ },
+ "web": {
+  "capturedAt": "2026-09-28T22:25:30.856Z",
+  "database": "datacare",
+  "engine": "postgres"
+ },
+ "matched": false,
+ "cases": [
+  {
+   "caseId": "n23-purc-035-00001",
+   "description": "",
+   "desktopVoucher": "035/00001",
+   "webVoucher": "035/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 50,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=00070 DR_AMT=0.00 CR_AMT=11.00",
+       "column": "LDR_NAME",
+       "desktop": "ACCOUNTS FEES A/C.",
+       "web": "",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "BILL_OS_DATA",
+     "presentOn": "web-only",
+     "desktopRows": 0,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [
+      "content:"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 0,
+     "differences": []
+    },
+    {
+     "table": "DELETE_DATA",
+     "presentOn": "desktop-only",
+     "desktopRows": 2,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:",
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "AC_NAME",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DELETE_DATE",
+      "DELETE_TIME",
+      "DELETE_USER",
+      "FINE_TYPE",
+      "LC_CODE",
+      "SR_NO",
+      "VCH_DATE",
+      "VCH_DESC",
+      "VCH_FINE_CR",
+      "VCH_FINE_DR",
+      "VCH_TYPE",
+      "VCH_VAL_CR",
+      "VCH_VAL_DR"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 4,
+     "differences": []
+    },
+    {
+     "table": "LOT_DETL",
+     "presentOn": "web-only",
+     "desktopRows": 0,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [
+      "content:"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 0,
+     "differences": []
+    },
+    {
+     "table": "MAIN_STOCK",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 46,
+     "fieldsExcluded": 3,
+     "differences": [
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "TBL_CODE",
+       "desktop": "001",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=999 ITM_SIGN=+",
+       "column": "ITM_PCS",
+       "desktop": "0",
+       "web": "1",
+       "scale": 0
+      }
+     ]
+    },
+    {
+     "table": "PR_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 58,
+     "fieldsExcluded": 8,
+     "differences": []
+    },
+    {
+     "table": "PR_DETL",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 97,
+     "fieldsExcluded": 6,
+     "differences": [
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "WITH_STOCK",
+       "desktop": "Y",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "IT_DESC",
+       "desktop": "999 GOLD",
+       "web": "",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 66,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "single unmatched row",
+       "column": "LEDR_KEY",
+       "desktop": "01002023-20240350000108",
+       "web": "01002023-20240350000102",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 4,
+     "fieldsExcluded": 1,
+     "differences": []
+    }
+   ],
+   "totals": {
+    "tablesCompared": 6,
+    "tablesDesktopOnly": 1,
+    "tablesWebOnly": 2,
+    "rowsMissing": 2,
+    "rowsExtra": 2,
+    "fieldsCompared": 321,
+    "fieldsExcluded": 27,
+    "fieldDifferences": 6
+   }
+  },
+  {
+   "caseId": "n23-wh-034-00004",
+   "description": "",
+   "desktopVoucher": "034/00004",
+   "webVoucher": "034/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 25,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000209 DR_AMT=0.00 CR_AMT=0.00",
+       "column": "LEDR_KEY",
+       "desktop": "01002023-20240340000423",
+       "web": "01002023-20240340000151",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "DELETE_DATA",
+     "presentOn": "desktop-only",
+     "desktopRows": 3,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:",
+      "content:",
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "AC_NAME",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DELETE_DATE",
+      "DELETE_TIME",
+      "DELETE_USER",
+      "FINE_TYPE",
+      "LC_CODE",
+      "SR_NO",
+      "VCH_DATE",
+      "VCH_DESC",
+      "VCH_FINE_CR",
+      "VCH_FINE_DR",
+      "VCH_TYPE",
+      "VCH_VAL_CR",
+      "VCH_VAL_DR"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 4,
+     "differences": []
+    },
+    {
+     "table": "MAIN_STOCK",
+     "presentOn": "desktop-only",
+     "desktopRows": 2,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "IT_CODE=LR916 ITM_SIGN=-",
+      "IT_CODE=LR916 ITM_SIGN=-"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DATA_TYPE",
+      "DESIGN_NO",
+      "EMP_CODE",
+      "GHT_PRC",
+      "ISR_NO",
+      "ITM_AMT",
+      "ITM_COLOR",
+      "ITM_DESC",
+      "ITM_FINE",
+      "ITM_GWT",
+      "ITM_MRP",
+      "ITM_NWT",
+      "ITM_PCS",
+      "ITM_QTY",
+      "ITM_RATE",
+      "ITM_SIGN",
+      "ITM_SIZE",
+      "ITM_TOUCH",
+      "ITM_WEST",
+      "IT_CODE",
+      "KR_COST",
+      "KR_FINE",
+      "KR_LBR_AMT",
+      "KR_NWT",
+      "KR_OTH_AMT",
+      "KR_TOUCH",
+      "KR_WEST",
+      "LBR_AMT",
+      "LBR_RATE",
+      "LC_CODE",
+      "NET_AMT",
+      "OTH_AMT",
+      "OTH_FINE",
+      "SR_NO",
+      "STK_DATE",
+      "TAG_NO",
+      "TBL_CODE",
+      "TR_TYPE",
+      "VCH_DATE",
+      "VCH_SRNO",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 3,
+     "differences": []
+    },
+    {
+     "table": "RATE_CUT_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 84,
+     "fieldsExcluded": 8,
+     "differences": [
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "MOBILE",
+       "desktop": "9856525",
+       "web": "",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "RATE_CUT_ISU",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=|HM_ID_WT=0.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=11.931|ITM_GHT_WT=0.000|ITM_GWT=12.300|ITM_MRP=0.00|ITM_NWT=12.300|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=L RING 916|ITM_SIZE=|ITM_TOUCH=92.000|ITM_WEST_PRC=5.0000|IT_CODE=LR916|IT_TYPE=G|KR_FINE=12.300|KR_NAME=KJ|KR_NET_WT=12.300|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=1|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=LR|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=1|TAG_COST=0.00|TAG_GWT=12.300000|TAG_NO=LRG00001|TAG_NWT=12.300000|TAX_PRC=0.0000|TBL_CODE=001|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=100312000009.000000|VCH_TYPE=WSALE",
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=|HM_ID_WT=0.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=12.610|ITM_GHT_WT=0.000|ITM_GWT=13.000|ITM_MRP=0.00|ITM_NWT=13.000|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=L RING 916|ITM_SIZE=|ITM_TOUCH=92.000|ITM_WEST_PRC=5.0000|IT_CODE=LR916|IT_TYPE=G|KR_FINE=13.000|KR_NAME=AB|KR_NET_WT=13.000|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=2|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=LR|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=2|TAG_COST=0.00|TAG_GWT=13.000000|TAG_NO=LRG00002|TAG_NWT=13.000000|TAX_PRC=0.0000|TBL_CODE=001|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=100312000010.000000|VCH_TYPE=WSALE"
+     ],
+     "extraRows": [
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=|HM_ID_WT=0.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=11.931|ITM_GHT_WT=0.000|ITM_GWT=12.300|ITM_MRP=0.00|ITM_NWT=12.300|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=|ITM_SIZE=|ITM_TOUCH=92.000|ITM_WEST_PRC=5.0000|IT_CODE=LR916|IT_TYPE=G|KR_FINE=12.300|KR_NAME=|KR_NET_WT=12.300|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=1|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=1|TAG_COST=0.00|TAG_GWT=12.300000|TAG_NO=LRG00001|TAG_NWT=12.300000|TAX_PRC=0.0000|TBL_CODE=|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=0.000000|VCH_TYPE=WSALE",
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=|HM_ID_WT=0.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=12.610|ITM_GHT_WT=0.000|ITM_GWT=13.000|ITM_MRP=0.00|ITM_NWT=13.000|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=|ITM_SIZE=|ITM_TOUCH=92.000|ITM_WEST_PRC=5.0000|IT_CODE=LR916|IT_TYPE=G|KR_FINE=13.000|KR_NAME=|KR_NET_WT=13.000|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=2|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=2|TAG_COST=0.00|TAG_GWT=13.000000|TAG_NO=LRG00002|TAG_NWT=13.000000|TAX_PRC=0.0000|TBL_CODE=|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=0.000000|VCH_TYPE=WSALE"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 6,
+     "differences": []
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [
+      "LEDR_KEY=01002023-20240340000405         1",
+      "LEDR_KEY=01002023-20240340000405         2"
+     ],
+     "extraRows": [
+      "LEDR_KEY=01002023-20240340000103"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "desktop-only",
+     "desktopRows": 1,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "LC_CODE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    }
+   ],
+   "totals": {
+    "tablesCompared": 4,
+    "tablesDesktopOnly": 3,
+    "tablesWebOnly": 0,
+    "rowsMissing": 10,
+    "rowsExtra": 3,
+    "fieldsCompared": 109,
+    "fieldsExcluded": 27,
+    "fieldDifferences": 2
+   }
+  },
+  {
+   "caseId": "n23-wh-034-00006",
+   "description": "",
+   "desktopVoucher": "034/00006",
+   "webVoucher": "034/00002",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 4,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [
+      "AC_CODE=000209 DR_AMT=32240.00 CR_AMT=0.00",
+      "AC_CODE=00003 DR_AMT=0.00 CR_AMT=32240.00",
+      "AC_CODE=000209 DR_AMT=0.00 CR_AMT=0.00"
+     ],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 25,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000209 DR_AMT=0.00 CR_AMT=0.00",
+       "column": "LEDR_KEY",
+       "desktop": "01002023-20240340000623",
+       "web": "01002023-20240340000251",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "MAIN_STOCK",
+     "presentOn": "desktop-only",
+     "desktopRows": 3,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "IT_CODE=CH916 ITM_SIGN=-",
+      "IT_CODE=CH916 ITM_SIGN=-",
+      "IT_CODE=999 ITM_SIGN=+"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DATA_TYPE",
+      "DESIGN_NO",
+      "EMP_CODE",
+      "GHT_PRC",
+      "ISR_NO",
+      "ITM_AMT",
+      "ITM_COLOR",
+      "ITM_DESC",
+      "ITM_FINE",
+      "ITM_GWT",
+      "ITM_MRP",
+      "ITM_NWT",
+      "ITM_PCS",
+      "ITM_QTY",
+      "ITM_RATE",
+      "ITM_SIGN",
+      "ITM_SIZE",
+      "ITM_TOUCH",
+      "ITM_WEST",
+      "IT_CODE",
+      "KR_COST",
+      "KR_FINE",
+      "KR_LBR_AMT",
+      "KR_NWT",
+      "KR_OTH_AMT",
+      "KR_TOUCH",
+      "KR_WEST",
+      "LBR_AMT",
+      "LBR_RATE",
+      "LC_CODE",
+      "NET_AMT",
+      "OTH_AMT",
+      "OTH_FINE",
+      "SR_NO",
+      "STK_DATE",
+      "TAG_NO",
+      "TBL_CODE",
+      "TR_TYPE",
+      "VCH_DATE",
+      "VCH_SRNO",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 3,
+     "differences": []
+    },
+    {
+     "table": "RATE_CUT_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 84,
+     "fieldsExcluded": 8,
+     "differences": [
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "DR_AMT",
+       "desktop": "32240.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "CR_FINE",
+       "desktop": "4.960",
+       "web": "0.000",
+       "scale": 3
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "FINE_RATE",
+       "desktop": "6500.000",
+       "web": "0.000",
+       "scale": 3
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "PR_FINE",
+       "desktop": "20.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "TOT_FINE_CR",
+       "desktop": "24.960000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_NET_AMT",
+       "desktop": "32240.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "MOBILE",
+       "desktop": "9856525",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_TOT_AMT",
+       "desktop": "32240.000000",
+       "web": "0.000000",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "RATE_CUT_ISU",
+     "presentOn": "both",
+     "desktopRows": 2,
+     "webRows": 2,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=UY76UY|HM_ID_WT=12.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=11.520|ITM_GHT_WT=0.000|ITM_GWT=12.000|ITM_MRP=0.00|ITM_NWT=12.000|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=CHAIN 916|ITM_SIZE=3|ITM_TOUCH=92.000|ITM_WEST_PRC=4.0000|IT_CODE=CH916|IT_TYPE=G|KR_FINE=12.000|KR_NAME=SJ|KR_NET_WT=12.000|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=1|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=CH|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=1|TAG_COST=0.00|TAG_GWT=12.000000|TAG_NO=CHG00002|TAG_NWT=12.000000|TAX_PRC=0.0000|TBL_CODE=001|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=100312000004.000000|VCH_TYPE=WSALE",
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=|HM_ID_WT=0.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=13.440|ITM_GHT_WT=0.000|ITM_GWT=14.000|ITM_MRP=0.00|ITM_NWT=14.000|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=CHAIN 916|ITM_SIZE=3|ITM_TOUCH=92.000|ITM_WEST_PRC=4.0000|IT_CODE=CH916|IT_TYPE=G|KR_FINE=14.000|KR_NAME=KJ|KR_NET_WT=14.000|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=2|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=CH|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=2|TAG_COST=0.00|TAG_GWT=14.000000|TAG_NO=CHG00003|TAG_NWT=14.000000|TAX_PRC=0.0000|TBL_CODE=001|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=100312000005.000000|VCH_TYPE=WSALE"
+     ],
+     "extraRows": [
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=|HM_ID_WT=0.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=11.520|ITM_GHT_WT=0.000|ITM_GWT=12.000|ITM_MRP=0.00|ITM_NWT=12.000|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=|ITM_SIZE=|ITM_TOUCH=92.000|ITM_WEST_PRC=4.0000|IT_CODE=CH916|IT_TYPE=G|KR_FINE=12.000|KR_NAME=|KR_NET_WT=12.000|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=1|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=1|TAG_COST=0.00|TAG_GWT=12.000000|TAG_NO=CHG00002|TAG_NWT=12.000000|TAX_PRC=0.0000|TBL_CODE=|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=0.000000|VCH_TYPE=WSALE",
+      "content:AC_CODE=000209|ADD_USER=⌀|ADJ_WT=0.000|BAG_WT=0.000|BOOK_NAME=WH SALES|CONV_PRC=0.000000|CONV_RATE=0.000000|CO_BOOK=034|CO_CODE=01|CO_YEAR=2023-2024|DATA_TRFR=⌀|DESIGN_IMG_ID=N|DESIGN_NO=|EMP_CODE=001|ENTRY_TYPE=W|HM_FINE=0.000000|HM_ID2=|HM_ID2_WT=0.000|HM_ID3=|HM_ID3_WT=0.000|HM_ID4=|HM_ID4_WT=0.000|HM_ID=|HM_ID_WT=0.000|INOUT_TYPE=O|ISU_DBCD=|ISU_LC_CODE=00|ISU_NO=|ISU_SRNO=0.000000|ISU_YRCD=|ITM_AMT=0.00|ITM_COLOR=|ITM_FINE=13.440|ITM_GHT_WT=0.000|ITM_GWT=14.000|ITM_MRP=0.00|ITM_NWT=14.000|ITM_OTH_FINE=0.000000|ITM_OTH_RATE=0.000000|ITM_OTH_WT=0.000|ITM_PCS=1|ITM_RATE=0.00|ITM_REMARK=|ITM_SIZE=|ITM_TOUCH=92.000|ITM_WEST_PRC=4.0000|IT_CODE=CH916|IT_TYPE=G|KR_FINE=14.000|KR_NAME=|KR_NET_WT=14.000|KR_TOUCH=0.000|KR_WEST_PRC=0.0000|LBR_AMT=0.00|LBR_PRC=0.0000|LBR_RATE=0.00|LBR_TYPE=|LC_CODE=00|LESS_TOUCH=0.000000|LESS_WT=0.000|LOT_NO=⌀|MCX_RATE=0.000000|NET_AMT=0.00|OLD_SRNO=2|OTH_AMT=0.00|PRM_AMT=0.00|PR_CODE=|RATE_TYPE=G|SILVER_FINE=0.000000|SR_NO=2|TAG_COST=0.00|TAG_GWT=14.000000|TAG_NO=CHG00003|TAG_NWT=14.000000|TAX_PRC=0.0000|TBL_CODE=|TOT_AMT=0.00|VCH_DATE=2024-03-12|VCH_SRNO=0.000000|VCH_TYPE=WSALE"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 6,
+     "differences": []
+    },
+    {
+     "table": "RATE_CUT_ISU_REC",
+     "presentOn": "desktop-only",
+     "desktopRows": 3,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:",
+      "content:",
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "ADD_USER",
+      "BAG_WT",
+      "CONV_PRC",
+      "CONV_RATE",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DESIGN_IMG_ID",
+      "DESIGN_NO",
+      "EMP_CODE",
+      "ENTRY_TYPE",
+      "HM_FINE",
+      "HM_ID",
+      "HM_ID2",
+      "HM_ID2_WT",
+      "HM_ID3",
+      "HM_ID3_WT",
+      "HM_ID4",
+      "HM_ID4_WT",
+      "HM_ID_WT",
+      "IMAGE_ID",
+      "ITM_AMT",
+      "ITM_COLOR",
+      "ITM_FINE",
+      "ITM_GHT_WT",
+      "ITM_GWT",
+      "ITM_MRP",
+      "ITM_NWT",
+      "ITM_OTH_FINE",
+      "ITM_OTH_RATE",
+      "ITM_OTH_WT",
+      "ITM_PCS",
+      "ITM_RATE",
+      "ITM_SIZE",
+      "ITM_TOUCH",
+      "ITM_WEST_PRC",
+      "IT_CODE",
+      "IT_DESC",
+      "IT_TYPE",
+      "LBR_AMT",
+      "LBR_PRC",
+      "LBR_RATE",
+      "LBR_TYPE",
+      "LC_CODE",
+      "LESS_TOUCH",
+      "LESS_WT",
+      "LOT_NO",
+      "MCX_RATE",
+      "NET_AMT",
+      "OTH_AMT",
+      "OTH_AMT_1",
+      "OTH_AMT_2",
+      "OTH_AMT_3",
+      "OTH_AMT_4",
+      "OTH_IT_1",
+      "OTH_IT_2",
+      "OTH_IT_3",
+      "OTH_IT_4",
+      "OTH_PCS_1",
+      "OTH_PCS_2",
+      "OTH_PCS_3",
+      "OTH_PCS_4",
+      "OTH_WT_1",
+      "OTH_WT_2",
+      "OTH_WT_3",
+      "OTH_WT_4",
+      "PRM_AMT",
+      "RATE_TYPE",
+      "SILVER_FINE",
+      "SR_NO",
+      "TAG_NO",
+      "TBL_CODE",
+      "VCH_DATE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 2,
+     "differences": []
+    },
+    {
+     "table": "RATE_CUT_REC",
+     "presentOn": "desktop-only",
+     "desktopRows": 1,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "ADD_USER",
+      "ADJ_WT",
+      "BAG_WT",
+      "BOOK_NAME",
+      "CONV_PRC",
+      "CONV_RATE",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DESIGN_NO",
+      "EMP_CODE",
+      "ENTRY_TYPE",
+      "HM_ID",
+      "HM_ID2",
+      "HM_ID2_WT",
+      "HM_ID3",
+      "HM_ID3_WT",
+      "HM_ID4",
+      "HM_ID4_WT",
+      "HM_ID_WT",
+      "INOUT_TYPE",
+      "ISU_DBCD",
+      "ISU_LC_CODE",
+      "ISU_NO",
+      "ISU_SRNO",
+      "ISU_YRCD",
+      "ITM_AMT",
+      "ITM_COLOR",
+      "ITM_FINE",
+      "ITM_GHT_WT",
+      "ITM_GWT",
+      "ITM_MRP",
+      "ITM_NWT",
+      "ITM_OTH_FINE",
+      "ITM_OTH_RATE",
+      "ITM_OTH_WT",
+      "ITM_PCS",
+      "ITM_RATE",
+      "ITM_REMARK",
+      "ITM_SIZE",
+      "ITM_TOUCH",
+      "ITM_WEST_PRC",
+      "IT_CODE",
+      "IT_TYPE",
+      "LBR_AMT",
+      "LBR_PRC",
+      "LBR_RATE",
+      "LBR_TYPE",
+      "LC_CODE",
+      "LESS_TOUCH",
+      "LESS_WT",
+      "LOT_NO",
+      "MCX_RATE",
+      "NET_AMT",
+      "OLD_SRNO",
+      "OTH_AMT",
+      "PRM_AMT",
+      "RATE_TYPE",
+      "SILVER_FINE",
+      "SR_NO",
+      "TAG_COST",
+      "TAG_NO",
+      "TAX_PRC",
+      "TBL_CODE",
+      "TOT_AMT",
+      "VCH_DATE",
+      "VCH_TYPE",
+      "WITH_STOCK"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 6,
+     "differences": []
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 5,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [
+      "LEDR_KEY=01002023-20240340000603",
+      "LEDR_KEY=01002023-20240340000604",
+      "LEDR_KEY=01002023-20240340000605         1",
+      "LEDR_KEY=01002023-20240340000605         2",
+      "LEDR_KEY=01002023-20240340000606         1"
+     ],
+     "extraRows": [
+      "LEDR_KEY=01002023-20240340000203"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "desktop-only",
+     "desktopRows": 1,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "LC_CODE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    }
+   ],
+   "totals": {
+    "tablesCompared": 4,
+    "tablesDesktopOnly": 4,
+    "tablesWebOnly": 0,
+    "rowsMissing": 18,
+    "rowsExtra": 3,
+    "fieldsCompared": 109,
+    "fieldsExcluded": 31,
+    "fieldDifferences": 9
+   }
+  }
+ ],
+ "desktopOnlyCases": [],
+ "webOnlyCases": [],
+ "totals": {
+  "cases": 3,
+  "casesMatched": 0,
+  "tablesCompared": 14,
+  "tablesDesktopOnly": 8,
+  "tablesWebOnly": 2,
+  "rowsMissing": 30,
+  "rowsExtra": 8,
+  "fieldsCompared": 539,
+  "fieldsExcluded": 85,
+  "fieldDifferences": 17
+ }
+}

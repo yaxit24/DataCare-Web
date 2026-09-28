@@ -1,0 +1,3 @@
+PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests
+SESSION_CONTEXT_REAL_STACK_PASSED: 14 checks (original12 + additive2), real responses with 5 declared transport injections; no synthetic business response
+LABOUR_PREVIEW_LIFECYCLE_PASSED: 5/5 checks; 4/4 explicit actual-response faults; zero synthetic business responses

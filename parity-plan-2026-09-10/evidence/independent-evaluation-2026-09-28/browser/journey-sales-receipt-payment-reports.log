@@ -1,0 +1,518 @@
+{"status":"ok","service":"datacare-api","version":"0.0.0","uptimeSec":1,"ts":"2026-09-28T22:52:49.404Z"}
+
+### login
+{
+ "coYear": "2026-2027"
+}
+
+### daily-rate
+{
+ "api": {
+  "method": "POST",
+  "url": "/api/daily-rate",
+  "status": 201,
+  "req": "{\"date\":\"2026-09-28\",\"goldRate\":60000,\"silverRate\":70000,\"taxPct\":3}",
+  "body": "{\"date\":\"2026-09-28\",\"groups\":1,\"goldRate\":60000,\"silverRate\":70000}"
+ },
+ "db": [
+  {
+   "tenant_id": "e2e2",
+   "CO_CODE": "01",
+   "LC_CODE": "01",
+   "VCH_DATE": "2026-09-28T00:00:00.000Z",
+   "SR_NO": 1,
+   "GR_CODE": "01",
+   "GR_NAME": "GOLD JEWELLERY",
+   "FINE_GL_RATE": "60000",
+   "FINE_SL_RATE": "70000",
+   "GR_RATE": "0",
+   "ADD_DATE": null,
+   "ADD_USER": null,
+   "AND_TRFR": null,
+   "CASH_AMT": null,
+   "CO_YEAR": "2026-2027",
+   "DOLLAR_GL_RATE": null,
+   "DOLLAR_SL_RATE": null,
+   "EMP_CODE": null,
+   "FINE_GL_PR_RATE": "60000",
+   "FINE_SL_PR_RATE": "70000",
+   "GR_PR_RATE": "0",
+   "GR_PR_TOUCH": "0",
+   "GR_TAX_PRC": "3",
+   "GR_TAX_RATE": "0",
+   "GR_TOUCH": "0",
+   "GR_TYPE": null,
+   "MAIN_USER": null,
+   "OP_GL_RATE": null
+  }
+ ]
+}
+
+### sales-books-offered
+{
+ "books": [
+  "Select configured book…",
+  "CON — Contra",
+  "ILT — Item Lot",
+  "JV — Journal",
+  "PAY — Payment",
+  "PR — Purchase",
+  "PRT — Purchase Return",
+  "RCT — Receipt",
+  "SAJ — Stock Adjust",
+  "SL — Sales",
+  "SOR — Sales Order",
+  "SRT — Sales Return",
+  "TRR — Approval Return",
+  "TTR — Tag Transfer",
+  "TUR — Approval Issue"
+ ],
+ "chosen": "SL — Sales"
+}
+
+### sales-save
+{
+ "lineVals": [
+  "GOLD",
+  "",
+  "1",
+  "10",
+  "10",
+  "91.6",
+  "6000",
+  "500",
+  "",
+  "",
+  "",
+  "",
+  "",
+  null,
+  null,
+  null,
+  null
+ ],
+ "post": {
+  "method": "POST",
+  "url": "/api/sales",
+  "status": 201,
+  "req": "{\"coBook\":\"SL\",\"coYear\":\"2026-2027\",\"lcCode\":\"01\",\"acCode\":\"CUST01\",\"vchDate\":\"2026-09-28\",\"taxRatePct\":3,\"interState\":false,\"ornamentIssued\":true,\"cashAmt\":20000,\"lines\":[{\"itCode\":\"GOLD\",\"pcs\":1,\"grossWt\":10,\"netWt\":10,\"touch\":91.6,\"rate\":6000,\"labourType\":\"per_gram\",\"labourRate\":500}]}",
+  "body": "{\"vchNo\":1,\"totals\":{\"net\":59960,\"discount\":0,\"taxable\":59960,\"tax\":1798.8,\"cgst\":899.4,\"sgst\":899.4,\"igst\":0,\"roundOff\":0,\"total\":61758.8}}"
+ },
+ "uiMessage": [
+  "Saved — Voucher #1"
+ ]
+}
+
+### sales-db-write-set
+{
+ "book": "SL",
+ "vch": "00001",
+ "tables": {
+  "SL_DATA": 1,
+  "SL_DETL": 1,
+  "AC_DATA": 5,
+  "ROJ_MEL_DATA": 3,
+  "MAIN_STOCK": 1,
+  "TAX_DATA": 2,
+  "BILL_OS_DATA": 1
+ },
+ "ledgerDr": "061758.800020000",
+ "ledgerCr": "00599601798.8200000",
+ "ws": {
+  "SL_DATA": [
+   {
+    "VCH_NO": "00001",
+    "CO_CODE": "01",
+    "LC_CODE": "01",
+    "CO_YEAR": "2026-2027",
+    "CO_BOOK": "SL",
+    "VCH_DATE": "2026-09-28T00:00:00.000Z",
+    "VCH_TIME": "2026-09-28T22:54:53.338Z",
+    "BILL_NO": "00001",
+    "HD_VCH_NO": "00001",
+    "AC_CODE": "CUST01",
+    "NET_AMT": "59960",
+    "DISC_PRC": "0",
+    "DISC_AMT": "0",
+    "TAX_CODE": "10",
+    "TAX_PRC": "3",
+    "TAX_AMT": "1798.8",
+    "ROF_AMT": "0",
+    "TOT_AMT": "61758.8",
+    "CASH_AMT": "20000",
+    "CARD_AMT": "0",
+    "CHQ_AMT": "0",
+    "SCHM_AMT": "0",
+    "CASH_PAID": "0",
+    "KASAR_AMT": "0",
+    "BILL_OS": 41758.8,
+    "AC_GST_TYPE": "L",
+    "CGST_TAX": 899.4,
+    "SGST_TAX": 899.4,
+    "DATA_TRFR": "N",
+    "MAIN_USER": "admin",
+    "CARD_ADJ": "N",
+    "ISU_LC_CODE": "01",
+    "TCS_PRC": "0",
+    "TCS_AMT": "0",
+    "TDS_PRC": "0",
+    "TDS_AMT": "0",
+    "CARD_COM_AMT": "0",
+    "USER_UPDATE": "N",
+    "USER_DELETE": "N",
+    "ORNA_ISU": "W",
+    "MOB_ENTRY_SAVE": "Y",
+    "UPI_AMT": "0",
+    "LBR_AMT": "0",
+    "OTH_AMT": "0",
+    "PARTY_FINE": "0",
+    "RATE_UNFIX": "N"
+   }
+  ],
+  "SL_DETL": [
+   {
+    "TAG_NO": "N",
+    "IT_TAX_AMT": 1798.8,
+    "VCH_NO": "00001",
+    "CO_CODE": "01",
+    "LC_CODE": "01",
+    "CO_YEAR": "2026-2027",
+    "CO_BOOK": "SL",
+    "SR_NO": 1,
+    "OLD_SRNO": 1,
+    "VCH_DATE": "2026-09-28T00:00:00.000Z",
+    "VCH_TIME": "2026-09-28T22:54:53.338Z",
+    "VCH_TYPE": "SL",
+    "INOUT_TYPE": "O",
+    "ENTRY_TYPE": "S",
+    "BOOK_NAME": "SALES",
+    "AC_CODE": "CUST01",
+    "IT_CODE": "GOLD",
+    "TBL_CODE": "001",
+    "ITM_PCS": "1",
+    "BAG_WT": "0",
+    "ITM_GWT": "10",
+    "ITM_OTH_WT": "0",
+    "ITM_NWT": "10",
+    "ITM_GHT_WT": "0",
+    "ITM_TOUCH": "91.6",
+    "ITM_WEST_PRC": "0",
+    "ITM_FINE": "9.16",
+    "LBR_PRC": "0",
+    "LBR_RATE": "500",
+    "LBR_TYPE": "N",
+    "LBR_AMT": "5000",
+    "OTH_AMT": "0",
+    "ITM_RATE": "6000",
+    "ITM_AMT": "54960",
+    "TAG_COST": "0",
+    "ITM_MRP": "0",
+    "TOT_AMT": "59960",
+    "TAX_PRC": "3",
+    "NET_AMT": "59960",
+    "KR_NET_WT": "10",
+    "KR_TOUCH": "0",
+    "KR_WEST_PRC": "0",
+    "KR_FINE": "0",
+    "IT_TYPE": "G",
+    "HD_VCH_NO": "00001",
+    "MAIN_USER": "admin",
+    "ISU_LC_CODE": "01",
+    "ITM_GHT_PRC":
+
+### sales-expected-desktop-formula
+{
+ "fine": 9.16,
+ "metal": 60000,
+ "labour": 5000,
+ "taxable": 65000,
+ "gst": 1950,
+ "total": 66950,
+ "outstandingAfterCash": 46950
+}
+
+### sales-reload
+{
+ "reVals": [
+  "GOLD",
+  "",
+  "1",
+  "10",
+  "10",
+  "91.6",
+  "6000",
+  "500",
+  "",
+  "",
+  "",
+  "",
+  "",
+  null,
+  null,
+  null,
+  null
+ ],
+ "buttons": [
+  "Print",
+  "Delete",
+  "Update Invoice"
+ ]
+}
+
+### receipt
+{
+ "post": {
+  "method": "POST",
+  "url": "/api/receipts",
+  "status": 400,
+  "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+  "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+ }
+}
+
+### payment-ui
+{
+ "post": {
+  "method": "POST",
+  "url": "/api/payments",
+  "status": 400,
+  "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+  "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+ }
+}
+
+### receipt-api-with-book
+{
+ "status": 201,
+ "body": "{\"vchNo\":1}"
+}
+
+### purchase
+{
+ "error": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-grid-row=\"0\"][data-grid-column=\"0\"] input').first()\n"
+}
+
+### report-account-ledger
+{
+ "rows": 3,
+ "sample": [
+  "00001 SL 2026-09-28T00:00:00.000Z 61758.8 0 61758.8",
+  "00001 SL 2026-09-28T00:00:00.000Z 0 20000 41758.8",
+  "00001 CREC 2026-09-28T00:00:00.000Z 0 5000 36758.8"
+ ],
+ "failed": [
+  {
+   "method": "POST",
+   "url": "/api/receipts",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+  },
+  {
+   "method": "POST",
+   "url": "/api/payments",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+  }
+ ]
+}
+
+### db-ledger-CUST01
+{
+ "rows": [
+  {
+   "CO_BOOK": "SL",
+   "VCH_NO": "00001",
+   "VCH_DATE": "2026-09-28T00:00:00.000Z",
+   "DR_AMT": "61758.8",
+   "CR_AMT": "0"
+  },
+  {
+   "CO_BOOK": "SL",
+   "VCH_NO": "00001",
+   "VCH_DATE": "2026-09-28T00:00:00.000Z",
+   "DR_AMT": "0",
+   "CR_AMT": "20000"
+  },
+  {
+   "CO_BOOK": "RCT",
+   "VCH_NO": "00001",
+   "VCH_DATE": "2026-09-28T00:00:00.000Z",
+   "DR_AMT": "0",
+   "CR_AMT": "5000"
+  }
+ ]
+}
+
+### report-rojmel
+{
+ "rows": 4,
+ "sample": [
+  "00001 SL SL SALES SALES CUST01 G - 0 59960 1 10 10 0",
+  "00001 SL SL SALES CUST01 SALES A 41758.8 0 0 0 0 0",
+  "00001 SL SL SALES GST CUST01 A 0 1798.8 0 0 0 0",
+  "00001 RCT CREC Receipt CASH CUST01 A 0 5000 0 0 0 0"
+ ],
+ "failed": [
+  {
+   "method": "POST",
+   "url": "/api/receipts",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+  },
+  {
+   "method": "POST",
+   "url": "/api/payments",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+  }
+ ]
+}
+
+### report-trial-balance
+{
+ "rows": 4,
+ "sample": [
+  "CASH 25000 0 25000",
+  "CUST01 61758.8 25000 36758.8",
+  "GST 0 1798.8 -1798.8",
+  "SALES 0 59960 -59960"
+ ],
+ "failed": [
+  {
+   "method": "POST",
+   "url": "/api/receipts",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+  },
+  {
+   "method": "POST",
+   "url": "/api/payments",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+  }
+ ]
+}
+
+### db-trial-balance
+{
+ "rows": [
+  {
+   "AC_CODE": "CASH",
+   "dr": "25000",
+   "cr": "0"
+  },
+  {
+   "AC_CODE": "CUST01",
+   "dr": "61758.8",
+   "cr": "25000"
+  },
+  {
+   "AC_CODE": "GST",
+   "dr": "0",
+   "cr": "1798.8"
+  },
+  {
+   "AC_CODE": "SALES",
+   "dr": "0",
+   "cr": "59960"
+  }
+ ]
+}
+
+### report-tag-stock
+{
+ "rows": 1,
+ "sample": [
+  "No tags for this view."
+ ],
+ "failed": [
+  {
+   "method": "POST",
+   "url": "/api/receipts",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+  },
+  {
+   "method": "POST",
+   "url": "/api/payments",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+  }
+ ]
+}
+
+### report-stock-valuation
+{
+ "rows": 0,
+ "sample": [],
+ "failed": [
+  {
+   "method": "POST",
+   "url": "/api/receipts",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+  },
+  {
+   "method": "POST",
+   "url": "/api/payments",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+  }
+ ]
+}
+
+### report-sales-register
+{
+ "rows": 1,
+ "sample": [
+  "00001 SL 2026-09-28T00:00:00.000Z 00001 CUST01 59960 1798.8 899.4 899.4 0 61758.8 41758.8"
+ ],
+ "failed": [
+  {
+   "method": "POST",
+   "url": "/api/receipts",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+  },
+  {
+   "method": "POST",
+   "url": "/api/payments",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+  }
+ ]
+}
+
+### report-gstr3b
+{
+ "rows": 0,
+ "sample": [],
+ "failed": [
+  {
+   "method": "POST",
+   "url": "/api/receipts",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":5000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"FinanceLifecycleValidationError\",\"message\":\"voucher requires tenant, company, location, fiscal year, and configured book\"}"
+  },
+  {
+   "method": "POST",
+   "url": "/api/payments",
+   "status": 400,
+   "req": "{\"partyAc\":\"CUST01\",\"amount\":1000,\"mode\":\"cash\"}",
+   "body": "{\"error\":\"NumberingConfigurationError\",\"message\":\"voucher numbering requires tenant, company, location, fiscal year, and book\"}"
+  }
+ ]
+}

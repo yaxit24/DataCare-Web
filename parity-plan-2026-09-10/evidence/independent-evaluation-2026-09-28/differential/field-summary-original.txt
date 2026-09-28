@@ -1,0 +1,133 @@
+=== Next23  totals={'cases': 3, 'casesMatched': 0, 'tablesCompared': 14, 'tablesDesktopOnly': 8, 'tablesWebOnly': 2, 'rowsMissing': 30, 'rowsExtra': 8, 'fieldsCompared': 539, 'fieldsExcluded': 85, 'fieldDifferences': 17}
+-- n23-purc-035-00001  desktop 035/00001  web 035/00001  fields=321 diffs=6 missingRows=2 extraRows=2
+   AC_DATA            rows d2/w2
+      LDR_NAME: ACCOUNTS FEES A/C.->
+   BILL_OS_DATA       rows d0/w1 extra=1
+   DELETE_DATA        rows d2/w0 missing=2 schemaMissingCols=['AC_CODE', 'AC_NAME', 'BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DELETE_DATE', 'DELETE_TIME', 'DELETE_USER', 'FINE_TYPE', 'LC_CODE', 'SR_NO', 'VCH_DATE', 'VCH_DESC', 'VCH_FINE_CR', 'VCH_FINE_DR', 'VCH_TYPE', 'VCH_VAL_CR', 'VCH_VAL_DR']
+   LOT_DETL           rows d0/w1 extra=1
+   MAIN_STOCK         rows d1/w1
+      TBL_CODE: 001->
+      ITM_PCS: 0->1
+   PR_DETL            rows d1/w1
+      WITH_STOCK: Y->
+      IT_DESC: 999 GOLD->
+   ROJ_MEL_DATA       rows d2/w2
+      LEDR_KEY: 01002023-20240350000108->01002023-20240350000102
+-- n23-wh-034-00004  desktop 034/00004  web 034/00001  fields=109 diffs=2 missingRows=10 extraRows=3
+   AC_DATA            rows d1/w1
+      LEDR_KEY: 01002023-20240340000423->01002023-20240340000151
+   DELETE_DATA        rows d3/w0 missing=3 schemaMissingCols=['AC_CODE', 'AC_NAME', 'BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DELETE_DATE', 'DELETE_TIME', 'DELETE_USER', 'FINE_TYPE', 'LC_CODE', 'SR_NO', 'VCH_DATE', 'VCH_DESC', 'VCH_FINE_CR', 'VCH_FINE_DR', 'VCH_TYPE', 'VCH_VAL_CR', 'VCH_VAL_DR']
+   MAIN_STOCK         rows d2/w0 missing=2 schemaMissingCols=['AC_CODE', 'BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DATA_TYPE', 'DESIGN_NO', 'EMP_CODE', 'GHT_PRC', 'ISR_NO', 'ITM_AMT', 'ITM_COLOR', 'ITM_DESC', 'ITM_FINE', 'ITM_GWT', 'ITM_MRP', 'ITM_NWT', 'ITM_PCS', 'ITM_QTY', 'ITM_RATE', 'ITM_SIGN', 'ITM_SIZE', 'ITM_TOUCH', 'ITM_WEST', 'IT_CODE', 'KR_COST', 'KR_FINE', 'KR_LBR_AMT', 'KR_NWT', 'KR_OTH_AMT', 'KR_TOUCH', 'KR_WEST', 'LBR_AMT', 'LBR_RATE', 'LC_CODE', 'NET_AMT', 'OTH_AMT', 'OTH_FINE', 'SR_NO', 'STK_DATE', 'TAG_NO', 'TBL_CODE', 'TR_TYPE', 'VCH_DATE', 'VCH_SRNO', 'VCH_TYPE']
+   RATE_CUT_DATA      rows d1/w1
+      MOBILE: 9856525->
+   RATE_CUT_ISU       rows d2/w2 missing=2 extra=2
+   ROJ_MEL_DATA       rows d2/w1 missing=2 extra=1
+   TEMP_BOOK_DATA     rows d1/w0 missing=1 schemaMissingCols=['BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'LC_CODE']
+-- n23-wh-034-00006  desktop 034/00006  web 034/00002  fields=109 diffs=9 missingRows=18 extraRows=3
+   AC_DATA            rows d4/w1 missing=3
+      LEDR_KEY: 01002023-20240340000623->01002023-20240340000251
+   MAIN_STOCK         rows d3/w0 missing=3 schemaMissingCols=['AC_CODE', 'BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DATA_TYPE', 'DESIGN_NO', 'EMP_CODE', 'GHT_PRC', 'ISR_NO', 'ITM_AMT', 'ITM_COLOR', 'ITM_DESC', 'ITM_FINE', 'ITM_GWT', 'ITM_MRP', 'ITM_NWT', 'ITM_PCS', 'ITM_QTY', 'ITM_RATE', 'ITM_SIGN', 'ITM_SIZE', 'ITM_TOUCH', 'ITM_WEST', 'IT_CODE', 'KR_COST', 'KR_FINE', 'KR_LBR_AMT', 'KR_NWT', 'KR_OTH_AMT', 'KR_TOUCH', 'KR_WEST', 'LBR_AMT', 'LBR_RATE', 'LC_CODE', 'NET_AMT', 'OTH_AMT', 'OTH_FINE', 'SR_NO', 'STK_DATE', 'TAG_NO', 'TBL_CODE', 'TR_TYPE', 'VCH_DATE', 'VCH_SRNO', 'VCH_TYPE']
+   RATE_CUT_DATA      rows d1/w1
+      DR_AMT: 32240.00->0.00
+      CR_FINE: 4.960->0.000
+      FINE_RATE: 6500.000->0.000
+      PR_FINE: 20.000000->0.000000
+      TOT_FINE_CR: 24.960000->0.000000
+      SL_NET_AMT: 32240.000000->0.000000
+      MOBILE: 9856525->
+      SL_TOT_AMT: 32240.000000->0.000000
+   RATE_CUT_ISU       rows d2/w2 missing=2 extra=2
+   RATE_CUT_ISU_REC   rows d3/w0 missing=3 schemaMissingCols=['AC_CODE', 'ADD_USER', 'BAG_WT', 'CONV_PRC', 'CONV_RATE', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DESIGN_IMG_ID', 'DESIGN_NO', 'EMP_CODE', 'ENTRY_TYPE', 'HM_FINE', 'HM_ID', 'HM_ID2', 'HM_ID2_WT', 'HM_ID3', 'HM_ID3_WT', 'HM_ID4', 'HM_ID4_WT', 'HM_ID_WT', 'IMAGE_ID', 'ITM_AMT', 'ITM_COLOR', 'ITM_FINE', 'ITM_GHT_WT', 'ITM_GWT', 'ITM_MRP', 'ITM_NWT', 'ITM_OTH_FINE', 'ITM_OTH_RATE', 'ITM_OTH_WT', 'ITM_PCS', 'ITM_RATE', 'ITM_SIZE', 'ITM_TOUCH', 'ITM_WEST_PRC', 'IT_CODE', 'IT_DESC', 'IT_TYPE', 'LBR_AMT', 'LBR_PRC', 'LBR_RATE', 'LBR_TYPE', 'LC_CODE', 'LESS_TOUCH', 'LESS_WT', 'LOT_NO', 'MCX_RATE', 'NET_AMT', 'OTH_AMT', 'OTH_AMT_1', 'OTH_AMT_2', 'OTH_AMT_3', 'OTH_AMT_4', 'OTH_IT_1', 'OTH_IT_2', 'OTH_IT_3', 'OTH_IT_4', 'OTH_PCS_1', 'OTH_PCS_2', 'OTH_PCS_3', 'OTH_PCS_4', 'OTH_WT_1', 'OTH_WT_2', 'OTH_WT_3', 'OTH_WT_4', 'PRM_AMT', 'RATE_TYPE', 'SILVER_FINE', 'SR_NO', 'TAG_NO', 'TBL_CODE', 'VCH_DATE']
+   RATE_CUT_REC       rows d1/w0 missing=1 schemaMissingCols=['AC_CODE', 'ADD_USER', 'ADJ_WT', 'BAG_WT', 'BOOK_NAME', 'CONV_PRC', 'CONV_RATE', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DESIGN_NO', 'EMP_CODE', 'ENTRY_TYPE', 'HM_ID', 'HM_ID2', 'HM_ID2_WT', 'HM_ID3', 'HM_ID3_WT', 'HM_ID4', 'HM_ID4_WT', 'HM_ID_WT', 'INOUT_TYPE', 'ISU_DBCD', 'ISU_LC_CODE', 'ISU_NO', 'ISU_SRNO', 'ISU_YRCD', 'ITM_AMT', 'ITM_COLOR', 'ITM_FINE', 'ITM_GHT_WT', 'ITM_GWT', 'ITM_MRP', 'ITM_NWT', 'ITM_OTH_FINE', 'ITM_OTH_RATE', 'ITM_OTH_WT', 'ITM_PCS', 'ITM_RATE', 'ITM_REMARK', 'ITM_SIZE', 'ITM_TOUCH', 'ITM_WEST_PRC', 'IT_CODE', 'IT_TYPE', 'LBR_AMT', 'LBR_PRC', 'LBR_RATE', 'LBR_TYPE', 'LC_CODE', 'LESS_TOUCH', 'LESS_WT', 'LOT_NO', 'MCX_RATE', 'NET_AMT', 'OLD_SRNO', 'OTH_AMT', 'PRM_AMT', 'RATE_TYPE', 'SILVER_FINE', 'SR_NO', 'TAG_COST', 'TAG_NO', 'TAX_PRC', 'TBL_CODE', 'TOT_AMT', 'VCH_DATE', 'VCH_TYPE', 'WITH_STOCK']
+   ROJ_MEL_DATA       rows d5/w1 missing=5 extra=1
+   TEMP_BOOK_DATA     rows d1/w0 missing=1 schemaMissingCols=['BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'LC_CODE']
+=== Next25  totals={'cases': 2, 'casesMatched': 0, 'tablesCompared': 10, 'tablesDesktopOnly': 3, 'tablesWebOnly': 1, 'rowsMissing': 12, 'rowsExtra': 2, 'fieldsCompared': 475, 'fieldsExcluded': 51, 'fieldDifferences': 32}
+-- n25-purc-035-00001  desktop 035/00001  web 035/00001  fields=247 diffs=17 missingRows=5 extraRows=2
+   AC_DATA            rows d3/w1 missing=2
+      LEDR_KEY: 01002025-202603500001         129->01002025-202603500001         121
+   LOT_DETL           rows d0/w1 extra=1
+   MAIN_STOCK         rows d1/w1
+      TBL_CODE: 001->
+      OTH_AMT: 2000.00->0.00
+      NET_AMT: 2000.00->0.00
+      ITM_LOT: ->(null)
+      ITM_DISC: 0.000000->(null)
+   PR_DATA            rows d1/w1 schemaMissingCols=['OTH_TAX_AMT', 'OTH_TAX_CODE', 'OTH_TAX_PRC', 'RE_TRFR', 'ZERO_RATED_AMT']
+      NET_AMT: 2000.00->0.00
+      TOT_AMT: 2000.00->0.00
+      BILL_OS: 2000.000000->0.000000
+      EMP_CODE: 001->
+      OTH_AMT: 2000.00->0.00
+   PR_DETL            rows d1/w1 schemaMissingCols=['BAG_TOT', 'GRAND_TOTAL', 'ITM_CGST_AMT', 'ITM_IGST_AMT', 'ITM_REMARK', 'ITM_SGST_AMT', 'IT_TAX_AMT', 'RATE_WITH', 'TAXABL_RATE', 'TAX_CODE', 'TAX_FREE_AMT', 'TAX_RVRS', 'TAX_TYPE']
+      OTH_AMT: 2000.00->0.00
+      TOT_AMT: 2000.00->0.00
+      NET_AMT: 2000.00->0.00
+      WITH_STOCK: Y->
+      IT_DESC: GOLD ORNAMETNS->
+      PR_CODE: OR->
+   ROJ_MEL_DATA       rows d3/w1 missing=3 extra=1
+-- n25-wh-034-00001  desktop 034/00001  web 034/00001  fields=228 diffs=15 missingRows=7 extraRows=0
+   AC_DATA            rows d3/w1 missing=2
+      LEDR_KEY: 01002025-20260340000123->01002025-20260340000151
+   MAIN_STOCK         rows d1/w0 missing=1 schemaMissingCols=['AC_CODE', 'BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DATA_TYPE', 'DESIGN_NO', 'EMP_CODE', 'GHT_PRC', 'ISR_NO', 'ITM_AMT', 'ITM_COLOR', 'ITM_DESC', 'ITM_DISC', 'ITM_FINE', 'ITM_GWT', 'ITM_LOT', 'ITM_MRP', 'ITM_NWT', 'ITM_PCS', 'ITM_QTY', 'ITM_RATE', 'ITM_SIGN', 'ITM_SIZE', 'ITM_TOUCH', 'ITM_WEST', 'IT_CODE', 'KR_COST', 'KR_FINE', 'KR_LBR_AMT', 'KR_NWT', 'KR_OTH_AMT', 'KR_TOUCH', 'KR_WEST', 'LBR_AMT', 'LBR_RATE', 'LC_CODE', 'NET_AMT', 'OTH_AMT', 'OTH_FINE', 'SR_NO', 'STK_DATE', 'TAG_NO', 'TBL_CODE', 'TR_TYPE', 'VCH_DATE', 'VCH_SRNO', 'VCH_TYPE']
+   RATE_CUT_DATA      rows d1/w1 schemaMissingCols=['RE_TRFR']
+      SL_NET_AMT: 500.000000->0.000000
+      SL_OTH_AMT: 500.000000->0.000000
+      SL_TOT_AMT: 500.000000->0.000000
+   RATE_CUT_ISU       rows d1/w1 schemaMissingCols=['FIX_WEST_PRC']
+      TBL_CODE: 001->
+      LBR_TYPE: N->
+      OTH_AMT: 500.00->0.00
+      NET_AMT: 500.00->0.00
+      ITM_REMARK: GENTS RING 18K->
+      VCH_SRNO: 100512000001.000000->0.000000
+      KR_NAME: YT->
+      PR_CODE: GR->
+      FINE_CUT_PCS: 0.000000->1.000000
+   ROJ_MEL_DATA       rows d3/w1 missing=2
+      AC_NAME: WSALE - SS->SS
+      ITM_FINE: 0.000->10.793
+   SL_IDTL            rows d1/w0 missing=1 schemaMissingCols=['AC_CODE', 'BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'CO_YEAR', 'DM_CODE', 'DM_COLOR', 'DM_LEB', 'DM_NAME', 'DM_ORIGIN', 'DM_REMARK', 'DM_SFNO', 'DM_SIZE', 'ENTRY_TYPE', 'INOUT_TYPE', 'ISR_NO', 'IT_AMT', 'IT_CODE', 'IT_CON_PRC', 'IT_CON_WT', 'IT_DISC_AMT', 'IT_DISC_PRC', 'IT_GWT', 'IT_LBR_AMT', 'IT_LBR_RATE', 'IT_NET_AMT', 'IT_PCS', 'IT_PCS_WT', 'IT_RATE', 'IT_RATE_TYPE', 'IT_TYPE', 'KR_AMT', 'KR_CON_PRC', 'KR_CON_WT', 'KR_LBR_AMT', 'KR_LBR_RATE', 'KR_LESS_PRC', 'KR_NET_AMT', 'KR_RATE', 'KR_RATE_TYPE', 'KR_WT', 'LC_CODE', 'SR_NO', 'TAG_NO', 'VCH_DATE', 'VCH_SRNO', 'VCH_TYPE']
+   TEMP_BOOK_DATA     rows d1/w0 missing=1 schemaMissingCols=['BOOK_NAME', 'CO_BOOK', 'CO_CODE', 'LC_CODE']
+
+=== aggregate (class, table/column): occurrences
+  4  field        AC_DATA.LEDR_KEY
+  2  field        MAIN_STOCK.TBL_CODE
+  2  field        PR_DETL.IT_DESC
+  2  field        PR_DETL.WITH_STOCK
+  2  field        RATE_CUT_DATA.MOBILE
+  2  field        RATE_CUT_DATA.SL_NET_AMT
+  2  field        RATE_CUT_DATA.SL_TOT_AMT
+  1  field        AC_DATA.LDR_NAME
+  1  field        MAIN_STOCK.ITM_DISC
+  1  field        MAIN_STOCK.ITM_LOT
+  1  field        MAIN_STOCK.ITM_PCS
+  1  field        MAIN_STOCK.NET_AMT
+  1  field        MAIN_STOCK.OTH_AMT
+  1  field        PR_DATA.BILL_OS
+  1  field        PR_DATA.EMP_CODE
+  1  field        PR_DATA.NET_AMT
+  1  field        PR_DATA.OTH_AMT
+  1  field        PR_DATA.TOT_AMT
+  1  field        PR_DETL.NET_AMT
+  1  field        PR_DETL.OTH_AMT
+  1  field        PR_DETL.PR_CODE
+  1  field        PR_DETL.TOT_AMT
+  1  field        RATE_CUT_DATA.CR_FINE
+  1  field        RATE_CUT_DATA.DR_AMT
+  1  field        RATE_CUT_DATA.FINE_RATE
+  1  field        RATE_CUT_DATA.PR_FINE
+  1  field        RATE_CUT_DATA.SL_OTH_AMT
+  1  field        RATE_CUT_DATA.TOT_FINE_CR
+  1  field        RATE_CUT_ISU.FINE_CUT_PCS
+  1  field        RATE_CUT_ISU.ITM_REMARK
+  1  field        RATE_CUT_ISU.KR_NAME
+  1  field        RATE_CUT_ISU.LBR_TYPE
+  1  field        RATE_CUT_ISU.NET_AMT
+  1  field        RATE_CUT_ISU.OTH_AMT
+  1  field        RATE_CUT_ISU.PR_CODE
+  1  field        RATE_CUT_ISU.TBL_CODE
+  1  field        RATE_CUT_ISU.VCH_SRNO
+  1  field        ROJ_MEL_DATA.AC_NAME
+  1  field        ROJ_MEL_DATA.ITM_FINE
+  1  field        ROJ_MEL_DATA.LEDR_KEY

@@ -1,0 +1,192 @@
+{"status":"ok","service":"datacare-api","version":"0.0.0","uptimeSec":1,"ts":"2026-09-28T22:59:00.831Z"}
+
+### purchase-row-inputs
+{
+ "n": 8
+}
+
+### purchase-save
+{
+ "post": {
+  "m": "POST",
+  "u": "/api/purchases",
+  "s": 400,
+  "req": "{\"coBook\":\"PR\",\"coYear\":\"2026-2027\",\"lcCode\":\"01\",\"acCode\":\"CUST01\",\"vchDate\":\"2026-09-28\",\"urd\":false,\"taxRatePct\":3,\"interState\":false,\"lines\":[{\"itCode\":\"GOLD\",\"metal\":\"G\",\"pcs\":1,\"grossWt\":5,\"netWt\":5,\"touch\":99.5,\"rate\":5900,\"labourType\":\"per_gram\",\"labourRate\":0}],\"cashAmt\":0,\"chequeAmt\":0,\"cardAmt\":0,\"upiAmt\":0,\"kasar\":0}",
+  "b": "{\"error\":\"PurchaseValidationError\",\"message\":\"missing GROUP_MAST.PURC_AC for item GOLD\"}"
+ },
+ "writeSet": {
+  "SL_DATA": 0,
+  "SL_DETL": 0,
+  "AC_DATA": 0,
+  "ROJ_MEL_DATA": 0,
+  "MAIN_STOCK": 0,
+  "TAX_DATA": 0,
+  "BILL_OS_DATA": 0,
+  "PR_DATA": 0,
+  "PR_DETL": 0,
+  "LOT_DETL": 0,
+  "DELETE_DATA": 0
+ },
+ "ledger": [],
+ "stock": []
+}
+
+### sale-created
+{
+ "s": 201,
+ "b": "{\"vchNo\":1,\"totals\":{\"net\":47168,\"discount\":0,\"taxable\":47168,\"tax\":1415.04,\"cgst\":707.52,\"sgst\":707.52,\"igst\":0,\"roundOff\":0,\"total\":48583.04}}",
+ "counts": {
+  "SL_DATA": 1,
+  "SL_DETL": 1,
+  "AC_DATA": 3,
+  "ROJ_MEL_DATA": 3,
+  "MAIN_STOCK": 1,
+  "TAX_DATA": 2,
+  "BILL_OS_DATA": 1,
+  "PR_DATA": 0,
+  "PR_DETL": 0,
+  "LOT_DETL": 0,
+  "DELETE_DATA": 0
+ }
+}
+
+### sale-update
+{
+ "counts": {
+  "SL_DATA": 1,
+  "SL_DETL": 1,
+  "AC_DATA": 3,
+  "ROJ_MEL_DATA": 3,
+  "MAIN_STOCK": 1,
+  "TAX_DATA": 2,
+  "BILL_OS_DATA": 1,
+  "PR_DATA": 0,
+  "PR_DETL": 0,
+  "LOT_DETL": 0,
+  "DELETE_DATA": 0
+ },
+ "before": [
+  {
+   "AC_CODE": "CUST01",
+   "DR_AMT": "48583.04",
+   "CR_AMT": "0"
+  },
+  {
+   "AC_CODE": "GST",
+   "DR_AMT": "0",
+   "CR_AMT": "1415.04"
+  },
+  {
+   "AC_CODE": "SALES",
+   "DR_AMT": "0",
+   "CR_AMT": "47168"
+  }
+ ],
+ "after": [
+  {
+   "AC_CODE": "CUST01",
+   "DR_AMT": "54655.92",
+   "CR_AMT": "0"
+  },
+  {
+   "AC_CODE": "GST",
+   "DR_AMT": "0",
+   "CR_AMT": "1591.92"
+  },
+  {
+   "AC_CODE": "SALES",
+   "DR_AMT": "0",
+   "CR_AMT": "53064"
+  }
+ ],
+ "detl": [
+  {
+   "ITM_GWT": "9",
+   "ITM_NWT": "9",
+   "ITM_FINE": "8.244",
+   "ITM_AMT": "49464",
+   "LBR_AMT": "3600",
+   "NET_AMT": "53064"
+  }
+ ],
+ "userUpdate": "\nInvalid `prisma.$queryRawUnsafe()` invocation:\n\n\nRaw query failed. Code: `42703`. Message: `column \"UPDATE_USER\" does not exist`"
+}
+
+### sale-print
+{
+ "url": "/api/sales/invoice?coBook=SL&coYear=2026-2027&vchNo=00001&format=html&copy=O",
+ "text": "🖨 Print Demo Jeweller TAX INVOICEORIGINAL FOR RECIPIENT BILL TO DEMO CUSTOMER Invoice No 00001 Date Mon Sep 28 Book / Vch SL / 00001 # Description HSN Pcs Gross Wt Net Wt Rate Making Taxable 1 GOLD — 1 9.000 9.000 6,000.00 3,600.00 53,064.00 Total 1 9.000 9.000 3,600.00 53,064.00 HSN Taxable CGST SGST Tax — 53,064.00 795.96 795.96 1,591.92 Taxable Value 53,064.00 CGST 795.96 SGST 795.96 Grand Total ₹ 54,655.92 Amount in words: Fifty Four Thousand Six Hundred Fifty Five Rupees only. For Demo Jeweller Authorised Signatory Certified that the particulars given above are true and correct. Goods once sold will not be taken back or exchanged. Subject to local jurisdiction. E.&O.E."
+}
+
+### sale-delete
+{
+ "counts": {
+  "SL_DATA": 0,
+  "SL_DETL": 0,
+  "AC_DATA": 0,
+  "ROJ_MEL_DATA": 0,
+  "MAIN_STOCK": 0,
+  "TAX_DATA": 0,
+  "BILL_OS_DATA": 0,
+  "PR_DATA": 0,
+  "PR_DETL": 0,
+  "LOT_DETL": 0,
+  "DELETE_DATA": 2
+ },
+ "deleteData": [
+  {
+   "tenant_id": "e2e3",
+   "row_id": 94,
+   "CO_CODE": "01",
+   "LC_CODE": "01",
+   "CO_YEAR": "2026-2027",
+   "CO_BOOK": "SL",
+   "VCH_NO": "00001",
+   "SR_NO": 1,
+   "VCH_DATE": "2026-09-28T00:00:00.000Z",
+   "DELETE_DATE": "2026-09-28T00:00:00.000Z",
+   "VCH_TYPE": "SL",
+   "VCH_TIME": "2026-09-28T22:59:04.618Z",
+   "DELETE_TIME": "2026-09-28T22:59:08.615Z",
+   "BOOK_NAME": "Sales",
+   "AC_CODE": "CUST01",
+   "AC_NAME": "",
+   "VCH_VAL_DR": 53064,
+   "VCH_VAL_CR": 0,
+   "FINE_TYPE": "G",
+   "VCH_FINE_DR": "0",
+   "VCH_FINE_CR": "9",
+   "HD_VCH_NO": "00001",
+   "MAIN_USER": "admin",
+   "DELETE_USER": "admin",
+   "VCH_DESC": "ItCode / GOLD   TagNo / N"
+  },
+  {
+   "tenant_id": "e2e3",
+   "row_id": 93,
+   "CO_CODE": "01",
+   "LC_CODE": "01",
+   "CO_YEAR": "2026-2027",
+   "CO_BOOK": "SL",
+   "VCH_NO": "00001",
+   "SR_NO": 0,
+   "VCH_DATE": "2026-09-28T00:00:00.000Z",
+   "DELETE_DATE": "2026-09-28T00:00:00.000Z",
+   "VCH_TYPE": "SL",
+   "VCH_TIME": "2026-09-28T22:59:04.618Z",
+   "DELETE_TIME": "2026-09-28T22:59:08.615Z",
+   "BOOK_NAME": "Sales",
+   "AC_CODE": "CUST01",
+   "AC_NAME": "",
+   "VCH_VAL_DR": 54655.92,
+   "VCH_VAL_CR": 0,
+   "FINE_TYPE": "A",
+   "VCH_FINE_DR": "0",
+   "VCH_FINE_CR": "0",
+   "HD_VCH_NO": "00001",
+   "MAIN_USER": "admin",
+   "DELETE_USER": "admin",
+   "VCH_DESC": ""
+  }
+ ]
+}
