@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "meaning": "Planning structure, retained-record coverage, source identities and log integrity only; no runtime/full-product certification.",
+  "counts": {
+    "indexedRawRecords": 12822,
+    "sourceRegisters": 10,
+    "primarySources": 204,
+    "priorPackages": 83,
+    "priorCards": 34,
+    "newSlices": 30,
+    "apiModules": 31,
+    "businessJourneys": 28,
+    "checkedLocalMarkdownLinks": 13
+  },
+  "errors": []
+}
